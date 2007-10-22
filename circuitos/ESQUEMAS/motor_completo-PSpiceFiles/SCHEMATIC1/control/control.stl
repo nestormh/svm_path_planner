@@ -1,0 +1,14 @@
+* C:\ORCAD\ORCAD_10.3\proyecto\motor-PSpiceFiles\SCHEMATIC1\control\control.stl written on Wed Jul 20 12:11:47 2005
+* by Stimulus Editor -- Serial Number: 1111111111 -- Version 10.3.0
+;!Stimulus Get
+;! control Digital
+;!Ok
+;!Plot Axis_Settings
+;!Xrange 0s 1s
+;!AutoUniverse
+;!XminRes 1ns
+;!YminRes 1n
+;!Ok
+.STIMULUS control STIM (1, 1)
++   +0s 0
++   497.674419ms 1

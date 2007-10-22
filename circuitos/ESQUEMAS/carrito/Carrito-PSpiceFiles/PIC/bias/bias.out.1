@@ -1,0 +1,78 @@
+
+**** 12/28/05 12:43:30 ******* PSpice 10.3.0 (Jan 2004) ******* ID# 1111111111 
+ ** Profile: "PIC-bias"  [ C:\OrCAD\OrCAD_10.3\proyecto\carrito-pspicefiles\pic\bias.sim ] 
+
+
+ ****     CIRCUIT DESCRIPTION
+
+
+******************************************************************************
+
+
+
+
+** Creating circuit file "bias.cir" 
+** WARNING: THIS AUTOMATICALLY GENERATED FILE MAY BE OVERWRITTEN BY SUBSEQUENT SIMULATIONS
+
+*Libraries: 
+* Profile Libraries :
+* Local Libraries :
+* From [PSPICE NETLIST] section of C:\OrCAD\OrCAD_10.3\tools\PSpice\PSpice.ini file:
+.lib "nom.lib" 
+
+*Analysis directives: 
+.PROBE V(alias(*)) I(alias(*)) W(alias(*)) D(alias(*)) NOISE(alias(*)) 
+.INC "..\PIC.net" 
+
+
+
+**** INCLUDING PIC.net ****
+* source CARRITO
+.EXTERNAL OUTPUT RELE_ACEL
+.EXTERNAL OUTPUT DAC0
+.EXTERNAL OUTPUT DAC1
+.EXTERNAL OUTPUT DAC2
+.EXTERNAL OUTPUT DAC3
+.EXTERNAL OUTPUT DAC4
+.EXTERNAL OUTPUT DAC5
+.EXTERNAL OUTPUT DAC6
+.EXTERNAL OUTPUT DAC7
+.EXTERNAL OUTPUT PWM_DC
+.EXTERNAL OUTPUT SENTIDO
+.EXTERNAL OUTPUT PWM_PAP
+.EXTERNAL OUTPUT DC0
+.EXTERNAL OUTPUT DC1
+.EXTERNAL OUTPUT PAP0
+.EXTERNAL OUTPUT PAP1
+.EXTERNAL OUTPUT PAP2
+.EXTERNAL OUTPUT PAP3
+.EXTERNAL INPUT ENCODER_0
+.EXTERNAL INPUT ENCODER_1
+C_C7         0 N68145 C
+-----------------------$
+ERROR -- Missing value
+C_C4         N61377 N61579 C
+----------------------------$
+ERROR -- Missing value
+V_V2         5V 0 5Vdc
+C_C6         N62219 N63004 C
+----------------------------$
+ERROR -- Missing value
+C_C2         5V 0 22u
+D_D1         N48231 5V D10D1 
+R_R2         N48231 N48381  1K  
+C_C5         N61896 N62001 C
+----------------------------$
+ERROR -- Missing value
+R_R1         5V N48231  10K  
+C_C3         N63004 0 C
+-----------------------$
+ERROR -- Missing value
+C_C1         N48231 0 C
+-----------------------$
+ERROR -- Missing value
+V_V1         12V 0 12Vdc
+
+**** RESUMING bias.cir ****
+.END
+

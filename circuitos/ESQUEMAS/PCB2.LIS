@@ -1,0 +1,26 @@
+AutoECO Report
+FILE-A: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB2.MAX
+FILE-B: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\CARRITO.MNL
+If "*EOF*" immediately follows, no changes were made
+Adding component R55
+Adding component R56
+Net N383775 renamed to REF2.5
+Adding net N600286
+Net N506568 renamed to N600453
+Adding net N600796
+Deleting R27.1 from net ENCODER_TRACCION
+Adding R55.1 to net ENCODER_TRACCION
+Adding U5.14 to net ENCODER_TRACCION
+Adding R56.2 to net REF2.5
+Deleting U1.3 from net PWM_DC
+Adding U5.13 to net N600286
+Adding R27.1 to net N600286
+Adding R55.2 to net N600796
+Adding U5.12 to net N600796
+Adding R56.1 to net N600796
+Adding P2.15 to net RC0
+Adding P2.18 to net RC3
+Adding P2.24 to net RC5
+Adding P2.27 to net RD4
+*EOF*
+No errors found

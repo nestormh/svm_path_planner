@@ -1,0 +1,310 @@
+Wed Feb 01 19:53:24 Saved as file BACKUP1.MAX
+Wed Feb 01 19:53:25 Saved as file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.MAX
+Wed Feb 01 19:53:25 UserDiv from Layout.INI for AutoECO: 60
+Wed Feb 01 19:53:26 Loaded file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.MAX
+Wed Feb 01 19:53:26 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\BCON100T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\BCON156T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\BGA.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\CLCC.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DCON050T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DCON085T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIMM050F.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIMM050T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIN.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIP100B.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIP100T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DSUBT.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DSUBT_HD.LLB
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\ECON100T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\FBUS.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\ISA.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\JUMPER.LLB
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\LAYOUT.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\LCON100T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PC104.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PCI.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PCON100T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PCON156T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PGA.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PLCC.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\QUAD.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\QUADB.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\RELAY.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\RF.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SBUS.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIMM050F.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIMM050T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIMM100F.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIMM100T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIP.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SM.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SOG.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SOJ.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\STIFF.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TELE.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_AXIAL.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_CAP_P.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_CYLND.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_DIODE.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_DISC.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_RAD.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TO.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TRAINING.LLB
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\VRES.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\WCON100T.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\XT.llb
+Wed Feb 01 19:53:27 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\ZIGZAG.llb
+Wed Feb 01 19:53:28 Saved as file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.MAX
+Wed Feb 01 19:53:28 Loaded file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.MAX
+Wed Feb 01 19:53:45 Saved as file BACKUP1.MAX
+Wed Feb 01 19:53:45 Saved as file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB2.MAX
+Wed Feb 01 19:53:45 UserDiv from Layout.INI for AutoECO: 60
+Wed Feb 01 19:53:46 Loaded file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB2.MAX
+Wed Feb 01 19:53:46 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\BCON100T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\BCON156T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\BGA.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\CLCC.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DCON050T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DCON085T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIMM050F.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIMM050T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIN.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIP100B.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DIP100T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DSUBT.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\DSUBT_HD.LLB
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\ECON100T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\FBUS.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\ISA.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\JUMPER.LLB
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\LAYOUT.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\LCON100T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PC104.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PCI.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PCON100T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PCON156T.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PGA.llb
+Wed Feb 01 19:53:47 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\PLCC.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\QUAD.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\QUADB.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\RELAY.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\RF.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SBUS.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIMM050F.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIMM050T.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIMM100F.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIMM100T.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SIP.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SM.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SOG.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\SOJ.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\STIFF.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TELE.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_AXIAL.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_CAP_P.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_CYLND.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_DIODE.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_DISC.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TM_RAD.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TO.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\TRAINING.LLB
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\VRES.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\WCON100T.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\XT.llb
+Wed Feb 01 19:53:48 Loaded file C:\CADENCE\PSD_14.2\TOOLS\LAYOUT_PLUS\library\ZIGZAG.llb
+Wed Feb 01 19:53:49 Saved as file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB2.MAX
+Wed Feb 01 19:53:49 Loaded file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB2.MAX
+Wed Feb 15 12:11:36 Saved as file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.MAX
+Wed Feb 15 12:21:05 Saved as file BACKUP1.MAX
+Wed Feb 15 12:21:12 Saved as file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.MAX
+Fri Feb 17 10:46:13 Saved as file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB4.MAX
+Fri Feb 17 10:52:08 Saved as file BACKUP1.MAX
+Fri Feb 17 11:02:38 Saved as file BACKUP1.MAX
+Fri Feb 17 11:13:08 Saved as file BACKUP1.MAX
+Fri Feb 17 11:23:39 Saved as file BACKUP1.MAX
+Fri Feb 17 11:34:09 Saved as file BACKUP1.MAX
+Fri Feb 17 11:44:39 Saved as file BACKUP1.MAX
+Fri Feb 17 17:50:47 Loaded file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB4.MAX
+Fri Feb 17 17:55:36 Saved as file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB4.MAX
+Fri Feb 17 17:59:02 Saved as file BACKUP1.MAX
+Fri Feb 17 17:59:02 Routed 268 connections in 5 seconds.
+Fri Feb 17 17:59:02 Total is now 268 out of 344 (77%).
+Fri Feb 17 17:59:03 Saved as file SWEEP1.MAX
+Fri Feb 17 17:59:14 Saved as file BACKUP1.MAX
+Fri Feb 17 17:59:14 Routed 73 connections in 11 seconds.
+Fri Feb 17 17:59:14 Total is now 341 out of 344 (99%).
+Fri Feb 17 17:59:14 Saved as file SWEEP2.MAX
+Fri Feb 17 17:59:16 Routed 2 connections in 1 seconds.
+Fri Feb 17 17:59:16 Total is now 343 out of 344 (99%).
+Fri Feb 17 17:59:16 Saved as file SWEEP3.MAX
+Fri Feb 17 17:59:18 Routed 1 connections in 1 seconds.
+Fri Feb 17 17:59:18 Total is now 344 out of 344 (100%).
+Fri Feb 17 17:59:18 Saved as file SWEEP4.MAX
+Fri Feb 17 17:59:19 No new connections routed.
+Fri Feb 17 17:59:19 Total is now 344 out of 344 (100%).
+Fri Feb 17 17:59:19 Saved as file SWEEP5.MAX
+Fri Feb 17 18:01:26 Saved as file H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB4.MAX
+Fri Mar 17 12:58:42 Saved as file BACKUP1.MAX
+Fri Mar 17 13:09:11 Saved as file BACKUP1.MAX
+Fri Mar 17 13:19:42 Saved as file BACKUP1.MAX
+Fri Mar 17 13:30:17 Saved as file BACKUP1.MAX
+Fri Mar 17 13:40:43 Saved as file BACKUP1.MAX
+Fri Mar 17 13:51:15 Saved as file BACKUP1.MAX
+Fri Mar 17 14:01:41 Saved as file BACKUP1.MAX
+Fri Mar 17 14:12:11 Saved as file BACKUP1.MAX
+Fri Mar 17 14:22:41 Saved as file BACKUP1.MAX
+Fri Mar 17 14:33:11 Saved as file BACKUP1.MAX
+Fri Mar 17 14:43:41 Saved as file BACKUP1.MAX
+Fri Mar 17 14:54:11 Saved as file BACKUP1.MAX
+Fri Mar 17 15:04:41 Saved as file BACKUP1.MAX
+Fri Mar 17 15:15:11 Saved as file BACKUP1.MAX
+Fri Mar 17 15:25:41 Saved as file BACKUP1.MAX
+Fri Mar 17 15:35:41 Saved as file BACKUP1.MAX
+Fri Mar 17 15:46:11 Saved as file BACKUP1.MAX
+Fri Mar 17 15:56:41 Saved as file BACKUP1.MAX
+Fri Mar 17 16:07:11 Saved as file BACKUP1.MAX
+Fri Mar 17 16:17:41 Saved as file BACKUP1.MAX
+Fri Mar 17 16:28:11 Saved as file BACKUP1.MAX
+Fri Mar 17 16:38:41 Saved as file BACKUP1.MAX
+Fri Mar 17 16:49:13 Saved as file BACKUP1.MAX
+Fri Mar 17 16:59:41 Saved as file BACKUP1.MAX
+Fri Mar 17 17:10:11 Saved as file BACKUP1.MAX
+Fri Mar 17 17:20:41 Saved as file BACKUP1.MAX
+Fri Mar 17 17:31:11 Saved as file BACKUP1.MAX
+Fri Mar 17 17:41:41 Saved as file BACKUP1.MAX
+Fri Mar 17 17:52:11 Saved as file BACKUP1.MAX
+Fri Mar 17 18:02:41 Saved as file BACKUP1.MAX
+Fri Mar 17 18:13:11 Saved as file BACKUP1.MAX
+Fri Mar 17 18:23:41 Saved as file BACKUP1.MAX
+Fri Mar 17 18:34:11 Saved as file BACKUP1.MAX
+Fri Mar 17 18:44:41 Saved as file BACKUP1.MAX
+Mon Mar 20 11:35:28 Saved as file BACKUP1.MAX
+Mon Mar 20 11:45:57 Saved as file BACKUP1.MAX
+Mon Mar 20 11:56:27 Saved as file BACKUP1.MAX
+Mon Mar 20 12:06:57 Saved as file BACKUP1.MAX
+Mon Mar 20 12:17:27 Saved as file BACKUP1.MAX
+Mon Mar 20 12:27:57 Saved as file BACKUP1.MAX
+Mon Mar 20 12:38:27 Saved as file BACKUP1.MAX
+Mon Mar 20 12:48:57 Saved as file BACKUP1.MAX
+Mon Mar 20 12:59:27 Saved as file BACKUP1.MAX
+Mon Mar 20 13:09:57 Saved as file BACKUP1.MAX
+Mon Mar 20 13:20:27 Saved as file BACKUP1.MAX
+Mon Mar 20 13:30:57 Saved as file BACKUP1.MAX
+Mon Mar 20 13:41:27 Saved as file BACKUP1.MAX
+Mon Mar 20 13:51:57 Saved as file BACKUP1.MAX
+Mon Mar 20 14:02:27 Saved as file BACKUP1.MAX
+Mon Mar 20 14:12:57 Saved as file BACKUP1.MAX
+Mon Mar 20 14:23:27 Saved as file BACKUP1.MAX
+Mon Mar 20 14:33:57 Saved as file BACKUP1.MAX
+Mon Mar 20 14:44:27 Saved as file BACKUP1.MAX
+Mon Mar 20 14:54:57 Saved as file BACKUP1.MAX
+Mon Mar 20 15:05:27 Saved as file BACKUP1.MAX
+Mon Mar 20 15:15:57 Saved as file BACKUP1.MAX
+Mon Mar 20 15:26:27 Saved as file BACKUP1.MAX
+Mon Mar 20 15:36:57 Saved as file BACKUP1.MAX
+Mon Mar 20 15:47:27 Saved as file BACKUP1.MAX
+Mon Mar 20 15:57:57 Saved as file BACKUP1.MAX
+Mon Mar 20 16:08:27 Saved as file BACKUP1.MAX
+Mon Mar 20 16:18:57 Saved as file BACKUP1.MAX
+Mon Mar 20 16:29:27 Saved as file BACKUP1.MAX
+Mon Mar 20 16:39:57 Saved as file BACKUP1.MAX
+Mon Mar 20 16:50:27 Saved as file BACKUP1.MAX
+Mon Mar 20 17:00:57 Saved as file BACKUP1.MAX
+Mon Mar 20 17:11:27 Saved as file BACKUP1.MAX
+Mon Mar 20 17:21:57 Saved as file BACKUP1.MAX
+Mon Mar 20 17:32:27 Saved as file BACKUP1.MAX
+Mon Mar 20 17:42:57 Saved as file BACKUP1.MAX
+Mon Mar 20 17:53:27 Saved as file BACKUP1.MAX
+Mon Mar 20 18:03:57 Saved as file BACKUP1.MAX
+Mon Mar 20 18:14:27 Saved as file BACKUP1.MAX
+Mon Mar 20 18:24:57 Saved as file BACKUP1.MAX
+Mon Mar 20 18:35:27 Saved as file BACKUP1.MAX
+Mon Mar 20 18:45:57 Saved as file BACKUP1.MAX
+Mon Mar 20 18:56:27 Saved as file BACKUP1.MAX
+Mon Mar 20 19:06:57 Saved as file BACKUP1.MAX
+Mon Mar 20 19:17:28 Saved as file BACKUP1.MAX
+Mon Mar 20 19:27:57 Saved as file BACKUP1.MAX
+Mon Mar 20 19:38:27 Saved as file BACKUP1.MAX
+Mon Mar 20 19:48:57 Saved as file BACKUP1.MAX
+Mon Mar 20 19:59:27 Saved as file BACKUP1.MAX
+Fri Mar 31 21:18:42 Saved as file BACKUP1.MAX
+Fri Mar 31 21:29:12 Saved as file BACKUP1.MAX
+Fri Mar 31 21:39:42 Saved as file BACKUP1.MAX
+Fri Mar 31 21:50:12 Saved as file BACKUP1.MAX
+Fri Mar 31 22:00:42 Saved as file BACKUP1.MAX
+Fri Mar 31 22:11:12 Saved as file BACKUP1.MAX
+Fri Mar 31 22:21:42 Saved as file BACKUP1.MAX
+Fri Mar 31 22:32:12 Saved as file BACKUP1.MAX
+Thu May 25 14:14:38 Saved as file BACKUP1.MAX
+Thu May 25 14:25:08 Saved as file BACKUP1.MAX
+Thu May 25 14:35:38 Saved as file BACKUP1.MAX
+Thu May 25 14:46:08 Saved as file BACKUP1.MAX
+Thu May 25 14:56:38 Saved as file BACKUP1.MAX
+Thu May 25 15:07:08 Saved as file BACKUP1.MAX
+Thu May 25 15:17:39 Saved as file BACKUP1.MAX
+Thu May 25 15:28:08 Saved as file BACKUP1.MAX
+Thu May 25 15:38:38 Saved as file BACKUP1.MAX
+Thu May 25 15:49:10 Saved as file BACKUP1.MAX
+Thu May 25 15:59:38 Saved as file BACKUP1.MAX
+Thu May 25 16:10:08 Saved as file BACKUP1.MAX
+Thu May 25 16:20:38 Saved as file BACKUP1.MAX
+Thu May 25 16:31:08 Saved as file BACKUP1.MAX
+Thu May 25 16:41:38 Saved as file BACKUP1.MAX
+Thu May 25 16:52:08 Saved as file BACKUP1.MAX
+Thu May 25 17:02:38 Saved as file BACKUP1.MAX
+Thu May 25 17:13:08 Saved as file BACKUP1.MAX
+Thu May 25 17:23:38 Saved as file BACKUP1.MAX
+Thu May 25 17:34:08 Saved as file BACKUP1.MAX
+Thu May 25 17:44:38 Saved as file BACKUP1.MAX
+Thu May 25 17:54:38 Saved as file BACKUP1.MAX
+Thu May 25 18:05:08 Saved as file BACKUP1.MAX
+Thu May 25 18:15:38 Saved as file BACKUP1.MAX
+Thu May 25 18:26:08 Saved as file BACKUP1.MAX
+Thu May 25 18:36:38 Saved as file BACKUP1.MAX
+Thu May 25 18:47:08 Saved as file BACKUP1.MAX
+Thu May 25 18:57:38 Saved as file BACKUP1.MAX
+Thu May 25 19:08:08 Saved as file BACKUP1.MAX
+Thu May 25 19:18:38 Saved as file BACKUP1.MAX
+Thu May 25 19:29:08 Saved as file BACKUP1.MAX
+Thu May 25 19:39:38 Saved as file BACKUP1.MAX
+Thu May 25 19:50:08 Saved as file BACKUP1.MAX
+Thu May 25 20:00:38 Saved as file BACKUP1.MAX
+Thu May 25 20:11:08 Saved as file BACKUP1.MAX
+Fri May 26 17:23:53 Saved as file BACKUP1.MAX
+Fri May 26 17:34:23 Saved as file BACKUP1.MAX
+Fri May 26 17:44:53 Saved as file BACKUP1.MAX
+Fri May 26 17:55:23 Saved as file BACKUP1.MAX
+Fri May 26 18:05:53 Saved as file BACKUP1.MAX
+Fri May 26 18:15:53 Saved as file BACKUP1.MAX
+Fri May 26 18:26:23 Saved as file BACKUP1.MAX
+Fri May 26 18:36:53 Saved as file BACKUP1.MAX
+Fri May 26 18:47:23 Saved as file BACKUP1.MAX
+Fri May 26 18:57:23 Saved as file BACKUP1.MAX
+Wed May 31 17:58:15 Saved as file BACKUP1.MAX
+Wed May 31 18:08:45 Saved as file BACKUP1.MAX
+Wed May 31 18:19:14 Saved as file BACKUP1.MAX
+Wed May 31 18:29:44 Saved as file BACKUP1.MAX
+Wed May 31 18:40:14 Saved as file BACKUP1.MAX
+Wed May 31 18:50:44 Saved as file BACKUP1.MAX
+Wed May 31 19:01:14 Saved as file BACKUP1.MAX
+Wed May 31 19:11:44 Saved as file BACKUP1.MAX
+Wed May 31 19:22:14 Saved as file BACKUP1.MAX
+Wed May 31 19:32:44 Saved as file BACKUP1.MAX
+Wed May 31 19:43:15 Saved as file BACKUP1.MAX
+Fri Jun 09 11:54:23 Saved as file BACKUP1.MAX
+Mon Aug 14 11:29:56 Saved as file BACKUP1.MAX
+Mon Aug 14 11:40:26 Saved as file BACKUP1.MAX
+Mon Aug 14 11:50:56 Saved as file BACKUP1.MAX
+Mon Aug 14 12:01:26 Saved as file BACKUP1.MAX
+Mon Aug 14 12:11:56 Saved as file BACKUP1.MAX
+Mon Aug 14 12:21:56 Saved as file BACKUP1.MAX
+Mon Aug 14 12:32:26 Saved as file BACKUP1.MAX
+Mon Aug 14 12:42:56 Saved as file BACKUP1.MAX
+Mon Aug 14 12:53:26 Saved as file BACKUP1.MAX
+Mon Aug 14 13:03:56 Saved as file BACKUP1.MAX
+Mon Aug 14 13:14:26 Saved as file BACKUP1.MAX
+Mon Aug 14 13:24:26 Saved as file BACKUP1.MAX
+Mon Aug 14 13:34:56 Saved as file BACKUP1.MAX
+Mon Aug 14 13:45:27 Saved as file BACKUP1.MAX
+Mon Aug 14 13:55:56 Saved as file BACKUP1.MAX
+Mon Aug 14 14:06:26 Saved as file BACKUP1.MAX

@@ -1,0 +1,17 @@
+** Profile: "SCHEMATIC1-bias"  [ F:\PAS\simulacion-schematic1-bias.sim ] 
+
+** Creating circuit file "simulacion-schematic1-bias.sim.cir" 
+** WARNING: THIS AUTOMATICALLY GENERATED FILE MAY BE OVERWRITTEN BY SUBSEQUENT SIMULATIONS
+
+*Libraries: 
+* Local Libraries :
+* From [PSPICE NETLIST] section of C:\Cadence\PSD_14.2\tools\PSpice\PSpice.ini file:
+.lib "nom.lib" 
+
+*Analysis directives: 
+.TRAN  0 20ms 0 
+.PROBE V(alias(*)) I(alias(*)) W(alias(*)) D(alias(*)) NOISE(alias(*)) 
+.INC ".\simulacion-SCHEMATIC1.net" 
+
+
+.END

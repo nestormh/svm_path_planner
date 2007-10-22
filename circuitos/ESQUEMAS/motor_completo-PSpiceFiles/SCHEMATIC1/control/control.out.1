@@ -1,0 +1,92 @@
+
+**** 07/20/05 12:16:10 ******* PSpice 10.3.0 (Jan 2004) ******* ID# 1111111111 
+ ** Profile: "SCHEMATIC1-control"  [ C:\ORCAD\ORCAD_10.3\proyecto\motor-PSpiceFiles\SCHEMATIC1\control.sim ] 
+
+
+ ****     CIRCUIT DESCRIPTION
+
+
+******************************************************************************
+
+
+
+
+** Creating circuit file "control.cir" 
+** WARNING: THIS AUTOMATICALLY GENERATED FILE MAY BE OVERWRITTEN BY SUBSEQUENT SIMULATIONS
+
+*Libraries: 
+* Profile Libraries :
+.INC "C:\ORCAD\ORCAD_10.3\proyecto\motor-PSpiceFiles\SCHEMATIC1\control\control_profile.inc" 
+* Local Libraries :
+* From [PSPICE NETLIST] section of C:\OrCAD\OrCAD_10.3\tools\PSpice\PSpice.ini file:
+
+**** INCLUDING control_profile.inc ****
+.STMLIB ".\control.stl" 
+
+**** RESUMING control.cir ****
+.lib "nom.lib" 
+
+*Analysis directives: 
+.TRAN  0 1s 0 
+.PROBE V(alias(*)) I(alias(*)) W(alias(*)) D(alias(*)) NOISE(alias(*)) 
+.INC "..\SCHEMATIC1.net" 
+
+
+
+**** INCLUDING SCHEMATIC1.net ****
+* source MOTOR
+X_U4         12V N05554 N05454 RFP30N06LE/HA
+X_U2         N05438 N05554 0 RFP30N06LE/HA
+D_D4         0 N05454 D10D1 
+X_U5         N05554 N05498 0 RFP30N06LE/HA
+D_D1         N09377 12V D10D1 
+X_U3         N05454 N05498 0 RFP30N06LE/HA
+U_DSTM1         STIM(1,0) $G_DPWR $G_DGND N05498 IO_STM STIMULUS=control
+V_V1         12V 0 12Vdc
+D_D2         N05454 12V D10D1 
+R_R2         N05554 VCC  1K  
+X_U1         12V N05498 N05438 RFP30N06LE/HA
+D_D3         0 N05438 D10D1 
+V_V2         VCC 0 5Vdc
+L_L2         N05438 N05422  2.1m  
+R_R1         N05422 N05454  0.55  
+
+**** RESUMING control.cir ****
+.END
+
+
+**** Generated AtoD and DtoA Interfaces ****
+
+*
+* Analog/Digital interface for node N05498
+*
+* Moving U_DSTM1:OUT1 from analog node N05498 to new digital node N05498$DtoA
+X$N05498_DtoA1
++ N05498$DtoA
++ N05498
++ $G_DPWR
++ $G_DGND
++ DtoA_STM
++       PARAMS: DRVH=   0      DRVL=   0      CAPACITANCE=   0     
+*
+* Analog/Digital interface power supply subcircuits
+*
+X$DIGIFPWR 0 DIGIFPWR
+
+
+* C:\ORCAD\ORCAD_10.3\proyecto\motor-PSpiceFiles\SCHEMATIC1\control\control.stl written on Wed Jul 20 12:11:47 2005
+* by Stimulus Editor -- Serial Number: 1111111111 -- Version 10.3.0
+;!Stimulus Get
+;! control Digital
+;!Ok
+;!Plot Axis_Settings
+;!Xrange 0s 1s
+;!AutoUniverse
+;!XminRes 1ns
+;!YminRes 1n
+;!Ok
+.STIMULUS control STIM (1, 1)
++   +0s 0
++   497.674419ms 1
+
+ERROR -- Less than 2 connections at node N09377

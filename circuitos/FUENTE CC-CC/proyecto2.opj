@@ -1,0 +1,119 @@
+(ExpressProject "proyecto2"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (NoModify)
+    (File ".\proyecto2.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (Netlist_TAB "3")
+    (LAYOUT_Netlist_File "PROYECTO2Cb.MNL")
+    (LAYOUT_PCB_Footprint "{PCB Footprint}")
+    (TRUE)
+    (LAYOUT_Units "1")
+    (TRUE)
+    (TRUE)
+    (TRUE)
+    (TRUE)
+    (TRUE)
+    (DRC_Scope "0")
+    (DRC_Action "0")
+    (DRC_Create_Warnings "FALSE")
+    (DRC_Check_Ports "FALSE")
+    (DRC_Check_Off-Page_Connectors "FALSE")
+    (DRC_Identical_References "TRUE")
+    (DRC_Type_Mismatch "TRUE")
+    (DRC_Report_Ports_and_Off-page_Connectors "FALSE")
+    (DRC_SDT_Compatibility "FALSE")
+    (DRC_Report_Off-grid_Objects "FALSE")
+    (DRC_Check_Unconnected_Nets "TRUE")
+    (DRC_Report_Netnames "FALSE")
+    (DRC_View_Output "FALSE")
+    (DRC_Report_File "F:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTO2.DRC")
+    (TRUE)
+    (TRUE)
+    (TRUE)
+    (TRUE))
+  (Folder "Outputs"
+    (File ".\proyecto2cb.mnl"
+      (Type "LAYOUT Netlist File"))
+    (File ".\proyecto2.drc"
+      (Type "Report")))
+  (Folder "Referenced Projects")
+  (PartMRUSelector
+    (MBR1045/TO
+      (FullPartName "MBR1045/TO.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (R
+      (FullPartName "R.Normal")
+      (LibraryName
+         "D:\ORCAD\ORCAD_10.5\TOOLS\CAPTURE\LIBRARY\PSPICE\ANALOG.OLB")
+      (DeviceIndex "0"))
+    (GND
+      (LibraryName "D:\ORCAD\ORCAD_10.5\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (GND_EARTH
+      (LibraryName "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (VCC_BAR
+      (LibraryName "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (GND_POWER
+      (LibraryName "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    ($D_HI
+      (LibraryName "C:\PROGRAM FILES\ORCAD\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (0
+      (LibraryName "C:\PROGRAM FILES\ORCAD\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (CON2
+      (FullPartName "CON2.Normal")
+      (LibraryName "C:\PROGRAM FILES\ORCAD\CAPTURE\LIBRARY\CONNECTOR.OLB")
+      (DeviceIndex "0"))
+    (D1N5819
+      (FullPartName "D1N5819.Normal")
+      (LibraryName "C:\PROGRAM FILES\ORCAD\CAPTURE\LIBRARY\PSPICE\DIODE.OLB")
+      (DeviceIndex "0"))
+    (L
+      (FullPartName "L.Normal")
+      (LibraryName "C:\PROGRAM FILES\ORCAD\CAPTURE\LIBRARY\PSPICE\ANALOG.OLB")
+      (DeviceIndex "0"))
+    (C
+      (FullPartName "C.Normal")
+      (LibraryName "C:\PROGRAM FILES\ORCAD\CAPTURE\LIBRARY\DISCRETE.OLB")
+      (DeviceIndex "0"))
+    (LM2574
+      (FullPartName "LM2574.Normal")
+      (LibraryName "C:\PROGRAM FILES\ORCAD\CAPTURE\LIBRARY\REGULATOR.OLB")
+      (DeviceIndex "0")))
+  (LastUsedLibraryBrowseDirectory "C:\Cadence\PSD_14.2\tools\capture\library")
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources"
+         "H:\carrito golf\ORCAD\FUENTE CC-CC\proyecto2.dsn")
+      (Path "Design Resources"
+         "H:\carrito golf\ORCAD\FUENTE CC-CC\proyecto2.dsn" "12V_2")
+      (Path "Outputs")
+      (Select "Design Resources"
+         "H:\carrito golf\ORCAD\FUENTE CC-CC\proyecto2.dsn" "12V_2" "12VSenal"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 320 878 -4 -23 0 200 0 496"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 44 1034 44 660")
+        (Scroll "424 0")
+        (Zoom "100")
+        (Occurrence "/12V_2"))
+      (Path "H:\CARRITO GOLF\ORCAD\FUENTE CC-CC\PROYECTO2.DSN")
+      (Schematic "12V_2")
+      (Page "12VSenal"))))

@@ -1,0 +1,135 @@
+(ExpressProject "simulacion"
+  (ProjectVersion "19981106")
+  (ProjectType "Analog or A/D Mixed Mode")
+  (Folder "Design Resources"
+    (Folder "Library"
+      (File "C:\Cadence\PSD_14.2\tools\capture\library\pspice\analog.olb"
+        (Type "Schematic Library"))
+      (File "C:\Cadence\PSD_14.2\tools\capture\library\pspice\breakout.olb"
+        (Type "Schematic Library"))
+      (File "C:\Cadence\PSD_14.2\tools\capture\library\pspice\source.olb"
+        (Type "Schematic Library"))
+      (File "C:\Cadence\PSD_14.2\tools\capture\library\pspice\sourcstm.olb"
+        (Type "Schematic Library"))
+      (File "C:\Cadence\PSD_14.2\tools\capture\library\pspice\special.olb"
+        (Type "Schematic Library")))
+    (NoModify)
+    (File "simulacion.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (ANNOTATE_Scope "0")
+    (ANNOTATE_Mode "1")
+    (ANNOTATE_Action "1")
+    (ANNOTATE_Reset_References_to_1 "FALSE")
+    (ANNOTATE_No_Page_Number_Change "TRUE")
+    (ANNOTATE_Property_Combine "{Value}{Source Package}")
+    (PSPICE_Regenerate_Netlist_Flag "FALSE"))
+  (Folder "Outputs"
+    (File ".\simulacion-schematic1.net"
+      (Type "Report")))
+  (Folder "PSpice Resources"
+    (Folder "Simulation Profiles"
+      (ActiveProfile "simulacion-schematic1-bias.sim")
+      (File.PSpice.{09528990-3187-11D2-BC7B-00A0C90CBF91}
+         "simulacion-schematic1-bias.sim"
+        (DisplayName "SCHEMATIC1-bias")
+        (Type "PSpice Profile")))
+    (Folder "Model Libraries"
+      (Sort User))
+    (Folder "Stimulus Files"
+      (Sort User))
+    (Folder "Include Files"
+      (Sort User)))
+  (DefaultLibraryBrowseDirectory "library\PSpice")
+  (PartMRUSelector
+    (IRF530
+      (FullPartName "IRF530.Normal")
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\PWRMOS.OLB")
+      (DeviceIndex "0"))
+    (IRF9640
+      (FullPartName "IRF9640.Normal")
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\PWRMOS.OLB")
+      (DeviceIndex "0"))
+    (MJE3055T
+      (FullPartName "MJE3055T.Normal")
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\PWRBJT.OLB")
+      (DeviceIndex "0"))
+    (D1N4148
+      (FullPartName "D1N4148.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\DIODE.OLB")
+      (DeviceIndex "0"))
+    (D1N5819
+      (FullPartName "D1N5819.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\DIODE.OLB")
+      (DeviceIndex "0"))
+    (R
+      (FullPartName "R.Normal")
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\ANALOG.OLB")
+      (DeviceIndex "0"))
+    (Q2N2220
+      (FullPartName "Q2N2220.Normal")
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\BIPOLAR.OLB")
+      (DeviceIndex "0"))
+    (VPULSE
+      (FullPartName "VPULSE.Normal")
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (C
+      (FullPartName "C.Normal")
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\ANALOG.OLB")
+      (DeviceIndex "0"))
+    (D1N4007
+      (FullPartName "D1N4007.Normal")
+      (LibraryName "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\DIODE.OLB")
+      (DeviceIndex "0"))
+    (L
+      (FullPartName "L.Normal")
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\ANALOG.OLB")
+      (DeviceIndex "0"))
+    (0
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (VCC
+      (LibraryName "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (VDC
+      (FullPartName "VDC.Normal")
+      (LibraryName
+         "C:\CADENCE\PSD_14.2\TOOLS\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (VSTIM
+      (FullPartName "VSTIM.Normal")
+      (LibraryName "..\..\LIBRARY\PSPICE\SOURCSTM.OLB")
+      (DeviceIndex "0")))
+  (LastUsedLibraryBrowseDirectory
+     "C:\Cadence\PSD_14.2\tools\capture\library\pspice")
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Outputs"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -4 -23 0 200 0 589"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 2 3 -1 -1 -4 -23 66 1056 66 652")
+        (Scroll "0 0")
+        (Zoom "115")
+        (Occurrence "/"))
+      (Path "F:\PAS\SIMULACION.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1"))))

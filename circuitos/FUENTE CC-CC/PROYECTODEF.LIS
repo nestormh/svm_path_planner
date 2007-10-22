@@ -1,0 +1,135 @@
+Post Processor Report
+OrCAD FILE: H:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTODEF.MAX
+Wed Feb 22 11:17:52 2006
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTODEF.TOP
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTODEF.TOP:
+---------------------------------------------------------
+D11:  0.0520 ROUND  --       0 Draws,      32 Flashes
+D12:  0.0520 SQUARE --       0 Draws,       8 Flashes
+D13:  0.0640 ROUND  --       0 Draws,       4 Flashes
+D14:  0.0640 SQUARE --       0 Draws,       4 Flashes
+D15:  0.0750 ROUND  --       0 Draws,      18 Flashes
+D16:  0.0750 SQUARE --       0 Draws,       9 Flashes
+D17:  0.1000 ROUND  --       0 Draws,       8 Flashes
+D18:  0.1000 SQUARE --       0 Draws,       8 Flashes
+D19:  0.1181 ROUND  --       0 Draws,      12 Flashes
+D20:  0.0550 ROUND  --       0 Draws,     102 Flashes
+D21:  0.0450 ROUND  --       0 Draws,      40 Flashes
+D22:  0.0551 ROUND  --       0 Draws,      60 Flashes
+D23:  0.0420 SQUARE --       0 Draws,       4 Flashes
+D24:  0.0700 ROUND  --      20 Draws,       0 Flashes
+D25:  0.0200 ROUND  --     352 Draws,       0 Flashes
+D26:  0.0300 ROUND  --       0 Draws,      18 Flashes
+D27:  0.0201 ROUND  --      96 Draws,       0 Flashes
+D28:  0.0827 ROUND  --      56 Draws,       0 Flashes
+D29:  0.0100 ROUND  --     106 Draws,       0 Flashes
+D30:  0.0080 ROUND  --      28 Draws,       0 Flashes
+---------------------------------------------------------
+ 20 D-Codes      -----     658 Draws,     327 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTODEF.BOT
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTODEF.BOT:
+---------------------------------------------------------
+D24:  0.0700 ROUND  --      23 Draws,       0 Flashes
+D25:  0.0200 ROUND  --     201 Draws,       0 Flashes
+D26:  0.0300 ROUND  --       0 Draws,      18 Flashes
+D27:  0.0201 ROUND  --     164 Draws,       0 Flashes
+D28:  0.0827 ROUND  --     192 Draws,       0 Flashes
+D31:  0.0520 ROUND  --       0 Draws,      32 Flashes
+D32:  0.0520 SQUARE --       0 Draws,       8 Flashes
+D33:  0.0640 ROUND  --       0 Draws,       4 Flashes
+D34:  0.0640 SQUARE --       0 Draws,       4 Flashes
+D35:  0.0750 ROUND  --       0 Draws,      18 Flashes
+D36:  0.0750 SQUARE --       0 Draws,       9 Flashes
+D37:  0.1000 ROUND  --       0 Draws,       8 Flashes
+D38:  0.1000 SQUARE --       0 Draws,       8 Flashes
+D39:  0.1181 ROUND  --       0 Draws,      12 Flashes
+D40:  0.0550 ROUND  --       0 Draws,     102 Flashes
+D41:  0.0450 ROUND  --       0 Draws,      40 Flashes
+D42:  0.0551 ROUND  --       0 Draws,      60 Flashes
+D43:  0.0420 ROUND  --       0 Draws,       4 Flashes
+---------------------------------------------------------
+ 18 D-Codes      -----     580 Draws,     327 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTODEF.AST
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTODEF.AST:
+---------------------------------------------------------
+D29:  0.0100 ROUND  --      60 Draws,       0 Flashes
+D30:  0.0080 ROUND  --    4524 Draws,       0 Flashes
+D44:  0.0039 ROUND  --      24 Draws,       0 Flashes
+D45:  0.0500 ROUND  --       4 Draws,       0 Flashes
+D46:  0.0004 ROUND  --      36 Draws,       0 Flashes
+D47:  0.0010 ROUND  --      24 Draws,       0 Flashes
+D48:  0.0098 ROUND  --     444 Draws,       0 Flashes
+---------------------------------------------------------
+  7 D-Codes      -----    5116 Draws,       0 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTODEF.DRD
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\FUENTE CC-CC\PROYECTODEF.DRD:
+---------------------------------------------------------
+D44:  0.0039 ROUND  --    2370 Draws,       0 Flashes
+D45:  0.0500 ROUND  --       4 Draws,       0 Flashes
+---------------------------------------------------------
+  2 D-Codes      -----    2374 Draws,       0 Flashes
+
+
+*********************************************************
+
+Aperture totals for entire project:
+---------------------------------------------------------
+D11:  0.0520 ROUND  --       0 Draws,      32 Flashes
+D12:  0.0520 SQUARE --       0 Draws,       8 Flashes
+D13:  0.0640 ROUND  --       0 Draws,       4 Flashes
+D14:  0.0640 SQUARE --       0 Draws,       4 Flashes
+D15:  0.0750 ROUND  --       0 Draws,      18 Flashes
+D16:  0.0750 SQUARE --       0 Draws,       9 Flashes
+D17:  0.1000 ROUND  --       0 Draws,       8 Flashes
+D18:  0.1000 SQUARE --       0 Draws,       8 Flashes
+D19:  0.1181 ROUND  --       0 Draws,      12 Flashes
+D20:  0.0550 ROUND  --       0 Draws,     102 Flashes
+D21:  0.0450 ROUND  --       0 Draws,      40 Flashes
+D22:  0.0551 ROUND  --       0 Draws,      60 Flashes
+D23:  0.0420 SQUARE --       0 Draws,       4 Flashes
+D24:  0.0700 ROUND  --      43 Draws,       0 Flashes
+D25:  0.0200 ROUND  --     553 Draws,       0 Flashes
+D26:  0.0300 ROUND  --       0 Draws,      36 Flashes
+D27:  0.0201 ROUND  --     260 Draws,       0 Flashes
+D28:  0.0827 ROUND  --     248 Draws,       0 Flashes
+D29:  0.0100 ROUND  --     166 Draws,       0 Flashes
+D30:  0.0080 ROUND  --    4552 Draws,       0 Flashes
+D31:  0.0520 ROUND  --       0 Draws,      32 Flashes
+D32:  0.0520 SQUARE --       0 Draws,       8 Flashes
+D33:  0.0640 ROUND  --       0 Draws,       4 Flashes
+D34:  0.0640 SQUARE --       0 Draws,       4 Flashes
+D35:  0.0750 ROUND  --       0 Draws,      18 Flashes
+D36:  0.0750 SQUARE --       0 Draws,       9 Flashes
+D37:  0.1000 ROUND  --       0 Draws,       8 Flashes
+D38:  0.1000 SQUARE --       0 Draws,       8 Flashes
+D39:  0.1181 ROUND  --       0 Draws,      12 Flashes
+D40:  0.0550 ROUND  --       0 Draws,     102 Flashes
+D41:  0.0450 ROUND  --       0 Draws,      40 Flashes
+D42:  0.0551 ROUND  --       0 Draws,      60 Flashes
+D43:  0.0420 ROUND  --       0 Draws,       4 Flashes
+D44:  0.0039 ROUND  --    2394 Draws,       0 Flashes
+D45:  0.0500 ROUND  --       8 Draws,       0 Flashes
+D46:  0.0004 ROUND  --      36 Draws,       0 Flashes
+D47:  0.0010 ROUND  --      24 Draws,       0 Flashes
+D48:  0.0098 ROUND  --     444 Draws,       0 Flashes
+---------------------------------------------------------
+ 38 D-Codes      -----    8728 Draws,     654 Flashes
+
+
+No warnings or errors.

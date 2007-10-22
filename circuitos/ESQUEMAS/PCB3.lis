@@ -1,0 +1,187 @@
+Post Processor Report
+OrCAD FILE: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.MAX
+Wed Feb 15 12:14:43 2006
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.TOP
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.TOP:
+---------------------------------------------------------
+D13:  0.0500 ROUND  --       4 Draws,       0 Flashes
+D23:  0.0630 ROUND  --       0 Draws,       8 Flashes
+D24:  0.0394 ROUND  --       0 Draws,     105 Flashes
+D27:  0.0394 ROUND  --       0 Draws,       1 Flashes
+D67:  0.0570 ROUND  --       0 Draws,     282 Flashes
+D68:  0.0750 ROUND  --       0 Draws,      38 Flashes
+D69:  0.0750 SQUARE --       0 Draws,      19 Flashes
+D70:  0.1200 ROUND  --       0 Draws,       2 Flashes
+D71:  0.0630 SQUARE --       0 Draws,       1 Flashes
+D72:  0.0570 SQUARE --       0 Draws,       6 Flashes
+D73:  0.0157 ROUND  --     609 Draws,       0 Flashes
+D74:  0.0394 ROUND  --       0 Draws,     256 Flashes
+D75:  0.0197 ROUND  --     348 Draws,       0 Flashes
+D76:  0.0591 ROUND  --      91 Draws,       0 Flashes
+D77:  0.0394 ROUND  --      70 Draws,       0 Flashes
+---------------------------------------------------------
+ 15 D-Codes      -----    1122 Draws,     718 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.BOT
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.BOT:
+---------------------------------------------------------
+D13:  0.0500 ROUND  --       4 Draws,       0 Flashes
+D26:  0.0630 ROUND  --       0 Draws,       8 Flashes
+D27:  0.0394 ROUND  --       0 Draws,     106 Flashes
+D41:  0.1200 ROUND  --       0 Draws,       2 Flashes
+D42:  0.0630 SQUARE --       0 Draws,       1 Flashes
+D57:  0.0750 ROUND  --       0 Draws,      38 Flashes
+D58:  0.0750 SQUARE --       0 Draws,      19 Flashes
+D73:  0.0157 ROUND  --     777 Draws,       0 Flashes
+D74:  0.0394 ROUND  --       0 Draws,     256 Flashes
+D75:  0.0197 ROUND  --     273 Draws,       0 Flashes
+D76:  0.0591 ROUND  --     129 Draws,       0 Flashes
+D77:  0.0394 ROUND  --      98 Draws,       0 Flashes
+D78:  0.0570 ROUND  --       0 Draws,     288 Flashes
+---------------------------------------------------------
+ 13 D-Codes      -----    1281 Draws,     718 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.GND
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.GND:
+---------------------------------------------------------
+D13:  0.0500 ROUND  --       4 Draws,       0 Flashes
+D26:  0.0630 ROUND  --       0 Draws,     288 Flashes
+D27:  0.0394 ROUND  --       0 Draws,     317 Flashes
+D38:  0.1400 ROUND  --       0 Draws,       2 Flashes
+D39:  0.0830 ROUND  --       0 Draws,       8 Flashes
+D40:  0.0830 SQUARE --       0 Draws,       1 Flashes
+D55:  0.0950 ROUND  --       0 Draws,      38 Flashes
+D56:  0.0950 SQUARE --       0 Draws,      19 Flashes
+D79:  0.0394 ROUND  --       0 Draws,      45 Flashes
+---------------------------------------------------------
+  9 D-Codes      -----       4 Draws,     718 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.PWR
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.PWR:
+---------------------------------------------------------
+D13:  0.0500 ROUND  --       4 Draws,       0 Flashes
+D26:  0.0630 ROUND  --       0 Draws,     288 Flashes
+D27:  0.0394 ROUND  --       0 Draws,     317 Flashes
+D38:  0.1400 ROUND  --       0 Draws,       2 Flashes
+D39:  0.0830 ROUND  --       0 Draws,       8 Flashes
+D40:  0.0830 SQUARE --       0 Draws,       1 Flashes
+D55:  0.0950 ROUND  --       0 Draws,      38 Flashes
+D56:  0.0950 SQUARE --       0 Draws,      19 Flashes
+D79:  0.0394 ROUND  --       0 Draws,      45 Flashes
+---------------------------------------------------------
+  9 D-Codes      -----       4 Draws,     718 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.SMT
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.SMT:
+---------------------------------------------------------
+D26:  0.0630 ROUND  --       0 Draws,       8 Flashes
+D27:  0.0394 ROUND  --       0 Draws,     317 Flashes
+D29:  0.0620 ROUND  --       0 Draws,     288 Flashes
+D41:  0.1200 ROUND  --       0 Draws,       2 Flashes
+D42:  0.0630 SQUARE --       0 Draws,       1 Flashes
+D57:  0.0750 ROUND  --       0 Draws,      38 Flashes
+D58:  0.0750 SQUARE --       0 Draws,      19 Flashes
+D79:  0.0394 ROUND  --       0 Draws,      45 Flashes
+---------------------------------------------------------
+  8 D-Codes      -----       0 Draws,     718 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.SMB
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.SMB:
+---------------------------------------------------------
+D26:  0.0630 ROUND  --       0 Draws,       8 Flashes
+D27:  0.0394 ROUND  --       0 Draws,     317 Flashes
+D29:  0.0620 ROUND  --       0 Draws,     288 Flashes
+D41:  0.1200 ROUND  --       0 Draws,       2 Flashes
+D42:  0.0630 SQUARE --       0 Draws,       1 Flashes
+D57:  0.0750 ROUND  --       0 Draws,      38 Flashes
+D58:  0.0750 SQUARE --       0 Draws,      19 Flashes
+D79:  0.0394 ROUND  --       0 Draws,      45 Flashes
+---------------------------------------------------------
+  8 D-Codes      -----       0 Draws,     718 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.SST
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.SST:
+---------------------------------------------------------
+D22:  0.0100 ROUND  --     657 Draws,       0 Flashes
+D27:  0.0394 ROUND  --       0 Draws,     317 Flashes
+D31:  0.0080 ROUND  --    2819 Draws,       0 Flashes
+D79:  0.0394 ROUND  --       0 Draws,      45 Flashes
+---------------------------------------------------------
+  4 D-Codes      -----    3476 Draws,     362 Flashes
+
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.AST
+*********************************************************
+
+Output file: H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.DRD
+
+Aperture totals for H:\VEHICULO AUTOGUIADO\ORCAD\ESQUEMAS\PCB3.DRD:
+---------------------------------------------------------
+D13:  0.0500 ROUND  --       4 Draws,       0 Flashes
+D22:  0.0100 ROUND  --    7529 Draws,       0 Flashes
+---------------------------------------------------------
+  2 D-Codes      -----    7533 Draws,       0 Flashes
+
+
+*********************************************************
+
+Aperture totals for entire project:
+---------------------------------------------------------
+D13:  0.0500 ROUND  --      20 Draws,       0 Flashes
+D22:  0.0100 ROUND  --    8186 Draws,       0 Flashes
+D23:  0.0630 ROUND  --       0 Draws,       8 Flashes
+D24:  0.0394 ROUND  --       0 Draws,     105 Flashes
+D26:  0.0630 ROUND  --       0 Draws,     600 Flashes
+D27:  0.0394 ROUND  --       0 Draws,    1692 Flashes
+D29:  0.0620 ROUND  --       0 Draws,     576 Flashes
+D31:  0.0080 ROUND  --    2819 Draws,       0 Flashes
+D38:  0.1400 ROUND  --       0 Draws,       4 Flashes
+D39:  0.0830 ROUND  --       0 Draws,      16 Flashes
+D40:  0.0830 SQUARE --       0 Draws,       2 Flashes
+D41:  0.1200 ROUND  --       0 Draws,       6 Flashes
+D42:  0.0630 SQUARE --       0 Draws,       3 Flashes
+D55:  0.0950 ROUND  --       0 Draws,      76 Flashes
+D56:  0.0950 SQUARE --       0 Draws,      38 Flashes
+D57:  0.0750 ROUND  --       0 Draws,     114 Flashes
+D58:  0.0750 SQUARE --       0 Draws,      57 Flashes
+D67:  0.0570 ROUND  --       0 Draws,     282 Flashes
+D68:  0.0750 ROUND  --       0 Draws,      38 Flashes
+D69:  0.0750 SQUARE --       0 Draws,      19 Flashes
+D70:  0.1200 ROUND  --       0 Draws,       2 Flashes
+D71:  0.0630 SQUARE --       0 Draws,       1 Flashes
+D72:  0.0570 SQUARE --       0 Draws,       6 Flashes
+D73:  0.0157 ROUND  --    1386 Draws,       0 Flashes
+D74:  0.0394 ROUND  --       0 Draws,     512 Flashes
+D75:  0.0197 ROUND  --     621 Draws,       0 Flashes
+D76:  0.0591 ROUND  --     220 Draws,       0 Flashes
+D77:  0.0394 ROUND  --     168 Draws,       0 Flashes
+D78:  0.0570 ROUND  --       0 Draws,     288 Flashes
+D79:  0.0394 ROUND  --       0 Draws,     225 Flashes
+---------------------------------------------------------
+ 30 D-Codes      -----   13420 Draws,    4670 Flashes
+
+
+No warnings or errors.
