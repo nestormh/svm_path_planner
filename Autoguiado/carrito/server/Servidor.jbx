@@ -1,0 +1,15 @@
+[PropertyInfo]
+camaras,carrito.server.serial.ControlCamara,false,false, , ,false,<default>
+camarasConn,carrito.server.serial.CamaraConnection,false,false, , ,false,<default>
+control,carrito.server.serial.ControlCarro,false,false, , ,false,<default>
+controlConn,carrito.server.serial.SerialConnection,false,false, , ,false,<default>
+cte,carrito.configura.Constantes,false,false, , ,false,<default>
+media,carrito.media.ServerMedia,false,false, , ,false,<default>
+rmi,carrito.server.ServidorRMI,false,false, , ,false,<default>
+zoom,carrito.server.serial.ControlZoom,false,false, , ,false,<default>
+zoomConn,carrito.server.serial.ZoomConnection[],false,false, , ,false,<default>
+[IconNames]
+
+
+
+

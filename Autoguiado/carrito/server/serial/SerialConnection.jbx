@@ -1,0 +1,40 @@
+[PropertyInfo]
+alarma,int,false,false, , ,true,<default>
+avance,int,false,false, , ,true,<default>
+avanceant,int,false,false, , ,false,<default>
+BufferComandos,int[][],false,false, , ,false,<default>
+BufferRecibe,int[][],false,false, , ,false,<default>
+bytes,int,false,false, , ,true,<default>
+ConsignaFreno,int,false,false, , ,false,<default>
+ConsignaNumPasosFreno,int,false,false, , ,false,<default>
+ConsignaSentidoFreno,int,false,false, , ,false,<default>
+ConsignaSentidoVelocidad,int,false,false, , ,false,<default>
+ConsignaVelocidad,int,false,false, , ,false,<default>
+ConsignaVolante,int,false,false, , ,false,<default>
+ConsignaVolanteHigh,int,false,false, , ,false,<default>
+ConsignaVolanteLow,int,false,false, , ,false,<default>
+der,int,false,false, , ,true,<default>
+desfreno,int,false,false, , ,true,<default>
+freno,int,false,false, , ,true,<default>
+is,java.io.InputStream,false,false, , ,false,<default>
+izq,int,false,false, , ,true,<default>
+keyHandler,carrito.server.serial.SerialConnection.KeyHandler,false,false, , ,false,<default>
+MAXBUFFER,int,false,false, , ,false,<default>
+NumPasosFreno,int,false,false, , ,false,<default>
+open,boolean,false,false, , ,true,<default>
+os,java.io.OutputStream,false,false, , ,false,<default>
+outputStream,java.io.OutputStream,false,false, , ,true,<default>
+parameters,carrito.server.serial.SerialParameters,false,false, , ,false,<default>
+pasosFreno,int,false,false, , ,true,<default>
+portId,javax.comm.CommPortIdentifier,false,false, , ,false,<default>
+PtroBufferEnviar,int,false,false, , ,false,<default>
+PtroBufferRecibir,int,false,false, , ,false,<default>
+RVolante,int,false,false, , ,true,<default>
+SPort,javax.comm.SerialPort,false,false, , ,false,<default>
+TotalBytes,int,false,false, , ,false,<default>
+volante,int,false,false, , ,true,<default>
+[IconNames]
+
+
+
+

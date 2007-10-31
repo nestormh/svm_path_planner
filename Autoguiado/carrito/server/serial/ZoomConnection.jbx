@@ -1,0 +1,17 @@
+[PropertyInfo]
+is,java.io.InputStream,false,false, , ,false,<default>
+keyHandler,carrito.server.serial.ZoomConnection.KeyHandler,false,false, , ,false,<default>
+listo,boolean,false,false, , ,false,<default>
+open,boolean,false,false, , ,true,<default>
+os,java.io.OutputStream,false,false, , ,false,<default>
+outputStream,java.io.OutputStream,false,false, , ,true,<default>
+parameters,carrito.server.serial.SerialParameters,false,false, , ,false,<default>
+portId,javax.comm.CommPortIdentifier,false,false, , ,false,<default>
+retorno,String,false,false, , ,false,<default>
+SPort,javax.comm.SerialPort,false,false, , ,false,<default>
+zoom,int,false,false, , ,true,<default>
+[IconNames]
+
+
+
+

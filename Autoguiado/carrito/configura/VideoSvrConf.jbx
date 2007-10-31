@@ -1,0 +1,21 @@
+[PropertyInfo]
+bitrate,int,false,false, , ,false,<default>
+caching,int,false,false, , ,false,<default>
+codec,String,false,false, , ,false,<default>
+display,boolean,false,false, , ,false,<default>
+file,String,false,false, , ,false,<default>
+fps,float,false,false, , ,false,<default>
+height,int,false,false, , ,false,<default>
+ip,String,false,false, , ,false,<default>
+mux,String,false,false, , ,false,<default>
+name,String,false,false, , ,false,<default>
+port,int,false,false, , ,false,<default>
+scale,float,false,false, , ,false,<default>
+serial,String,false,false, , ,false,<default>
+videoDisp,int,false,false, , ,false,<default>
+width,int,false,false, , ,false,<default>
+[IconNames]
+
+
+
+

@@ -1,0 +1,15 @@
+[PropertyInfo]
+btnAceptar,javax.swing.JButton,false,false, , ,false,<default>
+btnCancelar,javax.swing.JButton,false,false, , ,false,<default>
+btnJoy,javax.swing.JButton,false,false, , ,false,<default>
+cte,carrito.configura.Constantes,false,false, , ,false,<default>
+lblCaching,javax.swing.JLabel,false,false, , ,false,<default>
+lblIP,javax.swing.JLabel,false,false, , ,false,<default>
+pnlVideo,javax.swing.JPanel,false,false, , ,false,<default>
+spnCaching,javax.swing.JSpinner,false,false, , ,false,<default>
+txtIP,javax.swing.JTextField,false,false, , ,false,<default>
+[IconNames]
+
+
+
+
