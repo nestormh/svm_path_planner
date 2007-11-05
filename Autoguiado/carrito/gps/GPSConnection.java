@@ -19,8 +19,8 @@ public class GPSConnection implements SerialPortEventListener,
     private static final double b = 6356752.31424518d;
     private static final double e = 0.0821;//0.08181919084262032d;
     private static final double e1 = 1.4166d;
-    
-    double u[] = new double[] { 0, a };
+
+    double u[] = new double[] { 0, 1 };
 
     private boolean open;
 
@@ -487,23 +487,23 @@ public class GPSConnection implements SerialPortEventListener,
                               hgeoide = 0;
                             }
                             altura = msl + hgeoide;
-                            
-                            
+
+
                             if (msj[13].equals("")) {
                                 age = -1;
                             } else {
                                 age = Double.parseDouble(msj[13]);
                             }
-                            
+
                             //calculaLLA(latitud, longitud, altura);
                             setECEF();
                             getDifAngulo();
-                            
+
                             if (write) {
                               vCaptura.add(new double[] { x, y, z });
                               osECEF.writeDouble(x);
                               osECEF.writeDouble(y);
-                              osECEF.writeDouble(z);                              
+                              osECEF.writeDouble(z);
                               osECEF.writeDouble(angulo);
                               osECEF.writeDouble(speed);
                               bw.write("(" + x + ", " + y + ", " + z + ")\n");
@@ -582,10 +582,10 @@ public class GPSConnection implements SerialPortEventListener,
       double den = p - (Math.pow(e , 2.0) * a * Math.pow(Math.cos(tita), 3.0));
       double latitud = num / den;
       double longitud = Math.atan(y / x);
-      
+
       return new double[] { latitud, longitud };
     }
-    
+
     public GPSData getECEF() {
         setECEF();
         GPSData data = new GPSData();
@@ -824,13 +824,13 @@ public class GPSConnection implements SerialPortEventListener,
         } catch (IOException ioe) {}
       }
     }
-    
+
     public void pauseReading() {
         if (write) {
             write = false;
         } else {
             write = true;
-        }            
+        }
     }
 
     public void startReadingImages(String nombre, CapturaImagen ci1, CapturaImagen ci2) {
@@ -865,42 +865,46 @@ public class GPSConnection implements SerialPortEventListener,
       bd = null;
       media = null;
     }
-    
+
     private double[] regresionLineal(Vector v) {
        int n = v.size();
        double x[] = new double[n];
        double y[] = new double[n];
-       
+
        // Obtenemos los datos que nos interesan del vector
        for (int i = 0; i < n; i++) {
            double xyz[] = (double[])v.elementAt(i);
-           x[i] = xyz[1]; 
-           y[i] = xyz[2];                     
+           //x[i] = xyz[1];
+           //y[i] = xyz[2];
+           // En caso de usar Mercator:
+           double coord[] = ECEF2LLA(xyz[0], xyz[1], xyz[2]);
+           x[i] = coord[1];
+           y[i] = Math.log(Math.tan(Math.PI / 4 + coord[0] / 2));
        }
-       
+
        // Hacemos la regresión lineal
        double pxy, sx, sy, sx2, sy2;
        pxy=sx=sy=sx2=sy2=0.0;
-       
+
        for (int i = 0; i < n; i++) {
            sx += x[i];
            sy += y[i];
            sx2 += x[i] * x[i];
            sy2 += y[i] * y[i];
-           pxy += x[i] * y[i]; 
+           pxy += x[i] * y[i];
        }
-       
+
        // Pendiente
        double a = (n * pxy - sx * sy) / (n * sx2 - sx * sx);
-              
+
        return new double[] { 1, a };
     }
 
     // Añade una nueva posicion a la lista y elimina las últimas de distancia superior a 1 m.
-    public void getDifAngulo() {              
+    public void getDifAngulo() {
       //if (sc != null && sc.getVelocidad() < 10)
       //    return;
-      
+
       //double xy[] = cc.cambioCoordenadas(x, y, z);
       double xy[] = new double[] { x, y, z };
       double oldXY[] = null;
@@ -924,25 +928,25 @@ public class GPSConnection implements SerialPortEventListener,
         for (int i = 0; i < indice; i++) {
           posiciones.remove(0);
         }
-        
-        
+
+
         //double v[] = new double[] { xy[1] - oldXY[1], xy[2] - oldXY[2] };
         double v[] = regresionLineal(posiciones);
-        
+
         double num = u[0] * v[0] + u[1] * v[1];
         double modU = (double)a;
-        double modV = Math.sqrt(Math.pow(v[0], 2.0f) + Math.pow(v[1], 2.0f));        
-        
+        double modV = Math.sqrt(Math.pow(v[0], 2.0f) + Math.pow(v[1], 2.0f));
+
         double ang = 0;
-        if (modU * modV != 0) {                   
+        if (modU * modV != 0) {
             ang = Math.acos(num / (modU * modV));
             if (v[0] > 0) {
                 ang = 2 * Math.PI - ang;
             }
         }
-        
+
         angulo = ang;
-        
+
         //angulo = hdgPoloN;
       }
     }
@@ -1010,7 +1014,7 @@ public class GPSConnection implements SerialPortEventListener,
         } catch(Exception e) {}
       }
   }
-  
+
   public double[][] getVCaptura() {
       int n = vCaptura.size();
       double retorno[][] = new double[vCaptura.size()][];
@@ -1018,7 +1022,7 @@ public class GPSConnection implements SerialPortEventListener,
           double xyz[] = (double [])vCaptura.elementAt(i);
           retorno[i] = xyz;
       }
-      
+
       return retorno;
   }
 }
