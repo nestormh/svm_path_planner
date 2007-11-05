@@ -15,9 +15,10 @@ import carrito.server.serial.*;
 public class GPSConnection implements SerialPortEventListener,
         CommPortOwnershipListener, Runnable {
 
-    private final long a = 6378137;
-    private final double b = 6356752.31424518d;
-    private final double e = 0.08181919084262032d;
+    private static final long a = 6378137;
+    private static final double b = 6356752.31424518d;
+    private static final double e = 0.0821;//0.08181919084262032d;
+    private static final double e1 = 1.4166d;
     
     double u[] = new double[] { 0, a };
 
@@ -574,6 +575,17 @@ public class GPSConnection implements SerialPortEventListener,
       z = ( ( (Math.pow(b, 2.0f) / Math.pow(a, 2.0f)) * N) + altura) * Math.sin(latitud);
     }
 
+    public static double[] ECEF2LLA(double x, double y, double z) {
+      double p = Math.sqrt(Math.pow(x, 2.0) + Math.pow(y, 2.0));
+      double tita = Math.atan((z * a) / (p * b));
+      double num = z + (Math.pow(e1, 2.0) * b * Math.pow(Math.sin(tita), 3.0));
+      double den = p - (Math.pow(e , 2.0) * a * Math.pow(Math.cos(tita), 3.0));
+      double latitud = num / den;
+      double longitud = Math.atan(y / x);
+      
+      return new double[] { latitud, longitud };
+    }
+    
     public GPSData getECEF() {
         setECEF();
         GPSData data = new GPSData();

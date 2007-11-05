@@ -140,6 +140,17 @@ public class CambioCoordenadas implements Runnable {
 
     return resultado;
   }
+  
+  /*public double[] cambioCoordenadas(double x, double y, double z) {
+      // Pasamos de coordenadas ECEF a LLA
+      double coord[] = GPSConnection.ECEF2LLA(x, y, z);
+      double latitud = coord[0];
+      double longitud = coord[1];
+      x = longitud + 1.0725693203475835d;
+      y = Math.log(Math.tan(Math.PI / 4 + latitud / 2));
+      
+      return new double[] { x, y, 0 };
+  }*/
 
   public void setOrigen(double[] origen) {
     this.origen = origen;
@@ -342,15 +353,41 @@ public class CambioCoordenadas implements Runnable {
     } catch (Exception e) {
       System.out.println("Error al cargar la ruta desde el fichero " + e.getMessage());
     }
+    
+    // Obtiene los 3 puntos más alejados del centro
+    // Primero busca el centro
+    double centro[] = { 0, 0, 0 };
+    for (int i = 0; i < v.size(); i++) {
+        centro[0] += ((double[])v.elementAt(i))[0];
+        centro[1] += ((double[])v.elementAt(i))[1];
+        centro[2] += ((double[])v.elementAt(i))[2];
+    }
+    centro[0] /= v.size();
+    centro[1] /= v.size();
+    centro[2] /= v.size();
 
     // Calcula p
-    double[] p = (double[])v.elementAt(0);
+    double maxDist = 0;
+    int max = 0;
+        
+    for (int i = 0; i < v.size(); i++) {
+      double dist = Math.sqrt(Math.pow(((double[])v.elementAt(i))[0] - centro[0], 2.0f) +
+                              Math.pow(((double[])v.elementAt(i))[1] - centro[1], 2.0f) +
+                              Math.pow(((double[])v.elementAt(i))[2] - centro[2], 2.0f));
+      if (maxDist < dist) {
+        maxDist = dist;
+        max = i;
+      }
+    }
+
+    double[] p = (double[])v.elementAt(max);
+
     System.out.println("P = " + 0);
     System.out.println("P = [" + p[0] + ", " + p[1] + ", " + p[2] + "]");
 
     // Calcula q
-    double maxDist = 0;
-    int max = 0;
+    maxDist = 0;
+    max = 0;
 
     for (int i = 0; i < v.size(); i++) {
       double dist = Math.sqrt(Math.pow(((double[])v.elementAt(i))[0] - p[0], 2.0f) +
@@ -367,6 +404,9 @@ public class CambioCoordenadas implements Runnable {
     System.out.println("Q = [" + q[0] + ", " + q[1] + ", " + q[2] + "]");
 
     // Calcula r
+    maxDist = 0;
+    max = 0;
+
     for (int i = 0; i < v.size(); i++) {
       double dist1 = Math.sqrt(Math.pow(((double[])v.elementAt(i))[0] - p[0], 2.0f) +
                               Math.pow(((double[])v.elementAt(i))[1] - p[1], 2.0f) +
@@ -380,11 +420,12 @@ public class CambioCoordenadas implements Runnable {
         maxDist = dist;
         max = i;
       }
-    }
-
+    } 
+      
     double r[] = (double[])v.elementAt(max);
     System.out.println("R = " + max);
     System.out.println("R = [" + r[0] + ", " + r[1] + ", " + r[2] + "]");
+    
 
     // Establece los parámetros
     setParams(p, r, q);
@@ -393,6 +434,8 @@ public class CambioCoordenadas implements Runnable {
     for (int i = 0; i < v.size(); i++) {
       double elem[] = (double[])v.elementAt(i);
       double xy[] = this.cambioCoordenadas(elem[0], elem[1], elem[2]);
+      System.out.print("(" + elem[0] + ", " + elem[1] + ", " + elem[2] + ") --> ");
+      System.out.println("(" + xy[0] + ", " + xy[1] + ")");
       ruta[i * 2] = xy[0];
       ruta[(i * 2) + 1] = xy[1];
     }
@@ -406,8 +449,13 @@ public class CambioCoordenadas implements Runnable {
       velocidades[i / 2] = ((Double)valores.elementAt(i + 1)).doubleValue();
     }
 
-    canvas = new CanvasRuta(ruta, angulos, velocidades, this, 800, 600);
-    control.setCanvas(canvas);
+    if (canvas == null) {
+        canvas = new CanvasRuta(ruta, angulos, velocidades, this, 800, 600);
+        control.setCanvas(canvas);
+    } else {
+        //canvas = new CanvasRuta(ruta, angulos, velocidades, this, 800, 600);
+        canvas.setRuta(ruta, angulos, velocidades, 800, 600);
+    }
 
   }
 
@@ -897,8 +945,12 @@ public class CambioCoordenadas implements Runnable {
     frmRuta.setVisible(true);
     frmRuta.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frmRuta.setResizable(true);
-    frmRuta.addKeyListener(canvas);
+    frmRuta.addKeyListener(canvas);    
     canvas.repaint();
+  }
+  
+  public void hideCanvas(boolean valor) {
+      frmRuta.setVisible(! valor);
   }
 
   public void conduce(double angulo, double velocidad) {
@@ -1411,7 +1463,7 @@ public class CambioCoordenadas implements Runnable {
     }
     angulos[angulos.length - 1] = getAnguloEntrePuntos(new double[] { ruta[ruta.length - 2], ruta[ruta.length - 1] },
                                            new double[] { ruta[0], ruta[1] });
-    canvas.setRuta(ruta, angulos, velocidades);
+    canvas.setRuta(ruta, angulos, velocidades, 800, 600);
   }
 
   public double[][] getRuta() {
