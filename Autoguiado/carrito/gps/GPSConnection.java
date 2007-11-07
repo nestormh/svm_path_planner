@@ -972,8 +972,7 @@ public class GPSConnection implements SerialPortEventListener,
           posiciones.remove(0);
         }
 
-
-       double v[] = new double[] { xy[1] - oldXY[1], xy[2] - oldXY[2] };
+        double v[] = new double[] { xy[1] - oldXY[1], xy[2] - oldXY[2] };
         //double v[] = regresionLineal(posiciones);        
 
         double num = u[0] * v[0] + u[1] * v[1];
