@@ -458,6 +458,45 @@ public class CambioCoordenadas implements Runnable {
     }
 
   }
+  
+  public double[] testRuta(String fichero) {
+    Vector r = new Vector();
+    Vector a = new Vector();
+    Vector v = new Vector();
+    
+    try {
+      File file = new File(fichero);
+      ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
+      double x = 0, y = 0, z = 0;
+      while (is.available() != 0) {
+        x = is.readDouble();
+        y = is.readDouble();
+        z = is.readDouble();
+
+        r.add(new double[]{x, y, z});
+
+        // Lee el ángulo
+        a.add(is.readDouble());
+        // Lee la velocidad
+        v.add(is.readDouble());
+      }
+      is.close();
+    } catch (Exception e) {
+      System.out.println("Error al cargar la ruta desde el fichero " + e.getMessage());
+    }            
+    
+    double ang[] = new double[r.size()];
+    for (int i = 0; i < r.size(); i++) {
+        double xyz[] = (double[])r.elementAt(i);
+        ang[i] = gps.testAngulo(xyz[0], xyz[1], xyz[2]);
+        
+        /*try {
+            Thread.sleep(200);
+        } catch (Exception e) {}*/
+    }
+    
+    return ang;
+  }
 
   public void loadRutaConImagenes2(String fichero) {
     Vector v = new Vector();
