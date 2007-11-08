@@ -1008,8 +1008,14 @@ public class GPSConnection implements SerialPortEventListener,
       }
     }
 
-    public double getAnguloConDesv() {
-      double ang = angulo + desvPlano;
+    /**
+     * Recibe el ángulo calculado en el eje de coordenadas local y lo devuelve
+     * según el eje de coordenadas global
+     * @param anguloCalc Ángulo en el eje de coordenadas local
+     * @return double Ángulo en coordenadas globales
+     */
+    public double getAnguloConDesv(double anguloCalc) {
+      double ang = anguloCalc + desvPlano;
       if (ang < 0)
         ang += 2 * Math.PI;
       if (ang > 2 * Math.PI)
@@ -1035,7 +1041,12 @@ public class GPSConnection implements SerialPortEventListener,
     this.maxMedidas = maxMedidas;
   }
 
-  public void setDesvPlano(double desvPlano) {
+  public void setDesvPlano(double[] norteLocal) {
+    double desvPlano = getAnguloNorte(norteLocal);
+
+    if (desvPlano > Math.PI)
+      desvPlano -= 2 * Math.PI;
+
     this.desvPlano = desvPlano;
   }
 

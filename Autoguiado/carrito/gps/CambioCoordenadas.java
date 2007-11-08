@@ -851,12 +851,7 @@ public class CambioCoordenadas implements Runnable {
     if (cambioCoordenadas(0, 0, 0)[2] < 0)
         setParams(q, p, r);
 
-    double desvPlano = gps.getAnguloNorte(y);
-
-    if (desvPlano > Math.PI)
-      desvPlano -= 2 * Math.PI;
-
-    gps.setDesvPlano(desvPlano);
+    gps.setDesvPlano(y);
   }
 
   public void savePunto(String id) {
