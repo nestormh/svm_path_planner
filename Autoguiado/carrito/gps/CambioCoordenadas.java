@@ -11,8 +11,6 @@ import Jama.*;
 import carrito.media.*;
 import carrito.server.serial.*;
 
-import java.io.*;
-
 public class CambioCoordenadas implements Runnable {
   // Nuevo eje
   //private double v[][] = { { 1.0f, 0.0f, 0.0f}, { 0.0f, 1.0f, 0.0f }, { 1.0f, 0.0f, 0.0f } };
@@ -140,7 +138,7 @@ public class CambioCoordenadas implements Runnable {
 
     return resultado;
   }
-  
+
   /*public double[] cambioCoordenadas(double x, double y, double z) {
       // Pasamos de coordenadas ECEF a LLA
       double coord[] = GPSConnection.ECEF2LLA(x, y, z);
@@ -148,7 +146,7 @@ public class CambioCoordenadas implements Runnable {
       double longitud = coord[1];
       x = longitud + 1.0725693203475835d;
       y = Math.log(Math.tan(Math.PI / 4 + latitud / 2));
-      
+
       return new double[] { x, y, 0 };
   }*/
 
@@ -353,7 +351,7 @@ public class CambioCoordenadas implements Runnable {
     } catch (Exception e) {
       System.out.println("Error al cargar la ruta desde el fichero " + e.getMessage());
     }
-    
+
     // Obtiene los 3 puntos más alejados del centro
     // Primero busca el centro
     double centro[] = { 0, 0, 0 };
@@ -369,7 +367,7 @@ public class CambioCoordenadas implements Runnable {
     // Calcula p
     double maxDist = 0;
     int max = 0;
-        
+
     for (int i = 0; i < v.size(); i++) {
       double dist = Math.sqrt(Math.pow(((double[])v.elementAt(i))[0] - centro[0], 2.0f) +
                               Math.pow(((double[])v.elementAt(i))[1] - centro[1], 2.0f) +
@@ -420,12 +418,12 @@ public class CambioCoordenadas implements Runnable {
         maxDist = dist;
         max = i;
       }
-    } 
-      
+    }
+
     double r[] = (double[])v.elementAt(max);
     System.out.println("R = " + max);
     System.out.println("R = [" + r[0] + ", " + r[1] + ", " + r[2] + "]");
-    
+
 
     // Establece los parámetros
     setParams(p, r, q);
@@ -458,12 +456,12 @@ public class CambioCoordenadas implements Runnable {
     }
 
   }
-  
+
   public double[] testRuta(String fichero) {
     Vector r = new Vector();
     Vector a = new Vector();
     Vector v = new Vector();
-    
+
     try {
       File file = new File(fichero);
       ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
@@ -483,18 +481,18 @@ public class CambioCoordenadas implements Runnable {
       is.close();
     } catch (Exception e) {
       System.out.println("Error al cargar la ruta desde el fichero " + e.getMessage());
-    }            
-    
+    }
+
     double ang[] = new double[r.size()];
     for (int i = 0; i < r.size(); i++) {
         double xyz[] = (double[])r.elementAt(i);
         ang[i] = gps.testAngulo(xyz[0], xyz[1], xyz[2]);
-        
+
         /*try {
             Thread.sleep(200);
         } catch (Exception e) {}*/
     }
-    
+
     return ang;
   }
 
@@ -852,6 +850,13 @@ public class CambioCoordenadas implements Runnable {
 
     if (cambioCoordenadas(0, 0, 0)[2] < 0)
         setParams(q, p, r);
+
+    double desvPlano = gps.getAnguloNorte(y);
+
+    if (desvPlano > Math.PI)
+      desvPlano -= 2 * Math.PI;
+
+    gps.setDesvPlano(desvPlano);
   }
 
   public void savePunto(String id) {
@@ -916,7 +921,7 @@ public class CambioCoordenadas implements Runnable {
   public void stopRuta() {
     gps.stopReading();
   }
-  
+
   public void pauseReading() {
       gps.pauseReading();
   }
@@ -984,10 +989,10 @@ public class CambioCoordenadas implements Runnable {
     frmRuta.setVisible(true);
     frmRuta.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frmRuta.setResizable(true);
-    frmRuta.addKeyListener(canvas);    
+    frmRuta.addKeyListener(canvas);
     canvas.repaint();
   }
-  
+
   public void hideCanvas(boolean valor) {
       frmRuta.setVisible(! valor);
   }
@@ -1004,7 +1009,7 @@ public class CambioCoordenadas implements Runnable {
   public double[] setPuntoActual(double x, double y, double z, double angulo, double speed) {
       double xy[] = cambioCoordenadas(x, y, z);
 
-      double u[] = getU(xy[0], xy[1], angulo, speed);           
+      double u[] = getU(xy[0], xy[1], angulo, speed);
 
       if (cocheActivo) {
         conduce(u[0], u[1]);
@@ -1015,7 +1020,7 @@ public class CambioCoordenadas implements Runnable {
       if (frmRuta.isVisible()) {
         canvas.setPoint(xy[0], xy[1], u, angulo, speed);
       }
-      
+
       control.getPuerto().setConsignaAvance(u[1]);
 
       return xy;
@@ -1613,20 +1618,20 @@ public class CambioCoordenadas implements Runnable {
       System.out.println("Max: " + max);
       System.out.println("Min: " + min);
   }
-  
+
   public void grabaRutaEnXY(String rutaOrigen, String rutaDest) {
       try {
         loadRuta(rutaOrigen, false);
-      
+
         PrintWriter pw = new PrintWriter(new File(rutaDest));
-      
+
         for (int i = 0; i < ruta.length; i++) {
           pw.println(ruta[i]);
         }
-        
+
         pw.close();
       } catch(Exception e) {
           System.err.println("Excepción: " + e.getMessage());
-      }           
+      }
   }
 }
