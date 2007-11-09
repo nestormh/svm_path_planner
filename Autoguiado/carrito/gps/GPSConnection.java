@@ -7,6 +7,7 @@ import javax.comm.*;
 
 import carrito.media.*;
 import carrito.server.serial.*;
+import Jama.Matrix;
 
 /**
  A class that handles the details of a serial connection. Reads from one
@@ -20,6 +21,9 @@ public class GPSConnection implements SerialPortEventListener,
     private static final double b = 6356752.31424518d;
     private static final double e = 0.0821;//0.08181919084262032d;
     private static final double e1 = 1.4166d;
+
+    // Vector del polo N
+    double u[] = new double[] { 0, b };
 
     private boolean open;
 
@@ -88,10 +92,11 @@ public class GPSConnection implements SerialPortEventListener,
 
     private long lastInstruccion = System.currentTimeMillis() * 2;
 
-    // Desviación del plano respecto al N
-    private double desvPlano = 0.0;
-
     private SerialConnection sc = null;
+
+    double posAnt[] = { 0, 0, 0 };
+
+    double minDistOperativa = 0.5;
 
   /**
          Creates a SerialConnection object and initilizes variables passed in
@@ -498,8 +503,7 @@ public class GPSConnection implements SerialPortEventListener,
                             }
 
                             //calculaLLA(latitud, longitud, altura);
-                            setECEF();
-                            getDifAngulo();
+                            setValores();
 
                             if (write) {
                               vCaptura.add(new double[] { x, y, z });
@@ -582,10 +586,13 @@ public class GPSConnection implements SerialPortEventListener,
       double tita = Math.atan((z * a) / (p * b));
       double num = z + (Math.pow(e1, 2.0) * b * Math.pow(Math.sin(tita), 3.0));
       double den = p - (Math.pow(e , 2.0) * a * Math.pow(Math.cos(tita), 3.0));
+
       double latitud = num / den;
       double longitud = Math.atan(y / x);
+      double N = a / Math.sqrt(1 - Math.pow(e, 2.0f) * Math.pow(Math.sin(longitud), 2.0f));
+      double altura = p / Math.cos(longitud) - N;
 
-      return new double[] { latitud, longitud };
+      return new double[] { latitud, longitud, altura };
     }
 
     public GPSData getECEF() {
@@ -641,6 +648,10 @@ public class GPSConnection implements SerialPortEventListener,
 
     public double[] getXY() {
       return cc.cambioCoordenadas(x, y, z);
+    }
+
+    public double[] getXYZ() {
+      return new double[] { x, y, z };
     }
 
     public double getDesvAltura() {
@@ -723,8 +734,8 @@ public class GPSConnection implements SerialPortEventListener,
     return maxMedidas;
   }
 
-  public double getDesvPlano() {
-    return desvPlano;
+  public double getMinDistOperativa() {
+    return minDistOperativa;
   }
 
   public GPSData getError() {
@@ -949,24 +960,29 @@ public class GPSConnection implements SerialPortEventListener,
        return ang;
     }
 
-    public double getAnguloNorte(double[] v) {
-      // Vector del polo N
-      double u[] = new double[] { 0, b };
+    /**
+     * Establece los valores de ángulo y velocidad
+     */
+    public void setValores() {
+      setECEF();
+      if (Math.sqrt(Math.pow(x - posAnt[0], 2.0f) +
+                    Math.pow(y - posAnt[1], 2.0f) +
+                    Math.pow(z - posAnt[2], 2.0f)) < minDistOperativa)
+        return;
 
-      double num = u[0] * v[0] + u[1] * v[1];
-      double modU = (double)a;
-      double modV = Math.sqrt(Math.pow(v[0], 2.0f) + Math.pow(v[1], 2.0f));
+      double v[] = { x - posAnt[0], y - posAnt[1], z - posAnt[2]};
 
-      double ang = 0;
+      double vNorth = - v[0] * Math.sin(latitud) * Math.cos(longitud) -
+          v[1] * Math.sin(latitud) * Math.sin(longitud) +
+          v[2] * Math.cos(latitud);
+      double vEast = - v[0] * Math.sin(longitud) + v[1] * Math.cos(longitud);
 
-      if (modU * modV != 0) {
-        ang = Math.acos(num / (modU * modV));
-        if (v[0] > 0) {
-          ang = 2 * Math.PI - ang;
-        }
-      }
+      double ang = Math.atan2(vEast, vNorth);
+      if (ang < 0)
+        ang += Math.PI * 2;
 
-      return ang;
+      angulo = ang;
+      speed = Math.sqrt(Math.pow(vNorth, 2.0f) + Math.pow(vEast, 2.0f)) * 5;
     }
 
     // Añade una nueva posicion a la lista y elimina las últimas de distancia superior a 1 m.
@@ -1001,29 +1017,25 @@ public class GPSConnection implements SerialPortEventListener,
         double v[] = new double[] { xy[1] - oldXY[1], xy[2] - oldXY[2] };
         //double v[] = regresionLineal(posiciones);
 
-        angulo = getAnguloNorte(v);
+        double num = u[0] * v[0] + u[1] * v[1];
+        double modU = (double)a;
+        double modV = Math.sqrt(Math.pow(v[0], 2.0f) + Math.pow(v[1], 2.0f));
+
+        double ang = 0;
+
+        if (modU * modV != 0) {
+          ang = Math.acos(num / (modU * modV));
+          if (v[0] > 0) {
+            ang = 2 * Math.PI - ang;
+          }
+        }
+
+        angulo = ang;
         //angulo = regresionLineal(posiciones);
 
         //angulo = hdgPoloN;
       }
     }
-
-    /**
-     * Recibe el ángulo calculado en el eje de coordenadas local y lo devuelve
-     * según el eje de coordenadas global
-     * @param anguloCalc Ángulo en el eje de coordenadas local
-     * @return double Ángulo en coordenadas globales
-     */
-    public double getAnguloConDesv(double anguloCalc) {
-      double ang = anguloCalc + desvPlano;
-      if (ang < 0)
-        ang += 2 * Math.PI;
-      if (ang > 2 * Math.PI)
-        ang -= 2 * Math.PI;
-
-      return ang;
-    }
-
 
     /*public void getDifAngulo(double x, double y, double z) {
       this.x = x;
@@ -1041,13 +1053,8 @@ public class GPSConnection implements SerialPortEventListener,
     this.maxMedidas = maxMedidas;
   }
 
-  public void setDesvPlano(double[] norteLocal) {
-    double desvPlano = getAnguloNorte(norteLocal);
-
-    if (desvPlano > Math.PI)
-      desvPlano -= 2 * Math.PI;
-
-    this.desvPlano = desvPlano;
+  public void setMinDistOperativa(double minDistOperativa) {
+    this.minDistOperativa = minDistOperativa;
   }
 
   private void calculaLLA(double latitud, double longitud, double altura) {

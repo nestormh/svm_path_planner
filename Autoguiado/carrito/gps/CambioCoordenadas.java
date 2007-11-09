@@ -46,6 +46,8 @@ public class CambioCoordenadas implements Runnable {
 
   // Array que contiene las coordenadas y valores en el plano de la ruta
   private double ruta[] = null;
+  private double rutaECEF[][] = null;
+  private double rutaLLA[][] = null;
   private double velocidades[] = null;
   private double angulos[] = null;
   private ImagenId[] imagenes1a = null;
@@ -97,6 +99,8 @@ public class CambioCoordenadas implements Runnable {
   String imagenes = null;
 
   Media media = null;
+
+  double vDirector[] = null;
 
   public CambioCoordenadas(String puerto, String params, String puertoCoche, boolean cocheActivo) {
       loadParams(params);
@@ -253,9 +257,7 @@ public class CambioCoordenadas implements Runnable {
       v = (double[][])is.readObject();
       origen = (double[])is.readObject();
       limites = (double[])is.readObject();
-      System.out.println(new Matrix(v));
-      System.out.println(new Matrix(new double[][] { origen }));
-      System.out.println(new Matrix(new double[][] { limites }));
+
       if (limites[0] > limites[2]) {
         double tmp = limites[2];
         limites[2] = limites[0];
@@ -352,88 +354,25 @@ public class CambioCoordenadas implements Runnable {
       System.out.println("Error al cargar la ruta desde el fichero " + e.getMessage());
     }
 
-    // Obtiene los 3 puntos más alejados del centro
-    // Primero busca el centro
-    double centro[] = { 0, 0, 0 };
+    rutaECEF = new double[v.size()][3];
+    rutaLLA = new double[v.size()][3];
     for (int i = 0; i < v.size(); i++) {
-        centro[0] += ((double[])v.elementAt(i))[0];
-        centro[1] += ((double[])v.elementAt(i))[1];
-        centro[2] += ((double[])v.elementAt(i))[2];
-    }
-    centro[0] /= v.size();
-    centro[1] /= v.size();
-    centro[2] /= v.size();
+      double elem[] = (double[])v.elementAt(i);
+      double LLA[] = gps.ECEF2LLA(elem[0], elem[1], elem[2]);
 
-    // Calcula p
-    double maxDist = 0;
-    int max = 0;
-
-    for (int i = 0; i < v.size(); i++) {
-      double dist = Math.sqrt(Math.pow(((double[])v.elementAt(i))[0] - centro[0], 2.0f) +
-                              Math.pow(((double[])v.elementAt(i))[1] - centro[1], 2.0f) +
-                              Math.pow(((double[])v.elementAt(i))[2] - centro[2], 2.0f));
-      if (maxDist < dist) {
-        maxDist = dist;
-        max = i;
+      for (int j = 0; j < 3; j++) {
+        rutaECEF[i][j] = elem[j];
+        rutaLLA[i][j] = LLA[j];
       }
     }
 
-    double[] p = (double[])v.elementAt(max);
-
-    System.out.println("P = " + 0);
-    System.out.println("P = [" + p[0] + ", " + p[1] + ", " + p[2] + "]");
-
-    // Calcula q
-    maxDist = 0;
-    max = 0;
-
-    for (int i = 0; i < v.size(); i++) {
-      double dist = Math.sqrt(Math.pow(((double[])v.elementAt(i))[0] - p[0], 2.0f) +
-                              Math.pow(((double[])v.elementAt(i))[1] - p[1], 2.0f) +
-                              Math.pow(((double[])v.elementAt(i))[2] - p[2], 2.0f));
-      if (maxDist < dist) {
-        maxDist = dist;
-        max = i;
-      }
-    }
-
-    double[] q = (double[])v.elementAt(max);
-    System.out.println("Q = " + max);
-    System.out.println("Q = [" + q[0] + ", " + q[1] + ", " + q[2] + "]");
-
-    // Calcula r
-    maxDist = 0;
-    max = 0;
-
-    for (int i = 0; i < v.size(); i++) {
-      double dist1 = Math.sqrt(Math.pow(((double[])v.elementAt(i))[0] - p[0], 2.0f) +
-                              Math.pow(((double[])v.elementAt(i))[1] - p[1], 2.0f) +
-                              Math.pow(((double[])v.elementAt(i))[2] - p[2], 2.0f));
-      double dist2 = Math.sqrt(Math.pow(((double[])v.elementAt(i))[0] - q[0], 2.0f) +
-                              Math.pow(((double[])v.elementAt(i))[1] - q[1], 2.0f) +
-                              Math.pow(((double[])v.elementAt(i))[2] - q[2], 2.0f));
-      double dist = Math.abs(dist1 + dist2);
-
-      if (maxDist < dist) {
-        maxDist = dist;
-        max = i;
-      }
-    }
-
-    double r[] = (double[])v.elementAt(max);
-    System.out.println("R = " + max);
-    System.out.println("R = [" + r[0] + ", " + r[1] + ", " + r[2] + "]");
-
-
-    // Establece los parámetros
-    setParams(p, r, q);
+    setParams();
 
     ruta = new double[v.size() * 2];
     for (int i = 0; i < v.size(); i++) {
       double elem[] = (double[])v.elementAt(i);
       double xy[] = this.cambioCoordenadas(elem[0], elem[1], elem[2]);
-      System.out.print("(" + elem[0] + ", " + elem[1] + ", " + elem[2] + ") --> ");
-      System.out.println("(" + xy[0] + ", " + xy[1] + ")");
+
       ruta[i * 2] = xy[0];
       ruta[(i * 2) + 1] = xy[1];
     }
@@ -443,9 +382,13 @@ public class CambioCoordenadas implements Runnable {
     velocidades = new double[valores.size() / 2];
     angulos = new double[valores.size() / 2];
     for (int i = 0; i < valores.size(); i += 2) {
-      angulos[i / 2] = ((Double)valores.elementAt(i)).doubleValue();
       velocidades[i / 2] = ((Double)valores.elementAt(i + 1)).doubleValue();
     }
+
+    for (int i = 1; i < angulos.length; i++) {
+      angulos[i] = calculaAngulo(rutaECEF[i-1], rutaECEF[i], rutaLLA[i][0], rutaLLA[i][1])[1];
+    }
+    angulos[0] = angulos[1];
 
     if (canvas == null) {
         canvas = new CanvasRuta(ruta, angulos, velocidades, this, 800, 600);
@@ -808,6 +751,29 @@ public class CambioCoordenadas implements Runnable {
     System.out.println(data.getZ());
   }
 
+  public void setParams() {
+    // Buscamos el centro de la ruta
+    origen = new double[]{ 0, 0, 0 };
+    for (int i = 0; i < rutaECEF.length; i++) {
+      for (int j = 0; j < 3; j++) {
+        origen[j] += rutaECEF[i][j];
+      }
+    }
+    for (int j = 0; j < 3; j++) {
+      origen[j] /= rutaECEF.length;
+    }
+
+    double coord[] = gps.ECEF2LLA(origen[0], origen[1], origen[2]);
+
+    v = new double[3][];
+    v[0] = new double[] { -Math.sin(coord[1]), Math.cos(coord[1]), 0 };
+    v[1] = new double[] { -Math.cos(coord[1]) * Math.sin(coord[0]), -Math.sin(coord[0]) * Math.sin(coord[1]), Math.cos(coord[0]) };
+    v[2] = new double[] { Math.cos(coord[0]) * Math.cos(coord[1]), Math.cos(coord[0]) * Math.sin(coord[1]), Math.sin(coord[0])};
+
+    T = new Matrix(v);
+
+  }
+
   public void setParams(double[] p, double[] q, double[] r) {
     double a[] = { q[0] - p[0], q[1] - p[1], q[2] - p[2] };
     double b[] = { r[0] - p[0], r[1] - p[1], r[2] - p[2] };
@@ -850,8 +816,26 @@ public class CambioCoordenadas implements Runnable {
 
     if (cambioCoordenadas(0, 0, 0)[2] < 0)
         setParams(q, p, r);
+  }
 
-    gps.setDesvPlano(y);
+  public double[] calculaAngulo(double punto1[], double punto2[], double latitud, double longitud) {
+    double v[] = { punto2[0] - punto1[0], punto2[1] - punto1[1], punto2[2] - punto1[2] };
+
+    double vNorth = - v[0] * Math.sin(latitud) * Math.cos(longitud) -
+        v[1] * Math.sin(latitud) * Math.sin(longitud) +
+        v[2] * Math.cos(latitud);
+    double vEast = - v[0] * Math.sin(longitud) + v[1] * Math.cos(longitud);
+
+    double ang = Math.atan2(vNorth, vEast);
+    if (ang < 0)
+      ang += Math.PI * 2;
+
+    double modulo = Math.sqrt(Math.pow(vNorth, 2.0f) + Math.pow(vEast, 2.0f)) * 5;
+    return new double[] { modulo, ang };
+  }
+
+  public double[] getVectorAcercamiento(int indice) {
+    return calculaAngulo(gps.getXYZ(), rutaECEF[indice], gps.getLatitud(), gps.getLongitud());
   }
 
   public void savePunto(String id) {
@@ -1536,7 +1520,7 @@ public class CambioCoordenadas implements Runnable {
       System.out.println(listaDisp[i]);
 */
     CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "", false);
-    cc.loadRuta("coche1.dat", false);
+    cc.loadRuta("320e.dat", false);
     cc.showCanvas();
     double xy[] = cc.getGps().getXY();
     System.out.println(xy[0] + ", " + xy[1] + ", " + xy[2]);

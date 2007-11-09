@@ -99,9 +99,9 @@ public class CanvasRuta extends Canvas implements MouseListener, KeyListener {
   }
 
   public void setRuta(double input[], double angulos[], double velocidades[], int ancho, int alto) {
-      
+
     setLimites(input, ancho, alto);
-    
+
     ruta = new Point[input.length / 2];
 
     kx = ancho / (maxX - minX);
@@ -194,10 +194,10 @@ public class CanvasRuta extends Canvas implements MouseListener, KeyListener {
   }
 
 
-  public void paint(Graphics g) {     
+  public void paint(Graphics g) {
     g.translate(origenX, origenY);
-       
-    
+
+
     if ((obstaculos != null) && (obstaculos.size() != 0)) {
       g.setColor(Color.darkGray);
       for (int i = 0; i < obstaculos.size(); i++) {
