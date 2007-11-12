@@ -144,6 +144,16 @@ public class CambioCoordenadas implements Runnable {
     return resultado;
   }
 
+  public static double[] cambioCoordenadas(double x, double y, double z, Matrix m, double coord[]) {
+    double resultado[] = null;
+
+    Matrix res = new Matrix(new double[][] { {x - coord[0]}, {y - coord[1]}, {z - coord[2]} });
+    resultado = (m.times(res).transpose().getArray())[0];
+
+    return resultado;
+  }
+
+
   /*public double[] cambioCoordenadas(double x, double y, double z) {
       // Pasamos de coordenadas ECEF a LLA
       double coord[] = GPSConnection.ECEF2LLA(x, y, z);
@@ -345,8 +355,8 @@ public class CambioCoordenadas implements Runnable {
         valores.add(is.readDouble());
         // Lee la velocidad
         valores.add(is.readDouble());
-        
-        vRms.add(is.readDouble());
+
+        //vRms.add(is.readDouble());
       }
       is.close();
 
@@ -387,9 +397,9 @@ public class CambioCoordenadas implements Runnable {
     angulos = new double[valores.size() / 2];
     rms = new double[vRms.size()];
     for (int i = 0; i < valores.size(); i += 2) {
-      velocidades[i / 2] = ((Double)valores.elementAt(i + 1)).doubleValue();     
+      velocidades[i / 2] = ((Double)valores.elementAt(i + 1)).doubleValue();
     }
-    
+
     for (int i = 0; i < vRms.size(); i++) {
         rms[i] = ((Double)vRms.elementAt(i)).doubleValue();
     }
@@ -760,6 +770,26 @@ public class CambioCoordenadas implements Runnable {
     System.out.println(data.getZ());
   }
 
+  // Obtiene la matriz del plano tangente a un punto
+  public static Matrix getPTP(double latitud, double longitud) {
+    // Matriz de rotación en torno a un punto
+    double v[][] = new double[3][];
+    v[0] = new double[] { -Math.sin(longitud), Math.cos(longitud), 0 };
+    v[1] = new double[] { -Math.cos(longitud) * Math.sin(latitud), -Math.sin(latitud) * Math.sin(longitud), Math.cos(latitud) };
+    v[2] = new double[] { Math.cos(latitud) * Math.cos(longitud), Math.cos(latitud) * Math.sin(longitud), Math.sin(latitud)};
+
+    Matrix M1 = new Matrix(v);
+
+    // Matriz de inversión del eje z en torno al eje x (Norte)
+    double w[][] = new double[3][];
+    w[0] = new double[] { -1, 0, 0 };
+    w[1] = new double[] { 0, 1, 0 };
+    w[2] = new double[] { 0, 0, -1 };
+    Matrix M2 = new Matrix(w);
+
+    return M2.times(M1);
+  }
+
   public void setParams() {
     // Buscamos el centro de la ruta
     origen = new double[]{ 0, 0, 0 };
@@ -774,13 +804,7 @@ public class CambioCoordenadas implements Runnable {
 
     double coord[] = gps.ECEF2LLA(origen[0], origen[1], origen[2]);
 
-    v = new double[3][];
-    v[0] = new double[] { -Math.sin(coord[1]), Math.cos(coord[1]), 0 };
-    v[1] = new double[] { -Math.cos(coord[1]) * Math.sin(coord[0]), -Math.sin(coord[0]) * Math.sin(coord[1]), Math.cos(coord[0]) };
-    v[2] = new double[] { Math.cos(coord[0]) * Math.cos(coord[1]), Math.cos(coord[0]) * Math.sin(coord[1]), Math.sin(coord[0])};
-
-    T = new Matrix(v);
-
+    T = getPTP(coord[0], coord[1]);
   }
 
   public void setParams(double[] p, double[] q, double[] r) {
@@ -1122,7 +1146,7 @@ public class CambioCoordenadas implements Runnable {
     py = data.getY();
     pz = data.getZ();
   }
- 
+
   public void muestraDistancia() {
     GPSData data = gps.getGPSData();
     double base[] = cambioCoordenadas(px, py, pz);
@@ -1529,7 +1553,7 @@ public class CambioCoordenadas implements Runnable {
       System.out.println(listaDisp[i]);
 */
     CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "", false);
-    cc.loadRuta("nov12b.dat", false);
+    cc.loadRuta("320e.dat", false);
     cc.showCanvas();
     double xy[] = cc.getGps().getXY();
     System.out.println(xy[0] + ", " + xy[1] + ", " + xy[2]);
@@ -1622,7 +1646,7 @@ public class CambioCoordenadas implements Runnable {
           System.err.println("Excepción: " + e.getMessage());
       }
   }
-  
+
   public double[] getRms() {
       return rms;
   }

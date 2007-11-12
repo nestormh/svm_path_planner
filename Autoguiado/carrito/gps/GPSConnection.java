@@ -371,7 +371,7 @@ public class GPSConnection implements SerialPortEventListener,
 
                         if (Pattern.matches("\\$..GST", msj[0])) {
                             //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
-                            
+
                             if (msj[2].equals("")) {
                                 rms = 0;
                             } else {
@@ -971,34 +971,20 @@ public class GPSConnection implements SerialPortEventListener,
                     Math.pow(z - posAnt[2], 2.0f)) < minDistOperativa)
         return;
 
-      double v[] = { x - posAnt[0], y - posAnt[1], z - posAnt[2]};
+      Matrix T = CambioCoordenadas.getPTP(latitud, longitud);
 
-      double vNorth = - v[0] * Math.sin(latitud) * Math.cos(longitud) -
-          v[1] * Math.sin(latitud) * Math.sin(longitud) +
-          v[2] * Math.cos(latitud);
-      double vEast = - v[0] * Math.sin(longitud) + v[1] * Math.cos(longitud);
-      
-   /* double m[][] = new double[3][];
-    m[0] = new double[] { -Math.sin(v[1]), Math.cos(v[1]), 0 };
-    m[1] = new double[] { -Math.cos(v[1]) * Math.sin(v[0]), -Math.sin(v[0]) * Math.sin(v[1]), Math.cos(v[0]) };
-    m[2] = new double[] { Math.cos(v[0]) * Math.cos(v[1]), Math.cos(v[0]) * Math.sin(v[1]), Math.sin(v[0])};
+      double v[] = CambioCoordenadas.cambioCoordenadas(posAnt[0], posAnt[1], posAnt[2], T, new double[] { x, y, z });
+      for (int i = 0; i < v.length; i++) {
+        v[i] *= -1;
+      }
 
-    Matrix T = new Matrix(m);
-
-    double resultado[] = null;
-
-    Matrix res = new Matrix(new double[][] { { v[0]}, {y - origen[1]}, {z - origen[2]} });
-    resultado = (T.times(res).transpose().getArray())[0];*/
-         
-      double ang = Math.atan2(vEast, -vNorth);
+      double ang = Math.atan2(v[1], v[0]);
       if (ang < 0)
-        ang += Math.PI * 2;
-      /*if (ang > Math.PI * 2)
-        ang -= Math.PI * 2;*/
-      
+        ang += 2 * Math.PI;
+
       angulo = ang;
-      speed = Math.sqrt(Math.pow(vNorth, 2.0f) + Math.pow(vEast, 2.0f)) * 5;
-      
+      speed = Math.sqrt(Math.pow(v[0], 2.0f) + Math.pow(v[1], 2.0f)) * 5;
+
       posAnt = new double[] { x, y, z };
     }
 
@@ -1137,7 +1123,7 @@ public class GPSConnection implements SerialPortEventListener,
       this.x = x;
       this.y = y;
       this.z = z;
-      this.getDifAngulo();
+      this.setValores();
       return angulo;
   }
 }

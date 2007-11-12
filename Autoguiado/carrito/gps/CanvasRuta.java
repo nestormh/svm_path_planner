@@ -410,6 +410,7 @@ public class CanvasRuta extends Canvas implements MouseListener, KeyListener {
       double miX = (((e.getPoint().x - origenX) / (kx * aumento) ) + minX);
       double miY = (((alto * aumento - e.getPoint().y + origenY) / (ky * aumento)) + minY);
 
+      System.out.println("Estoy en: (" + miX + ", " + miY + ")");
       cc.muestraImagenCercana(miX, miY);
       cc.simulaPuntoActual(miX, miY, miAngulo + giroRuedas, miVelocidad);
       repaint();
