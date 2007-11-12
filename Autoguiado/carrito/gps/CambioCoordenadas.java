@@ -48,6 +48,7 @@ public class CambioCoordenadas implements Runnable {
   private double ruta[] = null;
   private double rutaECEF[][] = null;
   private double rutaLLA[][] = null;
+  private double rms[] = null;
   private double velocidades[] = null;
   private double angulos[] = null;
   private ImagenId[] imagenes1a = null;
@@ -328,6 +329,7 @@ public class CambioCoordenadas implements Runnable {
     }
     Vector v = new Vector();
     Vector valores = new Vector();
+    Vector vRms = new Vector();
     try {
       File file = new File(fichero);
       ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
@@ -343,6 +345,8 @@ public class CambioCoordenadas implements Runnable {
         valores.add(is.readDouble());
         // Lee la velocidad
         valores.add(is.readDouble());
+        
+        vRms.add(is.readDouble());
       }
       is.close();
 
@@ -381,8 +385,13 @@ public class CambioCoordenadas implements Runnable {
 
     velocidades = new double[valores.size() / 2];
     angulos = new double[valores.size() / 2];
+    rms = new double[vRms.size()];
     for (int i = 0; i < valores.size(); i += 2) {
-      velocidades[i / 2] = ((Double)valores.elementAt(i + 1)).doubleValue();
+      velocidades[i / 2] = ((Double)valores.elementAt(i + 1)).doubleValue();     
+    }
+    
+    for (int i = 0; i < vRms.size(); i++) {
+        rms[i] = ((Double)vRms.elementAt(i)).doubleValue();
     }
 
     for (int i = 1; i < angulos.length; i++) {
@@ -826,7 +835,7 @@ public class CambioCoordenadas implements Runnable {
         v[2] * Math.cos(latitud);
     double vEast = - v[0] * Math.sin(longitud) + v[1] * Math.cos(longitud);
 
-    double ang = Math.atan2(vNorth, vEast);
+    double ang = Math.atan2(vEast, -vNorth);
     if (ang < 0)
       ang += Math.PI * 2;
 
@@ -1113,7 +1122,7 @@ public class CambioCoordenadas implements Runnable {
     py = data.getY();
     pz = data.getZ();
   }
-
+ 
   public void muestraDistancia() {
     GPSData data = gps.getGPSData();
     double base[] = cambioCoordenadas(px, py, pz);
@@ -1520,7 +1529,7 @@ public class CambioCoordenadas implements Runnable {
       System.out.println(listaDisp[i]);
 */
     CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "", false);
-    cc.loadRuta("320e.dat", false);
+    cc.loadRuta("nov12b.dat", false);
     cc.showCanvas();
     double xy[] = cc.getGps().getXY();
     System.out.println(xy[0] + ", " + xy[1] + ", " + xy[2]);
@@ -1612,5 +1621,9 @@ public class CambioCoordenadas implements Runnable {
       } catch(Exception e) {
           System.err.println("Excepción: " + e.getMessage());
       }
+  }
+  
+  public double[] getRms() {
+      return rms;
   }
 }

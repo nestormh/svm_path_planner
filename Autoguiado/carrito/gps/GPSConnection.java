@@ -371,48 +371,48 @@ public class GPSConnection implements SerialPortEventListener,
 
                         if (Pattern.matches("\\$..GST", msj[0])) {
                             //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
-
-                            if (msj[1].equals("")) {
+                            
+                            if (msj[2].equals("")) {
                                 rms = 0;
                             } else {
-                                rms = Double.parseDouble(msj[1]);
-                            }
-
-                            if (msj[2].equals("")) {
-                                desvEjeMayor = 0;
-                            } else {
-                                desvEjeMayor = Double.parseDouble(msj[2]);
+                                rms = Double.parseDouble(msj[2]);
                             }
 
                             if (msj[3].equals("")) {
-                                desvEjeMenor = 0;
+                                desvEjeMayor = 0;
                             } else {
-                                desvEjeMenor = Double.parseDouble(msj[3]);
+                                desvEjeMayor = Double.parseDouble(msj[3]);
                             }
 
                             if (msj[4].equals("")) {
-                                orientacionMayor = 0;
+                                desvEjeMenor = 0;
                             } else {
-                                orientacionMayor = Double.parseDouble(msj[4]);
+                                desvEjeMenor = Double.parseDouble(msj[4]);
                             }
 
                             if (msj[5].equals("")) {
-                                desvLatitud = 0;
+                                orientacionMayor = 0;
                             } else {
-                                desvLatitud = Double.parseDouble(msj[5]);
+                                orientacionMayor = Double.parseDouble(msj[5]);
                             }
 
                             if (msj[6].equals("")) {
-                                desvLongitud = 0;
+                                desvLatitud = 0;
                             } else {
-                                desvLongitud = Double.parseDouble(msj[6]);
+                                desvLatitud = Double.parseDouble(msj[6]);
                             }
 
-                            msj[7] = (msj[7].split("\\*"))[0];
                             if (msj[7].equals("")) {
+                                desvLongitud = 0;
+                            } else {
+                                desvLongitud = Double.parseDouble(msj[7]);
+                            }
+
+                            msj[8] = (msj[8].split("\\*"))[0];
+                            if (msj[8].equals("")) {
                                 desvAltura = 0;
                             } else {
-                                desvAltura = Double.parseDouble(msj[6]);
+                                desvAltura = Double.parseDouble(msj[8]);
                             }
 
                             cadena = "";
@@ -512,6 +512,7 @@ public class GPSConnection implements SerialPortEventListener,
                               osECEF.writeDouble(z);
                               osECEF.writeDouble(angulo);
                               osECEF.writeDouble(speed);
+                              osECEF.writeDouble(pdop);
                               bw.write("(" + x + ", " + y + ", " + z + ")\n");
                               System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
                               if (ci1 != null) {
@@ -976,13 +977,29 @@ public class GPSConnection implements SerialPortEventListener,
           v[1] * Math.sin(latitud) * Math.sin(longitud) +
           v[2] * Math.cos(latitud);
       double vEast = - v[0] * Math.sin(longitud) + v[1] * Math.cos(longitud);
+      
+   /* double m[][] = new double[3][];
+    m[0] = new double[] { -Math.sin(v[1]), Math.cos(v[1]), 0 };
+    m[1] = new double[] { -Math.cos(v[1]) * Math.sin(v[0]), -Math.sin(v[0]) * Math.sin(v[1]), Math.cos(v[0]) };
+    m[2] = new double[] { Math.cos(v[0]) * Math.cos(v[1]), Math.cos(v[0]) * Math.sin(v[1]), Math.sin(v[0])};
 
-      double ang = Math.atan2(vEast, vNorth);
+    Matrix T = new Matrix(m);
+
+    double resultado[] = null;
+
+    Matrix res = new Matrix(new double[][] { { v[0]}, {y - origen[1]}, {z - origen[2]} });
+    resultado = (T.times(res).transpose().getArray())[0];*/
+         
+      double ang = Math.atan2(vEast, -vNorth);
       if (ang < 0)
         ang += Math.PI * 2;
-
+      /*if (ang > Math.PI * 2)
+        ang -= Math.PI * 2;*/
+      
       angulo = ang;
       speed = Math.sqrt(Math.pow(vNorth, 2.0f) + Math.pow(vEast, 2.0f)) * 5;
+      
+      posAnt = new double[] { x, y, z };
     }
 
     // Añade una nueva posicion a la lista y elimina las últimas de distancia superior a 1 m.
