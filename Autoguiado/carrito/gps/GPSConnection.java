@@ -1123,6 +1123,9 @@ public class GPSConnection implements SerialPortEventListener,
       this.x = x;
       this.y = y;
       this.z = z;
+      double coord[] = this.ECEF2LLA(x, y, z);
+      this.latitud= coord[0];
+      this.longitud = coord[1];
       this.setValores();
       return angulo;
   }
