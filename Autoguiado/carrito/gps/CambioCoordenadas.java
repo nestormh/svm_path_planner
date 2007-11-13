@@ -396,16 +396,26 @@ public class CambioCoordenadas implements Runnable {
     velocidades = new double[valores.size() / 2];
     angulos = new double[valores.size() / 2];
     rms = new double[vRms.size()];
-    for (int i = 0; i < valores.size(); i += 2) {
+    /*for (int i = 0; i < valores.size(); i += 2) {
       velocidades[i / 2] = ((Double)valores.elementAt(i + 1)).doubleValue();
-    }
+    }*/
 
     for (int i = 0; i < vRms.size(); i++) {
         rms[i] = ((Double)vRms.elementAt(i)).doubleValue();
     }
 
+    angulos[0] = 0;
     for (int i = 1; i < angulos.length; i++) {
-      angulos[i] = calculaAngulo(rutaECEF[i-1], rutaECEF[i], rutaLLA[i][0], rutaLLA[i][1])[1];
+      if (Math.sqrt(Math.pow(rutaECEF[i - 1][0] - rutaECEF[i][0], 2.0f) +
+                    Math.pow(rutaECEF[i - 1][1] - rutaECEF[i][1], 2.0f) +
+                    Math.pow(rutaECEF[i - 1][2] - rutaECEF[i][2], 2.0f)) < GPSConnection.minDistOperativa) {
+        angulos[i] = angulos[i - 1];
+        continue;
+      }
+
+      double val[] = calculaAnguloVel(rutaECEF[i-1], rutaECEF[i], rutaLLA[i][0], rutaLLA[i][1]);
+      angulos[i] = val[0];
+      velocidades[i] = val[1];
     }
     angulos[0] = angulos[1];
 
@@ -851,24 +861,18 @@ public class CambioCoordenadas implements Runnable {
         setParams(q, p, r);
   }
 
-  public double[] calculaAngulo(double punto1[], double punto2[], double latitud, double longitud) {
-    double v[] = { punto2[0] - punto1[0], punto2[1] - punto1[1], punto2[2] - punto1[2] };
+  public static double[] calculaAnguloVel(double punto1[], double punto2[], double latitud, double longitud) {
+    Matrix m = getPTP(latitud, longitud);
 
-    double vNorth = - v[0] * Math.sin(latitud) * Math.cos(longitud) -
-        v[1] * Math.sin(latitud) * Math.sin(longitud) +
-        v[2] * Math.cos(latitud);
-    double vEast = - v[0] * Math.sin(longitud) + v[1] * Math.cos(longitud);
+    double v[] = CambioCoordenadas.cambioCoordenadas(punto1[0], punto1[1], punto1[2], m, new double[] { punto2[0], punto2[1], punto2[2] });
 
-    double ang = Math.atan2(vEast, -vNorth);
-    if (ang < 0)
-      ang += Math.PI * 2;
+    double angulo = Math.atan2(v[1], v[0]);
+    if (angulo < 0)
+      angulo += 2 * Math.PI;
 
-    double modulo = Math.sqrt(Math.pow(vNorth, 2.0f) + Math.pow(vEast, 2.0f)) * 5;
-    return new double[] { modulo, ang };
-  }
+    double vel = Math.sqrt(Math.pow(v[0], 2.0f) + Math.pow(v[1], 2.0f));
 
-  public double[] getVectorAcercamiento(int indice) {
-    return calculaAngulo(gps.getXYZ(), rutaECEF[indice], gps.getLatitud(), gps.getLongitud());
+    return new double[] { angulo, vel };
   }
 
   public void savePunto(String id) {
