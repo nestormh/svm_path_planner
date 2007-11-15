@@ -3,7 +3,9 @@
 
 #include "stdafx.h"
 #include "CapturaVLC.h"
+#include <stdio.h>
 
+using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -19,14 +21,15 @@ int _tmain(int argc, _TCHAR* argv[])
 		printf("%d: %S\n", i + 1, lista[i]);
 	}
 
-	IplImage * img = captura.captura(lista[0]);
+	IplImage * img = captura.captura(lista[2]);			
+
+	cvNamedWindow("Test", 1);	
 
 	while(true) {
-		img = captura.captura(lista[0]);
+		img = captura.captura(lista[2]);	
 		
 		//cvAddS(img, cvScalar(0, 0, 128), img);
-
-		cvNamedWindow("Test", 1);
+		
 		cvShowImage("Test", img);
 
 		cvReleaseImage(&img);

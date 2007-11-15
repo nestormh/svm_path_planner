@@ -268,16 +268,46 @@ IplImage * CCapturaVLC::captura(LPWSTR dispositivo) {
 		
 		CopyMemory(imagen, (unsigned char *)&(pBuf[posicion]), sizeof(unsigned char) * imagesize);
 
-		IplImage * ipl = cvCreateImage(cvSize(ancho, alto), IPL_DEPTH_8U, 3);
-		ipl->origin = 1;
+		IplImage * ipl = cvCreateImage(cvSize(ancho, alto), IPL_DEPTH_8U, 3);				
+		//ipl->dataOrder = 1;
+		strcpy(ipl->colorModel, formato);
+		strcpy(ipl->channelSeq, formato);
 
 		cvZero(ipl);
-		for (int i = 0; i < alto; i++) {
-			for (int j = 0; j < ancho; j++) {				
-				CV_IMAGE_ELEM(ipl, unsigned char, i, j * 3) = (unsigned int)imagen[i * ancho * 3 + j * 3];
-				CV_IMAGE_ELEM(ipl, unsigned char, i, j * 3 + 1) = (unsigned int)imagen[i * ancho * 3 + j * 3 + 1];
-				CV_IMAGE_ELEM(ipl, unsigned char, i, j * 3 + 2) = (unsigned int)imagen[i * ancho * 3 + j * 3 + 2];
+		if(strcmp(formato, "RV24") == 0) {
+			ipl->origin = 1;
+			for (int i = 0; i < alto; i++) {
+				for (int j = 0; j < ancho; j++) {				
+					CV_IMAGE_ELEM(ipl, unsigned char, i, j * 3) = (unsigned int)imagen[i * ancho * 3 + j * 3];
+					CV_IMAGE_ELEM(ipl, unsigned char, i, j * 3 + 1) = (unsigned int)imagen[i * ancho * 3 + j * 3 + 1];
+					CV_IMAGE_ELEM(ipl, unsigned char, i, j * 3 + 2) = (unsigned int)imagen[i * ancho * 3 + j * 3 + 2];
+				}
 			}
+		}
+		
+		if (strcmp(formato, "YUY2") == 0) {
+		// Mirar en www.fourcc.org			
+			unsigned int Y0, U, Y1, V, fila, col;
+			for (int i = 0; i < alto * ancho / 2; i++) {
+				Y0 = (unsigned int)imagen[i * 4];
+				U = (unsigned int)imagen[i * 4 + 1];
+				Y1 = (unsigned int)imagen[i * 4 + 2];
+				V = (unsigned int)imagen[i * 4 + 3];
+
+				fila = (int)(i * 2 / ancho);
+				col = ((2 * i) % ancho) * 3;				
+				
+				CV_IMAGE_ELEM(ipl, unsigned char, fila, col) = Y0;
+				CV_IMAGE_ELEM(ipl, unsigned char, fila, col + 1) = U;
+				CV_IMAGE_ELEM(ipl, unsigned char, fila, col + 2) = V;
+
+				CV_IMAGE_ELEM(ipl, unsigned char, fila, col + 3) = Y1;
+				CV_IMAGE_ELEM(ipl, unsigned char, fila, col + 4) = U;
+				CV_IMAGE_ELEM(ipl, unsigned char, fila, col + 5) = V;				
+
+			}
+
+			cvCvtColor(ipl, ipl, CV_YCrCb2RGB);
 		}
 
 		delete imagen;
