@@ -96,7 +96,7 @@ public class GPSConnection implements SerialPortEventListener,
 
     double posAnt[] = { 0, 0, 0 };
 
-    public static double minDistOperativa = 0.5;
+    public static double minDistOperativa = 0.4;
 
   /**
          Creates a SerialConnection object and initilizes variables passed in
@@ -971,7 +971,7 @@ public class GPSConnection implements SerialPortEventListener,
                     Math.pow(z - posAnt[2], 2.0f)) < minDistOperativa)
         return;
 
-      double valores[] = CambioCoordenadas.calculaAnguloVel(posAnt, new double[] {x, y, z }, latitud, longitud);
+      double valores[] = CambioCoordenadas.calculaAnguloVel(new double[] {x, y, z }, posAnt, latitud, longitud);
 
       angulo = valores[0];
       speed = valores[1];

@@ -356,7 +356,7 @@ public class CambioCoordenadas implements Runnable {
         // Lee la velocidad
         valores.add(is.readDouble());
 
-        //vRms.add(is.readDouble());
+        vRms.add(is.readDouble());
       }
       is.close();
 
@@ -412,13 +412,13 @@ public class CambioCoordenadas implements Runnable {
         angulos[i] = angulos[i - 1];
         continue;
       }
-
+      
       double val[] = calculaAnguloVel(rutaECEF[i-1], rutaECEF[i], rutaLLA[i][0], rutaLLA[i][1]);
-      angulos[i] = val[0];
+      angulos[i] = val[0];      
       velocidades[i] = val[1];
     }
     angulos[0] = angulos[1];
-
+            
     if (canvas == null) {
         canvas = new CanvasRuta(ruta, angulos, velocidades, this, 800, 600);
         control.setCanvas(canvas);
