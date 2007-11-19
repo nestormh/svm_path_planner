@@ -48,7 +48,6 @@ public class CambioCoordenadas implements Runnable {
   private double ruta[] = null;
   private double rutaECEF[][] = null;
   private double rutaLLA[][] = null;
-  private double rms[] = null;
   private double velocidades[] = null;
   private double angulos[] = null;
   private ImagenId[] imagenes1a = null;
@@ -339,7 +338,6 @@ public class CambioCoordenadas implements Runnable {
     }
     Vector v = new Vector();
     Vector valores = new Vector();
-    Vector vRms = new Vector();
     try {
       File file = new File(fichero);
       ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
@@ -356,7 +354,6 @@ public class CambioCoordenadas implements Runnable {
         // Lee la velocidad
         valores.add(is.readDouble());
 
-        vRms.add(is.readDouble());
       }
       is.close();
 
@@ -396,14 +393,9 @@ public class CambioCoordenadas implements Runnable {
 
     velocidades = new double[valores.size() / 2];
     angulos = new double[valores.size() / 2];
-    rms = new double[vRms.size()];
     /*for (int i = 0; i < valores.size(); i += 2) {
       velocidades[i / 2] = ((Double)valores.elementAt(i + 1)).doubleValue();
     }*/
-
-    for (int i = 0; i < vRms.size(); i++) {
-        rms[i] = ((Double)vRms.elementAt(i)).doubleValue();
-    }
 
     angulos[0] = 0;
     for (int i = 1; i < angulos.length; i++) {
@@ -1652,7 +1644,4 @@ public class CambioCoordenadas implements Runnable {
       }
   }
 
-  public double[] getRms() {
-      return rms;
-  }
 }

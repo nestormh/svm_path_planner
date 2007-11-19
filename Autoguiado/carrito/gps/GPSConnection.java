@@ -101,7 +101,7 @@ public class GPSConnection implements SerialPortEventListener,
     // Posición anterior para calcular el ángulo
     double posAnt[] = { 0, 0, 0 };
     // Posición anterior para calcular la posición actual si hay filtrado
-    double oldPos[] = { 0, 0, 0 };
+    double oldLLA[] = { 0, 0, 0 };
 
     public static double minDistOperativa = 0.4;
 
@@ -521,8 +521,7 @@ public class GPSConnection implements SerialPortEventListener,
                               osECEF.writeDouble(y);
                               osECEF.writeDouble(z);
                               osECEF.writeDouble(angulo);
-                              osECEF.writeDouble(speed);
-                              osECEF.writeDouble(pdop);
+                              osECEF.writeDouble(speed);    
                               bw.write("(" + x + ", " + y + ", " + z + ")\n");
                               System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
 
@@ -636,7 +635,8 @@ public class GPSConnection implements SerialPortEventListener,
       double den = p - (Math.pow(e , 2.0) * a * Math.pow(Math.cos(tita), 3.0));
 
       double latitud = num / den;
-      double longitud = Math.atan(y / x);
+      double longitud = Math.atan2(y, x);
+
       double N = a / Math.sqrt(1 - Math.pow(e, 2.0f) * Math.pow(Math.sin(longitud), 2.0f));
       double altura = p / Math.cos(longitud) - N;
 
@@ -786,8 +786,8 @@ public class GPSConnection implements SerialPortEventListener,
     return minDistOperativa;
   }
 
-  public boolean isFiltrar() {
-    return filtrar;
+  public void setFiltrar(boolean filtrar) {
+    this.filtrar = filtrar;
   }
 
   public GPSData getError() {
@@ -1018,25 +1018,21 @@ public class GPSConnection implements SerialPortEventListener,
      * Establece los valores de ángulo y velocidad
      */
     public void setValores() {
-      setECEF();
       if (filtrar) {
-        x = (x + oldPos[0]) / 2;
-        y = (y + oldPos[1]) / 2;
-        z = (z + oldPos[2]) / 2;
+        latitud = (latitud + oldLLA[0]) / 2;
+        longitud = (longitud + oldLLA[1]) / 2;
+        altura = (altura + oldLLA[2]) / 2; 
 
-        double val[] = ECEF2LLA(x, y, z);
-        latitud = val[0];
-        longitud = val[1];
-        altura = val[2];
-
-        oldPos = new double[] { x, y, z };
+        oldLLA = new double[] { latitud, longitud, altura };
       }
+
+      setECEF();
 
       if (Math.sqrt(Math.pow(x - posAnt[0], 2.0f) +
                     Math.pow(y - posAnt[1], 2.0f) +
                     Math.pow(z - posAnt[2], 2.0f)) < minDistOperativa)
         return;
-
+        
       double valores[] = CambioCoordenadas.calculaAnguloVel(new double[] {x, y, z }, posAnt, latitud, longitud);
 
       angulo = valores[0];
