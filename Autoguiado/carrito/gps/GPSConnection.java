@@ -7,7 +7,6 @@ import javax.comm.*;
 
 import carrito.media.*;
 import carrito.server.serial.*;
-import Jama.Matrix;
 
 /**
  A class that handles the details of a serial connection. Reads from one
@@ -32,6 +31,10 @@ public class GPSConnection implements SerialPortEventListener,
     private InputStream is;
     private ObjectOutputStream osECEF;
     private BufferedWriter bw;
+
+    private long lastPaquete = 0;
+    private String tipoPaquete = "";
+    private ObjectOutputStream oosFull = null;
 
     private CommPortIdentifier portId;
     private SerialPort sPort;
@@ -89,12 +92,16 @@ public class GPSConnection implements SerialPortEventListener,
     private Vector vCaptura = new Vector();
 
     private boolean independiente = false;
+    private boolean filtrar = false;
 
     private long lastInstruccion = System.currentTimeMillis() * 2;
 
     private SerialConnection sc = null;
 
+    // Posición anterior para calcular el ángulo
     double posAnt[] = { 0, 0, 0 };
+    // Posición anterior para calcular la posición actual si hay filtrado
+    double oldPos[] = { 0, 0, 0 };
 
     public static double minDistOperativa = 0.4;
 
@@ -104,7 +111,9 @@ public class GPSConnection implements SerialPortEventListener,
 
          @param parameters A SerialParameters object.
      */
-    public GPSConnection() {}
+    public GPSConnection() {
+      lastPaquete = System.currentTimeMillis();
+    }
 
     public GPSConnection(SerialParameters parameters) {
         this.parameters = parameters;
@@ -120,7 +129,7 @@ public class GPSConnection implements SerialPortEventListener,
         if (isOpen()) {
             System.out.println("Puerto Abierto");
         }
-
+        lastPaquete = System.currentTimeMillis();
     }
 
     public GPSConnection(String portName) {
@@ -136,6 +145,7 @@ public class GPSConnection implements SerialPortEventListener,
         if (isOpen()) {
             System.out.println("Puerto Abierto BaudRate " + portName);
         }
+        lastPaquete = System.currentTimeMillis();
     }
 
     public GPSConnection(String portName,
@@ -160,7 +170,7 @@ public class GPSConnection implements SerialPortEventListener,
         if (isOpen()) {
             System.out.println("Puerto Abierto BaudRate " + baudRate);
         }
-
+        lastPaquete = System.currentTimeMillis();
     }
 
     /**
@@ -515,6 +525,42 @@ public class GPSConnection implements SerialPortEventListener,
                               osECEF.writeDouble(pdop);
                               bw.write("(" + x + ", " + y + ", " + z + ")\n");
                               System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
+
+                              oosFull.writeUTF(cadena);
+                              oosFull.writeUTF(tipoPaquete);
+                              oosFull.writeLong(System.currentTimeMillis() - lastPaquete);
+                              // Variables del paquete GSA:
+                              oosFull.writeDouble(pdop);
+                              oosFull.writeDouble(hdop);
+                              oosFull.writeDouble(vdop);
+                              // Variables del paquete GST:
+                              oosFull.writeDouble(rms);
+                              oosFull.writeDouble(desvEjeMayor);
+                              oosFull.writeDouble(desvEjeMenor);
+                              oosFull.writeDouble(orientacionMayor);
+                              oosFull.writeDouble(desvLatitud);
+                              oosFull.writeDouble(desvLongitud);
+                              oosFull.writeDouble(desvAltura);
+                              // Variables del paquete VTG
+                              oosFull.writeDouble(hdgPoloN);
+                              oosFull.writeDouble(hdgPoloM);
+                              oosFull.writeDouble(speed);
+                              // Variables del paquete GGA
+                              oosFull.writeUTF(hora);
+                              oosFull.writeDouble(latitud);
+                              oosFull.writeDouble(longitud);
+                              oosFull.writeDouble(altura);
+                              oosFull.writeDouble(x);
+                              oosFull.writeDouble(y);
+                              oosFull.writeDouble(z);
+                              oosFull.writeDouble(angulo);
+                              oosFull.writeUTF(latitudg);
+                              oosFull.writeUTF(longitudg);
+                              oosFull.writeInt(satelites);
+                              oosFull.writeDouble(msl);
+                              oosFull.writeDouble(hgeoide);
+                              oosFull.writeDouble(age);
+
                               if (ci1 != null) {
                                 String nombre = ruta + "\\Imagen" + index + "a.jpg";
                                 System.out.println(nombre);
@@ -542,6 +588,7 @@ public class GPSConnection implements SerialPortEventListener,
                             lastInstruccion = System.currentTimeMillis();
                         }
                         cadena = "";
+                        lastPaquete = System.currentTimeMillis();
                     }
                 }
             } catch (IOException ioe) {
@@ -739,6 +786,10 @@ public class GPSConnection implements SerialPortEventListener,
     return minDistOperativa;
   }
 
+  public boolean isFiltrar() {
+    return filtrar;
+  }
+
   public GPSData getError() {
         GPSData data = new GPSData();
         data.setError(pdop, hdop, vdop);
@@ -824,6 +875,8 @@ public class GPSConnection implements SerialPortEventListener,
       try {
         File ecef = new File(nombre);
         osECEF = new ObjectOutputStream(new FileOutputStream(ecef, false));
+        File full = new File(nombre.substring(0, nombre.length() - 5) + ".gps");
+        oosFull = new ObjectOutputStream(new FileOutputStream(full, false));
         bw = new BufferedWriter(new FileWriter("ruta.txt", false));
         vCaptura.clear();
         write = true;
@@ -966,6 +1019,19 @@ public class GPSConnection implements SerialPortEventListener,
      */
     public void setValores() {
       setECEF();
+      if (filtrar) {
+        x = (x + oldPos[0]) / 2;
+        y = (y + oldPos[1]) / 2;
+        z = (z + oldPos[2]) / 2;
+
+        double val[] = ECEF2LLA(x, y, z);
+        latitud = val[0];
+        longitud = val[1];
+        altura = val[2];
+
+        oldPos = new double[] { x, y, z };
+      }
+
       if (Math.sqrt(Math.pow(x - posAnt[0], 2.0f) +
                     Math.pow(y - posAnt[1], 2.0f) +
                     Math.pow(z - posAnt[2], 2.0f)) < minDistOperativa)

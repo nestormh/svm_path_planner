@@ -372,6 +372,7 @@ public class CambioCoordenadas implements Runnable {
     rutaLLA = new double[v.size()][3];
     for (int i = 0; i < v.size(); i++) {
       double elem[] = (double[])v.elementAt(i);
+      //if (i > 1) elem = new double[] { (elem[0] + rutaECEF[i - 2][0]) / 2, (elem[1] + rutaECEF[i - 2][1]) / 2, (elem[2] + rutaECEF[i - 2][2]) / 2 };
       double LLA[] = gps.ECEF2LLA(elem[0], elem[1], elem[2]);
 
       for (int j = 0; j < 3; j++) {
@@ -412,13 +413,13 @@ public class CambioCoordenadas implements Runnable {
         angulos[i] = angulos[i - 1];
         continue;
       }
-      
+
       double val[] = calculaAnguloVel(rutaECEF[i-1], rutaECEF[i], rutaLLA[i][0], rutaLLA[i][1]);
-      angulos[i] = val[0];      
+      angulos[i] = val[0];
       velocidades[i] = val[1];
     }
     angulos[0] = angulos[1];
-            
+
     if (canvas == null) {
         canvas = new CanvasRuta(ruta, angulos, velocidades, this, 800, 600);
         control.setCanvas(canvas);
@@ -1557,7 +1558,7 @@ public class CambioCoordenadas implements Runnable {
       System.out.println(listaDisp[i]);
 */
     CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "", false);
-    cc.loadRuta("320e.dat", false);
+    cc.loadRuta("nov12b.dat", false);
     cc.showCanvas();
     double xy[] = cc.getGps().getXY();
     System.out.println(xy[0] + ", " + xy[1] + ", " + xy[2]);
