@@ -521,12 +521,12 @@ public class GPSConnection implements SerialPortEventListener,
                               osECEF.writeDouble(y);
                               osECEF.writeDouble(z);
                               osECEF.writeDouble(angulo);
-                              osECEF.writeDouble(speed);    
+                              osECEF.writeDouble(speed);
                               bw.write("(" + x + ", " + y + ", " + z + ")\n");
                               System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
 
                               oosFull.writeUTF(cadena);
-                              oosFull.writeUTF(tipoPaquete);
+                              oosFull.writeUTF(msj[0].substring(3, 5));
                               oosFull.writeLong(System.currentTimeMillis() - lastPaquete);
                               // Variables del paquete GSA:
                               oosFull.writeDouble(pdop);
@@ -1021,7 +1021,7 @@ public class GPSConnection implements SerialPortEventListener,
       if (filtrar) {
         latitud = (latitud + oldLLA[0]) / 2;
         longitud = (longitud + oldLLA[1]) / 2;
-        altura = (altura + oldLLA[2]) / 2; 
+        altura = (altura + oldLLA[2]) / 2;
 
         oldLLA = new double[] { latitud, longitud, altura };
       }
@@ -1032,7 +1032,7 @@ public class GPSConnection implements SerialPortEventListener,
                     Math.pow(y - posAnt[1], 2.0f) +
                     Math.pow(z - posAnt[2], 2.0f)) < minDistOperativa)
         return;
-        
+
       double valores[] = CambioCoordenadas.calculaAnguloVel(new double[] {x, y, z }, posAnt, latitud, longitud);
 
       angulo = valores[0];
