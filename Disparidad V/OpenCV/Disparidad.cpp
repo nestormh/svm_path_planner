@@ -5,7 +5,8 @@
 #include <time.h>
 #include "..\..\CapturaImagen\CapturaImagen\CapturaVLC.h"
 
-#define MAXD 70
+#define MAXD 70				// Disparidad máxima
+#define MIND 15				// Mínimo valor de disparidad a tener en cuenta para detectar obstáculos
 
 
 /*-----------------------------------------------------------------------------------------------------------------
@@ -99,9 +100,9 @@ void preprocesadoB (IplImage *left, IplImage *right, int th){
 	}
 	*/
 	cvNamedWindow("Izquierda", CV_WINDOW_AUTOSIZE);// Filtrado de Sobel de bordes verticales
-	cvShowImage("Izquierda", left);
+//	cvShowImage("Izquierda", left);
 	cvNamedWindow("Derecha", CV_WINDOW_AUTOSIZE);// Filtrado de Sobel de bordes verticales
-	cvShowImage("Derecha", right);
+//	cvShowImage("Derecha", right);
 	
 }
 
@@ -154,7 +155,7 @@ void preprocesado (IplImage *left, IplImage *right, int filterSize, int sobelSiz
 	cvCopy(aux, temp, mask);							// Aplicar máscara
 
 	cvCopy(temp, left);
-cvShowImage("Preprocesado Izquierda", left);
+//cvShowImage("Preprocesado Izquierda", left);
 
 	/* Ternarización de imagen derecha*/
 	cvSobel(right, auxSobel, 1, 0, 3);						// Filtrado de Sobel de bordes verticales
@@ -333,7 +334,7 @@ void lineas(IplImage *src){
 
 	cvReleaseMemStorage (&storage);
 	cvReleaseStructuringElement(&se);
-   	cvShowImage("Hough", src);
+ //  	cvShowImage("Hough", src);
 	src->origin = 1;
   
 }
@@ -364,7 +365,7 @@ void obstaculos (IplImage *img, int th, int factor){
 		cvSetImageROI(img, cvRect(i, 0, 1, img->height));					// Seleccionar columna
 		counts[i] = cvCountNonZero(img);									// Contar puntos
 		
-		if ((i > 1) & (i < MAXD - 1)){
+		if ((i > MIND) & (i < MAXD - 1)){									// Sólo buscar máximos entre MIND y MAXD -> Descartar objetos lejanos
 			if ((counts[i]>= counts[i-1]) & (counts[i] > counts[i + 1]) & (i - 1 != maximos[nMax - 1])){
 				maximos[nMax] = i;
 				nMax++;
@@ -485,15 +486,15 @@ int main (int argc, char* argv[]){
 	while(1) {
 		
 		izquierda = cvLoadImage("izquierda8.jpg", 0);
-//		tempImage = captura.captura(lista[0]);					// Capturar imagen izquierda
-//		cvCvtColor(tempImage, izquierda, CV_RGB2GRAY);
-//		cvReleaseImage(&tempImage);
+		//tempImage = captura.captura(lista[0]);					// Capturar imagen izquierda
+		//cvCvtColor(tempImage, izquierda, CV_RGB2GRAY);
+		//cvReleaseImage(&tempImage);
 		izquierda->origin = 1;
 
 		derecha = cvLoadImage("derecha8.jpg", 0);
-//		tempImage = captura.captura(lista[1]);					// Capturar imagen derecha
-//		cvCvtColor(tempImage, derecha, CV_RGB2GRAY);
-//		cvReleaseImage(&tempImage);
+		//tempImage = captura.captura(lista[1]);					// Capturar imagen derecha
+		//cvCvtColor(tempImage, derecha, CV_RGB2GRAY);
+		//cvReleaseImage(&tempImage);
 		derecha->origin = 1;
 
 /*
@@ -502,8 +503,8 @@ cvRectangle(izquierda, cvPoint(50, 0), cvPoint(70, 20), cvScalar(254),CV_FILLED)
 cvSet(derecha, cvScalar(0));
 cvRectangle(derecha, cvPoint(20, 0), cvPoint(40, 20), cvScalar(254), CV_FILLED);
 */
-		cvShowImage ("Izquierda", izquierda);	
-		cvShowImage ("Derecha", derecha);	
+//		cvShowImage ("Izquierda", izquierda);	
+//		cvShowImage ("Derecha", derecha);	
 
 	clock_t start = clock();
 		preprocesado (izquierda, derecha, filtro, sobel, umbral);
@@ -517,7 +518,7 @@ cvRectangle(derecha, cvPoint(20, 0), cvPoint(40, 20), cvScalar(254), CV_FILLED);
 
 		printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 
-		cvShowImage ("Mapa disparidad", mapaDisparidad);	
+//		cvShowImage ("Mapa disparidad", mapaDisparidad);	
 		cvShowImage ("Imagen disparidad", imagenDisparidad);
 	
 //		lineas(imagenDisparidad);
