@@ -1,5 +1,6 @@
 package carrito.gps;
 
+import Jama.Matrix;
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
@@ -123,8 +124,7 @@ public class GPSConnection implements SerialPortEventListener,
         } catch (SerialConnectionException e2) {
 
             System.out.println("Error al abrir el puerto GPSConnection");
-            System.out.flush();
-            System.exit(1);
+            System.out.flush();            
         }
         if (isOpen()) {
             System.out.println("Puerto Abierto");
@@ -139,8 +139,7 @@ public class GPSConnection implements SerialPortEventListener,
         } catch (SerialConnectionException e2) {
 
             System.out.println("Error al abrir el puerto " + portName);
-            System.out.flush();
-            System.exit(1);
+            System.out.flush();            
         }
         if (isOpen()) {
             System.out.println("Puerto Abierto BaudRate " + portName);
@@ -346,13 +345,13 @@ public class GPSConnection implements SerialPortEventListener,
      event occurs the words BREAK RECEIVED are written to the messageAreaIn.
      */
 
-    public synchronized void serialEvent(SerialPortEvent e) {
+    public synchronized void serialEvent(SerialPortEvent e) {        
         if (e.getEventType() == e.DATA_AVAILABLE) {
             try {
                 while (is.available() != 0) {
                     int val = is.read();
                     if (val != 10) {
-                        cadena += (char) val;
+                        cadena += (char) val;                        
                     } else {
                         String[] msj = cadena.split(",");
 
@@ -520,10 +519,13 @@ public class GPSConnection implements SerialPortEventListener,
                               osECEF.writeDouble(x);
                               osECEF.writeDouble(y);
                               osECEF.writeDouble(z);
+                              osECEF.writeDouble(latitud);
+                              osECEF.writeDouble(longitud);
+                              osECEF.writeDouble(altura);
                               osECEF.writeDouble(angulo);
                               osECEF.writeDouble(speed);
                               bw.write("(" + x + ", " + y + ", " + z + ")\n");
-                              System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
+                              //System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
 
                               oosFull.writeUTF(cadena);
                               oosFull.writeUTF(msj[0].substring(3, 5));
@@ -626,21 +628,6 @@ public class GPSConnection implements SerialPortEventListener,
       x = (N + altura) * Math.cos(latitud) * Math.cos(longitud);
       y = (N + altura) * Math.cos(latitud) * Math.sin(longitud);
       z = ( ( (Math.pow(b, 2.0f) / Math.pow(a, 2.0f)) * N) + altura) * Math.sin(latitud);
-    }
-
-    public static double[] ECEF2LLA(double x, double y, double z) {
-      double p = Math.sqrt(Math.pow(x, 2.0) + Math.pow(y, 2.0));
-      double tita = Math.atan((z * a) / (p * b));
-      double num = z + (Math.pow(e1, 2.0) * b * Math.pow(Math.sin(tita), 3.0));
-      double den = p - (Math.pow(e , 2.0) * a * Math.pow(Math.cos(tita), 3.0));
-
-      double latitud = num / den;
-      double longitud = Math.atan2(y, x);
-
-      double N = a / Math.sqrt(1 - Math.pow(e, 2.0f) * Math.pow(Math.sin(longitud), 2.0f));
-      double altura = p / Math.cos(longitud) - N;
-
-      return new double[] { latitud, longitud, altura };
     }
 
     public GPSData getECEF() {
@@ -875,7 +862,7 @@ public class GPSConnection implements SerialPortEventListener,
       try {
         File ecef = new File(nombre);
         osECEF = new ObjectOutputStream(new FileOutputStream(ecef, false));
-        File full = new File(nombre.substring(0, nombre.length() - 5) + ".gps");
+        File full = new File(nombre.substring(0, nombre.length() - 4) + ".gps");
         oosFull = new ObjectOutputStream(new FileOutputStream(full, false));
         bw = new BufferedWriter(new FileWriter("ruta.txt", false));
         vCaptura.clear();
@@ -890,6 +877,7 @@ public class GPSConnection implements SerialPortEventListener,
       if (write) {
         try {
           osECEF.close();
+          oosFull.close();
           bw.close();
           write = false;
         } catch (IOException ioe) {}
@@ -1018,12 +1006,24 @@ public class GPSConnection implements SerialPortEventListener,
      * Establece los valores de ángulo y velocidad
      */
     public void setValores() {
-      if (filtrar) {
+      if (filtrar) {          
+        double[] lla = { latitud, longitud, altura };
+        System.out.println("(" + latitud + ", " + longitud + ", " + altura + ")");
+        setECEF();
+        
+        System.out.println("(" + x + ", " + y + ", " + z + ")");
+        
         latitud = (latitud + oldLLA[0]) / 2;
         longitud = (longitud + oldLLA[1]) / 2;
         altura = (altura + oldLLA[2]) / 2;
+        
+        System.out.println("(" + latitud + ", " + longitud + ", " + altura + ")");
 
-        oldLLA = new double[] { latitud, longitud, altura };
+        oldLLA = lla;
+        
+        setECEF();
+        
+        System.out.println("(" + x + ", " + y + ", " + z + ")");
       }
 
       setECEF();
@@ -1033,12 +1033,26 @@ public class GPSConnection implements SerialPortEventListener,
                     Math.pow(z - posAnt[2], 2.0f)) < minDistOperativa)
         return;
 
-      double valores[] = CambioCoordenadas.calculaAnguloVel(new double[] {x, y, z }, posAnt, latitud, longitud);
+      double valores[] = calculaAnguloVel(new double[] {x, y, z }, posAnt, latitud, longitud);
 
       angulo = valores[0];
       speed = valores[1];
 
       posAnt = new double[] { x, y, z };
+    }
+    
+    public static double[] calculaAnguloVel(double punto1[], double punto2[], double latitud, double longitud) {
+        Matrix m = CambioCoordenadas.getPTP(latitud, longitud);
+
+        double v[] = CambioCoordenadas.cambioCoordenadas(punto1[0], punto1[1], punto1[2], m, new double[] { punto2[0], punto2[1], punto2[2] });
+
+        double angulo = Math.atan2(v[1], v[0]);
+        if (angulo < 0)
+            angulo += 2 * Math.PI;
+
+        double vel = Math.sqrt(Math.pow(v[0], 2.0f) + Math.pow(v[1], 2.0f));
+
+        return new double[] { angulo, vel };
     }
 
     // Añade una nueva posicion a la lista y elimina las últimas de distancia superior a 1 m.
@@ -1172,13 +1186,13 @@ public class GPSConnection implements SerialPortEventListener,
       return retorno;
   }
 
-  public double testAngulo(double x, double y, double z) {
+  public double testAngulo(double x, double y, double z, double latitud, double longitud, double altura) {
       this.x = x;
       this.y = y;
       this.z = z;
-      double coord[] = this.ECEF2LLA(x, y, z);
-      this.latitud= coord[0];
-      this.longitud = coord[1];
+      this.latitud= latitud;
+      this.longitud = longitud;
+      this.altura = altura;
       this.setValores();
       return angulo;
   }

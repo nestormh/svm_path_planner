@@ -129,8 +129,7 @@ public class SerialConnection implements SerialPortEventListener,
           } catch (SerialConnectionException e2) {
 
               System.out.println("Error al abrir el puerto");
-              System.out.flush();
-              System.exit(1);
+              System.out.flush();              
        }
        if (isOpen())
            System.out.println("Puerto Abierto");
@@ -153,8 +152,7 @@ public class SerialConnection implements SerialPortEventListener,
           } catch (SerialConnectionException e2) {
 
               System.out.println("Error al abrir el puerto " + portName);
-              System.out.flush();
-              System.exit(1);
+              System.out.flush();              
        }
        if (isOpen())
            System.out.println("Puerto Abierto BaudRate "+ portName);

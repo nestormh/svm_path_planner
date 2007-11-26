@@ -341,13 +341,16 @@ public class CambioCoordenadas implements Runnable {
     try {
       File file = new File(fichero);
       ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
-      double x = 0, y = 0, z = 0;
+      double x = 0, y = 0, z = 0, latitud = 0, longitud = 0, altura = 0;
       while (is.available() != 0) {
         x = is.readDouble();
         y = is.readDouble();
         z = is.readDouble();
+        latitud = is.readDouble();
+        longitud = is.readDouble();
+        altura = is.readDouble();
 
-        v.add(new double[]{x, y, z});
+        v.add(new double[]{x, y, z, latitud, longitud, altura});
 
         // Lee el ángulo
         valores.add(is.readDouble());
@@ -370,11 +373,10 @@ public class CambioCoordenadas implements Runnable {
     for (int i = 0; i < v.size(); i++) {
       double elem[] = (double[])v.elementAt(i);
       //if (i > 1) elem = new double[] { (elem[0] + rutaECEF[i - 2][0]) / 2, (elem[1] + rutaECEF[i - 2][1]) / 2, (elem[2] + rutaECEF[i - 2][2]) / 2 };
-      double LLA[] = gps.ECEF2LLA(elem[0], elem[1], elem[2]);
 
       for (int j = 0; j < 3; j++) {
         rutaECEF[i][j] = elem[j];
-        rutaLLA[i][j] = LLA[j];
+        rutaLLA[i][j] = elem[j + 3];
       }
     }
 
@@ -393,11 +395,12 @@ public class CambioCoordenadas implements Runnable {
 
     velocidades = new double[valores.size() / 2];
     angulos = new double[valores.size() / 2];
-    /*for (int i = 0; i < valores.size(); i += 2) {
+    for (int i = 0; i < valores.size(); i += 2) {
+      angulos[i / 2] = ((Double)valores.elementAt(i)).doubleValue();
       velocidades[i / 2] = ((Double)valores.elementAt(i + 1)).doubleValue();
-    }*/
+    }
 
-    angulos[0] = 0;
+    /*angulos[0] = 0;
     for (int i = 1; i < angulos.length; i++) {
       if (Math.sqrt(Math.pow(rutaECEF[i - 1][0] - rutaECEF[i][0], 2.0f) +
                     Math.pow(rutaECEF[i - 1][1] - rutaECEF[i][1], 2.0f) +
@@ -410,7 +413,7 @@ public class CambioCoordenadas implements Runnable {
       angulos[i] = val[0];
       velocidades[i] = val[1];
     }
-    angulos[0] = angulos[1];
+    angulos[0] = angulos[1];*/
 
     if (canvas == null) {
         canvas = new CanvasRuta(ruta, angulos, velocidades, this, 800, 600);
@@ -430,13 +433,16 @@ public class CambioCoordenadas implements Runnable {
     try {
       File file = new File(fichero);
       ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
-      double x = 0, y = 0, z = 0;
+      double x = 0, y = 0, z = 0, latitud = 0, longitud = 0, altura = 0;
       while (is.available() != 0) {
         x = is.readDouble();
         y = is.readDouble();
         z = is.readDouble();
+        latitud = is.readDouble();
+        longitud = is.readDouble();
+        altura = is.readDouble();        
 
-        r.add(new double[]{x, y, z});
+        r.add(new double[]{x, y, z, latitud, longitud, altura });
 
         // Lee el ángulo
         a.add(is.readDouble());
@@ -451,7 +457,7 @@ public class CambioCoordenadas implements Runnable {
     double ang[] = new double[r.size()];
     for (int i = 0; i < r.size(); i++) {
         double xyz[] = (double[])r.elementAt(i);
-        ang[i] = gps.testAngulo(xyz[0], xyz[1], xyz[2]);
+        ang[i] = gps.testAngulo(xyz[0], xyz[1], xyz[2], xyz[3], xyz[4], xyz[5]);
 
         /*try {
             Thread.sleep(200);
@@ -804,10 +810,8 @@ public class CambioCoordenadas implements Runnable {
     for (int j = 0; j < 3; j++) {
       origen[j] /= rutaECEF.length;
     }
-
-    double coord[] = gps.ECEF2LLA(origen[0], origen[1], origen[2]);
-
-    T = getPTP(coord[0], coord[1]);
+   
+    T = getPTP(rutaLLA[0][0], rutaLLA[0][1]);
   }
 
   public void setParams(double[] p, double[] q, double[] r) {
@@ -852,20 +856,6 @@ public class CambioCoordenadas implements Runnable {
 
     if (cambioCoordenadas(0, 0, 0)[2] < 0)
         setParams(q, p, r);
-  }
-
-  public static double[] calculaAnguloVel(double punto1[], double punto2[], double latitud, double longitud) {
-    Matrix m = getPTP(latitud, longitud);
-
-    double v[] = CambioCoordenadas.cambioCoordenadas(punto1[0], punto1[1], punto1[2], m, new double[] { punto2[0], punto2[1], punto2[2] });
-
-    double angulo = Math.atan2(v[1], v[0]);
-    if (angulo < 0)
-      angulo += 2 * Math.PI;
-
-    double vel = Math.sqrt(Math.pow(v[0], 2.0f) + Math.pow(v[1], 2.0f));
-
-    return new double[] { angulo, vel };
   }
 
   public void savePunto(String id) {
@@ -996,7 +986,7 @@ public class CambioCoordenadas implements Runnable {
     frmRuta.getContentPane().add(canvas);
     frmRuta.setSize(canvas.getWidth() + 10, canvas.getHeight() + 30);
     frmRuta.setVisible(true);
-    frmRuta.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frmRuta.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     frmRuta.setResizable(true);
     frmRuta.addKeyListener(canvas);
     canvas.repaint();
@@ -1527,6 +1517,10 @@ public class CambioCoordenadas implements Runnable {
     }
 
     return retorno;
+  }
+  
+  public double[][] getRutaLLA() {
+    return rutaLLA;
   }
 
   public static void main(String args[]) {

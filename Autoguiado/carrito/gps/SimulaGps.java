@@ -6,74 +6,46 @@ import javax.comm.*;
 
 import carrito.server.serial.*;
 
-public class SimulaGps {
+public class SimulaGps implements Runnable {
   private SerialParameters parameters;
   private OutputStream os;
   private CommPortIdentifier portId;
   private SerialPort sPort;
   private boolean open;
+  
+  private static boolean simulando = false;
 
   // Vectores del GPS
-  Vector vCadena = new Vector();
-  Vector vTipoPaquete = new Vector();
-  Vector vTiempo = new Vector();
-  Vector vPdop = new Vector();
-  Vector vHdop = new Vector();
-  Vector vVdop = new Vector();
-  Vector vRms = new Vector();
-  Vector vDesvEjeMayor = new Vector();
-  Vector vDesvEjeMenor = new Vector();
-  Vector vOrientacionMayor = new Vector();
-  Vector vDesvLatitud = new Vector();
-  Vector vDesvLongitud = new Vector();
-  Vector vDesvAltura = new Vector();
-  Vector vHdgPoloN = new Vector();
-  Vector vHdgPoloM = new Vector();
-  Vector vSpeed = new Vector();
-  Vector vHora = new Vector();
-  Vector vLatitud = new Vector();
-  Vector vLongitud = new Vector();
-  Vector vAltura = new Vector();
-  Vector vX = new Vector();
-  Vector vY = new Vector();
-  Vector vZ = new Vector();
-  Vector vAngulo = new Vector();
-  Vector vLatitudG = new Vector();
-  Vector vLongitudG = new Vector();
-  Vector vSatelites = new Vector();
-  Vector vMsl = new Vector();
-  Vector vHGeoide = new Vector();
-  Vector vAge = new Vector();
-  private Vector VAge;
-  private Vector VAltura;
-  private Vector VAngulo;
-  private Vector VCadena;
-  private Vector VDesvAltura;
-  private Vector VDesvEjeMayor;
-  private Vector VDesvEjeMenor;
-  private Vector VDesvLatitud;
-  private Vector VDesvLongitud;
-  private Vector VHdgPoloM;
-  private Vector VHdgPoloN;
-  private Vector VHdop;
-  private Vector VHGeoide;
-  private Vector VHora;
-  private Vector VLatitud;
-  private Vector VLatitudG;
-  private Vector VLongitud;
-  private Vector VLongitudG;
-  private Vector VMsl;
-  private Vector VOrientacionMayor;
-  private Vector VPdop;
-  private Vector VRms;
-  private Vector VSatelites;
-  private Vector VSpeed;
-  private Vector VTiempo;
-  private Vector VTipoPaquete;
-  private Vector VVdop;
-  private Vector VX;
-  private Vector VY;
-  private Vector VZ;
+  private Vector vCadena = new Vector();
+  private Vector vTipoPaquete = new Vector();
+  private Vector vTiempo = new Vector();
+  private Vector vPdop = new Vector();
+  private Vector vHdop = new Vector();
+  private Vector vVdop = new Vector();
+  private Vector vRms = new Vector();
+  private Vector vDesvEjeMayor = new Vector();
+  private Vector vDesvEjeMenor = new Vector();
+  private Vector vOrientacionMayor = new Vector();
+  private Vector vDesvLatitud = new Vector();
+  private Vector vDesvLongitud = new Vector();
+  private Vector vDesvAltura = new Vector();
+  private Vector vHdgPoloN = new Vector();
+  private Vector vHdgPoloM = new Vector();
+  private Vector vSpeed = new Vector();
+  private Vector vHora = new Vector();
+  private Vector vLatitud = new Vector();
+  private Vector vLongitud = new Vector();
+  private Vector vAltura = new Vector();
+  private Vector vX = new Vector();
+  private Vector vY = new Vector();
+  private Vector vZ = new Vector();
+  private Vector vAngulo = new Vector();
+  private Vector vLatitudG = new Vector();
+  private Vector vLongitudG = new Vector();
+  private Vector vSatelites = new Vector();
+  private Vector vMsl = new Vector();
+  private Vector vHGeoide = new Vector();
+  private Vector vAge = new Vector();
 
   public SimulaGps() {}
 
@@ -172,7 +144,7 @@ public class SimulaGps {
       throw new SerialConnectionException("Unsupported flow control");
     }
   }
-
+  
   public boolean isOpen() {
     return open;
   }
@@ -203,7 +175,11 @@ public class SimulaGps {
   }
 
   public String[] getCadena() {
-    return (String[])vCadena.toArray();
+    String retorno[] = new String[vCadena.size()];
+    for (int i = 0; i < retorno.length; i++) {
+      retorno[i] = (String)vCadena.elementAt(i);
+    }
+    return retorno;  
   }
 
   public double[] getDesvAltura() {
@@ -288,7 +264,11 @@ public class SimulaGps {
   }
 
   public String[] getHora() {
-    return (String[])vHora.toArray();
+    String retorno[] = new String[vHora.size()];
+    for (int i = 0; i < retorno.length; i++) {
+      retorno[i] = (String)vHora.elementAt(i);
+    }
+    return retorno;  
   }
 
   public double[] getLatitud() {
@@ -301,7 +281,11 @@ public class SimulaGps {
   }
 
   public String[] getLatitudG() {
-    return (String[])vLatitudG.toArray();
+    String retorno[] = new String[vLatitudG.size()];
+    for (int i = 0; i < retorno.length; i++) {
+      retorno[i] = (String)vLatitudG.elementAt(i);
+    }
+    return retorno;  
   }
 
   public double[] getLongitud() {
@@ -313,7 +297,11 @@ public class SimulaGps {
   }
 
   public String[] getLongitudG() {
-    return (String[])vLongitudG.toArray();
+    String retorno[] = new String[vLongitudG.size()];
+    for (int i = 0; i < retorno.length; i++) {
+      retorno[i] = (String)vLongitudG.elementAt(i);
+    }
+    return retorno;  
   }
 
   public double[] getMsl() {
@@ -380,7 +368,12 @@ public class SimulaGps {
   }
 
   public String[] getTipoPaquete() {
-    return (String[])vTipoPaquete.toArray();
+    String retorno[] = new String[vTipoPaquete.size()];
+    for (int i = 0; i < retorno.length; i++) {
+      retorno[i] = (String)vTipoPaquete.elementAt(i);
+    }
+    return retorno;  
+
   }
 
   public double[] getVdop() {
@@ -421,14 +414,16 @@ public class SimulaGps {
 
   public void loadDatos(String fichero) {
     try {
-      ObjectInputStream is = new ObjectInputStream(new FileInputStream(fichero));
-      while (is.available() != 0) {
-        vCadena.add(is.readUTF());
+      File fich = new File(fichero);
+      ObjectInputStream is = new ObjectInputStream(new FileInputStream(fich));
+      while (is.available() != 0) {                
+        vCadena.add(is.readUTF());        
         vTipoPaquete.add(is.readUTF());
-        vTiempo.add(is.readLong());
+        System.out.println(vTipoPaquete.lastElement());
+        vTiempo.add(is.readLong());        
         vPdop.add(is.readDouble());
         vHdop.add(is.readDouble());
-        vVdop.add(is.readDouble());
+        vVdop.add(is.readDouble());     
         vRms.add(is.readDouble());
         vDesvEjeMayor.add(is.readDouble());
         vDesvEjeMenor.add(is.readDouble());
@@ -439,7 +434,7 @@ public class SimulaGps {
         vHdgPoloN.add(is.readDouble());
         vHdgPoloM.add(is.readDouble());
         vSpeed.add(is.readDouble());
-        vHora.add(is.readDouble());
+        vHora.add(is.readUTF());      
         vLatitud.add(is.readDouble());
         vLongitud.add(is.readDouble());
         vAltura.add(is.readDouble());
@@ -452,17 +447,62 @@ public class SimulaGps {
         vSatelites.add(is.readInt());
         vMsl.add(is.readDouble());
         vHGeoide.add(is.readDouble());
-        vAge.add(is.readDouble());
-      }
-      is.close();
+        vAge.add(is.readDouble());          
+      }      
+      is.close();      
+    } catch (UTFDataFormatException udfe) {
+        System.err.println("Error con el formato de la cadena: " + udfe.getMessage());
     } catch(FileNotFoundException fnfe) {
       System.err.println("Fichero inexistente: " + fnfe.getMessage());
     } catch(IOException ioe) {
       System.err.println("Error de E/S: " + ioe.getMessage());
     }
   }
+  
+  public void run() {
+      int i = 0;
+      try {
+        os.flush();
+      } catch(IOException ioe) {}
+      while(simulando) {
+          try {
+              Thread.sleep(((Long)vTiempo.elementAt(i)).longValue());              
+          } catch(Exception e) {}
+          String cadena = (String)vCadena.elementAt(i);
+          try {
+            for (int j = 0; j < cadena.length(); j++) {                
+               os.write(cadena.charAt(j));
+               //System.out.print(cadena.charAt(j));
+            }
+            os.write((char)10);
+            //System.out.println((char)10);
+          } catch(IOException ioe) {
+              System.err.println("ERROR: " + ioe.getMessage());
+          }
+                  
+          i = (i + 1) % vCadena.size();
+      }
+  }
+  
+  public void startSimulacion() {
+      if (os == null)
+          return;
+      simulando = true;
+      Thread hilo = new Thread(this);
+      hilo.start();
+  }
+  
+  public void stopSimulacion() {
+      simulando = false;
+  }
 
   public static void main(String[] args) {
-    SimulaGps simulagps = new SimulaGps("COM1");
+    SimulaGps simulagps = new SimulaGps();
+    simulagps.loadDatos("C:\\GPS\\Integracion\\build\\classes\\nov19.gps");
+    double[] x = simulagps.getX();
+    for (int i = 0; i < x.length; i++) {
+        System.out.println(x[i]);        
+    }
+    simulagps.startSimulacion();
   }
 }
