@@ -22,6 +22,8 @@ public class GPSConnection implements SerialPortEventListener,
     private static final double e = 0.0821;//0.08181919084262032d;
     private static final double e1 = 1.4166d;
 
+    private static final double NULLANG = -5 * Math.PI;
+
     // Vector del polo N
     double u[] = new double[] { 0, b };
 
@@ -102,7 +104,8 @@ public class GPSConnection implements SerialPortEventListener,
     // Posición anterior para calcular el ángulo
     double posAnt[] = { 0, 0, 0 };
     // Posición anterior para calcular la posición actual si hay filtrado
-    double oldLLA[] = { 0, 0, 0 };
+    double oldLLA[] = new double[]{ 0, 0 ,0 };
+    double[] oldAng = new double[] { NULLANG, NULLANG };
 
     public static double minDistOperativa = 0.4;
 
@@ -124,7 +127,7 @@ public class GPSConnection implements SerialPortEventListener,
         } catch (SerialConnectionException e2) {
 
             System.out.println("Error al abrir el puerto GPSConnection");
-            System.out.flush();            
+            System.out.flush();
         }
         if (isOpen()) {
             System.out.println("Puerto Abierto");
@@ -139,7 +142,7 @@ public class GPSConnection implements SerialPortEventListener,
         } catch (SerialConnectionException e2) {
 
             System.out.println("Error al abrir el puerto " + portName);
-            System.out.flush();            
+            System.out.flush();
         }
         if (isOpen()) {
             System.out.println("Puerto Abierto BaudRate " + portName);
@@ -345,13 +348,13 @@ public class GPSConnection implements SerialPortEventListener,
      event occurs the words BREAK RECEIVED are written to the messageAreaIn.
      */
 
-    public synchronized void serialEvent(SerialPortEvent e) {        
+    public synchronized void serialEvent(SerialPortEvent e) {
         if (e.getEventType() == e.DATA_AVAILABLE) {
             try {
                 while (is.available() != 0) {
                     int val = is.read();
                     if (val != 10) {
-                        cadena += (char) val;                        
+                        cadena += (char) val;
                     } else {
                         String[] msj = cadena.split(",");
 
@@ -502,7 +505,8 @@ public class GPSConnection implements SerialPortEventListener,
                             } else {
                               hgeoide = 0;
                             }
-                            altura = msl + hgeoide;
+                            //altura = msl + hgeoide;
+                            altura = hgeoide;
 
 
                             if (msj[13].equals("")) {
@@ -1006,24 +1010,14 @@ public class GPSConnection implements SerialPortEventListener,
      * Establece los valores de ángulo y velocidad
      */
     public void setValores() {
-      if (filtrar) {          
-        double[] lla = { latitud, longitud, altura };
-        System.out.println("(" + latitud + ", " + longitud + ", " + altura + ")");
-        setECEF();
-        
-        System.out.println("(" + x + ", " + y + ", " + z + ")");
-        
-        latitud = (latitud + oldLLA[0]) / 2;
-        longitud = (longitud + oldLLA[1]) / 2;
-        altura = (altura + oldLLA[2]) / 2;
-        
-        System.out.println("(" + latitud + ", " + longitud + ", " + altura + ")");
-
-        oldLLA = lla;
-        
-        setECEF();
-        
-        System.out.println("(" + x + ", " + y + ", " + z + ")");
+      //System.out.println("\t" + latitud + " " + longitud + " " + altura + ";");
+      if (filtrar) {
+        // Filtro 1:
+        if (oldLLA[0] != 0 || oldLLA[1] != 0 || oldLLA[2] != 0) {
+          latitud = (latitud + oldLLA[0]) / 2.0d;
+          longitud = (longitud + oldLLA[1]) / 2.0d;
+          altura = (altura + oldLLA[2]) / 2.0d;
+        }
       }
 
       setECEF();
@@ -1038,9 +1032,29 @@ public class GPSConnection implements SerialPortEventListener,
       angulo = valores[0];
       speed = valores[1];
 
+      if (filtrar) {
+        if ((oldAng[0] != NULLANG) && (oldAng[1] != NULLANG)){
+          // Filtro 1:
+          //angulo = (valores[0] + oldAng) / 2.0f;
+
+          // Filtro 2:
+          double difAng[] = new double[2];
+          difAng[0] = Math.min(oldAng[1] - oldAng[0] + ((oldAng[1] - oldAng[0] < 0)? (Math.PI * 2):0),
+                               oldAng[0] - oldAng[1] + ((oldAng[0] - oldAng[1] < 0)? (Math.PI * 2):0));
+          difAng[1] = Math.min(oldAng[1] - valores[0] + ((oldAng[1] - valores[0] < 0)? (Math.PI * 2):0),
+                               valores[0] - oldAng[1] + ((valores[0] - oldAng[1] < 0)? (Math.PI * 2):0));
+          System.err.println("Revisar filtro");
+          if (Math.abs(difAng[1] - difAng[0]) > Math.toRadians(2)) {
+            angulo = oldAng[1];
+          }
+        }
+      }
       posAnt = new double[] { x, y, z };
+      oldLLA = new double[] { latitud, longitud, altura };
+      oldAng[0] = oldAng[1];
+      oldAng[1] = valores[0];
     }
-    
+
     public static double[] calculaAnguloVel(double punto1[], double punto2[], double latitud, double longitud) {
         Matrix m = CambioCoordenadas.getPTP(latitud, longitud);
 

@@ -12,7 +12,7 @@ public class SimulaGps implements Runnable {
   private CommPortIdentifier portId;
   private SerialPort sPort;
   private boolean open;
-  
+
   private static boolean simulando = false;
 
   // Vectores del GPS
@@ -144,7 +144,7 @@ public class SimulaGps implements Runnable {
       throw new SerialConnectionException("Unsupported flow control");
     }
   }
-  
+
   public boolean isOpen() {
     return open;
   }
@@ -179,7 +179,7 @@ public class SimulaGps implements Runnable {
     for (int i = 0; i < retorno.length; i++) {
       retorno[i] = (String)vCadena.elementAt(i);
     }
-    return retorno;  
+    return retorno;
   }
 
   public double[] getDesvAltura() {
@@ -268,7 +268,7 @@ public class SimulaGps implements Runnable {
     for (int i = 0; i < retorno.length; i++) {
       retorno[i] = (String)vHora.elementAt(i);
     }
-    return retorno;  
+    return retorno;
   }
 
   public double[] getLatitud() {
@@ -285,7 +285,7 @@ public class SimulaGps implements Runnable {
     for (int i = 0; i < retorno.length; i++) {
       retorno[i] = (String)vLatitudG.elementAt(i);
     }
-    return retorno;  
+    return retorno;
   }
 
   public double[] getLongitud() {
@@ -301,7 +301,7 @@ public class SimulaGps implements Runnable {
     for (int i = 0; i < retorno.length; i++) {
       retorno[i] = (String)vLongitudG.elementAt(i);
     }
-    return retorno;  
+    return retorno;
   }
 
   public double[] getMsl() {
@@ -372,7 +372,7 @@ public class SimulaGps implements Runnable {
     for (int i = 0; i < retorno.length; i++) {
       retorno[i] = (String)vTipoPaquete.elementAt(i);
     }
-    return retorno;  
+    return retorno;
 
   }
 
@@ -416,14 +416,14 @@ public class SimulaGps implements Runnable {
     try {
       File fich = new File(fichero);
       ObjectInputStream is = new ObjectInputStream(new FileInputStream(fich));
-      while (is.available() != 0) {                
-        vCadena.add(is.readUTF());        
+      while (is.available() != 0) {
+        vCadena.add(is.readUTF());
         vTipoPaquete.add(is.readUTF());
         System.out.println(vTipoPaquete.lastElement());
-        vTiempo.add(is.readLong());        
+        vTiempo.add(is.readLong());
         vPdop.add(is.readDouble());
         vHdop.add(is.readDouble());
-        vVdop.add(is.readDouble());     
+        vVdop.add(is.readDouble());
         vRms.add(is.readDouble());
         vDesvEjeMayor.add(is.readDouble());
         vDesvEjeMenor.add(is.readDouble());
@@ -434,7 +434,7 @@ public class SimulaGps implements Runnable {
         vHdgPoloN.add(is.readDouble());
         vHdgPoloM.add(is.readDouble());
         vSpeed.add(is.readDouble());
-        vHora.add(is.readUTF());      
+        vHora.add(is.readUTF());
         vLatitud.add(is.readDouble());
         vLongitud.add(is.readDouble());
         vAltura.add(is.readDouble());
@@ -447,9 +447,9 @@ public class SimulaGps implements Runnable {
         vSatelites.add(is.readInt());
         vMsl.add(is.readDouble());
         vHGeoide.add(is.readDouble());
-        vAge.add(is.readDouble());          
-      }      
-      is.close();      
+        vAge.add(is.readDouble());
+      }
+      is.close();
     } catch (UTFDataFormatException udfe) {
         System.err.println("Error con el formato de la cadena: " + udfe.getMessage());
     } catch(FileNotFoundException fnfe) {
@@ -458,7 +458,7 @@ public class SimulaGps implements Runnable {
       System.err.println("Error de E/S: " + ioe.getMessage());
     }
   }
-  
+
   public void run() {
       int i = 0;
       try {
@@ -466,11 +466,11 @@ public class SimulaGps implements Runnable {
       } catch(IOException ioe) {}
       while(simulando) {
           try {
-              Thread.sleep(((Long)vTiempo.elementAt(i)).longValue());              
+              Thread.sleep(((Long)vTiempo.elementAt(i)).longValue());
           } catch(Exception e) {}
           String cadena = (String)vCadena.elementAt(i);
           try {
-            for (int j = 0; j < cadena.length(); j++) {                
+            for (int j = 0; j < cadena.length(); j++) {
                os.write(cadena.charAt(j));
                //System.out.print(cadena.charAt(j));
             }
@@ -479,11 +479,11 @@ public class SimulaGps implements Runnable {
           } catch(IOException ioe) {
               System.err.println("ERROR: " + ioe.getMessage());
           }
-                  
+
           i = (i + 1) % vCadena.size();
       }
   }
-  
+
   public void startSimulacion() {
       if (os == null)
           return;
@@ -491,17 +491,17 @@ public class SimulaGps implements Runnable {
       Thread hilo = new Thread(this);
       hilo.start();
   }
-  
+
   public void stopSimulacion() {
       simulando = false;
   }
 
   public static void main(String[] args) {
-    SimulaGps simulagps = new SimulaGps();
-    simulagps.loadDatos("C:\\GPS\\Integracion\\build\\classes\\nov19.gps");
+    SimulaGps simulagps = new SimulaGps("COM4");
+    simulagps.loadDatos("C:\\Proyecto\\GPS\\Integracion\\classes\\nov1.gps");
     double[] x = simulagps.getX();
     for (int i = 0; i < x.length; i++) {
-        System.out.println(x[i]);        
+        System.out.println(x[i]);
     }
     simulagps.startSimulacion();
   }

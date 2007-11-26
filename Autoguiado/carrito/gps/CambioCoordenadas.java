@@ -440,7 +440,7 @@ public class CambioCoordenadas implements Runnable {
         z = is.readDouble();
         latitud = is.readDouble();
         longitud = is.readDouble();
-        altura = is.readDouble();        
+        altura = is.readDouble();
 
         r.add(new double[]{x, y, z, latitud, longitud, altura });
 
@@ -810,7 +810,7 @@ public class CambioCoordenadas implements Runnable {
     for (int j = 0; j < 3; j++) {
       origen[j] /= rutaECEF.length;
     }
-   
+
     T = getPTP(rutaLLA[0][0], rutaLLA[0][1]);
   }
 
@@ -1518,124 +1518,67 @@ public class CambioCoordenadas implements Runnable {
 
     return retorno;
   }
-  
+
   public double[][] getRutaLLA() {
     return rutaLLA;
   }
 
-  public static void main(String args[]) {
-    /*String cadena = "msg_Err( p_demux, \""; //%i", p_data[i]);
-    for (int i = 0; i < 28800; i++) {
-      cadena += ", %i";
-      System.out.println(i);
-    }
-    cadena += "\"";
-    for (int i = 0; i < 28800; i++) {
-      cadena += ", p_data[" + i + " + i]";
-      System.out.println(i);
-    }
-    cadena += ");";
-    System.out.println(cadena);*/
-    //CambioCoordenadas cc = new CambioCoordenadas("COM3", "todo.dat");
-    //cc.loadRuta("coche2.dat");
-    CambioCoordenadas.showSerial();
-    /*String listaDisp[] = Media.listaDispositivos();
-    for (int i = 0; i < listaDisp.length; i++)
-      System.out.println(listaDisp[i]);
-*/
-    CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "", false);
-    cc.loadRuta("nov12b.dat", false);
-    cc.showCanvas();
-    double xy[] = cc.getGps().getXY();
-    System.out.println(xy[0] + ", " + xy[1] + ", " + xy[2]);
-
-    //cc.testRutaConImagenes(args[0], "C:\\Proyecto\\PruebasGPS\\IntegracionVideo\\testCaptura", 0);
-
-    /*cc.loadRuta("iter2.dat", false);
-    cc.setAngulos(1);
-    cc.setMaxCheck(50);
-    //cc.setIndependiente(true, 1000);
-    cc.showCanvas();
-
-    try {
-      Thread.sleep(5000);
-    } catch (Exception e) {}
-
-    //cc.startRutaBD("pruebaBD2", 0, 1);
-    cc.startRutaBD("prueba1234", 0, 1);
-
-    try {
-      Thread.sleep(20000);
-    } catch (Exception e) {}
-
-    cc.stopRutaBD();
-
-    System.out.println("Finalizo");
-    /*String dispositivo1 = "AVerTV USB 2.0:0";
-    CapturaImagen ci1 = new CapturaImagen(args[0], dispositivo1, false);
-    String dispositivo2 = "AVerTV USB 2.0:1";
-    CapturaImagen ci2 = new CapturaImagen(args[0], dispositivo2, false);
-
-    int i = 0;
-    while (true) {
-      i++;
-      ImagenId ii1 = ci1.getImagen(i * 10 % 100, i * 20 % 100, i * 30 % 100);
-      ii1.setNombre(dispositivo1);
-      ii1.verImagen();
-      ImagenId ii2 = ci2.getImagen(i * 10 % 100, i * 20 % 100, i * 30 % 100);
-      ii2.setNombre(dispositivo2);
-      ii2.verImagen();
-      ci1.verImagen();
-      try {
-        Thread.sleep(10);
-      } catch(Exception e) {}*/
-    //}
-    //cc.loadRuta2("coche3.dat");
-    //cc.loadObstaculos("informaticaObs.dat");
-    /*cc.setObstaculo("obs1", -7.73f, -10.39f, 0);
-    cc.setObstaculo("obs1", 4.64f, -10.50f, 0);
-    cc.setObstaculo("obs1", 5.21f, -50.08f, 0);
-    cc.setObstaculo("obs1", -5.88f, -48.92f, 0);
-    cc.addObstaculo("obs1");*/
-    //cc.showCanvas();
-    //cc.setIndependiente(true);
-    /*while(true) {
-      try {
-        cc.setPuntoActual(false);
-        Thread.sleep(1000);
-      } catch (Exception e) {}
-    }*/
-  }
-
   public void getMaxMinSpeed() {
-      double max = velocidades[0];
-      double min = velocidades[0];
+    double max = velocidades[0];
+    double min = velocidades[0];
 
-      for (int i = 0; i < velocidades.length; i++) {
-          if (max < velocidades[i])
-              max = velocidades[i];
-          if (min > velocidades[i])
-              min = velocidades[i];
-      }
+    for (int i = 0; i < velocidades.length; i++) {
+      if (max < velocidades[i])
+        max = velocidades[i];
+      if (min > velocidades[i])
+        min = velocidades[i];
+    }
 
-      System.out.println("Max: " + max);
-      System.out.println("Min: " + min);
+    System.out.println("Max: " + max);
+    System.out.println("Min: " + min);
   }
 
   public void grabaRutaEnXY(String rutaOrigen, String rutaDest) {
-      try {
-        loadRuta(rutaOrigen, false);
+    try {
+      loadRuta(rutaOrigen, false);
 
-        PrintWriter pw = new PrintWriter(new File(rutaDest));
+      PrintWriter pw = new PrintWriter(new File(rutaDest));
 
-        for (int i = 0; i < ruta.length; i++) {
-          pw.println(ruta[i]);
-        }
-
-        pw.close();
-      } catch(Exception e) {
-          System.err.println("Excepción: " + e.getMessage());
+      for (int i = 0; i < ruta.length; i++) {
+        pw.println(ruta[i]);
       }
+
+      pw.close();
+    } catch(Exception e) {
+      System.err.println("Excepción: " + e.getMessage());
+    }
   }
 
+  public static void main(String args[]) {
+    CambioCoordenadas.showSerial();
+
+    CambioCoordenadas cc = new CambioCoordenadas("COM6", "paramsInformatica.dat", "", false);
+    cc.getGps().setFiltrar(true);
+
+    cc.startRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro.dat");
+    long t0 = System.currentTimeMillis();
+    while(true) {
+      try {
+        Thread.sleep(10);
+      } catch(Exception e) {}
+      long tiempo = System.currentTimeMillis() - t0;
+      if (tiempo > 120000)
+        break;
+      //else
+      //  System.out.print((tiempo / 1000) + ": ");
+    }
+    cc.stopRuta();
+
+    cc.loadRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro.dat", false);
+    cc.showCanvas();
+
+    /*CambioCoordenadas cc2 = new CambioCoordenadas("", "paramsInformatica.dat", "", false);
+    cc2.loadRuta("testBase.dat", false);
+    cc2.showCanvas();*/
+  }
 }
