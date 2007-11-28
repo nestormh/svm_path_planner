@@ -95,7 +95,7 @@ public class GPSConnection implements SerialPortEventListener,
     private Vector vCaptura = new Vector();
 
     private boolean independiente = false;
-    private boolean filtrar = false;
+    private boolean filtrar = true;
 
     private long lastInstruccion = System.currentTimeMillis() * 2;
 
@@ -106,6 +106,7 @@ public class GPSConnection implements SerialPortEventListener,
     // Posición anterior para calcular la posición actual si hay filtrado
     double oldLLA[] = new double[]{ 0, 0 ,0 };
     double[] oldAng = new double[] { NULLANG, NULLANG };
+    double[] lastAng = new double[] { NULLANG, NULLANG };
 
     public static double minDistOperativa = 0.4;
 
@@ -1043,16 +1044,19 @@ public class GPSConnection implements SerialPortEventListener,
                                oldAng[0] - oldAng[1] + ((oldAng[0] - oldAng[1] < 0)? (Math.PI * 2):0));
           difAng[1] = Math.min(oldAng[1] - valores[0] + ((oldAng[1] - valores[0] < 0)? (Math.PI * 2):0),
                                valores[0] - oldAng[1] + ((valores[0] - oldAng[1] < 0)? (Math.PI * 2):0));
-          System.err.println("Revisar filtro");
-          if (Math.abs(difAng[1] - difAng[0]) > Math.toRadians(2)) {
+          System.out.println(difAng[0] + " " + difAng[1] + " " + Math.abs(difAng[1] - difAng[0]) + ";");
+          if (Math.abs(difAng[1] - difAng[0]) > 0.0001) {
             angulo = oldAng[1];
           }
+          //angulo = (angulo + lastAng[0] + lastAng[1]) / 3.0d;
         }
       }
       posAnt = new double[] { x, y, z };
       oldLLA = new double[] { latitud, longitud, altura };
       oldAng[0] = oldAng[1];
       oldAng[1] = valores[0];
+      lastAng[0] = lastAng[1];
+      lastAng[1] = angulo;
     }
 
     public static double[] calculaAnguloVel(double punto1[], double punto2[], double latitud, double longitud) {
