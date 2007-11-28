@@ -95,7 +95,8 @@ public class GPSConnection implements SerialPortEventListener,
     private Vector vCaptura = new Vector();
 
     private boolean independiente = false;
-    private boolean filtrar = true;
+    private boolean filtrarPuntos = true;
+    private boolean filtrarAngulos = true;
 
     private long lastInstruccion = System.currentTimeMillis() * 2;
 
@@ -357,244 +358,8 @@ public class GPSConnection implements SerialPortEventListener,
                     if (val != 10) {
                         cadena += (char) val;
                     } else {
-                        String[] msj = cadena.split(",");
-
-                        if (Pattern.matches("\\$..GSA", msj[0])) {
-                            //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
-                            if (msj[15].equals("")) {
-                                pdop = 0;
-                            } else {
-                                pdop = Double.parseDouble(msj[15]);
-                            }
-
-                            if (msj[16].equals("")) {
-                                hdop = 0;
-                            } else {
-                                hdop = Double.parseDouble(msj[16]);
-                            }
-
-                            msj[17] = (msj[17].split("\\*"))[0];
-                            if (msj[17].equals("")) {
-                                vdop = 0;
-                            } else {
-                                vdop = Double.parseDouble(msj[17]);
-                            }
-                            cadena = "";
-                        }
-
-                        if (Pattern.matches("\\$..GST", msj[0])) {
-                            //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
-
-                            if (msj[2].equals("")) {
-                                rms = 0;
-                            } else {
-                                rms = Double.parseDouble(msj[2]);
-                            }
-
-                            if (msj[3].equals("")) {
-                                desvEjeMayor = 0;
-                            } else {
-                                desvEjeMayor = Double.parseDouble(msj[3]);
-                            }
-
-                            if (msj[4].equals("")) {
-                                desvEjeMenor = 0;
-                            } else {
-                                desvEjeMenor = Double.parseDouble(msj[4]);
-                            }
-
-                            if (msj[5].equals("")) {
-                                orientacionMayor = 0;
-                            } else {
-                                orientacionMayor = Double.parseDouble(msj[5]);
-                            }
-
-                            if (msj[6].equals("")) {
-                                desvLatitud = 0;
-                            } else {
-                                desvLatitud = Double.parseDouble(msj[6]);
-                            }
-
-                            if (msj[7].equals("")) {
-                                desvLongitud = 0;
-                            } else {
-                                desvLongitud = Double.parseDouble(msj[7]);
-                            }
-
-                            msj[8] = (msj[8].split("\\*"))[0];
-                            if (msj[8].equals("")) {
-                                desvAltura = 0;
-                            } else {
-                                desvAltura = Double.parseDouble(msj[8]);
-                            }
-
-                            cadena = "";
-                        }
-
-                        if (Pattern.matches("\\$..VTG", msj[0])) {
-                            //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
-                            if ((msj[2].equals("T") && (! msj[1].equals("")))) {
-                                hdgPoloN = double2radians(Double.parseDouble(msj[1]));
-                            } else {
-                                hdgPoloN = 0;
-                            }
-
-                            if ((msj[4].equals("M")) && (! msj[3].equals(""))) {
-                                hdgPoloM = double2radians(Double.parseDouble(msj[3]));
-                            } else {
-                                hdgPoloM = 0;
-                            }
-
-                            if (sc != null) {
-                                speed = sc.getVelocidad();
-                            } else {
-                                msj[8] = (msj[8].split("\\*"))[0];
-                                if ((msj[8].equals("K")) && (msj[7].equals(""))) {
-                                    speed = 0;
-                                } else {
-                                    speed = Double.parseDouble(msj[7]);
-                                }
-                            }
-
-                            cadena = "";
-                        }
-                        if (Pattern.matches("\\$..GGA", msj[0])) {
-                            //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
-
-                            if (msj[1].equals("")) {
-                                hora = "";
-                            } else {
-                                hora = cadena2Time(msj[1]);
-                            }
-                            if (msj[2].equals("")) {
-                                latitud = 0;
-                            } else {
-                                latitud = sexagesimal2double(msj[2], 2);
-                                latitudg = sexagesimal2string(msj[2], 2);
-                            }
-                            if (! msj[3].equals("")) {
-                                if (msj[3].equals("S"))
-                                    latitud *= -1;
-                                latitudg += " " + msj[3];
-                            }
-                            if (msj[2].equals("")) {
-                                longitud = 0;
-                            } else {
-                                longitud = sexagesimal2double(msj[4], 3);
-                                longitudg = sexagesimal2string(msj[4], 3);
-                            }
-                            if (! msj[5].equals(""))  {
-                                if (msj[5].equals("W"))
-                                    longitud *= -1;
-                                longitudg += " " + msj[5];
-                            }
-
-                            if (msj[7].equals("")) {
-                                satelites = 0;
-                            } else {
-                                satelites = Integer.parseInt(msj[7]);
-                            }
-
-                            if ((!msj[9].equals("")) || (!msj[10].equals("M"))) {
-                                msl = Double.parseDouble(msj[9]);
-                            } else {
-                              msl = 0;
-                            }
-
-                            if ((!msj[11].equals("")) || (!msj[12].equals("M"))) {
-                              hgeoide = Double.parseDouble(msj[11]);
-                            } else {
-                              hgeoide = 0;
-                            }
-                            //altura = msl + hgeoide;
-                            altura = hgeoide;
-
-
-                            if (msj[13].equals("")) {
-                                age = -1;
-                            } else {
-                                age = Double.parseDouble(msj[13]);
-                            }
-
-                            //calculaLLA(latitud, longitud, altura);
-                            setValores();
-
-                            if (write) {
-                              vCaptura.add(new double[] { x, y, z });
-                              osECEF.writeDouble(x);
-                              osECEF.writeDouble(y);
-                              osECEF.writeDouble(z);
-                              osECEF.writeDouble(latitud);
-                              osECEF.writeDouble(longitud);
-                              osECEF.writeDouble(altura);
-                              osECEF.writeDouble(angulo);
-                              osECEF.writeDouble(speed);
-                              bw.write("(" + x + ", " + y + ", " + z + ")\n");
-                              //System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
-
-                              oosFull.writeUTF(cadena);
-                              oosFull.writeUTF(msj[0].substring(3, 5));
-                              oosFull.writeLong(System.currentTimeMillis() - lastPaquete);
-                              // Variables del paquete GSA:
-                              oosFull.writeDouble(pdop);
-                              oosFull.writeDouble(hdop);
-                              oosFull.writeDouble(vdop);
-                              // Variables del paquete GST:
-                              oosFull.writeDouble(rms);
-                              oosFull.writeDouble(desvEjeMayor);
-                              oosFull.writeDouble(desvEjeMenor);
-                              oosFull.writeDouble(orientacionMayor);
-                              oosFull.writeDouble(desvLatitud);
-                              oosFull.writeDouble(desvLongitud);
-                              oosFull.writeDouble(desvAltura);
-                              // Variables del paquete VTG
-                              oosFull.writeDouble(hdgPoloN);
-                              oosFull.writeDouble(hdgPoloM);
-                              oosFull.writeDouble(speed);
-                              // Variables del paquete GGA
-                              oosFull.writeUTF(hora);
-                              oosFull.writeDouble(latitud);
-                              oosFull.writeDouble(longitud);
-                              oosFull.writeDouble(altura);
-                              oosFull.writeDouble(x);
-                              oosFull.writeDouble(y);
-                              oosFull.writeDouble(z);
-                              oosFull.writeDouble(angulo);
-                              oosFull.writeUTF(latitudg);
-                              oosFull.writeUTF(longitudg);
-                              oosFull.writeInt(satelites);
-                              oosFull.writeDouble(msl);
-                              oosFull.writeDouble(hgeoide);
-                              oosFull.writeDouble(age);
-
-                              if (ci1 != null) {
-                                String nombre = ruta + "\\Imagen" + index + "a.jpg";
-                                System.out.println(nombre);
-                                ci1.saveImagen(nombre);
-                                //ImagenId ii = ci1.getImagen(x, y, z);
-                              }
-                              if (ci2 != null) {
-                                String nombre = ruta + "\\Imagen" + index + "b.jpg";
-                                System.out.println(nombre);
-                                ci2.saveImagen(nombre);
-                              }
-                              if ((ci1 != null) || (ci2 != null))
-                                index++;
-                            }
-
-                            if (bd != null) {
-                              ObjetoRuta or = new ObjetoRuta(media, dispositivo1, dispositivo2,
-                                  x, y, z, angulo, speed);
-                              for (int i = 0; i < 10; i++) {
-                                System.out.print("[" + or.getImg1()[i] + "]");
-                              }
-                              System.out.println();
-                              //bd.writeObject(or, ruta);
-                            }
-                            lastInstruccion = System.currentTimeMillis();
-                        }
-                        cadena = "";
-                        lastPaquete = System.currentTimeMillis();
+                      procesaCadena(cadena);
+                      cadena = "";
                     }
                 }
             } catch (IOException ioe) {
@@ -606,6 +371,242 @@ public class GPSConnection implements SerialPortEventListener,
         }
     }
 
+    public void procesaCadena(String cadena) throws IOException, Exception {
+      String[] msj = cadena.split(",");
+
+      if (Pattern.matches("\\$..GSA", msj[0])) {
+        //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
+        if (msj[15].equals("")) {
+          pdop = 0;
+        } else {
+          pdop = Double.parseDouble(msj[15]);
+        }
+
+        if (msj[16].equals("")) {
+          hdop = 0;
+        } else {
+          hdop = Double.parseDouble(msj[16]);
+        }
+
+        msj[17] = (msj[17].split("\\*"))[0];
+        if (msj[17].equals("")) {
+          vdop = 0;
+        } else {
+          vdop = Double.parseDouble(msj[17]);
+        }
+      }
+
+      if (Pattern.matches("\\$..GST", msj[0])) {
+        //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
+
+        if (msj[2].equals("")) {
+          rms = 0;
+        } else {
+          rms = Double.parseDouble(msj[2]);
+        }
+
+        if (msj[3].equals("")) {
+          desvEjeMayor = 0;
+        } else {
+          desvEjeMayor = Double.parseDouble(msj[3]);
+        }
+
+        if (msj[4].equals("")) {
+          desvEjeMenor = 0;
+        } else {
+          desvEjeMenor = Double.parseDouble(msj[4]);
+        }
+
+        if (msj[5].equals("")) {
+          orientacionMayor = 0;
+        } else {
+          orientacionMayor = Double.parseDouble(msj[5]);
+        }
+
+        if (msj[6].equals("")) {
+          desvLatitud = 0;
+        } else {
+          desvLatitud = Double.parseDouble(msj[6]);
+        }
+
+        if (msj[7].equals("")) {
+          desvLongitud = 0;
+        } else {
+          desvLongitud = Double.parseDouble(msj[7]);
+        }
+
+        msj[8] = (msj[8].split("\\*"))[0];
+        if (msj[8].equals("")) {
+          desvAltura = 0;
+        } else {
+          desvAltura = Double.parseDouble(msj[8]);
+        }
+
+      }
+
+      if (Pattern.matches("\\$..VTG", msj[0])) {
+        //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
+        if ((msj[2].equals("T") && (! msj[1].equals("")))) {
+          hdgPoloN = double2radians(Double.parseDouble(msj[1]));
+        } else {
+          hdgPoloN = 0;
+        }
+
+        if ((msj[4].equals("M")) && (! msj[3].equals(""))) {
+          hdgPoloM = double2radians(Double.parseDouble(msj[3]));
+        } else {
+          hdgPoloM = 0;
+        }
+
+        if (sc != null) {
+          speed = sc.getVelocidad();
+        } else {
+          msj[8] = (msj[8].split("\\*"))[0];
+          if ((msj[8].equals("K")) && (msj[7].equals(""))) {
+            speed = 0;
+          } else {
+            speed = Double.parseDouble(msj[7]);
+          }
+        }
+
+      }
+      if (Pattern.matches("\\$..GGA", msj[0])) {
+        //System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
+
+        if (msj[1].equals("")) {
+          hora = "";
+        } else {
+          hora = cadena2Time(msj[1]);
+        }
+        if (msj[2].equals("")) {
+          latitud = 0;
+        } else {
+          latitud = sexagesimal2double(msj[2], 2);
+          latitudg = sexagesimal2string(msj[2], 2);
+        }
+        if (! msj[3].equals("")) {
+          if (msj[3].equals("S"))
+            latitud *= -1;
+          latitudg += " " + msj[3];
+        }
+        if (msj[2].equals("")) {
+          longitud = 0;
+        } else {
+          longitud = sexagesimal2double(msj[4], 3);
+          longitudg = sexagesimal2string(msj[4], 3);
+        }
+        if (! msj[5].equals(""))  {
+          if (msj[5].equals("W"))
+            longitud *= -1;
+          longitudg += " " + msj[5];
+        }
+
+        if (msj[7].equals("")) {
+          satelites = 0;
+        } else {
+          satelites = Integer.parseInt(msj[7]);
+        }
+
+        if ((!msj[9].equals("")) || (!msj[10].equals("M"))) {
+          msl = Double.parseDouble(msj[9]);
+        } else {
+          msl = 0;
+        }
+
+        if ((!msj[11].equals("")) || (!msj[12].equals("M"))) {
+          hgeoide = Double.parseDouble(msj[11]);
+        } else {
+          hgeoide = 0;
+        }
+        //altura = msl + hgeoide;
+        altura = hgeoide;
+
+
+        if (msj[13].equals("")) {
+          age = -1;
+        } else {
+          age = Double.parseDouble(msj[13]);
+        }
+
+        //calculaLLA(latitud, longitud, altura);
+        setValores();
+
+        if (write) {
+          vCaptura.add(new double[] { x, y, z });
+          osECEF.writeDouble(x);
+          osECEF.writeDouble(y);
+          osECEF.writeDouble(z);
+          osECEF.writeDouble(latitud);
+          osECEF.writeDouble(longitud);
+          osECEF.writeDouble(altura);
+          osECEF.writeDouble(angulo);
+          osECEF.writeDouble(speed);
+          bw.write("(" + x + ", " + y + ", " + z + ")\n");
+          //System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
+
+          oosFull.writeUTF(cadena);
+          oosFull.writeUTF(msj[0].substring(3, 5));
+          oosFull.writeLong(System.currentTimeMillis() - lastPaquete);
+          // Variables del paquete GSA:
+          oosFull.writeDouble(pdop);
+          oosFull.writeDouble(hdop);
+          oosFull.writeDouble(vdop);
+          // Variables del paquete GST:
+          oosFull.writeDouble(rms);
+          oosFull.writeDouble(desvEjeMayor);
+          oosFull.writeDouble(desvEjeMenor);
+          oosFull.writeDouble(orientacionMayor);
+          oosFull.writeDouble(desvLatitud);
+          oosFull.writeDouble(desvLongitud);
+          oosFull.writeDouble(desvAltura);
+          // Variables del paquete VTG
+          oosFull.writeDouble(hdgPoloN);
+          oosFull.writeDouble(hdgPoloM);
+          oosFull.writeDouble(speed);
+          // Variables del paquete GGA
+          oosFull.writeUTF(hora);
+          oosFull.writeDouble(latitud);
+          oosFull.writeDouble(longitud);
+          oosFull.writeDouble(altura);
+          oosFull.writeDouble(x);
+          oosFull.writeDouble(y);
+          oosFull.writeDouble(z);
+          oosFull.writeDouble(angulo);
+          oosFull.writeUTF(latitudg);
+          oosFull.writeUTF(longitudg);
+          oosFull.writeInt(satelites);
+          oosFull.writeDouble(msl);
+          oosFull.writeDouble(hgeoide);
+          oosFull.writeDouble(age);
+
+          if (ci1 != null) {
+            String nombre = ruta + "\\Imagen" + index + "a.jpg";
+            System.out.println(nombre);
+            ci1.saveImagen(nombre);
+            //ImagenId ii = ci1.getImagen(x, y, z);
+          }
+          if (ci2 != null) {
+            String nombre = ruta + "\\Imagen" + index + "b.jpg";
+            System.out.println(nombre);
+            ci2.saveImagen(nombre);
+          }
+          if ((ci1 != null) || (ci2 != null))
+            index++;
+        }
+
+        if (bd != null) {
+          ObjetoRuta or = new ObjetoRuta(media, dispositivo1, dispositivo2,
+                                         x, y, z, angulo, speed);
+          for (int i = 0; i < 10; i++) {
+            System.out.print("[" + or.getImg1()[i] + "]");
+          }
+          System.out.println();
+          //bd.writeObject(or, ruta);
+        }
+        lastInstruccion = System.currentTimeMillis();
+      }
+      lastPaquete = System.currentTimeMillis();
+    }
 
     public void ownershipChange(int type) {
     }
@@ -778,8 +779,12 @@ public class GPSConnection implements SerialPortEventListener,
     return minDistOperativa;
   }
 
-  public void setFiltrar(boolean filtrar) {
-    this.filtrar = filtrar;
+  public void setFiltrarPuntos(boolean valor) {
+    this.filtrarPuntos = valor;
+  }
+
+  public void setFiltrarAngulos(boolean valor) {
+    this.filtrarAngulos = valor;
   }
 
   public GPSData getError() {
@@ -1011,9 +1016,7 @@ public class GPSConnection implements SerialPortEventListener,
      * Establece los valores de ángulo y velocidad
      */
     public void setValores() {
-      //System.out.println("\t" + latitud + " " + longitud + " " + altura + ";");
-      if (filtrar) {
-        // Filtro 1:
+      if (filtrarPuntos) {
         if (oldLLA[0] != 0 || oldLLA[1] != 0 || oldLLA[2] != 0) {
           latitud = (latitud + oldLLA[0]) / 2.0d;
           longitud = (longitud + oldLLA[1]) / 2.0d;
@@ -1031,14 +1034,10 @@ public class GPSConnection implements SerialPortEventListener,
       double valores[] = calculaAnguloVel(new double[] {x, y, z }, posAnt, latitud, longitud);
 
       angulo = valores[0];
-      speed = valores[1];
+      speed = valores[1] * 5 * 3.60;
 
-      if (filtrar) {
+      if (filtrarAngulos) {
         if ((oldAng[0] != NULLANG) && (oldAng[1] != NULLANG)){
-          // Filtro 1:
-          //angulo = (valores[0] + oldAng) / 2.0f;
-
-          // Filtro 2:
           double difAng[] = new double[2];
           difAng[0] = Math.min(oldAng[1] - oldAng[0] + ((oldAng[1] - oldAng[0] < 0)? (Math.PI * 2):0),
                                oldAng[0] - oldAng[1] + ((oldAng[0] - oldAng[1] < 0)? (Math.PI * 2):0));
@@ -1048,7 +1047,6 @@ public class GPSConnection implements SerialPortEventListener,
           if (Math.abs(difAng[1] - difAng[0]) > 0.0001) {
             angulo = oldAng[1];
           }
-          //angulo = (angulo + lastAng[0] + lastAng[1]) / 3.0d;
         }
       }
       posAnt = new double[] { x, y, z };
@@ -1202,17 +1200,6 @@ public class GPSConnection implements SerialPortEventListener,
       }
 
       return retorno;
-  }
-
-  public double testAngulo(double x, double y, double z, double latitud, double longitud, double altura) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-      this.latitud= latitud;
-      this.longitud = longitud;
-      this.altura = altura;
-      this.setValores();
-      return angulo;
   }
 }
 

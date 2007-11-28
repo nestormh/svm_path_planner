@@ -425,46 +425,12 @@ public class CambioCoordenadas implements Runnable {
 
   }
 
-  public double[] testRuta(String fichero) {
-    Vector r = new Vector();
-    Vector a = new Vector();
-    Vector v = new Vector();
-
-    try {
-      File file = new File(fichero);
-      ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
-      double x = 0, y = 0, z = 0, latitud = 0, longitud = 0, altura = 0;
-      while (is.available() != 0) {
-        x = is.readDouble();
-        y = is.readDouble();
-        z = is.readDouble();
-        latitud = is.readDouble();
-        longitud = is.readDouble();
-        altura = is.readDouble();
-
-        r.add(new double[]{x, y, z, latitud, longitud, altura });
-
-        // Lee el ángulo
-        a.add(is.readDouble());
-        // Lee la velocidad
-        v.add(is.readDouble());
-      }
-      is.close();
-    } catch (Exception e) {
-      System.out.println("Error al cargar la ruta desde el fichero " + e.getMessage());
-    }
-
-    double ang[] = new double[r.size()];
-    for (int i = 0; i < r.size(); i++) {
-        double xyz[] = (double[])r.elementAt(i);
-        ang[i] = gps.testAngulo(xyz[0], xyz[1], xyz[2], xyz[3], xyz[4], xyz[5]);
-
-        /*try {
-            Thread.sleep(200);
-        } catch (Exception e) {}*/
-    }
-
-    return ang;
+  public void testRuta(String fichero_in, String fichero_out) {
+    SimulaGps simula = new SimulaGps();
+    simula.loadDatos(fichero_in);
+    startRuta(fichero_out);
+    simula.ejecuta(gps);
+    stopRuta();
   }
 
   public void loadRutaConImagenes2(String fichero) {
@@ -1555,7 +1521,12 @@ public class CambioCoordenadas implements Runnable {
   }
 
   public static void main(String args[]) {
-    CambioCoordenadas.showSerial();
+    CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "", false);
+    cc.getGps().setFiltrarPuntos(true);
+    cc.getGps().setFiltrarAngulos(true);
+
+    cc.testRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\nov1.gps", "C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro.dat");
+    /*CambioCoordenadas.showSerial();
 
     CambioCoordenadas cc = new CambioCoordenadas("COM6", "paramsInformatica.dat", "", false);
     cc.getGps().setFiltrar(true);
@@ -1572,7 +1543,7 @@ public class CambioCoordenadas implements Runnable {
       //else
       //  System.out.print((tiempo / 1000) + ": ");
     }
-    cc.stopRuta();
+    cc.stopRuta();*/
 
     cc.loadRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro.dat", false);
     cc.showCanvas();

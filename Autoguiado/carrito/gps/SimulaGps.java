@@ -496,6 +496,22 @@ public class SimulaGps implements Runnable {
       simulando = false;
   }
 
+  public void ejecuta(GPSConnection gps) {
+    for (int i = 0; i < vCadena.size(); i++) {
+      /*try {
+        Thread.sleep(((Long)vTiempo.elementAt(i)).longValue());
+      } catch(Exception e) {}*/
+      String cadena = (String)vCadena.elementAt(i);
+      try {
+        gps.procesaCadena(cadena);
+      } catch (IOException ioe) {
+        System.err.println("\nError al recibir los datos");
+      } catch (Exception ex) {
+        System.err.println("\nGPSConnection Error: Cadena fragmentada " + ex.getMessage());
+      }
+    }
+  }
+
   public static void main(String[] args) {
     SimulaGps simulagps = new SimulaGps("COM4");
     simulagps.loadDatos("C:\\Proyecto\\GPS\\Integracion\\classes\\nov1.gps");
