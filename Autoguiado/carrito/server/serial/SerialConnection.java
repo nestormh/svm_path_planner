@@ -82,38 +82,42 @@ public class SerialConnection implements SerialPortEventListener,
 
    private int PtroBufferRecibir = 0, PtroBufferEnviar = 0;
     private int RVolante;
-    
+
     private static double velocidad = 0;
     private static double velocidadAnt = 0;
     private static int refresco = 200;
-    
-    
+
+
     // Variables del controlador PID
-    private double kPAvance = 0.3;   
-    private double kPFreno = 0.5;   
+    private double kPAvance = 0.3;
+    private double kPFreno = 0.5;
     private double kPDesfreno = 1.5;
-    
+
     private double kDAvance = 0;
     private double kIAvance = 0;
-    
+
     private static boolean controla = false;
     private static double consignaVel = 0;
-    
+
     private static int maxInc = 20;
     private static int minInc = -40;
-    
+
     private int comando = 0;
     private int comandoAnt = 0;
     private double derivativoAnt = 0;
     private double errorAnt = 0;
     private double integral = 0;
-    
+
     private Vector velocidades = null;
     private static int maxVeloc = 1;
-    
-    private int contadorFreno = 0;        
-    
+
+    private int contadorFreno = 0;
+
     private boolean volanteBloqueado = false;
+
+    private boolean capturando = false;
+    private Vector captura = null;
+    private String ficheroCaptura = "";
 
     /**
     Creates a SerialConnection object and initilizes variables passed in
@@ -129,13 +133,13 @@ public class SerialConnection implements SerialPortEventListener,
           } catch (SerialConnectionException e2) {
 
               System.out.println("Error al abrir el puerto");
-              System.out.flush();              
+              System.out.flush();
        }
        if (isOpen())
            System.out.println("Puerto Abierto");
 
    }
-    
+
    public SerialConnection(int num) {
         Thread hilo = new Thread(this);
         hilo.start();
@@ -152,11 +156,11 @@ public class SerialConnection implements SerialPortEventListener,
           } catch (SerialConnectionException e2) {
 
               System.out.println("Error al abrir el puerto " + portName);
-              System.out.flush();              
+              System.out.flush();
        }
        if (isOpen())
            System.out.println("Puerto Abierto BaudRate "+ portName);
-       
+
        Thread hilo = new Thread(this);
         hilo.start();
 
@@ -367,6 +371,7 @@ public class SerialConnection implements SerialPortEventListener,
 
 	int buffer[] = new int[100];
 	int newData = 0, oldData = 0;
+        long lastTime = System.currentTimeMillis();
 
 	// Determine type of event.
 	switch (e.getEventType()) {
@@ -378,6 +383,11 @@ public class SerialConnection implements SerialPortEventListener,
 
 		    	try {
 		    	    newData = is.read();
+                            if(capturando) {
+                              captura.add(System.currentTimeMillis() - lastTime);
+                              captura.add(new Integer(newData));
+                              lastTime = System.currentTimeMillis();
+                            }
                             TotalBytes++;
                             if ((newData == 250)) {
                                 newData = is.read();
@@ -404,7 +414,7 @@ public class SerialConnection implements SerialPortEventListener,
                                         avanceant = buffer[3];
                                         alarma = buffer[4];
                                         NumPasosFreno = buffer[5];
-                                        
+
                                         if (ConsignaSentidoFreno != 0)
                                             System.out.println("NumPasosFreno = " + NumPasosFreno);
                                         if (NumPasosFreno == 255) {
@@ -413,9 +423,9 @@ public class SerialConnection implements SerialPortEventListener,
                                                 if (contadorFreno > 0) {
                                                     System.out.println("ContadorFreno1 = " + contadorFreno);
                                                     if (getFreno() == 1) {
-                                                        contadorFreno = 0;                                                                                                                
+                                                        contadorFreno = 0;
                                                     } else {
-                                                        NumPasosFreno = 0;                                                                                                                
+                                                        NumPasosFreno = 0;
                                                         contadorFreno--;
                                                     }
                                                     System.out.println("ContadorFreno2 = " + contadorFreno);
@@ -434,10 +444,10 @@ public class SerialConnection implements SerialPortEventListener,
                                                 }
                                             }
                                         }
-                                        
+
                                         if (contadorFreno == 0)
                                             volanteBloqueado = false;
-                                        
+
                                         BufferRecibe[PtroBufferRecibir][0] = volante;
                                         BufferRecibe[PtroBufferRecibir][1] = buffer[3];
                                         BufferRecibe[PtroBufferRecibir][2] = alarma;
@@ -696,7 +706,7 @@ public int getAlarma() {
     @param Angulo Numero de cuentas a las que fijar el volante
     */
 public void setVolante(int Angulo) {
-   
+
  if (volanteBloqueado)
      return;
 
@@ -783,7 +793,7 @@ public void setRVolante(int Angulo) {
     @param Fuerza La fuerza con la que se frena el coche entre 0-255
     */
 public void Frena(int Fuerza) {
- 
+
  int a[] = new int[10];
 
  if (Fuerza > 255)
@@ -812,9 +822,9 @@ public void Frena(int Fuerza) {
 }
 
 public void FrenaTotal() {
- 
+
  int a[] = new int[10];
- 
+
  contadorFreno = 10;
  volanteBloqueado = true;
 
@@ -840,7 +850,7 @@ public void FrenaTotal() {
     */
 
 public void DesFrenaTotal() {
- 
+
  int a[] = new int[10];
 
  contadorFreno = 10;
@@ -863,7 +873,7 @@ public void DesFrenaTotal() {
 }
 
 public void DesFrena(int Fuerza) {
- 
+
  int a[] = new int[10];
 
  if (Fuerza > 255)
@@ -899,7 +909,7 @@ public void DesFrena(int Fuerza) {
     */
 
 public void Avanza(int Fuerza) {
- 
+
  int a[] = new int[10];
 
  if (Fuerza > 255)
@@ -1053,7 +1063,7 @@ private void Envia(int a[]) {
             System.out.println("Se va a proceder a vaciar el buffer");
             os.flush();
         } catch (Exception e2) {
-            System.out.println("Error al vaciar el buffer, " + e2.getMessage());            
+            System.out.println("Error al vaciar el buffer, " + e2.getMessage());
         }
      };
 
@@ -1089,25 +1099,25 @@ public int getBufferRecibir(int i, int j) {
 }
 
 public void run() {
-        
+
     velocidades = new Vector();
-    
-    while (true) {                      
+
+    while (true) {
         double vel = (avance - lastAvance); //* (1000 / refresco);
         lastAvance = avance;
-        
+
         /*velocidades.add(vel);
-        
+
         while (velocidades.size() > maxVeloc)
             velocidades.remove(0);
-        
+
         double suma = 0;
         for (int i = 0; i < velocidades.size(); i++)
             suma += ((Double)velocidades.elementAt(i)).doubleValue();
-        suma /= velocidades.size();            
-        
+        suma /= velocidades.size();
+
         velocidad = suma;*/
-        
+
         //velocidad = vel;
 
         double dif = Math.abs(vel - velocidadAnt);
@@ -1115,37 +1125,37 @@ public void run() {
             velocidad = vel;
 
         velocidadAnt = vel;
-        
+
         if (controla) {
             System.out.println("Control de velocidad activo");
             System.out.println("***********************");
             System.out.println("Velocidad: " + velocidad);
             System.out.println("Diferencia: " + dif);
-            System.out.println("Velocidad(m/s): " + (velocidad / 78 / (refresco / 1000)));            
+            System.out.println("Velocidad(m/s): " + (velocidad / 78 / (refresco / 1000)));
             System.out.println("Velocidad(Km/h): " + (((velocidad / 78 / (refresco / 1000)) * 1000) / 3600));
             double error = consignaVel - velocidad;
             double derivativo = kDAvance * (error - errorAnt) + kDAvance * derivativoAnt;
-            
+
             if((comandoAnt > 0 || error > 0) && (comandoAnt < 254 || error < 0))
                 integral += kIAvance * errorAnt;
-                    
-            System.out.println("Error: " + error);                    
-            
+
+            System.out.println("Error: " + error);
+
             int incremento = (int)(kPAvance * error + derivativo + integral);
-            
+
             errorAnt = error;
             derivativoAnt = derivativo;
-            
+
             if (incremento > maxInc)
                 incremento = maxInc;
-            
+
            if (incremento < minInc)
                 incremento = minInc;
-            
-            System.out.println("Inc: " + incremento);                    
-            
+
+            System.out.println("Inc: " + incremento);
+
             comando += incremento;
-            
+
             if ((comando > 0) && (comando < 255)) {
                 if (incremento > 0)
                     comando += 60;
@@ -1154,17 +1164,17 @@ public void run() {
             }
 
             comandoAnt = comando;
-            
+
             if (comando > 255)
                 comando = 255;
-    
+
             if (comando < 0)
                 comando = 0;
-                
+
             System.out.println("Avanzando: " + comando);
             Avanza(comando);
         }
-        
+
         try {
             Thread.sleep(refresco);
         } catch (Exception e) {}
@@ -1173,15 +1183,15 @@ public void run() {
 
 public void setConsigna(double valor) {
     boolean retroceso = false;
-    
+
     if (valor < 0) {
         retroceso = true;
         valor *= -1;
     }
     double error = valor - velocidad;
     System.out.println("Error: " + error);
-    
-    if (error >= 0) {                
+
+    if (error >= 0) {
         if (getDesfreno() == 0) {
          comando += (int)(kPDesfreno * error);
 
@@ -1189,7 +1199,7 @@ public void setConsigna(double valor) {
          System.out.println("Desfrenando: " + comando);
         } else {
             comando += (int)(kPAvance * error);
-    
+
             if (retroceso == true) {
                 System.out.println("Retrocediendo: " + comando);
                 Retrocede(comando);
@@ -1208,7 +1218,7 @@ public void setConsigna(double valor) {
 
 public void setConsignaAvance(double valor) {
     consignaVel = valor;
-    controla = true;     
+    controla = true;
 }
 
 public double getVelocidad() {
@@ -1270,6 +1280,30 @@ public void setKDAvance(double val) {
 public void setKIAvance(double val) {
     this.kIAvance = val;
 }
+
+  public void startCaptura(String fichero) {
+    if (! capturando) {
+      captura = new Vector();
+      ficheroCaptura = fichero;
+      capturando = true;
+    }
+  }
+
+  public void stopCaptura() {
+    if (capturando) {
+      capturando = false;
+      try {
+        File fich = new File(ficheroCaptura);
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fich, false));
+        for (int i = 0; i < captura.size(); i++) {
+          oos.write(((Integer)captura.elementAt(i)).intValue());
+        }
+        oos.close();
+      } catch (IOException ioe) {
+        System.err.println("No se pudo abrir el flujo de datos: " + ioe.getMessage());
+      }
+    }
+  }
 }
 
 

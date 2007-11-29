@@ -680,7 +680,6 @@ public class CambioCoordenadas implements Runnable {
     } catch (Exception e) {
       System.out.println("Error al escribir en el fichero " + e.getMessage());
     }
-
   }
 
   public void loadPolygon() {
@@ -1522,10 +1521,11 @@ public class CambioCoordenadas implements Runnable {
 
   public static void main(String args[]) {
     CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "", false);
-    cc.getGps().setFiltrarPuntos(true);
+    cc.getGps().setFiltrarPuntos(false);
     cc.getGps().setFiltrarAngulos(true);
+    cc.getGps().setFiltrarPuntosPost(true);
 
-    cc.testRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\nov1.gps", "C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro.dat");
+    cc.testRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\nov1.gps", "C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro3.dat");
     /*CambioCoordenadas.showSerial();
 
     CambioCoordenadas cc = new CambioCoordenadas("COM6", "paramsInformatica.dat", "", false);
@@ -1545,7 +1545,7 @@ public class CambioCoordenadas implements Runnable {
     }
     cc.stopRuta();*/
 
-    cc.loadRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro.dat", false);
+    cc.loadRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro3.dat", false);
     cc.showCanvas();
 
     /*CambioCoordenadas cc2 = new CambioCoordenadas("", "paramsInformatica.dat", "", false);

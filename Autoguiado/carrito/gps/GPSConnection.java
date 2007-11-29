@@ -95,8 +95,9 @@ public class GPSConnection implements SerialPortEventListener,
     private Vector vCaptura = new Vector();
 
     private boolean independiente = false;
-    private boolean filtrarPuntos = true;
+    private boolean filtrarPuntos = false;
     private boolean filtrarAngulos = true;
+    private boolean filtrarPuntosPost = true;
 
     private long lastInstruccion = System.currentTimeMillis() * 2;
 
@@ -783,6 +784,10 @@ public class GPSConnection implements SerialPortEventListener,
     this.filtrarPuntos = valor;
   }
 
+  public void setFiltrarPuntosPost(boolean valor) {
+    this.filtrarPuntosPost = valor;
+  }
+
   public void setFiltrarAngulos(boolean valor) {
     this.filtrarAngulos = valor;
   }
@@ -875,6 +880,8 @@ public class GPSConnection implements SerialPortEventListener,
         File full = new File(nombre.substring(0, nombre.length() - 4) + ".gps");
         oosFull = new ObjectOutputStream(new FileOutputStream(full, false));
         bw = new BufferedWriter(new FileWriter("ruta.txt", false));
+        if (sc != null)
+          sc.startCaptura(nombre.substring(0, nombre.length() - 4) + ".car");
         vCaptura.clear();
         write = true;
       } catch (IOException ioe) {
@@ -889,6 +896,8 @@ public class GPSConnection implements SerialPortEventListener,
           osECEF.close();
           oosFull.close();
           bw.close();
+          if (sc != null)
+            sc.stopCaptura();
           write = false;
         } catch (IOException ioe) {}
       }
@@ -1028,33 +1037,45 @@ public class GPSConnection implements SerialPortEventListener,
 
       if (Math.sqrt(Math.pow(x - posAnt[0], 2.0f) +
                     Math.pow(y - posAnt[1], 2.0f) +
-                    Math.pow(z - posAnt[2], 2.0f)) < minDistOperativa)
-        return;
+                    Math.pow(z - posAnt[2], 2.0f)) >= minDistOperativa) {
 
-      double valores[] = calculaAnguloVel(new double[] {x, y, z }, posAnt, latitud, longitud);
+        double valores[] = calculaAnguloVel(new double[] {x, y, z }, posAnt, latitud, longitud);
 
-      angulo = valores[0];
-      speed = valores[1] * 5 * 3.60;
+        angulo = valores[0];
+        speed = valores[1] * 5 * 3.60;
 
-      if (filtrarAngulos) {
-        if ((oldAng[0] != NULLANG) && (oldAng[1] != NULLANG)){
-          double difAng[] = new double[2];
-          difAng[0] = Math.min(oldAng[1] - oldAng[0] + ((oldAng[1] - oldAng[0] < 0)? (Math.PI * 2):0),
-                               oldAng[0] - oldAng[1] + ((oldAng[0] - oldAng[1] < 0)? (Math.PI * 2):0));
-          difAng[1] = Math.min(oldAng[1] - valores[0] + ((oldAng[1] - valores[0] < 0)? (Math.PI * 2):0),
-                               valores[0] - oldAng[1] + ((valores[0] - oldAng[1] < 0)? (Math.PI * 2):0));
-          System.out.println(difAng[0] + " " + difAng[1] + " " + Math.abs(difAng[1] - difAng[0]) + ";");
-          if (Math.abs(difAng[1] - difAng[0]) > 0.0001) {
-            angulo = oldAng[1];
+        if (filtrarAngulos) {
+          if ((oldAng[0] != NULLANG) && (oldAng[1] != NULLANG)){
+            double difAng[] = new double[2];
+            difAng[0] = Math.min(oldAng[1] - oldAng[0] + ((oldAng[1] - oldAng[0] < 0)? (Math.PI * 2):0),
+                                 oldAng[0] - oldAng[1] + ((oldAng[0] - oldAng[1] < 0)? (Math.PI * 2):0));
+            difAng[1] = Math.min(oldAng[1] - valores[0] + ((oldAng[1] - valores[0] < 0)? (Math.PI * 2):0),
+                                 valores[0] - oldAng[1] + ((valores[0] - oldAng[1] < 0)? (Math.PI * 2):0));
+
+            if (Math.abs(difAng[1] - difAng[0]) > 0.0001) {
+              angulo = oldAng[1];
+            }
           }
         }
+
+        posAnt = new double[] { x, y, z };
+        oldAng[0] = oldAng[1];
+        oldAng[1] = valores[0];
+        lastAng[0] = lastAng[1];
+        lastAng[1] = angulo;
       }
-      posAnt = new double[] { x, y, z };
+
+      if (filtrarPuntosPost) {
+        if (oldLLA[0] != 0 || oldLLA[1] != 0 || oldLLA[2] != 0) {
+          latitud = (latitud + oldLLA[0]) / 2.0d;
+          longitud = (longitud + oldLLA[1]) / 2.0d;
+          altura = (altura + oldLLA[2]) / 2.0d;
+
+          System.out.println(latitud + " " + longitud + " " + altura + ";");
+          setECEF();
+        }
+      }
       oldLLA = new double[] { latitud, longitud, altura };
-      oldAng[0] = oldAng[1];
-      oldAng[1] = valores[0];
-      lastAng[0] = lastAng[1];
-      lastAng[1] = angulo;
     }
 
     public static double[] calculaAnguloVel(double punto1[], double punto2[], double latitud, double longitud) {
