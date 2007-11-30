@@ -308,7 +308,7 @@ public class Constantes {
      * Obtiene el número de emisores actual
      * @return Devuelve el número actual de emisores
      */
-    public int getNumEmisores() {        
+    public int getNumEmisores() {
         return emisores.length;
     }
 
@@ -378,7 +378,10 @@ public class Constantes {
      * @return Devuelve el número de receptores actual
      */
     public int getNumReceptores() {
+      if (receptores != null)
         return receptores.length;
+      else
+        return 0;
     }
 
     /**

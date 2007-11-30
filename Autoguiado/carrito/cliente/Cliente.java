@@ -66,7 +66,7 @@ public class Cliente extends JFrame {
         // Inicia la comunicación con el servidor RMI
         iniciaRMI();
         // Inicia el objeto multimedia y las instancias que van a leer el stream remoto
-        iniciaMedia(dllpath);
+        //iniciaMedia(dllpath);
         // Inicia la interfaz
         iniciaInterfaz();
     }

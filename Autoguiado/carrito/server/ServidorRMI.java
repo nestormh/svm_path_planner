@@ -18,14 +18,8 @@ import carrito.server.serial.*;
  * @version 1.0
  */
 public class ServidorRMI extends UnicastRemoteObject implements InterfazRMI, Runnable {
-    /** Objeto que hace de interfaz entre todas las variables comunes a la aplicación */
-    private Constantes cte = null;
-    /** Objeto de control del vehículo */
     private ControlCarro control = null;
-    /** Objeto de control del motor de las cámaras */
-    private ControlCamara camara = null;
-    /** Objeto que controla el zoom de las cámaras */
-    private ControlZoom CZoom = null;
+
     /** Objeto que permite la creación de números aleatorios */
     private Random rnd = null;
     /** Identificador del dueño del control del vehículo */
@@ -36,29 +30,13 @@ public class ServidorRMI extends UnicastRemoteObject implements InterfazRMI, Run
     private boolean funcionando = false;
     /** Hilo de ejecución para comprobar si el cliente que tiene el control se desconecta */
     private Thread hilo = null;
-    /** Variable que indica si se está arrancando el servidor desde Matlab */
-    private boolean fromMatlab = false;
 
-    /**
-     * Constructor. Inicializa las variables y crea el hilo de ejecución.
-     * @param cte Objeto que hace de interfaz entre todas las variables comunes a la aplicación
-     * @param control Objeto de control del vehículo
-     * @param camara Objeto de control del motor de las cámaras
-     * @param CZoom Objeto que controla el zoom de las cámaras
-     * @throws RemoteException
-     */
-    public ServidorRMI(Constantes cte, ControlCarro control, ControlCamara camara, ControlZoom CZoom, boolean fromMatlab) throws RemoteException {
-        this.cte = cte;
+
+    public ServidorRMI(ControlCarro control) throws RemoteException {
         this.control = control;
-        this.camara = camara;
-        this.CZoom = CZoom;
         this.rnd = new Random(System.currentTimeMillis());
-        this.fromMatlab = fromMatlab;
-
-        if (! fromMatlab) {
-            hilo = new Thread(this);
-            hilo.start();
-        }
+        hilo = new Thread(this);
+        hilo.start();
     }
 
     /**
@@ -96,14 +74,8 @@ public class ServidorRMI extends UnicastRemoteObject implements InterfazRMI, Run
      * @throws RemoteException
      */
     public VideoCltConfig[] getVideos() throws RemoteException {
-        VideoCltConfig[] retorno = new VideoCltConfig[cte.getNumEmisores()];
-        for (int i = 0; i < retorno.length; i++) {
-            retorno[i] = new VideoCltConfig("", 1, null, 10, null, Constantes.NULLINT,
-                                            Constantes.NULLFLOAT, null, null);
-            retorno[i].setIp(cte.getEmisor(i).getIp());
-            retorno[i].setPort(cte.getEmisor(i).getPort());
-        }
-        return retorno;
+        VideoCltConfig[] retorno = new VideoCltConfig[0];
+        return null;
     }
 
     /**
@@ -113,7 +85,7 @@ public class ServidorRMI extends UnicastRemoteObject implements InterfazRMI, Run
          * @throws RemoteException
      */
     public Dimension getSize(int cam) {
-        return new Dimension(cte.getEmisor(cam).getWidth(), cte.getEmisor(cam).getHeight());
+        return new Dimension(320, 240);
     }
 
     /**
@@ -148,7 +120,7 @@ public class ServidorRMI extends UnicastRemoteObject implements InterfazRMI, Run
         if (! isActivo(own))
             return false;
         control.setAvance(aceleracion, frenado);
-        control.setGiro(giro);
+        //control.setGiro(giro);
         return true;
     }
 
@@ -158,18 +130,14 @@ public class ServidorRMI extends UnicastRemoteObject implements InterfazRMI, Run
      * @param angulo Ángulo indicado
      * @throws RemoteException
      */
-    public void setAnguloCamaras(int id, int angulo) throws RemoteException {
-        camara.setAngulo(id, angulo);
-    }
+    public void setAnguloCamaras(int id, int angulo) throws RemoteException {}
 
     /**
      * Indica el ángulo en altura de las cámaras
      * @param angulo Ángulo indicado
      * @throws RemoteException
      */
-    public void setAlturaCamaras(int angulo) throws RemoteException {
-        camara.setAltura(angulo);
-    }
+    public void setAlturaCamaras(int angulo) throws RemoteException {}
 
     /**
      * Indica el zoom de una determinada cámara
@@ -177,9 +145,7 @@ public class ServidorRMI extends UnicastRemoteObject implements InterfazRMI, Run
      * @param id Cámara a la que se hace referencia
      * @throws RemoteException
      */
-    public void setZoom(int zoom, int id) throws RemoteException {
-        CZoom.setZoom(zoom, id);
-    }
+    public void setZoom(int zoom, int id) throws RemoteException {}
 
     /**
      * Solicita el control del vehículo
@@ -188,11 +154,7 @@ public class ServidorRMI extends UnicastRemoteObject implements InterfazRMI, Run
      * @throws RemoteException
      */
     public synchronized int getJoystick() throws RemoteException {
-        // Si se está usando desde Matlab, se desactiva el control del vehículo
-        if (fromMatlab) {
-            return Constantes.DESACTIVADA;
-        // Si está siendo usado, devuelve -1
-        } else if (joyOwner != Constantes.NULLINT) {
+      if (joyOwner != Constantes.NULLINT) {
             return Constantes.NULLINT;
             // Si no, reinicia las variables de control y le da un nuevo identificador
             // al cliente
@@ -217,6 +179,6 @@ public class ServidorRMI extends UnicastRemoteObject implements InterfazRMI, Run
     }
 
     public boolean isControlActivo() {
-        return !fromMatlab;
+      return true;
     }
 }

@@ -10,6 +10,8 @@ import javax.swing.*;
 import Jama.*;
 import carrito.media.*;
 import carrito.server.serial.*;
+import java.rmi.Naming;
+import carrito.server.ServidorRMI;
 
 public class CambioCoordenadas implements Runnable {
   // Nuevo eje
@@ -102,7 +104,9 @@ public class CambioCoordenadas implements Runnable {
 
   double vDirector[] = null;
 
-  public CambioCoordenadas(String puerto, String params, String puertoCoche, boolean cocheActivo) {
+  private ServidorRMI rmi = null;
+
+  public CambioCoordenadas(String puerto, String params, String puertoCoche, boolean cocheActivo, boolean rmi) {
       loadParams(params);
     if (puerto.equals("")) {
       gps = new GPSConnection();
@@ -117,7 +121,35 @@ public class CambioCoordenadas implements Runnable {
       control = new ControlCarro();
     this.cocheActivo = cocheActivo;
     gps.setCc(this);
+    if (rmi) {
+      initRMI();
+    }
   }
+
+  public void initRMI() {
+        // Crea el objeto RMI
+        try {
+            rmi = new ServidorRMI(control);
+            Naming.bind("ServidorCarrito", rmi);
+        } catch (Exception e) {
+            System.out.println("Excepción: " + e.getMessage());
+            System.out.println("Error al crear objeto RMI");
+            System.exit(-1);
+        }
+        // Ubica el objeto RMI en el servidor
+        System.out.println("Objeto RMI creado");
+        try {
+            String[] bindings = Naming.list( "" );
+            System.out.println( "Vínculos disponibles:");
+            for ( int i = 0; i < bindings.length; i++ )
+                System.out.println( bindings[i] );
+        } catch (Exception e) {
+            System.out.println("Excepción: " + e.getMessage());
+            System.out.println("Error al obtener vínculos RMI disponibles");
+            System.exit(-1);
+        }
+    }
+
 
   public CambioCoordenadas(String puerto, String params, ControlCarro control, boolean cocheActivo) {
     loadParams(params);
@@ -1520,15 +1552,15 @@ public class CambioCoordenadas implements Runnable {
   }
 
   public static void main(String args[]) {
-    CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "", false);
+    CambioCoordenadas.showSerial();
+    CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "COM4", false, true);
     cc.getGps().setFiltrarPuntos(false);
     cc.getGps().setFiltrarAngulos(true);
     cc.getGps().setFiltrarPuntosPost(true);
 
     cc.testRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\nov1.gps", "C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro3.dat");
-    /*CambioCoordenadas.showSerial();
 
-    CambioCoordenadas cc = new CambioCoordenadas("COM6", "paramsInformatica.dat", "", false);
+    /*CambioCoordenadas cc = new CambioCoordenadas("COM6", "paramsInformatica.dat", "", false);
     cc.getGps().setFiltrar(true);
 
     cc.startRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro.dat");

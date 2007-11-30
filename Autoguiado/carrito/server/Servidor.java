@@ -65,13 +65,13 @@ public class Servidor {
         }
 
         if (! fromMatlab) {
-            initSerial();            
-            //initMedia(dllpath);            
+            initSerial();
+            //initMedia(dllpath);
             initGPS();
             initRMI();
         }
     }
-    
+
     /**
      * Inicializa los objetos encargados de la comunicación por los puertos COM
      */
@@ -93,7 +93,8 @@ public class Servidor {
     public void initRMI() {
         // Crea el objeto RMI
         try {
-            rmi = new ServidorRMI(cte, control, camaras, zoom, fromMatlab);
+            //rmi = new ServidorRMI(cte, control, camaras, zoom, fromMatlab);
+            rmi = new ServidorRMI(control);
             Naming.bind("ServidorCarrito", rmi);
         } catch (Exception e) {
             System.out.println("Excepción: " + e.getMessage());
@@ -119,8 +120,8 @@ public class Servidor {
      * @param dllpath Ubicación de la librería VLC
      */
     public void initMedia(String dllpath) {
-        // Crea el objeto multimedia        
-        media = new ServerMedia(dllpath);     
+        // Crea el objeto multimedia
+        media = new ServerMedia(dllpath);
         // Recorre la lista de descriptores de los servidores y añade una
         // instancia multimedia por cada uno de ellos
         for (int i = 0; i < cte.getNumEmisores(); i++) {
@@ -148,11 +149,11 @@ public class Servidor {
     public void initGPS() {
       String puerto = cte.getCOMCarrito().substring(0, 3);
       int num = Integer.parseInt(cte.getCOMCarrito().substring(3)) + 1;
-      puerto += Integer.toString(num);      
+      puerto += Integer.toString(num);
       cc = new CambioCoordenadas(puerto, "paramsInformatica.dat", control, true);
       cc.loadRuta("carroMay2.dat", false);
       cc.setAngulos(3);
-      
+
       cc.setKConsigna(1);
       cc.setKAngulo(1);
       cc.setKAlfa(1.2);
@@ -160,7 +161,7 @@ public class Servidor {
       cc.setKIntegral(0);
       cc.setKVel(0.5);
       cc.setAcelera(false);
-      
+
       cc.showCanvas();
       control.setCanvas(cc.getCanvas());
       cc.setIndependiente(true, 100);
@@ -251,7 +252,7 @@ public class Servidor {
     public ZoomConnection[] getZoomConn() {
          return zoomConn;
      }
-    
+
     public CambioCoordenadas getCc() {
         return cc;
     }
