@@ -8,6 +8,14 @@
 #define MAXD 70				// Disparidad máxima
 #define MIND 15				// Mínimo valor de disparidad a tener en cuenta para detectar obstáculos
 
+typedef struct {			// Tipo de datos para indicar los parámetros de ajuste de los diferentes algoritmos
+	int filtro,
+		sobel,
+		umbral,
+		porcentaje,
+		umbralObstaculos;
+} parameter;
+
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -425,11 +433,126 @@ void checkSobel (int id){
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE: disparity
+	   FUNCIÓN:
+	PARÁMETROS: IplImage *left    -> Imagen izquierda. Se asume una imagen RGB de 3 planos.
+				IplImage *right   -> Imagen derecha. Se asume una imagen RGB de 3 planos.
+				parameter adjusts -> Ajustes para los algoritmos que componen la disparidad.
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void disparity (IplImage *left, IplImage* right, parameter adjusts){
+	IplImage *izquierda,		// Imagen izquierda en escala de grises
+			 *derecha,			// Imagen derecha en escala de grises
+			 *mapaDisparidad,	// Mapa de disparidad
+			 *imagenDisparidad;
+
+	
+	mapaDisparidad = cvCreateImage(cvSize(320,240), IPL_DEPTH_8U, 1);
+	imagenDisparidad = cvCreateImage(cvSize(MAXD,240), IPL_DEPTH_8U, 1);
+	izquierda = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
+	derecha = cvCreateImage(cvGetSize(right), IPL_DEPTH_8U, 1);
+
+	mapaDisparidad->origin = 1;
+	imagenDisparidad->origin = 1;
+	
+	cvCvtColor(left, izquierda, CV_RGB2GRAY);					// Pasar a escala de grises
+	izquierda->origin = 1;
+
+	cvCvtColor(right, derecha, CV_RGB2GRAY);					// Pasar a escala de grises
+	derecha->origin = 1;
+
+clock_t start = clock();
+	preprocesado (izquierda, derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
+	correlacion (izquierda, derecha, MAXD, mapaDisparidad);
+	crearImagen (mapaDisparidad, imagenDisparidad);
+	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
+clock_t stop = clock();
+
+	printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
+
+//		cvShowImage ("Mapa disparidad", mapaDisparidad);	
+		cvShowImage ("Imagen disparidad", imagenDisparidad);
+	
+//		lineas(imagenDisparidad);
+
+	cvReleaseImage(&mapaDisparidad);
+	cvReleaseImage(&imagenDisparidad);
+	cvReleaseImage(&izquierda);
+	cvReleaseImage(&derecha);
+
+	cvWaitKey(1);
+
+}
+
+/*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
 	   FUNCIÓN:
 	PARÁMETROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
+int main (int argc, char* argv[]){
+	IplImage *tempImage,		// Temporal para la conversión RGB a escala de grises
+			 *izquierda,		// Imagen izquierda
+			 *derecha;			// Imagen derecha
+
+	LPWSTR *lista;
+	int totalDisp = 0;
+	CCapturaVLC captura;
+	parameter ajustes;
+
+
+	lista = captura.listaDispositivos(&totalDisp);
+	
+	printf("TotalDisp = %d\n", totalDisp);
+
+	for (int i = 0; i < totalDisp; i++) {
+		printf("%d: %S\n", i + 1, lista[i]);
+	}
+
+	izquierda = cvCreateImage(cvSize(320,240), IPL_DEPTH_8U, 3);
+	derecha = cvCreateImage(cvSize(320,240), IPL_DEPTH_8U, 3);
+
+	cvNamedWindow("Izquierda", CV_WINDOW_AUTOSIZE);
+	cvNamedWindow("Derecha", CV_WINDOW_AUTOSIZE);
+	cvNamedWindow("Obstaculos", CV_WINDOW_AUTOSIZE);
+//	cvNamedWindow("Hough", CV_WINDOW_AUTOSIZE);
+	cvNamedWindow("Mapa disparidad", CV_WINDOW_AUTOSIZE);
+	cvNamedWindow("Imagen disparidad", CV_WINDOW_AUTOSIZE);
+
+	/* Crear la ventana de controles */
+	cvNamedWindow("Controles", CV_WINDOW_AUTOSIZE);
+	ajustes.filtro = 3;
+	ajustes.sobel = 3;
+	ajustes.umbral = 4;
+	ajustes.umbralObstaculos = 10;
+	ajustes.porcentaje = 5;
+	cvCreateTrackbar ("Filtro", "Controles", &ajustes.filtro, 21, checkFilter);
+	cvCreateTrackbar ("Sobel", "Controles", &ajustes.sobel, 7, checkSobel);
+	cvCreateTrackbar ("Umbral Ter", "Controles", &ajustes.umbral, 10, NULL);
+	cvCreateTrackbar ("Umbral Obs", "Controles", &ajustes.umbralObstaculos, 15, NULL);
+	cvCreateTrackbar ("Porcentaje", "Controles", &ajustes.porcentaje, 10, NULL);
+
+	while(1) {
+		
+		izquierda = cvLoadImage("izquierda8.jpg");
+		izquierda->origin = 1;
+
+		derecha = cvLoadImage("derecha8.jpg");
+		derecha->origin = 1;
+
+		disparity (izquierda, derecha, ajustes);
+
+		cvWaitKey(1);
+	}
+	return (0);
+}
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------
 int main (int argc, char* argv[]){
 	IplImage *tempImage,		// Temporal para la conversión RGB a escala de grises
 			 *izquierda,		// Imagen izquierda
@@ -467,7 +590,7 @@ int main (int argc, char* argv[]){
 	cvNamedWindow("Mapa disparidad", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("Imagen disparidad", CV_WINDOW_AUTOSIZE);
 
-	/* Crear la ventana de controles */
+	/* Crear la ventana de controles 
 	cvNamedWindow("Controles", CV_WINDOW_AUTOSIZE);
 	filtro = 3;
 	sobel = 3;
@@ -502,7 +625,7 @@ cvSet(izquierda, cvScalar(0));
 cvRectangle(izquierda, cvPoint(50, 0), cvPoint(70, 20), cvScalar(254),CV_FILLED);
 cvSet(derecha, cvScalar(0));
 cvRectangle(derecha, cvPoint(20, 0), cvPoint(40, 20), cvScalar(254), CV_FILLED);
-*/
+
 //		cvShowImage ("Izquierda", izquierda);	
 //		cvShowImage ("Derecha", derecha);	
 
@@ -529,4 +652,4 @@ cvRectangle(derecha, cvPoint(20, 0), cvPoint(40, 20), cvScalar(254), CV_FILLED);
 		cvWaitKey(1);
 	}
 	return (0);
-}
+}*/
