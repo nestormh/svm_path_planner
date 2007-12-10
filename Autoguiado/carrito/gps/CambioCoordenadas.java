@@ -96,7 +96,7 @@ public class CambioCoordenadas implements Runnable {
   private double kDer2 = 0;
   private double kIntegral2 = 0;
 
-  String dllpath = "";
+  String dllpath = "C:\\GPS\\GPSConImagenes\\dll\\libvlc.dll";
 
   String imagenes = null;
 
@@ -115,9 +115,10 @@ public class CambioCoordenadas implements Runnable {
     }
     cc = this;
 
-    if ((puertoCoche != null) && (! puertoCoche.equals("")))
+    if ((puertoCoche != null) && (! puertoCoche.equals(""))) {
       control = new ControlCarro(puertoCoche);
-    else
+      gps.setSc(control.getPuerto());
+    } else
       control = new ControlCarro();
     this.cocheActivo = cocheActivo;
     gps.setCc(this);
@@ -1462,7 +1463,7 @@ public class CambioCoordenadas implements Runnable {
         disp1 = disp1.replaceAll(" ", "&nbsp;");
         disp1 += ":" + camara1;
         System.out.println(disp1);
-        String cadena = "dshow:// :dshow-vdev=" + disp1 + " :dshow-adev=none :dshow-size=640x480";
+        String cadena = "dshow:// :dshow-vdev=" + disp1 + " :dshow-adev=none :dshow-size=320x240";
         int instancia = media.addInstancia(cadena);
         System.out.println(instancia);
         media.play(instancia);
@@ -1472,7 +1473,7 @@ public class CambioCoordenadas implements Runnable {
         disp2 = disp2.replaceAll(" ", "&nbsp;");
         disp2 += ":" + camara2;
         System.out.println(disp2);
-        String cadena = "dshow:// :dshow-vdev=" + disp2+ " :dshow-adev=none :dshow-size=640x480";
+        String cadena = "dshow:// :dshow-vdev=" + disp2+ " :dshow-adev=none :dshow-size=320x240";
         int instancia = media.addInstancia(cadena);
         System.out.println(instancia);
         media.play(instancia);
@@ -1553,8 +1554,10 @@ public class CambioCoordenadas implements Runnable {
 
   public static void main(String args[]) {
     CambioCoordenadas.showSerial();
-    CambioCoordenadas cc = new CambioCoordenadas("", "paramsInformatica.dat", "COM4", false, true);
-    cc.getGps().setFiltrarPuntos(false);
+    CambioCoordenadas cc = new CambioCoordenadas("COM16", "paramsInformatica.dat", "", false, false);
+    //cc.startCamaras(0, -1, "C:\\GPS\\GPSConImagenes\\dll\\libvlc.dll");
+    cc.startRutaConImagenes("testImg1.dat", 0, -1);
+    /*cc.getGps().setFiltrarPuntos(false);
     cc.getGps().setFiltrarAngulos(true);
     cc.getGps().setFiltrarPuntosPost(true);
 
@@ -1575,7 +1578,7 @@ public class CambioCoordenadas implements Runnable {
       //else
       //  System.out.print((tiempo / 1000) + ": ");
     }
-    cc.stopRuta();*/
+    cc.stopRuta();
 
     cc.loadRuta("C:\\Proyecto\\GPS\\Integracion\\classes\\testFiltro3.dat", false);
     cc.showCanvas();

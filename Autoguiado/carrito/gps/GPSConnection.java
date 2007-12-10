@@ -96,9 +96,9 @@ public class GPSConnection implements SerialPortEventListener,
 
     private boolean independiente = false;
     private boolean filtrarPuntos = false;
-    private boolean filtrarAngulos = true;
-    private boolean filtrarPuntosPost = true;
-    private boolean fullAltura = false;
+    private boolean filtrarAngulos = false;  // true
+    private boolean filtrarPuntosPost = false; // true
+    private boolean fullAltura = true; // false
 
     private long lastInstruccion = System.currentTimeMillis() * 2;
 
@@ -547,7 +547,7 @@ public class GPSConnection implements SerialPortEventListener,
           osECEF.writeDouble(angulo);
           osECEF.writeDouble(speed);
           bw.write("(" + x + ", " + y + ", " + z + ")\n");
-          //System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
+          System.out.println("Escribiendo: (" + x + ", " + y + ", " + z + ")");
 
           oosFull.writeUTF(cadena);
           oosFull.writeUTF(msj[0].substring(3, 5));
@@ -1161,7 +1161,10 @@ public class GPSConnection implements SerialPortEventListener,
 
   public void setCc(CambioCoordenadas cc) {
     this.cc = cc;
-    this.sc = cc.getControl().getPuerto();
+  }
+  
+  public void setSc(SerialConnection sc) {
+    this.sc = sc;
   }
 
   public void setMaxMedidas(int maxMedidas) {
