@@ -79,7 +79,7 @@ public class SerialConnection implements SerialPortEventListener,
    private int NumPasosFreno = 0; // Numero de pasos de freno que se han dado
    private int BufferComandos[][] = new int[MAXBUFFER][7];
    private int BufferRecibe[][] = new int[MAXBUFFER][3];
-
+   
    private int PtroBufferRecibir = 0, PtroBufferEnviar = 0;
     private int RVolante;
 
@@ -383,11 +383,11 @@ public class SerialConnection implements SerialPortEventListener,
 
 		    	try {
 		    	    newData = is.read();
-                            if(capturando) {
+                            /*if(capturando) {
                               captura.add(System.currentTimeMillis() - lastTime);
                               captura.add(new Integer(newData));
                               lastTime = System.currentTimeMillis();
-                            }
+                            }*/
                             TotalBytes++;
                             if ((newData == 250)) {
                                 newData = is.read();
@@ -872,25 +872,25 @@ public void DesFrenaTotal() {
 
 }
 
-public void DesFrena(int Fuerza) {
+public void DesFrena(int tiempo) {
 
  int a[] = new int[10];
 
- if (Fuerza > 255)
-     Fuerza = 255;
+ if (tiempo > 255)
+     tiempo = 255;
 
- if (Fuerza < 0)
-     Fuerza = 0;
+ if (tiempo < 0)
+     tiempo = 0;
 
  a[0] = 250;
  a[1] = 251;
  a[2] = ConsignaVolanteLow;
  a[3] = ConsignaVolanteHigh;
- a[4] = ConsignaFreno = Fuerza;
- a[5] = ConsignaSentidoFreno = 1;
+ a[4] = ConsignaFreno = 255;
+ a[5] = ConsignaSentidoFreno = 3;
  a[6] = ConsignaVelocidad=0;
  a[7] = ConsignaSentidoVelocidad=0;
- a[8] = ConsignaNumPasosFreno = 0;
+ a[8] = ConsignaNumPasosFreno = tiempo;
  a[9] = 255;
 
 
@@ -974,7 +974,59 @@ if (getDesfreno() != 1) {
  Envia(a);
 }
 
+public void masFrena(int valor, int tiempo) {
+    int a[] = new int[10];
 
+    if (valor > 255)
+        valor = 255;
+
+    if (valor < 0)
+        valor = 0;
+
+    a[0] = 250;
+    a[1] = 251;
+    a[2] = ConsignaVolanteLow;
+    a[3] = ConsignaVolanteHigh;
+    a[4] = ConsignaFreno = valor;
+    a[5] = ConsignaSentidoFreno = 2;
+    a[6] = ConsignaVelocidad=0;
+    a[7] = ConsignaSentidoVelocidad=0;
+    a[8] = ConsignaNumPasosFreno = tiempo;
+    a[9] = 255;
+    
+    Envia(a);
+
+    ConsignaFreno = 0;
+    ConsignaNumPasosFreno = 0;
+    ConsignaSentidoFreno = 0;    
+}
+
+public void menosFrena(int valor, int tiempo) {
+    int a[] = new int[10];
+
+    if (valor > 255)
+        valor = 255;
+
+    if (valor < 0)
+        valor = 0;
+
+    a[0] = 250;
+    a[1] = 251;
+    a[2] = ConsignaVolanteLow;
+    a[3] = ConsignaVolanteHigh;
+    a[4] = ConsignaFreno = valor;
+    a[5] = ConsignaSentidoFreno = 1;
+    a[6] = ConsignaVelocidad=0;
+    a[7] = ConsignaSentidoVelocidad=0;
+    a[8] = ConsignaNumPasosFreno = tiempo;
+    a[9] = 255;
+    
+    Envia(a);
+
+    ConsignaFreno = 0;
+    ConsignaNumPasosFreno = 0;
+    ConsignaSentidoFreno = 0;    
+}
 
 /**
     Da N pasos de frenado para ir aguantando el coche poco a poco.

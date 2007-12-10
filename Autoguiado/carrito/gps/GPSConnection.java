@@ -98,6 +98,7 @@ public class GPSConnection implements SerialPortEventListener,
     private boolean filtrarPuntos = false;
     private boolean filtrarAngulos = true;
     private boolean filtrarPuntosPost = true;
+    private boolean fullAltura = false;
 
     private long lastInstruccion = System.currentTimeMillis() * 2;
 
@@ -519,8 +520,11 @@ public class GPSConnection implements SerialPortEventListener,
         } else {
           hgeoide = 0;
         }
-        //altura = msl + hgeoide;
-        altura = hgeoide;
+        
+        if (fullAltura)
+            altura = msl + hgeoide;
+        else
+            altura = hgeoide;
 
 
         if (msj[13].equals("")) {
@@ -790,6 +794,10 @@ public class GPSConnection implements SerialPortEventListener,
 
   public void setFiltrarAngulos(boolean valor) {
     this.filtrarAngulos = valor;
+  }
+
+  public void setFullAltura(boolean valor) {
+    this.fullAltura = valor;
   }
 
   public GPSData getError() {
