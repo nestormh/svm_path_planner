@@ -163,7 +163,7 @@ void preprocesado (IplImage *left, IplImage *right, int filterSize, int sobelSiz
 	cvCopy(aux, temp, mask);							// Aplicar máscara
 
 	cvCopy(temp, left);
-//cvShowImage("Preprocesado Izquierda", left);
+cvShowImage("Preprocesado Izquierda", left);
 
 	/* Ternarización de imagen derecha*/
 	cvSobel(right, auxSobel, 1, 0, 3);						// Filtrado de Sobel de bordes verticales
@@ -212,14 +212,14 @@ void correlacion (IplImage *left, IplImage *right, int d, IplImage *mapa){
 			 *mask;			
 	CvMat *kernel;			// Kernel de convolución
 
-	corr = cvCreateImage(cvSize(320,240), IPL_DEPTH_16S, 1);
-	auxU = cvCreateImage(cvSize(320,240), IPL_DEPTH_8U, 1);
-	auxS = cvCreateImage(cvSize(320,240), IPL_DEPTH_16S, 1);
-	min = cvCreateImage(cvSize(320,240), IPL_DEPTH_16S, 1);
-	mask = cvCreateImage(cvSize(320,240), IPL_DEPTH_8U, 1);
+	corr = cvCreateImage(cvGetSize(left), IPL_DEPTH_16S, 1);
+	auxU = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
+	auxS = cvCreateImage(cvGetSize(left), IPL_DEPTH_16S, 1);
+	min = cvCreateImage(cvGetSize(left), IPL_DEPTH_16S, 1);
+	mask = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
 
-	auxL = cvCreateImage(cvSize(320,240), IPL_DEPTH_16S, 1);
-	auxR = cvCreateImage(cvSize(320,240), IPL_DEPTH_16S, 1);
+	auxL = cvCreateImage(cvGetSize(left), IPL_DEPTH_16S, 1);
+	auxR = cvCreateImage(cvGetSize(left), IPL_DEPTH_16S, 1);
 	auxL->origin = 1;
 	auxR->origin = 1;
 
@@ -281,7 +281,7 @@ void crearImagen (IplImage *mapa, IplImage *imagen){
 	int	i, j, count;
 	IplImage *mask;
 
-	mask = cvCreateImage(cvSize(320, 240), 8, 1);
+	mask = cvCreateImage(cvGetSize(mapa), 8, 1);
 
 	for (i = 0; i < mapa->height; i ++) {
 		for (j = 0; j < MAXD; j++){
@@ -296,6 +296,33 @@ void crearImagen (IplImage *mapa, IplImage *imagen){
 	
 	cvReleaseImage (&mask);						// Liberar memoria
 }
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void crearImagenH (IplImage *mapa, IplImage *imagen){
+	int	i, j, count;
+	IplImage *mask;
+
+	mask = cvCreateImage(cvGetSize(mapa), 8, 1);
+
+	for (i = 0; i < mapa->width; i ++) {
+		for (j = 0; j < MAXD; j++){
+			cvSetImageROI(mapa, cvRect(i, 0, 1, mapa->height));			// Recorrer columna a columna de la imagen
+			cvSetImageROI(mask, cvRect(i, 0, 1, mapa->height));
+			cvCmpS(mapa, j, mask, CV_CMP_EQ);							// Ver cuantos pixeles tienen el valor de disparidad actual
+			count = cvCountNonZero(mask);								// Acumularlos
+			cvSet2D(imagen, j, i, cvScalar(count));						// Rellenar con la cuenta el pixel de la imagen de disparidad
+		}
+	}
+	cvResetImageROI(mapa);	
+	
+	cvReleaseImage (&mask);						// Liberar memoria
+}
+
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -433,6 +460,44 @@ void checkSobel (int id){
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE: rotate
+	   FUNCIÓN:
+	PARÁMETROS: IplImage *src --> Imagen a rotar
+				IplImage *dst --> Imagen de destino (debe tener las medidas apropiadas)
+				double degree --> Ángulo a rotar
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+void rotate(const IplImage *src, IplImage *dst, double degree){
+	double angle = degree * CV_PI / 180.;			// angle in radian
+	double a = sin(angle), b = cos(angle);			// sine and cosine of angle
+	int w_src = src->width,							// dimensions of src, dst and actual needed size
+		h_src = src->height;
+	int w_dst = dst->width, 
+		h_dst = dst->height;
+	int w_rot = 0, 
+		h_rot = 0;									// actual needed size
+	double scale_w = 0.,							// scale factor for rotation
+		scale_h = 0., 
+		scale = 0.;	
+	double map[6];									// map matrix for WarpAffine, stored in array
+	CvMat map_matrix = cvMat(2, 3, CV_64FC1, map);
+	CvPoint2D32f pt = cvPoint2D32f(w_src / 2, h_src / 2);// Rotation center needed for cv2DRotationMatrix
+  
+	// Make w_rot and h_rot according to phase
+	w_rot = (int)(h_src * fabs(a) + w_src * fabs(b));
+	h_rot = (int)(w_src * fabs(a) + h_src * fabs(b));
+	scale_w = (double)w_dst / (double)w_rot;
+	scale_h = (double)h_dst / (double)h_rot;
+	scale = MIN(scale_w, scale_h);
+	cv2DRotationMatrix(pt, -degree, scale, &map_matrix);
+	
+	// Adjust rotation center to dst's center
+	map[2] += (w_dst - w_src) / 2;
+	map[5] += (h_dst - h_src) / 2;
+	cvWarpAffine( src, dst, &map_matrix, CV_INTER_LINEAR | CV_WARP_FILL_OUTLIERS, cvScalarAll(0));
+}
+
+/*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE: disparity
 	   FUNCIÓN:
 	PARÁMETROS: IplImage *left    -> Imagen izquierda. Se asume una imagen RGB de 3 planos.
@@ -444,11 +509,14 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 	IplImage *izquierda,		// Imagen izquierda en escala de grises
 			 *derecha,			// Imagen derecha en escala de grises
 			 *mapaDisparidad,	// Mapa de disparidad
+			 *imagenDisparidadH,
 			 *imagenDisparidad;
 
-	
-	mapaDisparidad = cvCreateImage(cvSize(320,240), IPL_DEPTH_8U, 1);
-	imagenDisparidad = cvCreateImage(cvSize(MAXD,240), IPL_DEPTH_8U, 1);
+	mapaDisparidad = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
+	imagenDisparidad = cvCreateImage(cvSize(MAXD,cvGetSize(left).height), IPL_DEPTH_8U, 1);
+
+imagenDisparidadH = cvCreateImage(cvSize(cvGetSize(left).width, MAXD), IPL_DEPTH_8U, 1);
+
 	izquierda = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
 	derecha = cvCreateImage(cvGetSize(right), IPL_DEPTH_8U, 1);
 
@@ -465,13 +533,18 @@ clock_t start = clock();
 	preprocesado (izquierda, derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
 	correlacion (izquierda, derecha, MAXD, mapaDisparidad);
 	crearImagen (mapaDisparidad, imagenDisparidad);
+
+crearImagenH(mapaDisparidad, imagenDisparidadH);
+cvThreshold(imagenDisparidadH, imagenDisparidadH, 10, 255, CV_THRESH_BINARY);			// Umbralizar
+
 	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
 clock_t stop = clock();
 
 	printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 
-//		cvShowImage ("Mapa disparidad", mapaDisparidad);	
+		cvShowImage ("Mapa disparidad", mapaDisparidad);	
 		cvShowImage ("Imagen disparidad", imagenDisparidad);
+		cvShowImage ("Imagen disparidad H", imagenDisparidadH);
 	
 //		lineas(imagenDisparidad);
 
@@ -483,6 +556,8 @@ clock_t stop = clock();
 	cvWaitKey(1);
 
 }
+
+
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -499,7 +574,6 @@ int main (int argc, char* argv[]){
 	int totalDisp = 0;
 	CCapturaVLC captura;
 	parameter ajustes;
-
 
 	lista = captura.listaDispositivos(&totalDisp);
 	
@@ -518,6 +592,7 @@ int main (int argc, char* argv[]){
 //	cvNamedWindow("Hough", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("Mapa disparidad", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("Imagen disparidad", CV_WINDOW_AUTOSIZE);
+	cvNamedWindow("Imagen disparidad H", CV_WINDOW_AUTOSIZE);
 
 	/* Crear la ventana de controles */
 	cvNamedWindow("Controles", CV_WINDOW_AUTOSIZE);
