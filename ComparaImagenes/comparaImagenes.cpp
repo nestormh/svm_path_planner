@@ -710,7 +710,7 @@ void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage *
 
 	cvZero(gris2);
 	for( ; contour != 0; contour = contour->h_next) {				
-		if (abs(cvContourArea(contour)) > 150) {							
+		if (abs(cvContourArea(contour)) > 200) {							
 			cvDrawContours(gris2, contour, cvScalarAll(255), cvScalarAll(0), -1, -1);				
 		}
 	}
@@ -722,7 +722,7 @@ void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage *
 	cvCopy(img2, res, gris2);
 
 	cvShowImage("Debug", img2);
-	cvShowImage("Debug2", res);	
+	cvShowImage("Debug2", res);
 
 	cvReleaseImage(&res);
 }
