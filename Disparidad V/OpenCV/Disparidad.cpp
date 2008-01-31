@@ -71,47 +71,62 @@ void printImage(IplImage *image){
 }
 
 
-
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
-	   FUNCIÓN:
+	   FUNCIÓN: Adapta el brillo y contraste de la imagen2 a los valores de la imagen1. Primero calcula ambas 
+				magnitudes para las dos imágenes y calcula la diferencia entre ellas. Esta diferencia se usa para 
+				modificar el brillo y contraste de imagen2.
 	PARÁMETROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
-void preprocesadoB (IplImage *left, IplImage *right, int th){
-	IplImage *mask,				// Máscara
-			 *temp,				// Imagen ternarizada temporal
-			 *aux;				
-	CvSeq *contour = 0;
-	CvMemStorage *storage = cvCreateMemStorage(0);
+void iguala1D(IplImage * img1, IplImage * img2) {
+	uchar lut[256];
+	CvMat* lut_mat = cvCreateMatHeader(1, 256, CV_8UC1);
+    cvSetData(lut_mat, lut, 0);
 
-	cvCanny(left, left, 600, 500);
-	cvCanny(right, right, 600, 500);
-	cvSobel(left,left,1,0);
-	cvSobel(right,right,1,0);
-	//cvDilate(left, left, 0, 1);
-	//cvDilate(right, right, 0, 1);
-/*
-	cvFindContours (left, storage, &contour, sizeof(CvContour), CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-	cvZero(left);
-	for (; contour != 0; contour = contour->h_next){
-		if (contour->total > 20){
-			cvDrawContours (left, contour, cvScalar(255), cvScalar(255), -1, 1, 8);
-		}
-	}
-	cvFindContours (right, storage, &contour, sizeof(CvContour), CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-	cvZero(right);
-	for (; contour != 0; contour = contour->h_next){
-		if (contour->total > 20){
-			cvDrawContours (right, contour, cvScalar(255), cvScalar(255), -1, 1, 8);
-		}
-	}
-	*/
-	cvNamedWindow("Izquierda", CV_WINDOW_AUTOSIZE);// Filtrado de Sobel de bordes verticales
-//	cvShowImage("Izquierda", left);
-	cvNamedWindow("Derecha", CV_WINDOW_AUTOSIZE);// Filtrado de Sobel de bordes verticales
-//	cvShowImage("Derecha", right);
-	
+	CvScalar media1, desv1;
+	CvScalar media2, desv2;
+
+	// Calcular brillo y contraste de ambas imágenes
+	cvAvgSdv(img1, &media1, &desv1);
+	cvAvgSdv(img2, &media2, &desv2);
+
+	double brightness = ((media1.val[0] - media2.val[0]) * 100 / 128);
+	double contrast = ((desv1.val[0] - desv2.val[0]) * 100 / 128);
+
+    /*
+     * The algorithm is by Werner D. Streidt
+     * (http://visca.com/ffactory/archives/5-99/msg00021.html)
+     */
+    if( contrast > 0 ) {
+        double delta = 127.*contrast/100;
+        double a = 255./(255. - delta*2);
+        double b = a*(brightness - delta);
+        for(int i = 0; i < 256; i++ )
+        {
+            int v = cvRound(a*i + b);
+            if( v < 0 )
+                v = 0;
+            if( v > 255 )
+                v = 255;
+            lut[i] = (uchar)v;
+        }
+    } else {
+        double delta = -128.*contrast/100;
+        double a = (256.-delta*2)/255.;
+        double b = a*brightness + delta;
+        for(int i = 0; i < 256; i++ )
+        {
+            int v = cvRound(a*i + b);
+            if( v < 0 )
+                v = 0;
+            if( v > 255 )
+                v = 255;
+            lut[i] = (uchar)v;
+        }
+    }
+
+    cvLUT(img2, img2, lut_mat);
 }
 
 
@@ -121,7 +136,37 @@ void preprocesadoB (IplImage *left, IplImage *right, int th){
 	PARÁMETROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
-void preprocesado (IplImage *left, IplImage *right, int filterSize, int sobelSize, int th){
+void preprocesado (IplImage *left, IplImage *right, int filterSize){
+
+	iguala1D(right, left);						// Igualar brillo y contraste de ambas imágenes
+
+	cvSmooth(left, left, CV_BLUR, filterSize, filterSize);			// Filtrar para eliminar bordes superfluos
+	cvSmooth(right, right, CV_BLUR, filterSize, filterSize);
+
+	// Cuantizar la imagen descartando los bits menos significativos
+	//cvAndS(left, cvScalar(224), left);
+	//cvAndS(right, cvScalar(224), right);
+
+	//cvDilate(left, left, NULL, 1);
+	//cvDilate(right, right, NULL, 1);
+
+
+	//cvNamedWindow("Preprocesado Izquierda", CV_WINDOW_AUTOSIZE);
+	//cvShowImage("Preprocesado Izquierda", left);
+	//cvNamedWindow("Preprocesado Derecha", CV_WINDOW_AUTOSIZE);
+	//cvShowImage("Preprocesado Derecha", right);
+	
+	
+}
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN: Ternariza una imagen realizando previamente un filtrado para eliminar el número de bordes.
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void ternarizar (IplImage *left, IplImage *right, int filterSize, int sobelSize, int th){
 	IplImage *mask,				// Máscara
 			 *temp,				// Imagen ternarizada temporal
 			 *auxSobel,
@@ -163,7 +208,7 @@ void preprocesado (IplImage *left, IplImage *right, int filterSize, int sobelSiz
 	cvCopy(aux, temp, mask);							// Aplicar máscara
 
 	cvCopy(temp, left);
-cvShowImage("Preprocesado Izquierda", left);
+//cvShowImage("Preprocesado Izquierda", left);
 
 	/* Ternarización de imagen derecha*/
 	cvSobel(right, auxSobel, 1, 0, 3);						// Filtrado de Sobel de bordes verticales
@@ -330,48 +375,64 @@ void crearImagenH (IplImage *mapa, IplImage *imagen){
 	PARÁMETROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
-void lineas(IplImage *src){
-    
-    CvMemStorage *storage;
-    CvSeq *lines;   // NO SE ESTÁ LIBERANDO, HAY QUE VER SI SE VA A DEVOLVER O QUÉ
+void lineas(IplImage *src){         
+	IplImage* color_dst = cvCreateImage( cvGetSize(src), 8, 3 );
+    CvMemStorage* storage = cvCreateMemStorage(0);
+    CvSeq* lines = 0;
     int i;
-	IplConvKernel *se;
-	float* line;
-	float rho, theta;
-	CvPoint pt1, pt2;
-	double a, b, x0, y0;
-		
-	storage = cvCreateMemStorage(0);
-	lines = 0;
-	se = cvCreateStructuringElementEx(3, 3, 1, 1, CV_SHAPE_ELLIPSE);
 
-//	cvDilate(src, src, se);
+    cvCvtColor( src, color_dst, CV_GRAY2BGR );
+#if 0
+        lines = cvHoughLines2( src, storage, CV_HOUGH_STANDARD, 1, CV_PI/180, 50, 0, 0 );
 
-	cvSetImageROI(src, cvRect(10, 0, src->width - 30, src->height));
-	lines = cvHoughLines2( src, storage, CV_HOUGH_STANDARD, 1, CV_PI/180, 100, 0, 0 );
-
-    for( i = 0; i < MIN(lines->total,100); i++ ){
-		line = (float*)cvGetSeqElem(lines,i);
-        rho = line[0];
-        theta = line[1];
+        for( i = 0; i < lines->total; i++ )
+        {
+            float* line = (float*)cvGetSeqElem(lines,i);
+            float rho = line[0];
+            float theta = line[1];
+            CvPoint pt1, pt2;
+            double a = cos(theta), b = sin(theta);
+            if( fabs(a) < 0.001 )
+            {
+                pt1.x = pt2.x = cvRound(rho);
+                pt1.y = 0;
+                pt2.y = color_dst->height;
+            }
+            else if( fabs(b) < 0.001 )
+            {
+                pt1.y = pt2.y = cvRound(rho);
+                pt1.x = 0;
+                pt2.x = color_dst->width;
+            }
+            else
+            {
+                pt1.x = 0;
+                pt1.y = cvRound(rho/b);
+                pt2.x = cvRound(rho/a);
+                pt2.y = 0;
+            }
+            cvLine( color_dst, pt1, pt2, CV_RGB(255,0,0), 3, 8 );
+        }
+#else
+        lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 40, 30, 20 );
         
-        a = cos(theta), b = sin(theta);
-        x0 = a*rho, y0 = b*rho;
-        pt1.x = cvRound(x0 + 1000*(-b));
-        pt1.y = cvRound(y0 + 1000*(a));
-        pt2.x = cvRound(x0 - 1000*(-b));
-        pt2.y = cvRound(y0 - 1000*(a));
-        cvLine( src, pt1, pt2, cvScalar(255), 3, 8 );
-     }
+		// Habría que ir construyendo una estructura en la que devolver sólo aquellas líneas que resulten interesantes 
+		// (aprovechar para separarlas en verticales, horizontales y oblicuas)
+		for( i = 0; i < lines->total; i++ ) {
+            CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
+            if (line[0].y <= line[1].y)						// Líneas de pendiente positiva
+				cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, 8 );
+			else if (abs(line[0].x - line[1].x) < 5)		// Líneas semi-verticales
+				cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, 8 );
+			else if (abs(line[0].y - line[1].y) < 5)		// Líneas semi-horizontales
+				cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, 8 );
+        }
+#endif
+        cvShowImage( "Hough", color_dst );
 
+	cvReleaseImage (&color_dst);		
+	cvReleaseMemStorage(&storage);
 
-	cvResetImageROI(src);
-
-	cvReleaseMemStorage (&storage);
-	cvReleaseStructuringElement(&se);
- //  	cvShowImage("Hough", src);
-	src->origin = 1;
-  
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
@@ -529,8 +590,14 @@ imagenDisparidadH = cvCreateImage(cvSize(cvGetSize(left).width, MAXD), IPL_DEPTH
 	cvCvtColor(right, derecha, CV_RGB2GRAY);					// Pasar a escala de grises
 	derecha->origin = 1;
 
+cvShowImage ("Izquierda", izquierda);	
+cvShowImage ("Derecha", derecha);	
+
+
 clock_t start = clock();
-	preprocesado (izquierda, derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
+//	ternarizar (izquierda, derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
+
+preprocesado (izquierda, derecha, adjusts.filtro);
 	correlacion (izquierda, derecha, MAXD, mapaDisparidad);
 	crearImagen (mapaDisparidad, imagenDisparidad);
 
@@ -540,13 +607,16 @@ cvThreshold(imagenDisparidadH, imagenDisparidadH, 10, 255, CV_THRESH_BINARY);			
 	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
 clock_t stop = clock();
 
+	lineas(imagenDisparidad);
+	cvWaitKey(0);
+	lineas(imagenDisparidadH);
+
 	printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 
 		cvShowImage ("Mapa disparidad", mapaDisparidad);	
 		cvShowImage ("Imagen disparidad", imagenDisparidad);
 		cvShowImage ("Imagen disparidad H", imagenDisparidadH);
 	
-//		lineas(imagenDisparidad);
 
 	cvReleaseImage(&mapaDisparidad);
 	cvReleaseImage(&imagenDisparidad);
@@ -589,7 +659,7 @@ int main (int argc, char* argv[]){
 	cvNamedWindow("Izquierda", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("Derecha", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("Obstaculos", CV_WINDOW_AUTOSIZE);
-//	cvNamedWindow("Hough", CV_WINDOW_AUTOSIZE);
+	cvNamedWindow("Hough", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("Mapa disparidad", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("Imagen disparidad", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("Imagen disparidad H", CV_WINDOW_AUTOSIZE);
@@ -609,12 +679,14 @@ int main (int argc, char* argv[]){
 
 	while(1) {
 		
+		//izquierda = cvLoadImage("clio_izquierda.bmp");
 		izquierda = cvLoadImage("izquierda8.jpg");
 		izquierda->origin = 1;
-
+	
+		//derecha = cvLoadImage("clio_derecha.bmp");
 		derecha = cvLoadImage("derecha8.jpg");
 		derecha->origin = 1;
-
+	
 		disparity (izquierda, derecha, ajustes);
 
 		cvWaitKey(1);
