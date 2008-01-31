@@ -5,7 +5,7 @@
 #include "comparaImagenes.h"
 #include "CRuta.h"
 
-int inicio = 0, fin = 1617, vel = 0;
+int inicio = 850, fin = 1617, vel = 200;
 int pos = 0, next = 3;
 
 comparaImagenes comp;

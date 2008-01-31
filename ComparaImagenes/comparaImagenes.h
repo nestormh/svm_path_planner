@@ -63,7 +63,7 @@ private:
 	void preProcesado(IplImage * imagen);
 	void restaImagenes(IplImage * img, IplImage * resta);
 	void filtraImagen(IplImage * resta, IplImage * mask, IplImage * img2);
-	void getCarretera(IplImage * img1);
+	//void getCarretera(IplImage * img1);
 	void liberaMem();
 
 public:

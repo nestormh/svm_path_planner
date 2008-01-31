@@ -223,7 +223,7 @@ void comparaImagenes::aplicaPerspectiva(IplImage * img1, IplImage * img2) {
 	cvCopy(matrix, matrixAnt);
 }
 
-void comparaImagenes::getCarretera(IplImage * img1) {
+/*void comparaImagenes::getCarretera(IplImage * img1) {
 	pFuga = hormigas->obtieneMascara(img1);
 
 	// Aplicamos la transformación a los puntos
@@ -277,7 +277,7 @@ void comparaImagenes::getCarretera(IplImage * img1) {
 
 	cvNamedWindow("Debug", 1);
 	cvShowImage("Debug", mascaraCarretera);
-}
+}*/
 
 void comparaImagenes::iguala3D(IplImage * img1, IplImage * img2) {
 	IplImage * r1 = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 1);
@@ -619,8 +619,6 @@ void comparaImagenes::apaisaImagen(IplImage * img1, IplImage * img2) {
 }
 
 void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage * img2) {
-	IplImage * miMascara = cvCreateImage(cvGetSize(resta), IPL_DEPTH_8U, 1);	
-
 	// Variables para la búsqueda de contornos
 	CvMemStorage * storage = cvCreateMemStorage (0);
 	CvSeq *contour;
@@ -634,7 +632,7 @@ void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage *
 	cvZero(gris2);
 	cvCopy(gris1, gris2, perspMask);
 	cvZero(gris1);
-	cvCopy(gris2, gris1, mask);	
+	cvCopy(gris2, gris1, mask);		
 
 	// Buscamos contornos
 	storage = cvCreateMemStorage();
@@ -642,15 +640,15 @@ void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage *
 	cvFindContours(gris1, storage, &contour, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);    	
 
 	if (contour == NULL || contour->total == 0) {
+		cout << "contour == NULL" << endl;
 		return;
 	}
 
 	CvPoint der, izq, top;
 	double m1 = -1000, m2 = 1000;
 
-	for( ; contour != 0; contour = contour->h_next) {		
-		cout << abs(cvContourArea(contour)) << endl;
-		if (abs(cvContourArea(contour)) > 15000) {
+	for( ; contour != 0; contour = contour->h_next) {				
+		if (abs(cvContourArea(contour)) > 20000) {
 
 			CvSeq* poly = cvApproxPoly(contour, sizeof(CvContour), storage,
                     CV_POLY_APPROX_DP, 15, 0);
@@ -667,8 +665,7 @@ void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage *
 	
 			izq = der = top;
 			m1 = -1000;
-			m2 = 1000;
-			cout << poly->total << endl;
+			m2 = 1000;			
 			for (int i = 0; i < poly->total; i++) {
 				if (i == tope) continue;
 				CvPoint actual = *(CvPoint*)cvGetSeqElem(poly, i);
@@ -677,33 +674,57 @@ void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage *
 					m1 = m;
 					izq = actual;
 				}
-				if ((m > 0.75) && (m < m2)) {
+				if ((m > 0.5) && (m < m2)) {
 					m2 = m;
 					der = actual;
 				}				
 			}			
 		}
+	}	
+
+	// Si no los encontramos, usamos la máscara anterior
+	if (m1 != -1000) {	
+		// Creamos la máscara
+		double x = (resta->height - 1 - top.y) / m1 + top.x;
+		izq = cvPoint(x, resta->height - 1);
+
+		x = (resta->height - 1 - top.y) / m2 + top.x;
+		der = cvPoint(x, resta->height - 1);
+
+		CvPoint puntos[] = { izq, top, der };
+		cvZero(mascaraCarretera);
+		cvFillConvexPoly(mascaraCarretera, puntos, 3, cvScalar(255));		
 	}
 
-	if (m1 == -1000) {
-		return;
-	}
-		
-	double x = (resta->height - 1 - top.y) / m1 + top.x;
-	izq = cvPoint(x, resta->height - 1);
-
-	x = (resta->height - 1 - top.y) / m2 + top.x;
-	der = cvPoint(x, resta->height - 1);
-
-	CvPoint puntos[] = { izq, top, der };
-	cvZero(miMascara);
-	cvFillConvexPoly(miMascara, puntos, 3, cvScalar(255));
-
+	// Aplicamos la máscara recién creada
 	cvZero(gris1);
-	cvCopy(resta, gris1, miMascara);
-	cvShowImage("Debug", gris1);
+	cvCopy(resta, gris1, mascaraCarretera);
 
-	cvReleaseImage(&miMascara);
+	cvSmooth(gris1, gris1, CV_MEDIAN, 3, 7);
+	
+	aplicaBrilloContraste(gris1, gris1, 100, 100);	
+	
+	// Buscamos contornos: si el total encontrado es muy alto,
+	// erosionamos y volvemos a buscar
+	cvFindContours(gris1, storage, &contour, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+
+	cvZero(gris2);
+	for( ; contour != 0; contour = contour->h_next) {				
+		if (abs(cvContourArea(contour)) > 150) {							
+			cvDrawContours(gris2, contour, cvScalarAll(255), cvScalarAll(0), -1, -1);				
+		}
+	}
+	cvDilate(gris2, gris2, 0, 2);
+	
+	IplImage * res = cvCreateImage(cvGetSize(img2), IPL_DEPTH_8U, 3);
+
+	cvZero(res);
+	cvCopy(img2, res, gris2);
+
+	cvShowImage("Debug", img2);
+	cvShowImage("Debug2", res);	
+
+	cvReleaseImage(&res);
 }
 
 void comparaImagenes::liberaMem() {
