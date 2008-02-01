@@ -618,6 +618,38 @@ void comparaImagenes::apaisaImagen(IplImage * img1, IplImage * img2) {
 	cvReleaseImage(&res);
 }
 
+void comparaImagenes::difObstaculo(IplImage * img, IplImage * persp, IplImage * mask, CvScalar * media, CvScalar * desv) {
+	IplImage * test1 = cvCreateImage(cvGetSize(img), IPL_DEPTH_8U, 3);
+	IplImage * test2 = cvCreateImage(cvGetSize(persp), IPL_DEPTH_8U, 3);
+	cvZero(test1);
+	cvZero(test2);
+
+	cvCopy(img, test1, mask);
+	cvCopy(persp, test2, mask);
+
+	/*cvNamedWindow("Debug3", 1);
+	cvShowImage("Debug3", test1);
+	cvNamedWindow("Debug4", 1);
+	cvShowImage("Debug4", test2);*/
+
+	CvScalar media1, media2, desv1, desv2;
+	cvAvgSdv(test1, &media1, &desv1);
+	cvAvgSdv(test2, &media2, &desv2);
+
+ 	*media = cvScalar(abs(media1.val[0] - media2.val[0]), abs(media1.val[1] - media2.val[1]), abs(media1.val[2] - media2.val[2]));
+	*desv = cvScalar(abs(desv1.val[0] - desv2.val[0]), abs(desv1.val[1] - desv2.val[1]), abs(desv1.val[2] - desv2.val[2]));
+
+	cout << media1.val[0] << " - " << media2.val[0] << " = " << media->val[0] << endl;
+	cout << media1.val[1] << " - " << media2.val[1] << " = " << media->val[1] << endl;
+	cout << media1.val[2] << " - " << media2.val[2] << " = " << media->val[2] << endl;
+	cout << desv1.val[0] << " - " << desv2.val[0] << " = " << desv->val[0] << endl;
+	cout << desv1.val[1] << " - " << desv2.val[1] << " = " << desv->val[1] << endl;
+	cout << desv1.val[2] << " - " << desv2.val[2] << " = " << desv->val[2] << endl;
+
+	cvReleaseImage(&test1);
+	cvReleaseImage(&test2);
+}
+
 void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage * img2) {
 	// Variables para la búsqueda de contornos
 	CvMemStorage * storage = cvCreateMemStorage (0);
@@ -708,17 +740,30 @@ void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage *
 	// erosionamos y volvemos a buscar
 	cvFindContours(gris1, storage, &contour, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 
-	cvZero(gris2);
-	for( ; contour != 0; contour = contour->h_next) {				
-		if (abs(cvContourArea(contour)) > 200) {							
-			cvDrawContours(gris2, contour, cvScalarAll(255), cvScalarAll(0), -1, -1);				
-		}
-	}
-	cvDilate(gris2, gris2, 0, 2);
-	
 	IplImage * res = cvCreateImage(cvGetSize(img2), IPL_DEPTH_8U, 3);
 
 	cvZero(res);
+
+
+	cvZero(gris2);
+	for( ; contour != 0; contour = contour->h_next) {				
+		if (abs(cvContourArea(contour)) > 200) {										
+			cvZero(gris1);
+			cvDrawContours(gris1, contour, cvScalarAll(255), cvScalarAll(0), -1, -1);
+			CvScalar media, desv;
+			difObstaculo(img2, persp, gris1, &media, &desv);
+			// Desechamos obstáculos falsos
+			if (media.val[0] < 1 && media.val[1] < 1 && media.val[2] < 1 && 
+				desv.val[0] < 4 && desv.val[1] < 4 && desv.val[2] < 4) {
+				cvDrawContours(res, contour, cvScalar(0, 0, 255), cvScalarAll(0), -1, 3);
+			} else {
+				cvDrawContours(res, contour, cvScalar(0, 255, 0), cvScalarAll(0), -1, 3);
+				cvDrawContours(gris2, contour, cvScalarAll(255), cvScalarAll(0), -1, -1);				
+			}
+		}
+	}
+	//cvDilate(gris2, gris2, 0, 2);
+	
 	cvCopy(img2, res, gris2);
 
 	cvShowImage("Debug", img2);

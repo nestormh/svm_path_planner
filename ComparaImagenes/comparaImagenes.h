@@ -63,6 +63,7 @@ private:
 	void preProcesado(IplImage * imagen);
 	void restaImagenes(IplImage * img, IplImage * resta);
 	void filtraImagen(IplImage * resta, IplImage * mask, IplImage * img2);
+	void difObstaculo(IplImage * img, IplImage * persp, IplImage * mask, CvScalar * media, CvScalar * desv);
 	//void getCarretera(IplImage * img1);
 	void liberaMem();
 
