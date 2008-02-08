@@ -435,6 +435,122 @@ void lineas(IplImage *src){
 
 }
 
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+static int cmp_vert( const void* _a, const void* _b, void* userdata ) {
+    CvPoint* a = (CvPoint*)_a;
+    CvPoint* b = (CvPoint*)_b;
+ 
+    int x_diff = a[1].x - b[1].x;
+    return x_diff;
+}
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void lineasV(IplImage *src, CvSeq *vertical, CvSeq *diagonal){         
+	IplImage* color_dst = cvCreateImage( cvGetSize(src), 8, 3 );
+    CvMemStorage* storage = cvCreateMemStorage(0);
+    CvSeq* lines = 0;
+	CvPoint *line;
+    int i,
+		nLines;
+
+    cvCvtColor( src, color_dst, CV_GRAY2BGR );
+	line = (CvPoint*) malloc (sizeof (CvPoint *));
+	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 40, 30, 20 );
+        	
+	nLines = lines->total;
+	for (i = 0; i < nLines; i++) {
+		cvSeqPopFront(lines, line);						// Sacar el primer elemento de la lista
+        		
+		if (line[0].x == line[1].x){					// Líneas verticales
+			cvSeqPush(vertical, line);	
+			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
+		}else if (abs((line[0].y - line[1].y) / (line[0].x - line[1].x)) > 5){				// Líneas semi-verticales		
+			cvSeqPush(vertical, line);			
+			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
+			//printf ("Semivertical (%d, %d)(%d, %d) m=%f\n", line[1].x, line[1].y, line[0].x, line[0].y, (float) abs((line[0].y - line[1].y) / (line[0].x - line[1].x)));
+		} else if (line[0].y <= line[1].y){					// Líneas de pendiente negativa
+			cvSeqPush(diagonal, line);			
+		}
+	}
+
+	cvSeqSort(vertical, cmp_vert, 0);					// Ordenar las líneas verticales
+	cvShowImage ("Imagen disparidad", color_dst);
+	
+	cvReleaseImage (&color_dst);		
+	cvReleaseMemStorage(&storage);
+
+}
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+static int cmp_hor( const void* _a, const void* _b, void* userdata ) {
+    CvPoint* a = (CvPoint*)_a;
+    CvPoint* b = (CvPoint*)_b;
+ 
+    int y_diff = a[1].y - b[1].y;
+    return y_diff;
+}
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void lineasH(IplImage *src, CvSeq *horizontal, CvSeq *pendpos, CvSeq *pendneg){         
+	IplImage* color_dst = cvCreateImage( cvGetSize(src), 8, 3 );
+    CvMemStorage* storage = cvCreateMemStorage(0);
+    CvSeq* lines = 0;
+	CvPoint *line;
+    int i,
+		nLines;
+
+    cvCvtColor( src, color_dst, CV_GRAY2BGR );
+	line = (CvPoint*) malloc (sizeof (CvPoint *));
+	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 40, 30, 20 );
+        	
+	nLines = lines->total;
+	for (i = 0; i < nLines; i++) {
+		cvSeqPopFront(lines, line);						// Sacar el primer elemento de la lista
+        		
+		if (line[0].y == line[1].y){					// Líneas horizontale
+			cvSeqPush(horizontal, line);			
+			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
+		}else if (abs((line[0].y - line[1].y) / (line[0].x - line[1].x)) < 3){				// Líneas semi-horizontales		
+			cvSeqPush(horizontal, line);			
+			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
+			//printf ("Semihorizontal (%d, %d)(%d, %d) m=%f\n", line[1].x, line[1].y, line[0].x, line[0].y, (float) abs((line[0].y - line[1].y) / (line[0].x - line[1].x)));
+		} else if (line[0].y < line[1].y){					// Líneas de pendiente negativa
+			cvSeqPush(pendpos, line);			
+		} else {					// Líneas de pendiente positiva
+			cvSeqPush(pendneg, line);			
+		}
+	}
+
+	cvSeqSort(horizontal, cmp_hor, 0);					// Ordenar las líneas verticales
+	cvShowImage ("Imagen disparidad H", color_dst);
+
+	cvReleaseImage (&color_dst);		
+	cvReleaseMemStorage(&storage);
+
+}
+
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
 	   FUNCIÓN:
@@ -573,6 +689,19 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 			 *imagenDisparidadH,
 			 *imagenDisparidad;
 
+	CvSeq *vertical, 
+		  *diagonal,
+		  *horizontal,
+		  *pendpos,
+		  *pendneg; 
+
+	CvMemStorage *storageV,
+				 *storageD,
+				 *storageH,
+				 *storageMP,
+				 *storageMN;
+				 
+	
 	mapaDisparidad = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
 	imagenDisparidad = cvCreateImage(cvSize(MAXD,cvGetSize(left).height), IPL_DEPTH_8U, 1);
 
@@ -606,16 +735,62 @@ cvThreshold(imagenDisparidadH, imagenDisparidadH, 10, 255, CV_THRESH_BINARY);			
 
 	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
 clock_t stop = clock();
+	
+	storageV = cvCreateMemStorage(0);
+	storageD= cvCreateMemStorage(0);
+	vertical = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageV);
+	diagonal = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageD);
 
-	lineas(imagenDisparidad);
-	cvWaitKey(0);
-	lineas(imagenDisparidadH);
+	lineasV(imagenDisparidad, vertical, diagonal);
+
+	storageH = cvCreateMemStorage(0);
+	storageMP= cvCreateMemStorage(0);
+	storageMN = cvCreateMemStorage(0);
+	horizontal = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageV);
+	pendpos = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageD);
+	pendneg = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageV);
+
+	lineasH(imagenDisparidadH, horizontal, pendpos, pendneg);
+
+
+IplImage* color_dst = cvCreateImage( cvGetSize(izquierda), 8, 3 );
+//color_dst->origin = 1;
+cvCvtColor( izquierda, color_dst, CV_GRAY2BGR );
+CvPoint *obj;
+int j;
+CvPoint *hor;
+CvPoint *ver;
+for (int i= 0; i < horizontal->total; i ++){
+	hor = (CvPoint *) cvGetSeqElem(horizontal, i);
+	j = 0;
+	ver = (CvPoint *) cvGetSeqElem(vertical, j);
+	while (/*(ver[0].x < hor[0].y) &&*/ (j < vertical -> total)){
+		j++;
+		ver = (CvPoint *) cvGetSeqElem(vertical, j);
+	
+	if ((abs(ver[0].x - hor[0].y) < 2) || (abs(ver[0].x - hor[1].y) < 2) ||
+		(abs(ver[1].x - hor[0].y) < 2) || (abs(ver[1].x - hor[1].y) < 2)){   // Coincidencia
+		cvRectangle(color_dst, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y)), cvPoint(max(hor[0].x, hor[1].x), max(ver[0].y, ver[1].y)), CV_RGB(255,0,0));
+		//cvLine( color_dst, ver[0], ver[1], CV_RGB(255,255,0), 3, 8 );
+		//cvLine( color_dst, hor[0], hor[1], CV_RGB(255,255,0), 3, 8 );
+		//printf ("box (%d, %d) (%d, %d)\n", min(hor[0].x, hor[1].x),min(ver[0].y, ver[1].y) , max(hor[0].x, hor[1].x), max(ver[0].y, ver[1].y));
+		//cvRectangle(color_dst, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y)), cvPoint(max(ver[0].y, ver[1].y), max(hor[0].x, hor[1].x)), CV_RGB(255,255,0));
+		//cvRect(ver[0].x, hor[0].y, abs(hor[0].x-hor[1].x), abs(ver[0].y-hor[1].y));
+	cvShowImage( "Hough", color_dst );
+	//cvWaitKey(0);
+	} 
+	}
+}
+
+
+cvShowImage( "Hough", color_dst );
+
 
 	printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 
 		cvShowImage ("Mapa disparidad", mapaDisparidad);	
-		cvShowImage ("Imagen disparidad", imagenDisparidad);
-		cvShowImage ("Imagen disparidad H", imagenDisparidadH);
+		//cvShowImage ("Imagen disparidad", imagenDisparidad);
+		//cvShowImage ("Imagen disparidad H", imagenDisparidadH);
 	
 
 	cvReleaseImage(&mapaDisparidad);
@@ -694,109 +869,3 @@ int main (int argc, char* argv[]){
 	return (0);
 }
 
-/*-----------------------------------------------------------------------------------------------------------------
-		NOMBRE:
-	   FUNCIÓN:
-	PARÁMETROS:
-	  DEVUELVE:
------------------------------------------------------------------------------------------------------------------
-int main (int argc, char* argv[]){
-	IplImage *tempImage,		// Temporal para la conversión RGB a escala de grises
-			 *izquierda,		// Imagen izquierda
-			 *derecha,			// Imagen derecha
-			 *mapaDisparidad,	// Mapa de disparidad
-			 *imagenDisparidad;
-
-	LPWSTR *lista;
-	int totalDisp = 0;
-	int filtro,
-		sobel,
-		umbral,
-		porcentaje,
-		umbralObstaculos;
-	CCapturaVLC captura;
-
-
-	lista = captura.listaDispositivos(&totalDisp);
-	
-	printf("TotalDisp = %d\n", totalDisp);
-
-	for (int i = 0; i < totalDisp; i++) {
-		printf("%d: %S\n", i + 1, lista[i]);
-	}
-
-	izquierda = cvCreateImage(cvSize(320,240), IPL_DEPTH_8U, 1);
-	derecha = cvCreateImage(cvSize(320,240), IPL_DEPTH_8U, 1);
-	mapaDisparidad = cvCreateImage(cvSize(320,240), IPL_DEPTH_8U, 1);
-	imagenDisparidad = cvCreateImage(cvSize(MAXD,240), IPL_DEPTH_8U, 1);
-
-	cvNamedWindow("Izquierda", CV_WINDOW_AUTOSIZE);
-	cvNamedWindow("Derecha", CV_WINDOW_AUTOSIZE);
-	cvNamedWindow("Obstaculos", CV_WINDOW_AUTOSIZE);
-//	cvNamedWindow("Hough", CV_WINDOW_AUTOSIZE);
-	cvNamedWindow("Mapa disparidad", CV_WINDOW_AUTOSIZE);
-	cvNamedWindow("Imagen disparidad", CV_WINDOW_AUTOSIZE);
-
-	/* Crear la ventana de controles 
-	cvNamedWindow("Controles", CV_WINDOW_AUTOSIZE);
-	filtro = 3;
-	sobel = 3;
-	umbral = 4;
-	umbralObstaculos = 10;
-	porcentaje = 5;
-	cvCreateTrackbar ("Filtro", "Controles", &filtro, 21, checkFilter);
-	cvCreateTrackbar ("Sobel", "Controles", &sobel, 7, checkSobel);
-	cvCreateTrackbar ("Umbral Ter", "Controles", &umbral, 10, NULL);
-	cvCreateTrackbar ("Umbral Obs", "Controles", &umbralObstaculos, 15, NULL);
-	cvCreateTrackbar ("Porcentaje", "Controles", &porcentaje, 10, NULL);
-
-	mapaDisparidad->origin = 1;
-	imagenDisparidad->origin = 1;
-
-	while(1) {
-		
-		izquierda = cvLoadImage("izquierda8.jpg", 0);
-		//tempImage = captura.captura(lista[0]);					// Capturar imagen izquierda
-		//cvCvtColor(tempImage, izquierda, CV_RGB2GRAY);
-		//cvReleaseImage(&tempImage);
-		izquierda->origin = 1;
-
-		derecha = cvLoadImage("derecha8.jpg", 0);
-		//tempImage = captura.captura(lista[1]);					// Capturar imagen derecha
-		//cvCvtColor(tempImage, derecha, CV_RGB2GRAY);
-		//cvReleaseImage(&tempImage);
-		derecha->origin = 1;
-
-/*
-cvSet(izquierda, cvScalar(0));
-cvRectangle(izquierda, cvPoint(50, 0), cvPoint(70, 20), cvScalar(254),CV_FILLED);
-cvSet(derecha, cvScalar(0));
-cvRectangle(derecha, cvPoint(20, 0), cvPoint(40, 20), cvScalar(254), CV_FILLED);
-
-//		cvShowImage ("Izquierda", izquierda);	
-//		cvShowImage ("Derecha", derecha);	
-
-	clock_t start = clock();
-		preprocesado (izquierda, derecha, filtro, sobel, umbral);
-		correlacion (izquierda, derecha, MAXD, mapaDisparidad);
-
-//tempImage = cvLoadImage("mapa.bmp");					// Cargar mapadisparidad calculado con matlab --> A partir de aqui funciona
-//cvCvtColor(tempImage, mapaDisparidad, CV_RGB2GRAY);
-		crearImagen (mapaDisparidad, imagenDisparidad);
-		obstaculos(imagenDisparidad, umbralObstaculos, porcentaje * 10);
-	clock_t stop = clock();
-
-		printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
-
-//		cvShowImage ("Mapa disparidad", mapaDisparidad);	
-		cvShowImage ("Imagen disparidad", imagenDisparidad);
-	
-//		lineas(imagenDisparidad);
-	
-//		cvReleaseImage(&izquierda);
-//		cvReleaseImage(&derecha);
-
-		cvWaitKey(1);
-	}
-	return (0);
-}*/
