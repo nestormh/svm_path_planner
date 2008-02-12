@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "comparaImagenes.h"
-#include<time.h>
+#include <time.h>
 
 comparaImagenes::comparaImagenes() {		
 	//criterio = cvTermCriteria(CV_TERMCRIT_EPS, 0, 0.001);
@@ -359,6 +359,8 @@ void comparaImagenes::aplicaBrilloContraste(IplImage * img1, IplImage * img2, do
     }
 
     cvLUT(img1, img2, lut_mat);
+
+	cvReleaseMat(&lut_mat);
 }
 
 void comparaImagenes::preProcesado(IplImage * imagen) {
