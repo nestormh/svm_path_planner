@@ -50,7 +50,7 @@ public class CapturaImagen {
   }
 
   public void verImagen() {
-    _verImagen(dispositivo);
+    //_verImagen(dispositivo);
   }
 
   public void saveImagen(String fichero) {
@@ -58,18 +58,17 @@ public class CapturaImagen {
   }
 
   public static void main(String args[]) {
-  String dispositivo = "Creative WebCam Notebook Ultra #3:0";
+  String dispositivo = "Creative WebCam Notebook Ultra #2:0";
   CapturaImagen ci = new CapturaImagen(args[0], dispositivo, false);
   int i = 0;
   while (true) {
     i++;
     ImagenId ii = ci.getImagen(i * 10 % 100, i * 20 % 100, i * 30 % 100);
     ii.setNombre(dispositivo);
-    ii.verImagen();
-    //ci.verImagen();
-    /*try {
+    ci.saveImagen("C:\\temp\\nmh\\Imagen" + i + ".jpg");
+    try {
       Thread.sleep(1000);
-    } catch (Exception e) {}*/
+    } catch (Exception e) {}
   }
   }
 }
