@@ -30,7 +30,8 @@ package sibtra.gps;
  * purposes.
  */
 
-import javax.comm.*;
+//import javax.comm.*;
+import gnu.io.*;
 
 /**
 A class that stores parameters for serial ports.

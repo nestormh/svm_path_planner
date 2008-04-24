@@ -4,7 +4,8 @@ import Jama.Matrix;
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
-import javax.comm.*;
+//import javax.comm.*;
+import gnu.io.*;
 
 /**
  A class that handles the details of a serial connection. Reads from one
