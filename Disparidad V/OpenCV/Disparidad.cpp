@@ -127,6 +127,8 @@ void iguala1D(IplImage * img1, IplImage * img2) {
     }
 
     cvLUT(img2, img2, lut_mat);
+
+	cvReleaseMat (&lut_mat);
 }
 
 
@@ -191,7 +193,8 @@ void ternarizar (IplImage *left, IplImage *right, int filterSize, int sobelSize,
 			
 	cvSobel(left, auxSobel, 1, 0, sobelSize);			// Filtrado de Sobel de bordes verticales
 	
-	cvSetZero(b);										// Cálculo automatizado del umbral
+	/* Cálculo automatizado del umbral */
+	cvSetZero(b);										
 	cvConvertScale(auxSobel, auxThreshold, 1, 0);		// Pasar a punto flotante
 	cvSquareAcc(auxThreshold, b);						// Elevar al cuadrado
 	mean = cvAvg(b);									// Hallar la media
@@ -208,12 +211,14 @@ void ternarizar (IplImage *left, IplImage *right, int filterSize, int sobelSize,
 	cvCopy(aux, temp, mask);							// Aplicar máscara
 
 	cvCopy(temp, left);
-//cvShowImage("Preprocesado Izquierda", left);
+cvShowImage("Preprocesado Izquierda", left);
+
 
 	/* Ternarización de imagen derecha*/
 	cvSobel(right, auxSobel, 1, 0, 3);						// Filtrado de Sobel de bordes verticales
 	
-	cvSetZero(b);											// Cálculo automatizado del umbral
+	/* Cálculo automatizado del umbral */
+	cvSetZero(b);											
 	cvConvertScale(auxSobel, auxThreshold, 1, 0);			// Pasar a punto flotante
 	cvSquareAcc(auxThreshold, b);
 	mean = cvAvg(b);
@@ -239,6 +244,62 @@ void ternarizar (IplImage *left, IplImage *right, int filterSize, int sobelSize,
 	cvReleaseImage (&temp);
 }
 
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN: Ternariza una imagen realizando previamente un filtrado para eliminar el número de bordes.
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void ternarizacion (IplImage *img, int filterSize, int sobelSize, int th){
+	IplImage *mask,				// Máscara
+			 *temp,				// Imagen ternarizada temporal
+			 *auxSobel,
+			 *auxThreshold,
+			 *aux;				
+	IplImage *b;
+	CvScalar mean;
+	double threshold;
+
+	cvSmooth(img, img, CV_BLUR, filterSize, filterSize);			// Filtrar para eliminar bordes superfluos
+	
+	mask = cvCreateImage(cvGetSize(img), IPL_DEPTH_8U, 1);
+	temp = cvCreateImage(cvGetSize(img), IPL_DEPTH_8U, 1);
+	aux = cvCreateImage(cvGetSize(img), IPL_DEPTH_8U, 1);
+	auxSobel = cvCreateImage(cvGetSize(img), IPL_DEPTH_16S, 1);
+	auxThreshold = cvCreateImage(cvGetSize(img), IPL_DEPTH_32F, 1);
+	b = cvCreateImage(cvGetSize(img), IPL_DEPTH_32F, 1);
+
+	cvNamedWindow("Preprocesado Izquierda", CV_WINDOW_AUTOSIZE);
+			
+	cvSobel(img, auxSobel, 1, 0, sobelSize);			// Filtrado de Sobel de bordes verticales
+	
+	/* Cálculo automatizado del umbral */
+	cvSetZero(b);										
+	cvConvertScale(auxSobel, auxThreshold, 1, 0);		// Pasar a punto flotante
+	cvSquareAcc(auxThreshold, b);						// Elevar al cuadrado
+	mean = cvAvg(b);									// Hallar la media
+	threshold = sqrt(4 * (double)mean.val[0]);
+	
+	cvSet (temp, cvScalar(127));						// Inicializar imagen ternarizada
+
+	cvSetZero (aux);
+	cvCmpS(auxSobel,  - (threshold / th), mask, CV_CMP_LT);			// Construir máscara para valores por debajo del umbral
+	cvCopy(aux, temp, mask);							// Aplicar máscara
+
+	cvSet (aux, cvScalar(255));
+	cvCmpS(auxSobel,  threshold / th, mask, CV_CMP_GT);			// Construir máscara para valores por encima del umbral
+	cvCopy(aux, temp, mask);							// Aplicar máscara
+
+	cvCopy(temp, img);
+cvShowImage("Preprocesado Izquierda", img);
+
+	cvReleaseImage (&auxSobel);								// Liberar memoria
+	cvReleaseImage (&auxThreshold);
+	cvReleaseImage (&b);
+	cvReleaseImage (&mask);
+	cvReleaseImage (&aux);
+	cvReleaseImage (&temp);
+}
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -375,7 +436,7 @@ void crearImagenH (IplImage *mapa, IplImage *imagen){
 	PARÁMETROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
-void lineas(IplImage *src){         
+/*void lineas(IplImage *src){         
 	IplImage* color_dst = cvCreateImage( cvGetSize(src), 8, 3 );
     CvMemStorage* storage = cvCreateMemStorage(0);
     CvSeq* lines = 0;
@@ -433,7 +494,7 @@ void lineas(IplImage *src){
 	cvReleaseImage (&color_dst);		
 	cvReleaseMemStorage(&storage);
 
-}
+}*/
 
 
 /*-----------------------------------------------------------------------------------------------------------------
@@ -460,36 +521,68 @@ void lineasV(IplImage *src, CvSeq *vertical, CvSeq *diagonal){
 	IplImage* color_dst = cvCreateImage( cvGetSize(src), 8, 3 );
     CvMemStorage* storage = cvCreateMemStorage(0);
     CvSeq* lines = 0;
-	CvPoint *line;
-    int i,
+	CvPoint *line, 
+		    *aux;
+    int i, j,
 		nLines;
 
+	int ymax, ymin;
+
     cvCvtColor( src, color_dst, CV_GRAY2BGR );
+
+	cvSetImageROI(src, cvRect(15, 0, src->width - 15, src->height));	// Descartar la zona correspondiente a disparidades pequeñas
+
 	line = (CvPoint*) malloc (sizeof (CvPoint *));
 	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 40, 30, 20 );
         	
 	nLines = lines->total;
 	for (i = 0; i < nLines; i++) {
 		cvSeqPopFront(lines, line);						// Sacar el primer elemento de la lista
-        		
-		if (line[0].x == line[1].x){					// Líneas verticales
-			cvSeqPush(vertical, line);	
-			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
-		}else if (abs((line[0].y - line[1].y) / (line[0].x - line[1].x)) > 5){				// Líneas semi-verticales		
+        
+		line[0].x = line[0].x + 15;						// Corregir para que quede en coordenadas de la imagen original
+		line[1].x = line[1].x + 15;
+		
+		j = 0;
+		if ((line[0].x == line[1].x)					// Líneas verticales
+			|| (abs((line[0].y - line[1].y) / (line[0].x - line[1].x)) > 5)){				// Líneas semi-verticales		
+			do {										// Buscar el índice para inserción en orden
+				aux = (CvPoint *) cvGetSeqElem(vertical, j);
+				j++;
+			}while ((j < vertical->total) && (line[0].x > aux[0].x));
+				
+
+			 if ((aux != NULL) && (abs(aux[0].x - line[0].x) < 5)) {				// Si tiene una línea paralela muy cerca
+				ymax = max(max (aux[0].y, aux[1].y),  max (line[0].y, line[1].y));	// Combinar las dos líneas (longitud máxima)
+				ymin = min(min (aux[0].y, aux[1].y),  min (line[0].y, line[1].y));
+
+				aux[0].y = ymin;
+				aux[1].y = ymax;
+				aux[0].x = max(max (aux[0].x, aux[1].x),  max (line[0].x, line[1].x));	// Elegir el valor de X más alto --> peor caso (obstáculo más cerca)
+				aux[1].x = aux[0].x;
+				cvLine( color_dst, aux[0], aux[1], CV_RGB(255,0,0), 1, 8 );
+			} else {																// Si va al final o no tiene paralelas cercanas
+				cvSeqInsert(vertical, j - 1, line);
+				cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
+			}
+			
+		}/*else if (abs((line[0].y - line[1].y) / (line[0].x - line[1].x)) > 5){				// Líneas semi-verticales		
 			cvSeqPush(vertical, line);			
 			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
 			//printf ("Semivertical (%d, %d)(%d, %d) m=%f\n", line[1].x, line[1].y, line[0].x, line[0].y, (float) abs((line[0].y - line[1].y) / (line[0].x - line[1].x)));
-		} else if (line[0].y <= line[1].y){					// Líneas de pendiente negativa
+		} */else if (line[0].y <= line[1].y){					// Líneas de pendiente negativa
 			cvSeqPush(diagonal, line);			
 		}
+		
 	}
 
-	cvSeqSort(vertical, cmp_vert, 0);					// Ordenar las líneas verticales
+	//cvSeqSort(vertical, cmp_vert, 0);					// Ordenar las líneas verticales
 	cvShowImage ("Imagen disparidad", color_dst);
 	
-	cvReleaseImage (&color_dst);		
+	cvReleaseImage (&color_dst);
+	cvClearSeq(lines);
 	cvReleaseMemStorage(&storage);
 
+	cvResetImageROI(src);
 }
 
 
@@ -517,26 +610,54 @@ void lineasH(IplImage *src, CvSeq *horizontal, CvSeq *pendpos, CvSeq *pendneg){
 	IplImage* color_dst = cvCreateImage( cvGetSize(src), 8, 3 );
     CvMemStorage* storage = cvCreateMemStorage(0);
     CvSeq* lines = 0;
-	CvPoint *line;
-    int i,
-		nLines;
+	CvPoint *line, 
+			*aux;
+    int i, j,
+		nLines,
+		xmax, 
+		xmin;
 
     cvCvtColor( src, color_dst, CV_GRAY2BGR );
+
+	cvSetImageROI(src, cvRect(0, 15, src->width, src->height - 15));	// Descartar la zona correspondiente a disparidades pequeñas
+
 	line = (CvPoint*) malloc (sizeof (CvPoint *));
 	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 40, 30, 20 );
         	
 	nLines = lines->total;
 	for (i = 0; i < nLines; i++) {
 		cvSeqPopFront(lines, line);						// Sacar el primer elemento de la lista
-        		
-		if (line[0].y == line[1].y){					// Líneas horizontale
+
+		line[0].y = line[0].y + 15;						// Corregir para que quede en coordenadas de la imagen original
+		line[1].y = line[1].y + 15;
+
+		j = 0;
+		if ((line[0].y == line[1].y)					// Líneas horizontales
+			|| (abs((float)(line[0].y - line[1].y) / (float)(line[0].x - line[1].x)) < 1)){				// Líneas semi-horizontales	(ESTABLECER UN UMBRAL ADECUADO)
+			do {										// Buscar el índice para inserción en orden
+				aux = (CvPoint *) cvGetSeqElem(horizontal, j);
+				j++;
+			}while ((j < horizontal->total) && (line[0].y > aux[0].y));
+				
+
+			 if ((aux != NULL) && (abs(aux[0].y - line[0].y) < 5)) {				// Si tiene una línea paralela muy cerca
+				xmax = max(max (aux[0].x, aux[1].x),  max (line[0].x, line[1].x));	// Combinar las dos líneas (longitud máxima)
+				xmin = min(min (aux[0].x, aux[1].x),  min (line[0].x, line[1].x));
+
+				aux[0].x = xmin;
+				aux[1].x = xmax;
+				aux[0].y = max(max (aux[0].y, aux[1].y),  max (line[0].y, line[1].y));	// Elegir el valor de X más alto --> peor caso (obstáculo más cerca)
+				aux[1].y = aux[0].y;
+				cvLine( color_dst, aux[0], aux[1], CV_RGB(255,255,0), 1, 8 );
+			} else {																// Si va al final o no tiene paralelas cercanas
+				cvSeqInsert(horizontal, j - 1, line);
+				cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
+			}
+		}/*else if (abs((float)(line[0].y - line[1].y) / (float)(line[0].x - line[1].x)) < 1){				// Líneas semi-horizontales	(ESTABLECER UN UMBRAL ADECUADO)	
 			cvSeqPush(horizontal, line);			
 			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
-		}else if (abs((line[0].y - line[1].y) / (line[0].x - line[1].x)) < 3){				// Líneas semi-horizontales		
-			cvSeqPush(horizontal, line);			
-			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
-			//printf ("Semihorizontal (%d, %d)(%d, %d) m=%f\n", line[1].x, line[1].y, line[0].x, line[0].y, (float) abs((line[0].y - line[1].y) / (line[0].x - line[1].x)));
-		} else if (line[0].y < line[1].y){					// Líneas de pendiente negativa
+			printf ("Semihorizontal (%d, %d)(%d, %d) m=%f\n", line[1].x, line[1].y, line[0].x, line[0].y, (float) abs((float)(line[0].y - line[1].y) / (float)(line[0].x - line[1].x)));
+		} */else if (line[0].y < line[1].y){					// Líneas de pendiente negativa
 			cvSeqPush(pendpos, line);			
 		} else {					// Líneas de pendiente positiva
 			cvSeqPush(pendneg, line);			
@@ -547,8 +668,10 @@ void lineasH(IplImage *src, CvSeq *horizontal, CvSeq *pendpos, CvSeq *pendneg){
 	cvShowImage ("Imagen disparidad H", color_dst);
 
 	cvReleaseImage (&color_dst);		
+	cvClearSeq(lines);
 	cvReleaseMemStorage(&storage);
 
+	cvResetImageROI(src);
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
@@ -704,8 +827,7 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 	
 	mapaDisparidad = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
 	imagenDisparidad = cvCreateImage(cvSize(MAXD,cvGetSize(left).height), IPL_DEPTH_8U, 1);
-
-imagenDisparidadH = cvCreateImage(cvSize(cvGetSize(left).width, MAXD), IPL_DEPTH_8U, 1);
+	imagenDisparidadH = cvCreateImage(cvSize(cvGetSize(left).width, MAXD), IPL_DEPTH_8U, 1);
 
 	izquierda = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
 	derecha = cvCreateImage(cvGetSize(right), IPL_DEPTH_8U, 1);
@@ -724,17 +846,18 @@ cvShowImage ("Derecha", derecha);
 
 
 clock_t start = clock();
-//	ternarizar (izquierda, derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
 
-preprocesado (izquierda, derecha, adjusts.filtro);
+iguala1D(derecha, izquierda);						// Igualar brillo y contraste de ambas imágenes
+ternarizacion (izquierda, adjusts.filtro, adjusts.sobel, adjusts.umbral);
+ternarizacion (derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
+//preprocesado (izquierda, derecha, adjusts.filtro);
 	correlacion (izquierda, derecha, MAXD, mapaDisparidad);
 	crearImagen (mapaDisparidad, imagenDisparidad);
+	crearImagenH(mapaDisparidad, imagenDisparidadH);
+	cvThreshold(imagenDisparidad, imagenDisparidad, 10, 255, CV_THRESH_BINARY);			// Umbralizar
+	cvThreshold(imagenDisparidadH, imagenDisparidadH, 10, 255, CV_THRESH_BINARY);			// Umbralizar
 
-crearImagenH(mapaDisparidad, imagenDisparidadH);
-cvThreshold(imagenDisparidadH, imagenDisparidadH, 10, 255, CV_THRESH_BINARY);			// Umbralizar
-
-	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
-clock_t stop = clock();
+//	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
 	
 	storageV = cvCreateMemStorage(0);
 	storageD= cvCreateMemStorage(0);
@@ -752,36 +875,32 @@ clock_t stop = clock();
 
 	lineasH(imagenDisparidadH, horizontal, pendpos, pendneg);
 
-
 IplImage* color_dst = cvCreateImage( cvGetSize(izquierda), 8, 3 );
 //color_dst->origin = 1;
 cvCvtColor( izquierda, color_dst, CV_GRAY2BGR );
 CvPoint *obj;
-int j;
+int j, nVer;
 CvPoint *hor;
 CvPoint *ver;
-for (int i= 0; i < horizontal->total; i ++){
+for (int i= 0; i < horizontal->total; i ++){		// Dibujar rectángulos (detectar obstáculos)
 	hor = (CvPoint *) cvGetSeqElem(horizontal, i);
+	
 	j = 0;
-	ver = (CvPoint *) cvGetSeqElem(vertical, j);
-	while (/*(ver[0].x < hor[0].y) &&*/ (j < vertical -> total)){
-		j++;
+	nVer = vertical->total;
+	while (/*(ver[0].x < hor[0].y) &&*/(j < nVer)) {
 		ver = (CvPoint *) cvGetSeqElem(vertical, j);
 	
-	if ((abs(ver[0].x - hor[0].y) < 2) || (abs(ver[0].x - hor[1].y) < 2) ||
-		(abs(ver[1].x - hor[0].y) < 2) || (abs(ver[1].x - hor[1].y) < 2)){   // Coincidencia
-		cvRectangle(color_dst, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y)), cvPoint(max(hor[0].x, hor[1].x), max(ver[0].y, ver[1].y)), CV_RGB(255,0,0));
-		//cvLine( color_dst, ver[0], ver[1], CV_RGB(255,255,0), 3, 8 );
-		//cvLine( color_dst, hor[0], hor[1], CV_RGB(255,255,0), 3, 8 );
-		//printf ("box (%d, %d) (%d, %d)\n", min(hor[0].x, hor[1].x),min(ver[0].y, ver[1].y) , max(hor[0].x, hor[1].x), max(ver[0].y, ver[1].y));
-		//cvRectangle(color_dst, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y)), cvPoint(max(ver[0].y, ver[1].y), max(hor[0].x, hor[1].x)), CV_RGB(255,255,0));
-		//cvRect(ver[0].x, hor[0].y, abs(hor[0].x-hor[1].x), abs(ver[0].y-hor[1].y));
-	cvShowImage( "Hough", color_dst );
-	//cvWaitKey(0);
-	} 
+		if ((abs(ver[0].x - hor[0].y) < 5) || (abs(ver[0].x - hor[1].y) < 5) ||
+			(abs(ver[1].x - hor[0].y) < 5) || (abs(ver[1].x - hor[1].y) < 5)){   // Coincidencia
+			cvRectangle(color_dst, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y)), cvPoint(max(hor[0].x, hor[1].x), max(ver[0].y, ver[1].y)), CV_RGB(255,0,0));
+			cvShowImage( "Hough", color_dst );
+			printf ("Posible obstaculo a %f m (disparidad %d)\n", (float)(0.545*425/ver[0].x), ver[0].x);
+		} 
+
+		j++;
 	}
 }
-
+clock_t stop = clock();
 
 cvShowImage( "Hough", color_dst );
 
@@ -793,13 +912,27 @@ cvShowImage( "Hough", color_dst );
 		//cvShowImage ("Imagen disparidad H", imagenDisparidadH);
 	
 
+	cvClearSeq(vertical);
+	cvClearSeq(horizontal);
+	cvClearSeq(diagonal);
+	cvClearSeq(pendpos);
+	cvClearSeq(pendneg);
+	
+	cvReleaseMemStorage (&storageV);
+	cvReleaseMemStorage (&storageD);
+	cvReleaseMemStorage (&storageH);
+	cvReleaseMemStorage (&storageMP);
+	cvReleaseMemStorage (&storageMN);
+
+	cvReleaseImage(&color_dst);
+
 	cvReleaseImage(&mapaDisparidad);
 	cvReleaseImage(&imagenDisparidad);
+	cvReleaseImage(&imagenDisparidadH);
 	cvReleaseImage(&izquierda);
 	cvReleaseImage(&derecha);
 
 	cvWaitKey(1);
-
 }
 
 
@@ -864,6 +997,8 @@ int main (int argc, char* argv[]){
 	
 		disparity (izquierda, derecha, ajustes);
 
+		cvReleaseImage(&izquierda);
+		cvReleaseImage(&derecha);
 		cvWaitKey(1);
 	}
 	return (0);
