@@ -39,11 +39,11 @@ dimension = size (left);
 difVol = zeros(dimension(1), dimension(2), maxd);
 
 [bw, th, gv, gh] = edge(left, 'sobel');
-th
+
 ternarizedLeft = floor(gv) + ceil(gv);
 ternarizedLeft = (gv < -th/4) * -1 + (gv > th/4);
 [bw, th, gv, gh] = edge(right, 'sobel');
-th
+
 ternarizedRight = floor(gv) + ceil(gv);
 ternarizedRight = (gv < -th/4) * -1 + (gv > th/4);
 
@@ -84,3 +84,6 @@ for i=1:dimension(1)
     end
 end
 img = histo;
+
+
+figr

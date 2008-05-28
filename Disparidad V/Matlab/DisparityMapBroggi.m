@@ -13,6 +13,13 @@ function [ disparityMap, img ] = DisparityMapBroggi( left, right, fsize, ftype, 
 % wsize --> tamaño de la ventana
 % maxd --> disparidad máxima
 
+figure
+imshow(left)
+image(left)
+figure
+imshow(left)
+image(right)
+
 switch ftype
     case 0
         kfilter = fspecial ('average', fsize);          % Filtro de la media
@@ -39,11 +46,11 @@ dimension = size (left);
 difVol = zeros(dimension(1), dimension(2), maxd);
 
 [bw, th, gv, gh] = edge(left, 'sobel');
-th
+
 ternarizedLeft = floor(gv) + ceil(gv);
 ternarizedLeft = (gv < -th/4) * -1 + (gv > th/4);
 [bw, th, gv, gh] = edge(right, 'sobel');
-th
+
 ternarizedRight = floor(gv) + ceil(gv);
 ternarizedRight = (gv < -th/4) * -1 + (gv > th/4);
 
@@ -84,3 +91,7 @@ for i=1:dimension(1)
     end
 end
 img = histo;
+
+
+figure
+imshow(img>10)
