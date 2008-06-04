@@ -1,13 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
 
 package sibtra.gps;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,7 +11,7 @@ import java.io.UTFDataFormatException;
 import java.util.Vector;
 
 /**
- *
+ * Clase para simular el funcionamiento del GPS.
  * @author neztol
  */
 public class SimulaGps implements Runnable {
@@ -58,6 +50,11 @@ public class SimulaGps implements Runnable {
     
     private GPSConnection gps = null;
 
+    /**
+     * Constructor para simulación que usa datos de los dos ficheros pasados. 
+     * @param ruta nombre del fichero con la ruta
+     * @param nmea nombre del fichero con los comandos NMEA
+     */
     public SimulaGps(String ruta, String nmea) {
         gps = new GPSConnection();
         if (ruta != null)
@@ -67,10 +64,22 @@ public class SimulaGps implements Runnable {
         hilo.start(); 
     }
     
+    /**
+     * Constructor para acceder al GPS real a través del puerto
+     * @param puerto nombre del puerto serial
+     */
     public SimulaGps(String puerto) {
-        gps = new GPSConnection(puerto);        
+    	try {
+    		gps = new GPSConnection(puerto);
+    	} catch (SerialConnectionException e) {
+    		gps=null;
+    	}
     }
 
+    /**
+     * Carga los datos del fichero de ruta
+     * @param fichero
+     */
     public void loadDatos(String fichero) {
         try {
             File              fich = new File(fichero);
@@ -121,6 +130,9 @@ public class SimulaGps implements Runnable {
         }
     }
 
+    /**
+     * Para simular los eventos de recepción de datos por la serial.
+     */
     public void run() {
         int i = 0;
 
@@ -142,59 +154,75 @@ public class SimulaGps implements Runnable {
         }
     }
     
+    /**
+     * @return devuelve {@link #gps}
+     */
     public GPSConnection getGps() {
         return gps;
     }
     
+    /**
+     * @return array con las coordenadas de cada uno de los puntos de la ruta espacial 
+     * con  respecto a sistemas de coordenadas local
+     */
     public double[][] getRuta() {
-        Vector rutaGPS = gps.getRutaEspacial();
+        Vector<GPSData> rutaGPS = gps.getRutaEspacial();
         
         double ruta[][] = new double[rutaGPS.size()][];
         
         for (int i = 0; i < rutaGPS.size(); i++) {
-            GPSData data = (GPSData)rutaGPS.elementAt(i);
+            GPSData data = rutaGPS.elementAt(i);
             ruta[i] = new double[] { data.getXLocal(), data.getYLocal(), data.getZLocal() };
         }
         
         return ruta;
     }
     
+    /**
+     * @return array con los angulos de cada uno de los puntos de la ruta espacial
+     */
     public double[] getAngulos() {
-        Vector rutaGPS = gps.getRutaEspacial();
+        Vector<GPSData> rutaGPS = gps.getRutaEspacial();
         
         double angulos[] = new double[rutaGPS.size()];
         
         for (int i = 0; i < rutaGPS.size(); i++) {
-            GPSData data = (GPSData)rutaGPS.elementAt(i);
-            angulos[i] = ((GPSData)rutaGPS.elementAt(i)).getAngulo();
+            //GPSData data = (GPSData)rutaGPS.elementAt(i);
+            angulos[i] = rutaGPS.elementAt(i).getAngulo();
         }
         
         return angulos;
     }
     
+    /**
+     * @return array con las velocidades de cada uno de los puntos de la ruta espacial.
+     */
     public double[] getVelocidades() {
-        Vector rutaGPS = gps.getRutaEspacial();
+        Vector<GPSData> rutaGPS = gps.getRutaEspacial();
         
         double velocidades[] = new double[rutaGPS.size()];
         
         for (int i = 0; i < rutaGPS.size(); i++) {
-            GPSData data = (GPSData)rutaGPS.elementAt(i);
-            velocidades[i] = ((GPSData)rutaGPS.elementAt(i)).getVelocidad();
+            //GPSData data = (GPSData)rutaGPS.elementAt(i);
+            velocidades[i] = rutaGPS.elementAt(i).getVelocidad();
         }
         
         return velocidades;
     }      
     
+    /** @return coordenadas locales de punto actual.  */
     public double[] getXY() {
         GPSData data = gps.getPuntoActualEspacial();
         
         return (new double[] { data.getXLocal(), data.getYLocal(), data.getZLocal() });
     }
     
+    /** @return angulo del punto actual   */
     public double getAngulo() {
         return gps.getPuntoActualEspacial().getAngulo();
     }
     
+    /** @return velocidad del punto actual */
     public double getVelocidad() {
         return gps.getPuntoActualEspacial().getVelocidad();
     }
@@ -231,5 +259,3 @@ public class SimulaGps implements Runnable {
     }
 }
 
-
-//~ Formatted by Jindent --- http://www.jindent.com
