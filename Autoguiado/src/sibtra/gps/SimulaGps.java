@@ -144,7 +144,7 @@ public class SimulaGps implements Runnable {
             String cadena = (String) vCadena.elementAt(i);
             
             try {                
-                gps.procesaCadena(cadena);                
+                gps.actualizaNuevaCadena(cadena);                
             } catch(Exception e) {
                 System.err.println("Error al procesar la cadena " + cadena);
                 System.err.println("\t" + e.getMessage());
@@ -166,12 +166,12 @@ public class SimulaGps implements Runnable {
      * con  respecto a sistemas de coordenadas local
      */
     public double[][] getRuta() {
-        Vector<GPSData> rutaGPS = gps.getRutaEspacial();
+        Ruta rutaGPS = gps.getRutaEspacial();
         
-        double ruta[][] = new double[rutaGPS.size()][];
+        double ruta[][] = new double[rutaGPS.getNumPuntos()][];
         
-        for (int i = 0; i < rutaGPS.size(); i++) {
-            GPSData data = rutaGPS.elementAt(i);
+        for (int i = 0; i < rutaGPS.getNumPuntos(); i++) {
+            GPSData data = rutaGPS.getPunto(i);
             ruta[i] = new double[] { data.getXLocal(), data.getYLocal(), data.getZLocal() };
         }
         
@@ -182,13 +182,13 @@ public class SimulaGps implements Runnable {
      * @return array con los angulos de cada uno de los puntos de la ruta espacial
      */
     public double[] getAngulos() {
-        Vector<GPSData> rutaGPS = gps.getRutaEspacial();
+        Ruta rutaGPS = gps.getRutaEspacial();
         
-        double angulos[] = new double[rutaGPS.size()];
+        double angulos[] = new double[rutaGPS.getNumPuntos()];
         
-        for (int i = 0; i < rutaGPS.size(); i++) {
+        for (int i = 0; i < rutaGPS.getNumPuntos(); i++) {
             //GPSData data = (GPSData)rutaGPS.elementAt(i);
-            angulos[i] = rutaGPS.elementAt(i).getAngulo();
+            angulos[i] = rutaGPS.getPunto(i).getAngulo();
         }
         
         return angulos;
@@ -198,13 +198,13 @@ public class SimulaGps implements Runnable {
      * @return array con las velocidades de cada uno de los puntos de la ruta espacial.
      */
     public double[] getVelocidades() {
-        Vector<GPSData> rutaGPS = gps.getRutaEspacial();
+        Ruta rutaGPS = gps.getRutaEspacial();
         
-        double velocidades[] = new double[rutaGPS.size()];
+        double velocidades[] = new double[rutaGPS.getNumPuntos()];
         
-        for (int i = 0; i < rutaGPS.size(); i++) {
+        for (int i = 0; i < rutaGPS.getNumPuntos(); i++) {
             //GPSData data = (GPSData)rutaGPS.elementAt(i);
-            velocidades[i] = rutaGPS.elementAt(i).getVelocidad();
+            velocidades[i] = rutaGPS.getPunto(i).getVelocidad();
         }
         
         return velocidades;

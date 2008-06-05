@@ -1,13 +1,118 @@
 package sibtra.gps;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
+
+import Jama.Matrix;
 
 /**
-* Protege name: GPSData
-* @author ontology bean generator
-* @version 2008/04/3, 16:58:25
+* Contiene toda la información que proporcina el GPS sobre un punto 
 */
 public class GPSData implements Serializable, Cloneable {
+
+	private static final long a = 6378137;
+	
+	private static final double b = 6356752.31424518d;
+//	private static final double e1 = 1.4166d;
+//
+//	/** Vector del polo N */
+//	double u[] = new double[] { 0, b };
+	private static final double e = 0.0821;//0.08181919084262032d;
+
+	/**
+	 * Convierte cadena de tiempo recibida del GPS al formato hh:mm:ss
+	 * @param cadena
+	 * @return tiempo en formato hh:mm:ss
+	 */
+	private static String cadena2Time(String cadena) {
+		if (cadena.length() < 6)
+			return "";
+		int hora = 0;
+		int minutos = 0;
+		int segundos = 0;
+		hora = Integer.parseInt(cadena.substring(0, 2));
+		minutos = Integer.parseInt(cadena.substring(2, 4));
+		segundos = Integer.parseInt(cadena.substring(4, 6));
+		return hora + ":" + minutos + ":" + segundos;
+	}
+	
+	/**
+	 * Convierte cadena de caracteres que representa grados a double correspondiente
+	 * @param valor cadena a convertir
+	 * @param enteros número de dígitos que corresponden a grados (resto son minutos)
+	 * @return grados representados por la cadena
+	 */
+	public static double sexagesimal2double(String valor, int enteros) {
+		int grados = 0;
+		float minutos = 0;
+		if (valor.length() > enteros) {
+			grados = Integer.parseInt(valor.substring(0, enteros));
+			minutos = Float.parseFloat(valor.substring(enteros, valor.length()));
+			return grados + (minutos / 60.0f);
+		} else {
+			return Double.parseDouble(valor);
+		}
+	}
+	/**
+	 * Age of differential corrections in seconds
+	 */
+	private double age;
+
+	/**
+	 * Altura.
+	 * Se puede calcular como {@link #hGeoide} o como suma de {@link #hGeoide} + {@link #msL}.
+	 */
+	private double altura;
+	
+	/**
+	 * Angulo del último desplazamiento con respecto sistemas de coordenadas locales
+	 */
+	private double angulo;
+	/** cadena que se recibió del GPS y que dió lugar a este punto */
+	private String cadenaNMEA;
+
+	/** Vector columna que contiene coordenadas en sistema ECEF 
+ 	 * Se calcula en base a la {@link #altura}, {@link #longitud} y {@link #latitud}.
+	 */
+	private Matrix coordECEF;
+	
+	/**
+	 * vector columna con las 3 coordenadas respecto sistema 
+	 * de coordenadas local (con 0 en centro de trayectoria)
+	 */
+	private Matrix coordLocal;
+	/**
+	 * Standard deviation of altitude error (meters)
+	 */
+	private double desvAltura;
+
+	/**
+	 * Standard deviation of semi-major axis of error ellipse (meters)
+	 */
+	private double desvEjeMayor;
+	
+	/**
+	 * Standard deviation of semi-minor axis of error ellipse (meters)
+	 */
+	private double desvEjeMenor;
+	/**
+	 * Standard deviation of latitude error (meteers)
+	 */
+	private double desvLatitud;
+
+	/**
+	 * Standard deviation of longitude error (meters)
+	 */
+	private double desvLongitud;
+	
+	/**
+	 * Rumbo al norte magnético en grados (0-359)
+	 */
+	private double hdgPoloM;
+	/**
+	 * Rumbo al norte verdadero en grados (0-359)
+	 */
+	private double hdgPoloN;
 
 	/**
 	 * Horizontal Dilution of Precision (HDOP) =0.0 to 9.9
@@ -19,13 +124,34 @@ public class GPSData implements Serializable, Cloneable {
 	 */
 	private double hdoP;
 	
-	public void setHDOP(double value) { 
-		this.hdoP=value;
-	}
-	public double getHDOP() {
-		return this.hdoP;
-	}
+	/**
+	 * Separación de la geoide en metros (puede ser + o -)
+	 */
+	private double hGeoide;
+	/**
+	 * Cadena de caracteres con la hora en hh:mm:ss
+	 */
+	private String hora;
 
+	/**
+	 * Latitud del punto en grados con signo.
+	 */
+	private double latitud;
+	
+	/**
+	 * Logitud del punto en grados con signo.
+	 */
+	private double longitud;
+	/**
+	 * Altura de la antena en metros.
+	 */
+	private double msL;
+
+	/**
+	 * Orientation of semi-major axis of error ellipse (meters)
+	 */
+	private double orientacionMayor;
+	
 	/**
 	 * Position Dilution of Precision (PDOP) 1.0 to 9.9
 	 * La Dilución de la Precisión Posicional es una medida sin unidades que indica 
@@ -36,86 +162,6 @@ public class GPSData implements Serializable, Cloneable {
 	 *   Para obtener precisiones submétricas el PDOP debe ser de 4 o menos.
 	 */
 	private double pdoP;
-	
-	public void setPDOP(double value) { 
-		this.pdoP=value;
-	}
-	public double getPDOP() {
-		return this.pdoP;
-	}
-
-	/**
-	 * Altura de la antena en metros.
-	 */
-	private double msL;
-	
-	public void setMSL(double value) { 
-		this.msL=value;
-	}
-	public double getMSL() {
-		return this.msL;
-	}
-
-	/**
-	 *  Vertical Dilution of Precision (VDOP) = 1.0 to 9.9
-	 */
-	private double vdoP;
-	
-	public void setVDOP(double value) { 
-		this.vdoP=value;
-	}
-	public double getVDOP() {
-		return this.vdoP;
-	}
-
-	/**
-	 * Rumbo al norte verdadero en grados (0-359)
-	 */
-	private double hdgPoloN;
-	
-	public void setHdgPoloN(double value) { 
-		this.hdgPoloN=value;
-	}
-	public double getHdgPoloN() {
-		return this.hdgPoloN;
-	}
-
-	/**
-	 * Separación de la geoide en metros (puede ser + o -)
-	 */
-	private double hGeoide;
-	
-	public void setHGeoide(double value) { 
-		this.hGeoide=value;
-	}
-	public double getHGeoide() {
-		return this.hGeoide;
-	}
-
-	/**
-	 * Cadena de caracteres con la hora en hh:mm:ss
-	 */
-	private String hora;
-	
-	public void setHora(String value) { 
-		this.hora=value;
-	}
-	public String getHora() {
-		return this.hora;
-	}
-
-	/**
-	 * Rumbo al norte magnético en grados (0-359)
-	 */
-	private double hdgPoloM;
-	
-	public void setHdgPoloM(double value) { 
-		this.hdgPoloM=value;
-	}
-	public double getHdgPoloM() {
-		return this.hdgPoloM;
-	}
-
 	/**
 	 * Error cuadrático medio.
 	 * Root mean square (rms) value of the standard deviation of the range inputs to 
@@ -123,280 +169,540 @@ public class GPSData implements Serializable, Cloneable {
 	 * GNSS (DGNSS) corrections
 	 */
 	private double rms;
-	
-	public void setRms(double value) { 
-		this.rms=value;
-	}
-	public double getRms() {
-		return this.rms;
-	}
-
-	/**
-	 * Age of differential corrections in seconds
-	 */
-	private double age;
-	
-	public void setAge(double value) { 
-		this.age=value;
-	}
-	public double getAge() {
-		return this.age;
-	}
-
-	/**
-	 * Standard deviation of semi-minor axis of error ellipse (meters)
-	 */
-	private double desvEjeMenor;
-	
-	public void setDesvEjeMenor(double value) { 
-		this.desvEjeMenor=value;
-	}
-	public double getDesvEjeMenor() {
-		return this.desvEjeMenor;
-	}
-
-	/**
-	 * Standard deviation of semi-major axis of error ellipse (meters)
-	 */
-	private double desvEjeMayor;
-	
-	public void setDesvEjeMayor(double value) { 
-		this.desvEjeMayor=value;
-	}
-	public double getDesvEjeMayor() {
-		return this.desvEjeMayor;
-	}
-
-	/**
-	 * Orientation of semi-major axis of error ellipse (meters)
-	 */
-	private double orientacionMayor;
-	
-	public void setOrientacionMayor(double value) { 
-		this.orientacionMayor=value;
-	}
-	public double getOrientacionMayor() {
-		return this.orientacionMayor;
-	}
-
-	/**
-	 * Altura.
-	 * Se puede calcular como {@link #hGeoide} o como suma de {@link #hGeoide} + {@link #msL}.
-	 */
-	private double altura;
-	
-	public void setAltura(double value) { 
-		this.altura=value;
-	}
-	public double getAltura() {
-		return this.altura;
-	}
-
-	/**
-	 * Componente x de las coordenadas en sistema ECEF (Earth-Centered, Earth-Fixed).
-	 * Se calcula en base a la {@link #altura}, {@link #longitud} y {@link #latitud}.
-	 */
-	private double x;
-	
-	public void setX(double value) { 
-		this.x=value;
-	}
-	public double getX() {
-		return this.x;
-	}
-
-	/**
-	 * Componente y de las coordenadas en sistema ECEF (Earth-Centered, Earth-Fixed)
-	 * Se calcula en base a la {@link #altura}, {@link #longitud} y {@link #latitud}.
-	 */
-	private double y;
-	
-	public void setY(double value) { 
-		this.y=value;
-	}
-	public double getY() {
-		return this.y;
-	}
-
-	/**
-	 * Componente z de las coordenadas en sistema ECEF (Earth-Centered, Earth-Fixed)
-	 * Se calcula en base a la {@link #altura}, {@link #longitud} y {@link #latitud}.
-	 */
-	private double z;
-	
-	public void setZ(double value) { 
-		this.z=value;
-	}
-	public double getZ() {
-		return this.z;
-	}
-
-	/**
-	 * Angulo del último desplazamiento con respecto sistemas de coordenadas locales
-	 */
-	private double angulo;
-	
-	public void setAngulo(double value) { 
-		this.angulo=value;
-	}
-	public double getAngulo() {
-		return this.angulo;
-	}
-
-	/**
-	 * Velocidad del último desplazamiento con respecto sistemas de coordenadas locales
-	 */
-	private double velocidad;
-	
-	public void setVelocidad(double value) { 
-		this.velocidad=value;
-	}
-	public double getVelocidad() {
-		return this.velocidad;
-	}
-
-	/**
-	 * Velocidad estimada por el GPS.
-	 * Speed over ground, 000 to 999 km/h
-	 */
-	private double velocidadGPS;
-	
-	public void setVelocidadGPS(double value) { 
-		this.velocidadGPS=value;
-	}
-	public double getVelocidadGPS() {
-		return this.velocidadGPS;
-	}
-
-	/**
-	 * Componente x de la posición en el sistema de coordenadas loca (con 0 en centro de trayectoria) 
-	 */
-	private double xLocal;
-	
-	public void setXLocal(double value) { 
-		this.xLocal=value;
-	}
-	public double getXLocal() {
-		return this.xLocal;
-	}
-
-	/**
-	 * Componente x de la posición en el sistema de coordenadas loca (con 0 en centro de trayectoria) 
-	 */
-	private double yLocal;
-	
-	public void setYLocal(double value) { 
-		this.yLocal=value;
-	}
-	public double getYLocal() {
-		return this.yLocal;
-	}
-
-	/**
-	 * Componente x de la posición en el sistema de coordenadas loca (con 0 en centro de trayectoria) 
-	 */
-	private double zLocal;
-	
-	public void setZLocal(double value) { 
-		this.zLocal=value;
-	}
-	public double getZLocal() {
-		return this.zLocal;
-	}
 
 	/**
 	 * Número de satelites disponibles cuando se obtuvo el punto.
 	 */
 	private int satelites;
 	
-	public void setSatelites(int value) { 
-		this.satelites=value;
+	/**
+	 * Hora del ordenador cuando se obtuvo el punto (en milisegundos).
+	 * Como lo devuelve la llamada <code>System.currentTimeMillis()</code>.
+	 */
+	private long sysTime;
+	/**
+	 *  Vertical Dilution of Precision (VDOP) = 1.0 to 9.9
+	 */
+	private double vdoP;
+
+	/**
+	 * Velocidad del último desplazamiento con respecto sistemas de coordenadas locales
+	 */
+	private double velocidad;
+	
+	/**
+	 * Velocidad estimada por el GPS.
+	 * Speed over ground, 000 to 999 km/h
+	 */
+	private double velocidadGPS;
+	
+	/** Constructor por defecto */
+	public GPSData() {
+		coordECEF=new Matrix(3,1);
+		coordLocal=new Matrix(3,1);
 	}
-	public int getSatelites() {
-		return this.satelites;
+	
+	/** Constructor de copia */
+	public GPSData(GPSData aCopiar) {
+		this.copy(aCopiar);
 	}
 
 	/**
-	 * Latitud del punto en grados con signo.
+	 * Copia los datos del punto pasado a este
+	 * @param aCopiar punto que va haser copiado
+	 * @return este objeto
 	 */
-	private double latitud;
-	
-	public void setLatitud(double value) { 
-		this.latitud=value;
+	public GPSData copy(GPSData aCopiar) {
+		age=aCopiar.age;
+		altura=aCopiar.altura;
+		angulo=aCopiar.angulo;
+		cadenaNMEA=aCopiar.cadenaNMEA;
+		coordECEF=(Matrix)aCopiar.coordECEF.clone();
+		coordLocal=(Matrix)aCopiar.coordLocal.clone();
+		desvAltura=aCopiar.desvAltura;
+		desvEjeMayor=aCopiar.desvEjeMayor;
+		desvEjeMenor=aCopiar.desvEjeMenor;
+		desvLatitud=aCopiar.desvLatitud;
+		desvLongitud=aCopiar.desvLongitud;
+		hdgPoloM=aCopiar.hdgPoloM;
+		hdgPoloN=aCopiar.hdgPoloN;
+		hdoP=aCopiar.hdoP;
+		hGeoide=aCopiar.hGeoide;
+		hora=aCopiar.hora;
+		latitud=aCopiar.latitud;
+		longitud=aCopiar.longitud;
+		msL=aCopiar.msL;
+		orientacionMayor=aCopiar.orientacionMayor;
+		pdoP=aCopiar.pdoP;
+		rms=aCopiar.rms;
+		satelites=aCopiar.satelites;
+		sysTime=aCopiar.sysTime;
+		vdoP=aCopiar.vdoP;
+		velocidad=aCopiar.velocidad;
+		velocidadGPS=aCopiar.velocidadGPS;		
+		return this;
 	}
-	public double getLatitud() {
-		return this.latitud;
+	
+	/**
+	 * Calcula y actualiza el agulo y la velocidad del punto pasado con 
+	 * respecto a este punto.
+	 * @param val punto que se usa para el calculo y se actualiza con velocidad y ángulo calculados
+	 */
+	public void calculaAngSpeed(GPSData val) {
+		double x = val.getXLocal() - getXLocal();
+		double y = val.getYLocal() - getYLocal();       
+
+		double ang = Math.atan2(x, y);
+		if (ang < 0) ang += 2 * Math.PI;
+
+		// En principio no diferencio entre angulo y angulo local
+		val.setAngulo(ang);
+
+		double vel = Math.sqrt(Math.pow(x , 2.0f) + Math.pow(y , 2.0f));
+		vel /= (val.getSysTime() - getSysTime()) / 1000.0;
+		val.setVelocidad(vel);                
+	}
+	
+	public Object clone() {
+		Object clone = null;
+		try {
+			clone = super.clone();
+		} catch(CloneNotSupportedException e) {}
+		return clone;
+	}
+	/** @return distancia (en sistema de coordenadas local) entre punto actual y el pasado */
+	public double distancia(GPSData data) {
+		return data.getCoordECEF().minus(getCoordECEF()).normF();
 	}
 
-	/**
-	 * Logitud del punto en grados con signo.
-	 */
-	private double longitud;
-	
-	public void setLongitud(double value) { 
-		this.longitud=value;
+	public double getAge() {
+		return this.age;
 	}
-	public double getLongitud() {
-		return this.longitud;
+	
+	public double getAltura() {
+		return this.altura;
+	}
+	public double getAngulo() {
+		return this.angulo;
 	}
 
-	/**
-	 * Standard deviation of altitude error (meters)
-	 */
-	private double desvAltura;
-	
-	public void setDesvAltura(double value) { 
-		this.desvAltura=value;
+	/** @return the cadenaNMEA	 */
+	public String getCadenaNMEA() {
+		return cadenaNMEA;
 	}
+	
+	/** @return the coordECEF */
+	public Matrix getCoordECEF() {
+		return coordECEF;
+	}
+	/** @return the coordLocal	 */
+	public Matrix getCoordLocal() {
+		return coordLocal;
+	}
+
 	public double getDesvAltura() {
 		return this.desvAltura;
 	}
-
-	/**
-	 * Standard deviation of longitude error (meters)
-	 */
-	private double desvLongitud;
 	
-	public void setDesvLongitud(double value) { 
-		this.desvLongitud=value;
+	public double getDesvEjeMayor() {
+		return this.desvEjeMayor;
+	}
+	public double getDesvEjeMenor() {
+		return this.desvEjeMenor;
+	}
+	public double getDesvLatitud() {
+		return this.desvLatitud;
 	}
 	public double getDesvLongitud() {
 		return this.desvLongitud;
 	}
 
-	/**
-	 * Standard deviation of latitude error (meteers)
-	 */
-	private double desvLatitud;
 	
-	public void setDesvLatitud(double value) { 
-		this.desvLatitud=value;
+	public double getHdgPoloM() {
+		return this.hdgPoloM;
 	}
-	public double getDesvLatitud() {
-		return this.desvLatitud;
+	public double getHdgPoloN() {
+		return this.hdgPoloN;
 	}
 
-	/**
-	 * Hora del ordenador cuando se obtuvu el punto (en milisegundos).
-	 * Como lo devuelve la llamada <code>System.currentTimeMillis()</code>.
-	 */
-	private long sysTime;
+	public double getHDOP() {
+		return this.hdoP;
+	}
+	public double getHGeoide() {
+		return this.hGeoide;
+	}
+
+	public String getHora() {
+		return this.hora;
+	}
 	
-	public void setSysTime(long sysTime) { 
-		this.sysTime=sysTime;
+	public double getLatitud() {
+		return this.latitud;
+	}
+	public double getLongitud() {
+		return this.longitud;
+	}
+
+	public double getMSL() {
+		return this.msL;
+	}
+	
+	public double getOrientacionMayor() {
+		return this.orientacionMayor;
+	}
+	public double getPDOP() {
+		return this.pdoP;
+	}
+
+	public double getRms() {
+		return this.rms;
+	}
+	
+	public int getSatelites() {
+		return this.satelites;
 	}
 	public long getSysTime() {
 		return this.sysTime;
 	}
-        
-        public Object clone() {
-            Object clone = null;
-            try {
-                clone = super.clone();
-            } catch(CloneNotSupportedException e) {}
-            return clone;
-        }
 
+	
+	public double getVDOP() {
+		return this.vdoP;
+	}
+
+	public double getVelocidad() {
+		return this.velocidad;
+	}
+	public double getVelocidadGPS() {
+		return this.velocidadGPS;
+	}
+	public double getX() {
+		return coordECEF.get(1,1);
+	}
+	public double getXLocal() {
+		return coordLocal.get(1,1);
+	}
+
+	public double getY() {
+		return coordECEF.get(1, 2);
+	}
+	public double getYLocal() {
+		return coordLocal.get(2,1);
+	}
+
+	public double getZ() {
+		return coordECEF.get(1, 3);
+	}
+	public double getZLocal() {
+		return coordLocal.get(3,1);
+	}
+
+	/**
+	 * Interpreta la cadena recibida del GPS y obtiene los distintos datos contenidos.
+	 * Trata los mensajes GSA, GST, VTG y GGA.
+	 * @param cadena mensaje a interpretar
+	 */
+	public void procesaCadena(String cadena) {//throws IOException, Exception {
+		String[] msj = cadena.split(",");
+
+		if (Pattern.matches("\\$..GSA", msj[0])) {
+			//System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
+			if (msj[15].equals("")) {
+				setPDOP(0);
+			} else {
+				setPDOP(Double.parseDouble(msj[15]));
+			}
+
+			if (msj[16].equals("")) {
+				setHDOP(0);
+			} else {
+				setHDOP(Double.parseDouble(msj[16]));
+			}
+
+			msj[17] = (msj[17].split("\\*"))[0];
+			if (msj[17].equals("")) {
+				setVDOP(0);
+			} else {
+				setVDOP(Double.parseDouble(msj[17]));
+			}
+		}
+
+		if (Pattern.matches("\\$..GST", msj[0])) {
+			//System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
+
+			if (msj[2].equals("")) {
+				setRms(0);
+			} else {
+				setRms(Double.parseDouble(msj[2]));
+			}
+
+			if (msj[3].equals("")) {
+				setDesvEjeMayor(0);
+			} else {
+				setDesvEjeMayor(Double.parseDouble(msj[3]));
+			}
+
+			if (msj[4].equals("")) {
+				setDesvEjeMenor(0);
+			} else {
+				setDesvEjeMenor(Double.parseDouble(msj[4]));
+			}
+
+			if (msj[5].equals("")) {
+				setOrientacionMayor(0);
+			} else {
+				setOrientacionMayor(Double.parseDouble(msj[5]));
+			}
+
+			if (msj[6].equals("")) {
+				setDesvLatitud(0);          
+			} else {
+				setDesvLatitud(Double.parseDouble(msj[6]));
+			}
+
+			if (msj[7].equals("")) {
+				setDesvLongitud(0);
+			} else {
+				setDesvLongitud(Double.parseDouble(msj[7]));
+			}
+
+			msj[8] = (msj[8].split("\\*"))[0];
+			if (msj[8].equals("")) {
+				setDesvAltura(0);
+			} else {
+				setDesvAltura(Double.parseDouble(msj[8]));
+			}
+
+		}
+
+		if (Pattern.matches("\\$..VTG", msj[0])) {
+			//System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
+			if ((msj[2].equals("T") && (! msj[1].equals("")))) {
+				setHdgPoloN(Math.toRadians(Double.parseDouble(msj[1])));
+			} else {
+				setHdgPoloN(0);
+			}
+
+			if ((msj[4].equals("M")) && (! msj[3].equals(""))) {
+				setHdgPoloM(Math.toRadians(Double.parseDouble(msj[3])));
+			} else {
+				setHdgPoloM(0);
+			}
+
+			msj[8] = (msj[8].split("\\*"))[0];
+			if ((msj[8].equals("K")) && (msj[7].equals(""))) {
+				setVelocidadGPS(0);
+			} else {
+				setVelocidadGPS(Double.parseDouble(msj[7]));
+			}        
+		}
+
+		if (Pattern.matches("\\$..GGA", msj[0])) {
+			//System.out.println(System.currentTimeMillis() + "***" + cadena + "***");
+
+			if (msj[1].equals("")) {
+				setHora("");
+			} else {
+				setHora(cadena2Time(msj[1]));
+			}
+			if (msj[2].equals("")) {
+				setLatitud(0);
+			} else {
+				setLatitud(sexagesimal2double(msj[2], 2));          
+			}
+			if (! msj[3].equals("")) {
+				if (msj[3].equals("S"))
+					setLatitud(getLatitud() * -1);            
+			}
+			if (msj[2].equals("")) {
+				setLongitud(0);
+			} else {
+				setLongitud(sexagesimal2double(msj[4], 3));          
+			}
+			if (! msj[5].equals(""))  {
+				if (msj[5].equals("W"))
+					setLongitud(getLongitud() * -1);
+			}
+
+			if (msj[7].equals("")) {            
+				setSatelites(0);
+			} else {
+				setSatelites(Integer.parseInt(msj[7]));
+			}
+
+			if ((!msj[9].equals("")) || (!msj[10].equals("M"))) {
+				setMSL(Double.parseDouble(msj[9]));
+			} else {
+				setMSL(0);
+			}
+
+			if ((!msj[11].equals("")) || (!msj[12].equals("M"))) {
+				setHGeoide(Double.parseDouble(msj[11]));
+			} else {
+				setHGeoide(0);
+			}
+
+			//altura = msl + hgeoide;
+			//setAltura(getHGeoide() + getMSL());
+			setAltura(getHGeoide());
+
+
+			if (msj[13].equals("")) {
+				setAge(-1);
+			} else {
+				setAge(Double.parseDouble(msj[13]));
+			}
+
+			//calculaLLA(latitud, longitud, altura);        
+		}
+		setCadenaNMEA(cadena);
+	}
+	
+	public void setAge(double value) { 
+		this.age=value;
+	}
+	public void setAltura(double value) { 
+		this.altura=value;
+	}
+
+	public void setAngulo(double value) { 
+		this.angulo=value;
+	}
+	
+	/** @param cadenaNMEA the cadenaNMEA to set	 */
+	public void setCadenaNMEA(String cadenaNMEA) {
+		this.cadenaNMEA = cadenaNMEA;
+	}
+	/** @param coordECEF the coordECEF to set	 */
+	public void setCoordECEF(Matrix coordECEF) {
+		if(coordECEF.getColumnDimension()!=1 || coordECEF.getRowDimension()!=3)
+			throw new IllegalArgumentException("Parámetro debe ser vector columna de 3 componentes");
+		this.coordECEF = coordECEF;
+	}
+
+	/** @param coordLocal the coordLocal to set	 */
+	public void setCoordLocal(Matrix coordLocal) {
+		if(coordLocal.getColumnDimension()!=1 || coordLocal.getRowDimension()!=3)
+			throw new IllegalArgumentException("Parámetro debe ser vector columna de 3 componentes");
+		this.coordLocal = coordLocal;
+	}
+	
+	public void setDesvAltura(double value) { 
+		this.desvAltura=value;
+	}
+	public void setDesvEjeMayor(double value) { 
+		this.desvEjeMayor=value;
+	}
+
+	public void setDesvEjeMenor(double value) { 
+		this.desvEjeMenor=value;
+	}
+	
+	public void setDesvLatitud(double value) { 
+		this.desvLatitud=value;
+	}
+	public void setDesvLongitud(double value) { 
+		this.desvLongitud=value;
+	}
+
+	/**
+	 * Calcula y actualiza las coordenadas x,y,z (ECEF) del úlmimo punto (en {@link #data}).
+	 */
+	public void setECEF() {
+//		double altura = data.getAltura();
+//		double latitud = Math.toRadians(data.getLatitud());
+//		double longitud = Math.toRadians(data.getLongitud());
+		double N = a / Math.sqrt(1 - (Math.pow(e, 2.0f) * Math.pow(Math.sin(latitud), 2.0f)));
+		double x = (N + altura) * Math.cos(latitud) * Math.cos(longitud);
+		double y = (N + altura) * Math.cos(latitud) * Math.sin(longitud);
+		double z = ( ( (Math.pow(b, 2.0f) / Math.pow(a, 2.0f)) * N) + altura) * Math.sin(latitud);
+		setX(x);
+		setY(y);
+		setZ(z);      
+	}
+	
+	public void setHdgPoloM(double value) { 
+		this.hdgPoloM=value;
+	}
+	public void setHdgPoloN(double value) { 
+		this.hdgPoloN=value;
+	}
+
+	public void setHDOP(double value) { 
+		this.hdoP=value;
+	}
+	
+	public void setHGeoide(double value) { 
+		this.hGeoide=value;
+	}
+	public void setHora(String value) { 
+		this.hora=value;
+	}
+
+	public void setLatitud(double value) { 
+		this.latitud=value;
+	}
+	
+	public void setLongitud(double value) { 
+		this.longitud=value;
+	}
+	public void setMSL(double value) { 
+		this.msL=value;
+	}
+        
+	public void setOrientacionMayor(double value) { 
+		this.orientacionMayor=value;
+	}
+
+	public void setPDOP(double value) { 
+		this.pdoP=value;
+	}
+	
+	public void setRms(double value) { 
+		this.rms=value;
+	}
+	public void setSatelites(int value) { 
+		this.satelites=value;
+	}
+	public void setSysTime(long sysTime) { 
+		this.sysTime=sysTime;
+	}
+
+	public void setVDOP(double value) { 
+		this.vdoP=value;
+	}
+	
+	public void setVelocidad(double value) { 
+		this.velocidad=value;
+	}
+
+	public void setVelocidadGPS(double value) { 
+		this.velocidadGPS=value;
+	}
+	
+	public void setX(double value) { 
+		coordECEF.set(1, 1, value);
+	}
+
+	public void setXLocal(double value) { 
+		coordLocal.set(1,1,value);
+	}
+
+	public void setY(double value) { 
+		coordECEF.set(1, 2, value);
+	}
+	
+	public void setYLocal(double value) { 
+		coordLocal.set(1,2,value);
+	}
+
+	public void setZ(double value) { 
+		coordECEF.set(1, 3, value);
+	}
+	public void setZLocal(double value) { 
+		coordLocal.set(1,3,value);
+	}
+	
 	public String toString() {
 		String retorno = "";
 
@@ -407,4 +713,5 @@ public class GPSData implements Serializable, Cloneable {
 
 		return retorno;
 	}
+	
 }
