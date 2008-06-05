@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.TooManyListenersException;
 
 /**
@@ -287,6 +288,7 @@ public class GPSConnection implements SerialPortEventListener {
 		bufferEspacial.setCoordenadasLocales(data);
 
 		añadeABuffers();
+		avisaListeners(); //avisamos a todos los listeners
         data = new GPSData(data); //creamos nuevo punto copia del anterior
 
 	}
@@ -566,6 +568,27 @@ public class GPSConnection implements SerialPortEventListener {
 	public void setParameters(SerialParameters parameters) {
 		this.parameters = parameters;
 	}
+	
+	/** mantiene la lista de listeners */
+	private ArrayList<GpsEventListener> listeners = new ArrayList<GpsEventListener>();
 
+	/**
+	 * Para añadir objeto a la lista de {@link GpsEventListener}
+	 * @param gel objeto a añadir
+	 */
+	public void addGpsEventListener( GpsEventListener gel ) {
+		listeners.add( gel );
+	}
+	
+	/** avisa a todos los listeners con un evento */
+	private void avisaListeners() {
+	    for ( int j = 0; j < listeners.size(); j++ ) {
+	        GpsEventListener gel = listeners.get(j);
+	        if ( gel != null ) {
+	          GpsEvent me = new GpsEvent(this,data);
+	          gel.handleGpsEvent(me);
+	        }
+	    }
+	}
 }
 
