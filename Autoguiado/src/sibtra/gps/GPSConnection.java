@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.regex.*;
 //import javax.comm.*;
 import gnu.io.*;
+import xbeedemo.SerialConnectionException;
+import xbeedemo.SerialParameters;
 
 /**
  * Maneja la conexión serial con el GPS. 
@@ -456,7 +458,8 @@ public class GPSConnection implements SerialPortEventListener {
 		setCoordenadasLocales();
 		anadeBufferTemporal();
 		anadeBufferEspacial();
-		data = new GPSData();
+		//data = new GPSData();
+                data = (GPSData)data.clone();
 	}
 
 	/**

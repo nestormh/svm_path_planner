@@ -7,7 +7,7 @@ import java.io.Serializable;
 * @author ontology bean generator
 * @version 2008/04/3, 16:58:25
 */
-public class GPSData implements Serializable {
+public class GPSData implements Serializable, Cloneable {
 
 	/**
 	 * Horizontal Dilution of Precision (HDOP) =0.0 to 9.9
@@ -388,6 +388,14 @@ public class GPSData implements Serializable {
 	public long getSysTime() {
 		return this.sysTime;
 	}
+        
+        public Object clone() {
+            Object clone = null;
+            try {
+                clone = super.clone();
+            } catch(CloneNotSupportedException e) {}
+            return clone;
+        }
 
 	public String toString() {
 		String retorno = "";
