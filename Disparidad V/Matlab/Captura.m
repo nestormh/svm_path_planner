@@ -14,6 +14,6 @@ function [ disparityMap, img ] = Captura( cam_izq, cam_der, file_number )
     imshow(der);
     
 %    [disparityMap, img] = DisparityMapBroggi (izq, der, [1, 9], 50);
-    [disparityMap, img] = DisparityMapBroggi(izq, der, [3, 3],0,[1,9],70);
-    figure;
-    imshow(img);
+%    [disparityMap, img] = DisparityMapBroggi(izq, der, [3, 3],0,[1,9],70);
+%    figure;
+%    imshow(img);
