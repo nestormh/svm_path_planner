@@ -22,18 +22,12 @@ public class GPSData implements Serializable, Cloneable {
 	/**
 	 * Convierte cadena de tiempo recibida del GPS al formato hh:mm:ss
 	 * @param cadena
-	 * @return tiempo en formato hh:mm:ss
+	 * @return tiempo en formato hh:mm:ss.ss
 	 */
 	private static String cadena2Time(String cadena) {
 		if (cadena.length() < 6)
 			return "";
-		int hora = 0;
-		int minutos = 0;
-		int segundos = 0;
-		hora = Integer.parseInt(cadena.substring(0, 2));
-		minutos = Integer.parseInt(cadena.substring(2, 4));
-		segundos = Integer.parseInt(cadena.substring(4, 6));
-		return hora + ":" + minutos + ":" + segundos;
+		return cadena.substring(0, 2) + ":" + cadena.substring(2, 4)+":" + cadena.substring(4);
 	}
 	
 	/**
@@ -43,12 +37,12 @@ public class GPSData implements Serializable, Cloneable {
 	 * @return grados representados por la cadena
 	 */
 	public static double sexagesimal2double(String valor, int enteros) {
-		int grados = 0;
-		float minutos = 0;
+		double grados = 0;
+		double minutos = 0;
 		if (valor.length() > enteros) {
 			grados = Integer.parseInt(valor.substring(0, enteros));
-			minutos = Float.parseFloat(valor.substring(enteros, valor.length()));
-			return grados + (minutos / 60.0f);
+			minutos = Double.parseDouble(valor.substring(enteros));
+			return grados + (minutos / 60.0d);
 		} else {
 			return Double.parseDouble(valor);
 		}
@@ -377,24 +371,24 @@ public class GPSData implements Serializable, Cloneable {
 		return this.velocidadGPS;
 	}
 	public double getX() {
-		return coordECEF.get(1,1);
+		return coordECEF.get(0,0);
 	}
 	public double getXLocal() {
-		return coordLocal.get(1,1);
+		return coordLocal.get(0,0);
 	}
 
 	public double getY() {
-		return coordECEF.get(1, 2);
+		return coordECEF.get(1, 0);
 	}
 	public double getYLocal() {
-		return coordLocal.get(2,1);
+		return coordLocal.get(1,0);
 	}
 
 	public double getZ() {
-		return coordECEF.get(1, 3);
+		return coordECEF.get(2, 0);
 	}
 	public double getZLocal() {
-		return coordLocal.get(3,1);
+		return coordLocal.get(2,0);
 	}
 
 	/**
@@ -681,26 +675,26 @@ public class GPSData implements Serializable, Cloneable {
 	}
 	
 	public void setX(double value) { 
-		coordECEF.set(1, 1, value);
+		coordECEF.set(0, 0, value);
 	}
 
 	public void setXLocal(double value) { 
-		coordLocal.set(1,1,value);
+		coordLocal.set(0,0,value);
 	}
 
 	public void setY(double value) { 
-		coordECEF.set(1, 2, value);
+		coordECEF.set(1, 0, value);
 	}
 	
 	public void setYLocal(double value) { 
-		coordLocal.set(1,2,value);
+		coordLocal.set(1,0,value);
 	}
 
 	public void setZ(double value) { 
-		coordECEF.set(1, 3, value);
+		coordECEF.set(2, 0, value);
 	}
 	public void setZLocal(double value) { 
-		coordLocal.set(1,3,value);
+		coordLocal.set(2,0,value);
 	}
 	
 	public String toString() {
@@ -712,6 +706,21 @@ public class GPSData implements Serializable, Cloneable {
 		//retorno += "Angulo = " + angulo + " ::: " + "Velocidad = " + velocidad + "\n";
 
 		return retorno;
+	}
+
+	/**
+	 * @return
+	 */
+	public String getLatitudText() {
+		double grados=Math.rint(latitud);
+		double minutos=(latitud-grados)*60.0;
+		return String.format("%+3.0fº %8.5f", grados, Math.abs(minutos));
+	}
+	
+	public String getLongitudText() {
+		double grados=Math.rint(longitud);
+		double minutos=(longitud-grados)*60.0;
+		return String.format("%+4.0fº %8.5f", grados, Math.abs(minutos));
 	}
 	
 }

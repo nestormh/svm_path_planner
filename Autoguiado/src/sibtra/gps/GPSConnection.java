@@ -265,7 +265,7 @@ public class GPSConnection implements SerialPortEventListener {
 			} catch (IOException ioe) {
 				System.err.println("\nError al recibir los datos");
 			} catch (Exception ex) {
-				System.err.println("\nGPSConnection Error: Cadena fragmentada " + ex.getMessage());
+				System.err.println("\nGPSConnection Error: Cadena fragmentada : " + ex.getMessage());
 				cadenaTemp = "";
 			}
 		}
@@ -279,6 +279,8 @@ public class GPSConnection implements SerialPortEventListener {
 	void actualizaNuevaCadena(String cadena) {
 		
 		data.procesaCadena(cadena);
+		if(!cadena.substring(3, 6).equals("GGA"))
+			return;  //sólo será nuevo punto si es paquete GGA
 		data.setSysTime(System.currentTimeMillis());
 		data.setECEF();
 		if(!bufferEspacial.tieneSistemaLocal() && bufferEspacial.getNumPuntos()>100) {

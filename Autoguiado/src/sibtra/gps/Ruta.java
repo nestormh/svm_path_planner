@@ -171,7 +171,8 @@ public class Ruta implements Serializable {
 		}
 
 		Matrix res = pto.getCoordECEF().minus(centro.getCoordECEF()); 
-		res = T.times(res).transpose();
+//		res = T.times(res).transpose();
+		res = T.times(res); //dejamos como vector columna
 		pto.setCoordLocal(res);
 	}
 
