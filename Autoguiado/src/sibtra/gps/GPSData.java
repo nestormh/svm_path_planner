@@ -180,7 +180,8 @@ public class GPSData implements Serializable, Cloneable {
 	private double vdoP;
 
 	/**
-	 * Velocidad del último desplazamiento con respecto sistemas de coordenadas locales
+	 * Velocidad HORIZONTAL del último desplazamiento con respecto sistemas de coordenadas locales.
+	 * 
 	 */
 	private double velocidad;
 	
@@ -721,6 +722,17 @@ public class GPSData implements Serializable, Cloneable {
 		double grados=Math.rint(longitud);
 		double minutos=(longitud-grados)*60.0;
 		return String.format("%+4.0fº %8.5f", grados, Math.abs(minutos));
+	}
+
+	/**
+	 * Para pruebas
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		//probamos problema de los ángulos
+		GPSData p1=new GPSData();
+		//p1.setLatitud(value)
+
 	}
 	
 }

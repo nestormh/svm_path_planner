@@ -15,6 +15,13 @@ import Jama.Matrix;
  */
 public class Ruta implements Serializable {
 	
+	/**
+	 * Número de serie. IMPORTANTE porque vamos a salvarlo en fichero directamente.
+	 * Si cambiamos estructura del objeto tenemos que cambiar el número de serie y ver 
+	 * como se cargan versiones anteriores.
+	 */
+	private static final long serialVersionUID = 2L;
+
 	/** contendrá los puntos de la ruta */
 	Vector<GPSData> puntos;
 	
@@ -78,6 +85,7 @@ public class Ruta implements Serializable {
 	 * coordenadas locales.
 	 */
 	public void actualizaSistemaLocal () {
+		GPSData centro;
 		if ( puntos.size() == 0)
 			return;                
 
@@ -98,7 +106,16 @@ public class Ruta implements Serializable {
 				centro = puntos.elementAt(i);
 			}            
 		}
-
+		actualizaSistemaLocal(centro);
+	}
+	
+	/**
+	 * Crea la matriz de rotación {@link #T} y fija el {@link #centro} usando el punto pasado
+	 * @param centro punto que se usará como centro para definir el plano
+	 */
+	public void actualizaSistemaLocal(GPSData ptoParaCentro) {
+		if(ptoParaCentro==null) return;
+		centro=ptoParaCentro;
 		// Matriz de rotación en torno a un punto
 		double v[][] = new double[3][];
 		v[0] = new double[] { -Math.sin(centro.getLongitud()), Math.cos(centro.getLongitud()), 0 };
@@ -136,9 +153,10 @@ public class Ruta implements Serializable {
 	}
 
 	/**
+	 * Fija el centro sin actualizar el sistema local.
 	 * @param ptoCentro the ptoCentro to set
 	 */
-	public void setPtoCentro(GPSData ptoCentro) {
+	private void setPtoCentro(GPSData ptoCentro) {
 		this.centro = ptoCentro;
 	}
 
@@ -152,7 +170,7 @@ public class Ruta implements Serializable {
 	/**
 	 * @param t the t to set
 	 */
-	public void setT(Matrix t) {
+	private void setT(Matrix t) {
 		T = t;
 	}
 	
@@ -171,7 +189,6 @@ public class Ruta implements Serializable {
 		}
 
 		Matrix res = pto.getCoordECEF().minus(centro.getCoordECEF()); 
-//		res = T.times(res).transpose();
 		res = T.times(res); //dejamos como vector columna
 		pto.setCoordLocal(res);
 	}
@@ -253,5 +270,10 @@ public class Ruta implements Serializable {
 			return puntos.elementAt(i);
 	}
 
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
 
+	}
 }
