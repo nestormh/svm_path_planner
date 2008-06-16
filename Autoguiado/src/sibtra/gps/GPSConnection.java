@@ -305,40 +305,35 @@ public class GPSConnection implements SerialPortEventListener {
 			return;
 
 		rutaRef.actualizaCoordenadasLocales();
-		bufferEspacial.actualizaCoordenadasLocales();
 		Ruta ba;
 		ba=bufferEspacial;
 		if(ba!=null && ba!=rutaRef) {
-			//usamos sistema local de bufferEspacial
-			ba.actualizaSistemaLocal(bufferEspacial);
-			//actualizamos todos los puntos
+			ba.actualizaSistemaLocal(rutaRef);
 			ba.actualizaCoordenadasLocales();
 		}
 		ba=bufferTemporal;
 		if(ba!=null && ba!=rutaRef) {
-			//usamos sistema local de bufferEspacial
-			ba.actualizaSistemaLocal(bufferEspacial);
-			//actualizamos todos los puntos
+			ba.actualizaSistemaLocal(rutaRef);
 			ba.actualizaCoordenadasLocales();
 		}
 		ba=bufferRutaEspacial;
 		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(bufferEspacial);
+			ba.actualizaSistemaLocal(rutaRef);
 			ba.actualizaCoordenadasLocales();
 		}
 		ba=bufferRutaTemporal;
 		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(bufferEspacial);
+			ba.actualizaSistemaLocal(rutaRef);
 			ba.actualizaCoordenadasLocales();
 		}
 		ba=rutaEspacial;
 		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(bufferEspacial);
+			ba.actualizaSistemaLocal(rutaRef);
 			ba.actualizaCoordenadasLocales();
 		}
 		ba=rutaTemporal;
 		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(bufferEspacial);
+			ba.actualizaSistemaLocal(rutaRef);
 			ba.actualizaCoordenadasLocales();
 		}
 	}

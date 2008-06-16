@@ -1,6 +1,7 @@
 package sibtra.gps;
 
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import Jama.Matrix;
@@ -9,6 +10,13 @@ import Jama.Matrix;
 * Contiene toda la información que proporcina el GPS sobre un punto 
 */
 public class GPSData implements Serializable, Cloneable {
+
+	/**
+	 * Número de serie. IMPORTANTE porque vamos a salvarlo en fichero directamente.
+	 * Si cambiamos estructura del objeto tenemos que cambiar el número de serie y ver 
+	 * como se cargan versiones anteriores.
+	 */
+	private static final long serialVersionUID = 3L;
 
 	private static final long a = 6378137;
 	
@@ -47,66 +55,73 @@ public class GPSData implements Serializable, Cloneable {
 			return Double.parseDouble(valor);
 		}
 	}
+	
+	/** @return Cadena de caracteres de representación en grados y minutos	 */
+	public static String double2sexagesimal(double grados) {
+		double gr=Math.rint(grados);
+		double minutos=(grados-gr)*60.0;
+		return String.format((Locale)null,"% 3.0fº %8.5f'", grados, Math.abs(minutos));
+	}
 	/**
 	 * Age of differential corrections in seconds
 	 */
-	private double age;
+	private double age=Double.NaN;
 
 	/**
 	 * Altura.
 	 * Se puede calcular como {@link #hGeoide} o como suma de {@link #hGeoide} + {@link #msL}.
 	 */
-	private double altura;
+	private double altura=Double.NaN;
 	
 	/**
 	 * Angulo del último desplazamiento con respecto sistemas de coordenadas locales
 	 */
-	private double angulo;
+	private double angulo=Double.NaN;
 	/** cadena que se recibió del GPS y que dió lugar a este punto */
 	private String cadenaNMEA;
 
 	/** Vector columna que contiene coordenadas en sistema ECEF 
  	 * Se calcula en base a la {@link #altura}, {@link #longitud} y {@link #latitud}.
 	 */
-	private Matrix coordECEF;
+	private Matrix coordECEF=null;
 	
 	/**
 	 * vector columna con las 3 coordenadas respecto sistema 
 	 * de coordenadas local (con 0 en centro de trayectoria)
 	 */
-	private Matrix coordLocal;
+	private Matrix coordLocal=null;
 	/**
 	 * Standard deviation of altitude error (meters)
 	 */
-	private double desvAltura;
+	private double desvAltura=Double.NaN;
 
 	/**
 	 * Standard deviation of semi-major axis of error ellipse (meters)
 	 */
-	private double desvEjeMayor;
+	private double desvEjeMayor=Double.NaN;
 	
 	/**
 	 * Standard deviation of semi-minor axis of error ellipse (meters)
 	 */
-	private double desvEjeMenor;
+	private double desvEjeMenor=Double.NaN;
 	/**
 	 * Standard deviation of latitude error (meteers)
 	 */
-	private double desvLatitud;
+	private double desvLatitud=Double.NaN;
 
 	/**
 	 * Standard deviation of longitude error (meters)
 	 */
-	private double desvLongitud;
+	private double desvLongitud=Double.NaN;
 	
 	/**
 	 * Rumbo al norte magnético en grados (0-359)
 	 */
-	private double hdgPoloM;
+	private double hdgPoloM=Double.NaN;
 	/**
 	 * Rumbo al norte verdadero en grados (0-359)
 	 */
-	private double hdgPoloN;
+	private double hdgPoloN=Double.NaN;
 
 	/**
 	 * Horizontal Dilution of Precision (HDOP) =0.0 to 9.9
@@ -116,12 +131,13 @@ public class GPSData implements Serializable, Cloneable {
 	 *  weaker satellite geometry and accuracy may become affected. 
 	 *  This information is parsed from the GPGGA NMEA message.
 	 */
-	private double hdoP;
+	private double hdoP=Double.NaN;
 	
 	/**
 	 * Separación de la geoide en metros (puede ser + o -)
+	 * Se recibe como '±xxxx.xx'
 	 */
-	private double hGeoide;
+	private double hGeoide=Double.NaN;
 	/**
 	 * Cadena de caracteres con la hora en hh:mm:ss
 	 */
@@ -130,21 +146,21 @@ public class GPSData implements Serializable, Cloneable {
 	/**
 	 * Latitud del punto en grados con signo.
 	 */
-	private double latitud;
+	private double latitud=Double.NaN;
 	
 	/**
 	 * Logitud del punto en grados con signo.
 	 */
-	private double longitud;
+	private double longitud=Double.NaN;
 	/**
 	 * Altura de la antena en metros.
 	 */
-	private double msL;
+	private double msL=Double.NaN;
 
 	/**
 	 * Orientation of semi-major axis of error ellipse (meters)
 	 */
-	private double orientacionMayor;
+	private double orientacionMayor=Double.NaN;
 	
 	/**
 	 * Position Dilution of Precision (PDOP) 1.0 to 9.9
@@ -155,46 +171,44 @@ public class GPSData implements Serializable, Cloneable {
 	 *  Cuando los satélites están agrupados el valor PDOP es alto y las posiciones imprecisas.
 	 *   Para obtener precisiones submétricas el PDOP debe ser de 4 o menos.
 	 */
-	private double pdoP;
+	private double pdoP=Double.NaN;
 	/**
 	 * Error cuadrático medio.
 	 * Root mean square (rms) value of the standard deviation of the range inputs to 
 	 * the navigation process. Range inputs include pseudoranges and differential 
 	 * GNSS (DGNSS) corrections
 	 */
-	private double rms;
+	private double rms=Double.NaN;
 
 	/**
 	 * Número de satelites disponibles cuando se obtuvo el punto.
 	 */
-	private int satelites;
+	private int satelites=Integer.MIN_VALUE;
 	
 	/**
 	 * Hora del ordenador cuando se obtuvo el punto (en milisegundos).
 	 * Como lo devuelve la llamada <code>System.currentTimeMillis()</code>.
 	 */
-	private long sysTime;
+	private long sysTime=0;
 	/**
 	 *  Vertical Dilution of Precision (VDOP) = 1.0 to 9.9
 	 */
-	private double vdoP;
+	private double vdoP=Double.NaN;
 
 	/**
 	 * Velocidad HORIZONTAL del último desplazamiento con respecto sistemas de coordenadas locales.
 	 * 
 	 */
-	private double velocidad;
+	private double velocidad=Double.NaN;
 	
 	/**
 	 * Velocidad estimada por el GPS.
 	 * Speed over ground, 000 to 999 km/h
 	 */
-	private double velocidadGPS;
+	private double velocidadGPS=Double.NaN;
 	
 	/** Constructor por defecto */
 	public GPSData() {
-		coordECEF=new Matrix(3,1);
-		coordLocal=new Matrix(3,1);
 	}
 	
 	/** Constructor de copia */
@@ -212,8 +226,10 @@ public class GPSData implements Serializable, Cloneable {
 		altura=aCopiar.altura;
 		angulo=aCopiar.angulo;
 		cadenaNMEA=aCopiar.cadenaNMEA;
-		coordECEF=(Matrix)aCopiar.coordECEF.clone();
-		coordLocal=(Matrix)aCopiar.coordLocal.clone();
+		if(aCopiar.coordECEF!=null)
+			coordECEF=(Matrix)aCopiar.coordECEF.clone();
+		if(aCopiar.coordLocal!=null)
+			coordLocal=(Matrix)aCopiar.coordLocal.clone();
 		desvAltura=aCopiar.desvAltura;
 		desvEjeMayor=aCopiar.desvEjeMayor;
 		desvEjeMenor=aCopiar.desvEjeMenor;
@@ -265,9 +281,18 @@ public class GPSData implements Serializable, Cloneable {
 		} catch(CloneNotSupportedException e) {}
 		return clone;
 	}
-	/** @return distancia (en sistema de coordenadas local) entre punto actual y el pasado */
+	/** @return distancia (en sistema de coordenadas ECEF) entre punto actual y el pasado */
 	public double distancia(GPSData data) {
-		return data.getCoordECEF().minus(getCoordECEF()).normF();
+		if(data==null || data.coordECEF==null || coordECEF==null)
+			return Double.NaN;
+		return data.coordECEF.minus(coordECEF).normF();
+	}
+
+	/** @return distancia (en sistema de coordenadas local) entre punto actual y el pasado */
+	public double distanciaLocal(GPSData data) {
+		if(data==null || data.coordLocal==null || coordLocal==null)
+			return Double.NaN;
+		return data.coordLocal.minus(coordLocal).normF();
 	}
 
 	public double getAge() {
@@ -371,24 +396,46 @@ public class GPSData implements Serializable, Cloneable {
 	public double getVelocidadGPS() {
 		return this.velocidadGPS;
 	}
+
+	/** @return componente del vector en sistema ECEF. NaN si no se ha creado */
 	public double getX() {
+		if(coordECEF==null)
+			return Double.NaN;
 		return coordECEF.get(0,0);
 	}
+
+	/** @return componente del vector en sistema local. NaN si no se ha creado */
 	public double getXLocal() {
+		if(coordLocal==null)
+			return Double.NaN;
 		return coordLocal.get(0,0);
 	}
 
+	/** @return componente del vector en sistema ECEF. NaN si no se ha creado */
 	public double getY() {
+		if(coordECEF==null)
+			return Double.NaN;
 		return coordECEF.get(1, 0);
 	}
+	
+	/** @return componente del vector en sistema local. NaN si no se ha creado */
 	public double getYLocal() {
+		if(coordLocal==null)
+			return Double.NaN;
 		return coordLocal.get(1,0);
 	}
 
+	/** @return componente del vector en sistema ECEF. NaN si no se ha creado */
 	public double getZ() {
+		if(coordECEF==null)
+			return Double.NaN;
 		return coordECEF.get(2, 0);
 	}
+
+	/** @return componente del vector en sistema local. NaN si no se ha creado */
 	public double getZLocal() {
+		if(coordLocal==null)
+			return Double.NaN;
 		return coordLocal.get(2,0);
 	}
 
@@ -570,14 +617,16 @@ public class GPSData implements Serializable, Cloneable {
 	}
 	/** @param coordECEF the coordECEF to set	 */
 	public void setCoordECEF(Matrix coordECEF) {
-		if(coordECEF.getColumnDimension()!=1 || coordECEF.getRowDimension()!=3)
+		if(coordECEF!=null 
+				&& (coordECEF.getColumnDimension()!=1 || coordECEF.getRowDimension()!=3))
 			throw new IllegalArgumentException("Parámetro debe ser vector columna de 3 componentes");
 		this.coordECEF = coordECEF;
 	}
 
 	/** @param coordLocal the coordLocal to set	 */
 	public void setCoordLocal(Matrix coordLocal) {
-		if(coordLocal.getColumnDimension()!=1 || coordLocal.getRowDimension()!=3)
+		if(coordLocal!=null && 
+				(coordLocal.getColumnDimension()!=1 || coordLocal.getRowDimension()!=3))
 			throw new IllegalArgumentException("Parámetro debe ser vector columna de 3 componentes");
 		this.coordLocal = coordLocal;
 	}
@@ -676,34 +725,51 @@ public class GPSData implements Serializable, Cloneable {
 	}
 	
 	public void setX(double value) { 
+		if(coordECEF==null)
+			coordECEF=new Matrix(3,1,Double.NaN);
 		coordECEF.set(0, 0, value);
 	}
 
-	public void setXLocal(double value) { 
+	public void setXLocal(double value) {
+		if(coordLocal==null)
+			coordLocal=new Matrix(3,1,Double.NaN);
 		coordLocal.set(0,0,value);
 	}
 
 	public void setY(double value) { 
+		if(coordECEF==null)
+			coordECEF=new Matrix(3,1,Double.NaN);
 		coordECEF.set(1, 0, value);
 	}
 	
 	public void setYLocal(double value) { 
+		if(coordLocal==null) 
+			coordLocal=new Matrix(3,1,Double.NaN);
 		coordLocal.set(1,0,value);
 	}
 
 	public void setZ(double value) { 
+		if(coordECEF==null)
+			coordECEF=new Matrix(3,1,Double.NaN);
 		coordECEF.set(2, 0, value);
 	}
 	public void setZLocal(double value) { 
+		if(coordLocal==null) 
+			coordLocal=new Matrix(3,1,Double.NaN);
 		coordLocal.set(2,0,value);
 	}
 	
 	public String toString() {
 		String retorno = "";
 
-		retorno += "LLA = [" + latitud + ", " + longitud + ", " + altura + "]\n";
+		//retorno += String.format((Locale)null,"LLA = [% 9.6f , % 9.6f , % 8.2f]",latitud ,longitud , altura);
+		retorno += String.format((Locale)null,"LLA = [%s, %s , % 8.2f]"
+				,getLatitudText() ,getLongitudText() , altura);
+		if(coordLocal!=null)
+			retorno += String.format((Locale)null," PTP = [%.3f , %.3f , %.3f]",getXLocal(),getYLocal(),getZLocal());
+		//retorno += "\n";
 		//retorno += "ECEF = [" + x + ", " + y + ", " + z + "]\n";
-		//retorno += "PTP = [" + xLocal + ", " + yLocal + ", " + zLocal + "]\n";
+		//\n";
 		//retorno += "Angulo = " + angulo + " ::: " + "Velocidad = " + velocidad + "\n";
 
 		return retorno;
@@ -713,15 +779,11 @@ public class GPSData implements Serializable, Cloneable {
 	 * @return
 	 */
 	public String getLatitudText() {
-		double grados=Math.rint(latitud);
-		double minutos=(latitud-grados)*60.0;
-		return String.format("%+3.0fº %8.5f", grados, Math.abs(minutos));
+		return double2sexagesimal(latitud);
 	}
 	
 	public String getLongitudText() {
-		double grados=Math.rint(longitud);
-		double minutos=(longitud-grados)*60.0;
-		return String.format("%+4.0fº %8.5f", grados, Math.abs(minutos));
+		return double2sexagesimal(longitud);
 	}
 
 	/**
@@ -731,7 +793,55 @@ public class GPSData implements Serializable, Cloneable {
 	public static void main(String[] args) {
 		//probamos problema de los ángulos
 		GPSData p1=new GPSData();
-		//p1.setLatitud(value)
+		p1.setLatitud(28.0+28.93084/60.0);
+		p1.setLongitud(-(16+19.27510/60));
+		p1.setAltura(36);
+		p1.setECEF();
+		
+		GPSData p2=new GPSData();
+		p2.setLatitud(28.0+28.93055/60.0);
+		p2.setLongitud(-(16+19.27568/60));
+		p2.setAltura(p1.getAltura());
+		p2.setECEF();
+		
+		Ruta ruta=new Ruta();
+		ruta.add(p1);
+		ruta.add(p2);
+		ruta.actualizaSistemaLocal(new GPSData(p1));
+		ruta.actualizaCoordenadasLocales();
+		
+		p1.calculaAngSpeed(p2);
+		double ang1=p2.getAngulo();
+		System.out.println(ruta+"Angulo: "+ang1 + "=>"+Math.toDegrees(ang1) );
+		System.out.println("Distancias: ECEF="+p1.distancia(p2)+"  Local="+p1.distanciaLocal(p2));
+
+		
+		
+		p2.setAltura(p1.getAltura()+100);
+		p2.setECEF();
+		ruta.actualizaCoordenadasLocales();
+		p1.calculaAngSpeed(p2);
+		
+		double ang2=p2.getAngulo();
+		System.out.println("\n\n"+ruta+"\nAngulo: "+ang2+" => "+Math.toDegrees(ang2));
+		System.out.println("Distancias: ECEF="+p1.distancia(p2)+"  Local="+p1.distanciaLocal(p2));
+
+		
+		System.out.println("\nDiferencia en grados="+Math.toDegrees(ang2-ang1)
+				+" => "+double2sexagesimal(Math.toDegrees(ang2-ang1)));
+
+		p1.setAltura(p1.getAltura()+100);
+		p1.setECEF();
+		ruta.actualizaCoordenadasLocales();
+		p1.calculaAngSpeed(p2);
+		
+		double ang3=p2.getAngulo();
+		System.out.println("\n\n"+ruta+"\nAngulo: "+ang3+" => "+Math.toDegrees(ang3));
+		System.out.println("Distancias: ECEF="+p1.distancia(p2)+"  Local="+p1.distanciaLocal(p2));
+
+		
+		System.out.println("\nDiferencia en grados="+Math.toDegrees(ang3-ang1)
+				+" => "+double2sexagesimal(Math.toDegrees(ang3-ang1)));
 
 	}
 	

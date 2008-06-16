@@ -143,7 +143,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 	public static void main(String[] args) {
 
 		Ruta re, rt;
-		String fichero="Prueba1.gps";
+		String fichero="Rutas/Prueba1.gps";
 		try {
 			File file = new File(fichero);
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));

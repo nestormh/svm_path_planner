@@ -139,7 +139,7 @@ public class Ruta implements Serializable {
 	 * @param rutaUsar ruta de la que se tomará el centro y T
 	 */
 	public void actualizaSistemaLocal(Ruta rutaUsar) {
-		if(rutaUsar!=null && rutaUsar.T!=null && rutaUsar.centro!=null)
+		if(rutaUsar==null || rutaUsar.T==null || rutaUsar.centro==null)
 			return;
 		T=rutaUsar.T;
 		centro=rutaUsar.centro;
@@ -181,10 +181,8 @@ public class Ruta implements Serializable {
 	 * @param pto punto a actualizar
 	 */
 	public void setCoordenadasLocales(GPSData pto) {
-		if (T == null || centro==null) {       
-			pto.setXLocal(-1);
-			pto.setYLocal(-1);
-			pto.setZLocal(-1);
+		if (T == null || centro==null) {
+			pto.setCoordLocal(null);
 			return;
 		}
 
@@ -270,6 +268,15 @@ public class Ruta implements Serializable {
 			return puntos.elementAt(i);
 	}
 
+	public String toString() {
+		String retorno="Ruta "+(esEspacial?"ESPACIAL":"TEMPORAL")+" de "+puntos.size()+" puntos ";
+		if(centro!=null)
+			retorno+="CON sistema local centrado en "+centro;
+		retorno+="\n";
+		for(int i=0; i<puntos.size(); i++)
+			retorno+=i+":"+puntos.get(i)+"\n";
+		return retorno;
+	}
 	/**
 	 * @param args
 	 */

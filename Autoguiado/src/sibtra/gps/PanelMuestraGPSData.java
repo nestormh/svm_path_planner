@@ -36,9 +36,11 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	private JLabel jlEdad;
 	private JLabel jlCoordLocales;
 	private JLabel jlCoordECEF;
+	private JLabel jlAltura;
+	private JLabel jlHGeoide;
+	private JLabel jlAlturaGPS;
 	public PanelMuestraGPSData() {
 		setLayout(new GridLayout(0,3)); //empezamos con 3 columnas
-//		altura=aCopiar.altura;
 //		angulo=aCopiar.angulo;
 //		cadenaNMEA=aCopiar.cadenaNMEA;
 //		coordECEF=(Matrix)aCopiar.coordECEF.clone();
@@ -143,8 +145,35 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jla.setEnabled(false);
 			add(jla);
 		}
-		
+
+		{//altura
+			jlAltura=jla=new JLabel("+????.??");
+			jla.setBorder(BorderFactory.createTitledBorder(
+					       blackline, "Altura"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			add(jla);
+		}
 	
+		{//altura sobre geoide
+			jlHGeoide=jla=new JLabel("+????.??");
+			jla.setBorder(BorderFactory.createTitledBorder(
+					       blackline, "Alt. sobre Geoide"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			add(jla);
+		}
+		{//altura
+			jlAlturaGPS=jla=new JLabel("+????.??");
+			jla.setBorder(BorderFactory.createTitledBorder(
+					       blackline, "Altura GPS"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			add(jla);
+		}
 	}
 	
 	public void actualizaPunto(GPSData pto) {
@@ -158,6 +187,9 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlEdad.setEnabled(false);
 			jlCoordLocales.setEnabled(false);
 			jlCoordECEF.setEnabled(false);
+			jlAltura.setEnabled(false);
+			jlHGeoide.setEnabled(false);
+			jlAlturaGPS.setEnabled(false);
 		} else {
 			jlHora.setEnabled(true);
 			jlLatitud.setEnabled(true);
@@ -167,6 +199,10 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlEdad.setEnabled(true);
 			jlCoordLocales.setEnabled(true);
 			jlCoordECEF.setEnabled(true);
+			jlAltura.setEnabled(true);
+			jlHGeoide.setEnabled(true);
+			jlAlturaGPS.setEnabled(true);
+			//Nuevos valores
 			jlHora.setText(pto.getHora());
 			jlLatitud.setText(pto.getLatitudText());
 			jlLongitud.setText(pto.getLongitudText());
@@ -183,6 +219,9 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 				jlCoordECEF.setText(String.format("(%3.3f  %3.3f %3.3f)"
 						, ce.get(0,0), ce.get(1,0), ce.get(2,0)));
 			} else jlCoordECEF.setEnabled(false);
+			jlAltura.setText(String.format("%+8.2f", pto.getAltura()));
+			jlHGeoide.setText(String.format("%+8.2f", pto.getHGeoide()));
+			jlAlturaGPS.setText(String.format("%+8.2f", pto.getMSL()));
 		}
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
@@ -225,11 +264,27 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		JButton jbSalvar=new JButton("Salvar");
 		jbSalvar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				gpsc.stopRutaAndSave("Prueba1.gps");
+//				gpsc.getBufferRutaEspacial().actualizaCoordenadasLocales();
+//				gpsc.getBufferRutaTemporal().actualizaCoordenadasLocales();
+				gpsc.stopRutaAndSave("Rutas/Prueba1.gps");
 			}
 		}
 		);
-		ventanaPrincipal.getContentPane().add(jbSalvar,BorderLayout.PAGE_END);
+		
+		{ 
+			JPanel jpSur=new JPanel();
+			jpSur.add(jbSalvar);
+			final JLabel jlNumPtos = new JLabel("Puntos en Buffer Espacial=###");
+			jpSur.add(jlNumPtos);
+			ventanaPrincipal.getContentPane().add(jpSur,BorderLayout.PAGE_END);
+			gpsc.addGpsEventListener(new GpsEventListener() {
+				public void handleGpsEvent(GpsEvent ev) {
+					if(ev!=null)
+						jlNumPtos.setText(String.format("Puntos en Buffer Espacial=%d",gpsc.getBufferEspacial().getNumPuntos()));
+				}
+			});
+		}
+		
 		
 		ventanaPrincipal.setSize(new Dimension(800,400));
 		ventanaPrincipal.setVisible(true);
