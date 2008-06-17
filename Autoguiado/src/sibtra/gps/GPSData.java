@@ -585,8 +585,8 @@ public class GPSData implements Serializable, Cloneable {
 			}
 
 			//altura = msl + hgeoide;
-			//setAltura(getHGeoide() + getMSL());
-			setAltura(getHGeoide());
+			setAltura(getHGeoide() + getMSL());
+			//setAltura(getHGeoide());
 
 
 			if (msj[13].equals("")) {
