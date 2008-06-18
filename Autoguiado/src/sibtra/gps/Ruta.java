@@ -118,15 +118,17 @@ public class Ruta implements Serializable {
 		centro=ptoParaCentro;
 		// Matriz de rotación en torno a un punto
 		double v[][] = new double[3][];
-		v[0] = new double[] { -Math.sin(centro.getLongitud()), Math.cos(centro.getLongitud()), 0 };
-		v[1] = new double[] { -Math.cos(centro.getLongitud()) * Math.sin(centro.getLatitud()), -Math.sin(centro.getLatitud()) * Math.sin(centro.getLongitud()), Math.cos(centro.getLatitud()) };
-		v[2] = new double[] { Math.cos(centro.getLatitud()) * Math.cos(centro.getLongitud()), Math.cos(centro.getLatitud()) * Math.sin(centro.getLongitud()), Math.sin(centro.getLatitud())};
+		double lonCenRad=Math.toRadians(centro.getLongitud());
+		double latCenRad=Math.toRadians(centro.getLatitud());
+		v[0] = new double[] { -Math.sin(lonCenRad), Math.cos(lonCenRad), 0 };
+		v[1] = new double[] { -Math.cos(lonCenRad) * Math.sin(latCenRad), -Math.sin(latCenRad) * Math.sin(lonCenRad), Math.cos(latCenRad) };
+		v[2] = new double[] { Math.cos(latCenRad) * Math.cos(lonCenRad), Math.cos(latCenRad) * Math.sin(lonCenRad), Math.sin(latCenRad)};
 
 		Matrix M1 = new Matrix(v);
 
 		// Matriz de inversión del eje z en torno al eje x (Norte)
 		double w[][] = new double[3][];
-		w[0] = new double[] { -1, 0, 0 };
+		w[0] = new double[] { 1, 0, 0 };
 		w[1] = new double[] { 0, 1, 0 };
 		w[2] = new double[] { 0, 0, -1 };
 		Matrix M2 = new Matrix(w);

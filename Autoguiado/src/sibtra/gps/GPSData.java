@@ -18,14 +18,15 @@ public class GPSData implements Serializable, Cloneable {
 	 */
 	private static final long serialVersionUID = 3L;
 
-	private static final long a = 6378137;
+	private static final double a = 6378137.0;
 	
 	private static final double b = 6356752.31424518d;
 //	private static final double e1 = 1.4166d;
 //
 //	/** Vector del polo N */
 //	double u[] = new double[] { 0, b };
-	private static final double e = 0.0821;//0.08181919084262032d;
+	//private static final double e = 0.0821;//0.08181919084262032d;
+	private static final double e = 0.08181919084262032d;
 
 	/**
 	 * Convierte cadena de tiempo recibida del GPS al formato hh:mm:ss
@@ -653,13 +654,14 @@ public class GPSData implements Serializable, Cloneable {
 	 * Calcula y actualiza las coordenadas x,y,z (ECEF) del úlmimo punto (en {@link #data}).
 	 */
 	public void setECEF() {
-//		double altura = data.getAltura();
-//		double latitud = Math.toRadians(data.getLatitud());
-//		double longitud = Math.toRadians(data.getLongitud());
-		double N = a / Math.sqrt(1 - (Math.pow(e, 2.0f) * Math.pow(Math.sin(latitud), 2.0f)));
-		double x = (N + altura) * Math.cos(latitud) * Math.cos(longitud);
-		double y = (N + altura) * Math.cos(latitud) * Math.sin(longitud);
-		double z = ( ( (Math.pow(b, 2.0f) / Math.pow(a, 2.0f)) * N) + altura) * Math.sin(latitud);
+//		double altura = getAltura();
+		double latitudRad = Math.toRadians(getLatitud());
+		double longitudRad = Math.toRadians(getLongitud());
+		
+		double N = a / Math.sqrt(1 - (Math.pow(e, 2.0f) * Math.pow(Math.sin(latitudRad), 2.0f)));
+		double x = (N + altura) * Math.cos(latitudRad) * Math.cos(longitudRad);
+		double y = (N + altura) * Math.cos(latitudRad) * Math.sin(longitudRad);
+		double z = ( ( (Math.pow(b, 2.0f) / Math.pow(a, 2.0f)) * N) + altura) * Math.sin(latitudRad);
 		setX(x);
 		setY(y);
 		setZ(z);      
@@ -795,7 +797,7 @@ public class GPSData implements Serializable, Cloneable {
 		GPSData p1=new GPSData();
 		p1.setLatitud(28.0+28.93084/60.0);
 		p1.setLongitud(-(16+19.27510/60));
-		p1.setAltura(36);
+		p1.setAltura(610);
 		p1.setECEF();
 		
 		GPSData p2=new GPSData();
@@ -803,6 +805,9 @@ public class GPSData implements Serializable, Cloneable {
 		p2.setLongitud(-(16+19.27568/60));
 		p2.setAltura(p1.getAltura());
 		p2.setECEF();
+		
+		System.out.println("p1 ECEF="+p1.getX()+","+p1.getY()+","+p1.getZ()
+				+" p2 ECEF="+p2.getX()+","+p2.getY()+","+p2.getZ());
 		
 		Ruta ruta=new Ruta();
 		ruta.add(p1);
