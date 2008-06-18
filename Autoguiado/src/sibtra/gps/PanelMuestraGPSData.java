@@ -10,12 +10,15 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
@@ -219,7 +222,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 				jlCoordECEF.setText(String.format("(%3.3f  %3.3f %3.3f)"
 						, ce.get(0,0), ce.get(1,0), ce.get(2,0)));
 			} else jlCoordECEF.setEnabled(false);
-			jlAltura.setText(String.format("%+8.2f", pto.getAltura()));
+			jlAltura.setText(String.format("%+8.2f", pto.getHGeoide()+pto.getMSL()));
 			jlHGeoide.setText(String.format("%+8.2f", pto.getHGeoide()));
 			jlAlturaGPS.setText(String.format("%+8.2f", pto.getMSL()));
 		}
@@ -262,11 +265,17 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		ventanaPrincipal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ventanaPrincipal.getContentPane().add(PMGPS,BorderLayout.CENTER);
 		JButton jbSalvar=new JButton("Salvar");
+		
+		SimpleDateFormat FechaFich=new SimpleDateFormat("yyyyMMddHHmm");
+		String NombFich="Prueba"+FechaFich.format(new Date());
+		
+		final JTextField jtfNombreFich=new JTextField(NombFich);
+		
 		jbSalvar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 //				gpsc.getBufferRutaEspacial().actualizaCoordenadasLocales();
 //				gpsc.getBufferRutaTemporal().actualizaCoordenadasLocales();
-				gpsc.stopRutaAndSave("Rutas/Prueba1.gps");
+				gpsc.stopRutaAndSave("Rutas/"+jtfNombreFich.getText()+".gps");
 			}
 		}
 		);
@@ -286,7 +295,8 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		}
 		
 		
-		ventanaPrincipal.setSize(new Dimension(800,400));
+		//ventanaPrincipal.setSize(new Dimension(800,400));
+		ventanaPrincipal.pack();
 		ventanaPrincipal.setVisible(true);
 		
 		
