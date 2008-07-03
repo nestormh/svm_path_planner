@@ -26,7 +26,7 @@ public class Ruta implements Serializable {
 	Vector<GPSData> puntos;
 	
 	/** Punto mas cercano al centro de la ruta */
-	private GPSData centro = null;
+	GPSData centro = null;
 
 	/** Número máximo de puntos que contendrá la ruta */
 	int tamMaximo;
@@ -128,9 +128,9 @@ public class Ruta implements Serializable {
 
 		// Matriz de inversión del eje z en torno al eje x (Norte)
 		double w[][] = new double[3][];
-		w[0] = new double[] { 1, 0, 0 };
-		w[1] = new double[] { 0, 1, 0 };
-		w[2] = new double[] { 0, 0, -1 };
+		w[0] = new double[] { 0, 1, 0 };
+		w[1] = new double[] { -1, 0, 0 };
+		w[2] = new double[] { 0, 0, 1 };
 		Matrix M2 = new Matrix(w);
 
 		T = M2.times(M1); 
