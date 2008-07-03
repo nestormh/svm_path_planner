@@ -7,6 +7,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.GeneralPath;
@@ -14,6 +16,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,7 +28,7 @@ import javax.swing.border.Border;
  * Ponemos eje X vertical hacia arriba (Norte) y eje Y horizontal a la izda (Oeste)
  * @author alberto
  */
-public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventListener {
+public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventListener, ActionListener {
 	
 	/** Tamaño (en pixeles) de los ejes a pintar en el panel */
 	protected static final int TamEjes = 50;
@@ -64,7 +67,13 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 
 	private Ruta RU;
 
+	private JComboBox jcbEscalas;
+	String[] escalasS={ "0.5 m","1 m","2 m", "5 m","10 m","20 m","50 m", "100 m", "500 m" };
+	double[] escalasD={  0.5,    1,    2   ,  5   , 10   , 20   , 50   ,  100   ,  500    };  
 
+	/** Número de pixeles en pantalla que representa la escala seleccionada */
+	private static final int pixelEscala=100;
+	
 	/**
 	 * Convierte punto en el mundo real a punto en la pantalla. 
 	 * EN VERTICAL EL EJE X hacia la izquierda el eje Y. 
@@ -149,15 +158,30 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 					//Usamos mismo factor en ambas direcciones y centramos.
 					double Dx=(maxCX-minCX);
 					double Dy=(maxCY-minCY);
-					double fx=Dx/getHeight();
-					double fy=Dy/getWidth();
-					double f=(fx>fy)?fx:fy;
+					double f=escalasD[jcbEscalas.getSelectedIndex()]/pixelEscala;
+//					double fx=Dx/getHeight();
+//					double fy=Dy/getWidth();
+//					double f=(fx>fy)?fx:fy;
 					double lx=f*getHeight();
 					double ly=f*getWidth();
 					esqSI.setLocation(minCX+Dx+(lx-Dx)/2,minCY+Dy+(ly-Dy)/2);
 					esqID.setLocation(minCX-(lx-Dx)/2,minCY-(ly-Dy)/2);
 
 					restaurar=false;
+					{//pintamos referencia de escala
+						g.setColor(Color.WHITE);
+						float pxSep=20;
+						float altE=4;
+						float xCentE=getWidth()-pixelEscala/2-pxSep;
+						float yCentE=getHeight()-pxSep;
+						GeneralPath gpE=new GeneralPath(GeneralPath.WIND_EVEN_ODD,4);
+						gpE.moveTo(xCentE-pixelEscala/2, yCentE-altE);
+						gpE.lineTo(xCentE-pixelEscala/2, yCentE);
+						gpE.lineTo(xCentE+pixelEscala/2, yCentE);
+						gpE.lineTo(xCentE+pixelEscala/2, yCentE-altE);
+						g.draw(gpE);
+						g.drawString((String)jcbEscalas.getSelectedItem(), xCentE, yCentE-altE);
+					}
 				}
 				{//Pintamos  ejes en 0,0
 					g.setColor(Color.WHITE);
@@ -226,6 +250,19 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 		JPanelGrafico.setBackground(Color.BLACK);
 		JPanelGrafico.addMouseListener(this);
 		add(JPanelGrafico,BorderLayout.CENTER);
+		
+		{
+			JPanel jpSur=new JPanel();
+			
+			jpSur.add(new JLabel("Escala"));
+			jcbEscalas=new JComboBox(escalasS);
+			jcbEscalas.setSelectedIndex(4);
+			jcbEscalas.addActionListener(this);
+			jpSur.add(jcbEscalas);
+			
+			add(jpSur,BorderLayout.SOUTH);
+			
+		}
 		
 	}
 
@@ -326,7 +363,18 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 		});		
 	}
 
-	
+
+	/* (non-Javadoc)
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent ae) {
+		if(ae.getSource()==jcbEscalas) {
+			//solo repintamos restaurando
+			restaurar=true;
+			JPanelGrafico.repaint();
+		}
+	}
+
 	
 	/**
 	 * Programa para probar 
@@ -633,5 +681,7 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 		}
 		
 	}
+
+
 
 }
