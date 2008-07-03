@@ -38,7 +38,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 	private JButton jbSiguiente;
 	private JButton jbUltimo;
 
-	private JSpinner jsDato;
+	JSpinner jsDato;
 
 	private SpinnerNumberModel spm;
 

@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import sibtra.imu.AngulosIMU;
+
 import Jama.Matrix;
 
 /**
@@ -184,7 +186,7 @@ public class GPSData implements Serializable, Cloneable {
 	/**
 	 * Número de satelites disponibles cuando se obtuvo el punto.
 	 */
-	private int satelites=Integer.MIN_VALUE;
+	private int satelites=0;
 	
 	/**
 	 * Hora del ordenador cuando se obtuvo el punto (en milisegundos).
@@ -208,6 +210,17 @@ public class GPSData implements Serializable, Cloneable {
 	 */
 	private double velocidadGPS=Double.NaN;
 	
+	/** Angulos leidos de la IMU */
+	private AngulosIMU agulosIMU;
+	
+	public AngulosIMU getAgulosIMU() {
+		return agulosIMU;
+	}
+
+	public void setAgulosIMU(AngulosIMU agulosIMU) {
+		this.agulosIMU = agulosIMU;
+	}
+
 	/** Constructor por defecto */
 	public GPSData() {
 	}

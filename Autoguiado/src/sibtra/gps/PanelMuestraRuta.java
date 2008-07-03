@@ -71,6 +71,9 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 	String[] escalasS={ "0.5 m","1 m","2 m", "5 m","10 m","20 m","50 m", "100 m", "500 m" };
 	double[] escalasD={  0.5,    1,    2   ,  5   , 10   , 20   , 50   ,  100   ,  500    };  
 
+	private boolean escalado;
+
+
 	/** Número de pixeles en pantalla que representa la escala seleccionada */
 	private static final int pixelEscala=100;
 	
@@ -139,7 +142,6 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 
 		//Primero el Panel
 		JPanelGrafico=new JPanel() {
-
 			protected void paintComponent(Graphics g0) {
 				Graphics2D g=(Graphics2D)g0;
 				super.paintComponent(g);
@@ -168,20 +170,22 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 					esqID.setLocation(minCX-(lx-Dx)/2,minCY-(ly-Dy)/2);
 
 					restaurar=false;
-					{//pintamos referencia de escala
-						g.setColor(Color.WHITE);
-						float pxSep=20;
-						float altE=4;
-						float xCentE=getWidth()-pixelEscala/2-pxSep;
-						float yCentE=getHeight()-pxSep;
-						GeneralPath gpE=new GeneralPath(GeneralPath.WIND_EVEN_ODD,4);
-						gpE.moveTo(xCentE-pixelEscala/2, yCentE-altE);
-						gpE.lineTo(xCentE-pixelEscala/2, yCentE);
-						gpE.lineTo(xCentE+pixelEscala/2, yCentE);
-						gpE.lineTo(xCentE+pixelEscala/2, yCentE-altE);
-						g.draw(gpE);
-						g.drawString((String)jcbEscalas.getSelectedItem(), xCentE, yCentE-altE);
-					}
+					escalado=true;
+				}
+				if (escalado) {
+					//pintamos referencia de escala
+					g.setColor(Color.WHITE);
+					float pxSep=20;
+					float altE=4;
+					float xCentE=getWidth()-pixelEscala/2-pxSep;
+					float yCentE=getHeight()-pxSep;
+					GeneralPath gpE=new GeneralPath(GeneralPath.WIND_EVEN_ODD,4);
+					gpE.moveTo(xCentE-pixelEscala/2, yCentE-altE);
+					gpE.lineTo(xCentE-pixelEscala/2, yCentE);
+					gpE.lineTo(xCentE+pixelEscala/2, yCentE);
+					gpE.lineTo(xCentE+pixelEscala/2, yCentE-altE);
+					g.draw(gpE);
+					g.drawString((String)jcbEscalas.getSelectedItem(), xCentE, yCentE-altE);
 				}
 				{//Pintamos  ejes en 0,0
 					g.setColor(Color.WHITE);
@@ -260,6 +264,7 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 			jcbEscalas.addActionListener(this);
 			jpSur.add(jcbEscalas);
 			
+			
 			add(jpSur,BorderLayout.SOUTH);
 			
 		}
@@ -317,6 +322,7 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 					Point2D.Double nuevaEsqSI=pixel2Point( new Point2D.Double(evenPulsa.getX(),evenPulsa.getY()) );
 					esqID.setLocation(pixel2Point( new Point2D.Double(even.getX(),even.getY()) ));
 					esqSI.setLocation(nuevaEsqSI);
+					escalado=false;
 					JPanelGrafico.repaint();
 					System.out.println("Puntos:  SI ("+ esqSI.getX()+ ","+esqSI.getY() +") "
 							+"  ID ("+esqID.getX()+","+esqID.getY()+")"
@@ -344,23 +350,19 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 	 * Acatualiza la presentación con los datos en {@link #MI}.
 	 * Se debe invocar cuando {@link #MI} realiza un nuevo cálculo. 
 	 */
-	public void actualiza() {
+	public void nuevoPunto() {
 		restaurar=true;
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				JPanelGrafico.repaint();			
+				repaint();			
 			}
 		});
 	}
 	
 
 	public void handleGpsEvent(GpsEvent ev) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				JPanelGrafico.repaint();			
-			}
-		});		
+		nuevoPunto();
 	}
 
 
@@ -676,7 +678,7 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 				Thread.sleep(200);
 			} catch (Exception e) { }
 			ru.add(ru.setCoordenadasLocales((new GPSData(rutaLLA[i]).calculaECEF())));
-			pmr.actualiza();
+			pmr.nuevoPunto();
 			System.out.println("Añadido "+ru.getUltimoPto());
 		}
 		
