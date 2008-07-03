@@ -135,7 +135,7 @@ public class GPSData implements Serializable, Cloneable {
 	private double hdoP=Double.NaN;
 	
 	/**
-	 * Separación de la geoide en metros (puede ser + o -)
+	 * Separación de la geoide en metros con respecto al elipsoide (puede ser + o -)
 	 * Se recibe como '±xxxx.xx'
 	 */
 	private double hGeoide=Double.NaN;
@@ -217,6 +217,22 @@ public class GPSData implements Serializable, Cloneable {
 		this.copy(aCopiar);
 	}
 
+	/** Constructuor al que se le pasan Latitud, Longitud, Altura */
+	public GPSData(double Latitud, double Longitud, double Altura ) {
+		latitud=Latitud;
+		longitud=Longitud;
+		altura=Altura;
+	}
+	
+	/** Constructor al que se pasa array de tres doubles que son  Latitud, Longitud, Altura */
+	public GPSData(double[] lla){
+		if(lla.length!=3)
+			return;
+		latitud=lla[0];
+		longitud=lla[1];
+		altura=lla[2];
+	}
+	
 	/**
 	 * Copia los datos del punto pasado a este
 	 * @param aCopiar punto que va haser copiado
@@ -275,6 +291,7 @@ public class GPSData implements Serializable, Cloneable {
 		val.setVelocidad(vel);                
 	}
 	
+	/** Devuevle objeto {@link GPSData} identico al actual */
 	public Object clone() {
 		Object clone = null;
 		try {
@@ -296,13 +313,16 @@ public class GPSData implements Serializable, Cloneable {
 		return data.coordLocal.minus(coordLocal).normF();
 	}
 
+	/** @return {@link #age} la edad de la actualización */
 	public double getAge() {
 		return this.age;
 	}
 	
+	/** @return {@link #altura} la altura sobre el elipsoide */
 	public double getAltura() {
 		return this.altura;
 	}
+	/** @return {@link #angulo} angulo con respecto al punto anterior */
 	public double getAngulo() {
 		return this.angulo;
 	}
@@ -321,6 +341,7 @@ public class GPSData implements Serializable, Cloneable {
 		return coordLocal;
 	}
 
+	/** @return {@link #desvAltura} */
 	public double getDesvAltura() {
 		return this.desvAltura;
 	}
@@ -349,6 +370,7 @@ public class GPSData implements Serializable, Cloneable {
 	public double getHDOP() {
 		return this.hdoP;
 	}
+	/** @return {@link #hGeoide} desviación de la geoide resepecto al elipsoide */
 	public double getHGeoide() {
 		return this.hGeoide;
 	}
@@ -364,6 +386,7 @@ public class GPSData implements Serializable, Cloneable {
 		return this.longitud;
 	}
 
+	/** @return {@link #msL} altura de la antena sobre geoide */
 	public double getMSL() {
 		return this.msL;
 	}
@@ -441,7 +464,7 @@ public class GPSData implements Serializable, Cloneable {
 	}
 
 	/**
-	 * Interpreta la cadena recibida del GPS y obtiene los distintos datos contenidos.
+	 * Interpreta la cadena recibida del GPS y almacena los distintos datos contenidos.
 	 * Trata los mensajes GSA, GST, VTG y GGA.
 	 * @param cadena mensaje a interpretar
 	 */
@@ -617,7 +640,7 @@ public class GPSData implements Serializable, Cloneable {
 		this.cadenaNMEA = cadenaNMEA;
 	}
 	/** @param coordECEF the coordECEF to set	 */
-	public void setCoordECEF(Matrix coordECEF) {
+	void setCoordECEF(Matrix coordECEF) {
 		if(coordECEF!=null 
 				&& (coordECEF.getColumnDimension()!=1 || coordECEF.getRowDimension()!=3))
 			throw new IllegalArgumentException("Parámetro debe ser vector columna de 3 componentes");
@@ -625,7 +648,7 @@ public class GPSData implements Serializable, Cloneable {
 	}
 
 	/** @param coordLocal the coordLocal to set	 */
-	public void setCoordLocal(Matrix coordLocal) {
+	void setCoordLocal(Matrix coordLocal) {
 		if(coordLocal!=null && 
 				(coordLocal.getColumnDimension()!=1 || coordLocal.getRowDimension()!=3))
 			throw new IllegalArgumentException("Parámetro debe ser vector columna de 3 componentes");
@@ -651,20 +674,26 @@ public class GPSData implements Serializable, Cloneable {
 	}
 
 	/**
-	 * Calcula y actualiza las coordenadas x,y,z (ECEF) del úlmimo punto (en {@link #data}).
+	 * Calcula y actualiza las coordenadas x,y,z (ECEF) del punto.
 	 */
-	public void setECEF() {
-//		double altura = getAltura();
-		double latitudRad = Math.toRadians(getLatitud());
-		double longitudRad = Math.toRadians(getLongitud());
-		
-		double N = a / Math.sqrt(1 - (Math.pow(e, 2.0f) * Math.pow(Math.sin(latitudRad), 2.0f)));
-		double x = (N + altura) * Math.cos(latitudRad) * Math.cos(longitudRad);
-		double y = (N + altura) * Math.cos(latitudRad) * Math.sin(longitudRad);
-		double z = ( ( (Math.pow(b, 2.0f) / Math.pow(a, 2.0f)) * N) + altura) * Math.sin(latitudRad);
-		setX(x);
-		setY(y);
-		setZ(z);      
+	public GPSData calculaECEF() {
+		if(coordECEF==null) {
+			//no aún no están las calculamos
+			if(latitud==Double.NaN || longitud==Double.NaN  || altura==Double.NaN)
+				throw (new IllegalArgumentException("El punto no tiene infomración suficiente para calcular ECEF (LLA)"));
+
+			double latitudRad = Math.toRadians(getLatitud());
+			double longitudRad = Math.toRadians(getLongitud());
+
+			double N = a / Math.sqrt(1 - (Math.pow(e, 2.0f) * Math.pow(Math.sin(latitudRad), 2.0f)));
+			double x = (N + altura) * Math.cos(latitudRad) * Math.cos(longitudRad);
+			double y = (N + altura) * Math.cos(latitudRad) * Math.sin(longitudRad);
+			double z = ( ( (Math.pow(b, 2.0f) / Math.pow(a, 2.0f)) * N) + altura) * Math.sin(latitudRad);
+			setX(x);
+			setY(y);
+			setZ(z);  
+		}
+		return this;
 	}
 	
 	public void setHdgPoloM(double value) { 
@@ -798,13 +827,13 @@ public class GPSData implements Serializable, Cloneable {
 		p1.setLatitud(28.0+28.93084/60.0);
 		p1.setLongitud(-(16+19.27510/60));
 		p1.setAltura(610);
-		p1.setECEF();
+		p1.calculaECEF();
 		
 		GPSData p2=new GPSData();
 		p2.setLatitud(28.0+28.93055/60.0);
 		p2.setLongitud(-(16+19.27568/60));
 		p2.setAltura(p1.getAltura());
-		p2.setECEF();
+		p2.calculaECEF();
 		
 		System.out.println("p1 ECEF="+p1.getX()+","+p1.getY()+","+p1.getZ()
 				+" p2 ECEF="+p2.getX()+","+p2.getY()+","+p2.getZ());
@@ -823,7 +852,7 @@ public class GPSData implements Serializable, Cloneable {
 		
 		
 		p2.setAltura(p1.getAltura()+100);
-		p2.setECEF();
+		p2.calculaECEF();
 		ruta.actualizaCoordenadasLocales();
 		p1.calculaAngSpeed(p2);
 		
@@ -836,7 +865,7 @@ public class GPSData implements Serializable, Cloneable {
 				+" => "+double2sexagesimal(Math.toDegrees(ang2-ang1)));
 
 		p1.setAltura(p1.getAltura()+100);
-		p1.setECEF();
+		p1.calculaECEF();
 		ruta.actualizaCoordenadasLocales();
 		p1.calculaAngSpeed(p2);
 		

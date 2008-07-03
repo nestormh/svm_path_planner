@@ -44,6 +44,10 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 
 	private JLabel jlDeMaximo;
 
+	public PanelExaminaRuta() {
+		this(null);
+	}
+	
 	/**
 	 * 
 	 */

@@ -115,7 +115,7 @@ public class Ruta implements Serializable {
 	 */
 	public void actualizaSistemaLocal(GPSData ptoParaCentro) {
 		if(ptoParaCentro==null) return;
-		centro=ptoParaCentro;
+		centro=ptoParaCentro.calculaECEF();
 		// Matriz de rotación en torno a un punto
 		double v[][] = new double[3][];
 		double lonCenRad=Math.toRadians(centro.getLongitud());
@@ -182,15 +182,16 @@ public class Ruta implements Serializable {
 	 * Si no está definido el {@link #centro} o {@link #T} se inicializan a (-1,-1,-1) :-(
 	 * @param pto punto a actualizar
 	 */
-	public void setCoordenadasLocales(GPSData pto) {
+	public GPSData setCoordenadasLocales(GPSData pto) {
 		if (T == null || centro==null) {
 			pto.setCoordLocal(null);
-			return;
+			return pto;
 		}
 
 		Matrix res = pto.getCoordECEF().minus(centro.getCoordECEF()); 
 		res = T.times(res); //dejamos como vector columna
 		pto.setCoordLocal(res);
+		return pto;
 	}
 
 	/** actualiza coordenadas locales de todos los puntos de la ruta */

@@ -282,7 +282,7 @@ public class GPSConnection implements SerialPortEventListener {
 		if(!cadena.substring(3, 6).equals("GGA"))
 			return;  //sólo será nuevo punto si es paquete GGA
 		data.setSysTime(System.currentTimeMillis());
-		data.setECEF();
+		data.calculaECEF();
 		if(!bufferEspacial.tieneSistemaLocal() && bufferEspacial.getNumPuntos()>100) {
 			bufferEspacial.actualizaSistemaLocal();
 			updateBuffers(bufferEspacial);
