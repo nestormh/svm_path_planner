@@ -147,16 +147,22 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 				super.paintComponent(g);
 				if(restaurar) {
 					//restauramos las esquinas
-					double minCX=RU.getPunto(0).getXLocal();
-					double minCY=RU.getPunto(0).getYLocal();
-					double maxCX=minCX;
-					double maxCY=minCY;
-					for(int i=1; i<RU.getNumPuntos(); i++) {
-						if(RU.getPunto(i).getXLocal()<minCX) minCX=RU.getPunto(i).getXLocal();
-						if(RU.getPunto(i).getXLocal()>maxCX) maxCX=RU.getPunto(i).getXLocal();
-						if(RU.getPunto(i).getYLocal()<minCY) minCY=RU.getPunto(i).getYLocal();
-						if(RU.getPunto(i).getYLocal()>maxCY) maxCY=RU.getPunto(i).getYLocal();
-					}
+					double minCX=-10;
+					double minCY=-10;
+					double maxCX=10;
+					double maxCY=10;
+					if(RU!=null && RU.getNumPuntos()>=1) {
+						minCX=RU.getPunto(0).getXLocal();
+						minCY=RU.getPunto(0).getYLocal();
+						maxCX=minCX;
+						maxCY=minCY;
+						for(int i=1; i<RU.getNumPuntos(); i++) {
+							if(RU.getPunto(i).getXLocal()<minCX) minCX=RU.getPunto(i).getXLocal();
+							if(RU.getPunto(i).getXLocal()>maxCX) maxCX=RU.getPunto(i).getXLocal();
+							if(RU.getPunto(i).getYLocal()<minCY) minCY=RU.getPunto(i).getYLocal();
+							if(RU.getPunto(i).getYLocal()>maxCY) maxCY=RU.getPunto(i).getYLocal();
+						}
+					} 
 					//Usamos mismo factor en ambas direcciones y centramos.
 					double Dx=(maxCX-minCX);
 					double Dy=(maxCY-minCY);
@@ -198,7 +204,7 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 					g.drawString("N",(float)pxCentro.getX()+3,(float)pxCentro.getY()-TamEjes+12);
 					g.drawString("W",(float)pxCentro.getX()-TamEjes,(float)pxCentro.getY()-3);
 				}
-				{
+				if (RU!=null && RU.getNumPuntos()>=1){
 					//pintamos el trayecto
 					g.setStroke(new BasicStroke());
 					g.setColor(Color.YELLOW);
@@ -216,7 +222,7 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 					g.draw(gpTr);
 				}
 				
-				if(RU.getNumPuntos()>2)	{
+				if(RU!=null && RU.getNumPuntos()>2)	{
 					//Posición y orientación del coche
 					g.setStroke(new BasicStroke(3));
 					g.setPaint(Color.GRAY);
@@ -682,6 +688,18 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 			System.out.println("Añadido "+ru.getUltimoPto());
 		}
 		
+	}
+
+
+	/** @return ruta que se está representando	 */
+	public Ruta getRuta() {
+		return RU;
+	}
+	
+	/** Cambia a una nueva ruta a representando */
+	public void setRuta(Ruta ru) {
+		RU=ru;
+		nuevoPunto(); //para actualizar presentación
 	}
 
 
