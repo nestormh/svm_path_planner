@@ -18,7 +18,7 @@ public class GPSData implements Serializable, Cloneable {
 	 * Si cambiamos estructura del objeto tenemos que cambiar el número de serie y ver 
 	 * como se cargan versiones anteriores.
 	 */
-	private static final long serialVersionUID = 3L;
+	private static final long serialVersionUID = 4L;
 
 	private static final double a = 6378137.0;
 	
