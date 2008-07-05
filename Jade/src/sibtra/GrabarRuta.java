@@ -2,8 +2,17 @@ package sibtra;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JWindow;
 
 import sibtra.gps.GPSConnection;
 import sibtra.gps.GPSData;
@@ -18,7 +27,8 @@ import sibtra.imu.IMUEvent;
 import sibtra.imu.IMUEventListener;
 import sibtra.imu.PanelMuestraAngulosIMU;
 
-public class GrabarRuta implements GpsEventListener, IMUEventListener {
+public class GrabarRuta implements GpsEventListener, IMUEventListener, 
+ActionListener {
 	
 	private GPSConnection gpsCon;
 	private JFrame ventGData;
@@ -29,6 +39,14 @@ public class GrabarRuta implements GpsEventListener, IMUEventListener {
 	private JFrame ventRuta;
 	private PanelMuestraRuta pmr;
 	private AngulosIMU ultimoAngulo;
+	private JButton jbGrabar;
+	private JButton jbParar;
+	private JFileChooser fc;
+	private JLabel jlNpBT;
+	private JLabel jlNpBE;
+	private JLabel jlNpRT;
+	private JLabel jlNpRE;
+	private boolean cambioRuta;
 
 	public GrabarRuta(String[] args) {
 		if(args.length<2) {
@@ -42,10 +60,11 @@ public class GrabarRuta implements GpsEventListener, IMUEventListener {
 			System.err.println("No se obtuvo GPSConnection");
 			System.exit(1);
 		}
+		gpsCon.addGpsEventListener(this);
 
 		//conexión IMU
 		csi=new ConexionSerialIMU();
-		if(!csi.ConectaPuerto(args[1])) {
+		if(!csi.ConectaPuerto(args[1],5)) {
 			System.err.println("Problema en conexión serial con la IMU");
 			System.exit(1);
 		}
@@ -73,26 +92,85 @@ public class GrabarRuta implements GpsEventListener, IMUEventListener {
 
 		//Creamos ventana para la ruta
 		ventRuta=new JFrame("Ruta");
-		pmr=new PanelMuestraRuta(gpsCon.getRutaEspacial());
+		pmr=new PanelMuestraRuta(gpsCon.getBufferRutaEspacial());
 		gpsCon.addGpsEventListener(pmr);
 		ventRuta.getContentPane().add(pmr,BorderLayout.CENTER);
+		{ //sur ventana
+			JComponent ja;
+			
+			JPanel jpSur=new JPanel();
+
+			jbGrabar=new JButton("Grabar");
+			jbGrabar.addActionListener(this);
+			jpSur.add(jbGrabar);
+
+			jbParar=new JButton("Parar");
+			jbParar.setEnabled(false);
+			jbParar.addActionListener(this);
+			jpSur.add(jbParar);
+			
+			ja=jlNpBT=new JLabel("BT: ?????"); ja.setEnabled(true); jpSur.add(ja); 
+			ja=jlNpBE=new JLabel("BE: ?????"); ja.setEnabled(true); jpSur.add(ja); 
+			ja=jlNpRT=new JLabel("RT: ?????"); ja.setEnabled(false); jpSur.add(ja); 
+			ja=jlNpRE=new JLabel("RE: ?????"); ja.setEnabled(false); jpSur.add(ja); 
+			
+			ventRuta.getContentPane().add(jpSur,BorderLayout.SOUTH);
+		}
 //		ventRuta.pack();
 		ventRuta.setSize(new Dimension(800,600));
 		ventRuta.setVisible(true);
-		
+
+		//elegir fichero
+		fc=new JFileChooser(new File("./Rutas"));
+
 	}
 
 
 	public void handleGpsEvent(GpsEvent ev) {
 		//ponemos el último ángulo de la IMU en el último dato del GPS
 		ev.getNuevoPunto().setAgulosIMU(ultimoAngulo);
-		if(pmr.getRuta()==null && gpsCon.getRutaTemporal()!=null)
-			pmr.setRuta(gpsCon.getRutaTemporal());
+		//actualizamos el número de puntos
+		jlNpBE.setText(String.format("BE: %d5", gpsCon.getBufferEspacial().getNumPuntos()));
+		jlNpBT.setText(String.format("BT: %d5", gpsCon.getBufferTemporal().getNumPuntos()));
+		if(gpsCon.getBufferRutaEspacial()!=null) {
+			jlNpRE.setText(String.format("RE: %d5", gpsCon.getBufferRutaEspacial().getNumPuntos()));
+			jlNpRE.setEnabled(true);
+		}
+		if(gpsCon.getBufferRutaTemporal()!=null) {
+			jlNpRT.setText(String.format("RT: %d5", gpsCon.getBufferRutaTemporal().getNumPuntos()));
+			jlNpRT.setEnabled(true);
+		}
+		if(cambioRuta) {
+			System.out.println("Conectamos la ruta espacial");
+			pmr.setRuta(gpsCon.getBufferRutaEspacial());
+			cambioRuta=false;
+		}
 	}
 
 	public void handleIMUEvent(IMUEvent ev) {
 		ultimoAngulo=new AngulosIMU(ev.getAngulos());
 	}
+	
+
+	public void actionPerformed(ActionEvent ae) {
+		if(ae.getSource()==jbGrabar) {
+			//comienza la grabación
+			cambioRuta=true;
+			gpsCon.startRuta();
+			jbGrabar.setEnabled(false);
+			jbParar.setEnabled(true);
+		}
+		if(ae.getSource()==jbParar) {
+			gpsCon.stopRuta();
+			int devuelto=fc.showSaveDialog(ventRuta);
+			if(devuelto==JFileChooser.APPROVE_OPTION) {
+				File file=fc.getSelectedFile();
+				gpsCon.saveRuta(file.getAbsolutePath());
+			}
+			jbGrabar.setEnabled(true);
+		}
+	}
+
 
 	/**
 	 * @param args
@@ -101,5 +179,6 @@ public class GrabarRuta implements GpsEventListener, IMUEventListener {
 		GrabarRuta gr=new GrabarRuta(args);
 		
 	}
+
 
 }

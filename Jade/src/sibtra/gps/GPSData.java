@@ -690,22 +690,21 @@ public class GPSData implements Serializable, Cloneable {
 	 * Calcula y actualiza las coordenadas x,y,z (ECEF) del punto.
 	 */
 	public GPSData calculaECEF() {
-		if(coordECEF==null) {
-			//no aún no están las calculamos
-			if(latitud==Double.NaN || longitud==Double.NaN  || altura==Double.NaN)
-				throw (new IllegalArgumentException("El punto no tiene infomración suficiente para calcular ECEF (LLA)"));
+		//no aún no están las calculamos
+		if(latitud==Double.NaN || longitud==Double.NaN  || altura==Double.NaN)
+			throw (new IllegalArgumentException("El punto no tiene infomración suficiente para calcular ECEF (LLA)"));
 
-			double latitudRad = Math.toRadians(getLatitud());
-			double longitudRad = Math.toRadians(getLongitud());
+		double latitudRad = Math.toRadians(getLatitud());
+		double longitudRad = Math.toRadians(getLongitud());
 
-			double N = a / Math.sqrt(1 - (Math.pow(e, 2.0f) * Math.pow(Math.sin(latitudRad), 2.0f)));
-			double x = (N + altura) * Math.cos(latitudRad) * Math.cos(longitudRad);
-			double y = (N + altura) * Math.cos(latitudRad) * Math.sin(longitudRad);
-			double z = ( ( (Math.pow(b, 2.0f) / Math.pow(a, 2.0f)) * N) + altura) * Math.sin(latitudRad);
-			setX(x);
-			setY(y);
-			setZ(z);  
-		}
+		double N = a / Math.sqrt(1 - (Math.pow(e, 2.0f) * Math.pow(Math.sin(latitudRad), 2.0f)));
+		double x = (N + altura) * Math.cos(latitudRad) * Math.cos(longitudRad);
+		double y = (N + altura) * Math.cos(latitudRad) * Math.sin(longitudRad);
+		double z = ( ( (Math.pow(b, 2.0f) / Math.pow(a, 2.0f)) * N) + altura) * Math.sin(latitudRad);
+		setX(x);
+		setY(y);
+		setZ(z);  
+
 		return this;
 	}
 	

@@ -38,10 +38,12 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	private JLabel jlNumSat;
 	private JLabel jlEdad;
 	private JLabel jlCoordLocales;
-	private JLabel jlCoordECEF;
 	private JLabel jlAltura;
 	private JLabel jlHGeoide;
 	private JLabel jlAlturaGPS;
+	private JLabel jlCoordECEFx;
+	private JLabel jlCoordECEFy;
+	private JLabel jlCoordECEFz;
 	public PanelMuestraGPSData() {
 		setLayout(new GridLayout(0,3)); //empezamos con 3 columnas
 //		angulo=aCopiar.angulo;
@@ -139,10 +141,30 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			add(jla);
 		}
 		
-		{ //Coordenadas ECEF
-			jlCoordECEF=jla=new JLabel("(???.??, ???.??, ???.??)");
+		{ //Coordenadas ECEF X
+			jlCoordECEFx=jla=new JLabel("???????.??");
 			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "ECEF"));
+					       blackline, "ECEF X"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			add(jla);
+		}
+
+		{ //Coordenadas ECEF Y
+			jlCoordECEFy=jla=new JLabel("???????.??");
+			jla.setBorder(BorderFactory.createTitledBorder(
+					       blackline, "ECEF Y"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			add(jla);
+		}
+
+		{ //Coordenadas ECEF Z
+			jlCoordECEFz=jla=new JLabel("???????.??");
+			jla.setBorder(BorderFactory.createTitledBorder(
+					       blackline, "ECEF X"));
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
@@ -189,7 +211,9 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlNumSat.setEnabled(false);
 			jlEdad.setEnabled(false);
 			jlCoordLocales.setEnabled(false);
-			jlCoordECEF.setEnabled(false);
+			jlCoordECEFx.setEnabled(false);
+			jlCoordECEFy.setEnabled(false);
+			jlCoordECEFz.setEnabled(false);
 			jlAltura.setEnabled(false);
 			jlHGeoide.setEnabled(false);
 			jlAlturaGPS.setEnabled(false);
@@ -201,7 +225,9 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlNumSat.setEnabled(true);
 			jlEdad.setEnabled(true);
 			jlCoordLocales.setEnabled(true);
-			jlCoordECEF.setEnabled(true);
+			jlCoordECEFx.setEnabled(true);
+			jlCoordECEFy.setEnabled(true);
+			jlCoordECEFz.setEnabled(true);
 			jlAltura.setEnabled(true);
 			jlHGeoide.setEnabled(true);
 			jlAlturaGPS.setEnabled(true);
@@ -216,12 +242,18 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			if(cl!=null && cl.get(0, 0)<Double.MAX_VALUE) {
 				jlCoordLocales.setText(String.format("(%3.3f %3.3f %3.3f)"
 						, cl.get(0,0), cl.get(1,0), cl.get(2,0)));
-			} else jlCoordLocales.setEnabled(false);
+			} else 
+				jlCoordLocales.setEnabled(false);
 			Matrix ce=pto.getCoordECEF();
 			if(ce!=null && ce.get(0, 0)<Double.MAX_VALUE) {
-				jlCoordECEF.setText(String.format("(%3.3f  %3.3f %3.3f)"
-						, ce.get(0,0), ce.get(1,0), ce.get(2,0)));
-			} else jlCoordECEF.setEnabled(false);
+				jlCoordECEFx.setText(String.format("%10.3f",ce.get(0,0)));
+				jlCoordECEFy.setText(String.format("%10.3f",ce.get(1,0)));
+				jlCoordECEFz.setText(String.format("%10.3f",ce.get(2,0)));
+			} else {
+				jlCoordECEFx.setEnabled(false);
+				jlCoordECEFy.setEnabled(false);
+				jlCoordECEFz.setEnabled(false);
+			}
 			jlAltura.setText(String.format("%+8.2f", pto.getHGeoide()+pto.getMSL()));
 			jlHGeoide.setText(String.format("%+8.2f", pto.getHGeoide()));
 			jlAlturaGPS.setText(String.format("%+8.2f", pto.getMSL()));
@@ -285,7 +317,17 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jpSur.add(jbSalvar);
 			final JLabel jlNumPtos = new JLabel("Puntos en Buffer Espacial=###");
 			jpSur.add(jlNumPtos);
+			final JLabel jlNumPtosT = new JLabel("Puntos en Buffer Temporal=###");
+			jpSur.add(jlNumPtosT);
 			ventanaPrincipal.getContentPane().add(jpSur,BorderLayout.PAGE_END);
+			gpsc.addGpsEventListener(new GpsEventListener() {
+				public void handleGpsEvent(GpsEvent ev) {
+					if(ev!=null) {
+						jlNumPtos.setText(String.format("Puntos en Buffer Espacial=%d",gpsc.getBufferEspacial().getNumPuntos()));
+						jlNumPtosT.setText(String.format("Puntos en Buffer Temporal=%d",gpsc.getBufferTemporal().getNumPuntos()));
+					}
+				}
+			});
 			gpsc.addGpsEventListener(new GpsEventListener() {
 				public void handleGpsEvent(GpsEvent ev) {
 					if(ev!=null)

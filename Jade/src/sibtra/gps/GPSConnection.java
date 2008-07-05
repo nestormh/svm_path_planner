@@ -274,6 +274,7 @@ public class GPSConnection implements SerialPortEventListener {
 
 	/**
 	 * Actuliza toda los buffers con la información contenida en la nueva cadena recibida.
+	 * Fija el sistema local al primer punto de buffer espacial.
 	 * @param cadena cadena recibida (del GPS)
 	 */
 	void actualizaNuevaCadena(String cadena) {
@@ -283,8 +284,9 @@ public class GPSConnection implements SerialPortEventListener {
 			return;  //sólo será nuevo punto si es paquete GGA
 		data.setSysTime(System.currentTimeMillis());
 		data.calculaECEF();
-		if(!bufferEspacial.tieneSistemaLocal() && bufferEspacial.getNumPuntos()>100) {
-			bufferEspacial.actualizaSistemaLocal();
+		if(!bufferEspacial.tieneSistemaLocal())  {
+			System.out.println("Se actuliza local de buffer Espacial");
+			bufferEspacial.actualizaSistemaLocal(data);
 			updateBuffers(bufferEspacial);
 		}
 		bufferEspacial.setCoordenadasLocales(data);
@@ -359,7 +361,10 @@ public class GPSConnection implements SerialPortEventListener {
 
 	/**
 	 * Añade el punto en {@link #data} al {@link #bufferTemporal} y {@link #bufferEspacial} y si 
-	 * se está {@link #enRuta} también al {@link #bufferRutaTemporal} y {@link #bufferRutaEspacial}
+	 * se está {@link #enRuta} también al {@link #bufferRutaTemporal} y {@link #bufferRutaEspacial} 
+	 * Si se está {@link #enRuta} se usa primer punto de ruta espacial para fijar sistema local
+	 * de todos.
+	 * 
 	 */
 	private void añadeABuffers() {
 		bufferEspacial.add(data);
@@ -367,6 +372,13 @@ public class GPSConnection implements SerialPortEventListener {
 		if(enRuta) {
 			bufferRutaEspacial.add(data);
 			bufferRutaTemporal.add(data);
+			if(!bufferRutaEspacial.tieneSistemaLocal()) {
+				//sistema local con primer punto de la ruta espacial
+				bufferRutaEspacial.actualizaSistemaLocal(bufferRutaEspacial.getPunto(0));
+				//todos los demás con ese sistema local
+				updateBuffers(bufferRutaEspacial);
+			}
+				
 		}
 	}
 
@@ -459,6 +471,7 @@ public class GPSConnection implements SerialPortEventListener {
 	public void startRuta() {
 		bufferRutaEspacial = new Ruta(true);
 		bufferRutaTemporal = new Ruta(false);
+		
 
 		enRuta = true;
 	}    
