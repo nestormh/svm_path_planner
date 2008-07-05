@@ -40,11 +40,23 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 	/** Donde se almacena los últimos angulos recibidos */
 	private AngulosIMU angulo;
 
-
-	/* (non-Javadoc)
-	 * @see sibtra.lms.ManejaTelegramas#ConectaPuerto(java.lang.String)
+	/**
+	 * Inicialización del puerto serie. 
+	 * @param NombrePuerto
+	 * @return
 	 */
 	public boolean ConectaPuerto(String NombrePuerto) {
+		return ConectaPuerto(NombrePuerto,5);
+	}
+	
+	
+	/**
+	 * Inicialización del puerto serie. 
+	 * @param NombrePuerto
+	 * @param frecuencia
+	 * @return
+	 */
+	public boolean ConectaPuerto(String NombrePuerto, double frecuencia) {
 		try {
 			idPuertoCom=CommPortIdentifier.getPortIdentifier(NombrePuerto);
 		} catch (NoSuchPortException e) {
@@ -127,9 +139,60 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 		abierto=true;
 		buf=new byte[MaxLen]; // creamos del tamaño máximo de telegrama
 		enMensaje=false;
-		return true;
+		return initIMU() && fijaFrecuencia(frecuencia);
+		
 	}
 
+	public boolean initIMU() {
+		byte[] men;
+
+		try {
+			try{ Thread.sleep(500); } catch (InterruptedException e) {};
+			//pasamos modo configuración
+			byte[] menC={(byte)0xfa, (byte)0xff, 0x30, 0 , 0};
+			men=menC;
+			UtilMensajesIMU.fijaCRC(men);
+			System.out.println("Enviamos mensaje "+UtilMensajesIMU.hexaString(men));
+			flujoSalida.write(men);
+			flujoSalida.flush();
+			
+			try{ Thread.sleep(500); } catch (InterruptedException e) {};
+		
+			//indicamos envíe  sólo orientacion
+			byte[] menS={(byte)0xfa, (byte)0xff, (byte)0xd0, 2 , 0, 4, 0 };
+			men=menS;
+			UtilMensajesIMU.fijaCRC(men);
+			System.out.println("Enviamos mensaje "+UtilMensajesIMU.hexaString(men));
+			flujoSalida.write(men);
+			flujoSalida.flush();
+			
+			try{ Thread.sleep(500); } catch (InterruptedException e) {};
+			
+			//indicamos envíe angulo y time stamp
+			byte[] menA={(byte)0xfa, (byte)0xff, (byte)0xd2, 4 , 0,  0, 0, 5, 0 };
+			men=menA;
+			UtilMensajesIMU.fijaCRC(men);
+			System.out.println("Enviamos mensaje "+UtilMensajesIMU.hexaString(men));
+			flujoSalida.write(men);
+			flujoSalida.flush();
+			
+			try{ Thread.sleep(500); } catch (InterruptedException e) {};
+			//Volvemos a modo datos
+			byte[] menD={(byte)0xfa, (byte)0xff, (byte)0x10, 0, 0 };
+			men=menD;
+			UtilMensajesIMU.fijaCRC(men);
+			System.out.println("Enviamos mensaje "+UtilMensajesIMU.hexaString(men));
+			flujoSalida.write(men);
+			flujoSalida.flush();
+			return true;
+		}
+		catch (IOException e) {
+			System.err.println("Problema en inicialización al enviar mensaje:"+e.getMessage());
+			return false;
+		}
+
+
+	}
 
 	/** Cierra el puerto y los flujos de entrada y salida */
 	public boolean cierraPuerto() {
@@ -216,7 +279,7 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 					//leemos los datos
 					DataInputStream dis=new DataInputStream(new ByteArrayInputStream(buf,iniData,lenData));
 					angulo=new AngulosIMU(dis.readFloat(),dis.readFloat(),dis.readFloat(),dis.readUnsignedShort());
-					System.out.printf("%7d: %15f %15f %15f\n",angulo.contador,angulo.roll,angulo.pitch,angulo.yaw);
+//					System.out.printf("%7d: %15f %15f %15f\n",angulo.contador,angulo.roll,angulo.pitch,angulo.yaw);
 					avisaListeners();
 				} catch (IOException e) {
 					System.err.println("Problemas al leer floats del mensaje");
@@ -247,6 +310,8 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 		byte[] men;
 		
 		try {
+			try{ Thread.sleep(500); } catch (InterruptedException e) {};
+
 			//pasamos modo configuración
 			byte[] menC={(byte)0xfa, (byte)0xff, 0x30, 0 , 0};
 			men=menC;
@@ -255,7 +320,7 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 			flujoSalida.write(men);
 			flujoSalida.flush();
 			
-			try{ Thread.sleep(5000); } catch (InterruptedException e) {};
+			try{ Thread.sleep(500); } catch (InterruptedException e) {};
 		
 			//indicamos skipFacto
 			byte[] menS={(byte)0xfa, (byte)0xff, (byte)0xd4, 2, 0, 0, 0 };
@@ -267,7 +332,7 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 			flujoSalida.write(men);
 			flujoSalida.flush();
 			
-			try{ Thread.sleep(5000); } catch (InterruptedException e) {};
+			try{ Thread.sleep(500); } catch (InterruptedException e) {};
 			//Volvemos a modo datos
 			byte[] menD={(byte)0xfa, (byte)0xff, (byte)0x10, 0, 0 };
 			men=menD;
