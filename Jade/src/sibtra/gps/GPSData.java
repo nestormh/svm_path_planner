@@ -293,8 +293,9 @@ public class GPSData implements Serializable, Cloneable {
 		double x = val.getXLocal() - getXLocal();
 		double y = val.getYLocal() - getYLocal();       
 
-		double ang = Math.atan2(x, y);
-		if (ang < 0) ang += 2 * Math.PI;
+		double ang = Math.atan2(y, x);
+		//if (ang < 0) ang += 2 * Math.PI;
+		//usamos valores entre -PI/2 y PI/2
 
 		// En principio no diferencio entre angulo y angulo local
 		val.setAngulo(ang);

@@ -20,7 +20,7 @@ public class Ruta implements Serializable {
 	 * Si cambiamos estructura del objeto tenemos que cambiar el número de serie y ver 
 	 * como se cargan versiones anteriores.
 	 */
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 3L;
 
 	/** contendrá los puntos de la ruta */
 	Vector<GPSData> puntos;
@@ -41,6 +41,9 @@ public class Ruta implements Serializable {
 
 	/** Matriz de cambio de coordenadas ECEF a coordenadas locales */
 	Matrix T = null;
+	
+	/** Deviación magnética calculada */
+	double desviacionM=Double.NaN;
 
 	/** Constructor por defecto, no pone tamaño y supone que no es espacial */
 	public Ruta() {
@@ -280,6 +283,33 @@ public class Ruta implements Serializable {
 			retorno+=i+":"+puntos.get(i)+"\n";
 		return retorno;
 	}
+	
+	/** @return la desviación magnética {@link #desviacionM}. La calcula si no está caclulada */
+	public double getDesviacionM() {
+		if(desviacionM==Double.NaN)
+			calculaDesM();
+		return desviacionM;
+	}
+	
+	/** 
+	 * Calcula la desviación magnetica comparando los datos de la IMU con los de la 
+	 * evolución de la ruta obtenidos con el GPS
+	 *
+	 */
+	private void calculaDesM() {
+		if(puntos.size()<2)
+			return; //no tocamos la desv.
+		//vemos si tenemos datos IMU para todos
+		for(int i=0; i<puntos.size(); i++) 
+			if(puntos.get(i).getAgulosIMU()==null) {
+				System.out.println("Punto "+i+" de la ruta no tienen angulos IMU. No podemos calcular");
+				return;
+			}
+		//el angulo se calcula al añadir cada punto
+		//TODO hacer el bulce de cálculo
+		
+	}
+
 	/**
 	 * @param args
 	 */

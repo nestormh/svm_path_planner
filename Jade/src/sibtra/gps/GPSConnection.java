@@ -59,6 +59,8 @@ public class GPSConnection implements SerialPortEventListener {
 	/** Si estamos {@link #enRuta} almacena los puntos que estén separados al menos {@link #minDistOperativa} */
 	private Ruta bufferRutaEspacial = null;
 
+	private boolean actualizando=true;
+
 
 	/**
 	 * Constructor por defecto no hace nada.
@@ -155,6 +157,7 @@ public class GPSConnection implements SerialPortEventListener {
 		open = true;
 
 		sPort.disableReceiveTimeout();
+		actualizando=false;
 	}
 
 	/**
@@ -258,7 +261,12 @@ public class GPSConnection implements SerialPortEventListener {
 					if (val != 10) {
 						cadenaTemp += (char) val;
 					} else {
-						actualizaNuevaCadena(cadenaTemp);
+						if(!actualizando) {
+							actualizando=true;
+							actualizaNuevaCadena(cadenaTemp);
+							actualizando=false;
+						}
+						
 						cadenaTemp = "";
 					}
 				}
@@ -266,6 +274,7 @@ public class GPSConnection implements SerialPortEventListener {
 				System.err.println("\nError al recibir los datos");
 			} catch (Exception ex) {
 				System.err.println("\nGPSConnection Error: Cadena fragmentada : " + ex.getMessage());
+				ex.printStackTrace();
 				cadenaTemp = "";
 			}
 		}

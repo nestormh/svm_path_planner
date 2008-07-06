@@ -46,7 +46,7 @@ ActionListener {
 	private JLabel jlNpBE;
 	private JLabel jlNpRT;
 	private JLabel jlNpRE;
-	private boolean cambioRuta;
+	private boolean cambioRuta=false;
 
 	public GrabarRuta(String[] args) {
 		if(args.length<2) {
@@ -60,14 +60,6 @@ ActionListener {
 			System.err.println("No se obtuvo GPSConnection");
 			System.exit(1);
 		}
-		gpsCon.addGpsEventListener(this);
-
-		//conexión IMU
-		csi=new ConexionSerialIMU();
-		if(!csi.ConectaPuerto(args[1],5)) {
-			System.err.println("Problema en conexión serial con la IMU");
-			System.exit(1);
-		}
 
 		//VEntana datos gps
 		ventGData=new JFrame("Datos GPS");
@@ -78,17 +70,6 @@ ActionListener {
 		ventGData.getContentPane().add(PMGPS,BorderLayout.CENTER);
 		ventGData.pack();
 		ventGData.setVisible(true);
-
-		//Creamos ventana para IMU
-		ventIMU=new JFrame("Datos IMU");
-		pmai=new PanelMuestraAngulosIMU();
-		pmai.actualizaAngulo(new AngulosIMU(0,0,0,0));
-		ventIMU.add(pmai);
-		csi.addIMUEventListener(pmai);
-
-		ventIMU.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		ventIMU.pack();
-		ventIMU.setVisible(true);
 
 		//Creamos ventana para la ruta
 		ventRuta=new JFrame("Ruta");
@@ -119,6 +100,31 @@ ActionListener {
 //		ventRuta.pack();
 		ventRuta.setSize(new Dimension(800,600));
 		ventRuta.setVisible(true);
+		//conecto manejador cuando todas las ventanas están creadas
+		gpsCon.addGpsEventListener(this);
+
+		try { Thread.sleep(10000); } catch (Exception e) {	}
+		
+		System.out.println("Abrimos conexión IMU");
+		csi=new ConexionSerialIMU();
+		if(!csi.ConectaPuerto(args[1],5)) {
+			System.err.println("Problema en conexión serial con la IMU");
+			System.exit(1);
+		}
+		
+		//Creamos ventana para IMU
+		ventIMU=new JFrame("Datos IMU");
+		pmai=new PanelMuestraAngulosIMU();
+		pmai.actualizaAngulo(new AngulosIMU(0,0,0,0));
+		ventIMU.add(pmai);
+		csi.addIMUEventListener(pmai);
+
+		ventIMU.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		ventIMU.pack();
+		ventIMU.setVisible(true);
+		//conecto manejador cuando todas las ventanas están creadas
+		csi.addIMUEventListener(this);
+
 
 		//elegir fichero
 		fc=new JFileChooser(new File("./Rutas"));

@@ -32,6 +32,7 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 	private JFileChooser fc;
 	private JLabel jlNomF;
 	private JCheckBox jcbTemporal;
+	private PanelMuestraRuta pmr;
 	
 	public ExaminaFicherosRuta(String titulo) {
 		
@@ -55,6 +56,15 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 
 			getContentPane().add(jpSur,BorderLayout.PAGE_END);
 		}
+		
+		{
+			//Ventana gráfica
+			JFrame jfMR=new JFrame("Muestra ruta");
+			pmr=new PanelMuestraRuta(null);
+			jfMR.add(pmr);
+			jfMR.setSize(800, 600);
+			jfMR.setVisible(true);
+		}
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
@@ -72,10 +82,13 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 				rutaEspacial=(Ruta)ois.readObject();
 				rutaTemporal=(Ruta)ois.readObject();
 				ois.close();
-				if (jcbTemporal.isSelected())
+				if (jcbTemporal.isSelected()) {
 					per.setRuta(rutaTemporal);
-				else
+					pmr.setRuta(rutaTemporal);
+				} else {
 					per.setRuta(rutaEspacial);
+					pmr.setRuta(rutaEspacial);
+				}
 				jlNomF.setText("Fichero: "+file.getName());
 			} catch (IOException ioe) {
 				System.err.println("Error al abrir el fichero " + file.getName());
@@ -87,10 +100,13 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 	}
 
 	public void itemStateChanged(ItemEvent e) {
-		if(e.getStateChange()==ItemEvent.SELECTED)
+		if(e.getStateChange()==ItemEvent.SELECTED) {
 			per.setRuta(rutaTemporal);
-		else
+			pmr.setRuta(rutaTemporal);
+		} else {
 			per.setRuta(rutaEspacial);
+			pmr.setRuta(rutaEspacial);
+		}
 	}
 	
 	/**

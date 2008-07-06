@@ -44,6 +44,8 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	private JLabel jlCoordECEFx;
 	private JLabel jlCoordECEFy;
 	private JLabel jlCoordECEFz;
+	private JLabel jlYaw;
+	private JLabel jlAngulo;
 	public PanelMuestraGPSData() {
 		setLayout(new GridLayout(0,3)); //empezamos con 3 columnas
 //		angulo=aCopiar.angulo;
@@ -199,6 +201,24 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jla.setEnabled(false);
 			add(jla);
 		}
+		{//Yaw
+			jlYaw=jla=new JLabel("+????.??");
+			jla.setBorder(BorderFactory.createTitledBorder(
+					       blackline, "Yaw IMU"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			add(jla);
+		}
+		{//Angulo calculado
+			jlAngulo=jla=new JLabel("+????.??");
+			jla.setBorder(BorderFactory.createTitledBorder(
+					       blackline, "Angulo Calc."));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			add(jla);
+		}
 	}
 	
 	public void actualizaPunto(GPSData pto) {
@@ -217,6 +237,8 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlAltura.setEnabled(false);
 			jlHGeoide.setEnabled(false);
 			jlAlturaGPS.setEnabled(false);
+			jlYaw.setEnabled(false);
+			jlAngulo.setEnabled(false);
 		} else {
 			jlHora.setEnabled(true);
 			jlLatitud.setEnabled(true);
@@ -231,6 +253,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlAltura.setEnabled(true);
 			jlHGeoide.setEnabled(true);
 			jlAlturaGPS.setEnabled(true);
+			jlYaw.setEnabled(true);
 			//Nuevos valores
 			jlHora.setText(pto.getHora());
 			jlLatitud.setText(pto.getLatitudText());
@@ -257,6 +280,13 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlAltura.setText(String.format("%+8.2f", pto.getHGeoide()+pto.getMSL()));
 			jlHGeoide.setText(String.format("%+8.2f", pto.getHGeoide()));
 			jlAlturaGPS.setText(String.format("%+8.2f", pto.getMSL()));
+			if(pto.getAgulosIMU()!=null) {
+				jlYaw.setText(String.format("%+8.2f", pto.getAgulosIMU().getYaw()));
+				jlYaw.setEnabled(true);
+			} else
+				jlYaw.setEnabled(false);
+			jlAngulo.setText(String.format("%+8.2f", Math.toDegrees(pto.getAngulo())));
+			jlAngulo.setEnabled(true);
 		}
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
