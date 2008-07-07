@@ -88,4 +88,8 @@ public class AngulosIMU implements Serializable {
 	}
 	
 
+	public String toString() {
+		return String.format("[(%5d)R=%+8.2f P=%+8.2f Y=%+8.2f",contador,roll,pitch,yaw );
+	}
+
 }

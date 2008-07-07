@@ -280,7 +280,9 @@ public class GPSData implements Serializable, Cloneable {
 		sysTime=aCopiar.sysTime;
 		vdoP=aCopiar.vdoP;
 		velocidad=aCopiar.velocidad;
-		velocidadGPS=aCopiar.velocidadGPS;		
+		velocidadGPS=aCopiar.velocidadGPS;
+		if(aCopiar.agulosIMU!=null)
+			agulosIMU=new AngulosIMU(aCopiar.agulosIMU);
 		return this;
 	}
 	

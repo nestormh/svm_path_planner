@@ -11,6 +11,8 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.TooManyListenersException;
 
+import sibtra.imu.ConexionSerialIMU;
+
 /**
  * Maneja la conexión serial con el GPS. 
  * Al recibir un paquete recoge la información del nuevo punto y lo almacena en los distintos
@@ -59,8 +61,14 @@ public class GPSConnection implements SerialPortEventListener {
 	/** Si estamos {@link #enRuta} almacena los puntos que estén separados al menos {@link #minDistOperativa} */
 	private Ruta bufferRutaEspacial = null;
 
+	/** indica si se está procesando cadena (por los lístenes). Se desprecian las que lleguen 
+	 * mientras está a true.
+	 */
 	private boolean actualizando=true;
 
+	
+	/** Conexión serial IMU de la que leer ángulos*/
+	private ConexionSerialIMU csIMU=null;
 
 	/**
 	 * Constructor por defecto no hace nada.
@@ -265,6 +273,8 @@ public class GPSConnection implements SerialPortEventListener {
 							actualizando=true;
 							actualizaNuevaCadena(cadenaTemp);
 							actualizando=false;
+						} else {
+							System.err.println("Perdida cadena"+cadenaTemp);
 						}
 						
 						cadenaTemp = "";
@@ -273,7 +283,7 @@ public class GPSConnection implements SerialPortEventListener {
 			} catch (IOException ioe) {
 				System.err.println("\nError al recibir los datos");
 			} catch (Exception ex) {
-				System.err.println("\nGPSConnection Error: Cadena fragmentada : " + ex.getMessage());
+				System.err.println("\nGPSConnection Error al procesar >"+cadenaTemp+"< : " + ex.getMessage());
 				ex.printStackTrace();
 				cadenaTemp = "";
 			}
@@ -289,10 +299,12 @@ public class GPSConnection implements SerialPortEventListener {
 	void actualizaNuevaCadena(String cadena) {
 		
 		data.procesaCadena(cadena);
-		if(!cadena.substring(3, 6).equals("GGA"))
+		if(cadena.length()<6 || !cadena.substring(3, 6).equals("GGA"))
 			return;  //sólo será nuevo punto si es paquete GGA
 		data.setSysTime(System.currentTimeMillis());
 		data.calculaECEF();
+		if (csIMU!=null)  //si existe conexión seriañ a la IMU copiamos el ángulo  
+			data.setAgulosIMU(csIMU.getAngulo());
 		if(!bufferEspacial.tieneSistemaLocal())  {
 			System.out.println("Se actuliza local de buffer Espacial");
 			bufferEspacial.actualizaSistemaLocal(data);
@@ -300,8 +312,27 @@ public class GPSConnection implements SerialPortEventListener {
 		}
 		bufferEspacial.setCoordenadasLocales(data);
 
-		añadeABuffers();
-		avisaListeners(); //avisamos a todos los listeners
+		/**
+		 * Añade el punto en {@link #data} al {@link #bufferTemporal} y {@link #bufferEspacial} y si 
+		 * se está {@link #enRuta} también al {@link #bufferRutaTemporal} y {@link #bufferRutaEspacial} 
+		 * Si se está {@link #enRuta} se usa primer punto de ruta espacial para fijar sistema local
+		 * de todos.
+		 * 
+		 */
+		boolean seAñadeEspacial=bufferEspacial.add(data);
+		bufferTemporal.add(data);
+		if(enRuta) {
+			bufferRutaEspacial.add(data);
+			bufferRutaTemporal.add(data);
+			if(!bufferRutaEspacial.tieneSistemaLocal()) {
+				//sistema local con primer punto de la ruta espacial
+				bufferRutaEspacial.actualizaSistemaLocal(bufferRutaEspacial.getPunto(0));
+				//todos los demás con ese sistema local
+				updateBuffers(bufferRutaEspacial);
+			}
+
+		}
+		avisaListeners(seAñadeEspacial); //avisamos a todos los listeners
         data = new GPSData(data); //creamos nuevo punto copia del anterior
 
 	}
@@ -349,47 +380,6 @@ public class GPSConnection implements SerialPortEventListener {
 		}
 	}
 
-//	/**
-//	 * Calcula el {@link #centro} de la ruta y prepara {@link #T las matriz de traslación}.
-//	 * Al final se llama a {@link #updateBuffers()}.
-//	 * @param ruta sobre la que se calcula en centro.
-//	 */
-//	private void setParams(Ruta ruta) {
-//		ruta.actualizaLocal();
-//		updateBuffers();
-//	}
-
-//	/**
-//	 * Calcula y actualiza las coordenadas locales del nuevo punto (en {@link #data}).
-//	 * Hace uso de la {@link #T las matriz de traslación}. Si no existe aún, y hay más de 100 puntos, 
-//	 * llama a {@link #setParams(Vector)} para calcularla.
-//	 */
-//	public void setCoordenadasLocales() {
-//	}
-
-
-	/**
-	 * Añade el punto en {@link #data} al {@link #bufferTemporal} y {@link #bufferEspacial} y si 
-	 * se está {@link #enRuta} también al {@link #bufferRutaTemporal} y {@link #bufferRutaEspacial} 
-	 * Si se está {@link #enRuta} se usa primer punto de ruta espacial para fijar sistema local
-	 * de todos.
-	 * 
-	 */
-	private void añadeABuffers() {
-		bufferEspacial.add(data);
-		bufferTemporal.add(data);
-		if(enRuta) {
-			bufferRutaEspacial.add(data);
-			bufferRutaTemporal.add(data);
-			if(!bufferRutaEspacial.tieneSistemaLocal()) {
-				//sistema local con primer punto de la ruta espacial
-				bufferRutaEspacial.actualizaSistemaLocal(bufferRutaEspacial.getPunto(0));
-				//todos los demás con ese sistema local
-				updateBuffers(bufferRutaEspacial);
-			}
-				
-		}
-	}
 
 	/**
 	 * @return último punto del {@link #bufferEspacial}. null si no hay.
@@ -405,43 +395,6 @@ public class GPSConnection implements SerialPortEventListener {
 		return bufferTemporal.getUltimoPto();
 	}
 
-//	/**
-//	 * Devuelve lós último <code>n</code> puntos del del {@link #bufferEspacial}.
-//	 * @param n
-//	 * @return vector con los puntos
-//	 */
-//	public Vector<GPSData> getLastPuntosEspacial(int n) {
-//		if (bufferEspacial == null || bufferEspacial.size() == 0) return null;
-//
-//		Vector<GPSData> retorno = new Vector<GPSData>();
-//		Vector<GPSData> buffer = (Vector<GPSData>)(bufferEspacial.clone());
-//
-//		for (int i = n; i > 0; i--) {          
-//			if (buffer.size() - i < 0) continue;
-//			retorno.add(buffer.elementAt(buffer.size() - i));
-//		}        
-//
-//		return retorno;
-//	}
-//
-//	/**
-//	 * Devuelve los <code>n</code> últimos puntos del {@link #bufferTemporal}
-//	 * @param n
-//	 * @return vector con los puntos
-//	 */
-//	public Vector<GPSData> getLastPuntosTemporal(int n) {
-//		if (bufferTemporal == null || bufferTemporal.size() == 0) return null;
-//
-//		Vector<GPSData> retorno = new Vector<GPSData>();
-//		Vector<GPSData> buffer = (Vector<GPSData>)(bufferTemporal.clone());
-//
-//		for (int i = n; i > 0; i--) {          
-//			if (buffer.size() - i < 0) continue;
-//			retorno.add(buffer.elementAt(buffer.size() - i));
-//		}   
-//
-//		return retorno;
-//	}
 
 	/** @return {@link #bufferEspacial}	 */
 	public Ruta getBufferEspacial() {
@@ -542,37 +495,6 @@ public class GPSConnection implements SerialPortEventListener {
 		updateBuffers(rutaEspacial);
 	}
 
-//	/**
-//	 * Carga {@link #rutaTemporal} de fichero en formato anterior (no binario).
-//	 * @param fichero
-//	 */
-//	public void loadOldRuta(String fichero) {
-//		rutaTemporal = new Vector<GPSData>();
-//		//    Vector valores = new Vector();
-//		try {
-//			File file = new File(fichero);
-//			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-//			while (ois.available() != 0) {
-//				GPSData valor = new GPSData();
-//				valor.setX(ois.readDouble());
-//				valor.setY(ois.readDouble());
-//				valor.setZ(ois.readDouble());
-//				valor.setLatitud(ois.readDouble());
-//				valor.setLongitud(ois.readDouble());
-//				valor.setAltura(ois.readDouble());
-//				valor.setAngulo(ois.readDouble());
-//				valor.setVelocidad(ois.readDouble());
-//
-//				rutaTemporal.add(valor);
-//			}
-//			ois.close();
-//		} catch (IOException ioe) {
-//			System.err.println("Error al abrir el fichero " + fichero);
-//			System.err.println(ioe.getMessage());
-//		}
-//
-//		setParams(rutaTemporal);
-//	}
 
 	/**
 	 * @return the parameters
@@ -599,15 +521,43 @@ public class GPSConnection implements SerialPortEventListener {
 		listeners.add( gel );
 	}
 	
-	/** avisa a todos los listeners con un evento */
-	private void avisaListeners() {
+	/** avisa a todos los listeners con un evento. Siempre se manda evento temporal.
+	 * Si ha habido cambio espacial se manda también evento espacial 
+	 * @param seAñadeEspacial si se añadió en buffer espacial*/
+	private void avisaListeners(boolean seAñadeEspacial) {
 	    for ( int j = 0; j < listeners.size(); j++ ) {
 	        GpsEventListener gel = listeners.get(j);
 	        if ( gel != null ) {
-	          GpsEvent me = new GpsEvent(this,data);
+	        	//siempre mandamos evento temporal
+	          GpsEvent me = new GpsEvent(this,bufferTemporal.getUltimoPto(),false);
 	          gel.handleGpsEvent(me);
+	          
 	        }
 	    }
+	    if(seAñadeEspacial)
+	    	//mandamos eventos espaciales (si es el caso)
+	    	for ( int j = 0; j < listeners.size(); j++ ) {
+	    		GpsEventListener gel = listeners.get(j);
+	    		if ( gel != null ) {
+	    			GpsEvent me = new GpsEvent(this,bufferEspacial.getUltimoPto(),true);
+	    			gel.handleGpsEvent(me);
+
+	    		}
+	    }
 	}
+
+	/** @return la conexión serial a IMU {@link #csIMU} */
+	public ConexionSerialIMU getCsIMU() {
+		return csIMU;
+	}
+
+	/** 
+	 * fija valor para {@link #csIMU}. Si es !=null se leerá último angulo para cada nuevo 
+	 * dato. 
+	 */ 
+	public void setCsIMU(ConexionSerialIMU csIMU) {
+		this.csIMU = csIMU;
+	}
+	
 }
 

@@ -214,30 +214,39 @@ public class Ruta implements Serializable {
 	}
 
 	/**
-	 * Añade punto pasado a la ruta. Si esta es espcial sólo si esta a {@link #minDistOperativa} de 
+	 * Añade punto pasado a la ruta DUPLICANDOLO. Si esta es espcial sólo si esta a {@link #minDistOperativa} de 
 	 * el último de la ruta.
 	 * Se controla que el número de puntos no supere {@link #tamMaximo}.
 	 * @param data punto a añadir.
+	 * @return si se añadió (tiene sentido en los espaciales)
 	 */
-	public void add(GPSData data) {
+	public boolean add(GPSData nuevodata) {
 		if(!esEspacial) {
 			//para los buffers temporales siempre se añade quitando los primeros si no cabe
+			GPSData data=new GPSData(nuevodata);
 			if(puntos.size()>0) 
 				puntos.lastElement().calculaAngSpeed(data);
 			else { data.setAngulo(0); data.setVelocidad(0); }
 			puntos.add(data);
 			while(puntos.size()>tamMaximo) puntos.remove(0);
+			return true;
 		} else {
 			//para los espaciales sólo se considera el punto si está suficientemente lejos de 
 			// el último
 			if(puntos.size()==0) {
+				GPSData data=new GPSData(nuevodata);
 				data.setAngulo(0); data.setVelocidad(0); 
 				puntos.add(data);
-			} else if (puntos.lastElement().distancia(data)>minDistOperativa) {
+				return true;
+			} 
+			if (puntos.lastElement().distancia(nuevodata)>minDistOperativa) {
+				GPSData data=new GPSData(nuevodata);
 				puntos.lastElement().calculaAngSpeed(data);
 				puntos.add(data);
-				while(puntos.size()>tamMaximo) puntos.remove(0);				
+				while(puntos.size()>tamMaximo) puntos.remove(0);
+				return true;
 			}
+			return false;
 		}
 	}
 

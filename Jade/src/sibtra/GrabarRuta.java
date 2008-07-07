@@ -27,7 +27,7 @@ import sibtra.imu.IMUEvent;
 import sibtra.imu.IMUEventListener;
 import sibtra.imu.PanelMuestraAngulosIMU;
 
-public class GrabarRuta implements GpsEventListener, IMUEventListener, 
+public class GrabarRuta implements GpsEventListener, 
 ActionListener {
 	
 	private GPSConnection gpsCon;
@@ -38,7 +38,6 @@ ActionListener {
 	private ConexionSerialIMU csi;
 	private JFrame ventRuta;
 	private PanelMuestraRuta pmr;
-	private AngulosIMU ultimoAngulo;
 	private JButton jbGrabar;
 	private JButton jbParar;
 	private JFileChooser fc;
@@ -54,18 +53,25 @@ ActionListener {
 			System.exit(1);
 		}
 		
+		System.out.println("Abrimos conexión IMU");
+		csi=new ConexionSerialIMU();
+		if(!csi.ConectaPuerto(args[1],5)) {
+			System.err.println("Problema en conexión serial con la IMU");
+			System.exit(1);
+		}
+		
 		//comunicación con GPS
 		gpsCon=new SimulaGps(args[0]).getGps();
 		if(gpsCon==null) {
 			System.err.println("No se obtuvo GPSConnection");
 			System.exit(1);
 		}
-
+		gpsCon.setCsIMU(csi);
+		
 		//VEntana datos gps
 		ventGData=new JFrame("Datos GPS");
-		PMGPS=new PanelMuestraGPSData();
+		PMGPS=new PanelMuestraGPSData(true);
 		PMGPS.actualizaPunto(new GPSData()); 
-		gpsCon.addGpsEventListener(PMGPS);
 
 		ventGData.getContentPane().add(PMGPS,BorderLayout.CENTER);
 		ventGData.pack();
@@ -74,7 +80,6 @@ ActionListener {
 		//Creamos ventana para la ruta
 		ventRuta=new JFrame("Ruta");
 		pmr=new PanelMuestraRuta(gpsCon.getBufferRutaEspacial());
-		gpsCon.addGpsEventListener(pmr);
 		ventRuta.getContentPane().add(pmr,BorderLayout.CENTER);
 		{ //sur ventana
 			JComponent ja;
@@ -102,28 +107,22 @@ ActionListener {
 		ventRuta.setVisible(true);
 		//conecto manejador cuando todas las ventanas están creadas
 		gpsCon.addGpsEventListener(this);
+		gpsCon.addGpsEventListener(PMGPS);
+		gpsCon.addGpsEventListener(pmr);
 
-		try { Thread.sleep(10000); } catch (Exception e) {	}
-		
-		System.out.println("Abrimos conexión IMU");
-		csi=new ConexionSerialIMU();
-		if(!csi.ConectaPuerto(args[1],5)) {
-			System.err.println("Problema en conexión serial con la IMU");
-			System.exit(1);
-		}
+//		try { Thread.sleep(10000); } catch (Exception e) {	}
 		
 		//Creamos ventana para IMU
 		ventIMU=new JFrame("Datos IMU");
 		pmai=new PanelMuestraAngulosIMU();
 		pmai.actualizaAngulo(new AngulosIMU(0,0,0,0));
 		ventIMU.add(pmai);
-		csi.addIMUEventListener(pmai);
 
 		ventIMU.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ventIMU.pack();
 		ventIMU.setVisible(true);
 		//conecto manejador cuando todas las ventanas están creadas
-		csi.addIMUEventListener(this);
+		csi.addIMUEventListener(pmai);
 
 
 		//elegir fichero
@@ -133,17 +132,15 @@ ActionListener {
 
 
 	public void handleGpsEvent(GpsEvent ev) {
-		//ponemos el último ángulo de la IMU en el último dato del GPS
-		ev.getNuevoPunto().setAgulosIMU(ultimoAngulo);
 		//actualizamos el número de puntos
-		jlNpBE.setText(String.format("BE: %d5", gpsCon.getBufferEspacial().getNumPuntos()));
-		jlNpBT.setText(String.format("BT: %d5", gpsCon.getBufferTemporal().getNumPuntos()));
+		jlNpBE.setText(String.format("BE: %5d", gpsCon.getBufferEspacial().getNumPuntos()));
+		jlNpBT.setText(String.format("BT: %5d", gpsCon.getBufferTemporal().getNumPuntos()));
 		if(gpsCon.getBufferRutaEspacial()!=null) {
-			jlNpRE.setText(String.format("RE: %d5", gpsCon.getBufferRutaEspacial().getNumPuntos()));
+			jlNpRE.setText(String.format("RE: %5d", gpsCon.getBufferRutaEspacial().getNumPuntos()));
 			jlNpRE.setEnabled(true);
 		}
 		if(gpsCon.getBufferRutaTemporal()!=null) {
-			jlNpRT.setText(String.format("RT: %d5", gpsCon.getBufferRutaTemporal().getNumPuntos()));
+			jlNpRT.setText(String.format("RT: %5d", gpsCon.getBufferRutaTemporal().getNumPuntos()));
 			jlNpRT.setEnabled(true);
 		}
 		if(cambioRuta) {
@@ -153,10 +150,6 @@ ActionListener {
 		}
 	}
 
-	public void handleIMUEvent(IMUEvent ev) {
-		ultimoAngulo=new AngulosIMU(ev.getAngulos());
-	}
-	
 
 	public void actionPerformed(ActionEvent ae) {
 		if(ae.getSource()==jbGrabar) {

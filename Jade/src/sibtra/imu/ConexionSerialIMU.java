@@ -411,4 +411,9 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 
 	}
 
+	/** @return el último ángulo recibido */
+	public AngulosIMU getAngulo() {
+		return angulo;
+	}
+
 }

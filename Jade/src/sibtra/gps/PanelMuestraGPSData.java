@@ -15,6 +15,7 @@ import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -46,8 +47,23 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	private JLabel jlCoordECEFz;
 	private JLabel jlYaw;
 	private JLabel jlAngulo;
+	private JLabel jlDMag;
+	private JCheckBox jcbSoloEspa;
+	
+	/**
+	 * constructor por defecto. Se actualiza con todos los puntos.
+	 */
 	public PanelMuestraGPSData() {
-		setLayout(new GridLayout(0,3)); //empezamos con 3 columnas
+		this(false);
+	}
+	
+	/**
+	 * Constructor donde indicamos si sólo queremos actualizarnos con los espaciales
+	 * @param soloEspaciales
+	 */
+	public PanelMuestraGPSData(boolean soloEspaciales) {
+		JPanel jpCentro=new JPanel(new GridLayout(0,3)); //empezamos con 3 columnas
+		setLayout(new BorderLayout());
 //		angulo=aCopiar.angulo;
 //		cadenaNMEA=aCopiar.cadenaNMEA;
 //		coordECEF=(Matrix)aCopiar.coordECEF.clone();
@@ -80,7 +96,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 
 		{ //Latitud
@@ -90,7 +106,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 
 		{ //Longitud
@@ -100,7 +116,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 
 		{ //RMS
@@ -110,7 +126,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 
 		{ //Número satélites
@@ -120,7 +136,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 
 		{ //Edad correción diferencial
@@ -130,7 +146,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 
 		{ //Coordenadas locales
@@ -140,7 +156,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 		
 		{ //Coordenadas ECEF X
@@ -150,7 +166,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 
 		{ //Coordenadas ECEF Y
@@ -160,7 +176,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 
 		{ //Coordenadas ECEF Z
@@ -170,7 +186,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 
 		{//altura
@@ -180,7 +196,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 	
 		{//altura sobre geoide
@@ -190,7 +206,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+//			jpCentro.add(jla);
 		}
 		{//altura
 			jlAlturaGPS=jla=new JLabel("+????.??");
@@ -199,7 +215,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 		{//Yaw
 			jlYaw=jla=new JLabel("+????.??");
@@ -208,7 +224,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
 		{//Angulo calculado
 			jlAngulo=jla=new JLabel("+????.??");
@@ -217,8 +233,21 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			add(jla);
+			jpCentro.add(jla);
 		}
+		{//Diff angulos
+			jlDMag=jla=new JLabel("+????.??");
+			jla.setBorder(BorderFactory.createTitledBorder(
+					       blackline, "D. Magnetica"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			jpCentro.add(jla);
+		}
+		add(jpCentro,BorderLayout.CENTER);
+		jcbSoloEspa=new JCheckBox("Sólo datos espaciales");
+		jcbSoloEspa.setSelected(soloEspaciales);
+		add(jcbSoloEspa,BorderLayout.SOUTH);
 	}
 	
 	public void actualizaPunto(GPSData pto) {
@@ -239,6 +268,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlAlturaGPS.setEnabled(false);
 			jlYaw.setEnabled(false);
 			jlAngulo.setEnabled(false);
+			jlDMag.setEnabled(false);
 		} else {
 			jlHora.setEnabled(true);
 			jlLatitud.setEnabled(true);
@@ -283,8 +313,13 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			if(pto.getAgulosIMU()!=null) {
 				jlYaw.setText(String.format("%+8.2f", pto.getAgulosIMU().getYaw()));
 				jlYaw.setEnabled(true);
-			} else
+				jlDMag.setText(String.format("%+8.2f", 
+						Math.toDegrees(pto.getAngulo())-pto.getAgulosIMU().getYaw()));
+				jlDMag.setEnabled(true);
+			} else {
 				jlYaw.setEnabled(false);
+				jlDMag.setEnabled(false);
+			}
 			jlAngulo.setText(String.format("%+8.2f", Math.toDegrees(pto.getAngulo())));
 			jlAngulo.setEnabled(true);
 		}
@@ -302,8 +337,13 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	 * @see sibtra.gps.GpsEventListener#handleGpsEvent(sibtra.gps.GpsEvent)
 	 */
 	public void handleGpsEvent(GpsEvent ev) {
-		if(ev!=null)
-			actualizaPunto(ev.getNuevoPunto());
+		//atendemos sólo un tipo de evento según el tipo
+		if(ev!=null) {
+			if(jcbSoloEspa.isSelected() && ev.isEspacial())
+				actualizaPunto(ev.getNuevoPunto());
+			if(!jcbSoloEspa.isSelected() && !ev.isEspacial())
+				actualizaPunto(ev.getNuevoPunto());				
+		}
 	}
 
 	
@@ -372,6 +412,20 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		ventanaPrincipal.setVisible(true);
 		
 		
+	}
+
+	/**
+	 * @return el soloEspaciales
+	 */
+	public boolean isSoloEspaciales() {
+		return jcbSoloEspa.isSelected();
+	}
+
+	/**
+	 * @param soloEspaciales el soloEspaciales a establecer
+	 */
+	public void setSoloEspaciales(boolean soloEspaciales) {
+		jcbSoloEspa.setSelected(soloEspaciales);
 	}
 
 }
