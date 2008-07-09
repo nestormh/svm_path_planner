@@ -103,9 +103,11 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 		if(e.getStateChange()==ItemEvent.SELECTED) {
 			per.setRuta(rutaTemporal);
 			pmr.setRuta(rutaTemporal);
+			rutaTemporal.getDesviacionM();
 		} else {
 			per.setRuta(rutaEspacial);
 			pmr.setRuta(rutaEspacial);
+			rutaEspacial.getDesviacionM();
 		}
 	}
 	

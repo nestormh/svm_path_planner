@@ -295,7 +295,7 @@ public class Ruta implements Serializable {
 	
 	/** @return la desviación magnética {@link #desviacionM}. La calcula si no está caclulada */
 	public double getDesviacionM() {
-		if(desviacionM==Double.NaN)
+		if(Double.isNaN(desviacionM))
 			calculaDesM();
 		return desviacionM;
 	}
@@ -315,7 +315,36 @@ public class Ruta implements Serializable {
 				return;
 			}
 		//el angulo se calcula al añadir cada punto
-		//TODO hacer el bulce de cálculo
+		double dMax=0; //desviación máxima
+		double dAcum=0; //desviación acumulada
+		double dAcum2=0; //desviación acumulada al cuadrado
+		for(int i=2; i<puntos.size(); i++) {
+			double da=puntos.get(i).getAngulo()-Math.toRadians(puntos.get(i-1).getAgulosIMU().getYaw());
+			//colocamos la diferencia en rango +-PI
+			if(da<-Math.PI) da+=2*Math.PI;
+			if(da>Math.PI) da-=2*Math.PI;
+			double daAbs=Math.abs(da);
+			if(daAbs>dMax) dMax=daAbs;
+			dAcum+=da;
+			dAcum2+=da*da;
+		}
+		
+		desviacionM=dAcum/(puntos.size()-1); //desviación media
+
+		//desviación estandar de la desviación (valga la redundancia :-)
+		double dif2=0;
+		for(int i=2; i<puntos.size(); i++) {
+			double da=puntos.get(i).getAngulo()-Math.toRadians(puntos.get(i-1).getAgulosIMU().getYaw());
+			//colocamos la diferencia en rango +-PI
+			if(da<-Math.PI) da+=2*Math.PI;
+			if(da>Math.PI) da-=2*Math.PI;
+			dif2+=(da-desviacionM)*(da-desviacionM);
+		}
+		double desEstDM=dif2/(puntos.size()-1);
+		
+		System.out.println("Desviación media="+Math.toDegrees(desviacionM)
+				+" Desviación estandar="+Math.toDegrees(desEstDM)
+				+" Desviación máxima="+Math.toDegrees(dMax));
 		
 	}
 

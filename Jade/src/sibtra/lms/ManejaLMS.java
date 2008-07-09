@@ -359,6 +359,19 @@ public class ManejaLMS {
 			throw new IllegalArgumentException("Distancia solicitada ("+metros+") no es 8, 16, 32, 80 ");		
 	}
 	
+	public int getDistanciaMaxima() throws LMSException {
+		if(getCodigoRango()==2 && isEnMilimetros())
+			return 8;
+		if(getCodigoRango()==4 && isEnMilimetros())
+			return 16;
+		if(getCodigoRango()==6 && isEnMilimetros())
+			return 32;
+//		if(getCodigoRango()==2 && !isEnMilimetros())
+//			return 80.0;
+		return 80;
+	}
+
+	
 	public void pideZona(byte queZona, boolean elConjunto1) throws LMSException {
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -498,5 +511,6 @@ public class ManejaLMS {
 
 		return barr;
 	}
+
 
 }
