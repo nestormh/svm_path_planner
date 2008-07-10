@@ -60,7 +60,7 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 
 
 	/** Si ya hay datos que representar (posición y barrido) */
-	private boolean hayBarrido;
+	private boolean hayDatos;
 
 	/** Largo del coche en metros */
 	protected double largoCoche=2;
@@ -69,6 +69,12 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 
 	/** etiqueta que muestar la distancia al obstaculo */
 	private JLabel jlDistLin;
+
+	/** Etiqueta para indicar cuando estamos fuera del camino */
+	private JLabel jlFuera;
+
+	/** Etiqueta para indicar cuando no se detecta obstáculo */
+	private JLabel jlSinNada;
 
 	/**
 	 * Convierte punto en el mundo real a punto en la pantalla. 
@@ -129,7 +135,7 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 	public PanelMiraObstaculo(MiraObstaculo miObs) {
 		this.MI=miObs;
 		setLayout(new BorderLayout(3,3));
-		hayBarrido=false;
+		hayDatos=false;
 		esqID=new Point2D.Double();
 		esqSI=new Point2D.Double();
 		restaurar=true;	//se actualizan las esquinas la primera vez
@@ -186,7 +192,7 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 					g.setColor(Color.RED);
 					g.draw(pathArrayXY(MI.Bi));
 				}
-				if(hayBarrido) {
+				if(hayDatos) {
 					
 					{ //pintamos el barrido
 						g.setStroke(new BasicStroke());
@@ -205,38 +211,6 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 					
 					}
 
-					if(MI.dist==Double.NaN) {
-						System.out.println("No tenemos distancias miníma");
-					} else {
-						g.setStroke(new BasicStroke(2));
-						g.setColor(Color.WHITE);
-						//los de la derecha e izquierda que están libres
-						g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
-						g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
-					}
-					if(MI.ColDecha || MI.ColIzda) {
-						//marcamos el pto mínimo
-						g.setStroke(new BasicStroke());
-						g.setColor(Color.RED);
-						g.draw(new Line2D.Double(point2Pixel(MI.posActual),point2Pixel(ptoRF2Point(MI.indMin))));
-						
-						if(MI.iAD<MI.iAI) {
-							g.setStroke(new BasicStroke(3));
-							g.setColor(Color.RED);
-							//pintamos rango de puntos en camino
-							GeneralPath perimetro = 
-								new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
-
-							Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
-							perimetro.moveTo((float)px.getX(),(float)px.getY());
-							for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
-								px=point2Pixel(ptoRF2Point(i));
-								perimetro.lineTo((float)px.getX(),(float)px.getY());
-							}
-							g.draw(perimetro);
-						}
-					}
-					
 					{//Posición y orientación del coche
 						g.setStroke(new BasicStroke(3));
 						g.setPaint(Color.GRAY);
@@ -262,17 +236,51 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 						g.fill(coche);
 						g.draw(coche);
 					}
+					//vemos si hay información de colisión
+					if(!Double.isNaN(MI.dist)) {
+						//estamos dentro del camino
+						//Lineas indicando de donde empezó el barrido
+						g.setStroke(new BasicStroke());
+						g.setColor(Color.GRAY);
+						g.draw(new Line2D.Double(point2Pixel(MI.posActual)
+								,point2Pixel(MI.Bd[MI.iptoDini])));
+						g.draw(new Line2D.Double(point2Pixel(MI.posActual)
+								,point2Pixel(MI.Bd[MI.iptoD])));
+						g.draw(new Line2D.Double(point2Pixel(MI.posActual)
+								,point2Pixel(MI.Bi[MI.iptoIini])));
+						g.draw(new Line2D.Double(point2Pixel(MI.posActual)
+								,point2Pixel(MI.Bi[MI.iptoI])));
 
-					g.setStroke(new BasicStroke());
-					g.setColor(Color.GRAY);
-					g.draw(new Line2D.Double(point2Pixel(MI.posActual)
-							,point2Pixel(MI.Bd[MI.iptoDini])));
-					g.draw(new Line2D.Double(point2Pixel(MI.posActual)
-							,point2Pixel(MI.Bd[MI.iptoD])));
-					g.draw(new Line2D.Double(point2Pixel(MI.posActual)
-							,point2Pixel(MI.Bi[MI.iptoIini])));
-					g.draw(new Line2D.Double(point2Pixel(MI.posActual)
-							,point2Pixel(MI.Bi[MI.iptoI])));
+
+						g.setStroke(new BasicStroke(2));
+						g.setColor(Color.WHITE);
+						//los de la derecha e izquierda que están libres
+						g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
+						g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
+						if(MI.ColDecha || MI.ColIzda) {
+							//marcamos el pto mínimo
+							g.setStroke(new BasicStroke());
+							g.setColor(Color.RED);
+							g.draw(new Line2D.Double(point2Pixel(MI.posActual),point2Pixel(ptoRF2Point(MI.indMin))));
+
+							if(MI.iAD<MI.iAI) {
+								g.setStroke(new BasicStroke(3));
+								g.setColor(Color.RED);
+								//pintamos rango de puntos en camino
+								GeneralPath perimetro = 
+									new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
+
+								Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
+								perimetro.moveTo((float)px.getX(),(float)px.getY());
+								for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
+									px=point2Pixel(ptoRF2Point(i));
+									perimetro.lineTo((float)px.getX(),(float)px.getY());
+								}
+								g.draw(perimetro);
+							}
+						}
+					}
+					
 
 				}
 			}
@@ -289,14 +297,30 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 		{ //Parte inferior
 			JPanel jpSur=new JPanel();
 			
-			jla=jlDistLin=new JLabel("??.???");
+			jla=jlSinNada=new JLabel("SIN OBSTACULOS");
+		    Font Grande = jla.getFont().deriveFont(20.0f);
+		    jla.setFont(Grande);
+		    jla.setForeground(Color.GREEN);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			jpSur.add(jla);
+			
+			jla=jlDistLin=new JLabel("   ??.???");
 			jla.setBorder(BorderFactory.createTitledBorder(
 				       blackline, "Dist lineal"));
-		    Font Grande = jlDistLin.getFont().deriveFont(20.0f);
-		    jlDistLin.setFont(Grande);
-			jlDistLin.setHorizontalAlignment(JLabel.CENTER);
-			jlDistLin.setEnabled(false);
-			jpSur.add(jlDistLin);
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			jla.setMinimumSize(new Dimension(300, 20));
+			jla.setPreferredSize(new Dimension(130, 45));
+			jpSur.add(jla);
+			
+			jla=jlFuera=new JLabel("FUERA DEL CAMINO");
+		    jla.setFont(Grande);
+		    jla.setForeground(Color.RED);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			jpSur.add(jla);
 
 			add(jpSur,BorderLayout.SOUTH);
 		}
@@ -497,14 +521,26 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 	 * Se debe invocar cuando {@link #MI} realiza un nuevo cálculo. 
 	 */
 	public void actualiza() {
-		hayBarrido=true;
-		jlDistLin.setText(String.format("%6.3f m", MI.dist));
-		jlDistLin.setEnabled(true);
+		hayDatos=true;
+		if(Double.isNaN(MI.dist)) {
+			jlSinNada.setEnabled(false);
+			jlDistLin.setEnabled(false);
+			jlFuera.setEnabled(true);
+			
+		} else if(Double.isInfinite(MI.dist)) {
+			jlSinNada.setEnabled(true);
+			jlDistLin.setEnabled(false);
+			jlFuera.setEnabled(false);
+		} else 	{
+			jlSinNada.setEnabled(false);
+			jlDistLin.setText(String.format("%9.3f m", MI.dist));
+			jlDistLin.setEnabled(true);
+			jlFuera.setEnabled(false);
+		}
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				JPanelGrafico.repaint();			
-				jlDistLin.repaint();
+				repaint();
 			}
 		});
 	}
@@ -862,12 +898,12 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 		ventana.setVisible(true);
 
 		//Damos pto, orientación y barrido
-		BarridoAngular ba=new BarridoAngular(181,0,4,(byte)2,true,(short)2);
+		BarridoAngular ba=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
 		for(int i=0;i<ba.numDatos();i++) {
 //			ba.datos[i]=(short)((15.0)*100.0);
-			ba.datos[i]=(short)((Math.sin((double)i/(ba.numDatos()-1)*Math.PI*13.6)*3.0+10.0)*1000.0);
+			ba.datos[i]=(short)((Math.sin((double)i/(ba.numDatos()-1)*Math.PI*13.6)*3.0+10.0)*100.0);
 		}
-		double[] ptoAct={-26, 14};
+		double[] ptoAct={-26, 10};
 		double dist=mi.masCercano(ptoAct, Math.toRadians(90), ba);
 		pmo.actualiza();
 		System.out.println("Distancia="+dist);
@@ -879,7 +915,7 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 				+" \n iptoIini ="+pmo.MI.iptoIini
 				+" \n imin ="+pmo.MI.indMin
 				);
-		boolean Caminar=false;
+		boolean Caminar=true;
 		if(Caminar) {
 			//vamos recorriendo la trayectoria con barridos aleatorios
 			int inTr=10, inTrAnt=8;

@@ -3,12 +3,8 @@ package sibtra;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -118,7 +114,6 @@ public class Navega implements GpsEventListener {
 		fc=new JFileChooser(new File("./Rutas"));
 
 		//necestamos leer archivo con la ruta
-		boolean seCargo=false;
 		do {
 			int devuelto=fc.showOpenDialog(ventGData);
 			if (devuelto!=JFileChooser.APPROVE_OPTION) 
@@ -127,29 +122,11 @@ public class Navega implements GpsEventListener {
 						"Error",
 						JOptionPane.ERROR_MESSAGE);
 			else  {
-				File file=fc.getSelectedFile();
-				try {
-					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-					rutaEspacial=(Ruta)ois.readObject();
-					ois.close();
-					jlNomF.setText("Fichero: "+file.getName());
-					seCargo=true;
-				} catch (IOException ioe) {
-					JOptionPane.showMessageDialog(ventGData,
-							"Error al abrir el fichero " + file.getName(),
-							"Error",
-							JOptionPane.ERROR_MESSAGE);
-					System.err.println(ioe.getMessage());
-				} catch (ClassNotFoundException cnfe) {
-					JOptionPane.showMessageDialog(ventGData,
-							"Objeto leído inválido",
-							"Error",
-							JOptionPane.ERROR_MESSAGE);
-					System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
-				}
+				gpsCon.loadRuta(fc.getSelectedFile().getAbsolutePath());
 			}
-		} while(!seCargo);
-		
+		} while(gpsCon.getRutaEspacial()==null);
+		//nuestra ruta espacial será la que se cargó
+		rutaEspacial=gpsCon.getRutaEspacial();
 		desMag=rutaEspacial.getDesviacionM();
 		System.out.println("Usando desviación magnética "+desMag);
 		
@@ -174,11 +151,11 @@ public class Navega implements GpsEventListener {
 		//Checkbox para navegar
 		jcbNavegando=new JCheckBox("Navegando");
 		jcbNavegando.setSelected(false);
-		ventanaPMOS.getContentPane().add(jcbNavegando,BorderLayout.SOUTH);
 		
 		ventanaPMOS=new JFrame("Mira Obstáculo Subjetivo");
 		ventanaPMOS.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ventanaPMOS.getContentPane().add(PMOS,BorderLayout.CENTER);
+		ventanaPMOS.getContentPane().add(jcbNavegando,BorderLayout.SOUTH);
 		ventanaPMOS.setSize(new Dimension(800,400));
 		ventanaPMOS.setVisible(true);
 

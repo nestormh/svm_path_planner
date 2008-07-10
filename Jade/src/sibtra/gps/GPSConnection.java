@@ -282,10 +282,12 @@ public class GPSConnection implements SerialPortEventListener {
 				}
 			} catch (IOException ioe) {
 				System.err.println("\nError al recibir los datos");
+				actualizando=false; //para que puedas seguir recibiendo
 			} catch (Exception ex) {
 				System.err.println("\nGPSConnection Error al procesar >"+cadenaTemp+"< : " + ex.getMessage());
 				ex.printStackTrace();
 				cadenaTemp = "";
+				actualizando=false; //para que puedas seguir recibiendo
 			}
 		}
 	}
@@ -434,6 +436,11 @@ public class GPSConnection implements SerialPortEventListener {
 		bufferRutaEspacial = new Ruta(true);
 		bufferRutaTemporal = new Ruta(false);
 		
+		if(rutaEspacial!=null) {
+			//si se ha cargado una ruta se usa el sistema local de la ruta espacial cargada
+			bufferRutaEspacial.actualizaSistemaLocal(rutaEspacial);
+			bufferRutaTemporal.actualizaSistemaLocal(rutaEspacial);
+		}
 
 		enRuta = true;
 	}    
@@ -482,6 +489,8 @@ public class GPSConnection implements SerialPortEventListener {
 			File file = new File(fichero);
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
 			rutaEspacial=(Ruta)ois.readObject();
+			rutaEspacial.actualizaSistemaLocal();
+			updateBuffers(rutaEspacial);
 			rutaTemporal=(Ruta)ois.readObject();
 			ois.close();
 		} catch (IOException ioe) {
@@ -491,8 +500,6 @@ public class GPSConnection implements SerialPortEventListener {
 			System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
 		}     
 
-		rutaEspacial.actualizaSistemaLocal();
-		updateBuffers(rutaEspacial);
 	}
 
 
