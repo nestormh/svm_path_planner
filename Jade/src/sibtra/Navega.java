@@ -32,7 +32,9 @@ import sibtra.rfyruta.PanelMiraObstaculoSubjetivo;
  * @author alberto
  *
  */
-public class Navega implements GpsEventListener {
+public class Navega  {
+	/** Milisegundos del ciclo */
+	private static final long miliEspera = 200;
 	
 	private ConexionSerialIMU csi;
 	private GPSConnection gpsCon;
@@ -52,7 +54,7 @@ public class Navega implements GpsEventListener {
 	private PanelMiraObstaculo pmo;
 	private PanelMiraObstaculoSubjetivo PMOS;
 	private double desMag;
-	private JCheckBox jcbNavegando;
+	JCheckBox jcbNavegando;
 
 	public Navega(String[] args) {
 		if(args.length<3) {
@@ -168,38 +170,7 @@ public class Navega implements GpsEventListener {
 		ventanaPMO.setVisible(true);
 		
 		//conecto manejador cuando todas las ventanas están creadas
-		gpsCon.addGpsEventListener(this);
-	}
-
-	public void handleGpsEvent(GpsEvent ev) {
-		if(ev.isEspacial() && jcbNavegando.isSelected()) {
-			//Tenemos un nuevo punto ESPACIAL, pedimos barrido y miramos si hay obstáculo
-			//Damos pto, orientación y barrido
-			try {
-				manLMS.pideBarrido((short)0, (short)180, (short)1);
-				BarridoAngular ba=manLMS.recibeBarrido();
-				double[] ptoAct={ev.getNuevoPunto().getXLocal(), ev.getNuevoPunto().getYLocal()};
-				double dist=mi.masCercano(ptoAct, Math.toRadians(csi.getAngulo().getYaw())+desMag, ba);
-				pmo.actualiza();
-				PMOS.actualiza();
-				if(Double.isInfinite(dist))
-					System.out.println("Estamos fuera del camino");
-				else
-					System.out.println("Distancia="+dist);
-					
-//				System.out.println(" iAD="+PMOS.MI.iAD
-//				+"\n iAI="+PMOS.MI.iAI
-//				+"\n iptoD ="+PMOS.MI.iptoD
-//				+" \n iptoI ="+PMOS.MI.iptoI
-//				+" \n iptoDini ="+PMOS.MI.iptoDini
-//				+" \n iptoIini ="+PMOS.MI.iptoIini
-//				+" \n imin ="+PMOS.MI.indMin
-//				);
-			} catch (LMSException e) {
-				System.err.println("Problemas al obtener barrido en punto "+ev.getNuevoPunto()
-						+" :"+e.getMessage());
-			}
-		}
+//		gpsCon.addGpsEventListener(this);
 	}
 
 
@@ -208,6 +179,34 @@ public class Navega implements GpsEventListener {
 	 */
 	public static void main(String[] args) {
 		Navega na=new Navega(args);
+		long tSig;
+		while(true) {
+			tSig=System.currentTimeMillis()+miliEspera;
+			try { 
+				if(na.jcbNavegando.isSelected()) {
+					na.manLMS.pideBarrido((short)0, (short)180, (short)1);
+					BarridoAngular ba=na.manLMS.recibeBarrido();
+					GPSData pa=na.gpsCon.getPuntoActualTemporal();
+					double[] ptoAct={pa.getXLocal(), pa.getYLocal()};
+					double dist=na.mi.masCercano(ptoAct
+							, Math.toRadians(pa.getAgulosIMU().getYaw())+na.desMag, ba);
+					na.pmo.actualiza();
+					na.PMOS.actualiza();
+					if(Double.isNaN(dist))
+						System.out.println("Estamos fuera del camino");
+					else if(Double.isInfinite(dist))
+						System.out.println("No hay obstáculo");
+					else
+						System.out.println("Distancia="+dist);
+				}
+			} catch (LMSException e) {
+				System.err.println("Problemas al obtener barrido en punto "
+						+" :"+e.getMessage());
+			}
+			//esperamos hasta que hayan pasado miliSeg de ciclo.
+			while(System.currentTimeMillis()<tSig)
+				try{Thread.sleep(tSig-System.currentTimeMillis());} catch (Exception e) {}				
+		}
 	}
 
 }

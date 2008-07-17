@@ -340,49 +340,46 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 						g.draw(gpTr);
 					}
 					//pintamos la distancia mínima etc.
-					if(MI.dist==java.lang.Double.NaN) {
-						System.out.println("No tenemos distancias miníma");
-					} else {
+					if(!java.lang.Double.isNaN(MI.dist))  {
 						g.setStroke(new BasicStroke(2));
 						g.setColor(Color.WHITE);
 						//los de la derecha e izquierda que están libres
 						g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
 						g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
-					}
 
-					if(MI.ColDecha || MI.ColIzda) {
-						//marcamos el pto mínimo
-						g.setStroke(new BasicStroke());
-						g.setColor(Color.RED);
-						g.draw(new Line2D.Double(pointReal2pixel(MI.posActual),point2Pixel(ptoRF2Point(MI.indMin))));
-						
-						if(MI.iAD<MI.iAI) {
-							g.setStroke(new BasicStroke(3));
+						if(MI.ColDecha || MI.ColIzda) {
+							//marcamos el pto mínimo
+							g.setStroke(new BasicStroke());
 							g.setColor(Color.RED);
-							//pintamos rango de puntos en camino
-							GeneralPath perimetro = 
-								new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
+							g.draw(new Line2D.Double(pointReal2pixel(MI.posActual),point2Pixel(ptoRF2Point(MI.indMin))));
 
-							Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
-							perimetro.moveTo((float)px.getX(),(float)px.getY());
-							for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
-								px=point2Pixel(ptoRF2Point(i));
-								perimetro.lineTo((float)px.getX(),(float)px.getY());
+							if(MI.iAD<MI.iAI) {
+								g.setStroke(new BasicStroke(3));
+								g.setColor(Color.RED);
+								//pintamos rango de puntos en camino
+								GeneralPath perimetro = 
+									new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
+
+								Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
+								perimetro.moveTo((float)px.getX(),(float)px.getY());
+								for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
+									px=point2Pixel(ptoRF2Point(i));
+									perimetro.lineTo((float)px.getX(),(float)px.getY());
+								}
+								g.draw(perimetro);
 							}
-							g.draw(perimetro);
 						}
+						g.setStroke(new BasicStroke());
+						g.setColor(Color.GRAY);
+						g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
+								,pointReal2pixel(MI.Bd[MI.iptoDini])));
+						g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
+								,pointReal2pixel(MI.Bd[MI.iptoD])));
+						g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
+								,pointReal2pixel(MI.Bi[MI.iptoIini])));
+						g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
+								,pointReal2pixel(MI.Bi[MI.iptoI])));
 					}
-					g.setStroke(new BasicStroke());
-					g.setColor(Color.GRAY);
-					g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
-							,pointReal2pixel(MI.Bd[MI.iptoDini])));
-					g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
-							,pointReal2pixel(MI.Bd[MI.iptoD])));
-					g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
-							,pointReal2pixel(MI.Bi[MI.iptoIini])));
-					g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
-							,pointReal2pixel(MI.Bi[MI.iptoI])));
-
 				}
 				
 				g.setStroke(new BasicStroke());
@@ -468,7 +465,7 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 			jcbRejillaRecta.addChangeListener(this);
 			jpC.add(jcbRejillaRecta);
 
-			jlDistLin=new JLabel("Dist lineal ??.???");
+			jlDistLin=new JLabel("Dist ??.???");
 		    Font Grande = jlDistLin.getFont().deriveFont(20.0f);
 		    jlDistLin.setFont(Grande);
 			jlDistLin.setHorizontalAlignment(JLabel.CENTER);
@@ -557,7 +554,17 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 		if(MI==null)
 			return;
 		hayBarrido=true;
+		if(java.lang.Double.isNaN(MI.dist)) {
+			jlDistLin.setText("Fuera");
+			jlDistLin.setForeground(Color.RED);
+		} else if (java.lang.Double.isInfinite(MI.dist)) {
+			jlDistLin.setText("Nada");
+			jlDistLin.setForeground(Color.GREEN);
+		} else {
+			
 		jlDistLin.setText(String.format("Dist lineal %6.3f m", MI.dist));
+		jlDistLin.setForeground(Color.BLACK);
+		}
 		jlDistLin.setEnabled(true);
 
 		//cambiamos color de nombres de las zonas si están infringidas
