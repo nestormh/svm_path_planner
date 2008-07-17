@@ -61,11 +61,6 @@ public class GPSConnection implements SerialPortEventListener {
 	/** Si estamos {@link #enRuta} almacena los puntos que estén separados al menos {@link #minDistOperativa} */
 	private Ruta bufferRutaEspacial = null;
 
-	/** indica si se está procesando cadena (por los lístenes). Se desprecian las que lleguen 
-	 * mientras está a true.
-	 */
-	private boolean actualizando=true;
-
 	
 	/** Conexión serial IMU de la que leer ángulos*/
 	private ConexionSerialIMU csIMU=null;
@@ -165,7 +160,6 @@ public class GPSConnection implements SerialPortEventListener {
 		open = true;
 
 		sPort.disableReceiveTimeout();
-		actualizando=false;
 	}
 
 	/**
@@ -189,6 +183,8 @@ public class GPSConnection implements SerialPortEventListener {
 					parameters.getDatabits(),
 					parameters.getStopbits(),
 					parameters.getParity());
+			sPort.setInputBufferSize(1);
+//			sPort.setLowLatency();
 		} catch (UnsupportedCommOperationException e) {
 			parameters.setBaudRate(oldBaudRate);
 			parameters.setDatabits(oldDatabits);
@@ -240,7 +236,7 @@ public class GPSConnection implements SerialPortEventListener {
 	public void sendBreak() {
 		sPort.sendBreak(1000);
 	}
-
+	
 	/**
          Reports the open status of the port.
          @return true if port is open, false if port is closed.
@@ -269,25 +265,16 @@ public class GPSConnection implements SerialPortEventListener {
 					if (val != 10) {
 						cadenaTemp += (char) val;
 					} else {
-						if(!actualizando) {
-							actualizando=true;
-							actualizaNuevaCadena(cadenaTemp);
-							actualizando=false;
-						} else {
-							System.err.println("Perdida cadena"+cadenaTemp);
-						}
-						
+						actualizaNuevaCadena(cadenaTemp);						
 						cadenaTemp = "";
 					}
 				}
 			} catch (IOException ioe) {
 				System.err.println("\nError al recibir los datos");
-				actualizando=false; //para que puedas seguir recibiendo
 			} catch (Exception ex) {
 				System.err.println("\nGPSConnection Error al procesar >"+cadenaTemp+"< : " + ex.getMessage());
 				ex.printStackTrace();
 				cadenaTemp = "";
-				actualizando=false; //para que puedas seguir recibiendo
 			}
 		}
 	}
