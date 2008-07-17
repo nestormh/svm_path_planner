@@ -48,7 +48,7 @@ public class ManejaLMS {
 	 */	
 	public ManejaLMS(String puertoSerie){
 		//valores por defecto supuestos
-		manMen=new UtilMensajes((short)180,(short)50,true,(byte)0);
+		manMen=new UtilMensajes((short)50,(short)180,true,(byte)0);
 
 		//conectamos al puerto
 		manTel=new ManejaTelegramasJNI();
@@ -95,7 +95,7 @@ public class ManejaLMS {
 				configuradoCodigo=true;
 			}
 		if(!configuradoVariante) {
-			setVariante(manMen.getResAngular(), manMen.getRangoAngular());
+			setVariante(manMen.getRangoAngular(),manMen.getResAngular());
 			configuradoVariante=true;
 		}
 	}
