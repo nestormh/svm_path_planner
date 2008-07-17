@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
+import sibtra.lms.ManejaTelegramasIO;
 import sibtra.lms.ZonaLMS;
 
 
@@ -67,6 +68,7 @@ public class AgenteLMS extends Agent {
 		//Puerto serie por defecto
 		String puertoSerie="/dev/ttyS0";
 		logs=true;
+		boolean usaRXTX=false;
 		//analizamos argumentos
 		Object[] args = getArguments();
 		if (args!=null) 
@@ -79,11 +81,17 @@ public class AgenteLMS extends Agent {
 				if(aa.startsWith("logs:") && aa.length()>"logs:".length() ) {
 					logs=aa.substring(aa.indexOf(":")+1).equalsIgnoreCase("on");
 				}
+				if(aa.startsWith("rxtx:") && aa.length()>"rxtx:".length() ) {
+					usaRXTX=aa.substring(aa.indexOf(":")+1).equalsIgnoreCase("on");
+				}
 			}
 
 		agentLog("Usamos puerto serie: "+puertoSerie);
-
-		manLMS=new ManejaLMS(puertoSerie);
+		if(usaRXTX) {
+			//le pasamos el objeto IO
+			manLMS=new ManejaLMS(puertoSerie,new ManejaTelegramasIO());
+		} else
+			manLMS=new ManejaLMS(puertoSerie);
 
 		//Tratamos de pasar al modo 25
 		try { manLMS.CambiaAModo25(); } catch (LMSException e) {
