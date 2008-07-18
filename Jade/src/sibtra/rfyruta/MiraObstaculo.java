@@ -63,6 +63,8 @@ public class MiraObstaculo {
 	/** Índice del punto de la trayectoria que está cerca por detrás */
 	int indiceDentro;
 
+	int iLibre;
+
 
 
 	/**
@@ -146,7 +148,8 @@ public class MiraObstaculo {
 	 * En un momento dado nos dice a que distancia se encuentra el obstaculo más cercano
 	 * @param posicionLocal Posición en coordenadas locales donde nos encontramos
 	 * @param rumbo actual del vehiculo hacia el norte (EN RADIANES)
-	 * @return distancia al obstáculo más cercano.
+	 * @return NaN si estamos fuera del camino, valor positivo si obstáculo a esa distancia, 
+	 * valor negativo si está libre hasta esa distancia. 
 	 */
 	public double masCercano(double[] posicionLocal, double yawA, BarridoAngular barrAct) {
 		barr=barrAct;
@@ -313,22 +316,43 @@ public class MiraObstaculo {
 			
 		} //fin del while
 
-		dist=Double.POSITIVE_INFINITY;
-		if(ColIzda) {
-			dist=barr.getDistancia(iAI);
-			indMin=iAI;
-		}
-		if(ColDecha) {
-			dist= barr.getDistancia(iAD);
-			indMin=iAD;
-		}
+//		dist=Double.POSITIVE_INFINITY;
 		if(iAD<iAI) {
-			//si los rayos no se han cruzado buscamos posible minimo en medio
-			indMin=iAD;
-			for(int i=iAD+1; i<=iAI; i++)
-				if(barr.getDistancia(i)<barr.getDistancia(indMin))
-					indMin=i;
-			dist=barr.getDistancia(indMin);
+			//si los rayos no se han cruzado
+			if(ColDecha || ColIzda) {
+				//buscamos posible minimo en medio
+				indMin=iAD;
+				for(int i=iAD+1; i<=iAI; i++)
+					if(barr.getDistancia(i)<barr.getDistancia(indMin))
+						indMin=i;
+				dist=barr.getDistancia(indMin);
+			} else {
+				System.err.println("No se han cruzado y no hay colisión ??");
+				//no ha colisionado ningún lado, cogemos el índice mayor
+				iLibre=(iptoD<iptoI)?iptoI:iptoD;
+				dist=-distanciaPuntos(Tr[iLibre],posActual);								
+			}
+		} else {
+			//los rayos se han cruzado, la colisión puede se en medio
+			//usamos la distancia del índice del lado de colisión
+			if(ColDecha && ColIzda) {
+				System.err.println("RARO: se cruzaron y colisionaron los 2 ??");
+				//buscamos posible minimo en medio
+				indMin=iAD;
+				for(int i=iAD+1; i<=iAI; i++)
+					if(barr.getDistancia(i)<barr.getDistancia(indMin))
+						indMin=i;
+				dist=barr.getDistancia(indMin);
+			} else	if(ColIzda) {
+				//usamos el punto de la trayectoria hasta donde podemos llegar
+				dist=-distanciaPuntos(Tr[iLibre=iptoI],posActual);
+			} else  if(ColDecha) {
+				dist=-distanciaPuntos(Tr[iLibre=iptoD],posActual);
+			} else {
+				//no ha colisionado ningún lado, cogemos el índice mayor
+				iLibre=(iptoD<iptoI)?iptoI:iptoD;
+				dist=-distanciaPuntos(Tr[iLibre],posActual);				
+			}
 		}
 		return dist;
 	}
