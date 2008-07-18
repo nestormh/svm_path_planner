@@ -5,7 +5,7 @@
 #include "comparaImagenes.h"
 #include "CRuta.h"
 
-int inicio = 20, fin = 1617, vel = 0;
+int inicio = 20, fin = 1864, vel = 0;
 int pos = 0, next = 3;
 
 comparaImagenes comp;
@@ -24,25 +24,25 @@ void initControl() {
 void initGUI() {	
 	initControl();
 
-	/*cvNamedWindow("Imagen1", 1);
+	cvNamedWindow("Imagen1", 1);
 	cvMoveWindow("Imagen1", 10, 10);
 	cvNamedWindow("Imagen2", 1);	
 	cvMoveWindow("Imagen2", 10, 280);
 	
 	cvNamedWindow("Persp", 1);
-	cvMoveWindow("Persp", 360, 10);*/
+	cvMoveWindow("Persp", 360, 10);
 
 	cvNamedWindow("Resta", 1);
 	cvMoveWindow("Resta", 360, 320);	
 
-	/*cvNamedWindow("Mascara", 1);
-	cvMoveWindow("Mascara", 10, 550);*/
+	cvNamedWindow("Mascara", 1);
+	cvMoveWindow("Mascara", 360, 550);
 
 	cvNamedWindow("Debug", 1);
-	cvMoveWindow("Debug", 10, 10);
+	cvMoveWindow("Debug", 10, 550);
 
 	cvNamedWindow("Debug2", 1);
-	cvMoveWindow("Debug2", 360, 10);
+	cvMoveWindow("Debug2", 700, 320);
 }
 
 void creaMascara(IplImage * mascara) {
@@ -97,8 +97,8 @@ int inicio0() {
 }
 
 int inicio1() {	
-	/*CRuta ruta1("C:\\Proyecto\\Datos", "320e");
-	CRuta ruta2("C:\\Proyecto\\Datos", "320f");*/
+	//CRuta ruta1("C:\\Proyecto\\Datos", "320e");
+	//CRuta ruta2("C:\\Proyecto\\Datos", "320f");
 	CRuta ruta1("C:\\Proyecto\\Datos", "aerop14EneSinObs");
 	CRuta ruta2("C:\\Proyecto\\Datos", "aerop14EneConObs");
 
@@ -118,6 +118,10 @@ int inicio1() {
 		//IplImage * mask = NULL;
 		creaMascara(mask);
 
+		// Descomentar si queremos buscar en toda la imagen, no sólo en la zona de carretera, 
+		// y comentar la parte correspondiente en filtraImagen:
+		//// cvRectangle(mask, cvPoint(0,0), cvPoint(mask->width - 1, mask->height - 1), cvScalar(255), -1);
+		
 		if (resta == NULL)
 			resta = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 1);
 

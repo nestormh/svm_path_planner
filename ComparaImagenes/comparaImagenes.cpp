@@ -4,7 +4,7 @@
 
 comparaImagenes::comparaImagenes() {		
 	//criterio = cvTermCriteria(CV_TERMCRIT_EPS, 0, 0.001);
-	criterio = cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03);	
+	criterio = cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03);		
 }
 
 comparaImagenes::~comparaImagenes() {	
@@ -106,7 +106,7 @@ void comparaImagenes::cleanOpticalFlow(bool * estado, float * error) {
 
 void comparaImagenes::opticalFlow(IplImage * img1, IplImage * img2, IplImage * mask) {
 	// Inicializacion
-  	cuenta = 500;
+  	cuenta = 33*25; //500;
 	esquinas1 = new CvPoint2D32f[cuenta];
 	esquinas2 = new CvPoint2D32f[cuenta];	
 	
@@ -114,8 +114,16 @@ void comparaImagenes::opticalFlow(IplImage * img1, IplImage * img2, IplImage * m
 	cvCvtColor(img2, gris2, CV_BGR2GRAY);
 
 	// Obtiene las esquinas iniciales
-	cvGoodFeaturesToTrack(gris1, eigen, temp, esquinas1, &cuenta, 0.01, 10, mask, 3, 0, 0.04 );
-	cvFindCornerSubPix(gris1, esquinas1, cuenta, cvSize(10, 10), cvSize(-1,-1), criterio);
+	//cvGoodFeaturesToTrack(gris1, eigen, temp, esquinas1, &cuenta, 0.01, 10, mask, 3, 0, 0.04 );
+	//cvFindCornerSubPix(gris1, esquinas1, cuenta, cvSize(10, 10), cvSize(-1,-1), criterio);
+	
+	int k = 0;
+	for (int i = 0; i < 33; i++) {
+		for (int j = 0; j < 25; j++) {
+			esquinas1[k] = cvPointTo32f(cvPoint(i*10, j*10));
+			k++;
+		}
+	}
 
 	// Si no se encontraron las esquinas, se finaliza la ejecución de la iteración
 	if (cuenta == 0)
@@ -377,7 +385,7 @@ void comparaImagenes::preProcesado(IplImage * imagen) {
 void comparaImagenes::restaImagenes(IplImage * img, IplImage * resta) {
 	//***************************************
 	cvShowImage("Persp", persp);
-	//***************************************
+	//***************************************	
 
 	// Resta en B/N:
 
@@ -656,17 +664,19 @@ void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage *
 	// Variables para la búsqueda de contornos
 	CvMemStorage * storage = cvCreateMemStorage (0);
 	CvSeq *contour;
-	
+
 	// Buscamos la máscara de lo que es carretera
 	aplicaBrilloContraste(resta, gris1, 60, 60);	
 	cvDilate(gris1, gris1, 0, 2);
 
 	cvThreshold(gris1, gris1, 20, 255, CV_THRESH_BINARY_INV);
 	
+	cvShowImage("Mascara", gris1);
+
 	cvZero(gris2);
 	cvCopy(gris1, gris2, perspMask);
 	cvZero(gris1);
-	cvCopy(gris2, gris1, mask);		
+	cvCopy(gris2, gris1, mask);			
 
 	// Buscamos contornos
 	storage = cvCreateMemStorage();
@@ -732,11 +742,24 @@ void comparaImagenes::filtraImagen(IplImage * resta, IplImage * mask, IplImage *
 
 	// Aplicamos la máscara recién creada
 	cvZero(gris1);
-	cvCopy(resta, gris1, mascaraCarretera);
+	cvCopy(resta, gris1, mascaraCarretera);	
+
+	/*// Equalizamos
+	cvNamedWindow("Antes",1);
+	cvNamedWindow("Despues",1);
+	cvShowImage("Antes", gris1);
+	cvEqualizeHist(gris1, gris1);
+	cvThreshold(gris1, gris2, 220, 255, CV_THRESH_BINARY);
+	cvZero(gris1);
+	cvCopy(gris2, gris1, mascaraCarretera);
+	cvShowImage("Despues", gris1);*/
 
 	cvSmooth(gris1, gris1, CV_MEDIAN, 3, 7);
 	
 	aplicaBrilloContraste(gris1, gris1, 100, 100);	
+
+	// NOTA: Emplear la entropía para descartar falsos positivos 
+	// y/o contrastes de hipótesis
 	
 	// Buscamos contornos: si el total encontrado es muy alto,
 	// erosionamos y volvemos a buscar
