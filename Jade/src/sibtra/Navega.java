@@ -133,11 +133,7 @@ public class Navega  {
 		System.out.println("Usando desviación magnética "+desMag);
 		
 		//Rellenamos la tryectoria
-		Tr=new double[rutaEspacial.getNumPuntos()][2];
-		for(int i=0; i<rutaEspacial.getNumPuntos();i++) {
-			Tr[i][0]=rutaEspacial.getPunto(i).getXLocal();
-			Tr[i][1]=rutaEspacial.getPunto(i).getYLocal();
-		}
+		Tr=rutaEspacial.toTr();
 		
 		
 		System.out.println("Longitud de la trayectoria="+Tr.length);

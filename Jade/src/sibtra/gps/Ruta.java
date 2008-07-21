@@ -348,6 +348,17 @@ public class Ruta implements Serializable {
 		
 	}
 
+	/** @return array de dos columnas con las posiciones locales */
+	public double[][] toTr() {
+		double[][] Tr=new double[getNumPuntos()][2];
+		for(int i=0; i<getNumPuntos();i++) {
+			Tr[i][0]=getPunto(i).getXLocal();
+			Tr[i][1]=getPunto(i).getYLocal();
+		}
+		return Tr;
+	}
+
+	
 	/**
 	 * @param args
 	 */

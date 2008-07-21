@@ -12,7 +12,7 @@ import sibtra.lms.BarridoAngular;
  */
 public class MiraObstaculo {
 	
-	private static final boolean debug = false;
+	private static final boolean debug = true;
 
 	/** Ancho para el camino	 */
 	double anchoCamino=2.0;
@@ -58,15 +58,28 @@ public class MiraObstaculo {
 	/** barrido en la última invocación a masCercano */
 	BarridoAngular barr;
 
+	/** Distancia lineal a la que se encuentra el obstáculo teóricamente más cercano */
 	double dist;
+	
+	/** Distancia en camino donde está el obstáculo más cercano (sobre camino).
+	 * Será MAX_VALUE si no se ha encontrado
+	 */
+	double distCamino;
 
 	/** Índice del punto de la trayectoria que está cerca por detrás */
 	int indiceDentro;
 
+	/** indice del segmento de la trayectoria donde está el coche */
+	int indiceCoche;
+	
 	int iLibre;
 
+	/** indice del segmento de la trayectoria anterior al obstáculo*/
+	int indSegObs;
 
-
+	/** indice del barrido donde está el obstáculo más cercano en el camino*/
+	int indBarrSegObs;
+	
 	/**
 	 * Constructor necesita conocer la ruta que se va a seguir.
 	 * A partir de ella generará los bordes de la carretera
@@ -148,8 +161,7 @@ public class MiraObstaculo {
 	 * En un momento dado nos dice a que distancia se encuentra el obstaculo más cercano
 	 * @param posicionLocal Posición en coordenadas locales donde nos encontramos
 	 * @param rumbo actual del vehiculo hacia el norte (EN RADIANES)
-	 * @return NaN si estamos fuera del camino, valor positivo si obstáculo a esa distancia, 
-	 * valor negativo si está libre hasta esa distancia. 
+	 * @return Distancia libre en el camino. 
 	 */
 	public double masCercano(double[] posicionLocal, double yawA, BarridoAngular barrAct) {
 		barr=barrAct;
@@ -308,53 +320,143 @@ public class MiraObstaculo {
 					}
 				}
 			}
-			//TODO no esta claro si esto es necesario o no
-//			if(AngI<AngD) {
-//				System.out.println("Se han cruzado los haces");
-//				break;
-//			}
 			
 		} //fin del while
 
-//		dist=Double.POSITIVE_INFINITY;
-		if(iAD<iAI) {
-			//si los rayos no se han cruzado
-			if(ColDecha || ColIzda) {
-				//buscamos posible minimo en medio
-				indMin=iAD;
-				for(int i=iAD+1; i<=iAI; i++)
-					if(barr.getDistancia(i)<barr.getDistancia(indMin))
-						indMin=i;
-				dist=barr.getDistancia(indMin);
-			} else {
-				System.err.println("No se han cruzado y no hay colisión ??");
-				//no ha colisionado ningún lado, cogemos el índice mayor
-				iLibre=(iptoD<iptoI)?iptoI:iptoD;
-				dist=-distanciaPuntos(Tr[iLibre],posActual);								
+		//Buscamos segmento del coche
+		indiceCoche=indiceDentro;
+		while(!dentroSegmento(posicionLocal, indiceCoche)) { indiceCoche++; }
+		indiceCoche++; //nos quedamos con el siguiente
+
+		indSegObs=Integer.MAX_VALUE;
+		indBarrSegObs=Integer.MAX_VALUE;
+		if(iAD<iAI || (ColDecha && ColIzda)) {
+			log("Los rayos no se han cruzado o hay 2 colisiones");
+			if(!ColDecha && !ColIzda) {
+				//TODO se da cuando hay pequeñas curvas, hacer barrido exaustivo dentro del rango.
+				log("No se han cruzado y no hay colisión ??");
 			}
+			//buscamos posible minimo en medio
+			indMin=iAD;
+			for(int i=iAD+1; i<=iAI; i++)
+				if(barr.getDistancia(i)<barr.getDistancia(indMin))
+					indMin=i;
+			dist=barr.getDistancia(indMin);
+			//Tenemos que buscar pto dentro del camino más cercano
+			indSegObs=Tr.length; //para limitar la búsquda
+			indBarrSegObs=Integer.MAX_VALUE;
+			for(int i=iAD; i<=iAI; i++) {
+				double angI=barr.getAngulo(i);
+				double distI=barr.getDistancia(i);
+				double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
+						,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
+				//Buscamos segmento en que está
+				//TODO usar algo más eficiente que la fuerza bruta
+				int iSA=indiceCoche-1; //empezamos desde el coche
+				while (iSA<indSegObs && !dentroSegmento(ptoI, iSA)) {
+					//no está, vamos avanzando
+					iSA++;
+				} 
+				if(dentroSegmento(ptoI, iSA)) {
+					indSegObs=iSA; //se encontró uno más cercano
+					indBarrSegObs=i;
+				}
+//				indSegObs=(ColDecha?iptoD:iptoI);
+//				if(!dentroSegmento(pto, indSegObs)) {
+//				//si ya está dentro empezamos acercándonos
+//				do {
+//				indSegObs--;
+//				} while (indSegObs>indiceDentro && !dentroSegmento(pto, indSegObs));
+//				if(indSegObs==indiceDentro) indSegObs=Integer.MAX_VALUE;
+//				} 
+//				else {
+//				//no está, vamos avanzando
+//				do { indSegObs++;} while (indSegObs<Tr.length && !dentroSegmento(pto, indSegObs));
+//				if(!dentroSegmento(pto, indSegObs))
+//				indSegObs=Integer.MAX_VALUE; //no se encontró
+//				else
+//				indSegObs--; // nos quedamos con el anterior
+//				}
+			}
+			if(indSegObs==Tr.length) {
+				log("No se encontró segmento ");
+				//usamos hasta donde hemos podido explorar
+				indSegObs=(iptoD<iptoI)?iptoI:iptoD;
+				indBarrSegObs=Integer.MAX_VALUE;
+			} //else indSegObs--; //nos quedamos con el anterior
 		} else {
-			//los rayos se han cruzado, la colisión puede se en medio
-			//usamos la distancia del índice del lado de colisión
-			if(ColDecha && ColIzda) {
-				System.err.println("RARO: se cruzaron y colisionaron los 2 ??");
-				//buscamos posible minimo en medio
-				indMin=iAD;
-				for(int i=iAD+1; i<=iAI; i++)
-					if(barr.getDistancia(i)<barr.getDistancia(indMin))
-						indMin=i;
-				dist=barr.getDistancia(indMin);
-			} else	if(ColIzda) {
+			log("los rayos se han cruzado y no hay colisión en los 2");
+			if(ColIzda) {
 				//usamos el punto de la trayectoria hasta donde podemos llegar
 				dist=-distanciaPuntos(Tr[iLibre=iptoI],posActual);
+				//Tenemos que buscar pto dentro del camino más cercano
+				//TODO optimizar límites de búsqueda
+				indSegObs=Tr.length; //para limitar la búsquda
+				indBarrSegObs=Integer.MAX_VALUE;
+				for(int i=iAI;i>=0; i--) {
+					double angI=barr.getAngulo(i);
+					double distI=barr.getDistancia(i);
+					double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
+							,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
+					//Buscamos segmento en que está
+					//TODO usar algo más eficiente que la fuerza bruta
+					int iSA=indiceCoche-1; //empezamos desde el coche
+					while (iSA<indSegObs && !dentroSegmento(ptoI, iSA)) {
+						//no está, vamos avanzando
+						iSA++;
+					} 
+					if(dentroSegmento(ptoI, iSA)) {
+						indSegObs=iSA; //se encontró uno más cercano
+						indBarrSegObs=i;
+					}
+				}
+				if(indSegObs==Tr.length) {
+					log("No se encontró segmento a persar colision");
+					//usamos hasta donde hemos podido explorar
+					indSegObs=iptoI;
+					indBarrSegObs=Integer.MAX_VALUE;
+				} //else indSegObs--; //nos quedamos con el anterior
 			} else  if(ColDecha) {
 				dist=-distanciaPuntos(Tr[iLibre=iptoD],posActual);
+				//Tenemos que buscar pto dentro del camino más cercano
+				//TODO optimizar límites de búsqueda
+				indSegObs=Tr.length; //para limitar la búsquda
+				indBarrSegObs=Integer.MAX_VALUE;
+				for(int i=iAD;  i<barr.numDatos(); i++) {
+					double angI=barr.getAngulo(i);
+					double distI=barr.getDistancia(i);
+					double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
+							,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
+					//Buscamos segmento en que está
+					//TODO usar algo más eficiente que la fuerza bruta
+					int iSA=indiceCoche-1; //empezamos desde el coche
+					while (iSA<indSegObs && !dentroSegmento(ptoI, iSA)) {
+						//no está, vamos avanzando
+						iSA++;
+					} 
+					if(dentroSegmento(ptoI, iSA)) {
+						indSegObs=iSA; //se encontró uno más cercano
+						indBarrSegObs=i;
+					}
+				}
+				if(indSegObs==Tr.length) {
+					log("No se encontró segmento a persar colision");
+					//usamos hasta donde hemos podido explorar
+					indSegObs=iptoD;
+					indBarrSegObs=Integer.MAX_VALUE;
+				} //else indSegObs--; //nos quedamos con el anterior
 			} else {
 				//no ha colisionado ningún lado, cogemos el índice mayor
-				iLibre=(iptoD<iptoI)?iptoI:iptoD;
+				//tambien para el camino
+				iLibre=indSegObs=(iptoD<iptoI)?iptoI:iptoD;
+				indBarrSegObs=Integer.MAX_VALUE;
 				dist=-distanciaPuntos(Tr[iLibre],posActual);				
 			}
 		}
-		return dist;
+		log("Indice del segmento coche "+indiceCoche
+				+" anterior al obstáculo "+indSegObs);
+		distCamino=largoTramo(indiceCoche,indSegObs);
+		return distCamino;
 	}
 	
 	private void log(String string) {
@@ -373,6 +475,50 @@ public class MiraObstaculo {
 		return largoVector(d);
 	}
 
+	/**
+	 * Dice si pto pasado esta en cuadrilátero de la trayectoria
+	 * @param pto por el que se pregunt
+	 * @param i cuadrilátero i-ésimo del camino
+	 * @return si está dentro
+	 */
+	public boolean dentroSegmento(double[] pto,int i){
+		if(i>=(Tr.length-1))
+			return false;
+		double sumAng=0;
+		double[] vA={pto[0]-Bi[i][0], pto[1]-Bi[i][1]};
+		double[] vB={pto[0]-Bi[i+1][0], pto[1]-Bi[i+1][1]};
+		double[] vC={pto[0]-Bd[i+1][0], pto[1]-Bd[i+1][1]};
+		double[] vD={pto[0]-Bd[i][0], pto[1]-Bd[i][1]};
+		
+		System.out.println("esq=["+Bi[i][0]+","+Bi[i][1]+";"
+				+Bi[i][0]+","+Bi[i][1]+";"
+				+Bi[i+1][0]+","+Bi[i+1][1]+";"
+				+Bd[i+1][0]+","+Bd[i+1][1]+";"
+				+Bd[i][0]+","+Bd[i][1]+";"
+				+"], pto=["+pto[0]+","+pto[1]+"]"
+				);
+		
+		
+		sumAng+=anguloVectores(vA, vB);
+		sumAng+=anguloVectores(vB, vC);
+		sumAng+=anguloVectores(vC, vD);
+		sumAng+=anguloVectores(vD, vA);
+		
+		return (Math.abs(Math.abs(sumAng)-(2*Math.PI))<1e-3);
+
+	}
+	
+	
+	public double largoTramo(int iini, int ifin) {
+		if(iini>ifin || ifin>=Tr.length)
+			return Double.POSITIVE_INFINITY;
+		double largo=0;
+		for(int i=iini; i<ifin; i++) {
+			double[] v={Tr[i+1][0]-Tr[i][0], Tr[i+1][1]-Tr[i][1]}; 
+			largo+=largoVector(v);
+		}
+		return largo;
+	}
 	/**
 	 * @param args
 	 */
@@ -443,4 +589,43 @@ public class MiraObstaculo {
 		System.out.println("];");
 	}
 
+	/**
+	 * @return el bd
+	 */
+	public double[][] getBd() {
+		return Bd;
+	}
+
+	/**
+	 * @return el bi
+	 */
+	public double[][] getBi() {
+		return Bi;
+	}
+
+	/**
+	 * @return el tr
+	 */
+	public double[][] getTr() {
+		return Tr;
+	}
+
+	
+	public String toString() {
+		String ret="Lineal="+dist+" camino="+distCamino;
+		ret+="\n iAD="+iAD
+				+" iAI="+iAI
+				+" ColDecha =" + ColDecha
+				+" ColIzda ="+ ColIzda
+				+"\n iptoD ="+iptoD
+				+"  iptoI ="+iptoI
+				+"  iptoDini ="+iptoDini
+				+"  iptoIini ="+iptoIini
+				+" \n imin ="+indMin
+				+" \n indiceCoche ="+indiceCoche
+				+" indSegObs ="+indSegObs
+				+" indBarrSegObs ="+indBarrSegObs
+		;
+		return ret;
+	}
 }

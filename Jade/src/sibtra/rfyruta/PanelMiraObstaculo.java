@@ -69,6 +69,8 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 
 	/** etiqueta que muestar la distancia al obstaculo */
 	private JLabel jlDistLin;
+	/** etiqueta que muestar la distancia al obstaculo */
+	private JLabel jlDistCam;
 
 	/** Etiqueta para indicar cuando estamos fuera del camino */
 	private JLabel jlFuera;
@@ -190,6 +192,8 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 					g.draw(pathArrayXY(MI.Bi));
 				}
 				if(hayDatos) {
+					//pixeles del pto actual se usa para trazar varias líneas
+					Point2D pxPtoActual=point2Pixel(MI.posActual);
 					
 					{ //pintamos el barrido
 						g.setStroke(new BasicStroke());
@@ -239,13 +243,13 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 						//Lineas indicando de donde empezó el barrido
 						g.setStroke(new BasicStroke());
 						g.setColor(Color.GRAY);
-						g.draw(new Line2D.Double(point2Pixel(MI.posActual)
+						g.draw(new Line2D.Double(pxPtoActual
 								,point2Pixel(MI.Bd[MI.iptoDini])));
-						g.draw(new Line2D.Double(point2Pixel(MI.posActual)
+						g.draw(new Line2D.Double(pxPtoActual
 								,point2Pixel(MI.Bd[MI.iptoD])));
-						g.draw(new Line2D.Double(point2Pixel(MI.posActual)
+						g.draw(new Line2D.Double(pxPtoActual
 								,point2Pixel(MI.Bi[MI.iptoIini])));
-						g.draw(new Line2D.Double(point2Pixel(MI.posActual)
+						g.draw(new Line2D.Double(pxPtoActual
 								,point2Pixel(MI.Bi[MI.iptoI])));
 
 
@@ -258,7 +262,7 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 							//marcamos el pto mínimo
 							g.setStroke(new BasicStroke());
 							g.setColor(Color.RED);
-							g.draw(new Line2D.Double(point2Pixel(MI.posActual),point2Pixel(ptoRF2Point(MI.indMin))));
+							g.draw(new Line2D.Double(pxPtoActual,point2Pixel(ptoRF2Point(MI.indMin))));
 
 							if(MI.iAD<MI.iAI) { //no se han cruzado
 								g.setStroke(new BasicStroke(3));
@@ -278,10 +282,27 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 						} else {
 							//tenemos libre marcamos punto libre
 							g.setStroke(new BasicStroke());
-							g.setColor(Color.GREEN);
-							g.draw(new Line2D.Double(point2Pixel(MI.posActual)
+							g.setColor(Color.YELLOW);
+							g.draw(new Line2D.Double(pxPtoActual
 									,point2Pixel(MI.Tr[MI.iLibre])));
 
+						}
+						if(MI.indSegObs!=Integer.MAX_VALUE) {
+							//tenemos los índices
+							g.setStroke(new BasicStroke(3));
+							g.setColor(Color.GREEN);
+							g.draw(pathArrayXY(MI.Tr, MI.indiceCoche
+									, MI.indSegObs+1));
+							g.draw(new Line2D.Double(point2Pixel(MI.Bi[MI.indSegObs])
+									,point2Pixel(MI.Bd[MI.indSegObs])));
+							g.draw(new Line2D.Double(point2Pixel(MI.Bi[MI.indiceCoche])
+									,point2Pixel(MI.Bd[MI.indiceCoche])));
+							if(MI.indBarrSegObs!=Integer.MAX_VALUE) {
+								//marcamos pto barrido dió obstáculo camino más cercano
+								g.setStroke(new BasicStroke());
+								g.draw(new Line2D.Double(pxPtoActual
+										,point2Pixel(ptoRF2Point(MI.indBarrSegObs))));
+							}
 						}
 					}
 					
@@ -312,6 +333,16 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 			jla.setPreferredSize(new Dimension(130, 45));
 			jpSur.add(jla);
 			
+			jla=jlDistCam=new JLabel("   ??.???");
+			jla.setBorder(BorderFactory.createTitledBorder(
+				       blackline, "Dist Camino"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			jla.setMinimumSize(new Dimension(300, 20));
+			jla.setPreferredSize(new Dimension(130, 45));
+			jpSur.add(jla);
+
 			jla=jlFuera=new JLabel("FUERA DEL CAMINO");
 		    jla.setFont(Grande);
 		    jla.setForeground(Color.RED);
@@ -409,6 +440,14 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 			evenPulsa = even;
 			return;
 		}
+		if(even.getButton()==MouseEvent.BUTTON3) {
+			System.out.println("Pulsado Boton "+even.getButton()+" petimos los cálculos");
+			MI.masCercano(MI.posActual, MI.Yaw, MI.barr);
+
+			actualiza();
+			System.out.println(MI);
+			return;
+		}
 	}
 
 	/**
@@ -421,39 +460,53 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 			System.out.println("Soltado Boton "+even.getButton()
 					+" en posición: ("+even.getX()+","+even.getY()+")");
 			if ( (even.getModifiersEx()&MouseEvent.SHIFT_DOWN_MASK)!=0
-				&& evenPos!=null) {
-			System.out.println("Soltado con Shift Boton "+even.getButton()
-					+" en posición: ("+even.getX()+","+even.getY()+")");
-			//Creamos rectángulo si está suficientemente lejos
-			if(Math.abs(even.getX()-evenPos.getX())>50 
-					|| Math.abs(even.getY()-evenPos.getY())>50) {
-				Point2D.Double nuevaPos=pixel2Point(evenPos.getX(),evenPos.getY());
-				Point2D.Double posAngulo=pixel2Point(even.getX(),even.getY());
-				double[] npos={nuevaPos.getX(),nuevaPos.getY()};
-				MI.masCercano(npos, Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
-						, MI.barr);
-				actualiza();
+					&& evenPos!=null) {
+				System.out.println("Soltado con Shift Boton "+even.getButton()
+						+" en posición: ("+even.getX()+","+even.getY()+")");
+				//Creamos rectángulo si está suficientemente lejos
+				if(Math.abs(even.getX()-evenPos.getX())>50 
+						|| Math.abs(even.getY()-evenPos.getY())>50) {
+					Point2D.Double nuevaPos=pixel2Point(evenPos.getX(),evenPos.getY());
+					Point2D.Double posAngulo=pixel2Point(even.getX(),even.getY());
+					double[] npos={nuevaPos.getX(),nuevaPos.getY()};
+					{
+						BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
+						double frec=(13.6+2*Math.random());
+						double Amp=(3.0+15*Math.random());
+						double Dpor=(20.0+15*Math.random());
+						for(int i=0;i<barAct.numDatos();i++) {
+//							barAct.datos[i]=(short)((15.0)*100.0);
+							barAct.datos[i]=(short)((Math.sin((double)i/(barAct.numDatos()-1)*Math.PI*frec)
+									*Amp
+									+Dpor)*100.0);
+						}
+						MI.masCercano(npos, Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
+								, barAct);
+					}
+					actualiza();
+					System.out.println(MI);
+
+				}
+				return;
 			}
-			return;
-		}
-		if(evenPulsa!=null) {
-			System.out.println("Soltado Boton "+even.getButton()
-					+" en posición: ("+even.getX()+","+even.getY()+")");
-			//Creamos rectángulo si está suficientemente lejos
-			if(even.getX()-evenPulsa.getX()>50 
-					&& even.getY()-evenPulsa.getY()>50) {
-				//como se usan las esquinas actuales para calcular las nuevas sólo podemos modificarlas 
-				// después
-				Point2D.Double nuevaEsqSI=pixel2Point( new Point2D.Double(evenPulsa.getX(),evenPulsa.getY()) );
-				esqID.setLocation(pixel2Point( new Point2D.Double(even.getX(),even.getY()) ));
-				esqSI.setLocation(nuevaEsqSI);
-				JPanelGrafico.repaint();
-				System.out.println("Puntos:  SI ("+ esqSI.getX()+ ","+esqSI.getY() +") "
-						+"  ID ("+esqID.getX()+","+esqID.getY()+")"
-						+"   ("+JPanelGrafico.getWidth()+","+JPanelGrafico.getHeight()+")"
-				);
+			if(evenPulsa!=null) {
+				System.out.println("Soltado Boton "+even.getButton()
+						+" en posición: ("+even.getX()+","+even.getY()+")");
+				//Creamos rectángulo si está suficientemente lejos
+				if(even.getX()-evenPulsa.getX()>50 
+						&& even.getY()-evenPulsa.getY()>50) {
+					//como se usan las esquinas actuales para calcular las nuevas sólo podemos modificarlas 
+					// después
+					Point2D.Double nuevaEsqSI=pixel2Point( new Point2D.Double(evenPulsa.getX(),evenPulsa.getY()) );
+					esqID.setLocation(pixel2Point( new Point2D.Double(even.getX(),even.getY()) ));
+					esqSI.setLocation(nuevaEsqSI);
+					JPanelGrafico.repaint();
+					System.out.println("Puntos:  SI ("+ esqSI.getX()+ ","+esqSI.getY() +") "
+							+"  ID ("+esqID.getX()+","+esqID.getY()+")"
+							+"   ("+JPanelGrafico.getWidth()+","+JPanelGrafico.getHeight()+")"
+					);
+				}
 			}
-		}
 		}
 	}
 
@@ -521,6 +574,7 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 		hayDatos=true;
 		if(Double.isNaN(MI.dist)) {
 			jlDistLin.setEnabled(false);
+			jlDistCam.setEnabled(false);
 			jlFuera.setEnabled(true);
 			
 		} else {
@@ -533,6 +587,10 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 				jlDistLin.setText(String.format("%9.3f m", -MI.dist));
 				jlDistLin.setForeground(Color.GREEN);				
 			}
+			if(MI.indSegObs!=Integer.MAX_VALUE) {
+				jlDistCam.setEnabled(true);
+				jlDistCam.setText(String.format("%9.3f m", MI.distCamino));				
+			} else jlDistCam.setEnabled(false);
 		}
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
@@ -903,15 +961,7 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 		double[] ptoAct={-26, 10};
 		double dist=mi.masCercano(ptoAct, Math.toRadians(90), ba);
 		pmo.actualiza();
-		System.out.println("Distancia="+dist);
-		System.out.println(" iAD="+pmo.MI.iAD
-				+"\n iAI="+pmo.MI.iAI
-				+"\n iptoD ="+pmo.MI.iptoD
-				+" \n iptoI ="+pmo.MI.iptoI
-				+" \n iptoDini ="+pmo.MI.iptoDini
-				+" \n iptoIini ="+pmo.MI.iptoIini
-				+" \n imin ="+pmo.MI.indMin
-				);
+		System.out.println(mi);
 		boolean Caminar=false;
 		if(Caminar) {
 			//vamos recorriendo la trayectoria con barridos aleatorios
