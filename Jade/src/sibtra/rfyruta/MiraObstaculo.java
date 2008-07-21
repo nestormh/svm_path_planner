@@ -12,7 +12,7 @@ import sibtra.lms.BarridoAngular;
  */
 public class MiraObstaculo {
 	
-	private static final boolean debug = true;
+	private boolean debug = true;
 
 	/** Ancho para el camino	 */
 	double anchoCamino=2.0;
@@ -84,8 +84,10 @@ public class MiraObstaculo {
 	 * Constructor necesita conocer la ruta que se va a seguir.
 	 * A partir de ella generará los bordes de la carretera
 	 * @param trayectoria en coordenadas locales.
+	 * @param debug si queremos activar mensajes de depuracion
 	 */
-	public MiraObstaculo(double[][] trayectoria) {
+	public MiraObstaculo(double[][] trayectoria, boolean debug) {
+		this.debug=debug;
 		if(trayectoria==null || trayectoria.length<2 || trayectoria[1].length<2)
 			throw (new IllegalArgumentException("Trayectoria no tienen las dimensiones mínimas"));
 		Tr=trayectoria;
@@ -93,7 +95,11 @@ public class MiraObstaculo {
 		indiceDentro=0;
 				
 	}
-	
+
+	/** Constructor sin debug */
+	public MiraObstaculo(double[][] trayectoria) {
+		this(trayectoria,false);
+	}
 	/**
 	 * Transcripción de código octave RangeFinder/branches/RFyGPS/ConstruyeCamino.m
 	 * @param tr trayectoria
@@ -333,7 +339,6 @@ public class MiraObstaculo {
 		if(iAD<iAI || (ColDecha && ColIzda)) {
 			log("Los rayos no se han cruzado o hay 2 colisiones");
 			if(!ColDecha && !ColIzda) {
-				//TODO se da cuando hay pequeñas curvas, hacer barrido exaustivo dentro del rango.
 				log("No se han cruzado y no hay colisión ??");
 			}
 			//buscamos posible minimo en medio
@@ -490,7 +495,7 @@ public class MiraObstaculo {
 		double[] vC={pto[0]-Bd[i+1][0], pto[1]-Bd[i+1][1]};
 		double[] vD={pto[0]-Bd[i][0], pto[1]-Bd[i][1]};
 		
-		System.out.println("esq=["+Bi[i][0]+","+Bi[i][1]+";"
+		log("esq=["+Bi[i][0]+","+Bi[i][1]+";"
 				+Bi[i][0]+","+Bi[i][1]+";"
 				+Bi[i+1][0]+","+Bi[i+1][1]+";"
 				+Bd[i+1][0]+","+Bd[i+1][1]+";"
