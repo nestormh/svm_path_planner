@@ -6,7 +6,7 @@ package sibtra.rfyruta;
 import sibtra.lms.BarridoAngular;
 
 /**
- * Clase pra convinar el seguimiento de la ruta con el RF.
+ * Clase para combinar el seguimiento de la ruta con el RF.
  * Proviene de transcribir el código de octave en RangeFinder/branches/RFyGPS/
  * @author alberto
  */

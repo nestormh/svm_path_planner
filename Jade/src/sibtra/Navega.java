@@ -26,6 +26,7 @@ import sibtra.lms.ManejaLMS;
 import sibtra.rfyruta.MiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculoSubjetivo;
+import sibtra.util.EligeSerial;
 
 /**
  * Para realizar la navegación (sin control del coche) detectando obstáculos con el RF.
@@ -56,9 +57,10 @@ public class Navega  {
 	private double desMag;
 	JCheckBox jcbNavegando;
 
+	/** Se le han de pasar los 3 puertos series para: IMU, GPS y RF (en ese orden)*/
 	public Navega(String[] args) {
-		if(args.length<3) {
-			System.err.println("Son necesarios 3 argumentos con los puerstos seriales");
+		if(args==null || args.length<3) {
+			System.err.println("Son necesarios 3 argumentos con los puertos seriales");
 			System.exit(1);
 		}
 		
@@ -132,7 +134,7 @@ public class Navega  {
 		desMag=rutaEspacial.getDesviacionM();
 		System.out.println("Usando desviación magnética "+desMag);
 		
-		//Rellenamos la tryectoria
+		//Rellenamos la trayectoria
 		Tr=rutaEspacial.toTr();
 		
 		
@@ -171,10 +173,25 @@ public class Navega  {
 
 
 	/**
-	 * @param args
+	 * Crea el objeto y queda en bucle en que se ejecuta cada {@link #miliEspera} un nuevo 
+	 * cálculo de distancia del obstáculo.
+	 * @param args Seriales para IMU, GPS y RF. Si no se pasan de piden interactivamente.
 	 */
 	public static void main(String[] args) {
-		Navega na=new Navega(args);
+		String[] puertos;
+		if(args==null || args.length<3) {
+			//no se han pasado argumentos, pedimos los puertos interactivamente
+			String[] titulos={"IMU","GPS","RF"};			
+			puertos=new EligeSerial(titulos).getPuertos();
+			if(puertos==null) {
+				System.err.println("No se asignaron los puertos seriales");
+				System.exit(1);
+			}
+		} else puertos=args;
+		
+	
+		
+		Navega na=new Navega(puertos);
 		long tSig;
 		while(true) {
 			tSig=System.currentTimeMillis()+miliEspera;
