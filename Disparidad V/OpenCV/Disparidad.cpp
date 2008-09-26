@@ -632,7 +632,7 @@ void lineasH(IplImage *src, CvSeq *horizontal, CvSeq *pendpos, CvSeq *pendneg){
 	cvSetImageROI(src, cvRect(0, 15, src->width, src->height - 15));	// Descartar la zona correspondiente a disparidades pequeñas
 
 	line = (CvPoint*) malloc (sizeof (CvPoint *));
-	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 40, 30, 20 );
+	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 40, 30, 1 );
         	
 	nLines = lines->total;
 	for (i = 0; i < nLines; i++) {
@@ -811,6 +811,72 @@ void rotate(const IplImage *src, IplImage *dst, double degree){
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE: 
+	   FUNCIÓN:
+	PARÁMETROS: 
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+void marcObstacle (IplImage *sourceImage, CvSeq *vertical, CvSeq *horizontal ,CvSeq *diagonal ,CvSeq *pendpos, CvSeq *pendneg){
+	IplImage* color_dst;
+	CvPoint *obj;
+	int j, nVer;
+	CvPoint *hor;
+	CvPoint *ver;
+	char auxText[255];
+
+	CvFont font;
+	double hScale,
+		   vScale;
+	int lineWidth; 
+
+
+	/* Configurar la fuente para el texto en imágenes */
+	hScale = 0.5;
+	vScale = 0.5;
+	lineWidth = 0;
+	cvInitFont (&font, CV_FONT_HERSHEY_SIMPLEX|CV_FONT_ITALIC, hScale, vScale, lineWidth);
+
+	// Para mostrar el rectángulo
+	color_dst = cvCreateImage( cvGetSize(sourceImage), 8, 3 );		// Fijar imagen de base
+	color_dst = cvCloneImage (sourceImage);
+	if (source == 0)
+		color_dst->origin = 0;
+	else
+		color_dst->origin = 1;
+
+	for (int i= 0; i < horizontal->total; i ++){		// Dibujar rectángulos (detectar obstáculos)
+		hor = (CvPoint *) cvGetSeqElem(horizontal, i);
+	
+		j = 0;
+		nVer = vertical->total;
+		while (/*(ver[0].x < hor[0].y) &&*/(j < nVer)) {
+			ver = (CvPoint *) cvGetSeqElem(vertical, j);
+	
+			if ((abs(ver[0].x - hor[0].y) < 5) || (abs(ver[0].x - hor[1].y) < 5) ||
+				(abs(ver[1].x - hor[0].y) < 5) || (abs(ver[1].x - hor[1].y) < 5)){   // Coincidencia
+				cvRectangle(color_dst, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y)), cvPoint(max(hor[0].x, hor[1].x), max(ver[0].y, ver[1].y)), CV_RGB(255,0,0));
+
+				sprintf(auxText, "%.2f m",(float)(0.545*425/ver[0].x));
+				cvPutText (color_dst, auxText, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y) - 1), &font, CV_RGB(255,0,0));
+
+				cvShowImage( "Obstaculos", color_dst );
+				printf ("Posible obstaculo a %f m (disparidad %d)\n", (float)(0.545*425/ver[0].x), ver[0].x);
+			
+			} 
+
+			j++;
+		}
+	}
+
+
+
+	cvShowImage( "Obstaculos", color_dst );
+
+
+	cvReleaseImage(&color_dst);
+}
+
+/*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE: disparity
 	   FUNCIÓN:
 	PARÁMETROS: IplImage *left    -> Imagen izquierda. Se asume una imagen RGB de 3 planos.
@@ -818,12 +884,15 @@ void rotate(const IplImage *src, IplImage *dst, double degree){
 				parameter adjusts -> Ajustes para los algoritmos que componen la disparidad.
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
-void disparity (IplImage *left, IplImage* right, parameter adjusts, CvFont font){
+void disparity (IplImage *left, IplImage* right, parameter adjusts){
 	IplImage *izquierda,		// Imagen izquierda en escala de grises
 			 *derecha,			// Imagen derecha en escala de grises
 			 *mapaDisparidad,	// Mapa de disparidad
 			 *imagenDisparidadH,
 			 *imagenDisparidad;
+
+	IplImage *dummy;	// Temporal para la disparidad horizontal
+	CvPoint *ver;
 
 	CvSeq *vertical, 
 		  *diagonal,
@@ -841,13 +910,15 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts, CvFont font)
 	imagenDisparidad = cvCreateImage(cvSize(MAXD,cvGetSize(left).height), IPL_DEPTH_8U, 1);
 	imagenDisparidadH = cvCreateImage(cvSize(cvGetSize(left).width, MAXD), IPL_DEPTH_8U, 1);
 
+	dummy = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
+
 	izquierda = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
 	derecha = cvCreateImage(cvGetSize(right), IPL_DEPTH_8U, 1);
 
 	cvCvtColor(left, izquierda, CV_RGB2GRAY);					// Pasar a escala de grises
 	cvCvtColor(right, derecha, CV_RGB2GRAY);					// Pasar a escala de grises
 
-
+	/* Para que la imagen siempre se muestre "al derecho"*/
 	if (source == 0){
 		mapaDisparidad->origin = 0;
 		imagenDisparidad->origin = 0;
@@ -861,97 +932,83 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts, CvFont font)
 	}
 	
 
-
-// Para mostrar el rectángulo
-IplImage* color_dst = cvCreateImage( cvGetSize(izquierda), 8, 3 );
-cvCvtColor( izquierda, color_dst, CV_GRAY2BGR );
-if (source == 0)
-	color_dst->origin = 0;
-else
-	color_dst->origin = 1;
-
-
-
 cvShowImage ("Izquierda", izquierda);	
 cvShowImage ("Derecha", derecha);	
 
-
+	
 clock_t start = clock();
 
 	iguala1D(derecha, izquierda);						// Igualar brillo y contraste de ambas imágenes
 
 //Opción 1 de preprocesado
-ternarizacion (izquierda, adjusts.filtro, adjusts.sobel, adjusts.umbral);
-ternarizacion (derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
+	ternarizacion (izquierda, adjusts.filtro, adjusts.sobel, adjusts.umbral);
+	ternarizacion (derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
 
 // Opción 2 de preprocesado
 //preprocesado (izquierda, derecha, adjusts.filtro);
 
 	correlacion (izquierda, derecha, MAXD, mapaDisparidad);
+	
+	/* Disparidad V */
 	crearImagen (mapaDisparidad, imagenDisparidad);
-	crearImagenH(mapaDisparidad, imagenDisparidadH);
 	cvThreshold(imagenDisparidad, imagenDisparidad, 10, 255, CV_THRESH_BINARY);			// Umbralizar
+
+	/* Disparidad U */
+	crearImagenH(mapaDisparidad, imagenDisparidadH);
 	cvThreshold(imagenDisparidadH, imagenDisparidadH, 10, 255, CV_THRESH_BINARY);			// Umbralizar
 
-//	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
+
+	//	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
 	
-	storageV = cvCreateMemStorage(0);
+	storageV = cvCreateMemStorage(0);		// Verticales
 	storageD= cvCreateMemStorage(0);
 	vertical = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageV);
 	diagonal = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageD);
 
-	lineasV(imagenDisparidad, vertical, diagonal);
-
-	storageH = cvCreateMemStorage(0);
+	storageH = cvCreateMemStorage(0);		// Horizontales
 	storageMP= cvCreateMemStorage(0);
 	storageMN = cvCreateMemStorage(0);
 	horizontal = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageV);
 	pendpos = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageD);
 	pendneg = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageV);
 
-	lineasH(imagenDisparidadH, horizontal, pendpos, pendneg);
 
-CvPoint *obj;
-int j, nVer;
-CvPoint *hor;
-CvPoint *ver;
-char auxText[255];
+	lineasV(imagenDisparidad, vertical, diagonal);
 
-for (int i= 0; i < horizontal->total; i ++){		// Dibujar rectángulos (detectar obstáculos)
-	hor = (CvPoint *) cvGetSeqElem(horizontal, i);
-	
-	j = 0;
-	nVer = vertical->total;
-	while (/*(ver[0].x < hor[0].y) &&*/(j < nVer)) {
-		ver = (CvPoint *) cvGetSeqElem(vertical, j);
-	
-		if ((abs(ver[0].x - hor[0].y) < 5) || (abs(ver[0].x - hor[1].y) < 5) ||
-			(abs(ver[1].x - hor[0].y) < 5) || (abs(ver[1].x - hor[1].y) < 5)){   // Coincidencia
-			cvRectangle(color_dst, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y)), cvPoint(max(hor[0].x, hor[1].x), max(ver[0].y, ver[1].y)), CV_RGB(255,0,0));
+//	lineasH(imagenDisparidadH, horizontal, pendpos, pendneg);	// En la versión original estaba así
 
-			sprintf(auxText, "%.2f m",(float)(0.545*425/ver[0].x));
-			cvPutText (color_dst, auxText, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y) - 1), &font, CV_RGB(255,0,0));
 
-			cvShowImage( "Obstaculos", color_dst );
-			printf ("Posible obstaculo a %f m (disparidad %d)\n", (float)(0.545*425/ver[0].x), ver[0].x);
-			
-		} 
 
-		j++;
+/********************* Definiendo región de interés en base a las líneas verticales ****************/
+	for (int i= 0; i < vertical->total; i ++){		// Dibujar rectángulos (detectar obstáculos)
+		ver = (CvPoint *) cvGetSeqElem(vertical, i);
+		cvSetImageROI(mapaDisparidad, cvRect(ver[0].x, min(ver[0].y, ver[1].y), mapaDisparidad->width - ver[0].x, abs(ver[0].y - ver[1].y)));
+		cvSetZero(dummy);
+		cvSetImageROI(dummy, cvRect(ver[0].x, min(ver[0].y, ver[1].y), mapaDisparidad->width - ver[0].x, abs(ver[0].y - ver[1].y)));
+		cvCmpS(mapaDisparidad, ver[0].x, dummy, CV_CMP_EQ); 
+		cvSet (dummy, cvScalar(ver[0].x), dummy);
+		cvResetImageROI (mapaDisparidad);
+		cvResetImageROI (dummy);
+		// Rodear la región de interés en el mapa de disparidad reducido
+		cvRectangle(dummy, cvPoint(ver[0].x, min(ver[0].y, ver[1].y)), cvPoint(dummy->width, max(ver[0].y, ver[1].y)), CV_RGB(255,255,255));
+		
+		cvShowImage ("Mapa disparidad reducido", dummy);		
+
+		crearImagenH(dummy, imagenDisparidadH);
+		lineasH(imagenDisparidadH, horizontal, pendpos, pendneg);
+
 	}
-}
+/*******************************************************************************/
+
+	marcObstacle (left, vertical, horizontal, diagonal, pendpos, pendneg);
+
+
 clock_t stop = clock();
+printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 
-
-cvShowImage( "Obstaculos", color_dst );
-
-
-	printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
-
-		cvShowImage ("Mapa disparidad", mapaDisparidad);	
-		//cvShowImage ("Imagen disparidad", imagenDisparidad);
-		//cvShowImage ("Imagen disparidad H", imagenDisparidadH);
-	
+	cvShowImage ("Mapa disparidad", mapaDisparidad);	
+	//cvShowImage ("Imagen disparidad", imagenDisparidad);
+	//cvShowImage ("Imagen disparidad H", imagenDisparidadH);
 
 	cvClearSeq(vertical);
 	cvClearSeq(horizontal);
@@ -964,8 +1021,6 @@ cvShowImage( "Obstaculos", color_dst );
 	cvReleaseMemStorage (&storageH);
 	cvReleaseMemStorage (&storageMP);
 	cvReleaseMemStorage (&storageMN);
-
-	cvReleaseImage(&color_dst);
 
 	cvReleaseImage(&mapaDisparidad);
 	cvReleaseImage(&imagenDisparidad);
@@ -994,10 +1049,6 @@ int main (int argc, char* argv[]){
 	CCapturaVLC captura;
 	parameter ajustes;
 
-	CvFont font;
-	double hScale,
-		   vScale;
-	int lineWidth; 
 		
 
 	CvCapture *videoIzq;
@@ -1019,8 +1070,8 @@ int main (int argc, char* argv[]){
 		}
 
 		case 2:{										// Inicializar los vídeos
-			videoIzq = cvCaptureFromAVI("IzquierdaSincro320.avi");
-			videoDer = cvCaptureFromAVI("DerechaSincro320.avi");
+			videoIzq = cvCaptureFromAVI("../Videos d/Izquierda 01 Sincro.avi");
+			videoDer = cvCaptureFromAVI("../Videos d/Derecha 01 Sincro.avi");
 
 			break;
 		}
@@ -1037,6 +1088,8 @@ int main (int argc, char* argv[]){
 	cvNamedWindow("Imagen disparidad", CV_WINDOW_AUTOSIZE);
 	cvNamedWindow("Imagen disparidad H", CV_WINDOW_AUTOSIZE);
 
+	cvNamedWindow("Mapa disparidad reducido", CV_WINDOW_AUTOSIZE);
+
 	/* Crear la ventana de controles */
 	cvNamedWindow("Controles", CV_WINDOW_AUTOSIZE);
 	ajustes.filtro = 3;
@@ -1050,18 +1103,13 @@ int main (int argc, char* argv[]){
 	cvCreateTrackbar ("Umbral Obs", "Controles", &ajustes.umbralObstaculos, 15, NULL);
 	cvCreateTrackbar ("Porcentaje", "Controles", &ajustes.porcentaje, 10, NULL);
 
-	/* Configurar la fuente para el texto en imágenes */
-	hScale = 0.5;
-	vScale = 0.5;
-	lineWidth = 0;
-	cvInitFont (&font, CV_FONT_HERSHEY_SIMPLEX|CV_FONT_ITALIC, hScale, vScale, lineWidth);
 
 	while(1) {
 		
 		switch (source){
 			case 0: {		// Imágenes estáticas
-				izquierda = cvLoadImage("nave_izquierda1.jpg");
-				derecha = cvLoadImage("nave_derecha1.jpg");
+				izquierda = cvLoadImage("clio_izquierda.bmp");
+				derecha = cvLoadImage("clio_derecha.bmp");
 
 				izquierda->origin = 0;
 				derecha->origin = 0;
@@ -1098,7 +1146,7 @@ int main (int argc, char* argv[]){
 		}
 				
 	
-		disparity (izquierda, derecha, ajustes, font);
+		disparity (izquierda, derecha, ajustes);
 
 		if (source != 2){						// La propia función de captura se encarga de la memoria
 			cvReleaseImage(&izquierda);
