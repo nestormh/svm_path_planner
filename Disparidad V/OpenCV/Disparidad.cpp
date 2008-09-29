@@ -1048,7 +1048,9 @@ int main (int argc, char* argv[]){
 	int totalDisp = 0;
 	CCapturaVLC captura;
 	parameter ajustes;
-
+	int frameNr;
+	char filename[20];
+	char *prefix = "prueba";
 		
 
 	CvCapture *videoIzq;
@@ -1070,8 +1072,8 @@ int main (int argc, char* argv[]){
 		}
 
 		case 2:{										// Inicializar los vídeos
-			videoIzq = cvCaptureFromAVI("../Videos d/Izquierda 01 Sincro.avi");
-			videoDer = cvCaptureFromAVI("../Videos d/Derecha 01 Sincro.avi");
+			videoIzq = cvCaptureFromAVI("../Videos d/Izquierda 04 Sincro.avi");
+			videoDer = cvCaptureFromAVI("../Videos d/Derecha 04 Sincro.avi");
 
 			break;
 		}
@@ -1103,9 +1105,14 @@ int main (int argc, char* argv[]){
 	cvCreateTrackbar ("Umbral Obs", "Controles", &ajustes.umbralObstaculos, 15, NULL);
 	cvCreateTrackbar ("Porcentaje", "Controles", &ajustes.porcentaje, 10, NULL);
 
+	frameNr = 1;
 
 	while(1) {
-		
+
+				sprintf(filename, "%s_izquierda_%d.bmp", prefix, frameNr); 
+printf("%s", filename);
+
+
 		switch (source){
 			case 0: {		// Imágenes estáticas
 				izquierda = cvLoadImage("clio_izquierda.bmp");
@@ -1124,8 +1131,8 @@ int main (int argc, char* argv[]){
 				derecha->origin = 1;
 
 				break;		
-			}			// Vídeo
-			case 2: {
+			}			
+			case 2: {		// Vídeo
 				if (!cvGrabFrame(videoIzq)){
 					printf ("Error leyendo vídeo izquierdo\n");
 					exit (-1);
@@ -1143,6 +1150,33 @@ int main (int argc, char* argv[]){
 
 				break;
 			}
+			case 3: {		// Tiempo real con captura de secuencia de imágenes
+				izquierda = captura.captura(lista[0]);					// Capturar imagen izquierda
+				derecha = captura.captura(lista[1]);					// Capturar imagen derecha		
+
+				sprintf(filename, "%s_izquierda_%d.bmp", prefix, frameNr); 
+				cvSaveImage (filename, izquierda);
+				sprintf(filename, "%s_derecha_%d.bmp", prefix, frameNr); 
+				cvSaveImage (filename, derecha);
+
+				izquierda->origin = 1;
+				derecha->origin = 1;
+
+				break;		
+			}
+
+			case 4: {		// Secuencia de imágenes
+				sprintf(filename, "%s_izquierda_%d.bmp", prefix, frameNr); 
+				izquierda = cvLoadImage(filename);
+				sprintf(filename, "%s_derecha_%d.bmp", prefix, frameNr); 
+				derecha = cvLoadImage(filename);
+
+				izquierda->origin = 0;
+				derecha->origin = 0;
+
+				break;
+			}
+
 		}
 				
 	
@@ -1154,6 +1188,7 @@ int main (int argc, char* argv[]){
 		}
 
 		cvWaitKey(1);
+		frameNr++;
 	}
 	return (0);
 }
