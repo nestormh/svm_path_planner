@@ -327,7 +327,7 @@ void correlacion (IplImage *left, IplImage *right, int d, IplImage *mapa){
 	auxL = cvCreateImage(cvGetSize(left), IPL_DEPTH_16S, 1);
 	auxR = cvCreateImage(cvGetSize(left), IPL_DEPTH_16S, 1);
 	
-	if (source == 0){
+	if ((source == 0) || (source == 4)){
 		auxL->origin = 0;
 		auxR->origin = 0;
 	}else{
@@ -582,7 +582,7 @@ void lineasV(IplImage *src, CvSeq *vertical, CvSeq *diagonal){
 	}
 
 	//cvSeqSort(vertical, cmp_vert, 0);					// Ordenar las líneas verticales
-	if (source == 0)
+	if ((source == 0) || (source == 4))
 		color_dst->origin = 0;
 	else
 		color_dst->origin = 1;
@@ -699,7 +699,7 @@ void obstaculos (IplImage *img, int th, int factor){
 	IplImage *salida;
 		
 	salida = cvCreateImage(cvGetSize(img), 8, 1);
-	if (source == 0)
+	if ((source == 0) || (source == 4))
 		salida->origin = 0;
 	else
 		salida->origin = 1;
@@ -828,6 +828,7 @@ void marcObstacle (IplImage *sourceImage, CvSeq *vertical, CvSeq *horizontal ,Cv
 	double hScale,
 		   vScale;
 	int lineWidth; 
+	CvScalar rectColor;
 
 
 	/* Configurar la fuente para el texto en imágenes */
@@ -839,7 +840,7 @@ void marcObstacle (IplImage *sourceImage, CvSeq *vertical, CvSeq *horizontal ,Cv
 	// Para mostrar el rectángulo
 	color_dst = cvCreateImage( cvGetSize(sourceImage), 8, 3 );		// Fijar imagen de base
 	color_dst = cvCloneImage (sourceImage);
-	if (source == 0)
+	if ((source == 0) || (source == 4))
 		color_dst->origin = 0;
 	else
 		color_dst->origin = 1;
@@ -854,10 +855,17 @@ void marcObstacle (IplImage *sourceImage, CvSeq *vertical, CvSeq *horizontal ,Cv
 	
 			if ((abs(ver[0].x - hor[0].y) < 5) || (abs(ver[0].x - hor[1].y) < 5) ||
 				(abs(ver[1].x - hor[0].y) < 5) || (abs(ver[1].x - hor[1].y) < 5)){   // Coincidencia
-				cvRectangle(color_dst, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y)), cvPoint(max(hor[0].x, hor[1].x), max(ver[0].y, ver[1].y)), CV_RGB(255,0,0));
+				if (ver[0].x > 46)
+					rectColor = CV_RGB(255,0,0);
+				else if (ver[0].x > 23)
+					rectColor = CV_RGB(255,255,0);
+				else
+					rectColor = CV_RGB(0,255,0);
+
+				cvRectangle(color_dst, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y)), cvPoint(max(hor[0].x, hor[1].x), max(ver[0].y, ver[1].y)), rectColor);
 
 				sprintf(auxText, "%.2f m",(float)(0.545*425/ver[0].x));
-				cvPutText (color_dst, auxText, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y) - 1), &font, CV_RGB(255,0,0));
+				cvPutText (color_dst, auxText, cvPoint(min(hor[0].x, hor[1].x), min(ver[0].y, ver[1].y) - 1), &font, rectColor);
 
 				cvShowImage( "Obstaculos", color_dst );
 				printf ("Posible obstaculo a %f m (disparidad %d)\n", (float)(0.545*425/ver[0].x), ver[0].x);
@@ -919,7 +927,7 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 	cvCvtColor(right, derecha, CV_RGB2GRAY);					// Pasar a escala de grises
 
 	/* Para que la imagen siempre se muestre "al derecho"*/
-	if (source == 0){
+	if ((source == 0) || (source == 4)){
 		mapaDisparidad->origin = 0;
 		imagenDisparidad->origin = 0;
 		izquierda->origin = 0;
@@ -955,7 +963,7 @@ clock_t start = clock();
 
 	/* Disparidad U */
 	crearImagenH(mapaDisparidad, imagenDisparidadH);
-	cvThreshold(imagenDisparidadH, imagenDisparidadH, 10, 255, CV_THRESH_BINARY);			// Umbralizar
+	cvThreshold(imagenDisparidadH, imagenDisparidadH, 5, 255, CV_THRESH_BINARY);			// Umbralizar
 
 
 	//	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
@@ -1007,8 +1015,6 @@ clock_t stop = clock();
 printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 
 	cvShowImage ("Mapa disparidad", mapaDisparidad);	
-	//cvShowImage ("Imagen disparidad", imagenDisparidad);
-	//cvShowImage ("Imagen disparidad H", imagenDisparidadH);
 
 	cvClearSeq(vertical);
 	cvClearSeq(horizontal);
@@ -1016,11 +1022,15 @@ printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 	cvClearSeq(pendpos);
 	cvClearSeq(pendneg);
 	
+	
 	cvReleaseMemStorage (&storageV);
 	cvReleaseMemStorage (&storageD);
 	cvReleaseMemStorage (&storageH);
 	cvReleaseMemStorage (&storageMP);
 	cvReleaseMemStorage (&storageMN);
+
+
+	cvReleaseImage(&dummy);
 
 	cvReleaseImage(&mapaDisparidad);
 	cvReleaseImage(&imagenDisparidad);
@@ -1049,17 +1059,18 @@ int main (int argc, char* argv[]){
 	CCapturaVLC captura;
 	parameter ajustes;
 	int frameNr;
-	char filename[20];
-	char *prefix = "prueba";
+	char filename[30];
+	char *prefix = "Frames1/fuera";
 		
 
 	CvCapture *videoIzq;
 	CvCapture *videoDer;
 
-	source = 2;
+	source = 4;					// Origen de las imágenes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero vídeo, 3->T.Real Capturando frames, 4-> Frames capturados
 
 	switch (source) {
-		case 1:{										// Inicializar la captura desde cámaras
+		case 1:
+		case 3:{										// Inicializar la captura desde cámaras
 			lista = captura.listaDispositivos(&totalDisp);
 	
 			printf("TotalDisp = %d\n", totalDisp);
@@ -1074,7 +1085,6 @@ int main (int argc, char* argv[]){
 		case 2:{										// Inicializar los vídeos
 			videoIzq = cvCaptureFromAVI("../Videos d/Izquierda 04 Sincro.avi");
 			videoDer = cvCaptureFromAVI("../Videos d/Derecha 04 Sincro.avi");
-
 			break;
 		}
 	}
@@ -1109,15 +1119,16 @@ int main (int argc, char* argv[]){
 
 	while(1) {
 
-				sprintf(filename, "%s_izquierda_%d.bmp", prefix, frameNr); 
-printf("%s", filename);
-
-
 		switch (source){
 			case 0: {		// Imágenes estáticas
-				izquierda = cvLoadImage("clio_izquierda.bmp");
-				derecha = cvLoadImage("clio_derecha.bmp");
+				izquierda = cvLoadImage("Frames1/camino_left_1.bmp");
+				derecha = cvLoadImage("Frames1/camino_right_1.bmp");
 
+				if (!izquierda || !derecha){
+					printf ("Error leyendo imágenes\n");
+					exit (-1);
+				}
+				
 				izquierda->origin = 0;
 				derecha->origin = 0;
 
@@ -1154,9 +1165,9 @@ printf("%s", filename);
 				izquierda = captura.captura(lista[0]);					// Capturar imagen izquierda
 				derecha = captura.captura(lista[1]);					// Capturar imagen derecha		
 
-				sprintf(filename, "%s_izquierda_%d.bmp", prefix, frameNr); 
+				sprintf(filename, "%s_left_%d.bmp", prefix, frameNr); 
 				cvSaveImage (filename, izquierda);
-				sprintf(filename, "%s_derecha_%d.bmp", prefix, frameNr); 
+				sprintf(filename, "%s_right_%d.bmp", prefix, frameNr); 
 				cvSaveImage (filename, derecha);
 
 				izquierda->origin = 1;
@@ -1165,11 +1176,23 @@ printf("%s", filename);
 				break;		
 			}
 
-			case 4: {		// Secuencia de imágenes
-				sprintf(filename, "%s_izquierda_%d.bmp", prefix, frameNr); 
+			case 4: {
+				sprintf(filename, "%s_left_%d.bmp", prefix, frameNr); 
 				izquierda = cvLoadImage(filename);
-				sprintf(filename, "%s_derecha_%d.bmp", prefix, frameNr); 
+
+				sprintf(filename, "%s_right_%d.bmp", prefix, frameNr); 
 				derecha = cvLoadImage(filename);
+
+				if (!izquierda || !derecha) {		// Si se ha llegado al final de la secuencia -> reiniciar
+					frameNr = 1;
+
+					sprintf(filename, "%s_left_%d.bmp", prefix, frameNr); 
+					izquierda = cvLoadImage(filename);
+	
+					sprintf(filename, "%s_right_%d.bmp", prefix, frameNr); 
+					derecha = cvLoadImage(filename);
+
+				}
 
 				izquierda->origin = 0;
 				derecha->origin = 0;
@@ -1178,17 +1201,17 @@ printf("%s", filename);
 			}
 
 		}
-				
-	
+		
 		disparity (izquierda, derecha, ajustes);
 
-		if (source != 2){						// La propia función de captura se encarga de la memoria
+		if ((source != 2) && (source != 3)){					// La propia función de captura se encarga de la memoria
 			cvReleaseImage(&izquierda);
 			cvReleaseImage(&derecha);
 		}
 
 		cvWaitKey(1);
 		frameNr++;
+		printf ("Frame %d\n", frameNr);
 	}
 	return (0);
 }
