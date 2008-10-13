@@ -114,7 +114,7 @@ public class Ruta implements Serializable {
 	
 	/**
 	 * Crea la matriz de rotación {@link #T} y fija el {@link #centro} usando el punto pasado
-	 * @param centro punto que se usará como centro para definir el plano
+	 * @param ptoParaCentro punto que se usará como centro para definir el plano
 	 */
 	public void actualizaSistemaLocal(GPSData ptoParaCentro) {
 		if(ptoParaCentro==null) return;
@@ -217,7 +217,7 @@ public class Ruta implements Serializable {
 	 * Añade punto pasado a la ruta DUPLICANDOLO. Si esta es espcial sólo si esta a {@link #minDistOperativa} de 
 	 * el último de la ruta.
 	 * Se controla que el número de puntos no supere {@link #tamMaximo}.
-	 * @param data punto a añadir.
+	 * @param nuevodata punto a añadir.
 	 * @return si se añadió (tiene sentido en los espaciales)
 	 */
 	public boolean add(GPSData nuevodata) {

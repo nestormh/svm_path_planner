@@ -23,8 +23,8 @@ public class SimulaGps implements Runnable {
 
     /**
      * Constructor para simulación que usa datos de los dos ficheros pasados. 
-     * @param ruta nombre del fichero con la ruta
-     * @param nmea nombre del fichero con los comandos NMEA
+     * @param Simular banderín para indicar si se desea simulación o valores reales
+     * @param fichRuta nombre del fichero con los comandos NMEA
      */
     public SimulaGps(boolean Simular, String fichRuta) {
         gps = new GPSConnection();

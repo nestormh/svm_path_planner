@@ -155,8 +155,9 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 
     /**
      * Dado punto del mundo real lo pasa pixeles el coordenadas del RF.
-     * @param ds
-     * @return 
+     * @param xR coordenada x del mundo real
+     * @param yR coordenada y del mundo real
+     * @return punto en pixeles
      */
     private Point2D.Double pointReal2pixel(double xR,double yR) {
     	double Xrel=(xR-MI.posActual[0]);
@@ -554,8 +555,7 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 	
 	/**
 	 * Para cambiar el barrido que se está mostrando.
-	 * NO actualiza la presentación, sólo cambia los datos.
-	 * @param barr barrido nuevo
+	 * y actualiza la presentación
 	 */
 	public void actualiza() {
 		if(MI==null)

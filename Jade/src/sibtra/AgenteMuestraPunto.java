@@ -357,7 +357,7 @@ public class AgenteMuestraPunto extends Agent {
 		
 		/**
 		 * establece los datos seún punto pasado y programa actualización
-		 * @param punto obtenido
+		 * @param pto punto obtenido
 		 */
 		public void actualizaPto(GPSData pto) {
 			if(pto==null) {

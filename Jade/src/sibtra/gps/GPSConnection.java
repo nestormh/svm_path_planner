@@ -48,7 +48,7 @@ public class GPSConnection implements SerialPortEventListener {
 	/** Almacena ruta espacial cargada de fichero */
 	private Ruta rutaEspacial = null;
 
-	/** Almacena los {@link #MAXBUFFER} últimos puntos que están separados al menos {@link #minDistOperativa} */
+	/** Almacena los {@link #MAXBUFFER} últimos puntos de la ruta espacial */
 	private Ruta bufferEspacial = new Ruta(MAXBUFFER,true);
 	/** Almacena los {@link #MAXBUFFER} últimos puntos recibidos */
 	private Ruta bufferTemporal = new Ruta(MAXBUFFER);  
@@ -58,7 +58,7 @@ public class GPSConnection implements SerialPortEventListener {
 	
 	/** Si estamos {@link #enRuta}, almacena los puntos recibidos */
 	private Ruta bufferRutaTemporal = null;
-	/** Si estamos {@link #enRuta} almacena los puntos que estén separados al menos {@link #minDistOperativa} */
+	/** Si estamos {@link #enRuta} almacena los puntos en ruta espacial */
 	private Ruta bufferRutaEspacial = null;
 
 	
@@ -255,7 +255,7 @@ public class GPSConnection implements SerialPortEventListener {
 
 	/**
 	 * Maneja los eventos seriales {@link SerialPortEvent#DATA_AVAILABLE}.
-	 * Si se recibe un mensaje completo del GPS {@link #procesaCadena(String)}
+	 * Si se recibe un mensaje completo del GPS {@link #actualizaNuevaCadena(String)}
 	 */
 	public synchronized void serialEvent(SerialPortEvent e) {
 		if (e.getEventType() == SerialPortEvent.DATA_AVAILABLE) {

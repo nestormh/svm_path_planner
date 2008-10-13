@@ -71,7 +71,7 @@ public class Navega2Matlab {
 	/**
 	 * En un momento dado nos dice a que distancia se encuentra el obstaculo más cercano
 	 * @param posicionLocal Posición en coordenadas locales donde nos encontramos
-	 * @param rumbo actual del vehiculo hacia el norte (EN RADIANES)
+	 * @param yawA rumbo actual del vehiculo hacia el norte (EN RADIANES)
 	 * @return distancia al obstáculo más cercano.
 	 */
 	public double masCercano(double[] posicionLocal, double yawA) {

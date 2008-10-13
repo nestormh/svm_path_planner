@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.TooManyListenersException;
 
+import sibtra.gps.GpsEventListener;
+
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
@@ -356,7 +358,7 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 
 	/**
 	 * Para añadir objeto a la lista de {@link GpsEventListener}
-	 * @param gel objeto a añadir
+	 * @param iel objeto a añadir
 	 */
 	public void addIMUEventListener( IMUEventListener iel ) {
 		listeners.add( iel );

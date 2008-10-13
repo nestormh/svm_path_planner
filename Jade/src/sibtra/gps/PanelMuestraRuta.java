@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -12,19 +11,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
-import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
+
 
 /**
- * Clase amiga de {@link MiraObstaculo} que muestar graficamente resultado de sus cálculos.
+ * Clase amiga que muestra panel con la {@link Ruta} pasada.
  * Ponemos eje X vertical hacia arriba (Norte) y eje Y horizontal a la izda (Oeste)
  * @author alberto
  */
@@ -131,7 +128,7 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 
     /**
      * Constructor 
-     * @param miObs Obejto {@link MiraObstaculo} del cual se obtendrá toda la información.
+     * @param rupas Ruta pasada.
      */
 	public PanelMuestraRuta(Ruta rupas) {
 		RU=rupas;
@@ -353,8 +350,7 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 
 
 	/**
-	 * Acatualiza la presentación con los datos en {@link #MI}.
-	 * Se debe invocar cuando {@link #MI} realiza un nuevo cálculo. 
+	 * Acatualiza la presentación cuando la ruta tiene un nuevo punto. 
 	 */
 	public void nuevoPunto() {
 		restaurar=true;

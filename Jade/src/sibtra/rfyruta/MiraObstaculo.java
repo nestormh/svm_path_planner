@@ -166,7 +166,8 @@ public class MiraObstaculo {
 	/**
 	 * En un momento dado nos dice a que distancia se encuentra el obstaculo más cercano
 	 * @param posicionLocal Posición en coordenadas locales donde nos encontramos
-	 * @param rumbo actual del vehiculo hacia el norte (EN RADIANES)
+	 * @param yawA rumbo actual del vehiculo hacia el norte (EN RADIANES)
+	 * @param barrAct último barrido angular
 	 * @return Distancia libre en el camino. 
 	 */
 	public double masCercano(double[] posicionLocal, double yawA, BarridoAngular barrAct) {

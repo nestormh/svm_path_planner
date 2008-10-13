@@ -1,6 +1,6 @@
 package sibtra.util;
 
-import jade.wrapper.gateway.JadeGateway;
+import gnu.io.CommPortIdentifier;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -11,19 +11,14 @@ import java.awt.event.WindowEvent;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import gnu.io.CommPortIdentifier;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
-import sun.awt.windows.ThemeReader;
 
 /**
  * Abre ventana donde elegir seriales para distintos elementos.
@@ -65,7 +60,7 @@ public class EligeSerial implements ActionListener {
 	
 	
 	/**
-	 * @param titulo Titulo de los subsistemas para los que se busca puerto serial
+	 * @param titulos Titulo de los subsistemas para los que se busca puerto serial
 	 */ 
 	public EligeSerial(String[] titulos) {
 		if(titulos==null) { hayAsignacion=true; return; }
