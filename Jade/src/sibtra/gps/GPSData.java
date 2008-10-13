@@ -612,13 +612,13 @@ public class GPSData implements Serializable, Cloneable {
 				setSatelites(Integer.parseInt(msj[7]));
 			}
 
-			if ((!msj[9].equals("")) || (!msj[10].equals("M"))) {
+			if ((!msj[9].equals("")) && (msj[10].equals("M"))) {
 				setMSL(Double.parseDouble(msj[9]));
 			} else {
 				setMSL(0);
 			}
 
-			if ((!msj[11].equals("")) || (!msj[12].equals("M"))) {
+			if ((!msj[11].equals("")) && (msj[12].equals("M"))) {
 				setHGeoide(Double.parseDouble(msj[11]));
 			} else {
 				setHGeoide(0);

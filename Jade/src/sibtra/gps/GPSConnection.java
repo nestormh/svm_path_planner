@@ -82,7 +82,7 @@ public class GPSConnection implements SerialPortEventListener {
 	 * @param portName nombre puerto donde encontrar al GPS
 	 */
 	public GPSConnection(String portName) throws SerialConnectionException {
-		parameters = new SerialParameters(portName, 9600, 0, 0, 8, 1, 0);
+		parameters = new SerialParameters(portName, 115200, 0, 0, 8, 1, 0);
 		openConnection();
 		if (isOpen()) {
 			System.out.println("Puerto Abierto " + portName);

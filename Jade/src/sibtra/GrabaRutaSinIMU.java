@@ -28,15 +28,12 @@ import sibtra.imu.IMUEventListener;
 import sibtra.imu.PanelMuestraAngulosIMU;
 import sibtra.util.EligeSerial;
 
-public class GrabarRuta implements GpsEventListener, 
+public class GrabaRutaSinIMU  implements GpsEventListener, 
 ActionListener {
 	
 	private GPSConnection gpsCon;
 	private JFrame ventGData;
 	private PanelMuestraGPSData PMGPS;
-	private JFrame ventIMU;
-	private PanelMuestraAngulosIMU pmai;
-	private ConexionSerialIMU csi;
 	private JFrame ventRuta;
 	private PanelMuestraRuta pmr;
 	private JButton jbGrabar;
@@ -48,26 +45,18 @@ ActionListener {
 	private JLabel jlNpRE;
 	private boolean cambioRuta=false;
 
-	public GrabarRuta(String[] args) {
-		if(args.length<2) {
-			System.err.println("Necesarios dos parámetros con los puertos de GPS e IMU");
+	public GrabaRutaSinIMU(String[] args) {
+		if(args.length<1) {
+			System.err.println("Necesarios parámetro con el puerto de GPS");
 			System.exit(1);
 		}
-		
-		System.out.println("Abrimos conexión IMU");
-		csi=new ConexionSerialIMU();
-		if(!csi.ConectaPuerto(args[1],5)) {
-			System.err.println("Problema en conexión serial con la IMU");
-			System.exit(1);
-		}
-		
+				
 		//comunicación con GPS
 		gpsCon=new SimulaGps(args[0]).getGps();
 		if(gpsCon==null) {
 			System.err.println("No se obtuvo GPSConnection");
 			System.exit(1);
 		}
-		gpsCon.setCsIMU(csi);
 		
 		//VEntana datos gps
 		ventGData=new JFrame("Datos GPS");
@@ -113,17 +102,6 @@ ActionListener {
 
 //		try { Thread.sleep(10000); } catch (Exception e) {	}
 		
-		//Creamos ventana para IMU
-		ventIMU=new JFrame("Datos IMU");
-		pmai=new PanelMuestraAngulosIMU();
-		pmai.actualizaAngulo(new AngulosIMU(0,0,0,0));
-		ventIMU.add(pmai);
-
-		ventIMU.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		ventIMU.pack();
-		ventIMU.setVisible(true);
-		//conecto manejador cuando todas las ventanas están creadas
-		csi.addIMUEventListener(pmai);
 
 
 		//elegir fichero
@@ -177,9 +155,9 @@ ActionListener {
 	 */
 	public static void main(String[] args) {
 		String[] puertos;
-		if(args==null || args.length<3) {
+		if(args==null || args.length<1) {
 			//no se han pasado argumentos, pedimos los puertos interactivamente
-			String[] titulos={"IMU","GPS"};			
+			String[] titulos={"GPS"};			
 			puertos=new EligeSerial(titulos).getPuertos();
 			if(puertos==null) {
 				System.err.println("No se asignaron los puertos seriales");
@@ -187,9 +165,10 @@ ActionListener {
 			}
 		} else puertos=args;
 
-		GrabarRuta gr=new GrabarRuta(args);
+		GrabaRutaSinIMU gr=new GrabaRutaSinIMU(puertos);
 		
 	}
 
 
 }
+

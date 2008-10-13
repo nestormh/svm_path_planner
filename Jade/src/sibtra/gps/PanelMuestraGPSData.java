@@ -22,6 +22,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.xml.crypto.KeySelector.Purpose;
+
+import sibtra.util.EligeSerial;
 
 import Jama.Matrix;
 
@@ -351,11 +354,23 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		String[] puertos;
+		if(args==null || args.length<1) {
+			//no se han pasado argumentos, pedimos los puertos interactivamente
+			String[] titulos={"GPS"};			
+			puertos=new EligeSerial(titulos).getPuertos();
+			if(puertos==null) {
+				System.err.println("No se asignaron los puertos seriales");
+				System.exit(1);
+			}
+		} else puertos=args;
+		
+
 		JFrame ventanaPrincipal=new JFrame("PanelMuestraGPSData");
 		PanelMuestraGPSData PMGPS=new PanelMuestraGPSData();
 		PMGPS.actualizaPunto(new GPSData()); 
 
-		final GPSConnection gpsc=new SimulaGps("/dev/ttyUSB0").getGps();
+		final GPSConnection gpsc=new SimulaGps(puertos[0]).getGps();
 		if(gpsc!=null)
 			gpsc.addGpsEventListener(PMGPS);
 		else {
