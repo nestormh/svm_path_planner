@@ -5,7 +5,6 @@ package sibtra.gps;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -22,10 +21,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
-import javax.xml.crypto.KeySelector.Purpose;
 
 import sibtra.util.EligeSerial;
-
 import Jama.Matrix;
 
 /**

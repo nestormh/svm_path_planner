@@ -2,10 +2,13 @@ package sibtra.triumph;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.TooManyListenersException;
 
 import sibtra.gps.SerialConnectionException;
 import sibtra.gps.SerialParameters;
+import sibtra.imu.UtilMensajesIMU;
+import sibtra.util.EligeSerial;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
@@ -16,8 +19,10 @@ import gnu.io.UnsupportedCommOperationException;
 
 /** Clase para probar los mensajes estandar de la familia Triumph
  * Como:
- * out,,jps/RT,jps/PO,jps/ET
+ * 	,jps/PO,jps/ET
  * out,,jps/RT,jps/PO,jps/RD
+ * 
+ * em,,{jps/RT,nmea/GGA}:2
  * @author alberto
  *
  */
@@ -26,7 +31,7 @@ public class GPSConnection implements SerialPortEventListener {
 
 	
 	/** Tamaño máximo del mensaje */
-	private static final int MAXMENSAJE = 1000;
+	private static final int MAXMENSAJE = 5000;
 
 //	private static final double NULLANG = -5 * Math.PI;
 
@@ -40,10 +45,30 @@ public class GPSConnection implements SerialPortEventListener {
 	private CommPortIdentifier portId;
 	private SerialPort sPort;
 
-	/** Cadena en la que se van almacenando los trozos de mensajes que se van recibiendo */
-	private byte cadenaTemp[] = new byte[MAXMENSAJE];
+	/** Buffer en la que se van almacenando los trozos de mensajes que se van recibiendo */
+	private byte buff[] = new byte[MAXMENSAJE];
 
-	private int indCadenaTemp;
+	/** Indice inicial de un mensaje correcto */
+	private int indIni;
+	/** Indice final de un mensaje correcto */
+	private int indFin;
+	
+	/** largo del mensaje binario */
+	private int largoMen;
+
+	/** Banderín que indica que el mensaje es binario */
+	private boolean esBinario;
+
+	/** Banderín que indica que el mensaje es de texto */
+	private boolean esTexto;
+
+	private OutputStream flujoSalida;
+
+	private static byte ascii0=0x30;
+	private static byte ascii9=0x39;
+	private static byte asciiA=0x41;
+	private static byte asciiF=0x46;
+
 	/**
 	 * Constructor por defecto no hace nada.
 	 * Para usar el puerto hay que invocar a {@link #setParameters(SerialParameters)} 
@@ -61,7 +86,19 @@ public class GPSConnection implements SerialPortEventListener {
 	 * @param portName nombre puerto donde encontrar al GPS
 	 */
 	public GPSConnection(String portName) throws SerialConnectionException {
-		parameters = new SerialParameters(portName, 115200, 0, 0, 8, 1, 0);
+		this(portName,115200);
+	}
+
+	/**
+	 * Crea conexión a GPS en puerto serial indicado.
+	 * Se utilizan los parámetros <code>SerialParameters(portName, baudios, 0, 0, 8, 1, 0)</code>
+	 * Si se quieren especificar otros parámetros se debe utilizar
+	 * el {@link #GPSConnection() constructor por defecto}.
+	 * @param portName nombre puerto donde encontrar al GPS
+	 * @param baudios baudios de la conexion
+	 */
+	public GPSConnection(String portName, int baudios) throws SerialConnectionException {
+		parameters = new SerialParameters(portName, baudios, 0, 0, 8, 1, 0);
 		openConnection();
 		if (isOpen()) {
 			System.out.println("Puerto Abierto " + portName);
@@ -115,6 +152,13 @@ public class GPSConnection implements SerialPortEventListener {
 			throw new SerialConnectionException("Error opening i/o streams");
 		}
 
+		try {
+			flujoSalida = sPort.getOutputStream();
+		} catch (IOException e) {
+			System.err.println("\n No se pudo obtener flujo de salida para puerto ");
+			throw new SerialConnectionException("Error obteniendo flujo de salida");
+		}
+
 		// Add this object as an event listener for the serial port.
 		try {
 			sPort.addEventListener(this);
@@ -139,6 +183,7 @@ public class GPSConnection implements SerialPortEventListener {
 		open = true;
 
 		sPort.disableReceiveTimeout();
+		indIni=0; indFin=-1; esBinario=false; esTexto=false;
 	}
 
 	/**
@@ -234,34 +279,133 @@ public class GPSConnection implements SerialPortEventListener {
 				while (is.available() != 0) {
 					int val = is.read();
 					//añadimos nuevo byte recibido
-					indCadenaTemp++;
-					cadenaTemp[indCadenaTemp]= (byte) val;
-					//vemos si ya terminó la cadena
-					if (indCadenaTemp>0 
-							&& (cadenaTemp[0]>=33 && cadenaTemp[0]<=47) 
-							&& (cadenaTemp[indCadenaTemp] == 10 || cadenaTemp[indCadenaTemp]==13)
-					) {
-						//Tenemos un mensaje de texto
-						actualizaNuevaCadenaTexto();
-						indCadenaTemp=-1;
+					if(indFin==(buff.length-1)) {
+						System.err.println("Buffer se llenó. Resetamos");
+						indIni=0; indFin=-1; esBinario=false; esTexto=false;
 					}
-					else if (indCadenaTemp>=4) { //ya tenemos longitud
-						int logitud=(cadenaTemp[2]-0x30)*32+(cadenaTemp[3]-0x30)*16+(cadenaTemp[2]-0x30);
-						if(indCadenaTemp==(logitud+4)) {
+					indFin++;
+					buff[indFin]= (byte) val;
+					if(esTexto) {
+						if ( buff[indFin] == 10 || buff[indFin]==13)
+						{
+							//mensaje de texto completo
+							indFin--; //quitamos caracter del salto
+							actualizaNuevaCadenaTexto();
+							indIni=0; indFin=-1; esBinario=false; esTexto=false;
+						} 
+					} else if (esBinario) {
+						//terminamos si ya está el tamaño
+						if ( (indFin-indIni+1)==(largoMen+5) ) {
 							//tenemos el mensaje estandar completo
 							actualizaNuevaCadenaBinaria();						
-							indCadenaTemp=-1;
+							indIni=0; indFin=-1; esBinario=false; esTexto=false;
+						}
+					} else { //Todavía no sabemos si es texto o binario
+						boolean sincronizado=false;
+						while(!sincronizado && (indFin>=indIni)) {
+							int larAct=indFin-indIni+1;
+							larAct=indFin-indIni+1;
+							if (larAct==1) {
+								if (isCabTex(indIni)) {
+									esTexto=true;
+									sincronizado=true;
+								}
+								else 
+									if (!isCabBin(indIni)) {
+									//no es cabecera permitida, nos resincronizamos
+									indIni=0; indFin=-1; //reiniciamos el buffer
+								} else //por ahora puede ser binaria
+									sincronizado=true;
+								continue;
+							} 
+							if (larAct==2) {
+								if  (!isCabBin(indIni) || !isCabBin(indIni+1))  {
+									//no es cabecera permitida, nos resincronizamos
+									indIni++;
+								} else //por ahora puede ser binaria 
+									sincronizado=true;
+								continue;
+							}
+							if (larAct==3) {
+								if (!isCabBin(indIni) || !isCabBin(indIni+1) || !isHexa(indIni+2)) {
+									//no es caracter hexa, nos resincronizamos
+									indIni++;
+								} else  //por ahora puede ser binaria 
+									sincronizado=true;
+								continue;
+							}
+							if (larAct==4) {
+								if (!isCabBin(indIni) || !isCabBin(indIni+1) 
+										|| !isHexa(indIni+2) || !isHexa(indIni+3)) {
+									//no es caracter hexa, nos resincronizamos
+									indIni++;
+								} else  //por ahora puede ser binaria 
+									sincronizado=true;
+								continue;
+							} 
+							//caso de largo 5
+							if (!isCabBin(indIni) || !isCabBin(indIni+1) 
+									|| !isHexa(indIni+2) || !isHexa(indIni+3) || !isHexa(indIni+4)) {
+								//no es caracter hexa, nos resincronizamos
+								indIni++;
+							} else { //estamos seguros que es binaria 
+								sincronizado=true;
+								esBinario=true;
+								largoMen=largo();
+							}
+
 						}
 					}
 				}
 			} catch (IOException ioe) {
 				System.err.println("\nError al recibir los datos");
 			} catch (Exception ex) {
-				System.err.println("\nGPSConnection Error al procesar >"+cadenaTemp+"< : " + ex.getMessage());
+				System.err.println("\nGPSConnection Error al procesar >"+buff+"< : " + ex.getMessage());
 				ex.printStackTrace();
-				indCadenaTemp=-1;
+				indIni=-1;
 			}
 		}
+	}
+
+	private int largo() {
+		int lar=0;
+		int indAct=indIni+2;
+		if(buff[indAct]<ascii9) lar+=32*(buff[indAct]-ascii0);
+		else lar+=32*(buff[indAct]-asciiA+10);
+		indAct++;
+		if(buff[indAct]<ascii9) lar+=16*(buff[indAct]-ascii0);
+		else lar+=16*(buff[indAct]-asciiA+10);
+		indAct++;
+		if(buff[indAct]<ascii9) lar+=(buff[indAct]-ascii0);
+		else lar+=(buff[indAct]-asciiA+10);
+		return lar;
+	}
+
+	/**
+	 * Mira si es caracter hexadecimal MAYÚSCULA
+	 * @param ind indice en {@link #buff} del dato a mirar
+	 * @return true si es caracter hexadecimal mayúscula
+	 */
+	private boolean isHexa(int ind) {
+		return ((buff[ind]>=ascii0) && (buff[ind]<=ascii9)) || ((buff[ind]>=asciiA && buff[ind]<=asciiF)) ;
+	}
+
+	/**
+	 * Mira si es caracter válido en la cabecera de paquete binario (entre 48 y 126)
+	 * @param ind indice en {@link #buff} del dato a mirar
+	 * @return true si es caracter es válido
+	 */
+	private boolean isCabBin(int ind) {
+		return ((buff[ind]>=48) && (buff[ind]<=126)) ;
+	}
+
+	/**
+	 * Mira si es caracter válido en la cabecera de paquete texto (entre 33 y 47)
+	 * @param ind indice en {@link #buff} del dato a mirar
+	 * @return true si es caracter es válido
+	 */
+	private boolean isCabTex(int ind) {
+		return ((buff[ind]>=33) && (buff[ind]<=47)) ;
 	}
 
 	/**
@@ -270,9 +414,48 @@ public class GPSConnection implements SerialPortEventListener {
 	 * @param cadena cadena recibida (del GPS)
 	 */
 	void actualizaNuevaCadenaTexto() {
-		
+		int larMen=indFin-indIni+1;
+		System.out.print("Texto ("+larMen+"):>");
+		for(int i=indIni; i<=indFin; i++)
+			System.out.print((char)buff[i]);
+		System.out.println("<");
 	}
 	void actualizaNuevaCadenaBinaria() {
+		int larMen=indFin-indIni+1;
+		System.out.print("Binaria ("+larMen+"):"+new String(buff,indIni,5)+" >");
+		for(int i=indIni+5; i<=indFin; i++)
+			if (buff[i]<32 || buff[i]>126)
+				//no imprimible
+				System.out.print('.');
+			else
+				System.out.print((char)buff[i]);
+		System.out.println("< >"+UtilMensajesIMU.hexaString(buff, indIni+5, larMen-5)+"<");		
+	}
+
+	public void comandoGPS(String comando) {
+		try {
+		flujoSalida.write(comando.getBytes());
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+
+		GPSConnection gpsC;
+		
+		try {
+			gpsC=new GPSConnection("/dev/ttyUSB0",9600);
+
+			try { Thread.sleep(2000); } catch (Exception e) {}
+
+			gpsC.comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/ET}:2\n");
+		} catch (Exception e) {
+		}
+		
 		
 	}
 }
