@@ -3,6 +3,7 @@ package sibtra.triumph;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.TooManyListenersException;
 
 import sibtra.gps.SerialConnectionException;
@@ -429,9 +430,153 @@ public class GPSConnection implements SerialPortEventListener {
 				System.out.print('.');
 			else
 				System.out.print((char)buff[i]);
-		System.out.println("< >"+UtilMensajesIMU.hexaString(buff, indIni+5, larMen-5)+"<");		
+		System.out.println("< >"+UtilMensajesIMU.hexaString(buff, indIni+5, larMen-5)+"<");
+		//iterpretamos los mensajes
+		/* RT [~~]=126
+		 * struct RcvTime {5} {
+  			u4 tod; // Tr modulo 1 day (86400000 ms) [ms]
+  			u1 cs; // Checksum
+			};
+		 */
+		if(buff[indIni]==(byte)'~' || buff[indIni+1]==(byte)'~') {
+			if(larMen!=(5+5)) {
+				System.err.println("El mensaje RT no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
+				return;				
+			}
+			//comprobamos checksum
+			byte csc=checksum8(buff, indIni, larMen-1);
+			if(csc!=buff[indFin]) {
+				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
+				return;
+			}
+			//el checksum es correcto
+			ByteBuffer bb = ByteBuffer.allocate(4);
+			bb.put(buff, indIni+5, 4);
+			int tod=bb.getInt(0);
+			System.out.println("Mensaje RT: tod="+tod);
+		}
+		/* [::](ET) Epoch Time5 
+   			struct EpochTime {5} {
+     			u4 tod; // Tr modulo 1 day (86400000 ms) [ms]
+     			u1 cs; // Checksum
+   			};
+		 */
+		if(buff[indIni]==(byte)':' || buff[indIni+1]==(byte)':') {
+			if(larMen!=(5+5)) {
+				System.err.println("El mensaje ET no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
+				return;				
+			}
+			//comprobamos checksum
+			byte csc=checksum8(buff, indIni, larMen-1);
+			if(csc!=buff[indFin]) {
+				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
+				return;
+			}
+			//el checksum es correcto
+			ByteBuffer bb = ByteBuffer.allocate(4);
+			bb.put(buff, indIni+5, 4);
+			int tod=bb.getInt(0);
+			System.out.println("Mensaje ET: tod="+tod);
+		}
+		
+		/* [PO] Cartesian Position
+  			struct Pos {30} {
+    			f8 x, y, z; //  Cartesian coordinates [m]
+                    			Position SEP6 [m]
+    		f4 sigma;    //
+    		u1 solType; //  Solution type
+    		u1 cs;       // Checksum
+  			};
+		 */
+		if(buff[indIni]==(byte)'P' || buff[indIni+1]==(byte)'O') {
+			if(larMen!=(5+30)) {
+				System.err.println("El mensaje PO no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
+				return;				
+			}
+			//comprobamos checksum
+			byte csc=checksum8(buff, indIni, larMen-1);
+			if(csc!=buff[indFin]) {
+				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
+				return;
+			}
+			//el checksum es correcto
+			ByteBuffer bb = ByteBuffer.allocate(30);
+			bb.put(buff, indIni+5, 30);
+			bb.rewind();
+			double x=bb.getDouble();
+			double y=bb.getDouble();
+			double z=bb.getDouble();
+			float sigma=bb.getFloat();
+			byte solType=bb.get();
+			
+			System.out.println("Mensaje PO: ("+x+","+y+","+z+") sigma="+sigma+" solType="+solType);
+		}
+
+		/* [BL] Base Line
+  			struct BaseLine {34} {
+    			f8 x, y, z; // Calculated baseline vector coordinates [m]
+    			f4 sigma;    // Baseline Spherical Error Probable (SEP) [m]
+    			u1 solType; // Solution type
+    			i4 time;     // receiver time of the baseline estimate [s]
+    			u1 cs;       // Checksum
+  			};
+		 */
+		if(buff[indIni]==(byte)'B' || buff[indIni+1]==(byte)'L') {
+			if(larMen!=(5+34)) {
+				System.err.println("El mensaje BL no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
+				return;				
+			}
+			//comprobamos checksum
+			byte csc=checksum8(buff, indIni, larMen-1);
+			if(csc!=buff[indFin]) {
+				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
+				return;
+			}
+			//el checksum es correcto
+			ByteBuffer bb = ByteBuffer.allocate(34);
+			bb.put(buff, indIni+5, 34);
+			bb.rewind();
+			double x=bb.getDouble();
+			double y=bb.getDouble();
+			double z=bb.getDouble();
+			float sigma=bb.getFloat();
+			byte solType=bb.get();
+			int time=bb.getInt();
+
+			System.out.println("Mensaje PO: ("+x+","+y+","+z+") sigma="+sigma+" solType="+solType
+					+" time="+time);
+		}
 	}
 
+	/**
+	 * Calcula checksum de 8 bits según se indica pag 363 de la 'GREIS Reference Guide'
+	 * <code> 
+typedef unsigned char u1;
+enum {
+  bits = 8,
+  lShift = 2,
+  rShift = bits - lShift
+};
+#define ROT_LEFT(val) ((val << lShift) | (val >> rShift))
+u1 cs(u1 const* src, int count)
+{
+  u1 res = 0;
+  while(count--)
+    res = ROT_LEFT(res) ^ *src++;
+  return ROT_LEFT(res);
+}
+</code>
+ */
+	public static byte checksum8(byte[] buff, int ini, int largo) {
+		int res=0;
+		for(int i=ini; i<ini+largo; i++)
+			res= (((res<<2)|(res>>>6)) ^ buff[i]) & 0xff; //nos aseguramos parte alta de  int a 0
+		return (byte)((res<<2)|(res>>>6));
+	}
+	
+	/**
+	 * @param comando comando de texto a enviar al GPS
+	 */
 	public void comandoGPS(String comando) {
 		try {
 		flujoSalida.write(comando.getBytes());
@@ -453,6 +598,9 @@ public class GPSConnection implements SerialPortEventListener {
 			try { Thread.sleep(2000); } catch (Exception e) {}
 
 			gpsC.comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/ET}:2\n");
+			try { Thread.sleep(30000); } catch (Exception e) {}
+
+			gpsC.comandoGPS("dm\n");
 		} catch (Exception e) {
 		}
 		
