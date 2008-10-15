@@ -1,4 +1,4 @@
-package sibtra.triumph;
+package sibtra.gps.triumph;
 
 import java.io.IOException;
 import java.io.InputStream;
