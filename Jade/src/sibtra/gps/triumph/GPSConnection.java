@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.TooManyListenersException;
 
 import sibtra.gps.SerialConnectionException;
@@ -371,13 +372,13 @@ public class GPSConnection implements SerialPortEventListener {
 	private int largo() {
 		int lar=0;
 		int indAct=indIni+2;
-		if(buff[indAct]<ascii9) lar+=32*(buff[indAct]-ascii0);
+		if(buff[indAct]<=ascii9) lar+=32*(buff[indAct]-ascii0);
 		else lar+=32*(buff[indAct]-asciiA+10);
 		indAct++;
-		if(buff[indAct]<ascii9) lar+=16*(buff[indAct]-ascii0);
+		if(buff[indAct]<=ascii9) lar+=16*(buff[indAct]-ascii0);
 		else lar+=16*(buff[indAct]-asciiA+10);
 		indAct++;
-		if(buff[indAct]<ascii9) lar+=(buff[indAct]-ascii0);
+		if(buff[indAct]<=ascii9) lar+=(buff[indAct]-ascii0);
 		else lar+=(buff[indAct]-asciiA+10);
 		return lar;
 	}
@@ -423,14 +424,6 @@ public class GPSConnection implements SerialPortEventListener {
 	}
 	void actualizaNuevaCadenaBinaria() {
 		int larMen=indFin-indIni+1;
-		System.out.print("Binaria ("+larMen+"):"+new String(buff,indIni,5)+" >");
-		for(int i=indIni+5; i<=indFin; i++)
-			if (buff[i]<32 || buff[i]>126)
-				//no imprimible
-				System.out.print('.');
-			else
-				System.out.print((char)buff[i]);
-		System.out.println("< >"+UtilMensajesIMU.hexaString(buff, indIni+5, larMen-5)+"<");
 		//iterpretamos los mensajes
 		/* RT [~~]=126
 		 * struct RcvTime {5} {
@@ -451,9 +444,12 @@ public class GPSConnection implements SerialPortEventListener {
 			}
 			//el checksum es correcto
 			ByteBuffer bb = ByteBuffer.allocate(4);
+			bb.order(ByteOrder.LITTLE_ENDIAN);
 			bb.put(buff, indIni+5, 4);
-			int tod=bb.getInt(0);
-			System.out.println("Mensaje RT: tod="+tod);
+			bb.rewind();
+			int tod=bb.getInt();
+			System.out.println("\n\n\nMensaje RT: tod="+tod);
+			return;
 		}
 		/* [::](ET) Epoch Time5 
    			struct EpochTime {5} {
@@ -475,8 +471,10 @@ public class GPSConnection implements SerialPortEventListener {
 			//el checksum es correcto
 			ByteBuffer bb = ByteBuffer.allocate(4);
 			bb.put(buff, indIni+5, 4);
+			bb.order(ByteOrder.LITTLE_ENDIAN);
 			int tod=bb.getInt(0);
 			System.out.println("Mensaje ET: tod="+tod);
+			return;
 		}
 		
 		/* [PO] Cartesian Position
@@ -503,6 +501,7 @@ public class GPSConnection implements SerialPortEventListener {
 			ByteBuffer bb = ByteBuffer.allocate(30);
 			bb.put(buff, indIni+5, 30);
 			bb.rewind();
+			bb.order(ByteOrder.LITTLE_ENDIAN);
 			double x=bb.getDouble();
 			double y=bb.getDouble();
 			double z=bb.getDouble();
@@ -510,6 +509,7 @@ public class GPSConnection implements SerialPortEventListener {
 			byte solType=bb.get();
 			
 			System.out.println("Mensaje PO: ("+x+","+y+","+z+") sigma="+sigma+" solType="+solType);
+			return;
 		}
 
 		/* [BL] Base Line
@@ -535,6 +535,7 @@ public class GPSConnection implements SerialPortEventListener {
 			//el checksum es correcto
 			ByteBuffer bb = ByteBuffer.allocate(34);
 			bb.put(buff, indIni+5, 34);
+			bb.order(ByteOrder.LITTLE_ENDIAN);
 			bb.rewind();
 			double x=bb.getDouble();
 			double y=bb.getDouble();
@@ -543,9 +544,19 @@ public class GPSConnection implements SerialPortEventListener {
 			byte solType=bb.get();
 			int time=bb.getInt();
 
-			System.out.println("Mensaje PO: ("+x+","+y+","+z+") sigma="+sigma+" solType="+solType
+			System.out.println("Mensaje BL: ("+x+","+y+","+z+") sigma="+sigma+" solType="+solType
 					+" time="+time);
+			return;
 		}
+		//contenido del mensaje en crudo
+		System.out.print("Binaria ("+larMen+"):"+new String(buff,indIni,5)+" >");
+		for(int i=indIni+5; i<=indFin; i++)
+			if (buff[i]<32 || buff[i]>126)
+				//no imprimible
+				System.out.print('.');
+			else
+				System.out.print((char)buff[i]);
+		System.out.println("< >"+UtilMensajesIMU.hexaString(buff, indIni+5, larMen-5)+"<");
 	}
 
 	/**
@@ -580,6 +591,7 @@ u1 cs(u1 const* src, int count)
 	public void comandoGPS(String comando) {
 		try {
 		flujoSalida.write(comando.getBytes());
+		System.out.println("Enviado Comando:>"+comando+"<");
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -594,16 +606,17 @@ u1 cs(u1 const* src, int count)
 		
 		try {
 			gpsC=new GPSConnection("/dev/ttyUSB0",9600);
+			gpsC.comandoGPS("out,,jps/MF\n");
 
-			try { Thread.sleep(2000); } catch (Exception e) {}
+			try { Thread.sleep(5000); } catch (Exception e) {}
 
-			gpsC.comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/ET}:2\n");
-			try { Thread.sleep(30000); } catch (Exception e) {}
+			gpsC.comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/ET}:10\n");
+			try { Thread.sleep(100000); } catch (Exception e) {}
 
 			gpsC.comandoGPS("dm\n");
 		} catch (Exception e) {
 		}
 		
-		
+		System.exit(0);
 	}
 }
