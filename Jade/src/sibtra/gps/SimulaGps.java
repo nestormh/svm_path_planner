@@ -76,7 +76,7 @@ public class SimulaGps implements Runnable {
     			String cadena = rutaTemporal.getPunto(i).getCadenaNMEA();
 
     			try {                
-    				gps.actualizaNuevaCadena(cadena);                
+    				gps.nuevaCadenaNMEA(cadena);                
     			} catch(Exception e) {
     				System.err.println("Error al procesar la cadena " + cadena);
     				System.err.println("\t" + e.getMessage());

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.TooManyListenersException;
 
@@ -28,42 +29,42 @@ public class GPSConnection implements SerialPortEventListener {
 
 
 	/** si el puerto serial está abierto*/
-	private boolean open;
+	boolean open;
 
-	private SerialParameters parameters;    
-	private InputStream is;    
+	SerialParameters parameters;    
+	InputStream is;    
+	OutputStream os;
 
-	private CommPortIdentifier portId;
-	private SerialPort sPort;
+	CommPortIdentifier portId;
+	SerialPort sPort;
 
 	/** Cadena en la que se van almacenando los trozos de mensajes que se van recibiendo */
-	private String cadenaTemp = "";
+	String cadenaTemp = "";
 	
 	/** último punto recibido */
-	private GPSData data = new GPSData();    
+	GPSData data = new GPSData();    
 
 
 	/** Almacena ruta temporal cargada de fichero */
-	private Ruta rutaTemporal = null;
+	Ruta rutaTemporal = null;
 	/** Almacena ruta espacial cargada de fichero */
-	private Ruta rutaEspacial = null;
+	Ruta rutaEspacial = null;
 
 	/** Almacena los {@link #MAXBUFFER} últimos puntos de la ruta espacial */
-	private Ruta bufferEspacial = new Ruta(MAXBUFFER,true);
+	Ruta bufferEspacial = new Ruta(MAXBUFFER,true);
 	/** Almacena los {@link #MAXBUFFER} últimos puntos recibidos */
-	private Ruta bufferTemporal = new Ruta(MAXBUFFER);  
+	Ruta bufferTemporal = new Ruta(MAXBUFFER);  
 
 	/** indica si estamos capturando una ruta */
-	private boolean enRuta = false;
+	boolean enRuta = false;
 	
 	/** Si estamos {@link #enRuta}, almacena los puntos recibidos */
-	private Ruta bufferRutaTemporal = null;
+	Ruta bufferRutaTemporal = null;
 	/** Si estamos {@link #enRuta} almacena los puntos en ruta espacial */
-	private Ruta bufferRutaEspacial = null;
-
+	Ruta bufferRutaEspacial = null;
 	
 	/** Conexión serial IMU de la que leer ángulos*/
-	private ConexionSerialIMU csIMU=null;
+	ConexionSerialIMU csIMU=null;
 
 	/**
 	 * Constructor por defecto no hace nada.
@@ -76,18 +77,29 @@ public class GPSConnection implements SerialPortEventListener {
 
 	/**
 	 * Crea conexión a GPS en puerto serial indicado.
-	 * Se utilizan los parámetros <code>SerialParameters(portName, 9600, 0, 0, 8, 1, 0)</code>
+	 * Se utilizan los parámetros <code>SerialParameters(portName, 115200, 0, 0, 8, 1, 0)</code>
 	 * Si se quieren especificar otros parámetros se debe utilizar
 	 * el {@link #GPSConnection() constructor por defecto}.
 	 * @param portName nombre puerto donde encontrar al GPS
+	 * @param baudio velocidad de la comunicacion en baudios
 	 */
 	public GPSConnection(String portName) throws SerialConnectionException {
+		this(portName,115200);
+	}
+	/**
+	 * Crea conexión a GPS en puerto serial indicado.
+	 * Se utilizan los parámetros <code>SerialParameters(portName, baudios, 0, 0, 8, 1, 0)</code>
+	 * Si se quieren especificar otros parámetros se debe utilizar
+	 * el {@link #GPSConnection() constructor por defecto}.
+	 * @param portName nombre puerto donde encontrar al GPS
+	 * @param baudio velocidad de la comunicacion en baudios
+	 */
+	public GPSConnection(String portName, int baudios) throws SerialConnectionException {
 		parameters = new SerialParameters(portName, 115200, 0, 0, 8, 1, 0);
 		openConnection();
 		if (isOpen()) {
 			System.out.println("Puerto Abierto " + portName);
 		}
-		//lastPaquete = System.currentTimeMillis();
 	}
 
 	/**
@@ -135,6 +147,15 @@ public class GPSConnection implements SerialPortEventListener {
 			sPort.close();
 			throw new SerialConnectionException("Error opening i/o streams");
 		}
+
+		//Obtenemos el flujo de salida
+		try {
+			os = sPort.getOutputStream();
+		} catch (IOException e) {
+			System.err.println("\n No se pudo obtener flujo de salida para puerto ");
+			throw new SerialConnectionException("Error obteniendo flujo de salida");
+		}
+
 
 		// Add this object as an event listener for the serial port.
 		try {
@@ -255,7 +276,8 @@ public class GPSConnection implements SerialPortEventListener {
 
 	/**
 	 * Maneja los eventos seriales {@link SerialPortEvent#DATA_AVAILABLE}.
-	 * Si se recibe un mensaje completo del GPS {@link #actualizaNuevaCadena(String)}
+	 * Si se recibe un mensaje completo del GPS {@link #nuevaCadenaNMEA(String)}
+	 * Sirve para la gestión de mensajes NMEA
 	 */
 	public synchronized void serialEvent(SerialPortEvent e) {
 		if (e.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
@@ -265,7 +287,7 @@ public class GPSConnection implements SerialPortEventListener {
 					if (val != 10) {
 						cadenaTemp += (char) val;
 					} else {
-						actualizaNuevaCadena(cadenaTemp);						
+						nuevaCadenaNMEA(cadenaTemp);						
 						cadenaTemp = "";
 					}
 				}
@@ -285,13 +307,20 @@ public class GPSConnection implements SerialPortEventListener {
 	 * Fija el sistema local al primer punto de buffer espacial.
 	 * @param cadena cadena recibida (del GPS)
 	 */
-	void actualizaNuevaCadena(String cadena) {
+	void nuevaCadenaNMEA(String cadena) {
 		
 		data.procesaCadena(cadena);
 		if(cadena.length()<6 || !cadena.substring(3, 6).equals("GGA"))
 			return;  //sólo será nuevo punto si es paquete GGA
 		data.setSysTime(System.currentTimeMillis());
 		data.calculaECEF();
+		nuevoPunto();
+	}
+	
+	/** Gestiona acciones a realizar cuando se tiene nuevo punto. 
+	 * El nuevo punto está en campo {@link #data} 
+	 */
+	void nuevoPunto() {
 		if (csIMU!=null)  //si existe conexión seriañ a la IMU copiamos el ángulo  
 			data.setAgulosIMU(csIMU.getAngulo());
 		if(!bufferEspacial.tieneSistemaLocal())  {

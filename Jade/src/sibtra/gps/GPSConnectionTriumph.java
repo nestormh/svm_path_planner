@@ -1,4 +1,4 @@
-package sibtra.gps.triumph;
+package sibtra.gps;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,8 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.TooManyListenersException;
 
-import sibtra.gps.SerialConnectionException;
-import sibtra.gps.SerialParameters;
 import sibtra.imu.UtilMensajesIMU;
 import sibtra.util.EligeSerial;
 import gnu.io.CommPortIdentifier;
@@ -29,7 +27,7 @@ import gnu.io.UnsupportedCommOperationException;
  *
  */
 
-public class GPSConnection implements SerialPortEventListener {
+public class GPSConnectionTriumph extends GPSConnection {
 
 	
 	/** Tamaño máximo del mensaje */
@@ -38,242 +36,62 @@ public class GPSConnection implements SerialPortEventListener {
 //	private static final double NULLANG = -5 * Math.PI;
 
 
-	/** si el puerto serial está abierto*/
-	private boolean open;
-
-	private SerialParameters parameters;    
-	private InputStream is;    
-
-	private CommPortIdentifier portId;
-	private SerialPort sPort;
-
 	/** Buffer en la que se van almacenando los trozos de mensajes que se van recibiendo */
 	private byte buff[] = new byte[MAXMENSAJE];
 
 	/** Indice inicial de un mensaje correcto */
-	private int indIni;
+	private int indIni=0;
 	/** Indice final de un mensaje correcto */
-	private int indFin;
+	private int indFin=-1;
 	
 	/** largo del mensaje binario */
 	private int largoMen;
 
 	/** Banderín que indica que el mensaje es binario */
-	private boolean esBinario;
+	private boolean esBinario=false;
 
 	/** Banderín que indica que el mensaje es de texto */
-	private boolean esTexto;
+	private boolean esTexto=false;
 
-	private OutputStream flujoSalida;
-
-	private static byte ascii0=0x30;
-	private static byte ascii9=0x39;
-	private static byte asciiA=0x41;
-	private static byte asciiF=0x46;
 
 	/**
 	 * Constructor por defecto no hace nada.
 	 * Para usar el puerto hay que invocar a {@link #setParameters(SerialParameters)} 
 	 * y luego {@link #openConnection()}
 	 */
-	public GPSConnection() {
-		//lastPaquete = System.currentTimeMillis();
+	public GPSConnectionTriumph() {
+		super();
 	}
 
 	/**
 	 * Crea conexión a GPS en puerto serial indicado.
-	 * Se utilizan los parámetros <code>SerialParameters(portName, 9600, 0, 0, 8, 1, 0)</code>
+	 * Se utilizan los parámetros <code>SerialParameters(portName, 115200, 0, 0, 8, 1, 0)</code>
 	 * Si se quieren especificar otros parámetros se debe utilizar
 	 * el {@link #GPSConnection() constructor por defecto}.
 	 * @param portName nombre puerto donde encontrar al GPS
+	 * @param baudio velocidad de la comunicacion en baudios
 	 */
-	public GPSConnection(String portName) throws SerialConnectionException {
+	public GPSConnectionTriumph(String portName) throws SerialConnectionException {
 		this(portName,115200);
 	}
-
 	/**
 	 * Crea conexión a GPS en puerto serial indicado.
 	 * Se utilizan los parámetros <code>SerialParameters(portName, baudios, 0, 0, 8, 1, 0)</code>
 	 * Si se quieren especificar otros parámetros se debe utilizar
 	 * el {@link #GPSConnection() constructor por defecto}.
 	 * @param portName nombre puerto donde encontrar al GPS
-	 * @param baudios baudios de la conexion
+	 * @param baudio velocidad de la comunicacion en baudios
 	 */
-	public GPSConnection(String portName, int baudios) throws SerialConnectionException {
-		parameters = new SerialParameters(portName, baudios, 0, 0, 8, 1, 0);
-		openConnection();
-		if (isOpen()) {
-			System.out.println("Puerto Abierto " + portName);
-		}
-		//lastPaquete = System.currentTimeMillis();
+	public GPSConnectionTriumph(String portName, int baudios) throws SerialConnectionException {
+		super(portName,baudios);
 	}
 
-	/**
-        Attempts to open a serial connection and streams using the parameters
-        in the SerialParameters object. If it is unsuccesfull at any step it
-        returns the port to a closed state, throws a
-        <code>SerialConnectionException</code>, and returns.
 
-     Gives a timeout of 30 seconds on the portOpen to allow other applications
-        to reliquish the port if have it open and no longer need it.
-	 */
-	public void openConnection() throws SerialConnectionException {
-		// Obtain a CommPortIdentifier object for the port you want to open.
-		try {
-			portId =
-				CommPortIdentifier.getPortIdentifier(parameters.getPortName());
-		} catch (NoSuchPortException e) {
-			throw new SerialConnectionException(e.getMessage());
-		}
-
-		// Open the port represented by the CommPortIdentifier object. Give
-		// the open call a relatively long timeout of 30 seconds to allow
-		// a different application to reliquish the port if the user
-		// wants to.
-		try {
-			sPort = (SerialPort) portId.open("SerialDemo", 30000);
-		} catch (PortInUseException e) {
-			throw new SerialConnectionException(e.getMessage());
-		}
-
-		// Set the parameters of the connection. If they won't set, close the
-		// port before throwing an exception.
-		try {
-			setConnectionParameters();
-		} catch (SerialConnectionException e) {
-			sPort.close();
-			throw e;
-		}
-
-		// Open the input and output streams for the connection. If they won't
-		// open, close the port before throwing an exception.
-		try {            
-			is = sPort.getInputStream();
-		} catch (IOException e) {
-			sPort.close();
-			throw new SerialConnectionException("Error opening i/o streams");
-		}
-
-		try {
-			flujoSalida = sPort.getOutputStream();
-		} catch (IOException e) {
-			System.err.println("\n No se pudo obtener flujo de salida para puerto ");
-			throw new SerialConnectionException("Error obteniendo flujo de salida");
-		}
-
-		// Add this object as an event listener for the serial port.
-		try {
-			sPort.addEventListener(this);
-		} catch (TooManyListenersException e) {
-			sPort.close();
-			throw new SerialConnectionException("too many listeners added");
-		}
-
-		// Set notifyOnDataAvailable to true to allow event driven input.
-		sPort.notifyOnDataAvailable(true);
-
-		// Set notifyOnBreakInterrup to allow event driven break handling.
-		sPort.notifyOnBreakInterrupt(true);
-
-		// Set receive timeout to allow breaking out of polling loop during
-		// input handling.
-		//	try {
-		//	    sPort.enableReceiveTimeout(30);
-		//	} catch (UnsupportedCommOperationException e) {
-		//	}                
-
-		open = true;
-
-		sPort.disableReceiveTimeout();
-		indIni=0; indFin=-1; esBinario=false; esTexto=false;
-	}
-
-	/**
-     Sets the connection parameters to the setting in the {@link #parameters} object.
-         If set fails return the parameters object to original settings and
-         throw exception.
-	 */
-	public void setConnectionParameters() throws SerialConnectionException {
-
-		// Save state of parameters before trying a set.
-		int oldBaudRate = sPort.getBaudRate();
-		int oldDatabits = sPort.getDataBits();
-		int oldStopbits = sPort.getStopBits();
-		int oldParity = sPort.getParity();
-		//int oldFlowControl = sPort.getFlowControlMode();
-
-		// Set connection parameters, if set fails return parameters object
-		// to original state.
-		try {
-			sPort.setSerialPortParams(parameters.getBaudRate(),
-					parameters.getDatabits(),
-					parameters.getStopbits(),
-					parameters.getParity());
-			sPort.setInputBufferSize(1);
-//			sPort.setLowLatency();
-		} catch (UnsupportedCommOperationException e) {
-			parameters.setBaudRate(oldBaudRate);
-			parameters.setDatabits(oldDatabits);
-			parameters.setStopbits(oldStopbits);
-			parameters.setParity(oldParity);
-			throw new SerialConnectionException("Unsupported parameter");
-		}
-
-		// Set flow control.
-		try {
-			sPort.setFlowControlMode(parameters.getFlowControlIn()
-					| parameters.getFlowControlOut());
-		} catch (UnsupportedCommOperationException e) {
-			throw new SerialConnectionException("Unsupported flow control");
-		}
-	}
-
-	/**
-         Close the port and clean up associated elements.
-	 */
-	public void closeConnection() {
-		// If port is alread closed just return.
-		if (!open) {
-			return;
-		}
-
-		// Remove the key listener.
-		//	messageAreaOut.removeKeyListener(keyHandler);
-
-		// Check to make sure sPort has reference to avoid a NPE.
-		if (sPort != null) {
-			try {
-				// close the i/o streams.                
-				is.close();                
-			} catch (IOException e) {
-				System.err.println(e);
-			}
-
-			// Close the port.
-			sPort.close();            
-		}
-
-		open = false;
-	}
-
-	/**
-         Send a one second break signal.
-	 */
-	public void sendBreak() {
-		sPort.sendBreak(1000);
-	}
 	
-	/**
-         Reports the open status of the port.
-         @return true if port is open, false if port is closed.
-	 */
-	public boolean isOpen() {
-		return open;
-	}
 
 	/**
 	 * Maneja los eventos seriales {@link SerialPortEvent#DATA_AVAILABLE}.
-	 * Si se recibe un mensaje completo del GPS {@link #actualizaNuevaCadena(String)}
+	 * Si se recibe un mensaje completo del GPS {@link #nuevaCadenaNMEA(String)}
 	 */
 	public synchronized void serialEvent(SerialPortEvent e) {
 		if (e.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
@@ -292,14 +110,18 @@ public class GPSConnection implements SerialPortEventListener {
 						{
 							//mensaje de texto completo
 							indFin--; //quitamos caracter del salto
-							actualizaNuevaCadenaTexto();
+							String menTexto=new String(buff,indIni,(indFin-indIni+1));
+							if(menTexto.charAt(0)=='$')
+								nuevaCadenaNMEA(menTexto);
+							else
+								nuevaCadenaTexto(menTexto);
 							indIni=0; indFin=-1; esBinario=false; esTexto=false;
 						} 
 					} else if (esBinario) {
 						//terminamos si ya está el tamaño
 						if ( (indFin-indIni+1)==(largoMen+5) ) {
 							//tenemos el mensaje estandar completo
-							actualizaNuevaCadenaBinaria();						
+							nuevaCadenaBinaria();						
 							indIni=0; indFin=-1; esBinario=false; esTexto=false;
 						}
 					} else { //Todavía no sabemos si es texto o binario
@@ -372,14 +194,14 @@ public class GPSConnection implements SerialPortEventListener {
 	private int largo() {
 		int lar=0;
 		int indAct=indIni+2;
-		if(buff[indAct]<=ascii9) lar+=32*(buff[indAct]-ascii0);
-		else lar+=32*(buff[indAct]-asciiA+10);
+		if(buff[indAct]<=(byte)'9') lar+=32*(buff[indAct]-(byte)'0');
+		else lar+=32*(buff[indAct]-(byte)'A'+10);
 		indAct++;
-		if(buff[indAct]<=ascii9) lar+=16*(buff[indAct]-ascii0);
-		else lar+=16*(buff[indAct]-asciiA+10);
+		if(buff[indAct]<=(byte)'9') lar+=16*(buff[indAct]-(byte)'0');
+		else lar+=16*(buff[indAct]-(byte)'A'+10);
 		indAct++;
-		if(buff[indAct]<=ascii9) lar+=(buff[indAct]-ascii0);
-		else lar+=(buff[indAct]-asciiA+10);
+		if(buff[indAct]<=(byte)'9') lar+=(buff[indAct]-(byte)'0');
+		else lar+=(buff[indAct]-(byte)'A'+10);
 		return lar;
 	}
 
@@ -389,7 +211,7 @@ public class GPSConnection implements SerialPortEventListener {
 	 * @return true si es caracter hexadecimal mayúscula
 	 */
 	private boolean isHexa(int ind) {
-		return ((buff[ind]>=ascii0) && (buff[ind]<=ascii9)) || ((buff[ind]>=asciiA && buff[ind]<=asciiF)) ;
+		return ((buff[ind]>=(byte)'0') && (buff[ind]<=(byte)'9')) || ((buff[ind]>=(byte)'A' && buff[ind]<=(byte)'F')) ;
 	}
 
 	/**
@@ -410,19 +232,13 @@ public class GPSConnection implements SerialPortEventListener {
 		return ((buff[ind]>=33) && (buff[ind]<=47)) ;
 	}
 
-	/**
-	 * Actuliza toda los buffers con la información contenida en la nueva cadena recibida.
-	 * Fija el sistema local al primer punto de buffer espacial.
-	 * @param cadena cadena recibida (del GPS)
-	 */
-	void actualizaNuevaCadenaTexto() {
-		int larMen=indFin-indIni+1;
-		System.out.print("Texto ("+larMen+"):>");
-		for(int i=indIni; i<=indFin; i++)
-			System.out.print((char)buff[i]);
-		System.out.println("<");
+	/** Se invoca cuando se recibe una cadena de texto que no es NMEA */
+	void nuevaCadenaTexto(String mensaje) {
+		//TODO considerar mensajes de texto propietarios GREIS
 	}
-	void actualizaNuevaCadenaBinaria() {
+	
+	/** Se invoca cuando se recibe una cadena binaria propietaria GREIS */
+	void nuevaCadenaBinaria() {
 		int larMen=indFin-indIni+1;
 		//iterpretamos los mensajes
 		/* RT [~~]=126
@@ -590,10 +406,10 @@ u1 cs(u1 const* src, int count)
 	 */
 	public void comandoGPS(String comando) {
 		try {
-		flujoSalida.write(comando.getBytes());
+		os.write(comando.getBytes());
 		System.out.println("Enviado Comando:>"+comando+"<");
 		} catch (Exception e) {
-			// TODO: handle exception
+			System.err.println("Problema al enviar comando Triumph:"+e.getMessage());
 		}
 	}
 	
@@ -602,10 +418,10 @@ u1 cs(u1 const* src, int count)
 	 */
 	public static void main(String[] args) {
 
-		GPSConnection gpsC;
+		GPSConnectionTriumph gpsC;
 		
 		try {
-			gpsC=new GPSConnection("/dev/ttyUSB0",9600);
+			gpsC=new GPSConnectionTriumph("/dev/ttyUSB0",9600);
 			gpsC.comandoGPS("out,,jps/MF\n");
 
 			try { Thread.sleep(5000); } catch (Exception e) {}
