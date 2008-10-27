@@ -6,7 +6,6 @@
 package sibtra.predictivo;
 
 import Jama.Matrix;
-import org.jfree.chart.plot.Plot;
 
 /**
  * Modelo matemático del coche.

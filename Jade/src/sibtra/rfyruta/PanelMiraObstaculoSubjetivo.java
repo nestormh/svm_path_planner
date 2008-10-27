@@ -36,6 +36,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import sibtra.PanelMuestraBarrido;
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.ZonaLMS;
 import sibtra.lms.ZonaRadialLMS;
@@ -43,106 +44,13 @@ import sibtra.lms.ZonaRectangularLMS;
 import sibtra.lms.ZonaSegmentadaLMS;
 import sibtra.lms.BarridoAngular.barridoAngularIterator;
 import sibtra.lms.ZonaSegmentadaLMS.pointIterator;
+import sibtra.util.PanelBarrido;
 
-public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListener, MouseListener {
-	
-	protected static final int TamMarca = 40;
-
-	/**
-	 * Para variar zoom
-	 */
-	private JSlider JSliderZoom;
-	
-	/**
-	 * Panel donde pintar
-	 */
-	private JPanel	JPanelGrafico;
-	
-	private JCheckBox jcbBarrido;
-	private JCheckBox jcbZonaA;
-	private JCheckBox jcbZonaB;
-	private JCheckBox jcbZonaC;
-	
-	private JCheckBox jcbRejillaRadial;
-	private JCheckBox jcbRejillaRecta;
-
-	/**
-	 * Distancia maxima a representar
-	 */
-	private short distMax;
-	
-	
-	private ZonaLMS	Zona1A=null;
-	private ZonaLMS	Zona1B=null;
-	private ZonaLMS	Zona1C=null;
-	private ZonaLMS	Zona2A=null;
-	private ZonaLMS	Zona2B=null;
-	private ZonaLMS	Zona2C=null;
-
-	
-	/**
-	 * Coordenadas de la esquina superior izquierda.
-	 * En unidades mundo real.
-	 */
-	private Point2D esqSI;
-	
-	/**
-	 * Coordenadas de la esquina superior izquierda.
-	 * En unidades mundo real.
-	 */
-	private Point2D esqID;
-
-	private MouseEvent evenPulsa;
-
-	private boolean restaurar;
+public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 
 	private MiraObstaculo MI;
 
-	private boolean hayBarrido;
-
 	private JLabel jlDistLin;
-
-	protected double distanciaVista;
-
-	/**
-	 * Convierte punto en el mundo real a punto en la pantalla.
-	 * @param pt punto del mundo real
-	 * @return punto en pantalla
-	 */
-	private Point2D.Double point2Pixel(Point2D pt) {
-		return new Point2D.Double(
-				(pt.getX()-esqSI.getX())*JPanelGrafico.getWidth()/(esqID.getX()-esqSI.getX())
-				,JPanelGrafico.getHeight()-( (pt.getY()-esqID.getY())*JPanelGrafico.getHeight()/(esqSI.getY()-esqID.getY()) )
-				);
-	}
-
-	/**
-	 * Convierte punto en el mundo real a punto en la pantalla.
-	 * @param x coordenada X del punto
-	 * @param y coordenada Y del punto
-	 * @return punto en pantalla
-	 */
-	private Point2D.Double point2Pixel(double x, double y) {
-		return new Point2D.Double(
-				( x - esqSI.getX())*JPanelGrafico.getWidth()/(esqID.getX()-esqSI.getX())
-				,JPanelGrafico.getHeight()-( (y-esqID.getY())*JPanelGrafico.getHeight()/(esqSI.getY()-esqID.getY()) )
-				);
-	}
-
-	private Point2D.Double pixel2Point(Point2D px) {
-		return new Point2D.Double(
-				(double)px.getX() * (esqID.getX()-esqSI.getX()) / JPanelGrafico.getWidth() + esqSI.getX()
-				,(double)(JPanelGrafico.getHeight()-px.getY()) * (esqSI.getY()-esqID.getY()) / JPanelGrafico.getHeight() + esqID.getY()
-				);
-	}
-	
-
-    private Double pixel2Point(int x, int y) {
-		return new Point2D.Double(
-				(double)x * (esqID.getX()-esqSI.getX()) / JPanelGrafico.getWidth() + esqSI.getX()
-				,(double)(JPanelGrafico.getHeight()-y) * (esqSI.getY()-esqID.getY()) / JPanelGrafico.getHeight() + esqID.getY()
-				);
-	}
 
     /**
      * Dado punto del mundo real lo pasa pixeles el coordenadas del RF.
@@ -186,349 +94,115 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 	 * @param distanciaMaxima Distancia máxima del gráfico
 	 */
 	public PanelMiraObstaculoSubjetivo(MiraObstaculo miObs,short distanciaMaxima) {
+		super(distanciaMaxima);
 		MI=miObs;
-		distMax=80;
-		if(distanciaMaxima>0 && distanciaMaxima<=80)
-			distMax=distanciaMaxima;
-		
-		setLayout(new BorderLayout(3,3));
-		
-		esqID=new Point2D.Double();
-		esqSI=new Point2D.Double();
-		restaurar=true;	//se actualizan las esquinas la primera vez
-	
-		//Primero el Panel
-		JPanelGrafico=new JPanel() {
 
-			protected void paintComponent(Graphics g0) {
-				Graphics2D g=(Graphics2D)g0;
-				super.paintComponent(g);
-				if(restaurar) {
-					//restauramos las esquinas
-					double fact=(double)JPanelGrafico.getHeight()/(double)JSliderZoom.getValue();
-					esqSI.setLocation(-JPanelGrafico.getWidth()/2/fact, JPanelGrafico.getHeight()/fact);
-					esqID.setLocation(+JPanelGrafico.getWidth()/2/fact, 0);
-					distanciaVista=Math.sqrt(esqSI.getX()*esqSI.getX()+esqSI.getY()*esqSI.getY());
-					restaurar=false;
+		jlDistLin=new JLabel("Dist ??.???");
+		Font Grande = jlDistLin.getFont().deriveFont(20.0f);
+		jlDistLin.setFont(Grande);
+		jlDistLin.setHorizontalAlignment(JLabel.CENTER);
+		jlDistLin.setEnabled(false);
+		jpChecks.add(jlDistLin);
+
+	}
+
+	protected void cosasAPintar(Graphics g0) {
+		super.cosasAPintar(g0);
+		Graphics2D g=(Graphics2D)g0;
+		Point2D.Double pxCentro=point2Pixel(0.0,0.0);
+		if(MI!=null && MI.posActual!=null) {
+			//pintamos los bordes del camino
+			Point2D.Double pxB=null;
+			{//lado derecho
+				GeneralPath gpBd=new GeneralPath();
+				pxB=pointReal2pixel(MI.Bd[MI.iptoDini]);
+				gpBd.moveTo((float)pxB.getX(), (float)pxB.getY());
+				for(int i=MI.iptoDini+1; i<MI.Bd.length 
+				&& MiraObstaculo.distanciaPuntos(MI.Bd[i],MI.posActual)<distanciaVista; i++) {
+					pxB=pointReal2pixel(MI.Bd[i]);
+					gpBd.lineTo((float)pxB.getX(), (float)pxB.getY());
 				}
+				g.setColor(Color.BLUE);
+				g.draw(gpBd);
+			}
+			{//lado izquierdo
+				GeneralPath gpBi=new GeneralPath();
+				pxB=pointReal2pixel(MI.Bi[MI.iptoIini]);
+				gpBi.moveTo((float)pxB.getX(), (float)pxB.getY());
+				for(int i=MI.iptoIini+1; i<MI.Bi.length 
+				&& MiraObstaculo.distanciaPuntos(MI.Bi[i],MI.posActual)<distanciaVista; i++) {
+					pxB=pointReal2pixel(MI.Bi[i]);
+					gpBi.lineTo((float)pxB.getX(), (float)pxB.getY());
+				}
+				g.setColor(Color.RED);
+				g.draw(gpBi);
+			}
+			{// trayectoria
+				GeneralPath gpTr=new GeneralPath();
+				pxB=pointReal2pixel(MI.Tr[MI.indiceDentro]);
+				gpTr.moveTo((float)pxB.getX(), (float)pxB.getY());
+				for(int i=MI.indiceDentro+1; i<MI.Tr.length 
+				&& MiraObstaculo.distanciaPuntos(MI.Tr[i],MI.posActual)<distanciaVista; i++) {
+					pxB=pointReal2pixel(MI.Tr[i]);
+					gpTr.lineTo((float)pxB.getX(), (float)pxB.getY());
+				}
+				g.setColor(Color.YELLOW);
+				g.draw(gpTr);
+			}
+			//pintamos la distancia mínima etc.
+			if(!java.lang.Double.isNaN(MI.dist))  {
+				g.setStroke(new BasicStroke(2));
 				g.setColor(Color.WHITE);
-				Point2D.Double pxCentro=point2Pixel(0.0,0.0); 
-				g.draw(new Arc2D.Double(pxCentro.getX()-TamMarca/2, pxCentro.getY()-TamMarca/2 //esquina rectángulo
-						, TamMarca, TamMarca //Tamaño rectángulo
-						, 0, 180 //rango de ángulos
-						,Arc2D.CHORD //ralla entre los extremos
-						));
-				
-				{   //etiquetas de distancia
-					//Cosas comunes para cualquier rejilla
-					g.setColor(Color.GRAY); //en color gris
-					Point2D.Double pxFrenteCentro=point2Pixel(0.0,(double)JSliderZoom.getValue());
-					g.draw(new Line2D.Double(pxCentro.getX(), pxCentro.getY()
-							, pxFrenteCentro.getX(), pxFrenteCentro.getY()));
-					final float dash1[] = {10.0f};
-				    final BasicStroke dashed = new BasicStroke(0.5f, 
-				                                          BasicStroke.CAP_BUTT, 
-				                                          BasicStroke.JOIN_MITER, 
-				                                          10.0f, dash1, 0.0f);
-				    g.setStroke(dashed);
+				//los de la derecha e izquierda que están libres
+				g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
+				g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
 
-				    //circulos de distancia, que se vean al menos 10
-				    //Permitimos paso de decimas de metros
-				    double pasoD=(double)JSliderZoom.getValue()/10.0; //paso en unidades reales
-				    int paso;  //distancia en decimas de metro
-				    if(pasoD>5) paso=100;
-				    else if (pasoD>2) paso=50;
-				    else if (pasoD>1) paso=20;
-				    else if (pasoD>0.5) paso=10;
-				    else if (pasoD>0.2) paso=5;
-				    else if (pasoD>0.1) paso=2;
-				    else paso=1;
-				    //Ponemos etiquetas de distancias
-					for(double ma=((double)paso)/10; ma<=distMax;ma+=((double)paso)/10) {
-						Point2D.Double pxPtoMarca=point2Pixel(0.0,ma);
-						g.draw(new Line2D.Double(pxPtoMarca.getX()-4.0, pxPtoMarca.getY()
-								, pxPtoMarca.getX()+4, pxPtoMarca.getY()));
-						String etiqueta=String.valueOf(ma);
-						if (paso>=10) 
-							//sin decimales
-							etiqueta=etiqueta.substring(0,etiqueta.indexOf('.'));
-						else
-							//con 1 decimal
-							etiqueta=etiqueta.substring(0,etiqueta.indexOf('.')+2);
-						g.drawString(etiqueta,(float)pxPtoMarca.getX()+6,(float)pxPtoMarca.getY()+4);
-					}
-					//Rejilla radial
-					if(jcbRejillaRadial.isSelected()) {
-						for(double ma=((double)paso)/10; ma<=distMax;ma+=((double)paso)/10) {
-							Point2D.Double pxEsqSI=point2Pixel(-ma,ma)
-								,pxEsqID=point2Pixel(+ma,-ma);
-						    g.draw(new Arc2D.Double(pxEsqSI.getX(),pxEsqSI.getY()
-						    			,pxEsqID.getX()-pxEsqSI.getX(),pxEsqID.getY()-pxEsqSI.getY()
-						                                   ,0.0, 180.0
-						                                   ,Arc2D.OPEN));
-
-						}
-						
-					}
-					//Rejilla recta
-					if(jcbRejillaRecta.isSelected()) {
-						for(double ma=((double)paso)/10; ma<=distMax;ma+=((double)paso)/10) {
-							Point2D.Double pxEsqSI=point2Pixel(-ma,ma)
-								,pxEsqID=point2Pixel(+ma,0);
-						    g.draw(new Rectangle2D.Double(pxEsqSI.getX(),pxEsqSI.getY()
-						    			,pxEsqID.getX()-pxEsqSI.getX(),pxEsqID.getY()-pxEsqSI.getY()
-						    			));
-						}
-					}
-				}
-				
-				if(MI.barr!=null && jcbBarrido.isSelected()) {
-					//pasamos a representar el barrido
-					g.setColor(Color.GREEN);
+				if(MI.dist>0) {
+					//marcamos el pto mínimo
 					g.setStroke(new BasicStroke());
-					GeneralPath perimetro = 
-						new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.barr.numDatos());
+					g.setColor(Color.RED);
+					g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
+							,point2Pixel(ptoRF2Point(MI.indMin))));
 
-					barridoAngularIterator baIt=MI.barr.creaIterator();
-					baIt.next(); //para obtener el primer punto
-					Point2D.Double px=point2Pixel(baIt.punto());
-					perimetro.moveTo((float)px.getX(),(float)px.getY());
-					while(baIt.next()) {
-						px=point2Pixel(baIt.punto());
-						//Siguientes puntos son lineas
-						perimetro.lineTo((float)px.getX(),(float)px.getY());
-					}
-					g.draw(perimetro);
-				}
-				
-				if(MI!=null && MI.posActual!=null) {
-					//pintamos los bordes del camino
-					Point2D.Double pxB=null;
-					{//lado derecho
-						GeneralPath gpBd=new GeneralPath();
-						pxB=pointReal2pixel(MI.Bd[MI.iptoDini]);
-						gpBd.moveTo((float)pxB.getX(), (float)pxB.getY());
-						for(int i=MI.iptoDini+1; i<MI.Bd.length 
-						&& MiraObstaculo.distanciaPuntos(MI.Bd[i],MI.posActual)<distanciaVista; i++) {
-							pxB=pointReal2pixel(MI.Bd[i]);
-							gpBd.lineTo((float)pxB.getX(), (float)pxB.getY());
-						}
-						g.setColor(Color.BLUE);
-						g.draw(gpBd);
-					}
-					{//lado izquierdo
-						GeneralPath gpBi=new GeneralPath();
-						pxB=pointReal2pixel(MI.Bi[MI.iptoIini]);
-						gpBi.moveTo((float)pxB.getX(), (float)pxB.getY());
-						for(int i=MI.iptoIini+1; i<MI.Bi.length 
-						&& MiraObstaculo.distanciaPuntos(MI.Bi[i],MI.posActual)<distanciaVista; i++) {
-							pxB=pointReal2pixel(MI.Bi[i]);
-							gpBi.lineTo((float)pxB.getX(), (float)pxB.getY());
-						}
+					if(MI.iAD<MI.iAI) {
+						g.setStroke(new BasicStroke(3));
 						g.setColor(Color.RED);
-						g.draw(gpBi);
-					}
-					{// trayectoria
-						GeneralPath gpTr=new GeneralPath();
-						pxB=pointReal2pixel(MI.Tr[MI.indiceDentro]);
-						gpTr.moveTo((float)pxB.getX(), (float)pxB.getY());
-						for(int i=MI.indiceDentro+1; i<MI.Tr.length 
-						&& MiraObstaculo.distanciaPuntos(MI.Tr[i],MI.posActual)<distanciaVista; i++) {
-							pxB=pointReal2pixel(MI.Tr[i]);
-							gpTr.lineTo((float)pxB.getX(), (float)pxB.getY());
+						//pintamos rango de puntos en camino
+						GeneralPath perimetro = 
+							new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
+
+						Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
+						perimetro.moveTo((float)px.getX(),(float)px.getY());
+						for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
+							px=point2Pixel(ptoRF2Point(i));
+							perimetro.lineTo((float)px.getX(),(float)px.getY());
 						}
-						g.setColor(Color.YELLOW);
-						g.draw(gpTr);
+						g.draw(perimetro);
 					}
-					//pintamos la distancia mínima etc.
-					if(!java.lang.Double.isNaN(MI.dist))  {
-						g.setStroke(new BasicStroke(2));
-						g.setColor(Color.WHITE);
-						//los de la derecha e izquierda que están libres
-						g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
-						g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
-
-						if(MI.dist>0) {
-							//marcamos el pto mínimo
-							g.setStroke(new BasicStroke());
-							g.setColor(Color.RED);
-							g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
-									,point2Pixel(ptoRF2Point(MI.indMin))));
-
-							if(MI.iAD<MI.iAI) {
-								g.setStroke(new BasicStroke(3));
-								g.setColor(Color.RED);
-								//pintamos rango de puntos en camino
-								GeneralPath perimetro = 
-									new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
-
-								Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
-								perimetro.moveTo((float)px.getX(),(float)px.getY());
-								for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
-									px=point2Pixel(ptoRF2Point(i));
-									perimetro.lineTo((float)px.getX(),(float)px.getY());
-								}
-								g.draw(perimetro);
-							}
-						} else {
-							//tenemos libre marcamos punto libre
-							g.setStroke(new BasicStroke());
-							g.setColor(Color.GREEN);
-							g.draw(new Line2D.Double(pxCentro
-									,pointReal2pixel(MI.Tr[MI.iLibre])));
-						}
-						g.setStroke(new BasicStroke());
-						g.setColor(Color.GRAY);
-						g.draw(new Line2D.Double(pxCentro
-								,pointReal2pixel(MI.Bd[MI.iptoDini])));
-						g.draw(new Line2D.Double(pxCentro
-								,pointReal2pixel(MI.Bd[MI.iptoD])));
-						g.draw(new Line2D.Double(pxCentro
-								,pointReal2pixel(MI.Bi[MI.iptoIini])));
-						g.draw(new Line2D.Double(pxCentro
-								,pointReal2pixel(MI.Bi[MI.iptoI])));
-					}
+				} else {
+					//tenemos libre marcamos punto libre
+					g.setStroke(new BasicStroke());
+					g.setColor(Color.GREEN);
+					g.draw(new Line2D.Double(pxCentro
+							,pointReal2pixel(MI.Tr[MI.iLibre])));
 				}
-				
 				g.setStroke(new BasicStroke());
-				if(Zona1A!=null && jcbZonaA.isSelected()) {
-					g.setColor(Color.YELLOW);
-					pintaZona(Zona1A, g);
-				}
-				if(Zona1B!=null && jcbZonaB.isSelected()) {
-					g.setColor(Color.BLUE);
-					pintaZona(Zona1B, g);
-				}				
-				if(Zona1C!=null && jcbZonaC.isSelected()) {
-					g.setColor(Color.ORANGE);
-					pintaZona(Zona1C, g);
-				}
+				g.setColor(Color.GRAY);
 				
-				
-			}
-
-		};
-		JPanelGrafico.setMinimumSize(new Dimension(400,400));
-		JPanelGrafico.setSize(new Dimension(400,400));
-		JPanelGrafico.setBackground(Color.BLACK);
-		JPanelGrafico.addMouseListener(this);
-		add(JPanelGrafico,BorderLayout.CENTER);
-		
-		//después (a la dercha) el slider
-		JSliderZoom=new JSlider(SwingConstants.VERTICAL,0,distMax,distMax);
-		JSliderZoom.setMajorTickSpacing(10);
-		JSliderZoom.setMinorTickSpacing(5);
-		JSliderZoom.setPaintLabels(true);
-		JSliderZoom.setPaintTicks(true);
-		JSliderZoom.addChangeListener(this);
-		add(JSliderZoom,BorderLayout.LINE_END);
-		
-		{
-			Dimension sepH=new Dimension(15,0);
-			//Abajo los checks para mostrar o no las zonas y el barrido
-			JPanel jpC=new JPanel();
-			jpC.setLayout(new BoxLayout(jpC,BoxLayout.LINE_AXIS));
-			jpC.setBorder(
-					BorderFactory.createCompoundBorder(
-							BorderFactory.createEmptyBorder(5, 5, 5, 5)
-							,BorderFactory.createLineBorder(Color.BLACK)
-					)
-			);
-			
-			jpC.add(Box.createHorizontalStrut(15));
-			
-			jpC.add(new JLabel("Mostrar: "));
-			
-			jpC.add(Box.createHorizontalStrut(15));
-
-			jcbBarrido=new JCheckBox("Barrido",true);
-			jcbBarrido.addChangeListener(this);
-			jpC.add(jcbBarrido);
-			
-			jpC.add(Box.createHorizontalStrut(15));
-			
-			jcbZonaA=new JCheckBox("Zona A",true);
-			jcbZonaA.addChangeListener(this);
-			jpC.add(jcbZonaA);
-			
-			jpC.add(Box.createHorizontalStrut(15));
-			
-			jcbZonaB=new JCheckBox("Zona B",true);
-			jcbZonaB.addChangeListener(this);
-			jpC.add(jcbZonaB);
-			
-			jpC.add(Box.createHorizontalStrut(15));
-			
-			jcbZonaC=new JCheckBox("Zona C",true);
-			jcbZonaC.addChangeListener(this);
-			jpC.add(jcbZonaC);
-			
-			jpC.add(Box.createHorizontalStrut(15));
-			
-			jcbRejillaRadial=new JCheckBox("Rejilla Radial",true);
-			jcbRejillaRadial.addChangeListener(this);
-			jpC.add(jcbRejillaRadial);
-
-			jcbRejillaRecta=new JCheckBox("Rejilla Recta",false);  //recta no seleccionada
-			jcbRejillaRecta.addChangeListener(this);
-			jpC.add(jcbRejillaRecta);
-
-			jlDistLin=new JLabel("Dist ??.???");
-		    Font Grande = jlDistLin.getFont().deriveFont(20.0f);
-		    jlDistLin.setFont(Grande);
-			jlDistLin.setHorizontalAlignment(JLabel.CENTER);
-			jlDistLin.setEnabled(false);
-			jpC.add(jlDistLin);
-			
-			add(jpC,BorderLayout.PAGE_END);
-		}
-		
-	}
-
-	private void pintaZona(ZonaLMS za, Graphics2D g) {
-		//Tenemos que ver que tipo de zona es para representarla
-		if(ZonaRadialLMS.class.isInstance(za)) {
-			//es zona radial
-			ZonaRadialLMS zr=(ZonaRadialLMS)za;
-			double radio=zr.radioZona/(zr.isEnMilimetros()?1000.0:100.0);
-			Point2D.Double pxEsqSI=point2Pixel((double)-radio,(double)radio)
-			,pxEsqID=point2Pixel((double)+radio,(double)-radio);
-			g.draw(new Arc2D.Double(pxEsqSI.getX(),pxEsqSI.getY()
-					,pxEsqID.getX()-pxEsqSI.getX(),pxEsqID.getY()-pxEsqSI.getY()
-					,0.0, 180.0
-					,Arc2D.OPEN));
-		} else if (ZonaRectangularLMS.class.isInstance(za)) {
-			//es zona rectangular
-			ZonaRectangularLMS zr=(ZonaRectangularLMS)za;
-			//Calculamos las esquinas del rectangulo
-			Point2D.Double pxEsqSI=point2Pixel((double)-zr.distanciaIzda/(zr.isEnMilimetros()?1000.0:100.0)
-					,(double)zr.distanciaFrente/(zr.isEnMilimetros()?1000.0:100.0));
-			Point2D.Double pxEsqID=point2Pixel((double)zr.distanciaDecha/(zr.isEnMilimetros()?1000.0:100.0),(double)0);
-			//pintamos el rectángulo
-			g.draw(new Rectangle2D.Double(pxEsqSI.getX(), pxEsqSI.getY()
-					,pxEsqID.getX()-pxEsqSI.getX()
-					,pxEsqID.getY()-pxEsqSI.getY())
-			);
-		} else if (ZonaSegmentadaLMS.class.isInstance(za) ) {
-			//es zona segmentada
-			ZonaSegmentadaLMS zs=(ZonaSegmentadaLMS)za;
-			if(zs.radiosPuntos!=null && zs.radiosPuntos.length>0) {
-				GeneralPath perimetro = 
-					new GeneralPath(GeneralPath.WIND_EVEN_ODD, zs.radiosPuntos.length);
-				pointIterator pi=zs.creaPointIterator();
-				//Punto inicial del camino
-				Point2D.Double px=point2Pixel(pi.next());
-				perimetro.moveTo((float)px.getX(),(float)px.getY());
-				while(pi.hasNext()) {
-					px=point2Pixel(pi.next());
-					perimetro.lineTo((float)px.getX(),(float)px.getY());
-				}
-				g.draw(perimetro);
+				g.draw(new Line2D.Double(pxCentro
+						,pointReal2pixel(MI.Bd[MI.iptoDini])));
+				g.draw(new Line2D.Double(pxCentro
+						,pointReal2pixel(MI.Bd[MI.iptoD])));
+				g.draw(new Line2D.Double(pxCentro
+						,pointReal2pixel(MI.Bi[MI.iptoIini])));
+				g.draw(new Line2D.Double(pxCentro
+						,pointReal2pixel(MI.Bi[MI.iptoI])));
 			}
 		}
 
 	}
-	
+
+
 	/**
 	 * Genera {@link GeneralPath} con puntos en array expresados en sistema Real
 	 * @param v array de al menos 2 columnas. La primera se considera coordenada X, la segunda la Y
@@ -560,7 +234,6 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 	public void actualiza() {
 		if(MI==null)
 			return;
-		hayBarrido=true;
 		if(java.lang.Double.isNaN(MI.dist)) {
 			jlDistLin.setText("Fuera");
 			jlDistLin.setForeground(Color.RED);
@@ -574,137 +247,8 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 			}
 		jlDistLin.setEnabled(true);
 
-		//cambiamos color de nombres de las zonas si están infringidas
-		if(MI.barr.infringeA())
-			jcbZonaA.setForeground(Color.RED);
-		else
-			jcbZonaA.setForeground(Color.BLACK);
-		if(MI.barr.infringeB())
-			jcbZonaB.setForeground(Color.RED);
-		else
-			jcbZonaB.setForeground(Color.BLACK);
-		if(MI.barr.infringeC())
-			jcbZonaC.setForeground(Color.RED);
-		else
-			jcbZonaC.setForeground(Color.BLACK);
-		//programamos la actualizacion de la ventana
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				repaint();
-			}
-		});
-	}
-	/**
-	 * Devuelve la zona del conjunto especificado
-	 * @param del1 si es del 1
-	 * @param queZona cual zona (A, B ó C)
-	 * @return null si no es id de zona
-	 */
-	public ZonaLMS getZona(boolean del1, byte queZona) {
-		if(del1) {
-			//se quiere la del 1
-			if(queZona==ZonaLMS.ZONA_A)	return Zona1A;
-			if(queZona==ZonaLMS.ZONA_B) return Zona1B;
-			if(queZona==ZonaLMS.ZONA_C)	return Zona1C;
-		} else {
-			//se quiere la del 2
-			if(queZona==ZonaLMS.ZONA_A)	return Zona2A;
-			if(queZona==ZonaLMS.ZONA_B) return Zona2B;
-			if(queZona==ZonaLMS.ZONA_C)	return Zona2C;
-		}
-		return null;
-	}
-
-	/**
-	 * Establece una zona. Se mira el conjnto y la zona para sustituir la que se tiene.
-	 * NO actualiza la presentación.
-	 * @param zona a actualizar
-	 */
-	public void setZona(ZonaLMS zona) {
-		if(zona.isConjunto1()){
-			//es del conjunto 1
-			if(zona.getQueZona()==ZonaLMS.ZONA_A) Zona1A=zona;
-			if(zona.getQueZona()==ZonaLMS.ZONA_B) Zona1B=zona;
-			if(zona.getQueZona()==ZonaLMS.ZONA_C) Zona1C=zona;
-		} else {
-			if(zona.getQueZona()==ZonaLMS.ZONA_A) Zona2A=zona;
-			if(zona.getQueZona()==ZonaLMS.ZONA_B) Zona2B=zona;
-			if(zona.getQueZona()==ZonaLMS.ZONA_C) Zona2C=zona;
-		}
-		JPanelGrafico.repaint();
-	}
-
-	/**	
-	 * Atiende los cambios en el JSlider y de los check box de barrido y zona.
-	 * En todos los casos hay que repintar.
-	 */
-	public void stateChanged(ChangeEvent arg0) {
-		//Impedimos llegue a 0 
-		if(JSliderZoom.getValue()==0)
-			JSliderZoom.setValue(1);
-		// Mandamos repintar el panel del gráfico
-		JPanelGrafico.repaint();
-		restaurar=true;
-	}
-    /**
-     * Doble click del boton 1 vuelve a la presentación normal
-     */
-	public void mouseClicked(MouseEvent even) {
-		if(even.getButton()!=MouseEvent.BUTTON1 || even.getClickCount()!=2)
-			return;
-		System.out.println("Clickeado Boton "+even.getButton()
-				+" en posición: ("+even.getX()+","+even.getY()+") "
-				+even.getClickCount()+" veces");
-		restaurar=true;
-		JPanelGrafico.repaint();
-	}
-    /**
-     * Sólo nos interesan pulsaciones del boton 1
-     */
-	public void mousePressed(MouseEvent even) {
-		if(even.getButton()!=MouseEvent.BUTTON1)
-			return;
-		Point2D.Double ptPulsa=pixel2Point(even.getX(),even.getY());
-		System.out.println("Pulsado Boton "+even.getButton()
-				+" en posición: ("+even.getX()+","+even.getY()+")"
-				+"  ("+ptPulsa.getX()+","+ptPulsa.getY()+")  "
-				+" distancia: "+ptPulsa.distance(new Point2D.Double(0,0))
-				);
-		evenPulsa = even;
-	}
-
-	/**
-     * Sólo nos interesan al soltar el boton 1
-     */
-	public void mouseReleased(MouseEvent even) {
-		if(even.getButton()!=MouseEvent.BUTTON1)
-			return;
-		System.out.println("Soltado Boton "+even.getButton()
-				+" en posición: ("+even.getX()+","+even.getY()+")");
-		//Creamos rectángulo si está suficientemente lejos
-		if(even.getX()-evenPulsa.getX()>50 
-				&& even.getY()-evenPulsa.getY()>50) {
-			//como se usan las esquinas actuales para calcular las nuevas sólo podemos modificarlas 
-			// después
-			Point2D.Double nuevaEsqSI=pixel2Point( new Point2D.Double(evenPulsa.getX(),evenPulsa.getY()) );
-			esqID.setLocation(pixel2Point( new Point2D.Double(even.getX(),even.getY()) ));
-			esqSI.setLocation(nuevaEsqSI);
-			JPanelGrafico.repaint();
-			System.out.println("Puntos:  SI ("+ esqSI.getX()+ ","+esqSI.getY() +") "
-					+"  ID ("+esqID.getX()+","+esqID.getY()+")"
-					+"   ("+JPanelGrafico.getWidth()+","+JPanelGrafico.getHeight()+")"
-					);
-		}
-	}
-
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Apéndice de método generado automáticamente
-		
-	}
-
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Apéndice de método generado automáticamente
-		
+		setBarrido(MI.barr);
+		repaint();
 	}
 
 
@@ -986,11 +530,14 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 		System.out.println("Longitud de la trayectoria="+Tr.length);
 		
 		MiraObstaculo mi=new MiraObstaculo(Tr);		
-		PanelMiraObstaculoSubjetivo PMB=new PanelMiraObstaculoSubjetivo(mi,(short)80);
+		PanelMiraObstaculoSubjetivo pMOS=new PanelMiraObstaculoSubjetivo(mi,(short)80);
 		
 
 		JFrame VentanaPrincipal=new JFrame("PanelMuestraBarridoSubjetivo");
 		VentanaPrincipal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		VentanaPrincipal.add(pMOS);
+		VentanaPrincipal.setSize(new Dimension(800,400));
+		VentanaPrincipal.setVisible(true);
 		
 		JFrame ventana=new JFrame("Panel Mira Obstáculo");
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -999,30 +546,10 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 		ventana.setSize(new Dimension(800,600));
 		ventana.setVisible(true);
 
-
-
-		VentanaPrincipal.add(PMB);
-		VentanaPrincipal.setSize(new Dimension(800,400));
-		VentanaPrincipal.setVisible(true);
 		
-//		//generamos barrido aleatorio en de resolucion grado
-//		BarridoAngular barr=new BarridoAngular(181,0,4,(byte)0,false,(short)2); //crea los arrays de 181 datos.
-//		Random ran=new Random();
-//		double nd; 
-//		for(int i=0; i<=180; i++) {
-//			do {
-//				nd=(40+20*ran.nextGaussian());
-//			} while(nd>80 || nd<=0);
-//
-//			//nd=40;
-//			barr.datos[i]=(short)(nd*100);
-//		}
-//		
-//		PMB.setBarrido(barr);
+		pMOS.setZona(new ZonaRadialLMS((short)180,(short)50,true,true,ZonaLMS.ZONA_A,(short)25000));
 		
-		PMB.setZona(new ZonaRadialLMS((short)180,(short)50,true,true,ZonaLMS.ZONA_A,(short)25000));
-		
-		PMB.setZona(new ZonaRectangularLMS((short)180,(short)50,true,true,ZonaLMS.ZONA_B
+		pMOS.setZona(new ZonaRectangularLMS((short)180,(short)50,true,true,ZonaLMS.ZONA_B
 				,(short)20000,(short)15000,(short)30000));
 
 		ZonaSegmentadaLMS zs=new ZonaSegmentadaLMS((short)180,(short)100,false,true,ZonaLMS.ZONA_C,(short)30);
@@ -1030,10 +557,8 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 			zs.radiosPuntos[i]=990;
 		zs.radiosPuntos[0]=0;
 		zs.radiosPuntos[30]=0;
-		PMB.setZona(zs);
+		pMOS.setZona(zs);
 		
-		PMB.repaint();
-
 		//Damos pto, orientación y barrido
 		BarridoAngular ba=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
 		for(int i=0;i<ba.numDatos();i++) {
@@ -1043,24 +568,25 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 		double[] ptoAct={-26, 14};
 		double dist=mi.masCercano(ptoAct, Math.toRadians(90), ba);
 		pmo.actualiza();
-		PMB.actualiza();
+		pMOS.actualiza();
 		System.out.println("Distancia="+dist);
-		System.out.println(" iAD="+PMB.MI.iAD
-				+"\n iAI="+PMB.MI.iAI
-				+"\n iptoD ="+PMB.MI.iptoD
-				+" \n iptoI ="+PMB.MI.iptoI
-				+" \n iptoDini ="+PMB.MI.iptoDini
-				+" \n iptoIini ="+PMB.MI.iptoIini
-				+" \n imin ="+PMB.MI.indMin
+		System.out.println(" iAD="+pMOS.MI.iAD
+				+"\n iAI="+pMOS.MI.iAI
+				+"\n iptoD ="+pMOS.MI.iptoD
+				+" \n iptoI ="+pMOS.MI.iptoI
+				+" \n iptoDini ="+pMOS.MI.iptoDini
+				+" \n iptoIini ="+pMOS.MI.iptoIini
+				+" \n imin ="+pMOS.MI.indMin
 				);
 
 		boolean Caminar=true;
 		if(Caminar) {
+			//esparamos antes de empezar a caminar
 			try {
 				Thread.sleep(5000);
 			} catch (Exception e) { }
 			//vamos recorriendo la trayectoria con barridos aleatorios
-			int inTr=10, inTrAnt=8;
+			int inTr=20, inTrAnt=inTr-2;
 			while(true) {
 				BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
 				double frec=(13.6+2*Math.random());
@@ -1076,10 +602,10 @@ public class PanelMiraObstaculoSubjetivo extends JPanel implements ChangeListene
 				double diAct=mi.masCercano(Tr[inTr]
 				                               , Math.atan2(Tr[inTr][1]-Tr[inTrAnt][1],Tr[inTr][0]-Tr[inTrAnt][0]), barAct);
 				pmo.actualiza();
-				PMB.actualiza();
+				pMOS.actualiza();
 				System.out.println("Indice "+inTr+" distancia "+diAct);
 				try {
-					Thread.sleep(200);
+					Thread.sleep(500);
 				} catch (Exception e) { }
 				inTrAnt=inTr;
 				inTr=(inTr+1)%Tr.length;

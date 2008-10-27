@@ -332,7 +332,12 @@ public class MiraObstaculo {
 
 		//Buscamos segmento del coche
 		indiceCoche=indiceDentro;
-		while(!dentroSegmento(posicionLocal, indiceCoche)) { indiceCoche++; }
+		while(!dentroSegmento(posicionLocal, indiceCoche) && indiceCoche<Tr.length) { indiceCoche++; }
+		if(indiceCoche==Tr.length) {
+			System.err.println("No se ha encontrado el segmento del coche");
+			return Double.NaN;
+		}
+			
 		indiceCoche++; //nos quedamos con el siguiente
 
 		indSegObs=Integer.MAX_VALUE;
@@ -488,7 +493,7 @@ public class MiraObstaculo {
 	 * @return si está dentro
 	 */
 	public boolean dentroSegmento(double[] pto,int i){
-		if(i>=(Tr.length-1))
+		if(i>=(Tr.length-1) || i<0)
 			return false;
 		double sumAng=0;
 		double[] vA={pto[0]-Bi[i][0], pto[1]-Bi[i][1]};
