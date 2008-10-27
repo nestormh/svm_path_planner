@@ -294,7 +294,7 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 									,point2Pixel(MI.Tr[MI.iLibre])));
 
 						}
-						if(MI.indSegObs!=Integer.MAX_VALUE) {
+						if(!Double.isInfinite(MI.distCamino) && MI.indSegObs!=Integer.MAX_VALUE) {
 							//tenemos los índices
 							g.setStroke(new BasicStroke(3));
 							g.setColor(Color.GREEN);
@@ -381,7 +381,7 @@ public class PanelMiraObstaculo extends JPanel implements MouseListener {
 	 * @return {@link GeneralPath} con los puntos considerados
 	 */
 	protected GeneralPath pathArrayXY(double [][] v, int iini, int ifin) {
-		if(iini<0 || ifin<iini || v==null || v.length<ifin || v[0].length<2)
+		if(iini<0 || ifin<=iini || v==null || v.length<ifin || v[0].length<2)
 			return null;
 		GeneralPath perimetro = 
 			new GeneralPath(GeneralPath.WIND_EVEN_ODD, ifin-iini);

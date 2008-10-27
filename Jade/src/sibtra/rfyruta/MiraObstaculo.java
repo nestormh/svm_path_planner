@@ -495,6 +495,14 @@ public class MiraObstaculo {
 	public boolean dentroSegmento(double[] pto,int i){
 		if(i>=(Tr.length-1) || i<0)
 			return false;
+		
+		//está en alguna de las esquina
+		if(distanciaPuntos(pto, Bi[i])<1e-3)
+			return true;
+		if(distanciaPuntos(pto, Bd[i])<1e-3)
+			return true;
+			
+		
 		double sumAng=0;
 		double[] vA={pto[0]-Bi[i][0], pto[1]-Bi[i][1]};
 		double[] vB={pto[0]-Bi[i+1][0], pto[1]-Bi[i+1][1]};
@@ -509,11 +517,16 @@ public class MiraObstaculo {
 				+"], pto=["+pto[0]+","+pto[1]+"]"
 				);
 		
+
+		//Está en el segmento que une los puntos en i
+		sumAng=anguloVectores(vD, vA);
+		if( Math.abs((sumAng-Math.PI))<1e-3 )
+			return true;
+
 		
 		sumAng+=anguloVectores(vA, vB);
 		sumAng+=anguloVectores(vB, vC);
 		sumAng+=anguloVectores(vC, vD);
-		sumAng+=anguloVectores(vD, vA);
 		
 		return (Math.abs(Math.abs(sumAng)-(2*Math.PI))<1e-3);
 
