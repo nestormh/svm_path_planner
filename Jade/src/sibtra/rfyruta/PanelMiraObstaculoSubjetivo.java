@@ -15,6 +15,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
+import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
@@ -25,11 +26,14 @@ import sibtra.lms.ZonaRadialLMS;
 import sibtra.lms.ZonaRectangularLMS;
 import sibtra.lms.ZonaSegmentadaLMS;
 
+@SuppressWarnings("serial")
 public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 
 	private MiraObstaculo MI;
 
 	private JLabel jlDistLin;
+
+	private JLabel jlDistCamino;
 
     /**
      * Dado punto del mundo real lo pasa pixeles el coordenadas del RF.
@@ -81,7 +85,16 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		jlDistLin.setFont(Grande);
 		jlDistLin.setHorizontalAlignment(JLabel.CENTER);
 		jlDistLin.setEnabled(false);
+		jpChecks.add(Box.createHorizontalStrut(15));
 		jpChecks.add(jlDistLin);
+
+		jlDistCamino=new JLabel("Camino ??.???");
+		jlDistCamino.setFont(Grande);
+		jlDistCamino.setHorizontalAlignment(JLabel.CENTER);
+		jlDistCamino.setEnabled(false);
+		jpChecks.add(Box.createHorizontalStrut(15));
+		jpChecks.add(jlDistCamino);
+		
 
 	}
 
@@ -176,6 +189,28 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 						,pointReal2pixel(MI.Bi[MI.iptoIini])));
 				g.draw(new Line2D.Double(pxCentro
 						,pointReal2pixel(MI.Bi[MI.iptoI])));
+
+				//Pintamos en verde la distancia sobre el camino
+				if(!Double.isInfinite(MI.distCamino) && MI.indSegObs<MI.Tr.length) {
+					//tenemos los índices
+					g.setStroke(new BasicStroke(3));
+					g.setColor(Color.GREEN);
+					GeneralPath gp=pathArrayXY(MI.Tr, MI.indiceCoche
+							, MI.indSegObs+1);
+					if(gp!=null)
+						g.draw(gp);
+					g.draw(new Line2D.Double(pointReal2pixel(MI.Bi[MI.indSegObs])
+							,pointReal2pixel(MI.Bd[MI.indSegObs])));
+					g.draw(new Line2D.Double(pointReal2pixel(MI.Bi[MI.indiceCoche])
+							,pointReal2pixel(MI.Bd[MI.indiceCoche])));
+					if(MI.indBarrSegObs!=Integer.MAX_VALUE) {
+						//marcamos pto barrido dió obstáculo camino más cercano
+						g.setStroke(new BasicStroke());
+						g.draw(new Line2D.Double(pxCentro
+								,point2Pixel(ptoRF2Point(MI.indBarrSegObs))));
+					}
+				}
+
 			}
 		}
 
@@ -226,6 +261,11 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 			}
 		jlDistLin.setEnabled(true);
 
+		if(!Double.isInfinite(MI.distCamino)) {
+			jlDistCamino.setText(String.format("Camino %6.3f m", MI.distCamino));
+			jlDistCamino.setEnabled(true);
+		}
+		
 		setBarrido(MI.barr);
 		repaint();
 	}
@@ -584,7 +624,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 				pMOS.actualiza();
 				System.out.println("Indice "+inTr+" distancia "+diAct);
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(3000);
 				} catch (Exception e) { }
 				inTrAnt=inTr;
 				inTr=(inTr+1)%Tr.length;

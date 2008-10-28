@@ -14,18 +14,15 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.Arc2D;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D.Double;
-import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -33,14 +30,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import sibtra.lms.BarridoAngular;
-import sibtra.lms.ZonaLMS;
-import sibtra.lms.ZonaRadialLMS;
-import sibtra.lms.ZonaRectangularLMS;
-import sibtra.lms.ZonaSegmentadaLMS;
-import sibtra.lms.BarridoAngular.barridoAngularIterator;
-import sibtra.lms.ZonaSegmentadaLMS.pointIterator;
-
+@SuppressWarnings("serial")
 public class PanelBarrido extends JPanel implements ChangeListener, MouseListener {
 	
 	protected static final int TamMarca = 40;
@@ -258,7 +248,6 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 		add(JSliderZoom,BorderLayout.LINE_END);
 		
 		{
-			Dimension sepH=new Dimension(15,0);
 			//Abajo los checks para mostrar o no las zonas y el barrido
 			jpChecks=new JPanel();
 			jpChecks.setLayout(new BoxLayout(jpChecks,BoxLayout.LINE_AXIS));

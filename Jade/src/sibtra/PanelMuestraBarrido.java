@@ -6,32 +6,19 @@
 package sibtra;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Point2D.Double;
 import java.util.Random;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.ZonaLMS;
@@ -42,6 +29,7 @@ import sibtra.lms.BarridoAngular.barridoAngularIterator;
 import sibtra.lms.ZonaSegmentadaLMS.pointIterator;
 import sibtra.util.PanelBarrido;
 
+@SuppressWarnings("serial")
 public class PanelMuestraBarrido extends PanelBarrido {
 		
 	private JCheckBox jcbBarrido;
