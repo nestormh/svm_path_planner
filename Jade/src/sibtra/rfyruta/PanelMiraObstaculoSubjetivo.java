@@ -19,7 +19,7 @@ import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import sibtra.PanelMuestraBarrido;
+import sibtra.lms.PanelMuestraBarrido;
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.ZonaLMS;
 import sibtra.lms.ZonaRadialLMS;

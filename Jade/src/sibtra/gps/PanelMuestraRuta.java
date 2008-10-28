@@ -19,37 +19,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import sibtra.util.PanelMapa;
+
 
 /**
  * Clase amiga que muestra panel con la {@link Ruta} pasada.
  * Ponemos eje X vertical hacia arriba (Norte) y eje Y horizontal a la izda (Oeste)
  * @author alberto
  */
-public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventListener, ActionListener {
+public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener{
 	
-	/** Tamaño (en pixeles) de los ejes a pintar en el panel */
-	protected static final int TamEjes = 50;
-	
-	/** Panel de la gráfica */
-	JPanel JPanelGrafico;
-	
-	/**
-	 * Coordenadas de la esquina superior izquierda.
-	 * En unidades mundo real.
-	 */
-	private Point2D esqSI;
-	
-	/**
-	 * Coordenadas de la esquina superior izquierda.
-	 * En unidades mundo real.
-	 */
-	private Point2D esqID;
-
-	/** Banderín para indicar que hay que recalcular las esquinas */
-	private boolean restaurar;
-
-	/** Evento cuando se pulsó el ratón, se necesita para hacer los cálculos al soltar y hacer el zoom */
-	private MouseEvent evenPulsa;
 	/** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
 	private MouseEvent evenPos;
 
@@ -64,321 +43,110 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 
 	private Ruta RU;
 
-	private JComboBox jcbEscalas;
-	String[] escalasS={ "0.5 m","1 m","2 m", "5 m","10 m","20 m","50 m", "100 m", "500 m" };
-	double[] escalasD={  0.5,    1,    2   ,  5   , 10   , 20   , 50   ,  100   ,  500    };  
-
-	private boolean escalado;
-
-
-	/** Número de pixeles en pantalla que representa la escala seleccionada */
-	private static final int pixelEscala=100;
-	
-	/**
-	 * Convierte punto en el mundo real a punto en la pantalla. 
-	 * EN VERTICAL EL EJE X hacia la izquierda el eje Y. 
-	 * @param pt punto del mundo real
-	 * @return punto en pantalla
-	 */
-	private Point2D.Double point2Pixel(Point2D pt) {
-		return point2Pixel(pt.getX(), pt.getY()); 
-	}
-
-	
-	/**
-	 * Convierte punto en el mundo real a punto en la pantalla.
-	 *  EJE X vertical hacia arriba, Eje Y horizontal hacia la izquierda
-	 * @param x coordenada X del punto
-	 * @param y coordenada Y del punto
-	 * @return punto en pantalla
-	 */
-	private Point2D.Double point2Pixel(double x, double y) {
-		return new Point2D.Double(
-				(esqSI.getY()-y)*JPanelGrafico.getWidth()/(esqSI.getY()-esqID.getY())
-				,
-				JPanelGrafico.getHeight()-((x-esqID.getX())*JPanelGrafico.getHeight()/(esqSI.getX()-esqID.getX()))
-				);
-	}
-
-	/** @see #point2Pixel(double, double) */
-	private Point2D point2Pixel(double[] ds) {
-		return point2Pixel(ds[0], ds[1]);
-	}
-
-	/** @see #point2Pixel(double, double) */
-	private Point2D.Double pixel2Point(Point2D px) {
-		return pixel2Point(px.getX(), px.getY());
-	}
-	
-	
-	/**	
-	 * Dado pixel de la pantalla determina a que punto del mundo real corresponde. 
-	 * @param x coordenada x del pixel
-	 * @param y coordenada y del pixel
-	 * @return punto en el mundo real
-	 */
-    private Point2D.Double pixel2Point(double x, double y) {
-		return new Point2D.Double(
-				(JPanelGrafico.getHeight()-y)*(esqSI.getX()-esqID.getX())/JPanelGrafico.getHeight() + esqID.getX()
-				,
-				esqSI.getY()-x*(esqSI.getY()-esqID.getY())/JPanelGrafico.getWidth()
-				 );
-    }
-
 
     /**
      * Constructor 
      * @param rupas Ruta pasada.
      */
 	public PanelMuestraRuta(Ruta rupas) {
+		super();
 		RU=rupas;
-		setLayout(new BorderLayout(3,3));
-		esqID=new Point2D.Double();
-		esqSI=new Point2D.Double();
-		restaurar=true;	//se actualizan las esquinas la primera vez
+		//Si queremoa añadir algo al panel inferiro	
+		//		jpSur.add(jcbEscalas);
 
-		//Primero el Panel
-		JPanelGrafico=new JPanel() {
-			protected void paintComponent(Graphics g0) {
-				Graphics2D g=(Graphics2D)g0;
-				super.paintComponent(g);
-				if(restaurar) {
-					//restauramos las esquinas
-					double minCX=-10;
-					double minCY=-10;
-					double maxCX=10;
-					double maxCY=10;
-					if(RU!=null && RU.getNumPuntos()>=1) {
-						minCX=RU.getPunto(0).getXLocal();
-						minCY=RU.getPunto(0).getYLocal();
-						maxCX=minCX;
-						maxCY=minCY;
-						for(int i=1; i<RU.getNumPuntos(); i++) {
-							if(RU.getPunto(i).getXLocal()<minCX) minCX=RU.getPunto(i).getXLocal();
-							if(RU.getPunto(i).getXLocal()>maxCX) maxCX=RU.getPunto(i).getXLocal();
-							if(RU.getPunto(i).getYLocal()<minCY) minCY=RU.getPunto(i).getYLocal();
-							if(RU.getPunto(i).getYLocal()>maxCY) maxCY=RU.getPunto(i).getYLocal();
-						}
-					} 
-					//Usamos mismo factor en ambas direcciones y centramos.
-					double Dx=(maxCX-minCX);
-					double Dy=(maxCY-minCY);
-					double f=escalasD[jcbEscalas.getSelectedIndex()]/pixelEscala;
-//					double fx=Dx/getHeight();
-//					double fy=Dy/getWidth();
-//					double f=(fx>fy)?fx:fy;
-					double lx=f*getHeight();
-					double ly=f*getWidth();
-					esqSI.setLocation(minCX+Dx+(lx-Dx)/2,minCY+Dy+(ly-Dy)/2);
-					esqID.setLocation(minCX-(lx-Dx)/2,minCY-(ly-Dy)/2);
+	}
 
-					restaurar=false;
-					escalado=true;
-				}
-				if (escalado) {
-					//pintamos referencia de escala
-					g.setColor(Color.WHITE);
-					float pxSep=20;
-					float altE=4;
-					float xCentE=getWidth()-pixelEscala/2-pxSep;
-					float yCentE=getHeight()-pxSep;
-					GeneralPath gpE=new GeneralPath(GeneralPath.WIND_EVEN_ODD,4);
-					gpE.moveTo(xCentE-pixelEscala/2, yCentE-altE);
-					gpE.lineTo(xCentE-pixelEscala/2, yCentE);
-					gpE.lineTo(xCentE+pixelEscala/2, yCentE);
-					gpE.lineTo(xCentE+pixelEscala/2, yCentE-altE);
-					g.draw(gpE);
-					g.drawString((String)jcbEscalas.getSelectedItem(), xCentE, yCentE-altE);
-				}
-				{//Pintamos  ejes en 0,0
-					g.setColor(Color.WHITE);
-					Point2D.Double pxCentro=point2Pixel(0.0,0.0);
-					GeneralPath ejes=new GeneralPath(GeneralPath.WIND_EVEN_ODD,3);
-					ejes.moveTo((float)pxCentro.getX()-TamEjes, (float)pxCentro.getY());
-					ejes.lineTo((float)pxCentro.getX(), (float)pxCentro.getY());
-					ejes.lineTo((float)pxCentro.getX(), (float)pxCentro.getY()-TamEjes);
-					g.draw(ejes);
-					g.drawString("N",(float)pxCentro.getX()+3,(float)pxCentro.getY()-TamEjes+12);
-					g.drawString("W",(float)pxCentro.getX()-TamEjes,(float)pxCentro.getY()-3);
-				}
-				if (RU!=null && RU.getNumPuntos()>=1){
-					//pintamos el trayecto
-					g.setStroke(new BasicStroke());
-					g.setColor(Color.YELLOW);
-					GeneralPath gpTr= 
-						new GeneralPath(GeneralPath.WIND_EVEN_ODD, RU.getNumPuntos());
+	protected void cosasAPintar(Graphics g0) {
+		super.cosasAPintar(g0);
+		Graphics2D g=(Graphics2D)g0;
+		if (RU!=null && RU.getNumPuntos()>=1){
+			//pintamos el trayecto
+			g.setStroke(new BasicStroke());
+			g.setColor(Color.YELLOW);
+			GeneralPath gpTr= 
+				new GeneralPath(GeneralPath.WIND_EVEN_ODD, RU.getNumPuntos());
 
-					Point2D.Double px=point2Pixel(RU.getPunto(0).getXLocal(),RU.getPunto(0).getYLocal());
-					gpTr.moveTo((float)px.getX(),(float)px.getY());
-					for(int i=1; i<RU.getNumPuntos(); i++) {
-						px=point2Pixel(RU.getPunto(i).getXLocal(),RU.getPunto(i).getYLocal());
-						//Siguientes puntos son lineas
-						gpTr.lineTo((float)px.getX(),(float)px.getY());
-					}
-
-					g.draw(gpTr);
-				}
-				
-				if(RU!=null && RU.getNumPuntos()>2)	{
-					//Posición y orientación del coche
-					g.setStroke(new BasicStroke(3));
-					g.setPaint(Color.GRAY);
-					g.setColor(Color.GRAY);
-					double xl=RU.getUltimoPto().getXLocal();
-					double yl=RU.getUltimoPto().getYLocal();
-					double yaw=Math.atan2(yl-RU.getPunto(RU.getNumPuntos()-2).getYLocal()
-							, xl-RU.getPunto(RU.getNumPuntos()-2).getXLocal());
-					double[] esqDD={xl+anchoCoche/2*Math.sin(yaw)
-							,yl-anchoCoche/2*Math.cos(yaw) };
-					double[] esqDI={xl-anchoCoche/2*Math.sin(yaw)
-							,yl+anchoCoche/2*Math.cos(yaw) };
-					double[] esqPD={esqDD[0]-largoCoche*Math.cos(yaw)
-							,esqDD[1]-largoCoche*Math.sin(yaw) };
-					double[] esqPI={esqDI[0]-largoCoche*Math.cos(yaw)
-							,esqDI[1]-largoCoche*Math.sin(yaw) };
-					Point2D pxDD=point2Pixel(esqDD);
-					Point2D pxDI=point2Pixel(esqDI);
-					Point2D pxPD=point2Pixel(esqPD);
-					Point2D pxPI=point2Pixel(esqPI);
-					GeneralPath coche=new GeneralPath();
-					coche.moveTo((float)pxDD.getX(),(float)pxDD.getY());
-					coche.lineTo((float)pxPD.getX(),(float)pxPD.getY());
-					coche.lineTo((float)pxPI.getX(),(float)pxPI.getY());
-					coche.lineTo((float)pxDI.getX(),(float)pxDI.getY());
-					coche.closePath();
-					g.fill(coche);
-					g.draw(coche);
-				}
-
+			Point2D.Double px=point2Pixel(RU.getPunto(0).getXLocal(),RU.getPunto(0).getYLocal());
+			gpTr.moveTo((float)px.getX(),(float)px.getY());
+			for(int i=1; i<RU.getNumPuntos(); i++) {
+				px=point2Pixel(RU.getPunto(i).getXLocal(),RU.getPunto(i).getYLocal());
+				//Siguientes puntos son lineas
+				gpTr.lineTo((float)px.getX(),(float)px.getY());
 			}
-		};
-		JPanelGrafico.setMinimumSize(new Dimension(400,400));
-		JPanelGrafico.setSize(new Dimension(400,400));
-		JPanelGrafico.setBackground(Color.BLACK);
-		JPanelGrafico.addMouseListener(this);
-		add(JPanelGrafico,BorderLayout.CENTER);
-		
-		{
-			JPanel jpSur=new JPanel();
-			
-			jpSur.add(new JLabel("Escala"));
-			jcbEscalas=new JComboBox(escalasS);
-			jcbEscalas.setSelectedIndex(4);
-			jcbEscalas.addActionListener(this);
-			jpSur.add(jcbEscalas);
-			
-			
-			add(jpSur,BorderLayout.SOUTH);
-			
+
+			g.draw(gpTr);
 		}
 		
+		if(RU!=null && RU.getNumPuntos()>2)	{
+			//Posición y orientación del coche
+			g.setStroke(new BasicStroke(3));
+			g.setPaint(Color.GRAY);
+			g.setColor(Color.GRAY);
+			double xl=RU.getUltimoPto().getXLocal();
+			double yl=RU.getUltimoPto().getYLocal();
+			double yaw=Math.atan2(yl-RU.getPunto(RU.getNumPuntos()-2).getYLocal()
+					, xl-RU.getPunto(RU.getNumPuntos()-2).getXLocal());
+			double[] esqDD={xl+anchoCoche/2*Math.sin(yaw)
+					,yl-anchoCoche/2*Math.cos(yaw) };
+			double[] esqDI={xl-anchoCoche/2*Math.sin(yaw)
+					,yl+anchoCoche/2*Math.cos(yaw) };
+			double[] esqPD={esqDD[0]-largoCoche*Math.cos(yaw)
+					,esqDD[1]-largoCoche*Math.sin(yaw) };
+			double[] esqPI={esqDI[0]-largoCoche*Math.cos(yaw)
+					,esqDI[1]-largoCoche*Math.sin(yaw) };
+			Point2D pxDD=point2Pixel(esqDD);
+			Point2D pxDI=point2Pixel(esqDI);
+			Point2D pxPD=point2Pixel(esqPD);
+			Point2D pxPI=point2Pixel(esqPI);
+			GeneralPath coche=new GeneralPath();
+			coche.moveTo((float)pxDD.getX(),(float)pxDD.getY());
+			coche.lineTo((float)pxPD.getX(),(float)pxPD.getY());
+			coche.lineTo((float)pxPI.getX(),(float)pxPI.getY());
+			coche.lineTo((float)pxDI.getX(),(float)pxDI.getY());
+			coche.closePath();
+			g.fill(coche);
+			g.draw(coche);
+		}
 	}
 
-	
-    /**
-     * Doble click del boton 1 vuelve a la presentación normal
-     */
-	public void mouseClicked(MouseEvent even) {
-		if(even.getButton()!=MouseEvent.BUTTON1 || even.getClickCount()!=2)
-			return;
-		System.out.println("Clickeado Boton "+even.getButton()
-				+" en posición: ("+even.getX()+","+even.getY()+") "
-				+even.getClickCount()+" veces");
-		restaurar=true;
-		JPanelGrafico.repaint();
-	}
-	
-    /**
-     * Sólo nos interesan pulsaciones del boton 1  para hacer zoom.
-     * @see #mouseReleased(MouseEvent)
-     */
-	public void mousePressed(MouseEvent even) {
-		evenPulsa=null;
-		if(even.getButton()==MouseEvent.BUTTON1) {
-			Point2D.Double ptPulsa=pixel2Point(even.getX(),even.getY());
-			System.out.println("Pulsado Boton "+even.getButton()
-					+" en posición: ("+even.getX()+","+even.getY()+")"
-					+"  ("+ptPulsa.getX()+","+ptPulsa.getY()+")  "
-					+" distancia: "+ptPulsa.distance(new Point2D.Double(0,0))
-			);
-			evenPulsa = even;
-			return;
-		}
+	/** Los límites que necesitamos son los de la ruta a representar */
+	protected double[] limites() {
+		double axis[]=super.limites();
+		if(RU!=null && RU.getNumPuntos()>=1) {
+			for(int i=0; i<RU.getNumPuntos(); i++) {
+				if(RU.getPunto(i).getXLocal()<axis[0]) axis[0]=RU.getPunto(i).getXLocal();
+				if(RU.getPunto(i).getXLocal()>axis[1]) axis[1]=RU.getPunto(i).getXLocal();
+				if(RU.getPunto(i).getYLocal()<axis[2]) axis[2]=RU.getPunto(i).getYLocal();
+				if(RU.getPunto(i).getYLocal()>axis[3]) axis[3]=RU.getPunto(i).getYLocal();
+			}
+
+		} 
+		return axis;
 	}
 
 	/**
-     * Sólo nos interesan pulsaciones del boton 1 para hacer zoom.
-     * Termina el trabajo empezado en {@link #mousePressed(MouseEvent)}
-     */
-	public void mouseReleased(MouseEvent even) {
-		if(even.getButton()==MouseEvent.BUTTON1) {
-			System.out.println("Soltado Boton "+even.getButton()
-					+" en posición: ("+even.getX()+","+even.getY()+")");
-			if(evenPulsa!=null) {
-				System.out.println("Soltado Boton "+even.getButton()
-						+" en posición: ("+even.getX()+","+even.getY()+")");
-				//Creamos rectángulo si está suficientemente lejos
-				if(even.getX()-evenPulsa.getX()>50 
-						&& even.getY()-evenPulsa.getY()>50) {
-					//como se usan las esquinas actuales para calcular las nuevas sólo podemos modificarlas 
-					// después
-					Point2D.Double nuevaEsqSI=pixel2Point( new Point2D.Double(evenPulsa.getX(),evenPulsa.getY()) );
-					esqID.setLocation(pixel2Point( new Point2D.Double(even.getX(),even.getY()) ));
-					esqSI.setLocation(nuevaEsqSI);
-					escalado=false;
-					JPanelGrafico.repaint();
-					System.out.println("Puntos:  SI ("+ esqSI.getX()+ ","+esqSI.getY() +") "
-							+"  ID ("+esqID.getX()+","+esqID.getY()+")"
-							+"   ("+JPanelGrafico.getWidth()+","+JPanelGrafico.getHeight()+")"
-					);
-				}
-			}
-		}
-	}
-
-	/** NO hacemos nada */
-	public void mouseEntered(MouseEvent arg0) {
-		// No hacemos nada por ahora
-		
-	}
-
-	/** NO hacemos nada */
-	public void mouseExited(MouseEvent arg0) {
-		// No hacemos nada por ahora
-		
-	}
-
-
-	/**
-	 * Acatualiza la presentación cuando la ruta tiene un nuevo punto. 
+	 * Actualiza la presentación cuando la ruta tiene un nuevo punto. 
 	 */
 	public void nuevoPunto() {
-		restaurar=true;
-		//programamos la actualizacion de la ventana
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				repaint();			
-			}
-		});
+		fijarCentro(RU.getUltimoPto().getXLocal(), RU.getUltimoPto().getYLocal());
 	}
 	
-
+	/**	maneja los eventos cuando GPS recibe un nuevo punto */
 	public void handleGpsEvent(GpsEvent ev) {
 		nuevoPunto();
 	}
 
 
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent ae) {
-		if(ae.getSource()==jcbEscalas) {
-			//solo repintamos restaurando
-			restaurar=true;
-			JPanelGrafico.repaint();
-		}
+	/** @return ruta que se está representando	 */
+	public Ruta getRuta() {
+		return RU;
 	}
-
+	
+	/** Cambia a una nueva ruta a representando */
+	public void setRuta(Ruta ru) {
+		RU=ru;
+		nuevoPunto(); //para actualizar presentación
+	}
 	
 	/**
 	 * Programa para probar 
@@ -684,18 +452,6 @@ public class PanelMuestraRuta extends JPanel implements MouseListener, GpsEventL
 			System.out.println("Añadido "+ru.getUltimoPto());
 		}
 		
-	}
-
-
-	/** @return ruta que se está representando	 */
-	public Ruta getRuta() {
-		return RU;
-	}
-	
-	/** Cambia a una nueva ruta a representando */
-	public void setRuta(Ruta ru) {
-		RU=ru;
-		nuevoPunto(); //para actualizar presentación
 	}
 
 

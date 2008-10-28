@@ -40,6 +40,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import sibtra.lms.BarridoAngular;
+import sibtra.lms.PanelMuestraBarrido;
 import sibtra.lms.ZonaLMS;
 
 /**

@@ -3,7 +3,7 @@
  *
  * Creado por Alberto Hamilcon con Eclipse
  */
-package sibtra;
+package sibtra.lms;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
