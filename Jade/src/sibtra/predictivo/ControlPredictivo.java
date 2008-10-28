@@ -67,6 +67,7 @@ public class ControlPredictivo {
         this.ruta = ruta;
         this.Ts = Ts;
         G = new Matrix(horPrediccion,horControl);
+        this.landaEye = Matrix.identity(horControl,horControl).times(landa);
     }
     /**
      * Calcula la evolución del modelo del vehículo tantos pasos hacia delante como
@@ -84,9 +85,12 @@ public class ControlPredictivo {
         carroSim.copy(carroOriginal);//
         /*Hacemos la copia del objeto carroOriginal para realizar la simulación
          sobre la copia, de manera que no se modifiquen los datos reales*/
+        //La siguiente linea de código es el cálculo del vector deseado en MAtlab
+//        vec_deseado(1,:) = k_dist*(pos_ref(mod(ind_min(k)+cerca,length(pos_ref))+1,:) - [carro.x,carro.y])
+//+ k_ang*[cos(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1)),sin(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1))];
         int indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());        
-        double vectorDeseadoX = ruta[indMin][0] - carroSim.getX();
-        double vectorDeseadoY = ruta[indMin][1] - carroSim.getY();
+        double vectorDeseadoX = ruta[indMin][0] - carroSim.getX() + Math.cos(ruta[indMin][2]);
+        double vectorDeseadoY = ruta[indMin][1] - carroSim.getY() + Math.sin(ruta[indMin][2]);
         orientacionesDeseadas[0] = Math.atan2(vectorDeseadoX,vectorDeseadoY);
         predicOrientacion[0] = carroSim.getTita();
         vectorError[0] = orientacionesDeseadas[0] - predicOrientacion[0];
@@ -95,9 +99,13 @@ public class ControlPredictivo {
             carroSim.calculaEvolucion(comando,velocidad,Ts);
             predicOrientacion[i] = carroSim.getTita();
             indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());
-            vectorDeseadoX = ruta[indMin][0] - carroSim.getX();
-            vectorDeseadoY = ruta[indMin][1] - carroSim.getY();
-            orientacionesDeseadas[i] = Math.atan2(vectorDeseadoX,vectorDeseadoY);
+            vectorDeseadoX = ruta[indMin][0] - carroSim.getX() + Math.cos(ruta[indMin][2]);
+            vectorDeseadoY = ruta[indMin][1] - carroSim.getY() + Math.sin(ruta[indMin][2]);
+            orientacionesDeseadas[i] = Math.atan2(vectorDeseadoY,vectorDeseadoX);
+//            System.out.println("Indice minimo " + indMin);
+//            System.out.println("Vector x "+vectorDeseadoX+" "+ "Vector y "+vectorDeseadoY+"\n");
+//            System.out.println("Orientacion deseada " + orientacionesDeseadas[i] + " " 
+//                                +"prediccion de orientacion " + predicOrientacion[i]+"\n");
             vectorError[i] = normalizaAngulo(orientacionesDeseadas[i] - predicOrientacion[i]);
         }
         
@@ -157,16 +165,23 @@ public class ControlPredictivo {
         //    vector_error = tita_deseado - ftita;
 //    vector_error = vector_error + (vector_error > pi)*(-2*pi) + (vector_error < -pi)*2*pi;
         double[] vectorError = calculaPrediccion(carroOriginal.getConsignaVolante()
-                                                   ,carroOriginal.getConsignaVelocidad());
+                                                   ,carroOriginal.getVelocidad());
         //    M = diag(peso_tita'*vector_error);
         Matrix M = new Matrix(vectorError,horPrediccion).transpose();
+        //M.print(1,6);
 //        u = inv(G'*G + landa*eye(hor_control))*G'*M;
 //    u_actual = u(1) + u_anterior;
 //        %-----------Cálculo del vector de errores----------
         calculaG();
+        //G.print(1,6);
         Matrix Gt = G.transpose();
-        Matrix vectorU = Gt.times(G).plus(landaEye).inverse().times(Gt).times(M);
-        return vectorU.get(0,0) +  carroOriginal.getConsignaVolante();
+//        Matrix GtporM = Gt.times(M.transpose());
+//        Matrix GtporG = Gt.times(G);
+//        Matrix masLandaEye = GtporG.plus(landaEye);
+        Matrix vectorU = Gt.times(G).plus(landaEye).inverse().times(Gt).times(M.transpose());
+        //vectorU.print(1,6);
+        double comandoCalculado = vectorU.get(0,0) +  carroOriginal.getConsignaVolante();        
+        return comandoCalculado;
        
     }
     
@@ -179,31 +194,77 @@ public class ControlPredictivo {
 //        cont=cont+1;
 //    end
 //end
-
-
         for (int j=0;j<horControl;j++){
             int cont = 0;
             for (int i=j;i<horPrediccion;i++){
             G.set(i,j,escalon[cont]);
             cont++;
             }
-        }
-        
-        
-        
+        }   
     }
     
     private double[] calculaEscalon(double velocidad){
         double[] respuestaEscalon = new double[horPrediccion];
-        carroSim.setPostura(0,0,velocidad,Math.PI/4);
+        carroSim.setPostura(0,0,0,Math.PI/4);
         for (int i=0;i<horPrediccion;i++){
             carroSim.calculaEvolucion(Math.PI/4,velocidad, Ts);
             respuestaEscalon[i] = carroSim.getTita();
         }
         return respuestaEscalon;
     }
-    public void main(String[] args){
-        
+    static double[][] generaRuta(int numPuntos,double intervalo){
+        double[][] rutaAux = new double[numPuntos][3];
+        rutaAux[0][0] = 0;
+        rutaAux[0][1] = 0;
+        rutaAux[0][2] = 0;
+        for (int i=1;i<numPuntos;i++){
+            rutaAux[i][0] = i*intervalo;
+            rutaAux[i][1] = rutaAux[i][0]*2;
+            rutaAux[i][2] = Math.atan2((rutaAux[i][1]-rutaAux[i-1][1]),
+                                        (rutaAux[i][0]-rutaAux[i-1][0]));
+        }
+        return rutaAux;
     }
-    
+    public static void main(String[] args){
+        Coche carroOri = new Coche();
+        double vel = 2;
+        double consVolante = 0;
+        carroOri.setVelocidad(vel);
+        carroOri.setConsignaVolante(consVolante);
+        int horPredic = 12;
+        int horCont = 3;
+        double paramLanda = 1;
+        double paramTs = 0.2;
+        double[][] rutaPrueba = generaRuta(200,0.25);
+        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.1,0);
+//        for(int i=0;i<20;i++){
+//            System.out.println(rutaPrueba[i][0] + " / " + rutaPrueba[i][1] + 
+//                    "/" + rutaPrueba[i][2]);
+//        }
+        
+        
+        ControlPredictivo controlador = new ControlPredictivo(carroOri,rutaPrueba,
+                                            horPredic,horCont,paramLanda,paramTs);
+        controlador.calculaComando();
+        System.exit(0);
+        for (int i = 0; i < rutaPrueba.length; i++) {            
+            double comandoVolante = controlador.calculaComando(); 
+            if (comandoVolante > Math.PI/4)
+                comandoVolante = Math.PI/4;
+            if (comandoVolante < -Math.PI/4)
+                comandoVolante = -Math.PI/4;
+            System.out.println("Comando " + comandoVolante);
+            carroOri.setConsignaVolante(comandoVolante);
+            carroOri.calculaEvolucion(comandoVolante,2,0.2);
+            int indice = controlador.calculaDistMin(rutaPrueba,carroOri.getX(),carroOri.getY());
+            double error = rutaPrueba[indice][2] - carroOri.getTita();
+            System.out.println("Error " + error);
+        }
+//        double[] prediccion = controlador.calculaPrediccion(consVolante, vel);
+//        for(int i=0;i<controlador.horPrediccion;i++){
+//            System.out.println(prediccion[i]);
+//        }
+//        System.out.println("Angulo normalizado " +normalizaAngulo(0));
+//        System.exit(0);
+    }
 }

@@ -149,6 +149,17 @@ public class Coche {
         tita = orientacion;
         volante = posVolante;
     }
+    public void setVelocidad(double vel){
+        velocidad = vel;    
+    }
+    public void setConsignaVelocidad(double consignaVelocidad){
+        this.consignaVelocidad = consignaVelocidad;    
+    }
+    public void setConsignaVolante(double consignaVolante){
+        this.consignaVolante = consignaVolante;
+    }
+            
+            
     /**
      * Calcula la evolución del vehículo en un instante de muestreo
      * @param volante Orientación del volante
@@ -162,11 +173,11 @@ public class Coche {
         consignaVelocidad = velocidad;/*Por ahora no existe modelo dinámico para 
         calcular la evolución de la velocidad del vehículo, por lo que se supone
         la velocidad igual a la consigna de la velocidad*/
-        Matrix estadoAux = A.times(estado).plus(B.times(volante)).times(Ts);
+        Matrix estadoAux = A.times(estado).plus(B.times(this.consignaVolante)).times(Ts);
         Matrix alfa = C.transpose().times(estado.plus(estadoAux));
         estado.plusEquals(estadoAux);
         double alfaEscalar = alfa.get(0,0);
-        System.out.println("alfa escalar " + alfaEscalar);
+        //System.out.println("alfa escalar " + alfaEscalar);
         x = Math.cos(tita)*velocidad*Ts + x;
         y = Math.sin(tita)*velocidad*Ts + y;
         tita = ((Math.tan(alfaEscalar)/longitud)*velocidad*Ts + tita);//%2*Math.PI
