@@ -50,6 +50,10 @@ public class ControlPredictivo {
     double Ts;
     Matrix G;
     private Matrix landaEye;
+    /** Almacena las posiciones x e y de la prediccion*/
+    double[][] prediccionPosicion;
+    /** Último comando calculado por el controlador predictivo*/
+    double comandoCalculado;
     /**
      * 
      * @param carroOri Puntero al modelo actualzado del vehículo. No se modificará 
@@ -68,6 +72,7 @@ public class ControlPredictivo {
         this.Ts = Ts;
         G = new Matrix(horPrediccion,horControl);
         this.landaEye = Matrix.identity(horControl,horControl).times(landa);
+        prediccionPosicion = new double[horPrediccion][2];
     }
     /**
      * Calcula la evolución del modelo del vehículo tantos pasos hacia delante como
@@ -94,6 +99,8 @@ public class ControlPredictivo {
         orientacionesDeseadas[0] = Math.atan2(vectorDeseadoX,vectorDeseadoY);
         predicOrientacion[0] = carroSim.getTita();
         vectorError[0] = orientacionesDeseadas[0] - predicOrientacion[0];
+        prediccionPosicion[0][0] = carroSim.getX();
+        prediccionPosicion[0][1] = carroSim.getY();
         
         for (int i=1; i<horPrediccion;i++ ){
             carroSim.calculaEvolucion(comando,velocidad,Ts);
@@ -107,6 +114,8 @@ public class ControlPredictivo {
 //            System.out.println("Orientacion deseada " + orientacionesDeseadas[i] + " " 
 //                                +"prediccion de orientacion " + predicOrientacion[i]+"\n");
             vectorError[i] = normalizaAngulo(orientacionesDeseadas[i] - predicOrientacion[i]);
+            prediccionPosicion[i][0] = carroSim.getX();
+            prediccionPosicion[i][1] = carroSim.getY();
         }
         
         return vectorError;
@@ -180,12 +189,14 @@ public class ControlPredictivo {
 //        Matrix masLandaEye = GtporG.plus(landaEye);
         Matrix vectorU = Gt.times(G).plus(landaEye).inverse().times(Gt).times(M.transpose());
         //vectorU.print(1,6);
-        double comandoCalculado = vectorU.get(0,0) +  carroOriginal.getConsignaVolante();        
+        comandoCalculado = vectorU.get(0,0) +  carroOriginal.getConsignaVolante();        
         return comandoCalculado;
        
     }
     
-    private void calculaG(){
+    private Matrix calculaG(){
+        //TODO Optimizar el cálculo de G para que solo se realice si cambia la velocidad
+        // El cambio en la velocidad se acotará a unos niveles mínimos
         double[] escalon = calculaEscalon(carroOriginal.getVelocidad());
 //        for j=1:hor_control,
 //    cont=1;
@@ -200,7 +211,8 @@ public class ControlPredictivo {
             G.set(i,j,escalon[cont]);
             cont++;
             }
-        }   
+        }
+        return G;
     }
     
     private double[] calculaEscalon(double velocidad){
