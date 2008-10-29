@@ -50,6 +50,9 @@ public class ControlPredictivo {
     double Ts;
     Matrix G;
     private Matrix landaEye;
+    
+    /** Almacena las orientaciones de la prediccion*/
+    double[] predicOrientacion;
     /** Almacena las posiciones x e y de la prediccion*/
     double[][] prediccionPosicion;
     /** Último comando calculado por el controlador predictivo*/
@@ -84,7 +87,7 @@ public class ControlPredictivo {
      * el vehículo en la predicción y el vectores de orientaciones deseadas futuras
      */
     private double[] calculaPrediccion(double comando,double velocidad){
-        double[] predicOrientacion = new double[horPrediccion];
+        predicOrientacion = new double[horPrediccion];
         double[] vectorError = new double[horPrediccion];
         double[] orientacionesDeseadas = new double[horPrediccion];
         carroSim.copy(carroOriginal);//
@@ -128,7 +131,7 @@ public class ControlPredictivo {
      * @return Índice de la ruta en el que se encuentra el punto de la 
      * ruta más cercano al punto (posX,posY)
      */
-    private static int calculaDistMin(double[][] ruta,double posX,double posY){
+    public static int calculaDistMin(double[][] ruta,double posX,double posY){
         //Buscar punto más cercano al coche
             double distMin=Double.POSITIVE_INFINITY;
             int indMin=0;
@@ -268,7 +271,7 @@ public class ControlPredictivo {
             System.out.println("Comando " + comandoVolante);
             carroOri.setConsignaVolante(comandoVolante);
             carroOri.calculaEvolucion(comandoVolante,2,0.2);
-            int indice = controlador.calculaDistMin(rutaPrueba,carroOri.getX(),carroOri.getY());
+            int indice = ControlPredictivo.calculaDistMin(rutaPrueba,carroOri.getX(),carroOri.getY());
             double error = rutaPrueba[indice][2] - carroOri.getTita();
             System.out.println("Error " + error);
         }

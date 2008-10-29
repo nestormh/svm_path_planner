@@ -2,16 +2,12 @@ package sibtra.util;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-
-import sibtra.util.PanelMapa;
 
 
 /**
@@ -19,6 +15,7 @@ import sibtra.util.PanelMapa;
  * Por ahora es estático y no admite añadir un punto, sólo cambiar toda la trayectoria.
  * @author alberto
  */
+@SuppressWarnings("serial")
 public class PanelMuestraTrayectoria extends PanelMapa {
 	
 	/** Largo del coche en metros */
@@ -67,6 +64,8 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	}
 
 	protected void cosasAPintar(Graphics g0) {
+		if(!Double.isNaN(posXCoche) && jcbSeguirCoche.isSelected())
+			setCentro(posXCoche,posYCoche);
 		super.cosasAPintar(g0);
 		Graphics2D g=(Graphics2D)g0;
 		GeneralPath gptr=pathArrayXY(Tr);

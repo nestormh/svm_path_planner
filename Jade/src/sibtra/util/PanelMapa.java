@@ -403,7 +403,7 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	/** Fija el centro del mapa (en coordenadas del mundo real).
 	 *  NO ACTUALIZA PRESENTACIÓN  (usar {@link #actualiza()})
 	 */
-	public void fijarCentro(double xc,double yc) {
+	public void setCentro(double xc,double yc) {
 		centro[0]=xc;
 		centro[1]=yc;
 		restaurar=true;
