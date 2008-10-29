@@ -202,7 +202,7 @@ public class Navega  {
 					GPSData pa=na.gpsCon.getPuntoActualTemporal();
 					double[] ptoAct={pa.getXLocal(), pa.getYLocal()};
 					double dist=na.mi.masCercano(ptoAct
-							, Math.toRadians(pa.getAgulosIMU().getYaw())+na.desMag, ba);
+							, Math.toRadians(pa.getAngulosIMU().getYaw())+na.desMag, ba);
 					na.pmo.actualiza();
 					na.PMOS.actualiza();
 					if(Double.isNaN(dist))

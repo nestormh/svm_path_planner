@@ -210,15 +210,15 @@ public class GPSData implements Serializable, Cloneable {
 	 */
 	private double velocidadGPS=Double.NaN;
 	
-	/** Angulos leidos de la IMU */
-	private AngulosIMU agulosIMU;
+	/** Angulos leidos de la IMU. Serán null si no existe acceso a la IMU */
+	private AngulosIMU angulosIMU=null;
 	
-	public AngulosIMU getAgulosIMU() {
-		return agulosIMU;
+	public AngulosIMU getAngulosIMU() {
+		return angulosIMU;
 	}
 
-	public void setAgulosIMU(AngulosIMU agulosIMU) {
-		this.agulosIMU = agulosIMU;
+	public void setAngulosIMU(AngulosIMU angulosIMU) {
+		this.angulosIMU = angulosIMU;
 	}
 
 	/** Constructor por defecto */
@@ -281,8 +281,8 @@ public class GPSData implements Serializable, Cloneable {
 		vdoP=aCopiar.vdoP;
 		velocidad=aCopiar.velocidad;
 		velocidadGPS=aCopiar.velocidadGPS;
-		if(aCopiar.agulosIMU!=null)
-			agulosIMU=new AngulosIMU(aCopiar.agulosIMU);
+		if(aCopiar.angulosIMU!=null)
+			angulosIMU=new AngulosIMU(aCopiar.angulosIMU);
 		return this;
 	}
 	

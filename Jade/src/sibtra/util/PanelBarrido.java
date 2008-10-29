@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -362,10 +363,19 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 		
 	}
 
-
-	public void repaint() {
-		super.repaint();
-		if (JPanelGrafico!=null)
-			JPanelGrafico.repaint();
+	/** Programa el repintado del panel */
+	public void actualiza() {
+		//programamos la actualizacion de la ventana
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				repaint();						
+			}
+		});		
 	}
+	
+//	public void repaint() {
+//		super.repaint();
+//		if (JPanelGrafico!=null)
+//			JPanelGrafico.repaint();
+//	}
 }

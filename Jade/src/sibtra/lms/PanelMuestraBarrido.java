@@ -279,7 +279,7 @@ public class PanelMuestraBarrido extends PanelBarrido {
 		zs.radiosPuntos[30]=0;
 		PMB.setZona(zs);
 		
-		PMB.repaint();
+		PMB.actualiza();
 		
 	}
 

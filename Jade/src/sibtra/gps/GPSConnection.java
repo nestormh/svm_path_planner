@@ -17,7 +17,7 @@ import sibtra.imu.ConexionSerialIMU;
 /**
  * Maneja la conexión serial con el GPS. 
  * Al recibir un paquete recoge la información del nuevo punto y lo almacena en los distintos
- * buffers. 
+ * buffers. Si se define conexión a la IMU se almacena información águlos en el momento.
  */
 public class GPSConnection implements SerialPortEventListener {
 
@@ -322,7 +322,9 @@ public class GPSConnection implements SerialPortEventListener {
 	 */
 	void nuevoPunto() {
 		if (csIMU!=null)  //si existe conexión seriañ a la IMU copiamos el ángulo  
-			data.setAgulosIMU(csIMU.getAngulo());
+			data.setAngulosIMU(csIMU.getAngulo());
+		else
+			data.setAngulosIMU(null);
 		if(!bufferEspacial.tieneSistemaLocal())  {
 			System.out.println("Se actuliza local de buffer Espacial");
 			bufferEspacial.actualizaSistemaLocal(data);

@@ -310,7 +310,7 @@ public class Ruta implements Serializable {
 			return; //no tocamos la desv.
 		//vemos si tenemos datos IMU para todos
 		for(int i=0; i<puntos.size(); i++) 
-			if(puntos.get(i).getAgulosIMU()==null) {
+			if(puntos.get(i).getAngulosIMU()==null) {
 				System.out.println("Punto "+i+" de la ruta no tienen angulos IMU. No podemos calcular");
 				return;
 			}
@@ -319,7 +319,7 @@ public class Ruta implements Serializable {
 		double dAcum=0; //desviación acumulada
 		double dAcum2=0; //desviación acumulada al cuadrado
 		for(int i=2; i<puntos.size(); i++) {
-			double da=puntos.get(i).getAngulo()-Math.toRadians(puntos.get(i-1).getAgulosIMU().getYaw());
+			double da=puntos.get(i).getAngulo()-Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw());
 			//colocamos la diferencia en rango +-PI
 			if(da<-Math.PI) da+=2*Math.PI;
 			if(da>Math.PI) da-=2*Math.PI;
@@ -334,7 +334,7 @@ public class Ruta implements Serializable {
 		//desviación estandar de la desviación (valga la redundancia :-)
 		double dif2=0;
 		for(int i=2; i<puntos.size(); i++) {
-			double da=puntos.get(i).getAngulo()-Math.toRadians(puntos.get(i-1).getAgulosIMU().getYaw());
+			double da=puntos.get(i).getAngulo()-Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw());
 			//colocamos la diferencia en rango +-PI
 			if(da<-Math.PI) da+=2*Math.PI;
 			if(da>Math.PI) da-=2*Math.PI;

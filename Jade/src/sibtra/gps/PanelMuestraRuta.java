@@ -1,41 +1,26 @@
 package sibtra.gps;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
-import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import sibtra.util.PanelMapa;
 
 
 /**
- * Clase amiga que muestra panel con la {@link Ruta} pasada.
- * Ponemos eje X vertical hacia arriba (Norte) y eje Y horizontal a la izda (Oeste)
+ * Panel que usa {@link PanelMapa} para mostrar ruta y posición del coche.
+ * Atiende eventos de GPS y actualiza posición del coche.
  * @author alberto
  */
-public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener{
+public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener {
 	
-	/** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
-	private MouseEvent evenPos;
-
-
-	/** Si ya hay datos que representar (posición y barrido) */
-	private boolean hayBarrido;
-
 	/** Largo del coche en metros */
 	protected double largoCoche=2;
 	/** ancho del coche en metros */
@@ -43,7 +28,14 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener{
 
 	private Ruta RU;
 
-
+	/** coordenadas de la posición del coche. Si es NaN el coche no se pinta */
+	double posXCoche=Double.NaN;
+	double posYCoche;
+	/** orientación del coche */
+	double orientacionCoche;
+	private JCheckBox jcbSeguirCoche;
+	private JCheckBox jcbMostrarCoche;
+	
     /**
      * Constructor 
      * @param rupas Ruta pasada.
@@ -51,6 +43,11 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener{
 	public PanelMuestraRuta(Ruta rupas) {
 		super();
 		RU=rupas;
+		jcbSeguirCoche=new JCheckBox("Seguir Coche");
+		jpSur.add(jcbSeguirCoche);
+		
+		jcbMostrarCoche=new JCheckBox("Mostrar Coche");
+		jpSur.add(jcbMostrarCoche);
 		//Si queremoa añadir algo al panel inferiro	
 		//		jpSur.add(jcbEscalas);
 
@@ -76,36 +73,38 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener{
 
 			g.draw(gpTr);
 		}
-		
-		if(RU!=null && RU.getNumPuntos()>2)	{
-			//Posición y orientación del coche
-			g.setStroke(new BasicStroke(3));
-			g.setPaint(Color.GRAY);
-			g.setColor(Color.GRAY);
-			double xl=RU.getUltimoPto().getXLocal();
-			double yl=RU.getUltimoPto().getYLocal();
-			double yaw=Math.atan2(yl-RU.getPunto(RU.getNumPuntos()-2).getYLocal()
-					, xl-RU.getPunto(RU.getNumPuntos()-2).getXLocal());
-			double[] esqDD={xl+anchoCoche/2*Math.sin(yaw)
-					,yl-anchoCoche/2*Math.cos(yaw) };
-			double[] esqDI={xl-anchoCoche/2*Math.sin(yaw)
-					,yl+anchoCoche/2*Math.cos(yaw) };
-			double[] esqPD={esqDD[0]-largoCoche*Math.cos(yaw)
-					,esqDD[1]-largoCoche*Math.sin(yaw) };
-			double[] esqPI={esqDI[0]-largoCoche*Math.cos(yaw)
-					,esqDI[1]-largoCoche*Math.sin(yaw) };
-			Point2D pxDD=point2Pixel(esqDD);
-			Point2D pxDI=point2Pixel(esqDI);
-			Point2D pxPD=point2Pixel(esqPD);
-			Point2D pxPI=point2Pixel(esqPI);
-			GeneralPath coche=new GeneralPath();
-			coche.moveTo((float)pxDD.getX(),(float)pxDD.getY());
-			coche.lineTo((float)pxPD.getX(),(float)pxPD.getY());
-			coche.lineTo((float)pxPI.getX(),(float)pxPI.getY());
-			coche.lineTo((float)pxDI.getX(),(float)pxDI.getY());
-			coche.closePath();
-			g.fill(coche);
-			g.draw(coche);
+		if(Double.isNaN(posXCoche)) {
+			jcbMostrarCoche.setEnabled(false);
+			jcbSeguirCoche.setEnabled(false);
+		} else {
+			jcbMostrarCoche.setEnabled(true);
+			jcbSeguirCoche.setEnabled(true);
+			if(jcbMostrarCoche.isSelected()){
+				//Posición y orientación del coche
+				g.setStroke(new BasicStroke(3));
+				g.setPaint(Color.GRAY);
+				g.setColor(Color.GRAY);
+				double[] esqDD={posXCoche+anchoCoche/2*Math.sin(orientacionCoche)
+						,posYCoche-anchoCoche/2*Math.cos(orientacionCoche) };
+				double[] esqDI={posXCoche-anchoCoche/2*Math.sin(orientacionCoche)
+						,posYCoche+anchoCoche/2*Math.cos(orientacionCoche) };
+				double[] esqPD={esqDD[0]-largoCoche*Math.cos(orientacionCoche)
+						,esqDD[1]-largoCoche*Math.sin(orientacionCoche) };
+				double[] esqPI={esqDI[0]-largoCoche*Math.cos(orientacionCoche)
+						,esqDI[1]-largoCoche*Math.sin(orientacionCoche) };
+				Point2D pxDD=point2Pixel(esqDD);
+				Point2D pxDI=point2Pixel(esqDI);
+				Point2D pxPD=point2Pixel(esqPD);
+				Point2D pxPI=point2Pixel(esqPI);
+				GeneralPath coche=new GeneralPath();
+				coche.moveTo((float)pxDD.getX(),(float)pxDD.getY());
+				coche.lineTo((float)pxPD.getX(),(float)pxPD.getY());
+				coche.lineTo((float)pxPI.getX(),(float)pxPI.getY());
+				coche.lineTo((float)pxDI.getX(),(float)pxDI.getY());
+				coche.closePath();
+				g.fill(coche);
+				g.draw(coche);
+			}
 		}
 	}
 
@@ -120,22 +119,26 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener{
 				if(RU.getPunto(i).getYLocal()>axis[3]) axis[3]=RU.getPunto(i).getYLocal();
 			}
 
-		} 
+		}
+		if(!Double.isNaN(posXCoche)) {
+			if(posXCoche<axis[0]) axis[0]=posXCoche;
+			if(posXCoche>axis[1]) axis[1]=posXCoche;
+			if(posYCoche<axis[2]) axis[2]=posYCoche;
+			if(posYCoche>axis[3]) axis[3]=posYCoche;
+
+		}
 		return axis;
 	}
 
-	/**
-	 * Actualiza la presentación cuando la ruta tiene un nuevo punto. 
-	 */
-	public void nuevoPunto() {
-		fijarCentro(RU.getUltimoPto().getXLocal(), RU.getUltimoPto().getYLocal());
-	}
 	
-	/**	maneja los eventos cuando GPS recibe un nuevo punto */
-	public void handleGpsEvent(GpsEvent ev) {
-		nuevoPunto();
+	/** Define posición y orientación del coche. No repinta (usar {@link #actualiza()})
+	 * @param posX si se pasa NaN el coche no se pinta (no está situado)
+	 */
+	public void situaCoche(double posX, double posY, double orientacion) {
+		posXCoche=posX;
+		posYCoche=posY;
+		orientacionCoche=orientacion;
 	}
-
 
 	/** @return ruta que se está representando	 */
 	public Ruta getRuta() {
@@ -148,6 +151,28 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener{
 		nuevoPunto(); //para actualizar presentación
 	}
 	
+	/**
+	 * Actualiza la presentación cuando la ruta tiene un nuevo punto. 
+	 */
+	public void nuevoPunto() {
+		GPSData ultPto=RU.getUltimoPto();
+		double x=ultPto.getXLocal();
+		double y=ultPto.getYLocal();
+		double yaw=ultPto.getAngulo();
+		if(jcbSeguirCoche.isSelected())
+			fijarCentro(x,y);
+		if(ultPto.getAngulosIMU()!=null)
+			yaw=ultPto.getAngulosIMU().getYaw();
+		situaCoche(x, y, yaw);
+		actualiza();
+	}
+	
+	/**	maneja los eventos cuando GPS recibe un nuevo punto */
+	public void handleGpsEvent(GpsEvent ev) {
+		nuevoPunto();
+	}
+
+
 	/**
 	 * Programa para probar 
 	 * @param args

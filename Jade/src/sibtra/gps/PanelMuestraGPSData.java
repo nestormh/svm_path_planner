@@ -310,11 +310,11 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlAltura.setText(String.format("%+8.2f", pto.getHGeoide()+pto.getMSL()));
 			jlHGeoide.setText(String.format("%+8.2f", pto.getHGeoide()));
 			jlAlturaGPS.setText(String.format("%+8.2f", pto.getMSL()));
-			if(pto.getAgulosIMU()!=null) {
-				jlYaw.setText(String.format("%+8.2f", pto.getAgulosIMU().getYaw()));
+			if(pto.getAngulosIMU()!=null) {
+				jlYaw.setText(String.format("%+8.2f", pto.getAngulosIMU().getYaw()));
 				jlYaw.setEnabled(true);
 				jlDMag.setText(String.format("%+8.2f", 
-						Math.toDegrees(pto.getAngulo())-pto.getAgulosIMU().getYaw()));
+						Math.toDegrees(pto.getAngulo())-pto.getAngulosIMU().getYaw()));
 				jlDMag.setEnabled(true);
 			} else {
 				jlYaw.setEnabled(false);
