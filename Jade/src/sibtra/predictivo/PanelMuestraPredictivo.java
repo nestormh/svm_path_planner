@@ -9,6 +9,8 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JProgressBar;
 
 import sibtra.util.PanelMuestraTrayectoria;
 
@@ -20,26 +22,50 @@ import sibtra.util.PanelMuestraTrayectoria;
 @SuppressWarnings("serial")
 public class PanelMuestraPredictivo extends PanelMuestraTrayectoria {
 
+	/** Largo de la flecha que marcará orientación final de la predicción */
 	private static final double largoFlecha = 2;
+	/** Valor máximo de la barra de progreso */
+	private static final int pbMax = 100;
+	
+	/** Puntero al controlador predicctivo a mostrar */
 	ControlPredictivo CP=null;
 	
+	/** Barra progreso para comando a la izquierda */
+	private JProgressBar jpbComandoI;
+	/** Label que presentará el comando calculado */
+	private JLabel jlComando;
+	/** Barra progreso para comando a la izquierda */
+	private JProgressBar jpbComandoD;
+
+	/** Constructor necesita el controlador predictivo */
 	public PanelMuestraPredictivo(ControlPredictivo contPredic) {
 		super();
 		CP=contPredic;
 		setTr(CP.ruta);
 		//consas a añadir al jpSur
+		//barra de progreso para el comando
+		jpbComandoI=new JProgressBar(-pbMax,0);
+		jpSur.add(jpbComandoI);
+		
+		jlComando=new JLabel("+##.##º");
+		jpSur.add(jlComando);
+		//barra de progreso para el comando derecho
+		jpbComandoD = new JProgressBar(0,pbMax);
+		jpSur.add(jpbComandoD);
+		
 	}
 	
+	/** Lo que añadimos al panel */
 	protected void cosasAPintar(Graphics g0) {
-		double[] pini=CP.prediccionPosicion[CP.horPrediccion-1];
-		double ori=CP.predicOrientacion[CP.horPrediccion-1];
-		situaCoche(pini[0], pini[1], ori);
+		//colocamos el coche en su posición actual
+		situaCoche(CP.prediccionPosicion[0][0], CP.prediccionPosicion[0][1]
+		           , CP.predicOrientacion[0]);
 		super.cosasAPintar(g0);
 		Graphics2D g=(Graphics2D)g0;
 		
+		//pintamos la trayectoria predicha
 		GeneralPath gpPred=pathArrayXY(CP.prediccionPosicion);
 		if(gpPred!=null) {
-			//pintamos el trayecto
 			g.setStroke(new BasicStroke());
 			g.setColor(Color.WHITE);
 			g.draw(gpPred);
@@ -47,6 +73,8 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria {
 		
 		//pintamos la orientación final
 		{
+			double[] pini=CP.prediccionPosicion[CP.horPrediccion-1];
+			double ori=CP.predicOrientacion[CP.horPrediccion-1];
 			g.setStroke(new BasicStroke());
 			g.setColor(Color.RED);			
 			double[] pfin={pini[0]+largoFlecha*Math.cos(ori)
@@ -54,6 +82,16 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria {
 			g.draw(new Line2D.Double(point2Pixel(pini),point2Pixel(pfin)));
 	
 		}
+		//barra de progreso con el comando
+		if(CP.comandoCalculado>0) {
+			jpbComandoI.setValue(pbMax);
+			jpbComandoD.setValue((int)(CP.comandoCalculado*pbMax/(Math.PI/4)));
+		} else {
+			jpbComandoD.setValue(0);
+			jpbComandoI.setValue((int)(CP.comandoCalculado*pbMax/(Math.PI/4)));			
+		}
+		//texto con el comando
+		jlComando.setText(String.format("%+04.2fº", Math.toDegrees(CP.comandoCalculado)));
 	}
 	
 	/**
@@ -70,7 +108,8 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria {
         double paramLanda = 1;
         double paramTs = 0.2;
         double[][] rutaPrueba = ControlPredictivo.generaRuta(200,0.25);
-        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.1,0);
+        carroOri.setPostura(-1.0,0.0,0.5,0.0);
+//        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.3,0);
         
         ControlPredictivo controlador = new ControlPredictivo(carroOri,rutaPrueba,
                                             horPredic,horCont,paramLanda,paramTs);
@@ -96,7 +135,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria {
             System.out.println("Error " + error);
 			pmp.actualiza();
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(500);
 			} catch (Exception e) { }
 
         }

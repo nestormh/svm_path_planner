@@ -142,6 +142,7 @@ public class Coche {
      * @param posX Coordenada local X
      * @param posY Coordenada loacal Y
      * @param orientacion Orientación del vehículo (no del volante) en radianes. (Entre -Pi y Pi)s
+     * @param posVolante posición del volante
      */
     public void setPostura(double posX,double posY,double orientacion,double posVolante){
         x = posX;

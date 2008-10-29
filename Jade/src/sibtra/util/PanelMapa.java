@@ -1,5 +1,6 @@
 package sibtra.util;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -11,9 +12,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,6 +28,7 @@ import javax.swing.SwingUtilities;
  * a la izda (Oeste)
  * @author alberto
  */
+@SuppressWarnings("serial")
 public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	
 	/** Tamaño (en pixeles) de los ejes a pintar en el panel */
@@ -50,9 +54,6 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 
 	/** Evento cuando se pulsó el ratón, se necesita para hacer los cálculos al soltar y hacer el zoom */
 	private MouseEvent evenPulsa;
-	/** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
-	private MouseEvent evenPos;
-
 
 	private JComboBox jcbEscalas;
 	String[] escalasS={ "0.5 m","1 m","2 m", "5 m","10 m","20 m","50 m", "100 m", "500 m" };
@@ -67,6 +68,8 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	protected double[] centro;
 
 	private JButton jbCentrar;
+
+	private JCheckBox jcbRejilla;
 
 
 	/** Número de pixeles en pantalla que representa la escala seleccionada */
@@ -204,10 +207,10 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 					centro[1]=(minCY+maxCY)/2;
 					centrar=false;
 				}
+				double escala=escalasD[jcbEscalas.getSelectedIndex()];
 				if(restaurar) {
-					double f=escalasD[jcbEscalas.getSelectedIndex()]/pixelEscala;
-					double lx=f*getHeight();
-					double ly=f*getWidth();
+					double lx=escala/pixelEscala*getHeight();
+					double ly=escala/pixelEscala*getWidth();
 					
 					esqSI.setLocation(centro[0]+lx/2,centro[1]+ly/2);
 					esqID.setLocation(centro[0]-lx/2,centro[1]-ly/2);
@@ -243,6 +246,41 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 					g.drawString("N",(float)pxCentro.getX()+3,(float)pxCentro.getY()-TamEjes+12);
 					g.drawString("W",(float)pxCentro.getX()-TamEjes,(float)pxCentro.getY()-3);
 				}
+				
+				//Rejilla recta
+				if(jcbRejilla.isSelected()) {
+					//Definición de las lineas de rejilla
+					g.setColor(Color.GRAY); //en color gris
+					final float dash1[] = {10.0f};
+					final BasicStroke dashed = new BasicStroke(0.5f, 
+							BasicStroke.CAP_BUTT, 
+							BasicStroke.JOIN_MITER, 
+							10.0f, dash1, 0.0f);
+					g.setStroke(dashed);
+					double xmin=Math.floor(esqID.getX()/escala)*escala;
+					double xmax=Math.ceil(esqSI.getX()/escala)*escala;
+					double ymin=Math.floor(esqID.getY()/escala)*escala;
+					double ymax=Math.ceil(esqSI.getY()/escala)*escala;
+					//verticales
+					for(double ya=ymin; 
+					ya<=ymax;
+					ya+=escala) {
+						Point2D.Double ptInf=point2Pixel(xmin,ya);
+						Point2D.Double ptSup=point2Pixel(xmax,ya);
+						g.draw(new Line2D.Double(ptInf,ptSup));
+						g.drawString(String.format("%+1.0f",ya),(float)ptInf.getX()+6,getHeight()-4);
+					}
+					//horizontales
+					for(double xa=xmin; 
+					xa<=xmax;
+					xa+=escala) {
+						Point2D.Double ptIzdo=point2Pixel(xa, ymin);
+						Point2D.Double ptDecho=point2Pixel(xa, ymax);
+						g.draw(new Line2D.Double(ptIzdo,ptDecho));
+						g.drawString(String.format("%+1.0f", xa),4,(float)ptDecho.getY()-6);
+					}
+				}
+
 				cosasAPintar(g0);
 			}
 		};
@@ -266,6 +304,9 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 			jbCentrar.addActionListener(this);
 			jpSur.add(jbCentrar);
 			
+			jcbRejilla= new JCheckBox("Rejilla");
+			jcbRejilla.addActionListener(this);  //solo para que se repinte si cambia
+			jpSur.add(jcbRejilla);
 			
 			add(jpSur,BorderLayout.SOUTH);
 			
