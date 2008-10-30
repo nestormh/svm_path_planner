@@ -3,19 +3,23 @@ package sibtra.predictivo;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Label;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -57,46 +61,58 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 		super();
 		CP=contPredic;
 		setTr(CP.ruta);
-		//consas a añadir al jpSur
-		//barra de progreso para el comando
-		jpbComandoI=new JProgressBar(-pbMax,0);
-		jpSur.add(jpbComandoI);
-		
-		jlComando=new JLabel("+##.##º");
-		jlComando.setMinimumSize(new Dimension(80, 20));
-		jlComando.setPreferredSize(new Dimension(80, 45));
+		{//nuevo panel para añadir debajo
+			JPanel jpPre=new JPanel(new FlowLayout(FlowLayout.LEADING));
+			//barra de progreso para el comando
+			jpbComandoI=new JProgressBar(-pbMax,0);
+			jpPre.add(jpbComandoI);
 
-		jpSur.add(jlComando);
-		//barra de progreso para el comando derecho
-		jpbComandoD = new JProgressBar(0,pbMax);
-		jpSur.add(jpbComandoD);
-		
-		jlDistancia=new JLabel("+###.##");
-		jlDistancia.setMinimumSize(new Dimension(80, 20));
-		jlDistancia.setPreferredSize(new Dimension(80, 45));
-		jpSur.add(jlDistancia);
-		
-		jcbCaminar=new JCheckBox("Caminar");
-		jcbCaminar.setSelected(false);
-		jcbCaminar.addActionListener(this);
-		jpSur.add(jcbCaminar);
+			jlComando=new JLabel("+##.##º");
+			jlComando.setHorizontalAlignment(SwingConstants.TRAILING);
+			//jlComando.setMinimumSize(new Dimension(50, 20));
+			jlComando.setPreferredSize(new Dimension(60, 20));
+			jpPre.add(jlComando);
 
-		//jpSur.add(new Label("H Pred"));
-		jsModPred=new SpinnerNumberModel(10,1,25,1);
-		jsHorPred=new JSpinner(jsModPred);
-		jsHorPred.addChangeListener(this);
-		jpSur.add(jsHorPred);
-		
-		jsModCont=new SpinnerNumberModel(3,1,25,1);
-		jsHorCont=new JSpinner(jsModCont);
-		jsHorCont.addChangeListener(this);
-		jpSur.add(jsHorCont);
+			//barra de progreso para el comando derecho
+			jpbComandoD = new JProgressBar(0,pbMax);
+			jpPre.add(jpbComandoD);
 
-		jsModLanda=new SpinnerNumberModel(1,0,100,0.1);
-		jsLanda=new JSpinner(jsModLanda);
-		jsLanda.addChangeListener(this);
-		jpSur.add(jsLanda);
-}
+			jlDistancia=new JLabel("DL: +###.##");
+			//jlDistancia.setMinimumSize(new Dimension(60, 20));
+			jlDistancia.setPreferredSize(new Dimension(80, 20));
+			//jlDistancia.setSize(new Dimension(60, 20));
+			jlDistancia.setHorizontalAlignment(SwingConstants.TRAILING);
+			jpPre.add(jlDistancia);
+
+			jcbCaminar=new JCheckBox("Caminar");
+			jcbCaminar.setSelected(false);
+			jcbCaminar.addActionListener(this);
+			jpPre.add(jcbCaminar);
+
+			//jpPre.add(new Label("H Pred"));
+			jsModPred=new SpinnerNumberModel(10,1,25,1);
+			jsHorPred=new JSpinner(jsModPred);
+			jsHorPred.addChangeListener(this);
+			jpPre.add(jsHorPred);
+
+			jsModCont=new SpinnerNumberModel(3,1,25,1);
+			jsHorCont=new JSpinner(jsModCont);
+			jsHorCont.addChangeListener(this);
+			jpPre.add(jsHorCont);
+
+			jsModLanda=new SpinnerNumberModel(1,0,100,0.1);
+			jsLanda=new JSpinner(jsModLanda);
+			jsLanda.addChangeListener(this);
+			jpPre.add(jsLanda);
+			
+			jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE,40));
+//			jpPre.setBorder(BorderFactory.createCompoundBorder(
+//	                   BorderFactory.createLineBorder(Color.red),
+//	                   jpPre.getBorder()));
+
+			add(jpPre);
+		}
+	}
 	
 	/** Lo que añadimos al panel */
 	protected void cosasAPintar(Graphics g0) {
@@ -177,7 +193,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		PanelMuestraPredictivo pmp=new PanelMuestraPredictivo(controlador);
 		ventana.add(pmp);
-		ventana.setSize(new Dimension(1024,800));
+		ventana.setSize(new Dimension(800,700));
 		ventana.setVisible(true);
 
 //		for (int i = 0; i < rutaPrueba.length; i++) {

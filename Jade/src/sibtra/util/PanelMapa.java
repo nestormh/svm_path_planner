@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -15,11 +16,14 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 
@@ -173,8 +177,6 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
      * @param rupas Ruta pasada.
      */
 	public PanelMapa() {
-		// TODO Apéndice de constructor generado automáticamente
-		setLayout(new BorderLayout(3,3));
 		esqID=new Point2D.Double();
 		esqSI=new Point2D.Double();
 		centro=new double[2];
@@ -284,15 +286,24 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 				cosasAPintar(g0);
 			}
 		};
-		JPanelGrafico.setMinimumSize(new Dimension(400,400));
-		JPanelGrafico.setSize(new Dimension(400,400));
+//		setLayout(new BorderLayout(3,3));
+		setLayout(new BoxLayout(this,BoxLayout.PAGE_AXIS));
+//		JPanelGrafico.setMinimumSize(new Dimension(400,400));
+		//JPanelGrafico.setSize(new Dimension(400,400));
 		JPanelGrafico.setBackground(Color.BLACK);
 		JPanelGrafico.addMouseListener(this);
 		JPanelGrafico.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		
 		add(JPanelGrafico,BorderLayout.CENTER);
+//		add(JPanelGrafico);
+		
+		JPanelGrafico.setPreferredSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
+		JPanelGrafico.setMaximumSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
+
 		
 		{
 			jpSur=new JPanel();
+			jpSur.setLayout(new FlowLayout(FlowLayout.LEFT,3,3));
 			
 			jpSur.add(new JLabel("Escala"));
 			jcbEscalas=new JComboBox(escalasS);
@@ -308,8 +319,14 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 			jcbRejilla.addActionListener(this);  //solo para que se repinte si cambia
 			jpSur.add(jcbRejilla);
 			
-			add(jpSur,BorderLayout.SOUTH);
-			
+//			jpSur.setBorder(BorderFactory.createCompoundBorder(
+//	                   BorderFactory.createLineBorder(Color.red),
+//	                   jpSur.getBorder()));
+
+			jpSur.setMinimumSize(new Dimension(Short.MAX_VALUE,35));
+
+			//			add(jpSur,BorderLayout.SOUTH);
+			add(jpSur);
 		}
 		
 	}
