@@ -57,7 +57,17 @@ public class ControlPredictivo {
     double[][] prediccionPosicion;
     /** Último comando calculado por el controlador predictivo*/
     double comandoCalculado;
-    /**
+    /** Distancia lateral mínima del coche a la ruta */ 
+	double distanciaLateral;
+	
+	/** Se usa en calculos internos pero la tenemos como campo para no pedir memoria en cada iteración */
+	private double[] vectorError;
+	/** Se usa en calculos internos pero la tenemos como campo para no pedir memoria en cada iteración */
+	private double[] orientacionesDeseadas;
+	/** Se usa en calculos internos pero la tenemos como campo para no pedir memoria en cada iteración */
+	private double[] respuestaEscalon;
+
+	/**
      * 
      * @param carroOri Puntero al modelo actualzado del vehículo. No se modificará 
      * en esta clase
@@ -73,10 +83,54 @@ public class ControlPredictivo {
         this.landa = landa;
         this.ruta = ruta;
         this.Ts = Ts;
+        
+        // creamos todas las matrices que se usan en las iteracioner para evitar tener que 
+        //pedir memoria cada vez
         G = new Matrix(horPrediccion,horControl);
         this.landaEye = Matrix.identity(horControl,horControl).times(landa);
         prediccionPosicion = new double[horPrediccion][2];
+        predicOrientacion = new double[horPrediccion];
+        vectorError = new double[horPrediccion];
+        orientacionesDeseadas = new double[horPrediccion];
+        respuestaEscalon = new double[horPrediccion];
+
     }
+    
+	public int getHorControl() {
+		return horControl;
+	}
+	public void setHorControl(int horControl) {
+		if (horControl==this.horControl)
+			return;
+		this.horControl = horControl;
+        G = new Matrix(horPrediccion,horControl);
+        this.landaEye = Matrix.identity(horControl,horControl).times(landa);
+	}
+	public int getHorPrediccion() {
+		return horPrediccion;
+	}
+	public void setHorPrediccion(int horPrediccion) {
+		if(horPrediccion==this.horPrediccion)
+			return;
+		this.horPrediccion = horPrediccion;
+        prediccionPosicion = new double[horPrediccion][2];
+        G = new Matrix(horPrediccion,horControl);
+        predicOrientacion = new double[horPrediccion];
+        vectorError = new double[horPrediccion];
+        orientacionesDeseadas = new double[horPrediccion];
+        respuestaEscalon = new double[horPrediccion];
+	}
+	public double getLanda() {
+		return landa;
+	}
+	public void setLanda(double landa) {
+		if(landa==this.landa)
+			return;
+		this.landa = landa;
+        this.landaEye = Matrix.identity(horControl,horControl).times(landa);
+	}
+
+    
     /**
      * Calcula la evolución del modelo del vehículo tantos pasos hacia delante como
      * horizonte de predicción se haya definido
@@ -87,16 +141,16 @@ public class ControlPredictivo {
      * el vehículo en la predicción y el vectores de orientaciones deseadas futuras
      */
     private double[] calculaPrediccion(double comando,double velocidad){
-        predicOrientacion = new double[horPrediccion];
-        double[] vectorError = new double[horPrediccion];
-        double[] orientacionesDeseadas = new double[horPrediccion];
         carroSim.copy(carroOriginal);//
         /*Hacemos la copia del objeto carroOriginal para realizar la simulación
          sobre la copia, de manera que no se modifiquen los datos reales*/
         //La siguiente linea de código es el cálculo del vector deseado en MAtlab
 //        vec_deseado(1,:) = k_dist*(pos_ref(mod(ind_min(k)+cerca,length(pos_ref))+1,:) - [carro.x,carro.y])
 //+ k_ang*[cos(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1)),sin(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1))];
-        int indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());        
+        int indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());
+        double dx=ruta[indMin][0]-carroSim.getX();
+        double dy=ruta[indMin][1]-carroSim.getY();
+        distanciaLateral=Math.sqrt(dx*dx+dy*dy);
         double vectorDeseadoX = ruta[indMin][0] - carroSim.getX() + Math.cos(ruta[indMin][2]);
         double vectorDeseadoY = ruta[indMin][1] - carroSim.getY() + Math.sin(ruta[indMin][2]);
         orientacionesDeseadas[0] = Math.atan2(vectorDeseadoX,vectorDeseadoY);
@@ -219,7 +273,6 @@ public class ControlPredictivo {
     }
     
     private double[] calculaEscalon(double velocidad){
-        double[] respuestaEscalon = new double[horPrediccion];
         carroSim.setPostura(0,0,0,Math.PI/4);
         for (int i=0;i<horPrediccion;i++){
             carroSim.calculaEvolucion(Math.PI/4,velocidad, Ts);
