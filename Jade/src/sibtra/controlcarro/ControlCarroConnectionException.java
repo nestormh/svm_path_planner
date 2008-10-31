@@ -30,7 +30,7 @@
  * purposes.
  */
 
-package ControlCarro;
+package sibtra.controlcarro;
 
 public class ControlCarroConnectionException extends Exception {
 

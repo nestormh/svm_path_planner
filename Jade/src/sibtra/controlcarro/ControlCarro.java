@@ -3,7 +3,7 @@
  *
  * Clase de Control del vehículo Guistub
  */
-package ControlCarro;
+package sibtra.controlcarro;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
