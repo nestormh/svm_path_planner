@@ -14,19 +14,19 @@ import Jama.Matrix;
 public class Coche {
     // Matrices del espacio de los estados del volante
     
-    private Matrix A; 
-    private Matrix B;   
-    private Matrix C;
-    private Matrix D;
-    private double longitud;
-    private Matrix estado;
-    private double x = 0;
-    private double y = 0;
-    private double tita = 0;
-    private double consignaVolante;
-    private double consignaVelocidad;
-    private double volante;
-    private double velocidad;
+    protected Matrix A; 
+    protected Matrix B;   
+    protected Matrix C;
+    protected Matrix D;
+    protected double longitud;
+    protected Matrix estado;
+    protected double x = 0;
+    protected double y = 0;
+    protected double tita = 0;
+    protected double consignaVolante;
+    protected double consignaVelocidad;
+    protected double volante;
+    protected double velocidad;
     
     /**
      * Copia los campos del objeto coche original sobre el objeto actual. 
@@ -59,10 +59,12 @@ public class Coche {
      * la longitud del vehículo a 1.7 metros
      */
     public Coche(){
-        double[][] arrayA = {{-2.8,-1.8182},{1.0,0}};
-        double[] arrayB = {1.0,0};
-        double[] arrayC = {0.30,1.8182};
-        double[] arrayD = {0};
+    
+        double[][] arrayA = {{0.768181818181818,1.068181818181818}
+                            ,{-4.268181818181818,-3.568181818181818}};
+        double[] arrayB = {0.3,0.7};
+        double[] arrayC = {1.0,0.0};
+        double[] arrayD = {0.0};
         A = new Matrix(arrayA,2,2);
         B = new Matrix(arrayB,2);
         C = new Matrix(arrayC,2);
@@ -92,7 +94,7 @@ public class Coche {
         estado = new Matrix(2,1);
         longitud = longi;
     }
-    public double getVolante(){
+    public double getVolante(){       
         return volante;
     }
     public double getVelocidad(){
@@ -149,6 +151,7 @@ public class Coche {
         y = posY;
         tita = orientacion;
         volante = posVolante;
+        estado.set(0,0,volante);
     }
     public void setVelocidad(double vel){
         velocidad = vel;    
@@ -177,11 +180,11 @@ public class Coche {
         Matrix estadoAux = A.times(estado).plus(B.times(this.consignaVolante)).times(Ts);
         Matrix alfa = C.transpose().times(estado.plus(estadoAux));
         estado.plusEquals(estadoAux);
-        double alfaEscalar = alfa.get(0,0);
+        volante = alfa.get(0,0);
         //System.out.println("alfa escalar " + alfaEscalar);
         x = Math.cos(tita)*velocidad*Ts + x;
         y = Math.sin(tita)*velocidad*Ts + y;
-        tita = ((Math.tan(alfaEscalar)/longitud)*velocidad*Ts + tita);//%2*Math.PI
+        tita = ((Math.tan(volante)/longitud)*velocidad*Ts + tita);//%2*Math.PI
         tita = normalizaAngulo(tita);
         
 
