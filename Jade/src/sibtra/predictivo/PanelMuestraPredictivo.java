@@ -10,14 +10,12 @@ import java.awt.Label;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 
-import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
-import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
@@ -49,12 +47,9 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 	private JProgressBar jpbComandoD;
 	private JLabel jlDistancia;
 	public JCheckBox jcbCaminar;
-	private SpinnerNumberModel jsModPred;
-	private JSpinner jsHorPred;
-	private SpinnerNumberModel jsModCont;
-	private JSpinner jsHorCont;
+	private SpinnerNumberModel jsModHPred;
+	private SpinnerNumberModel jsModHCont;
 	private SpinnerNumberModel jsModLanda;
-	private JSpinner jsLanda;
 
 	/** Constructor necesita el controlador predictivo */
 	public PanelMuestraPredictivo(ControlPredictivo contPredic) {
@@ -89,20 +84,22 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 			jcbCaminar.addActionListener(this);
 			jpPre.add(jcbCaminar);
 
-			//jpPre.add(new Label("H Pred"));
-			jsModPred=new SpinnerNumberModel(10,1,25,1);
-			jsHorPred=new JSpinner(jsModPred);
-			jsHorPred.addChangeListener(this);
+			jpPre.add(new Label("H Pred"));
+			jsModHPred=new SpinnerNumberModel(1,1,25,1);
+			JSpinner jsHorPred=new JSpinner(jsModHPred);
+			jsModHPred.addChangeListener(this);
 			jpPre.add(jsHorPred);
 
-			jsModCont=new SpinnerNumberModel(3,1,25,1);
-			jsHorCont=new JSpinner(jsModCont);
-			jsHorCont.addChangeListener(this);
+			jpPre.add(new Label("H Cont"));
+			jsModHCont=new SpinnerNumberModel(1,1,25,1);
+			JSpinner jsHorCont=new JSpinner(jsModHCont);
+			jsModHCont.addChangeListener(this);
 			jpPre.add(jsHorCont);
 
-			jsModLanda=new SpinnerNumberModel(1,0,100,0.1);
-			jsLanda=new JSpinner(jsModLanda);
-			jsLanda.addChangeListener(this);
+			jpPre.add(new Label("Landa"));
+			jsModLanda=new SpinnerNumberModel(0,0,100,0.1);
+			JSpinner jsLanda=new JSpinner(jsModLanda);
+			jsModLanda.addChangeListener(this);
 			jpPre.add(jsLanda);
 			
 			jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE,40));
@@ -141,6 +138,27 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 			g.draw(new Line2D.Double(point2Pixel(pini),point2Pixel(pfin)));
 	
 		}
+	}
+
+	/** Atiende cambios en los spiners de los parámetros del controlador */
+	public void stateChanged(ChangeEvent ce) {
+		if(ce.getSource()==jsModHPred) {
+			CP.setHorPrediccion(jsModHPred.getNumber().intValue());
+		}
+		if(ce.getSource()==jsModHCont) {
+			int hc=jsModHCont.getNumber().intValue();
+			int hp=jsModHPred.getNumber().intValue();
+			if(hc>hp)
+				jsModHCont.setValue(hp);
+			CP.setHorControl(hc);
+		}
+		if(ce.getSource()==jsModLanda) {
+			CP.setLanda(jsModLanda.getNumber().doubleValue());
+		}
+	}
+	
+	/** programa el repintado del panel actulizando los valores de los spiners, etiquetas etc.*/
+	public void actualiza() {
 		//barra de progreso con el comando
 		if(CP.comandoCalculado>0) {
 			jpbComandoI.setValue(pbMax);
@@ -153,6 +171,13 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 		jlComando.setText(String.format("%+04.2fº", Math.toDegrees(CP.comandoCalculado)));
 		//texto con la distancia
 		jlDistancia.setText(String.format("DL=%+04.2f", CP.distanciaLateral));
+		
+		//reflejamos valores usados por controlador
+		jsModHCont.setValue(CP.horControl);
+		jsModHPred.setValue(CP.horPrediccion);
+		jsModLanda.setValue(CP.landa);
+		
+		super.actualiza();
 	}
 	
 	/**
@@ -193,7 +218,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		PanelMuestraPredictivo pmp=new PanelMuestraPredictivo(controlador);
 		ventana.add(pmp);
-		ventana.setSize(new Dimension(800,700));
+		ventana.setSize(new Dimension(900,700));
 		ventana.setVisible(true);
 
 //		for (int i = 0; i < rutaPrueba.length; i++) {
@@ -221,20 +246,5 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
 	}
 
-	public void stateChanged(ChangeEvent ce) {
-		if(ce.getSource()==jsHorPred) {
-			CP.setHorPrediccion(jsModPred.getNumber().intValue());
-		}
-		if(ce.getSource()==jsHorCont) {
-			int hc=jsModCont.getNumber().intValue();
-			int hp=jsModPred.getNumber().intValue();
-			if(hc>hp)
-				jsModCont.setValue(hp);
-			CP.setHorControl(hc);
-		}
-		if(ce.getSource()==jsLanda) {
-			CP.setLanda(jsModLanda.getNumber().doubleValue());
-		}
-	}
 
 }
