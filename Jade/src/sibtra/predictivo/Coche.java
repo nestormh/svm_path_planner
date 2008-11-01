@@ -203,7 +203,7 @@ public class Coche {
     }
     /**
      * Calcula la evolución del vehículo en un instante de muestreo 
-     * suponiendo velocidad cte
+     * suponiendo velocidad cte = 1.5
      * @param volante Consigna para la orientación del volante
      * @param Ts Periodo de muestreo
      */

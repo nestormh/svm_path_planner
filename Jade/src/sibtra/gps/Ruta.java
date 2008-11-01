@@ -6,6 +6,8 @@ package sibtra.gps;
 import java.io.Serializable;
 import java.util.Vector;
 
+import sibtra.imu.AngulosIMU;
+
 import Jama.Matrix;
 
 /**
@@ -348,12 +350,16 @@ public class Ruta implements Serializable {
 		
 	}
 
-	/** @return array de dos columnas con las posiciones locales */
+	/** @return array de tres columnas con las posiciones locales y las orientaciones (las de la IMU
+	 * si están disponibles). */
 	public double[][] toTr() {
-		double[][] Tr=new double[getNumPuntos()][2];
+		double[][] Tr=new double[getNumPuntos()][3];
 		for(int i=0; i<getNumPuntos();i++) {
-			Tr[i][0]=getPunto(i).getXLocal();
-			Tr[i][1]=getPunto(i).getYLocal();
+			GPSData ptoA=getPunto(i);
+			Tr[i][0]=ptoA.getXLocal();
+			Tr[i][1]=ptoA.getYLocal();
+			AngulosIMU ai=ptoA.getAngulosIMU();
+			Tr[i][2]=(ai!=null)?Math.toRadians(ai.getYaw()):ptoA.getAngulo();
 		}
 		return Tr;
 	}

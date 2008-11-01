@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import sibtra.controlcarro.ControlCarro;
 import sibtra.gps.GPSConnection;
 import sibtra.gps.GPSData;
 import sibtra.gps.GpsEvent;
@@ -25,6 +26,7 @@ import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.predictivo.Coche;
 import sibtra.predictivo.ControlPredictivo;
+import sibtra.predictivo.PanelMuestraPredictivo;
 import sibtra.rfyruta.MiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculoSubjetivo;
@@ -37,7 +39,7 @@ import sibtra.util.EligeSerial;
  */
 public class NavegaPredictivo  {
 	/** Milisegundos del ciclo */
-	private static final long miliEspera = 200;
+	private static final long periodoMuestreoMili = 200;
 	
 	private ConexionSerialIMU csi;
 	private GPSConnection gpsCon;
@@ -48,7 +50,6 @@ public class NavegaPredictivo  {
 	private PanelMuestraAngulosIMU pmai;
 	private JFileChooser fc;
 	private Ruta rutaEspacial;
-	private JLabel jlNomF;
 	
 	double[][] Tr=null;
 	private MiraObstaculo mi;
@@ -61,7 +62,9 @@ public class NavegaPredictivo  {
 	
 	Coche modCoche;
 	ControlPredictivo cp;
-	
+	ControlCarro contCarro;
+
+	private PanelMuestraPredictivo pmp;
 
 	/** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
 	public NavegaPredictivo(String[] args) {
@@ -70,7 +73,7 @@ public class NavegaPredictivo  {
 			System.exit(1);
 		}
 		
-		
+		//conexión de la IMU
 		System.out.println("Abrimos conexión IMU");
 		csi=new ConexionSerialIMU();
 		if(!csi.ConectaPuerto(args[1],5)) {
@@ -79,6 +82,7 @@ public class NavegaPredictivo  {
 		}
 		
 		//comunicación con GPS
+		System.out.println("Abrimos conexión GPS");
 		gpsCon=new SimulaGps(args[0]).getGps();
 		if(gpsCon==null) {
 			System.err.println("No se obtuvo GPSConnection");
@@ -88,6 +92,7 @@ public class NavegaPredictivo  {
 		
 		
 		//Conectamos a RF
+		System.out.println("Abrimos conexión LMS");
 		try { 		
 			manLMS=new ManejaLMS(args[2]);
 			manLMS.setDistanciaMaxima(80);
@@ -96,7 +101,12 @@ public class NavegaPredictivo  {
 			System.err.println("No fue posible conectar o configurar RF");
 		}
 		
-		//VEntana datos gps
+		//Conectamos Carro
+		System.out.println("Abrimos conexión al Carro");
+		contCarro=new ControlCarro(args[3]);
+		
+		
+		//Ventana datos gps
 		ventGData=new JFrame("Datos GPS");
 		PMGPS=new PanelMuestraGPSData(false);
 		PMGPS.actualizaPunto(new GPSData()); 
@@ -154,6 +164,7 @@ public class NavegaPredictivo  {
 			System.exit(1);
 		}
 		
+		
 		//Checkbox para navegar
 		jcbNavegando=new JCheckBox("Navegando");
 		jcbNavegando.setSelected(false);
@@ -173,51 +184,54 @@ public class NavegaPredictivo  {
 		ventanaPMO.setSize(new Dimension(800,600));
 		ventanaPMO.setVisible(true);
 		
-		//conecto manejador cuando todas las ventanas están creadas
-//		gpsCon.addGpsEventListener(this);
+		//Inicializamos modelos predictivos
+		modCoche=new Coche();
+		cp=new ControlPredictivo(modCoche,Tr,13,3,1.0,periodoMuestreoMili);
+		JFrame ventanaPredictivo=new JFrame("Panel Muestra Predictivo");		
+		ventanaPredictivo.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		pmp=new PanelMuestraPredictivo(cp);
+		ventanaPredictivo.add(pmp);
+		ventanaPredictivo.setSize(new Dimension(900,700));
+		ventanaPredictivo.setVisible(true);
+
 	}
 
-
-	/**
-	 * Crea el objeto y queda en bucle en que se ejecuta cada {@link #miliEspera} un nuevo 
-	 * cálculo de distancia del obstáculo.
-	 * @param args Seriales para IMU, GPS y RF. Si no se pasan de piden interactivamente.
+	/** Método que ejecuta cada {@link #periodoMuestreoMili} bulce de control del coche mirando los obstáculos con el RF 
 	 */
-	public static void main(String[] args) {
-		String[] puertos;
-		if(args==null || args.length<3) {
-			//no se han pasado argumentos, pedimos los puertos interactivamente
-			String[] titulos={"IMU","GPS","RF","Coche"};			
-			puertos=new EligeSerial(titulos).getPuertos();
-			if(puertos==null) {
-				System.err.println("No se asignaron los puertos seriales");
-				System.exit(1);
-			}
-		} else puertos=args;
-		
-        Coche carroOri = new Coche();
-        double vel = 2;
-        double consVolante = 0;
-        //TODO leer las cosas del coche
-        carroOri.setVelocidad(vel);
-        carroOri.setConsignaVolante(consVolante);
-
-		
-		NavegaPredictivo na=new NavegaPredictivo(puertos);
-		
+	public void camina() {
+		double comandoVelocidad=2;
+		modCoche.setVelocidad(comandoVelocidad);
 		long tSig;
 		while(true) {
-			tSig=System.currentTimeMillis()+miliEspera;
+			tSig=System.currentTimeMillis()+periodoMuestreoMili;
 			try { 
-				if(na.jcbNavegando.isSelected()) {
-					na.manLMS.pideBarrido((short)0, (short)180, (short)1);
-					BarridoAngular ba=na.manLMS.recibeBarrido();
-					GPSData pa=na.gpsCon.getPuntoActualTemporal();
+				if(jcbNavegando.isSelected()) {
+					manLMS.pideBarrido((short)0, (short)180, (short)1);
+					BarridoAngular ba=manLMS.recibeBarrido();
+					GPSData pa=gpsCon.getPuntoActualTemporal();
+					//vemos los obstaculos
 					double[] ptoAct={pa.getXLocal(), pa.getYLocal()};
-					double dist=na.mi.masCercano(ptoAct
-							, Math.toRadians(pa.getAngulosIMU().getYaw())+na.desMag, ba);
-					na.pmo.actualiza();
-					na.PMOS.actualiza();
+					double angAct=Math.toRadians(pa.getAngulosIMU().getYaw())+desMag;
+					double dist=mi.masCercano(ptoAct, angAct, ba);
+					pmo.actualiza();
+					PMOS.actualiza();
+					
+					//Calculamos el comando
+					double volante=contCarro.getAnguloVolante();
+					modCoche.setPostura(ptoAct[0], ptoAct[1], angAct, volante);
+					double comandoVolante = cp.calculaComando(); 
+					if (comandoVolante > Math.PI/4)
+						comandoVolante = Math.PI/4;
+					if (comandoVolante < -Math.PI/4)
+						comandoVolante = -Math.PI/4;
+					//System.out.println("Comando " + comandoVolante);
+					contCarro.setAnguloVolante(comandoVolante);
+					//TODO leer velocidad del coche??
+					// no hace falta modCoche.setConsignaVolante(comandoVolante);
+					modCoche.calculaEvolucion(comandoVolante,comandoVelocidad,periodoMuestreoMili/1000);
+
+					pmp.actualiza();
+					
 					if(Double.isNaN(dist))
 						System.out.println("Estamos fuera del camino");
 					else if(Double.isInfinite(dist))
@@ -231,8 +245,28 @@ public class NavegaPredictivo  {
 			}
 			//esperamos hasta que hayan pasado miliSeg de ciclo.
 			while(System.currentTimeMillis()<tSig)
-				try{Thread.sleep(tSig-System.currentTimeMillis());} catch (Exception e) {}				
+				try{Thread.sleep(tSig-System.currentTimeMillis());} catch (Exception e) {}	
 		}
+
+	}
+
+	/**
+	 * @param args Seriales para IMU, GPS, RF y Carro. Si no se pasan de piden interactivamente.
+	 */
+	public static void main(String[] args) {
+		String[] puertos;
+		if(args==null || args.length<3) {
+			//no se han pasado argumentos, pedimos los puertos interactivamente
+			String[] titulos={"IMU","GPS","RF","Coche"};			
+			puertos=new EligeSerial(titulos).getPuertos();
+			if(puertos==null) {
+				System.err.println("No se asignaron los puertos seriales");
+				System.exit(1);
+			}
+		} else puertos=args;
+		
+		NavegaPredictivo na=new NavegaPredictivo(puertos);
+		na.camina();
 	}
 
 }
