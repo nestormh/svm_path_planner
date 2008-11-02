@@ -77,7 +77,7 @@ public class ControlPredictivo {
      */
     public ControlPredictivo(Coche carroOri,double[][] ruta,int horPrediccion,int horControl,double landa,double Ts){
         carroOriginal = carroOri;
-        carroSim = new Coche(carroOri);
+        carroSim = (Coche)carroOri.clone();
         this.horPrediccion = horPrediccion;
         this.horControl = horControl;
         this.landa = landa;
