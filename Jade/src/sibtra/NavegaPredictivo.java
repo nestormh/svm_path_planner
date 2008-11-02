@@ -11,13 +11,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import sibtra.controlcarro.ControlCarro;
-import sibtra.gps.GPSConnection;
+import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.GPSData;
 import sibtra.gps.GpsEvent;
 import sibtra.gps.GpsEventListener;
 import sibtra.gps.PanelMuestraGPSData;
 import sibtra.gps.Ruta;
-import sibtra.gps.SimulaGps;
 import sibtra.imu.AngulosIMU;
 import sibtra.imu.ConexionSerialIMU;
 import sibtra.imu.PanelMuestraAngulosIMU;
@@ -33,16 +32,17 @@ import sibtra.rfyruta.PanelMiraObstaculoSubjetivo;
 import sibtra.util.EligeSerial;
 
 /**
- * Para realizar la navegación (sin control del coche) detectando obstáculos con el RF.
+ * Para realizar la navegación controlando el coche con @link {@link ControlPredictivo}
+ *  detectando obstáculos con el RF.
  * @author alberto
  *
  */
-public class NavegaPredictivo  {
+public class NavegaPredictivo implements GpsEventListener  {
 	/** Milisegundos del ciclo */
 	private static final long periodoMuestreoMili = 200;
 	
 	private ConexionSerialIMU csi;
-	private GPSConnection gpsCon;
+	private GPSConnectionTriumph gpsCon;
 	private ManejaLMS manLMS;
 	private JFrame ventGData;
 	private PanelMuestraGPSData PMGPS;
@@ -66,6 +66,8 @@ public class NavegaPredictivo  {
 
 	private PanelMuestraPredictivo pmp;
 
+	private JLabel jlCalidad;
+
 	/** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
 	public NavegaPredictivo(String[] args) {
 		if(args==null || args.length<4) {
@@ -83,7 +85,13 @@ public class NavegaPredictivo  {
 		
 		//comunicación con GPS
 		System.out.println("Abrimos conexión GPS");
-		gpsCon=new SimulaGps(args[0]).getGps();
+//		gpsCon=new SimulaGps(args[0]).getGps();
+		try {
+			gpsCon=new GPSConnectionTriumph(args[0]);
+		} catch (Exception e) {
+			System.err.println("Promblema a crear GPSConnection:"+e.getMessage());
+			System.exit(1);			
+		}
 		if(gpsCon==null) {
 			System.err.println("No se obtuvo GPSConnection");
 			System.exit(1);
@@ -112,9 +120,12 @@ public class NavegaPredictivo  {
 		PMGPS.actualizaPunto(new GPSData()); 
 
 		ventGData.getContentPane().add(PMGPS,BorderLayout.CENTER);
+		jlCalidad=new JLabel("Calidad ### %");
+		ventGData.getContentPane().add(jlCalidad,BorderLayout.PAGE_END);
 		ventGData.pack();
 		ventGData.setVisible(true);
 		gpsCon.addGpsEventListener(PMGPS);
+		gpsCon.addGpsEventListener(this);
 
 
 		//Creamos ventana para IMU
@@ -194,6 +205,11 @@ public class NavegaPredictivo  {
 		ventanaPredictivo.setSize(new Dimension(900,700));
 		ventanaPredictivo.setVisible(true);
 
+	}
+
+	/** Usamos para actulizar la etiqueta de la calidad */
+	public void handleGpsEvent(GpsEvent ev) {
+		jlCalidad.setText(String.format("Calidad Enlace: %.0f %%", gpsCon.getCalidadLink()));
 	}
 
 	/** Método que ejecuta cada {@link #periodoMuestreoMili} bulce de control del coche mirando los obstáculos con el RF 

@@ -31,7 +31,9 @@ public class GPSConnection implements SerialPortEventListener {
 	/** si el puerto serial está abierto*/
 	boolean open;
 
-	SerialParameters parameters;    
+	/** Los parámetros seriales instalados en el puerto */
+	SerialParameters parameters=null;
+	
 	InputStream is;    
 	OutputStream os;
 
@@ -81,7 +83,6 @@ public class GPSConnection implements SerialPortEventListener {
 	 * Si se quieren especificar otros parámetros se debe utilizar
 	 * el {@link #GPSConnection() constructor por defecto}.
 	 * @param portName nombre puerto donde encontrar al GPS
-	 * @param baudio velocidad de la comunicacion en baudios
 	 */
 	public GPSConnection(String portName) throws SerialConnectionException {
 		this(portName,115200);
@@ -95,8 +96,7 @@ public class GPSConnection implements SerialPortEventListener {
 	 * @param baudio velocidad de la comunicacion en baudios
 	 */
 	public GPSConnection(String portName, int baudios) throws SerialConnectionException {
-		parameters = new SerialParameters(portName, 115200, 0, 0, 8, 1, 0);
-		openConnection();
+		openConnection(new SerialParameters(portName, baudios, 0, 0, 8, 1, 0));
 		if (isOpen()) {
 			System.out.println("Puerto Abierto " + portName);
 		}
@@ -111,7 +111,7 @@ public class GPSConnection implements SerialPortEventListener {
      Gives a timeout of 30 seconds on the portOpen to allow other applications
         to reliquish the port if have it open and no longer need it.
 	 */
-	public void openConnection() throws SerialConnectionException {
+	public void openConnection(SerialParameters serPar) throws SerialConnectionException {
 		// Obtain a CommPortIdentifier object for the port you want to open.
 		try {
 			portId =
@@ -125,7 +125,7 @@ public class GPSConnection implements SerialPortEventListener {
 		// a different application to reliquish the port if the user
 		// wants to.
 		try {
-			sPort = (SerialPort) portId.open("SerialDemo", 30000);
+			sPort = (SerialPort) portId.open("Sibtra", 30000);
 		} catch (PortInUseException e) {
 			throw new SerialConnectionException(e.getMessage());
 		}
@@ -133,7 +133,7 @@ public class GPSConnection implements SerialPortEventListener {
 		// Set the parameters of the connection. If they won't set, close the
 		// port before throwing an exception.
 		try {
-			setConnectionParameters();
+			setConnectionParameters(serPar);
 		} catch (SerialConnectionException e) {
 			sPort.close();
 			throw e;
@@ -188,8 +188,10 @@ public class GPSConnection implements SerialPortEventListener {
          If set fails return the parameters object to original settings and
          throw exception.
 	 */
-	public void setConnectionParameters() throws SerialConnectionException {
+	protected void setConnectionParameters(SerialParameters serPar) throws SerialConnectionException {
 
+		parameters=serPar;
+		
 		// Save state of parameters before trying a set.
 		int oldBaudRate = sPort.getBaudRate();
 		int oldDatabits = sPort.getDataBits();
