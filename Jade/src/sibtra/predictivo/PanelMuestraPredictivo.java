@@ -1,15 +1,19 @@
 package sibtra.predictivo;
 
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Label;
+import java.awt.event.MouseEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,6 +25,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import sibtra.lms.BarridoAngular;
 import sibtra.util.PanelMuestraTrayectoria;
 
 /**
@@ -46,7 +51,6 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 	/** Barra progreso para comando a la izquierda */
 	private JProgressBar jpbComandoD;
 	private JLabel jlDistancia;
-	public JCheckBox jcbCaminar;
 	private SpinnerNumberModel jsModHPred;
 	private SpinnerNumberModel jsModHCont;
 	private SpinnerNumberModel jsModLanda;
@@ -79,11 +83,6 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 			jlDistancia.setHorizontalAlignment(SwingConstants.TRAILING);
 			jpPre.add(jlDistancia);
 
-			jcbCaminar=new JCheckBox("Caminar");
-			jcbCaminar.setSelected(false);
-			jcbCaminar.addActionListener(this);
-			jpPre.add(jcbCaminar);
-
 			jpPre.add(new Label("H Pred"));
 			jsModHPred=new SpinnerNumberModel(1,1,25,1);
 			JSpinner jsHorPred=new JSpinner(jsModHPred);
@@ -114,8 +113,8 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 	/** Lo que añadimos al panel */
 	protected void cosasAPintar(Graphics g0) {
 		//colocamos el coche en su posición actual
-		situaCoche(CP.prediccionPosicion[0][0], CP.prediccionPosicion[0][1]
-		           , CP.predicOrientacion[0]);
+		situaCoche(CP.carroOriginal.getX(), CP.carroOriginal.getY()
+		           , CP.carroOriginal.getTita());
 		super.cosasAPintar(g0);
 		Graphics2D g=(Graphics2D)g0;
 		
@@ -184,7 +183,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 	 * @param args
 	 */
 	public static void main(String[] args) {
-        Coche carroOri = new Coche();
+        final Coche carroOri = new CocheModeloAntiguo();
         double vel = 2;
         double consVolante = 0;
         carroOri.setVelocidad(vel);
@@ -208,7 +207,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                                         (rutaPrueba[i][0]-rutaPrueba[i-1][0]));
         }
 
-        carroOri.setPostura(0,-10,0.5,0.0);
+        carroOri.setPostura(0,+10,0.5,0.0);
 //        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.3,0);
         
         ControlPredictivo controlador = new ControlPredictivo(carroOri,rutaPrueba,
@@ -216,15 +215,74 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         //ventana
 		JFrame ventana=new JFrame("Panel Muestra Predictivo");		
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		PanelMuestraPredictivo pmp=new PanelMuestraPredictivo(controlador);
+		PanelMuestraPredictivo pmp=new PanelMuestraPredictivo(controlador){
+			/** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
+			MouseEvent evenPos;
+
+			/**
+		     * Sólo nos interesan pulsaciones del boton 1. 
+		     * Con CONTROL para determinar posición y orientación. Sin nada para hacer zoom.
+		     * @see #mouseReleased(MouseEvent)
+		     */
+			public void mousePressed(MouseEvent even) {
+				evenPos=null;
+				if(even.getButton()==MouseEvent.BUTTON1 && (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0) {
+					//Punto del coche
+					Point2D.Double nuevaPos=pixel2Point(even.getX(),even.getY());
+					System.out.println("Pulsado Boton 1 con CONTROL "+even.getButton()
+							+" en posición: ("+even.getX()+","+even.getY()+")"
+							+"  ("+nuevaPos.getX()+","+nuevaPos.getY()+")  "
+					);
+					evenPos=even;
+					return;
+				}
+				//al del padre lo llamamos al final
+				super.mousePressed(even);
+			}
+
+			/**
+		     * Las pulsaciones del boton 1 con CONTROL para determinar posición y orientación.
+		     * Termina el trabajo empezado en {@link #mousePressed(MouseEvent)}
+		     */
+			public void mouseReleased(MouseEvent even) {
+				if(even.getButton()==MouseEvent.BUTTON1 
+						&& (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0
+							&& evenPos!=null) {
+						System.out.println("Soltado con Control Boton "+even.getButton()
+								+" en posición: ("+even.getX()+","+even.getY()+")");
+						//Creamos rectángulo si está suficientemente lejos
+						if(Math.abs(even.getX()-evenPos.getX())>50 
+								|| Math.abs(even.getY()-evenPos.getY())>50) {
+							Point2D.Double nuevaPos=pixel2Point(evenPos.getX(),evenPos.getY());
+							Point2D.Double posAngulo=pixel2Point(even.getX(),even.getY());
+							double yaw=Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX());
+					        carroOri.setPostura(nuevaPos.getX(),nuevaPos.getY(),yaw,0.0);
+					        actualiza();
+
+						}
+						return;
+					}
+				//al final llamamos al del padre
+				super.mouseReleased(even);
+			}
+
+
+		};
+
 		ventana.add(pmp);
+		JCheckBox jcbCaminar=new JCheckBox("Caminar");
+		jcbCaminar.setSelected(false);
+		ventana.add(jcbCaminar,BorderLayout.PAGE_END);
 		ventana.setSize(new Dimension(900,700));
 		ventana.setVisible(true);
+		
+
+
 
 //		for (int i = 0; i < rutaPrueba.length; i++) {
 		pmp.actualiza();
 		while (true) {
-			if(pmp.jcbCaminar.isSelected()) {
+			if(jcbCaminar.isSelected()) {
 				double comandoVolante = controlador.calculaComando(); 
 				if (comandoVolante > Math.PI/4)
 					comandoVolante = Math.PI/4;

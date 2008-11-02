@@ -32,28 +32,7 @@ public class CocheModeloAntiguo extends Coche {
         longitud = 1.7;
        
     }
-    public CocheModeloAntiguo(Coche original){
-        this.copy(original);
-    }
-    /**
-      * Constructor que permite variar las matrices del espacio de los 
-      * estados para variar el modelo de la dirección. También permite
-      * variar la longitud del vehículo
-     * @param matrixA Doble array de doubles 2x2
-     * @param matrixB array de doubles 2x1
-     * @param matrixC array de doubles 2x1
-     * @param matrixD array de doubles 2x1
-     * @param longi Longitud en metros del coche
-     */
-    public CocheModeloAntiguo(double[][] matrixA,double[] matrixB,double[] matrixC,double[] matrixD,double longi){
-        A = new Matrix(matrixA,2,2);
-        B = new Matrix(matrixB,2);
-        C = new Matrix(matrixC,2);
-        D = new Matrix(matrixD,1);
-        estado = new Matrix(2,1);
-        longitud = longi;
-    }
-   
+    
     /**
      * Recoge la posición y orientación del vehículo. La fuente de la 
      * información puede ser la IMU y el GPS, el sistema odométrico

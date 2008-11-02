@@ -11,7 +11,7 @@ import Jama.Matrix;
  * Modelo matemático del coche.
  * @author Jesus
  */
-public class Coche {
+public class Coche implements Cloneable {
     // Matrices del espacio de los estados del volante
     
     protected Matrix A; 
@@ -53,6 +53,19 @@ public class Coche {
         velocidad = original.velocidad;
         return this;
     }
+    
+    public Object clone(){
+        Coche obj=null;
+        try{
+            obj=(Coche)super.clone();
+        }catch(CloneNotSupportedException ex){
+            System.out.println(" no se puede duplicar");
+        }
+        obj.estado=(Matrix)obj.estado.clone();
+        return obj;
+    }
+
+    
     /**
      * Constructor por defecto. Asigna a las matrices del espacio 
      * de los estados el valor definido por defecto. También inicializa 
@@ -73,9 +86,7 @@ public class Coche {
         longitud = 1.7;
        
     }
-    public Coche(Coche original){
-        this.copy(original);
-    }
+
     /**
       * Constructor que permite variar las matrices del espacio de los 
       * estados para variar el modelo de la dirección. También permite
@@ -83,26 +94,38 @@ public class Coche {
      * @param matrixA Doble array de doubles 2x2
      * @param matrixB array de doubles 2x1
      * @param matrixC array de doubles 2x1
-     * @param matrixD array de doubles 2x1
+     * @param matrixD array de doubles 1x1
      * @param longi Longitud en metros del coche
      */
     public Coche(double[][] matrixA,double[] matrixB,double[] matrixC,double[] matrixD,double longi){
+    	//llamamos constructor por defecto
+    	this();
+    	if(matrixA==null || matrixA.length!=2 || matrixA[0].length!=2 
+    			|| matrixB==null || matrixB.length!=2 
+    			|| matrixC==null || matrixC.length!=2
+    			|| matrixD==null || matrixD.length!=1)
+    		throw new IllegalArgumentException("Matrices del sistema no tienen dimensiones correctas");
+    	//modificamos con las matrices pasadas
         A = new Matrix(matrixA,2,2);
         B = new Matrix(matrixB,2);
         C = new Matrix(matrixC,2);
         D = new Matrix(matrixD,1);
-        estado = new Matrix(2,1);
         longitud = longi;
     }
+    
+    /** @return valor real del volante */
     public double getVolante(){       
         return volante;
     }
+    /** @return valor real de la velocidad */
     public double getVelocidad(){
         return velocidad;
     }
+    /** @return valor desado para el volante */
     public double getConsignaVolante(){
         return consignaVolante;
     }
+    /** @return valor deseado para la velocidad */
     public double getConsignaVelocidad(){
         return consignaVelocidad;
     }
