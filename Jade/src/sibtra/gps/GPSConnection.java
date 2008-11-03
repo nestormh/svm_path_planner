@@ -112,6 +112,7 @@ public class GPSConnection implements SerialPortEventListener {
         to reliquish the port if have it open and no longer need it.
 	 */
 	public void openConnection(SerialParameters serPar) throws SerialConnectionException {
+		parameters=serPar;
 		// Obtain a CommPortIdentifier object for the port you want to open.
 		try {
 			portId =
@@ -133,7 +134,7 @@ public class GPSConnection implements SerialPortEventListener {
 		// Set the parameters of the connection. If they won't set, close the
 		// port before throwing an exception.
 		try {
-			setConnectionParameters(serPar);
+			setConnectionParameters();
 		} catch (SerialConnectionException e) {
 			sPort.close();
 			throw e;
@@ -188,10 +189,8 @@ public class GPSConnection implements SerialPortEventListener {
          If set fails return the parameters object to original settings and
          throw exception.
 	 */
-	protected void setConnectionParameters(SerialParameters serPar) throws SerialConnectionException {
+	protected void setConnectionParameters() throws SerialConnectionException {
 
-		parameters=serPar;
-		
 		// Save state of parameters before trying a set.
 		int oldBaudRate = sPort.getBaudRate();
 		int oldDatabits = sPort.getDataBits();

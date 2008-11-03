@@ -572,10 +572,10 @@ public class GPSData implements Serializable, Cloneable {
 			}
 
 			msj[8] = (msj[8].split("\\*"))[0];
-			if ((msj[8].equals("K")) && (msj[7].equals(""))) {
-				setVelocidadGPS(0);
-			} else {
+			if ((msj[8].equals("K")) && (!msj[7].equals(""))) {
 				setVelocidadGPS(Double.parseDouble(msj[7]));
+			} else {
+				setVelocidadGPS(0);
 			}        
 		}
 
@@ -592,8 +592,7 @@ public class GPSData implements Serializable, Cloneable {
 			} else {
 				setLatitud(sexagesimal2double(msj[2], 2));          
 			}
-			if (! msj[3].equals("")) {
-				if (msj[3].equals("S"))
+			if (! msj[3].equals("") && msj[3].equals("S")) {
 					setLatitud(getLatitud() * -1);            
 			}
 			if (msj[2].equals("")) {
@@ -601,8 +600,7 @@ public class GPSData implements Serializable, Cloneable {
 			} else {
 				setLongitud(sexagesimal2double(msj[4], 3));          
 			}
-			if (! msj[5].equals(""))  {
-				if (msj[5].equals("W"))
+			if (! msj[5].equals("") && msj[5].equals("W")) {
 					setLongitud(getLongitud() * -1);
 			}
 
@@ -612,13 +610,13 @@ public class GPSData implements Serializable, Cloneable {
 				setSatelites(Integer.parseInt(msj[7]));
 			}
 
-			if ((!msj[9].equals("")) && (msj[10].equals("M"))) {
+			if ((!msj[9].equals("")) && !msj[10].equals("") && msj[10].equals("M") ) {
 				setMSL(Double.parseDouble(msj[9]));
 			} else {
 				setMSL(0);
 			}
 
-			if ((!msj[11].equals("")) && (msj[12].equals("M"))) {
+			if ((!msj[11].equals("")) && !msj[12].equals("") && (msj[12].equals("M"))) {
 				setHGeoide(Double.parseDouble(msj[11]));
 			} else {
 				setHGeoide(0);

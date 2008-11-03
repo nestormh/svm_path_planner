@@ -82,10 +82,11 @@ public class GPSConnectionTriumph extends GPSConnection {
 	 */
 	public GPSConnectionTriumph(String portName, int baudios) throws SerialConnectionException {
 		super(portName,baudios);
-		comandoGPS("dm\n");
+		comandoGPS("%dM%dm\n");
 //		comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/DL,jps/ET}:0.2\n");
 		//GGA cada segundo, GSA,GST,VTG y DL cada segundo
-		comandoGPS("em,,{nmea/{GGA:0.2,GSA,GST,VTG},jps/DL}:1\n");
+//		comandoGPS("%em%em,,{nmea/{GGA:0.2,GSA,GST,VTG},jps/DL}:1\n");
+		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL}:1\n");
 		
 	}
 
@@ -250,13 +251,13 @@ public class GPSConnectionTriumph extends GPSConnection {
   			u1 cs; // Checksum
 			};
 		 */
-		if(buff[indIni]==(byte)'~' || buff[indIni+1]==(byte)'~') {
+		if(buff[indIni]==(byte)'~' && buff[indIni+1]==(byte)'~') {
 			if(larMen!=(5+5)) {
 				System.err.println("El mensaje RT no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
 				return;				
 			}
 			//comprobamos checksum
-			byte csc=checksum8(buff, indIni, larMen-1);
+			byte csc=(byte)checksum8(buff, indIni, larMen-1);
 			if(csc!=buff[indFin]) {
 				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
 				return;
@@ -276,13 +277,13 @@ public class GPSConnectionTriumph extends GPSConnection {
      			u1 cs; // Checksum
    			};
 		 */
-		if(buff[indIni]==(byte)':' || buff[indIni+1]==(byte)':') {
+		if(buff[indIni]==(byte)':' && buff[indIni+1]==(byte)':') {
 			if(larMen!=(5+5)) {
 				System.err.println("El mensaje ET no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
 				return;				
 			}
 			//comprobamos checksum
-			byte csc=checksum8(buff, indIni, larMen-1);
+			byte csc=(byte)checksum8(buff, indIni, larMen-1);
 			if(csc!=buff[indFin]) {
 				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
 				return;
@@ -305,13 +306,13 @@ public class GPSConnectionTriumph extends GPSConnection {
     		u1 cs;       // Checksum
   			};
 		 */
-		if(buff[indIni]==(byte)'P' || buff[indIni+1]==(byte)'O') {
+		if(buff[indIni]==(byte)'P' && buff[indIni+1]==(byte)'O') {
 			if(larMen!=(5+30)) {
 				System.err.println("El mensaje PO no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
 				return;				
 			}
 			//comprobamos checksum
-			byte csc=checksum8(buff, indIni, larMen-1);
+			byte csc=(byte)checksum8(buff, indIni, larMen-1);
 			if(csc!=buff[indFin]) {
 				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
 				return;
@@ -340,13 +341,13 @@ public class GPSConnectionTriumph extends GPSConnection {
     			u1 cs;       // Checksum
   			};
 		 */
-		if(buff[indIni]==(byte)'B' || buff[indIni+1]==(byte)'L') {
+		if(buff[indIni]==(byte)'B' && buff[indIni+1]==(byte)'L') {
 			if(larMen!=(5+34)) {
 				System.err.println("El mensaje BL no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
 				return;				
 			}
 			//comprobamos checksum
-			byte csc=checksum8(buff, indIni, larMen-1);
+			byte csc=(byte)checksum8(buff, indIni, larMen-1);
 			if(csc!=buff[indFin]) {
 				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
 				return;
@@ -400,8 +401,12 @@ public class GPSConnectionTriumph extends GPSConnection {
 //    ‘U’      USB port A, /dev/usb/a
 //    ‘L’      Bluetooth port A, /dev/blt/a
 //    ‘g’      CAN port A, /dev/can/a
+//		
+//		EJemplo:DL02B,DLINK,1,{D,C,0000,999,0000,0000,100.00}@62
+//                VEMOS QUE FALTA LA COMA ANTES DE LA ARROBA^
 
-		if(buff[indIni]==(byte)'D' || buff[indIni+1]==(byte)'L') {
+
+		if(buff[indIni]==(byte)'D' && buff[indIni+1]==(byte)'L') {
 			//no tiene un largo estandar pero si uno mínimo
 			if(larMen<(5+9)) {
 				System.err.println("El mensaje DL no tienen el tamaño necesario "+larMen+". Ignoramos mensaje");
@@ -410,21 +415,22 @@ public class GPSConnectionTriumph extends GPSConnection {
 
 			//convertimos a string
 			try {
-				String cadena=new String(buff,indIni,larMen-1);
-				String[] campos=cadena.split(",");
-				//solo tiens chechksum de 2 hexa después de @
-				//comprobamos checksum
-				byte csc=checksum8(buff, indIni, larMen-2);
-				if( csc!=Byte.valueOf(campos[campos.length].substring(1)) ) {
-					System.err.println("Error checksum "+csc+"!="+campos[campos.length]+". Ignoramos mensaje");
+				String cadena=new String(buff,indIni,larMen);
+				int posArroba=cadena.indexOf('@');
+				String CS=cadena.substring(posArroba+1);
+				//TODO comprobamos checksum
+				int csc=checksum8(buff, indIni, larMen-2);
+				if( csc!=Byte.valueOf(CS,16) ) {
+					System.err.println("Error checksum "+csc+"!="+CS+". Ignoramos mensaje");
 					return;
 				}
+				String[] campos=cadena.substring(0, posArroba).split(",");
 				//el checksum es correcto
 				if(campos.length<4) {
 					System.err.println("DL no tiene los campos mínimos necesarios. Ignoramos");
 					return;
 				}
-				if(campos[1].equals("DLINK")) {
+				if(!campos[1].equals("DLINK")) {
 					System.err.println("DL no tiene título DLINK. Ignoramos");
 					return;
 				}
@@ -433,23 +439,24 @@ public class GPSConnectionTriumph extends GPSConnection {
 				while(la>0) {
 					while(campos[ca].charAt(0)!='{') ca++;
 					char tipo=campos[ca++].charAt(1);
-					char decoId=campos[ca++].charAt(1);
+					char decoId=campos[ca++].charAt(0);
 					String stationID=campos[ca++];
 					int timeLast=Integer.valueOf(campos[ca++]);
 					int numOK=Integer.valueOf(campos[ca++]);
 					int numCorrup=Integer.valueOf(campos[ca++]);
 					//TODO posible problema con }
-					double quality=Double.valueOf(campos[ca++]);
-					System.out.println(String.format("DL: %c, %c, %s, %d, %d, %d, %f"
+					double quality=Double.valueOf(campos[ca].substring(0,campos[ca].lastIndexOf('}')));
+					ca++;
+					System.out.println(String.format("DL: %c %c %s %d %d %d %f"
 							,decoId, tipo, stationID, timeLast, numOK, numCorrup,quality ));
-					if(decoId=='D') //puerto D es el del enlace
+					if(decoId=='D' && numOK>0) //puerto D es el del enlace sólo si se ha recibido algo
 						calidadLink=quality;
 					la--;
 				}
 			} catch (Exception e) {
 				System.err.println("Error parseando campo DL:"+e.getMessage()+" Ignoramos");
-				return;
 			}
+			return;
 		}
 		//contenido del mensaje en crudo
 		System.out.print("Binaria ("+larMen+"):"+new String(buff,indIni,5)+" >");
@@ -480,12 +487,13 @@ u1 cs(u1 const* src, int count)
   return ROT_LEFT(res);
 }
 </code>
+@return valor calculado como int para no tener problema con el signo
  */
-	public static byte checksum8(byte[] buff, int ini, int largo) {
+	public static int checksum8(byte[] buff, int ini, int largo) {
 		int res=0;
 		for(int i=ini; i<ini+largo; i++)
 			res= (((res<<2)|(res>>>6)) ^ buff[i]) & 0xff; //nos aseguramos parte alta de  int a 0
-		return (byte)((res<<2)|(res>>>6));
+		return ((res<<2)|(res>>>6))& 0xff;
 	}
 	
 	/**
@@ -513,16 +521,17 @@ u1 cs(u1 const* src, int count)
 		GPSConnectionTriumph gpsC;
 				
 		try {
-			gpsC=new GPSConnectionTriumph("/dev/ttyUSB0",9600);
-			gpsC.comandoGPS("out,,jps/MF\n");
+			gpsC=new GPSConnectionTriumph("/dev/ttyUSB0");
+//			gpsC.comandoGPS("%DL%out,,jps/DL\n");
 
-			try { Thread.sleep(5000); } catch (Exception e) {}
-
-			gpsC.comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/ET}:10\n");
-			try { Thread.sleep(100000); } catch (Exception e) {}
-
-			gpsC.comandoGPS("dm\n");
+//			try { Thread.sleep(5000); } catch (Exception e) {}
+//
+//			gpsC.comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/ET}:10\n");
+			try { Thread.sleep(10000000); } catch (Exception e) {}
+//
+//			gpsC.comandoGPS("dm\n");
 		} catch (Exception e) {
+			System.err.println("Problema al usar el GPS:"+e.getMessage());
 		}
 		
 		System.exit(0);
