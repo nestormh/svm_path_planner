@@ -186,7 +186,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         double consVolante = 0;
         carroOri.setVelocidad(vel);
         carroOri.setConsignaVolante(consVolante);
-        int horPredic = 12;
+        int horPredic = 10;
         int horCont = 3;
         double paramLanda = 1;
         double paramTs = 0.2;
@@ -205,7 +205,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                                         (rutaPrueba[i][0]-rutaPrueba[i-1][0]));
         }
 
-        carroOri.setPostura(0,+10,0.5,0.0);
+        carroOri.setPostura(0,2,0.5,0.0);
 //        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.3,0);
         
         ControlPredictivo controlador = new ControlPredictivo(carroOri,rutaPrueba,
@@ -298,7 +298,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 				Thread.sleep(250);
 			} catch (Exception e) { }
 
-        }
+                }
 
 	}
 

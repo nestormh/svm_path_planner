@@ -73,11 +73,15 @@ public class Coche implements Cloneable {
      */
     public Coche(){
     
-        double[][] arrayA = {{0.768181818181818,1.068181818181818}
-                            ,{-4.268181818181818,-3.568181818181818}};
-        double[] arrayB = {0.3,0.7};
-        double[] arrayC = {1.0,0.0};
-        double[] arrayD = {0.0};
+//        double[][] arrayA = {{0.768181818181818,1.068181818181818}
+//                            ,{-4.268181818181818,-3.568181818181818}};
+//        double[] arrayB = {0.3,0.7};
+//        double[] arrayC = {1.0,0.0};
+//        double[] arrayD = {0.0};
+        double[][] arrayA = {{-2.8,-1.8182},{1.0,0}};
+        double[] arrayB = {1.0,0};
+        double[] arrayC = {0.30,1.8182};
+        double[] arrayD = {0};
         A = new Matrix(arrayA,2,2);
         B = new Matrix(arrayB,2);
         C = new Matrix(arrayC,2);
