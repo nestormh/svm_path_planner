@@ -56,6 +56,9 @@ public class GPSConnectionTriumph extends GPSConnection {
 	/** Calidad del enlace con la base. NaN si no se ha recibdo paquete DL */
 	double calidadLink=Double.NaN;
 
+	/** contador de paquetes recibidos del GPS */
+	int cuentaPaquetesRecibidos=0;
+	
 	/**
 	 * Constructor por defecto no hace nada.
 	 * Para usar el puerto hay que invocar a {@link #setParameters(SerialParameters)} 
@@ -87,6 +90,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 		//GGA cada segundo, GSA,GST,VTG y DL cada segundo
 //		comandoGPS("%em%em,,{nmea/{GGA:0.2,GSA,GST,VTG},jps/DL}:1\n");
 		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL}:1\n");
+//		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG}:1\n");
 		
 	}
 
@@ -115,16 +119,24 @@ public class GPSConnectionTriumph extends GPSConnection {
 							//mensaje de texto completo
 							indFin--; //quitamos caracter del salto
 							String menTexto=new String(buff,indIni,(indFin-indIni+1));
-							if(menTexto.charAt(0)=='$')
+							if(menTexto.charAt(0)=='$') {
+//								System.out.print('n');
+								cuentaPaquetesRecibidos++;
 								nuevaCadenaNMEA(menTexto);
-							else
+							}
+							else {
+//								System.out.print('t');
+								cuentaPaquetesRecibidos++;
 								nuevaCadenaTexto(menTexto);
+							}
 							indIni=0; indFin=-1; esEstandar=false; esTexto=false;
 						} 
 					} else if (esEstandar) {
 						//terminamos si ya está el tamaño
 						if ( (indFin-indIni+1)==(largoMen+5) ) {
 							//tenemos el mensaje estandar completo
+//							System.out.print('e');
+							cuentaPaquetesRecibidos++;
 							nuevaCadenaEstandar();						
 							indIni=0; indFin=-1; esEstandar=false; esTexto=false;
 						}
@@ -419,11 +431,11 @@ public class GPSConnectionTriumph extends GPSConnection {
 				int posArroba=cadena.indexOf('@');
 				String CS=cadena.substring(posArroba+1);
 				//TODO comprobamos checksum
-				int csc=checksum8(buff, indIni, larMen-2);
-				if( csc!=Byte.valueOf(CS,16) ) {
-					System.err.println("Error checksum "+csc+"!="+CS+". Ignoramos mensaje");
-					return;
-				}
+//				int csc=checksum8(buff, indIni, larMen-2);
+//				if( csc!=Byte.valueOf(CS,16) ) {
+//					System.err.println("Error checksum "+csc+"!="+CS+". Ignoramos mensaje");
+//					return;
+//				}
 				String[] campos=cadena.substring(0, posArroba).split(",");
 				//el checksum es correcto
 				if(campos.length<4) {
@@ -447,8 +459,8 @@ public class GPSConnectionTriumph extends GPSConnection {
 					//TODO posible problema con }
 					double quality=Double.valueOf(campos[ca].substring(0,campos[ca].lastIndexOf('}')));
 					ca++;
-					System.out.println(String.format("DL: %c %c %s %d %d %d %f"
-							,decoId, tipo, stationID, timeLast, numOK, numCorrup,quality ));
+//					System.out.println(String.format("DL: %c %c %s %d %d %d %f"
+//							,decoId, tipo, stationID, timeLast, numOK, numCorrup,quality ));
 					if(decoId=='D' && numOK>0) //puerto D es el del enlace sólo si se ha recibido algo
 						calidadLink=quality;
 					la--;
@@ -513,6 +525,10 @@ u1 cs(u1 const* src, int count)
 		return calidadLink;
 	}
 
+	public int getCuentaPaquetesRecibidos(){
+		return cuentaPaquetesRecibidos;
+	}
+	
 	/**
 	 * @param args
 	 */

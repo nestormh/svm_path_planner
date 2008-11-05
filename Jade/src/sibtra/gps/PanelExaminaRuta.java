@@ -137,7 +137,10 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 	 */
 	public void stateChanged(ChangeEvent ce) {
 		if(ce.getSource()==jsDato) {
-			PanelPto.actualizaPunto(ruta.getPunto((Integer)jsDato.getValue()-1));
+			GPSData npto=ruta.getPunto((Integer)jsDato.getValue()-1);
+			PanelPto.actualizaPunto(npto);
+			System.out.println(npto.getCadenaNMEA());
+			
 		}
 	}
 

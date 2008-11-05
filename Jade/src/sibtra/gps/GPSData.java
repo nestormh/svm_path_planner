@@ -483,8 +483,10 @@ public class GPSData implements Serializable, Cloneable {
 	 * Interpreta la cadena recibida del GPS y almacena los distintos datos contenidos.
 	 * Trata los mensajes GSA, GST, VTG y GGA.
 	 * @param cadena mensaje a interpretar
+	 * @return true si el paquete es GGA VÁLIDO
 	 */
-	public void procesaCadena(String cadena) {//throws IOException, Exception {
+	public boolean procesaCadena(String cadena) {//throws IOException, Exception {
+		boolean esValido=false;
 		String[] msj = cadena.split(",");
 
 		if (Pattern.matches("\\$..GSA", msj[0])) {
@@ -633,9 +635,11 @@ public class GPSData implements Serializable, Cloneable {
 				setAge(Double.parseDouble(msj[13]));
 			}
 
-			//calculaLLA(latitud, longitud, altura);        
+			//calculaLLA(latitud, longitud, altura); 
+			esValido=(getLongitud()!=0) && (getLatitud()!=0) && (getHGeoide()!=0);
 		}
 		setCadenaNMEA(cadena);
+		return esValido;
 	}
 	
 	public void setAge(double value) { 

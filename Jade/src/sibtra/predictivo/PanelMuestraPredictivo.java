@@ -12,6 +12,10 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -24,6 +28,8 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import sibtra.gps.PanelExaminaRuta;
+import sibtra.gps.Ruta;
 import sibtra.util.PanelMuestraTrayectoria;
 
 /**
@@ -38,6 +44,8 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 	private static final double largoFlecha = 2;
 	/** Valor máximo de la barra de progreso */
 	private static final int pbMax = 100;
+	private static final double COTA_ANGULO = Math.toRadians(30);
+
 	
 	/** Puntero al controlador predicctivo a mostrar */
 	ControlPredictivo CP=null;
@@ -182,6 +190,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 	 */
 	public static void main(String[] args) {
         final Coche carroOri = new CocheModeloAntiguo();
+//        final Coche carroOri = new Coche();
         double vel = 2;
         double consVolante = 0;
         carroOri.setVelocidad(vel);
@@ -205,6 +214,21 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                                         (rutaPrueba[i][0]-rutaPrueba[i-1][0]));
         }
 
+		String fichero="Rutas/PT5";
+		try {
+			File file = new File(fichero);
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+			Ruta re=(Ruta)ois.readObject();
+			ois.close();
+			rutaPrueba=re.toTr();
+		} catch (IOException ioe) {
+			System.err.println("Error al abrir el fichero " + fichero);
+			System.err.println(ioe.getMessage());
+		} catch (ClassNotFoundException cnfe) {
+			System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
+		}     
+
+        
         carroOri.setPostura(0,2,0.5,0.0);
 //        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.3,0);
         
@@ -282,10 +306,10 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 		while (true) {
 			if(jcbCaminar.isSelected()) {
 				double comandoVolante = controlador.calculaComando(); 
-				if (comandoVolante > Math.PI/4)
-					comandoVolante = Math.PI/4;
-				if (comandoVolante < -Math.PI/4)
-					comandoVolante = -Math.PI/4;
+				if (comandoVolante > COTA_ANGULO)
+					comandoVolante = COTA_ANGULO;
+				if (comandoVolante < -COTA_ANGULO)
+					comandoVolante = -COTA_ANGULO;
 				//System.out.println("Comando " + comandoVolante);
 				carroOri.setConsignaVolante(comandoVolante);
 				carroOri.calculaEvolucion(comandoVolante,2,0.2);

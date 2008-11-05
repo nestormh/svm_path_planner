@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JWindow;
 
 import sibtra.gps.GPSConnection;
+import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.GPSData;
 import sibtra.gps.GpsEvent;
 import sibtra.gps.GpsEventListener;
@@ -31,7 +32,7 @@ import sibtra.util.EligeSerial;
 public class GrabarRuta implements GpsEventListener, 
 ActionListener {
 	
-	private GPSConnection gpsCon;
+	private GPSConnectionTriumph gpsCon;
 	private JFrame ventGData;
 	private PanelMuestraGPSData PMGPS;
 	private JFrame ventIMU;
@@ -48,6 +49,8 @@ ActionListener {
 	private JLabel jlNpRE;
 	private boolean cambioRuta=false;
 
+	
+	/** @param args primer argumento puerto del GPS, segundo puerto del la IMU */
 	public GrabarRuta(String[] args) {
 		if(args.length<2) {
 			System.err.println("Necesarios dos parámetros con los puertos de GPS e IMU");
@@ -62,7 +65,13 @@ ActionListener {
 		}
 		
 		//comunicación con GPS
-		gpsCon=new SimulaGps(args[0]).getGps();
+		System.out.println("Abrimos conexión GPS");
+		try {
+			gpsCon=new GPSConnectionTriumph(args[0]);
+		} catch (Exception e) {
+			System.err.println("Promblema a crear GPSConnection:"+e.getMessage());
+			System.exit(1);			
+		}
 		if(gpsCon==null) {
 			System.err.println("No se obtuvo GPSConnection");
 			System.exit(1);
@@ -76,6 +85,7 @@ ActionListener {
 
 		ventGData.getContentPane().add(PMGPS,BorderLayout.CENTER);
 		ventGData.pack();
+		ventGData.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ventGData.setVisible(true);
 
 		//Creamos ventana para la ruta
@@ -105,6 +115,7 @@ ActionListener {
 		}
 //		ventRuta.pack();
 		ventRuta.setSize(new Dimension(800,600));
+		ventRuta.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ventRuta.setVisible(true);
 		//conecto manejador cuando todas las ventanas están creadas
 		gpsCon.addGpsEventListener(this);
@@ -157,6 +168,8 @@ ActionListener {
 			//comienza la grabación
 			cambioRuta=true;
 			gpsCon.startRuta();
+			//el startRuta crea una nueva ruta, nos actualizamos
+			pmr.setRuta(gpsCon.getBufferRutaEspacial());
 			jbGrabar.setEnabled(false);
 			jbParar.setEnabled(true);
 		}
@@ -177,9 +190,9 @@ ActionListener {
 	 */
 	public static void main(String[] args) {
 		String[] puertos;
-		if(args==null || args.length<3) {
+		if(args==null || args.length<2) {
 			//no se han pasado argumentos, pedimos los puertos interactivamente
-			String[] titulos={"IMU","GPS"};			
+			String[] titulos={"GPS","IMU"};			
 			puertos=new EligeSerial(titulos).getPuertos();
 			if(puertos==null) {
 				System.err.println("No se asignaron los puertos seriales");
@@ -187,7 +200,7 @@ ActionListener {
 			}
 		} else puertos=args;
 
-		GrabarRuta gr=new GrabarRuta(args);
+		GrabarRuta gr=new GrabarRuta(puertos);
 		
 	}
 

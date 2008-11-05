@@ -107,7 +107,8 @@ public class EligeSerial implements ActionListener {
 			for(int i=0; i<numPuertos; i++) {
 				jpCentral.add(new JLabel(titulos[i],SwingConstants.RIGHT));
 			    jcbPuertos[i] = new JComboBox(vPuertos);
-			    jcbPuertos[i].setSelectedIndex(i);
+			    //los encuentra en orden inverso, los asignamos en orden inverso
+			    jcbPuertos[i].setSelectedIndex(numPuertos-i-1);
 			    jpCentral.add(jcbPuertos[i]);
 			}
 			jfPregunta.add(jpCentral,BorderLayout.CENTER);

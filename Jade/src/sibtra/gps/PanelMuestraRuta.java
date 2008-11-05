@@ -155,7 +155,10 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener {
 	 * Actualiza la presentación cuando la ruta tiene un nuevo punto. 
 	 */
 	public void nuevoPunto() {
-		GPSData ultPto=RU.getUltimoPto();
+		//puede que todavía no tengamos la ruta
+		GPSData ultPto;
+		if(RU==null || (ultPto=RU.getUltimoPto())==null)
+			return;		
 		double x=ultPto.getXLocal();
 		double y=ultPto.getYLocal();
 		double yaw=ultPto.getAngulo();

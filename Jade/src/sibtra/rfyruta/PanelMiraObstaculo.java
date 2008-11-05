@@ -3,6 +3,7 @@ package sibtra.rfyruta;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -20,6 +21,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.border.Border;
 
 import sibtra.gps.Ruta;
@@ -63,7 +65,8 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		
 		JLabel jla=null;
 		Border blackline = BorderFactory.createLineBorder(Color.black);
-		{ //Añadimos a la parte inferior
+		{//nuevo panel para añadir debajo
+			JPanel jpPre=new JPanel(new FlowLayout(FlowLayout.LEADING));
 			
 			jla=jlDistLin=new JLabel("   ??.???");
 		    Font Grande = jla.getFont().deriveFont(20.0f);
@@ -74,7 +77,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			jla.setEnabled(false);
 			jla.setMinimumSize(new Dimension(300, 20));
 			jla.setPreferredSize(new Dimension(130, 45));
-			jpSur.add(jla);
+			jpPre.add(jla);
 			
 			jla=jlDistCam=new JLabel("   ??.???");
 			jla.setBorder(BorderFactory.createTitledBorder(
@@ -84,14 +87,18 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			jla.setEnabled(false);
 			jla.setMinimumSize(new Dimension(300, 20));
 			jla.setPreferredSize(new Dimension(130, 45));
-			jpSur.add(jla);
+			jpPre.add(jla);
 
 			jla=jlFuera=new JLabel("FUERA DEL CAMINO");
 		    jla.setFont(Grande);
 		    jla.setForeground(Color.RED);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			jpSur.add(jla);
+			jpPre.add(jla);
+
+			jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE,60));
+			add(jpPre);
+
 		}
 	}
 

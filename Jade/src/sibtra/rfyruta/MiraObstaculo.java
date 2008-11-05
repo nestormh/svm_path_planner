@@ -202,7 +202,7 @@ public class MiraObstaculo {
 			} while(indiceDentro!=indIni
 					&& distanciaPuntos(posicionLocal,Tr[indiceDentro])>anchoCamino);
 			if(indiceDentro==indIni) {
-				System.out.println("estoy fuera ("+posicionLocal[0]+","+posicionLocal[1]+")");
+//				System.out.println("estoy fuera ("+posicionLocal[0]+","+posicionLocal[1]+")");
 				return dist;
 			}
 		}

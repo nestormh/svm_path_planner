@@ -23,6 +23,8 @@ import java.io.OutputStream;
 import java.util.TooManyListenersException;
 import java.util.Vector;
 
+import com.sun.xml.internal.fastinfoset.util.CharArrayArray;
+
 /**
 A class that handles the details of a serial connection. Reads from one
 TextArea and writes to a second TextArea.
@@ -48,7 +50,7 @@ Runnable {
 	Thread hilo; /* Hilo para el cálculo de la velocidad */
 	private boolean acelera = false, gira = true;
 	/** Punto central del volante del vehiculo */
-	public final static int CARRO_CENTRO = 5000;
+	public final static int CARRO_CENTRO = 5280;
 
 
 
@@ -57,7 +59,8 @@ Runnable {
 	 */
 	public final static double PULSOS_METRO = 8;
 	private static final double MAX_CUENTA_VOLANTE = 65535;
-	public static final double RADIANES_POR_CUENTA = 2*Math.PI/MAX_CUENTA_VOLANTE;
+//	public static final double RADIANES_POR_CUENTA = 2*Math.PI/MAX_CUENTA_VOLANTE;
+	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374/(5280-3300);
 
 	/** Indica si la ultima vez se estaba acelerando o se estaba frenando */
 	private int acelAnt = 0;
@@ -579,6 +582,13 @@ Runnable {
 	}
 
 	/**
+	 * Obtiene la consigna del volante en ángulo
+	 * @return Devuelve la consigna del volante en radianes
+	 */
+	public double getConsignaAnguloVolante() {
+ 		return (ConsignaVolante-CARRO_CENTRO)*RADIANES_POR_CUENTA;
+	}
+	/**
 	 * Obtiene la consigna de la velocidad
 	 * @return Devuelve la consigna de la velocidad
 	 */
@@ -590,7 +600,7 @@ Runnable {
 	 * @param comandoVolante angulo deseado en radianes desde el centro (+izquierda, - derecha)
 	 */
 	public void setAnguloVolante(double comandoVolante) {
-		setVolante((int)Math.floor(comando/RADIANES_POR_CUENTA));
+		setVolante((int)Math.floor(comandoVolante/RADIANES_POR_CUENTA)+CARRO_CENTRO);
 	}
 
 	/**

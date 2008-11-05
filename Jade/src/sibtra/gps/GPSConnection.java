@@ -304,15 +304,15 @@ public class GPSConnection implements SerialPortEventListener {
 
 
 	/**
-	 * Actuliza toda los buffers con la información contenida en la nueva cadena recibida.
+	 * Actuliza toda los buffers con la información contenida en la nueva cadena recibida
+	 *  sólo si es GGA válido.
 	 * Fija el sistema local al primer punto de buffer espacial.
 	 * @param cadena cadena recibida (del GPS)
 	 */
 	void nuevaCadenaNMEA(String cadena) {
 		
-		data.procesaCadena(cadena);
-		if(cadena.length()<6 || !cadena.substring(3, 6).equals("GGA"))
-			return;  //sólo será nuevo punto si es paquete GGA
+		if(!data.procesaCadena(cadena))
+			return;  //sólo será nuevo punto si es paquete GGA valido
 		data.setSysTime(System.currentTimeMillis());
 		data.calculaECEF();
 		nuevoPunto();

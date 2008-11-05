@@ -371,7 +371,11 @@ public class ManejaLMS {
 		return 80;
 	}
 
-	
+	/** Solicita zona al LMS
+	 * @param queZona 0 para A, 1 para B, 2 para C
+	 * @param elConjunto1 true si es conjunto 1, false para conjunto 2
+	 * @throws LMSException
+	 */
 	public void pideZona(byte queZona, boolean elConjunto1) throws LMSException {
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -382,6 +386,7 @@ public class ManejaLMS {
 		pidiendo=PIDIENDO_ZONA;
 	}
 	
+	/** recibe la zona solicitada previamente con {@link #pideZona(byte, boolean)} */
 	public ZonaLMS recibeZona() throws LMSException {
 		if(pidiendo!=PIDIENDO_ZONA)
 			throw new LMSException("No se acaba de pedir zona");

@@ -66,6 +66,7 @@ public class ControlPredictivo {
 	private double[] orientacionesDeseadas;
 	/** Se usa en calculos internos pero la tenemos como campo para no pedir memoria en cada iteración */
 	private double[] respuestaEscalon;
+	private Coche carroEscalon;
 
 	/**
      * 
@@ -78,6 +79,7 @@ public class ControlPredictivo {
     public ControlPredictivo(Coche carroOri,double[][] ruta,int horPrediccion,int horControl,double landa,double Ts){
         carroOriginal = carroOri;
         carroSim = (Coche)carroOri.clone();
+        carroEscalon=(Coche)carroOriginal.clone();
         this.horPrediccion = horPrediccion;
         this.horControl = horControl;
         this.landa = landa;
@@ -273,10 +275,10 @@ public class ControlPredictivo {
     }
     
     private double[] calculaEscalon(double velocidad){
-        carroSim.setPostura(0,0,0,Math.PI/4);
+        carroEscalon.setPostura(0,0,0,0);
         for (int i=0;i<horPrediccion;i++){
-            carroSim.calculaEvolucion(Math.PI/4,velocidad, Ts);
-            respuestaEscalon[i] = carroSim.getTita();
+            carroEscalon.calculaEvolucion(Math.PI/6,velocidad, Ts);
+            respuestaEscalon[i] = carroEscalon.getTita();
         }
         return respuestaEscalon;
     }

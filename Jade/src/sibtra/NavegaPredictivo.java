@@ -4,13 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
 
+import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import sibtra.controlcarro.ControlCarro;
+import sibtra.controlcarro.PanelCoche;
 import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.GPSData;
 import sibtra.gps.GpsEvent;
@@ -24,6 +27,7 @@ import sibtra.lms.BarridoAngular;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.predictivo.Coche;
+import sibtra.predictivo.CocheModeloAntiguo;
 import sibtra.predictivo.ControlPredictivo;
 import sibtra.predictivo.PanelMuestraPredictivo;
 import sibtra.rfyruta.MiraObstaculo;
@@ -40,13 +44,14 @@ import sibtra.util.EligeSerial;
 public class NavegaPredictivo implements GpsEventListener  {
 	/** Milisegundos del ciclo */
 	private static final long periodoMuestreoMili = 200;
+
+	private static final double COTA_ANGULO = Math.toRadians(30);
 	
 	private ConexionSerialIMU csi;
 	private GPSConnectionTriumph gpsCon;
 	private ManejaLMS manLMS;
-	private JFrame ventGData;
+	private JFrame ventNumeros;
 	private PanelMuestraGPSData PMGPS;
-	private JFrame ventIMU;
 	private PanelMuestraAngulosIMU pmai;
 	private JFileChooser fc;
 	private Ruta rutaEspacial;
@@ -67,6 +72,10 @@ public class NavegaPredictivo implements GpsEventListener  {
 	private PanelMuestraPredictivo pmp;
 
 	private JLabel jlCalidad;
+
+	private PanelCoche pmCoche;
+
+	private JLabel jlNumPaquetes;
 
 	/** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
 	public NavegaPredictivo(String[] args) {
@@ -114,41 +123,53 @@ public class NavegaPredictivo implements GpsEventListener  {
 		contCarro=new ControlCarro(args[3]);
 		
 		
-		//Ventana datos gps
-		ventGData=new JFrame("Datos GPS");
+		//Ventana datos numéricos
+		ventNumeros=new JFrame("Datos GPS IMU COCHE");
+		JPanel jpCentral=new JPanel();
+		ventNumeros.add(jpCentral,BorderLayout.CENTER);
+		//paneles uno debajo del otro
+		jpCentral.setLayout(new BoxLayout(jpCentral,BoxLayout.PAGE_AXIS));
+		
 		PMGPS=new PanelMuestraGPSData(false);
-		PMGPS.actualizaPunto(new GPSData()); 
+		PMGPS.actualizaPunto(new GPSData());
+		jpCentral.add(PMGPS);
 
-		ventGData.getContentPane().add(PMGPS,BorderLayout.CENTER);
-		jlCalidad=new JLabel("Calidad ### %");
-		ventGData.getContentPane().add(jlCalidad,BorderLayout.PAGE_END);
-		ventGData.pack();
-		ventGData.setVisible(true);
-		gpsCon.addGpsEventListener(PMGPS);
-		gpsCon.addGpsEventListener(this);
+		{
+			JPanel jpGPST=new JPanel();
+			jpCentral.add(jpGPST);
+			
+			jlCalidad=new JLabel("Calidad ### %");
+			jpGPST.add(jlCalidad);
+			gpsCon.addGpsEventListener(PMGPS);
+			gpsCon.addGpsEventListener(this);
+			
+			jlNumPaquetes=new JLabel("Mensajes #######");
+			jpGPST.add(jlNumPaquetes);
+			
+		}
 
 
-		//Creamos ventana para IMU
-		ventIMU=new JFrame("Datos IMU");
 		pmai=new PanelMuestraAngulosIMU();
 		pmai.actualizaAngulo(new AngulosIMU(0,0,0,0));
-		ventIMU.add(pmai);
-
-		ventIMU.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		ventIMU.pack();
-		ventIMU.setVisible(true);
+		jpCentral.add(pmai);
 		//conecto manejador cuando todas las ventanas están creadas
 		csi.addIMUEventListener(pmai);
 
+		pmCoche=new PanelCoche(contCarro);
+		jpCentral.add(pmCoche);
+		
+		ventNumeros.pack();
+		ventNumeros.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		ventNumeros.setVisible(true);
 
 		//elegir fichero
 		fc=new JFileChooser(new File("./Rutas"));
 
 		//necestamos leer archivo con la ruta
 		do {
-			int devuelto=fc.showOpenDialog(ventGData);
+			int devuelto=fc.showOpenDialog(ventNumeros);
 			if (devuelto!=JFileChooser.APPROVE_OPTION) 
-				JOptionPane.showMessageDialog(ventGData,
+				JOptionPane.showMessageDialog(ventNumeros,
 						"Necesario cargar fichero de ruta",
 						"Error",
 						JOptionPane.ERROR_MESSAGE);
@@ -159,7 +180,7 @@ public class NavegaPredictivo implements GpsEventListener  {
 		//nuestra ruta espacial será la que se cargó
 		rutaEspacial=gpsCon.getRutaEspacial();
 		desMag=rutaEspacial.getDesviacionM();
-		System.out.println("Usando desviación magnética "+desMag);
+		System.out.println("Usando desviación magnética "+Math.toDegrees(desMag));
 		
 		//Rellenamos la trayectoria
 		Tr=rutaEspacial.toTr();
@@ -196,8 +217,8 @@ public class NavegaPredictivo implements GpsEventListener  {
 		ventanaPMO.setVisible(true);
 		
 		//Inicializamos modelos predictivos
-		modCoche=new Coche();
-		cp=new ControlPredictivo(modCoche,Tr,13,3,1.0,periodoMuestreoMili);
+		modCoche=new CocheModeloAntiguo();
+		cp=new ControlPredictivo(modCoche,Tr,13,3,1.0,(double)periodoMuestreoMili/1000);
 		JFrame ventanaPredictivo=new JFrame("Panel Muestra Predictivo");		
 		ventanaPredictivo.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pmp=new PanelMuestraPredictivo(cp);
@@ -210,6 +231,7 @@ public class NavegaPredictivo implements GpsEventListener  {
 	/** Usamos para actulizar la etiqueta de la calidad */
 	public void handleGpsEvent(GpsEvent ev) {
 		jlCalidad.setText(String.format("Calidad Enlace: %.0f %%", gpsCon.getCalidadLink()));
+		jlNumPaquetes.setText(String.format("Mensajes %10d", gpsCon.getCuentaPaquetesRecibidos()));
 	}
 
 	/** Método que ejecuta cada {@link #periodoMuestreoMili} bulce de control del coche mirando los obstáculos con el RF 
@@ -223,42 +245,50 @@ public class NavegaPredictivo implements GpsEventListener  {
 			try { 
 				if(jcbNavegando.isSelected()) {
 					manLMS.pideBarrido((short)0, (short)180, (short)1);
-					BarridoAngular ba=manLMS.recibeBarrido();
-					GPSData pa=gpsCon.getPuntoActualTemporal();
-					//vemos los obstaculos
-					double[] ptoAct={pa.getXLocal(), pa.getYLocal()};
-					double angAct=Math.toRadians(pa.getAngulosIMU().getYaw())+desMag;
-					double dist=mi.masCercano(ptoAct, angAct, ba);
-					pmo.actualiza();
-					PMOS.actualiza();
 					
 					//Calculamos el comando
+					GPSData pa=gpsCon.getPuntoActualTemporal();
+					double[] ptoAct={pa.getXLocal(), pa.getYLocal()};
+					double angAct=Math.toRadians(pa.getAngulosIMU().getYaw())+desMag;
 					double volante=contCarro.getAnguloVolante();
 					modCoche.setPostura(ptoAct[0], ptoAct[1], angAct, volante);
 					double comandoVolante = cp.calculaComando(); 
-					if (comandoVolante > Math.PI/4)
-						comandoVolante = Math.PI/4;
-					if (comandoVolante < -Math.PI/4)
-						comandoVolante = -Math.PI/4;
+					if (comandoVolante > COTA_ANGULO)
+						comandoVolante = COTA_ANGULO;
+					if (comandoVolante < -COTA_ANGULO)
+						comandoVolante = -COTA_ANGULO;
 					//System.out.println("Comando " + comandoVolante);
-					contCarro.setAnguloVolante(comandoVolante);
+					contCarro.setAnguloVolante(-comandoVolante);
 					//TODO leer velocidad del coche??
 					// no hace falta modCoche.setConsignaVolante(comandoVolante);
 					modCoche.calculaEvolucion(comandoVolante,comandoVelocidad,periodoMuestreoMili/1000);
 
 					pmp.actualiza();
 					
-					if(Double.isNaN(dist))
-						System.out.println("Estamos fuera del camino");
-					else if(Double.isInfinite(dist))
-						System.out.println("No hay obstáculo");
-					else
-						System.out.println("Distancia="+dist);
+					BarridoAngular ba=manLMS.recibeBarrido();
+					if(pa==null) {
+						System.err.println("No hay punto");
+						continue;
+					}
+					//vemos los obstaculos
+					double dist=mi.masCercano(ptoAct, angAct, ba);
+					pmo.actualiza();
+					PMOS.actualiza();
+					
+					
+//					if(Double.isNaN(dist))
+//						System.out.println("Estamos fuera del camino");
+//					else if(Double.isInfinite(dist))
+//						System.out.println("No hay obstáculo");
+//					else
+//						System.out.println("Distancia="+dist);
 				}
 			} catch (LMSException e) {
 				System.err.println("Problemas al obtener barrido en punto "
 						+" :"+e.getMessage());
 			}
+			pmCoche.actualiza();
+			pmCoche.repinta();
 			//esperamos hasta que hayan pasado miliSeg de ciclo.
 			while(System.currentTimeMillis()<tSig)
 				try{Thread.sleep(tSig-System.currentTimeMillis());} catch (Exception e) {}	
