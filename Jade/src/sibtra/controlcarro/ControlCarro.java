@@ -1,7 +1,7 @@
 //package carrito.server.serial;
 /* @(#)SerialConnection.java	1.6 98/07/17 SMI
  *
- * Clase de Control del vehÃ­culo Guistub
+ * Clase de Control del vehículo Guistub
  */
 package sibtra.controlcarro;
 
@@ -31,8 +31,7 @@ TextArea and writes to a second TextArea.
 Holds the state of the connection.
  */
 public class ControlCarro implements SerialPortEventListener,
-CommPortOwnershipListener,
-Runnable {
+CommPortOwnershipListener {
 
 	/* En el freno existen 3 variables a modificar
 	 * Sentido_freno = indica si se debe frenar o desfrenar
@@ -47,7 +46,7 @@ Runnable {
 	 * / */
 
 	private boolean open;
-	Thread hilo; /* Hilo para el cÃ¡lculo de la velocidad */
+	Thread hilo; /* Hilo para el cálculo de la velocidad */
 	private boolean acelera = false, gira = true;
 	/** Punto central del volante del vehiculo */
 	public final static int CARRO_CENTRO = 5280;
@@ -57,7 +56,7 @@ Runnable {
 	/** 
 	 * Numero de cuentas necesarias para alcanzar un metro
 	 */
-	public final static double PULSOS_METRO = 8;
+	public final static double PULSOS_METRO = 74;
 	private static final double MAX_CUENTA_VOLANTE = 65535;
 //	public static final double RADIANES_POR_CUENTA = 2*Math.PI/MAX_CUENTA_VOLANTE;
 	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374/(5280-3300);
@@ -106,11 +105,11 @@ Runnable {
 
 
 	private double velocidadAnt = 0;
-	private int refresco = 200;
+	private int refresco = 300;
 
 
 	// Variables del controlador PID
-	private double kPAvance = 0.3;
+	private double kPAvance = 10;
 	private double kPFreno = 0.5;
 	private double kPDesfreno = 1.5;
 
@@ -125,8 +124,10 @@ Runnable {
 	 */
 	private int maxInc = 20;
 
+	private int NumPaquetes = 0; /* Numero de paquetes recibidos validos */
+	private int freqVel = 4;
 
-
+	private long lastPaquete = System.currentTimeMillis();
 	private int comandoAnt = 0;
 
 	private Vector velocidades = null;
@@ -159,8 +160,8 @@ Runnable {
 		if (isOpen())
 			System.out.println("Puerto Abierto "+ portName);
 
-		hilo = new Thread(this);
-		hilo.start();
+		//hilo = new Thread(this);
+		//hilo.start();
 
 	}
 
@@ -375,6 +376,7 @@ Runnable {
 							buffer[5] = is.read();
 							newData = is.read();
 							if (newData == 255) {
+								
 								volante = byte2entero(buffer[1],buffer[2]);
 
 
@@ -383,10 +385,23 @@ Runnable {
 									ConsignaVolanteLow =  volante&255;
 									ConsignaVolanteHigh = (volante & 65280) >> 8;
 								}
+
 								if (avanceant <= buffer[3])
 									avance = avance + buffer[3] - avanceant;
 								else
 									avance = avance + buffer[3] + (255 - avanceant) + 1;
+								
+								if ((NumPaquetes % freqVel) == 0) {
+									velocidadAnt = velocidadCS;
+									velocidadCS = avance - lastAvance;
+									velocidadCS = 1000*velocidadCS/(System.currentTimeMillis() - lastPaquete);
+									velocidadMS = velocidadCS / PULSOS_METRO;
+									velocidadKH = velocidadMS * 3600/1000;
+									lastAvance = avance;
+									
+									lastPaquete = System.currentTimeMillis();
+									controlVel();								
+								}
 								avanceant = buffer[3];
 								alarma = buffer[4];
 								NumPasosFreno = buffer[5];
@@ -428,7 +443,7 @@ Runnable {
 								BufferRecibe[PtroBufferRecibir][1] = buffer[3];
 								BufferRecibe[PtroBufferRecibir][2] = alarma;
 								PtroBufferRecibir = (PtroBufferRecibir++) % MAXBUFFER;
-
+								NumPaquetes++;
 							}
 						}
 					}
@@ -488,7 +503,7 @@ Runnable {
 	}
 
 	/**
-    Devuelve el numero de Cuentas del encoder de la tracciï¿½n, lo que se ha desplazado el coche
+    Devuelve el numero de Cuentas del encoder de la tracci?n, lo que se ha desplazado el coche
 
 	 */
 
@@ -1054,22 +1069,23 @@ Runnable {
 
 	 }
 	 /**
-	  * FunciÃ³n para el calculo de la velocidad a partir del encoder incluido en el vehiculo.
+	  * Función para el calculo de la velocidad a partir del encoder incluido en el vehiculo.
 	  */
-	 public void run() {
-
-		 velocidades = new Vector();
-
-		 while (true) {
-			 velocidadCS = (avance - lastAvance); //* (1000 / refresco);
-			 velocidadCS = 1000*velocidadCS/refresco;
-			 velocidadMS = velocidadCS/PULSOS_METRO;
-			 velocidadKH = velocidadMS*3600/1000;
-			 lastAvance = avance;
+	 public void controlVel() {
 
 
+		 
 
-			 velocidadAnt = velocidadCS;
+			
+
+                      
+//System.out.println("avance " + avance + " resta " + (avance - lastAvance) + " velocidad " + velocidadCS);			
+
+//			 lastAvance = avance;
+
+
+
+//			 velocidadAnt = velocidadCS;
 
 			 if (controla) {
 				 //System.out.println("Control de velocidad activo");
@@ -1100,14 +1116,12 @@ Runnable {
 
 				 comandoAnt = comando;
 
-				 System.out.println("Avanzando: " + comando);
+				// System.out.println("Avanzando: " + comando);
 				 Avanza(comando);
 			 }
 
-			 try {
-				 Thread.sleep(refresco);
-			 } catch (Exception e) {}
-		 }
+		
+		
 	 }
 	 /*
 public void setConsigna(double valor) {
@@ -1133,7 +1147,7 @@ public void setConsigna(double valor) {
                 System.out.println("Retrocediendo: " + comando);
                 Retrocede(comando);
             } else {
-                System.out.println("Avanzando: " + comando);
+                //System.out.println("Avanzando: " + comando);
                 Avanza(comando);
             }
         }
@@ -1221,7 +1235,7 @@ public void setConsigna(double valor) {
 	 }
 
 	 /**
-	  * Guarda los datos del vehÃ­culo en un fichero
+	  * Guarda los datos del vehículo en un fichero
 	  * @param fichero
 	  */
 	 public void startCaptura(String fichero) {
@@ -1253,21 +1267,27 @@ public void setConsigna(double valor) {
 
 	 /**
 	  * Fija el intervalo de tiempo para el calculo de la velocidad
-	  * @tiempo Tiempo de actualizaciÃ³n de la velocidad
+	  * @tiempo Tiempo de actualización de la velocidad
 	  */
 	 public void SetRefrescoVel(int tiempo) {
 		 refresco = tiempo;
 	 }
 	 /**
-	  * Fija el incremento mÃ¡ximo entre dos comandos de tracciÃ³n consecutivos para
+	  * Fija el incremento máximo entre dos comandos de tracción consecutivos para
 	  * evitar aceleraciones muy bruscas
-	  * @param incremento diferencia mÃ¡xima entre dos comandos
+	  * @param incremento diferencia máxima entre dos comandos
 	  */
 	 public void setMaxIncremento(int incremento) {
 		 maxInc = incremento;
 	 }
 
 
+	public void setFreqVel(int freq) {
+		freqVel = freq;
+	}
+	public int getPaquetes() {
+		return NumPaquetes;
+	}
 }
 
 
