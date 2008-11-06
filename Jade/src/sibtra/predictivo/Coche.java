@@ -192,6 +192,10 @@ public class Coche implements Cloneable {
     }
             
             
+    public void setEstadoA0() {
+    	estado.set(0, 0, 0.0);
+    	estado.set(1, 0, 0.0);
+    }
     /**
      * Calcula la evolución del vehículo en un instante de muestreo
      * @param volante Orientación del volante

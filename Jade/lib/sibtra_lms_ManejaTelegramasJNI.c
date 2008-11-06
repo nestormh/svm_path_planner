@@ -14,7 +14,8 @@
 #include <strings.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include <ctype.h>
+#include <ctype.h>#define TimeOut (10*1000) /*10 sg*/
+
 #include <errno.h>
 #include <time.h>
 
@@ -26,6 +27,7 @@
 #define TAMBUF (MAX_LEN+1)
 
 #define TimeOut (10*1000) /*10 sg*/
+#define TimeOut (200) /*10 sg*/
 
 /*Descriptor de archivo de la serial*/
 int fdSer;

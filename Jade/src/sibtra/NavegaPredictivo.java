@@ -122,11 +122,16 @@ public class NavegaPredictivo implements GpsEventListener  {
 		System.out.println("Abrimos conexión al Carro");
 		contCarro=new ControlCarro(args[3]);
 		
-		
+		//Checkbox para navegar
+		jcbNavegando=new JCheckBox("Navegando");
+		jcbNavegando.setSelected(false);
+
 		//Ventana datos numéricos
 		ventNumeros=new JFrame("Datos GPS IMU COCHE");
 		JPanel jpCentral=new JPanel();
 		ventNumeros.add(jpCentral,BorderLayout.CENTER);
+		ventNumeros.getContentPane().add(jcbNavegando,BorderLayout.SOUTH);
+
 		//paneles uno debajo del otro
 		jpCentral.setLayout(new BoxLayout(jpCentral,BoxLayout.PAGE_AXIS));
 		
@@ -197,14 +202,10 @@ public class NavegaPredictivo implements GpsEventListener  {
 		}
 		
 		
-		//Checkbox para navegar
-		jcbNavegando=new JCheckBox("Navegando");
-		jcbNavegando.setSelected(false);
 		
 		ventanaPMOS=new JFrame("Mira Obstáculo Subjetivo");
 		ventanaPMOS.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ventanaPMOS.getContentPane().add(PMOS,BorderLayout.CENTER);
-		ventanaPMOS.getContentPane().add(jcbNavegando,BorderLayout.SOUTH);
 		ventanaPMOS.setSize(new Dimension(800,400));
 		ventanaPMOS.setVisible(true);
 
@@ -239,12 +240,15 @@ public class NavegaPredictivo implements GpsEventListener  {
 	public void camina() {
 		double comandoVelocidad=2;
 		modCoche.setVelocidad(comandoVelocidad);
+		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		long tSig;
+		boolean solicitado=false;
 		while(true) {
 			tSig=System.currentTimeMillis()+periodoMuestreoMili;
 			try { 
 				if(jcbNavegando.isSelected()) {
-					manLMS.pideBarrido((short)0, (short)180, (short)1);
+//					manLMS.pideBarrido((short)0, (short)180, (short)1);
+//					solicitado=true;
 					
 					//Calculamos el comando
 					GPSData pa=gpsCon.getPuntoActualTemporal();
@@ -265,15 +269,17 @@ public class NavegaPredictivo implements GpsEventListener  {
 
 					pmp.actualiza();
 					
-					BarridoAngular ba=manLMS.recibeBarrido();
-					if(pa==null) {
-						System.err.println("No hay punto");
-						continue;
+					if(solicitado) {
+						BarridoAngular ba=manLMS.recibeBarrido();
+						if(pa==null) {
+							System.err.println("No hay punto");
+							continue;
+						}
+						//vemos los obstaculos
+						double dist=mi.masCercano(ptoAct, angAct, ba);
+						pmo.actualiza();
+						PMOS.actualiza();
 					}
-					//vemos los obstaculos
-					double dist=mi.masCercano(ptoAct, angAct, ba);
-					pmo.actualiza();
-					PMOS.actualiza();
 					
 					
 //					if(Double.isNaN(dist))
@@ -282,6 +288,7 @@ public class NavegaPredictivo implements GpsEventListener  {
 //						System.out.println("No hay obstáculo");
 //					else
 //						System.out.println("Distancia="+dist);
+					
 				}
 			} catch (LMSException e) {
 				System.err.println("Problemas al obtener barrido en punto "
@@ -290,6 +297,8 @@ public class NavegaPredictivo implements GpsEventListener  {
 			pmCoche.actualiza();
 			pmCoche.repinta();
 			//esperamos hasta que hayan pasado miliSeg de ciclo.
+			long msSobra=tSig-System.currentTimeMillis();
+			System.out.println("Sobra="+msSobra);
 			while(System.currentTimeMillis()<tSig)
 				try{Thread.sleep(tSig-System.currentTimeMillis());} catch (Exception e) {}	
 		}
@@ -303,7 +312,7 @@ public class NavegaPredictivo implements GpsEventListener  {
 		String[] puertos;
 		if(args==null || args.length<3) {
 			//no se han pasado argumentos, pedimos los puertos interactivamente
-			String[] titulos={"IMU","GPS","RF","Coche"};			
+			String[] titulos={"GPS","IMU","RF","Coche"};			
 			puertos=new EligeSerial(titulos).getPuertos();
 			if(puertos==null) {
 				System.err.println("No se asignaron los puertos seriales");

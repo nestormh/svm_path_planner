@@ -3,7 +3,7 @@
  */
 package sibtra.lms;
 
-import jade.util.leap.Serializable;
+import java.io.Serializable;
 
 import java.awt.geom.Point2D;
 

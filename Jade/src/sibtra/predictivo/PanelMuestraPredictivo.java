@@ -189,7 +189,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 	 * @param args
 	 */
 	public static void main(String[] args) {
-        final Coche carroOri = new CocheModeloAntiguo();
+        final Coche carroOri = new Coche();
 //        final Coche carroOri = new Coche();
         double vel = 2;
         double consVolante = 0;

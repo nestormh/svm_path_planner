@@ -275,7 +275,10 @@ public class ControlPredictivo {
     }
     
     private double[] calculaEscalon(double velocidad){
+//    	carroEscalon.copy(carroOriginal);
         carroEscalon.setPostura(0,0,0,0);
+        carroEscalon.setEstadoA0();
+        
         for (int i=0;i<horPrediccion;i++){
             carroEscalon.calculaEvolucion(Math.PI/6,velocidad, Ts);
             respuestaEscalon[i] = carroEscalon.getTita();

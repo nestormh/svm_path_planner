@@ -118,6 +118,10 @@ public class GPSConnectionTriumph extends GPSConnection {
 						{
 							//mensaje de texto completo
 							indFin--; //quitamos caracter del salto
+							if(indFin<=indIni) {
+								indIni=0; indFin=-1; esEstandar=false; esTexto=false;
+								continue;
+							}
 							String menTexto=new String(buff,indIni,(indFin-indIni+1));
 							if(menTexto.charAt(0)=='$') {
 //								System.out.print('n');

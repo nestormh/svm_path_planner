@@ -165,7 +165,7 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener {
 		if(jcbSeguirCoche.isSelected())
 			setCentro(x,y);
 		if(ultPto.getAngulosIMU()!=null)
-			yaw=ultPto.getAngulosIMU().getYaw();
+			yaw=Math.toRadians(ultPto.getAngulosIMU().getYaw());
 		situaCoche(x, y, yaw);
 		actualiza();
 	}

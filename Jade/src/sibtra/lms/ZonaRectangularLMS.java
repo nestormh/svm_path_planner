@@ -3,7 +3,7 @@
  */
 package sibtra.lms;
 
-import jade.util.leap.Serializable;
+import java.io.Serializable;
 
 
 /**
