@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sibtra;
+package sibtra.agentes;
 
 import jade.core.Agent;
 import jade.domain.DFService;

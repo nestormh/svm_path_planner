@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sibtra;
+package sibtra.agentes;
 
 import jade.core.AID;
 import jade.core.Agent;

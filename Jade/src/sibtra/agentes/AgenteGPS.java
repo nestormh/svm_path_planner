@@ -1,4 +1,4 @@
-package sibtra;
+package sibtra.agentes;
 
 
 import sibtra.gps.GPSConnection;
