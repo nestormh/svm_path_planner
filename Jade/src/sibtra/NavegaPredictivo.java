@@ -2,6 +2,7 @@ package sibtra;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.io.File;
 
 import javax.swing.BoxLayout;
@@ -77,6 +78,10 @@ public class NavegaPredictivo implements GpsEventListener  {
 
 	private JLabel jlNumPaquetes;
 
+	private JCheckBox jcbUsarRF;
+
+	protected double distRF;
+
 	/** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
 	public NavegaPredictivo(String[] args) {
 		if(args==null || args.length<4) {
@@ -122,15 +127,24 @@ public class NavegaPredictivo implements GpsEventListener  {
 		System.out.println("Abrimos conexión al Carro");
 		contCarro=new ControlCarro(args[3]);
 		
-		//Checkbox para navegar
-		jcbNavegando=new JCheckBox("Navegando");
-		jcbNavegando.setSelected(false);
 
 		//Ventana datos numéricos
 		ventNumeros=new JFrame("Datos GPS IMU COCHE");
 		JPanel jpCentral=new JPanel();
 		ventNumeros.add(jpCentral,BorderLayout.CENTER);
-		ventNumeros.getContentPane().add(jcbNavegando,BorderLayout.SOUTH);
+		{   //Parte baja de la ventana
+			JPanel jpSur=new JPanel(new FlowLayout(3));
+			ventNumeros.getContentPane().add(jpSur,BorderLayout.SOUTH);
+
+			//Checkbox para navegar
+			jcbNavegando=new JCheckBox("Navegando");
+			jcbNavegando.setSelected(false);
+			jpSur.add(jcbNavegando);
+			//Checkbox para detectar con RF
+			jcbUsarRF=new JCheckBox("Usar RF");
+			jcbUsarRF.setSelected(false);
+			jpSur.add(jcbUsarRF);
+		}
 
 		//paneles uno debajo del otro
 		jpCentral.setLayout(new BoxLayout(jpCentral,BoxLayout.PAGE_AXIS));
@@ -238,6 +252,51 @@ public class NavegaPredictivo implements GpsEventListener  {
 	/** Método que ejecuta cada {@link #periodoMuestreoMili} bulce de control del coche mirando los obstáculos con el RF 
 	 */
 	public void camina() {
+		Thread thRF=new Thread() {
+			private long periodoMuestreoMiliRF=500;
+
+			public void run() {
+				long tSig;
+				boolean solicitado=false;
+				while(true) {
+					tSig=System.currentTimeMillis()+periodoMuestreoMiliRF;
+					try { 
+						if(jcbUsarRF.isSelected()) {
+							manLMS.pideBarrido((short)0, (short)180, (short)1);
+							BarridoAngular ba=manLMS.recibeBarrido();
+
+							//Calculamos el comando
+							GPSData pa=gpsCon.getPuntoActualTemporal();
+							double[] ptoAct={pa.getXLocal(), pa.getYLocal()};
+							double angAct=Math.toRadians(pa.getAngulosIMU().getYaw())+desMag;
+							distRF=mi.masCercano(ptoAct, angAct, ba);
+							pmo.actualiza();
+							PMOS.actualiza();
+							
+							
+//							if(Double.isNaN(dist))
+//								System.out.println("Estamos fuera del camino");
+//							else if(Double.isInfinite(dist))
+//								System.out.println("No hay obstáculo");
+//							else
+//								System.out.println("Distancia="+dist);
+							
+						}
+					} catch (LMSException e) {
+						System.err.println("Problemas al obtener barrido en punto "
+								+" :"+e.getMessage());
+					}
+					long msSobra=tSig-System.currentTimeMillis();
+					System.out.println("Sobra RF ="+msSobra);
+					while(System.currentTimeMillis()<tSig)
+						try{Thread.sleep(tSig-System.currentTimeMillis());} catch (Exception e) {}	
+				}
+
+			}
+		};
+		
+		thRF.start();
+		
 		double comandoVelocidad=2;
 		modCoche.setVelocidad(comandoVelocidad);
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);

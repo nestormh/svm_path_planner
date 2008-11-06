@@ -56,8 +56,6 @@ public class GPSConnectionTriumph extends GPSConnection {
 	/** Calidad del enlace con la base. NaN si no se ha recibdo paquete DL */
 	double calidadLink=Double.NaN;
 
-	/** contador de paquetes recibidos del GPS */
-	int cuentaPaquetesRecibidos=0;
 	
 	/**
 	 * Constructor por defecto no hace nada.
@@ -527,10 +525,6 @@ u1 cs(u1 const* src, int count)
 	/** Calidad del enlace con la base */
 	public double getCalidadLink() {
 		return calidadLink;
-	}
-
-	public int getCuentaPaquetesRecibidos(){
-		return cuentaPaquetesRecibidos;
 	}
 	
 	/**

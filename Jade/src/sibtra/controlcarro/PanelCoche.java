@@ -32,6 +32,8 @@ public class PanelCoche extends JPanel implements ActionListener {
 	private SpinnerNumberModel jspMConsignaVolante;
 	private JButton jbAplicaConsignaVolante;
 	private JLabel jlConAngVolante;
+	/** para saber si se están recibiendo paquetes del coche */
+	private int cuentaBytes;
 
 	public PanelCoche(ControlCarro cc) {
 		if(cc==null) 
@@ -145,6 +147,9 @@ public class PanelCoche extends JPanel implements ActionListener {
 	
 	/** Actualiza campos con datos del {@link ControlCarro} */
 	public void actualiza() {
+		Boolean estado=contCarro.getBytes()!=cuentaBytes;
+		cuentaBytes=contCarro.getBytes();
+
 		jlCuentaBytes.setText(String.format("%10d", contCarro.getBytes()));
 		jlCuentaVolante.setText(String.format("%10d", contCarro.getVolante()));
 		jlAvance.setText(String.format("%10d", contCarro.getAvance()));
@@ -152,6 +157,18 @@ public class PanelCoche extends JPanel implements ActionListener {
 		jlConVelo.setText(String.format("%10d", contCarro.getConsignaVelocidad()));
 		jlConVol.setText(String.format("%10d", contCarro.getConsignaVolante()));
 		jlConAngVolante.setText(String.format("%5.2f", Math.toDegrees(contCarro.getConsignaAnguloVolante())));
+		
+		//fijamos estado
+		jlCuentaVolante.setEnabled(estado);
+		jlAnguloVolante.setEnabled(estado);
+		jlCuentaBytes.setEnabled(estado);
+		jlAvance.setEnabled(estado);
+		jlConVelo.setEnabled(estado);
+		jlConVol.setEnabled(estado);
+		jbAplicaConsignaVolante.setEnabled(estado);
+		jlConAngVolante.setEnabled(estado);
+		
+
 	}
 	
 	/** programa la actualizacion de la ventana */
@@ -185,6 +202,7 @@ public class PanelCoche extends JPanel implements ActionListener {
 		ventana.setVisible(true);
 		
 		while (true){
+			pc.setEnabled(true);
 			pc.actualiza();
 			pc.repinta();
 			try{Thread.sleep(500);} catch (Exception e) {}	

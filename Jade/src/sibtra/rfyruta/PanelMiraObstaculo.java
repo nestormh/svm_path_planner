@@ -357,8 +357,10 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 									if(Math.random()<0.05)
 										barAct.datos[i]=(short)((Math.random()*60+2)*100);
 								}
+								long tini=System.currentTimeMillis();
 								MI.masCercano(npos, Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
 										, barAct);
+								System.out.println("Tarda:"+(System.currentTimeMillis()-tini));
 							}
 							actualiza();
 							System.out.println(MI);

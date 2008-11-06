@@ -68,6 +68,9 @@ public class GPSConnection implements SerialPortEventListener {
 	/** Conexión serial IMU de la que leer ángulos*/
 	ConexionSerialIMU csIMU=null;
 
+	/** contador de paquetes recibidos del GPS */
+	int cuentaPaquetesRecibidos=0;
+
 	/**
 	 * Constructor por defecto no hace nada.
 	 * Para usar el puerto hay que invocar a {@link #setParameters(SerialParameters)} 
@@ -313,6 +316,7 @@ public class GPSConnection implements SerialPortEventListener {
 		
 		if(!data.procesaCadena(cadena))
 			return;  //sólo será nuevo punto si es paquete GGA valido
+		
 		data.setSysTime(System.currentTimeMillis());
 		data.calculaECEF();
 		nuevoPunto();
@@ -535,6 +539,12 @@ public class GPSConnection implements SerialPortEventListener {
 	public void setParameters(SerialParameters parameters) {
 		this.parameters = parameters;
 	}
+	
+	/** @return {@link #cuentaPaquetesRecibidos} */
+	public int getCuentaPaquetesRecibidos(){
+		return cuentaPaquetesRecibidos;
+	}
+
 	
 	/** mantiene la lista de listeners */
 	private ArrayList<GpsEventListener> listeners = new ArrayList<GpsEventListener>();
