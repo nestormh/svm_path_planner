@@ -59,10 +59,10 @@ public class NavegaPredictivo implements GpsEventListener  {
 	
 	double[][] Tr=null;
 	private MiraObstaculo mi;
-	private JFrame ventanaPMOS;
+//	private JFrame ventanaPMOS;
 	private JFrame ventanaPMO;
 	private PanelMiraObstaculo pmo;
-	private PanelMiraObstaculoSubjetivo PMOS;
+//	private PanelMiraObstaculoSubjetivo PMOS;
 	private double desMag;
 	JCheckBox jcbNavegando;
 	
@@ -81,6 +81,8 @@ public class NavegaPredictivo implements GpsEventListener  {
 	private JCheckBox jcbUsarRF;
 
 	protected double distRF;
+
+	private int numPaquetesGPS;
 
 	/** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
 	public NavegaPredictivo(String[] args) {
@@ -208,20 +210,18 @@ public class NavegaPredictivo implements GpsEventListener  {
 		System.out.println("Longitud de la trayectoria="+Tr.length);
 		
 		mi=new MiraObstaculo(Tr);
-		try {
-			PMOS=new PanelMiraObstaculoSubjetivo(mi,(short)manLMS.getDistanciaMaxima());
-		} catch (LMSException e) {
-			System.err.println("Problema al obtener distancia maxima configurada");
-			System.exit(1);
-		}
-		
-		
-		
-		ventanaPMOS=new JFrame("Mira Obstáculo Subjetivo");
-		ventanaPMOS.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		ventanaPMOS.getContentPane().add(PMOS,BorderLayout.CENTER);
-		ventanaPMOS.setSize(new Dimension(800,400));
-		ventanaPMOS.setVisible(true);
+		//TODO Activar panel muestra obtácuo subjetivo
+//		try {
+//			PMOS=new PanelMiraObstaculoSubjetivo(mi,(short)manLMS.getDistanciaMaxima());
+//		} catch (LMSException e) {
+//			System.err.println("Problema al obtener distancia maxima configurada");
+//			System.exit(1);
+//		}
+//		ventanaPMOS=new JFrame("Mira Obstáculo Subjetivo");
+//		ventanaPMOS.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		ventanaPMOS.getContentPane().add(PMOS,BorderLayout.CENTER);
+//		ventanaPMOS.setSize(new Dimension(800,400));
+//		ventanaPMOS.setVisible(true);
 
 		
 		ventanaPMO=new JFrame("Mira Obstáculo");
@@ -245,8 +245,9 @@ public class NavegaPredictivo implements GpsEventListener  {
 
 	/** Usamos para actulizar la etiqueta de la calidad */
 	public void handleGpsEvent(GpsEvent ev) {
-		jlCalidad.setText(String.format("Calidad Enlace: %.0f %%", gpsCon.getCalidadLink()));
-		jlNumPaquetes.setText(String.format("Mensajes %10d", gpsCon.getCuentaPaquetesRecibidos()));
+		jlCalidad.setText(String.format("Calidad Enlace: %4.0f %%", gpsCon.getCalidadLink()));
+		int paquetesAhora=gpsCon.getCuentaPaquetesRecibidos();
+		jlNumPaquetes.setText(String.format("Mensajes %10d", paquetesAhora ));			
 	}
 
 	/** Método que ejecuta cada {@link #periodoMuestreoMili} bulce de control del coche mirando los obstáculos con el RF 
@@ -271,7 +272,7 @@ public class NavegaPredictivo implements GpsEventListener  {
 							double angAct=Math.toRadians(pa.getAngulosIMU().getYaw())+desMag;
 							distRF=mi.masCercano(ptoAct, angAct, ba);
 							pmo.actualiza();
-							PMOS.actualiza();
+//							PMOS.actualiza();
 							
 							
 //							if(Double.isNaN(dist))
@@ -286,8 +287,9 @@ public class NavegaPredictivo implements GpsEventListener  {
 						System.err.println("Problemas al obtener barrido en punto "
 								+" :"+e.getMessage());
 					}
+					//TODO poner RF a todo lo que da
 					long msSobra=tSig-System.currentTimeMillis();
-					System.out.println("Sobra RF ="+msSobra);
+					if(msSobra<0) System.out.println("Sobra RF ="+msSobra);
 					while(System.currentTimeMillis()<tSig)
 						try{Thread.sleep(tSig-System.currentTimeMillis());} catch (Exception e) {}	
 				}
@@ -301,63 +303,42 @@ public class NavegaPredictivo implements GpsEventListener  {
 		modCoche.setVelocidad(comandoVelocidad);
 		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 		long tSig;
-		boolean solicitado=false;
 		while(true) {
 			tSig=System.currentTimeMillis()+periodoMuestreoMili;
-			try { 
-				if(jcbNavegando.isSelected()) {
-//					manLMS.pideBarrido((short)0, (short)180, (short)1);
-//					solicitado=true;
-					
-					//Calculamos el comando
-					GPSData pa=gpsCon.getPuntoActualTemporal();
-					double[] ptoAct={pa.getXLocal(), pa.getYLocal()};
-					double angAct=Math.toRadians(pa.getAngulosIMU().getYaw())+desMag;
-					double volante=contCarro.getAnguloVolante();
-					modCoche.setPostura(ptoAct[0], ptoAct[1], angAct, volante);
-					double comandoVolante = cp.calculaComando(); 
-					if (comandoVolante > COTA_ANGULO)
-						comandoVolante = COTA_ANGULO;
-					if (comandoVolante < -COTA_ANGULO)
-						comandoVolante = -COTA_ANGULO;
-					//System.out.println("Comando " + comandoVolante);
-					contCarro.setAnguloVolante(-comandoVolante);
-					//TODO leer velocidad del coche??
-					// no hace falta modCoche.setConsignaVolante(comandoVolante);
-					modCoche.calculaEvolucion(comandoVolante,comandoVelocidad,periodoMuestreoMili/1000);
+			if(jcbNavegando.isSelected()) {
 
-					pmp.actualiza();
-					
-					if(solicitado) {
-						BarridoAngular ba=manLMS.recibeBarrido();
-						if(pa==null) {
-							System.err.println("No hay punto");
-							continue;
-						}
-						//vemos los obstaculos
-						double dist=mi.masCercano(ptoAct, angAct, ba);
-						pmo.actualiza();
-						PMOS.actualiza();
-					}
-					
-					
-//					if(Double.isNaN(dist))
-//						System.out.println("Estamos fuera del camino");
-//					else if(Double.isInfinite(dist))
-//						System.out.println("No hay obstáculo");
-//					else
-//						System.out.println("Distancia="+dist);
-					
-				}
-			} catch (LMSException e) {
-				System.err.println("Problemas al obtener barrido en punto "
-						+" :"+e.getMessage());
+				//Calculamos el comando
+				GPSData pa=gpsCon.getPuntoActualTemporal();
+				double[] ptoAct={pa.getXLocal(), pa.getYLocal()};
+				double angAct=Math.toRadians(pa.getAngulosIMU().getYaw())+desMag;
+				double volante=contCarro.getAnguloVolante();
+				modCoche.setPostura(ptoAct[0], ptoAct[1], angAct, volante);
+				double comandoVolante = cp.calculaComando(); 
+				if (comandoVolante > COTA_ANGULO)
+					comandoVolante = COTA_ANGULO;
+				if (comandoVolante < -COTA_ANGULO)
+					comandoVolante = -COTA_ANGULO;
+				//System.out.println("Comando " + comandoVolante);
+				contCarro.setAnguloVolante(-comandoVolante);
+//				contCarro.Avanza(120);
+				//TODO leer velocidad del coche??
+				comandoVelocidad=contCarro.getVelocidadMS();
+				// no hace falta modCoche.setConsignaVolante(comandoVolante);
+				modCoche.calculaEvolucion(comandoVolante,comandoVelocidad,periodoMuestreoMili/1000);
+
+				pmp.actualiza();					
 			}
+			//para mostrar si se dejaron de recibir paquetes del GPS
+			int paquetesAhora=gpsCon.getCuentaPaquetesRecibidos();
+			if(numPaquetesGPS==paquetesAhora)
+				PMGPS.actualizaPunto(null);  //desabilitará todas las labels
+			numPaquetesGPS=paquetesAhora;
+			
 			pmCoche.actualiza();
 			pmCoche.repinta();
 			//esperamos hasta que hayan pasado miliSeg de ciclo.
 			long msSobra=tSig-System.currentTimeMillis();
-			System.out.println("Sobra="+msSobra);
+			if(msSobra<0) System.out.println("Sobra="+msSobra);
 			while(System.currentTimeMillis()<tSig)
 				try{Thread.sleep(tSig-System.currentTimeMillis());} catch (Exception e) {}	
 		}

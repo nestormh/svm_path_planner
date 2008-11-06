@@ -1,7 +1,7 @@
 //package carrito.server.serial;
 /* @(#)SerialConnection.java	1.6 98/07/17 SMI
  *
- * Clase de Control del vehículo Guistub
+ * Clase de Control del vehï¿½culo Guistub
  */
 package sibtra.controlcarro;
 
@@ -22,8 +22,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.TooManyListenersException;
 import java.util.Vector;
-
-import com.sun.xml.internal.fastinfoset.util.CharArrayArray;
 
 /**
 A class that handles the details of a serial connection. Reads from one
@@ -46,7 +44,7 @@ CommPortOwnershipListener {
 	 * / */
 
 	private boolean open;
-	Thread hilo; /* Hilo para el cálculo de la velocidad */
+	Thread hilo; /* Hilo para el cï¿½lculo de la velocidad */
 	private boolean acelera = false, gira = true;
 	/** Punto central del volante del vehiculo */
 	public final static int CARRO_CENTRO = 5280;
@@ -1069,7 +1067,7 @@ CommPortOwnershipListener {
 
 	 }
 	 /**
-	  * Función para el calculo de la velocidad a partir del encoder incluido en el vehiculo.
+	  * Funciï¿½n para el calculo de la velocidad a partir del encoder incluido en el vehiculo.
 	  */
 	 public void controlVel() {
 
@@ -1235,7 +1233,7 @@ public void setConsigna(double valor) {
 	 }
 
 	 /**
-	  * Guarda los datos del vehículo en un fichero
+	  * Guarda los datos del vehï¿½culo en un fichero
 	  * @param fichero
 	  */
 	 public void startCaptura(String fichero) {
@@ -1267,15 +1265,15 @@ public void setConsigna(double valor) {
 
 	 /**
 	  * Fija el intervalo de tiempo para el calculo de la velocidad
-	  * @tiempo Tiempo de actualización de la velocidad
+	  * @tiempo Tiempo de actualizaciï¿½n de la velocidad
 	  */
 	 public void SetRefrescoVel(int tiempo) {
 		 refresco = tiempo;
 	 }
 	 /**
-	  * Fija el incremento máximo entre dos comandos de tracción consecutivos para
+	  * Fija el incremento mï¿½ximo entre dos comandos de tracciï¿½n consecutivos para
 	  * evitar aceleraciones muy bruscas
-	  * @param incremento diferencia máxima entre dos comandos
+	  * @param incremento diferencia mï¿½xima entre dos comandos
 	  */
 	 public void setMaxIncremento(int incremento) {
 		 maxInc = incremento;

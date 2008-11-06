@@ -463,7 +463,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 					ca++;
 //					System.out.println(String.format("DL: %c %c %s %d %d %d %f"
 //							,decoId, tipo, stationID, timeLast, numOK, numCorrup,quality ));
-					if(decoId=='D' && numOK>0) //puerto D es el del enlace sólo si se ha recibido algo
+					if(tipo=='D' && numOK>0) //puerto D es el del enlace sólo si se ha recibido algo
 						calidadLink=quality;
 					la--;
 				}

@@ -16,11 +16,13 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import sibtra.util.EligeSerial;
 
 @SuppressWarnings("serial")
-public class PanelCoche extends JPanel implements ActionListener {
+public class PanelCoche extends JPanel implements ActionListener, ChangeListener {
 	
 	private JLabel jlCuentaVolante;
 	private ControlCarro contCarro;
@@ -34,6 +36,10 @@ public class PanelCoche extends JPanel implements ActionListener {
 	private JLabel jlConAngVolante;
 	/** para saber si se están recibiendo paquetes del coche */
 	private int cuentaBytes;
+	private JLabel jlVelMS;
+	private SpinnerNumberModel jspMConsignaVelocidad;
+	private JButton jbAplicaConsignaVelocidad;
+	private SpinnerNumberModel jspMAvance;
 
 	public PanelCoche(ControlCarro cc) {
 		if(cc==null) 
@@ -99,7 +105,7 @@ public class PanelCoche extends JPanel implements ActionListener {
 			jpCentro.add(jla);
 		}
 
-		{ //Avance
+		{
 			jlConVol=jla=new JLabel("######");
 			jla.setBorder(BorderFactory.createTitledBorder(
 				       blackline, "Con. Volante"));
@@ -118,7 +124,7 @@ public class PanelCoche extends JPanel implements ActionListener {
 		}
 
 		{// Boton aplicar
-			jbAplicaConsignaVolante=new JButton("Aplicar Consigna");
+			jbAplicaConsignaVolante=new JButton("Aplicar Consigna V");
 			jbAplicaConsignaVolante.setBorder(BorderFactory.createTitledBorder(
 				       blackline, "Con. Volante"));
 			jbAplicaConsignaVolante.addActionListener(this);
@@ -135,6 +141,41 @@ public class PanelCoche extends JPanel implements ActionListener {
 			jpCentro.add(jla);
 		}
 
+		{ //Velocidad en m/s
+			jlVelMS=jla=new JLabel("##.##");
+			jla.setBorder(BorderFactory.createTitledBorder(
+				       blackline, "Vel. m/s"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			jpCentro.add(jla);
+		}
+
+		{// comando velocidad
+			jspMConsignaVelocidad=new SpinnerNumberModel(0.0,0.0,6.0,0.1);
+			JSpinner jspcv=new JSpinner(jspMConsignaVelocidad);
+			jspcv.setBorder(BorderFactory.createTitledBorder(
+				       blackline, "Con. Velocidad"));
+			jpCentro.add(jspcv);
+		}
+
+		{// Boton aplicar
+			jbAplicaConsignaVelocidad=new JButton("Aplicar Consigna");
+			jbAplicaConsignaVelocidad.setBorder(BorderFactory.createTitledBorder(
+				       blackline, "Con. Velocidad"));
+			jbAplicaConsignaVelocidad.addActionListener(this);
+			jpCentro.add(jbAplicaConsignaVelocidad);
+		}
+
+
+		{// comando avance
+			jspMAvance=new SpinnerNumberModel(0,0,255,5);
+			JSpinner jspcv=new JSpinner(jspMAvance);
+			jspcv.setBorder(BorderFactory.createTitledBorder(
+				       blackline, "Avance"));
+			jspMAvance.addChangeListener(this);
+			jpCentro.add(jspcv);
+		}
 	}
 
 	/** atendemos pulsación boton aplicar comando volante */
@@ -143,21 +184,34 @@ public class PanelCoche extends JPanel implements ActionListener {
 			double angDeseado=Math.toRadians(jspMConsignaVolante.getNumber().doubleValue());
 			contCarro.setAnguloVolante(angDeseado);
 		}
+		if(ev.getSource()==jbAplicaConsignaVelocidad) {
+			double velDeseado=Math.toRadians(jspMConsignaVelocidad.getNumber().doubleValue());
+			contCarro.setConsignaAvanceMS(velDeseado);
+		}
 	}
 	
+
+	public void stateChanged(ChangeEvent ev) {
+		if(ev.getSource()==jspMAvance){
+			contCarro.Avanza(jspMAvance.getNumber().intValue());
+		}
+	}
+
 	/** Actualiza campos con datos del {@link ControlCarro} */
 	public void actualiza() {
 		Boolean estado=contCarro.getBytes()!=cuentaBytes;
 		cuentaBytes=contCarro.getBytes();
 
-		jlCuentaBytes.setText(String.format("%10d", contCarro.getBytes()));
-		jlCuentaVolante.setText(String.format("%10d", contCarro.getVolante()));
-		jlAvance.setText(String.format("%10d", contCarro.getAvance()));
-		jlAnguloVolante.setText(String.format("%5.2f", Math.toDegrees(contCarro.getAnguloVolante())));
-		jlConVelo.setText(String.format("%10d", contCarro.getConsignaVelocidad()));
-		jlConVol.setText(String.format("%10d", contCarro.getConsignaVolante()));
-		jlConAngVolante.setText(String.format("%5.2f", Math.toDegrees(contCarro.getConsignaAnguloVolante())));
-		
+		if(estado) {
+			jlCuentaBytes.setText(String.format("%10d", contCarro.getBytes()));
+			jlCuentaVolante.setText(String.format("%10d", contCarro.getVolante()));
+			jlAvance.setText(String.format("%10d", contCarro.getAvance()));
+			jlAnguloVolante.setText(String.format("%5.2f", Math.toDegrees(contCarro.getAnguloVolante())));
+			jlConVelo.setText(String.format("%10d", contCarro.getConsignaVelocidad()));
+			jlConVol.setText(String.format("%10d", contCarro.getConsignaVolante()));
+			jlConAngVolante.setText(String.format("%5.2f", Math.toDegrees(contCarro.getConsignaAnguloVolante())));
+			jlVelMS.setText(String.format("%5.2f",contCarro.getVelocidadMS()));
+		}
 		//fijamos estado
 		jlCuentaVolante.setEnabled(estado);
 		jlAnguloVolante.setEnabled(estado);
@@ -165,8 +219,8 @@ public class PanelCoche extends JPanel implements ActionListener {
 		jlAvance.setEnabled(estado);
 		jlConVelo.setEnabled(estado);
 		jlConVol.setEnabled(estado);
-		jbAplicaConsignaVolante.setEnabled(estado);
 		jlConAngVolante.setEnabled(estado);
+		jlVelMS.setEnabled(estado);
 		
 
 	}
