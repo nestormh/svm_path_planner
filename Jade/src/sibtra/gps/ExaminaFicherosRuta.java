@@ -19,12 +19,14 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * @author alberto
  *
  */
-public class ExaminaFicherosRuta extends JFrame implements  ItemListener, ActionListener {
+public class ExaminaFicherosRuta extends JFrame implements  ItemListener, ActionListener, ChangeListener {
 
 	private Ruta rutaEspacial=null, rutaTemporal=null;
 	private PanelExaminaRuta per;
@@ -66,6 +68,8 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 			jfMR.setVisible(true);
 		}
 
+		per.jsDato.addChangeListener(this);
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
 		setVisible(true);
@@ -116,6 +120,12 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 	 */
 	public static void main(String[] args) {
 		new ExaminaFicherosRuta("Examina Fich Ruta");
+	}
+
+
+	public void stateChanged(ChangeEvent arg0) {
+		GPSData npto=per.ruta.getPunto((Integer)per.jsDato.getValue()-1);
+		pmr.nuevoPunto(npto);
 	}
 
 

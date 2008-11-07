@@ -159,6 +159,11 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener {
 		GPSData ultPto;
 		if(RU==null || (ultPto=RU.getUltimoPto())==null)
 			return;		
+		nuevoPunto(ultPto);
+	}
+
+	/** Actualiza la presentación a la situación del pto pasado */
+	public void nuevoPunto(GPSData ultPto) {
 		double x=ultPto.getXLocal();
 		double y=ultPto.getYLocal();
 		double yaw=ultPto.getAngulo();
