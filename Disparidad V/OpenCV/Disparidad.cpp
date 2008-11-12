@@ -1096,6 +1096,23 @@ void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal)
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE: 
+	   FUNCI�N:
+	PAR�METROS: 
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+void crearRDM (IplImage *rdm, IplImage *dm, CvPoint *line){
+		
+		cvSetImageROI(dm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+		cvSetZero(rdm);
+		cvSetImageROI(rdm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+		cvCmpS(dm, line[0].x, rdm, CV_CMP_EQ); 
+		cvSet (rdm, cvScalar(line[0].x), rdm);
+		cvResetImageROI (dm);
+		cvResetImageROI (rdm);
+}
+
+/*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE: disparity
 	   FUNCI�N:
 	PAR�METROS: IplImage *left    -> Imagen izquierda. Se asume una imagen RGB de 3 planos.
@@ -1108,9 +1125,9 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 			 *derecha,			// Imagen derecha en escala de grises
 			 *mapaDisparidad,	// Mapa de disparidad
 			 *imagenDisparidadH,
-			 *imagenDisparidad;
+			 *imagenDisparidad,
+			 *mapaDisparidadReducido;
 
-	IplImage *dummy;	// Temporal para la disparidad horizontal
 	CvPoint *ver;
 
 	CvSeq *diagonal,
@@ -1134,7 +1151,7 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 	imagenDisparidad = cvCreateImage(cvSize(MAXD,cvGetSize(left).height), IPL_DEPTH_8U, 1);
 	imagenDisparidadH = cvCreateImage(cvSize(cvGetSize(left).width, MAXD), IPL_DEPTH_8U, 1);
 
-	dummy = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
+	mapaDisparidadReducido = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
 
 	izquierda = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
 	derecha = cvCreateImage(cvGetSize(right), IPL_DEPTH_8U, 1);
@@ -1183,42 +1200,27 @@ clock_t start = clock();
 	pendpos = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageMP);
 	pendneg = cvCreateSeq( CV_32SC4, sizeof(CvSeq), 2 * sizeof(CvPoint), storageMN);
 
-//	lineasV(imagenDisparidad, vertical, diagonal);
 	lineasV2(imagenDisparidad, vLines, diagonal);
-
-//	lineasH(imagenDisparidadH, horizontal, pendpos, pendneg);	// En la versi�n original estaba as�
-
-
 
 /********************* Definiendo regi�n de inter�s en base a las l�neas verticales ****************/
 	nVer = vLines->GetN();
 	index = vLines->GetIndex();
 	
-	for (i= 0; i < nVer; i ++){		// Dibujar rect�ngulos (detectar obst�culos)
+	for (i= 0; i < nVer; i ++){		
 		ver = (CvPoint *) cvGetSeqElem(vLines->GetLine(index[i]), 0);
-		cvSetImageROI(mapaDisparidad, cvRect(ver[0].x, MIN(ver[0].y, ver[1].y), mapaDisparidad->width - ver[0].x, abs(ver[0].y - ver[1].y)));
-		cvSetZero(dummy);
-		cvSetImageROI(dummy, cvRect(ver[0].x, MIN(ver[0].y, ver[1].y), mapaDisparidad->width - ver[0].x, abs(ver[0].y - ver[1].y)));
-		cvCmpS(mapaDisparidad, ver[0].x, dummy, CV_CMP_EQ); 
-		cvSet (dummy, cvScalar(ver[0].x), dummy);
-		cvResetImageROI (mapaDisparidad);
-		cvResetImageROI (dummy);
-		// Rodear la regi�n de inter�s en el mapa de disparidad reducido
-		cvRectangle(dummy, cvPoint(ver[0].x, MIN(ver[0].y, ver[1].y)), cvPoint(dummy->width, MAX(ver[0].y, ver[1].y)), CV_RGB(255,255,255));
-		
-		cvShowImage ("Mapa disparidad reducido", dummy);		
 
-//		crearImagenH(dummy, imagenDisparidadH);
-//		lineasH(imagenDisparidadH, horizontal, pendpos, pendneg);		
+		crearRDM (mapaDisparidadReducido, mapaDisparidad, ver);
 		
-		crearImagenH2(dummy, imagenDisparidadH, ver[0].x);
+		crearImagenH2(mapaDisparidadReducido, imagenDisparidadH, ver[0].x);
 		lineasH2(imagenDisparidadH, hLines, pendpos, pendneg);
 
+		// Rodear la regi�n de inter�s en el mapa de disparidad reducido
+		cvRectangle(mapaDisparidadReducido, cvPoint(ver[0].x, MIN(ver[0].y, ver[1].y)), cvPoint(mapaDisparidadReducido->width, MAX(ver[0].y, ver[1].y)), CV_RGB(255,255,255));	
+		cvShowImage ("Mapa disparidad reducido", mapaDisparidadReducido);
 	}
 /*******************************************************************************/
-	//marcObstacle (left, vertical, horizontal, diagonal, pendpos, pendneg);
-	marcObstacle2 (left, vLines, hLines);
 
+	marcObstacle2 (left, vLines, hLines);
 
 clock_t stop = clock();
 printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
@@ -1237,7 +1239,7 @@ printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 	cvReleaseMemStorage (&storageMP);
 	cvReleaseMemStorage (&storageMN);
 
-	cvReleaseImage(&dummy);
+	cvReleaseImage(&mapaDisparidadReducido);
 
 	cvReleaseImage(&mapaDisparidad);
 	cvReleaseImage(&imagenDisparidad);
@@ -1266,8 +1268,11 @@ int main (int argc, char* argv[]){
 	parameter ajustes;
 	int frameNr;
 	char filename[30];
-	const char *prefix = "Series/fuera";
+	const char *prefix = "Series/puerta";
+	
+	bool trackbar;
 		
+	trackbar = false;
 
 	CvCapture *videoIzq = 0;
 	CvCapture *videoDer = 0;
@@ -1424,14 +1429,21 @@ int main (int argc, char* argv[]){
 				derecha = cvLoadImage(filename);
 
 				if (!izquierda || !derecha) {		// Si se ha llegado al final de la secuencia -> reiniciar
+					cvCreateTrackbar ("Frame", "Controles", &frameNr, frameNr-1, NULL);
+					
 					frameNr = 1;
-
+					trackbar = true;
+					
 					sprintf(filename, "%s_left_%d.bmp", prefix, frameNr); 
 					izquierda = cvLoadImage(filename);
 	
 					sprintf(filename, "%s_right_%d.bmp", prefix, frameNr); 
 					derecha = cvLoadImage(filename);
 
+				}
+				
+				if (trackbar) {
+					cvSetTrackbarPos ("Frame", "Controles", frameNr);
 				}
 
 				izquierda->origin = 0;
