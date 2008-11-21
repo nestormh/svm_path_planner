@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -40,8 +41,12 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 		
 		super(titulo);
 		fc=new JFileChooser(new File("./Rutas"));
+		JPanel cp=(JPanel)getContentPane();
+		cp.setLayout(new BoxLayout(cp,BoxLayout.PAGE_AXIS));
+		pmr=new PanelMuestraRuta(null);
+		cp.add(pmr);
 		per=new PanelExaminaRuta();
-		add(per);
+		cp.add(per);
 
 		{
 			JPanel jpSur=new JPanel();
@@ -56,18 +61,9 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 			jbFichero.addActionListener(this);
 			jpSur.add(jbFichero);
 
-			getContentPane().add(jpSur,BorderLayout.PAGE_END);
+			cp.add(jpSur);
 		}
 		
-		{
-			//Ventana gráfica
-			JFrame jfMR=new JFrame("Muestra ruta");
-			pmr=new PanelMuestraRuta(null);
-			jfMR.add(pmr);
-			jfMR.setSize(800, 600);
-			jfMR.setVisible(true);
-		}
-
 		per.jsDato.addChangeListener(this);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -79,7 +75,6 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 	public void actionPerformed(ActionEvent e) {
 		int devuelto=fc.showOpenDialog(this);
 		if(devuelto==JFileChooser.APPROVE_OPTION) {
-			boolean seCargo=false;
 			File file=fc.getSelectedFile();
 			try {
 				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));

@@ -42,9 +42,9 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	private JLabel jlAltura;
 	private JLabel jlHGeoide;
 	private JLabel jlAlturaGPS;
-	private JLabel jlCoordECEFx;
-	private JLabel jlCoordECEFy;
-	private JLabel jlCoordECEFz;
+//	private JLabel jlCoordECEFx;
+//	private JLabel jlCoordECEFy;
+//	private JLabel jlCoordECEFz;
 	private JLabel jlYaw;
 	private JLabel jlAngulo;
 	private JLabel jlDMag;
@@ -159,35 +159,35 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jpCentro.add(jla);
 		}
 		
-		{ //Coordenadas ECEF X
-			jlCoordECEFx=jla=new JLabel("???????.??");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "ECEF X"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
-
-		{ //Coordenadas ECEF Y
-			jlCoordECEFy=jla=new JLabel("???????.??");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "ECEF Y"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
-
-		{ //Coordenadas ECEF Z
-			jlCoordECEFz=jla=new JLabel("???????.??");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "ECEF X"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
+//		{ //Coordenadas ECEF X
+//			jlCoordECEFx=jla=new JLabel("???????.??");
+//			jla.setBorder(BorderFactory.createTitledBorder(
+//					       blackline, "ECEF X"));
+//		    jla.setFont(Grande);
+//			jla.setHorizontalAlignment(JLabel.CENTER);
+//			jla.setEnabled(false);
+//			jpCentro.add(jla);
+//		}
+//
+//		{ //Coordenadas ECEF Y
+//			jlCoordECEFy=jla=new JLabel("???????.??");
+//			jla.setBorder(BorderFactory.createTitledBorder(
+//					       blackline, "ECEF Y"));
+//		    jla.setFont(Grande);
+//			jla.setHorizontalAlignment(JLabel.CENTER);
+//			jla.setEnabled(false);
+//			jpCentro.add(jla);
+//		}
+//
+//		{ //Coordenadas ECEF Z
+//			jlCoordECEFz=jla=new JLabel("???????.??");
+//			jla.setBorder(BorderFactory.createTitledBorder(
+//					       blackline, "ECEF X"));
+//		    jla.setFont(Grande);
+//			jla.setHorizontalAlignment(JLabel.CENTER);
+//			jla.setEnabled(false);
+//			jpCentro.add(jla);
+//		}
 
 		{//altura
 			jlAltura=jla=new JLabel("+????.??");
@@ -260,9 +260,9 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlNumSat.setEnabled(false);
 			jlEdad.setEnabled(false);
 			jlCoordLocales.setEnabled(false);
-			jlCoordECEFx.setEnabled(false);
-			jlCoordECEFy.setEnabled(false);
-			jlCoordECEFz.setEnabled(false);
+//			jlCoordECEFx.setEnabled(false);
+//			jlCoordECEFy.setEnabled(false);
+//			jlCoordECEFz.setEnabled(false);
 			jlAltura.setEnabled(false);
 			jlHGeoide.setEnabled(false);
 			jlAlturaGPS.setEnabled(false);
@@ -277,9 +277,9 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jlNumSat.setEnabled(true);
 			jlEdad.setEnabled(true);
 			jlCoordLocales.setEnabled(true);
-			jlCoordECEFx.setEnabled(true);
-			jlCoordECEFy.setEnabled(true);
-			jlCoordECEFz.setEnabled(true);
+//			jlCoordECEFx.setEnabled(true);
+//			jlCoordECEFy.setEnabled(true);
+//			jlCoordECEFz.setEnabled(true);
 			jlAltura.setEnabled(true);
 			jlHGeoide.setEnabled(true);
 			jlAlturaGPS.setEnabled(true);
@@ -298,15 +298,15 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			} else 
 				jlCoordLocales.setEnabled(false);
 			Matrix ce=pto.getCoordECEF();
-			if(ce!=null && ce.get(0, 0)<Double.MAX_VALUE) {
-				jlCoordECEFx.setText(String.format("%10.3f",ce.get(0,0)));
-				jlCoordECEFy.setText(String.format("%10.3f",ce.get(1,0)));
-				jlCoordECEFz.setText(String.format("%10.3f",ce.get(2,0)));
-			} else {
-				jlCoordECEFx.setEnabled(false);
-				jlCoordECEFy.setEnabled(false);
-				jlCoordECEFz.setEnabled(false);
-			}
+//			if(ce!=null && ce.get(0, 0)<Double.MAX_VALUE) {
+//				jlCoordECEFx.setText(String.format("%10.3f",ce.get(0,0)));
+//				jlCoordECEFy.setText(String.format("%10.3f",ce.get(1,0)));
+//				jlCoordECEFz.setText(String.format("%10.3f",ce.get(2,0)));
+//			} else {
+//				jlCoordECEFx.setEnabled(false);
+//				jlCoordECEFy.setEnabled(false);
+//				jlCoordECEFz.setEnabled(false);
+//			}
 			jlAltura.setText(String.format("%+8.2f", pto.getHGeoide()+pto.getMSL()));
 			jlHGeoide.setText(String.format("%+8.2f", pto.getHGeoide()));
 			jlAlturaGPS.setText(String.format("%+8.2f", pto.getMSL()));
