@@ -12,6 +12,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 
 import sibtra.util.PanelMapa;
+import sibtra.util.PanelMuestraTrayectoria;
 
 
 /**
@@ -19,23 +20,10 @@ import sibtra.util.PanelMapa;
  * Atiende eventos de GPS y actualiza posición del coche.
  * @author alberto
  */
-public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener {
+public class PanelMuestraRuta extends PanelMuestraTrayectoria implements  GpsEventListener {
 	
-	/** Largo del coche en metros */
-	protected double largoCoche=2;
-	/** ancho del coche en metros */
-	protected double anchoCoche = 1;
+	protected Ruta RU;
 
-	private Ruta RU;
-
-	/** coordenadas de la posición del coche. Si es NaN el coche no se pinta */
-	double posXCoche=Double.NaN;
-	double posYCoche;
-	/** orientación del coche */
-	double orientacionCoche;
-	private JCheckBox jcbSeguirCoche;
-	private JCheckBox jcbMostrarCoche;
-	
     /**
      * Constructor 
      * @param rupas Ruta pasada.
@@ -43,102 +31,17 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener {
 	public PanelMuestraRuta(Ruta rupas) {
 		super();
 		RU=rupas;
-		jcbSeguirCoche=new JCheckBox("Seguir Coche");
-		jpSur.add(jcbSeguirCoche);
-		
-		jcbMostrarCoche=new JCheckBox("Mostrar Coche");
-		jpSur.add(jcbMostrarCoche);
+		if(RU!=null)
+			setTr(RU.toTr());
 		//Si queremoa añadir algo al panel inferiro	
 		//		jpSur.add(jcbEscalas);
 
 	}
 
-	protected void cosasAPintar(Graphics g0) {
-		super.cosasAPintar(g0);
-		Graphics2D g=(Graphics2D)g0;
-		if (RU!=null && RU.getNumPuntos()>=1){
-			//pintamos el trayecto
-			g.setStroke(new BasicStroke());
-			g.setColor(Color.YELLOW);
-			GeneralPath gpTr= 
-				new GeneralPath(GeneralPath.WIND_EVEN_ODD, RU.getNumPuntos());
-
-			Point2D.Double px=point2Pixel(RU.getPunto(0).getXLocal(),RU.getPunto(0).getYLocal());
-			gpTr.moveTo((float)px.getX(),(float)px.getY());
-			for(int i=1; i<RU.getNumPuntos(); i++) {
-				px=point2Pixel(RU.getPunto(i).getXLocal(),RU.getPunto(i).getYLocal());
-				//Siguientes puntos son lineas
-				gpTr.lineTo((float)px.getX(),(float)px.getY());
-			}
-
-			g.draw(gpTr);
-		}
-		if(Double.isNaN(posXCoche)) {
-			jcbMostrarCoche.setEnabled(false);
-			jcbSeguirCoche.setEnabled(false);
-		} else {
-			jcbMostrarCoche.setEnabled(true);
-			jcbSeguirCoche.setEnabled(true);
-			if(jcbMostrarCoche.isSelected()){
-				//Posición y orientación del coche
-				g.setStroke(new BasicStroke(3));
-				g.setPaint(Color.GRAY);
-				g.setColor(Color.GRAY);
-				double[] esqDD={posXCoche+anchoCoche/2*Math.sin(orientacionCoche)
-						,posYCoche-anchoCoche/2*Math.cos(orientacionCoche) };
-				double[] esqDI={posXCoche-anchoCoche/2*Math.sin(orientacionCoche)
-						,posYCoche+anchoCoche/2*Math.cos(orientacionCoche) };
-				double[] esqPD={esqDD[0]-largoCoche*Math.cos(orientacionCoche)
-						,esqDD[1]-largoCoche*Math.sin(orientacionCoche) };
-				double[] esqPI={esqDI[0]-largoCoche*Math.cos(orientacionCoche)
-						,esqDI[1]-largoCoche*Math.sin(orientacionCoche) };
-				Point2D pxDD=point2Pixel(esqDD);
-				Point2D pxDI=point2Pixel(esqDI);
-				Point2D pxPD=point2Pixel(esqPD);
-				Point2D pxPI=point2Pixel(esqPI);
-				GeneralPath coche=new GeneralPath();
-				coche.moveTo((float)pxDD.getX(),(float)pxDD.getY());
-				coche.lineTo((float)pxPD.getX(),(float)pxPD.getY());
-				coche.lineTo((float)pxPI.getX(),(float)pxPI.getY());
-				coche.lineTo((float)pxDI.getX(),(float)pxDI.getY());
-				coche.closePath();
-				g.fill(coche);
-				g.draw(coche);
-			}
-		}
-	}
-
-	/** Los límites que necesitamos son los de la ruta a representar */
-	protected double[] limites() {
-		double axis[]=super.limites();
-		if(RU!=null && RU.getNumPuntos()>=1) {
-			for(int i=0; i<RU.getNumPuntos(); i++) {
-				if(RU.getPunto(i).getXLocal()<axis[0]) axis[0]=RU.getPunto(i).getXLocal();
-				if(RU.getPunto(i).getXLocal()>axis[1]) axis[1]=RU.getPunto(i).getXLocal();
-				if(RU.getPunto(i).getYLocal()<axis[2]) axis[2]=RU.getPunto(i).getYLocal();
-				if(RU.getPunto(i).getYLocal()>axis[3]) axis[3]=RU.getPunto(i).getYLocal();
-			}
-
-		}
-		if(!Double.isNaN(posXCoche)) {
-			if(posXCoche<axis[0]) axis[0]=posXCoche;
-			if(posXCoche>axis[1]) axis[1]=posXCoche;
-			if(posYCoche<axis[2]) axis[2]=posYCoche;
-			if(posYCoche>axis[3]) axis[3]=posYCoche;
-
-		}
-		return axis;
-	}
-
-	
-	/** Define posición y orientación del coche. No repinta (usar {@link #actualiza()})
-	 * @param posX si se pasa NaN el coche no se pinta (no está situado)
-	 */
-	public void situaCoche(double posX, double posY, double orientacion) {
-		posXCoche=posX;
-		posYCoche=posY;
-		orientacionCoche=orientacion;
-	}
+//	protected void cosasAPintar(Graphics g0) {
+//		super.cosasAPintar(g0);
+//		//Graphics2D g=(Graphics2D)g0;
+//	}
 
 	/** @return ruta que se está representando	 */
 	public Ruta getRuta() {
@@ -148,7 +51,8 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener {
 	/** Cambia a una nueva ruta a representando */
 	public void setRuta(Ruta ru) {
 		RU=ru;
-		nuevoPunto(); //para actualizar presentación
+		if(RU!=null && RU.getPunto(0)!=null)
+			nuevoPunto(RU.getPunto(0)); //para actualizar presentación
 	}
 	
 	/**
@@ -164,6 +68,8 @@ public class PanelMuestraRuta extends PanelMapa implements  GpsEventListener {
 
 	/** Actualiza la presentación a la situación del pto pasado */
 	public void nuevoPunto(GPSData ultPto) {
+		if(RU==null) return;
+		setTr(RU.toTr());		
 		double x=ultPto.getXLocal();
 		double y=ultPto.getYLocal();
 		double yaw=ultPto.getAngulo();

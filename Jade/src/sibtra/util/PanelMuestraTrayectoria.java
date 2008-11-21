@@ -35,10 +35,10 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	
 	
 	/** Para marcar si se quiere seguir el coche cuando hay cambios de posición */
-	private JCheckBox jcbSeguirCoche;
+	protected JCheckBox jcbSeguirCoche;
 	
 	/** Para marcar si se quiere mostrar el coche */
-	private JCheckBox jcbMostrarCoche;
+	protected JCheckBox jcbMostrarCoche;
 	
     /**
      * Constructor 
