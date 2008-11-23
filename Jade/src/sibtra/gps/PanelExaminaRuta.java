@@ -113,7 +113,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jbUltimo.setEnabled(true);
 			spm.setMaximum(ruta.getNumPuntos());
 			jlDeMaximo.setText(String.format(" de %d ", ruta.getNumPuntos()));
-			PanelPto.actualizaPunto(ruta.getPunto(0));
+			spm.setValue(1);
 		}
 	}
 

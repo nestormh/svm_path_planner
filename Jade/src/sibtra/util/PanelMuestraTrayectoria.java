@@ -18,12 +18,17 @@ import javax.swing.JCheckBox;
 @SuppressWarnings("serial")
 public class PanelMuestraTrayectoria extends PanelMapa {
 	
+	/** Tamaño en pixeles del aspa que marca cada punto */ 
+	private static final int tamCruz = 2;
+	
+	/** Longitud del vector que marca el rumbo en cada punto */
+	private static final double tamRumbo = 50;
 	/** Largo del coche en metros */
 	protected double largoCoche=2;
 	/** ancho del coche en metros */
 	protected double anchoCoche = 1;
 
-	/** Array de dos columnas con los puntos que forman la trayectoria */
+	/** Array de dos o tres columnas con los puntos que forman la trayectoria */
 	protected double Tr[][]=null;
 
 	/** coordenadas de la posición del coche. Si es NaN el coche no se pinta */
@@ -40,6 +45,12 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	/** Para marcar si se quiere mostrar el coche */
 	protected JCheckBox jcbMostrarCoche;
 	
+	/** Para marcar si se quiere mostrar los puntos */
+	protected JCheckBox jcbMostrarPuntos;
+
+	/** Para marcar si se quiere mostrar el rumbo */
+	protected JCheckBox jcbMostrarRumbo;
+	
     /**
      * Constructor 
      * @param rupas Ruta pasada.
@@ -47,15 +58,32 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	public PanelMuestraTrayectoria() {
 		super();
 
-		jcbSeguirCoche=new JCheckBox("Seguir Coche");
-		jpSur.add(jcbSeguirCoche);
-		jcbSeguirCoche.addActionListener(this);
-		jcbSeguirCoche.setSelected(true);
+		JCheckBox jcba;
 		
-		jcbMostrarCoche=new JCheckBox("Mostrar Coche");
-		jpSur.add(jcbMostrarCoche);
-		jcbMostrarCoche.addActionListener(this);
-		jcbMostrarCoche.setSelected(true);
+		jcbMostrarPuntos=jcba=new JCheckBox("Puntos");
+		jpSur.add(jcba);
+		jcba.setEnabled(false);
+		jcba.addActionListener(this);
+		jcba.setSelected(false);
+
+		jcbMostrarRumbo=jcba=new JCheckBox("Rumbo");
+		jpSur.add(jcba);
+		jcba.setEnabled(false);
+		jcba.addActionListener(this);
+		jcba.setSelected(false);
+
+		jcbSeguirCoche=jcba=new JCheckBox("Seguir Coche");
+		jpSur.add(jcba);
+		jcba.setEnabled(false);
+		jcba.addActionListener(this);
+		jcba.setSelected(true);
+		
+		jcbMostrarCoche=jcba=new JCheckBox("Mostrar Coche");
+		jpSur.add(jcba);
+		jcba.setEnabled(false);
+		jcba.addActionListener(this);
+		jcba.setSelected(true);
+
 		
 		
 		//Si queremoa añadir algo al panel inferiro	
@@ -64,16 +92,53 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	}
 
 	protected void cosasAPintar(Graphics g0) {
-		if(!Double.isNaN(posXCoche) && jcbSeguirCoche.isSelected())
-			setCentro(posXCoche,posYCoche);
 		super.cosasAPintar(g0);
 		Graphics2D g=(Graphics2D)g0;
-		GeneralPath gptr=pathArrayXY(Tr);
-		if(gptr!=null) {
-			//pintamos el trayecto
+		//pintamos el trayecto si lo hay
+		if(Tr!=null && Tr.length>0) {
 			g.setStroke(new BasicStroke());
 			g.setColor(Color.YELLOW);
-			g.draw(gptr);
+			if(!jcbMostrarPuntos.isSelected()) {
+				GeneralPath gptr=pathArrayXY(Tr);
+				if(gptr!=null) {
+					g.draw(gptr);
+				}
+			} else {
+				//pintamos los puntos que están dentro del recuadro
+				for(int i=0; i<Tr.length; i++) {
+					double pa[]=Tr[i];
+					if(pa[0]<=esqSI.getX() && pa[0]>=esqID.getX()
+							&& pa[1]<=esqSI.getY() && pa[1]>=esqID.getY() ) {
+						//esta dentro del recuadro
+						Point2D px=point2Pixel(pa);
+						int x=(int)px.getX(), y=(int)px.getY();
+						g.drawLine(x-tamCruz, y-tamCruz
+								, x+tamCruz, y+tamCruz);
+						g.drawLine(x-tamCruz, y+tamCruz
+								, x+tamCruz, y-tamCruz);
+					}
+				}
+			}
+
+			if(jcbMostrarRumbo.isSelected() && Tr[0].length>=3) {
+				g.setStroke(new BasicStroke());
+				g.setColor(Color.BLUE);
+				//pintamos los puntos que están dentro del recuadro
+				for(int i=0; i<Tr.length; i++) {
+					double pa[]=Tr[i];
+					if(pa[0]<=esqSI.getX() && pa[0]>=esqID.getX()
+							&& pa[1]<=esqSI.getY() && pa[1]>=esqID.getY() ) {
+						//esta dentro del recuadro
+						Point2D px=point2Pixel(pa);
+						int x=(int)px.getX(), y=(int)px.getY();
+						int Dx=(int)(-tamRumbo*Math.sin(pa[2]));
+						int Dy=(int)(-tamRumbo*Math.cos(pa[2]));
+						g.drawLine(x, y
+								, x+Dx, y+Dy);
+					}
+				}
+
+			}
 		}
 
 		if(Double.isNaN(posXCoche)) {
@@ -168,9 +233,17 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	 * @param tr debe tener al menos 2 columnas
 	 */
 	public void setTr(double[][] tr) {
-		if(tr!=null && tr.length>0 && tr[0].length<2) {
-			throw new IllegalArgumentException("La trayectoria pasada no tiene 2 columnas");
-		}
+		if(tr==null || tr.length==0) {
+			jcbMostrarPuntos.setEnabled(false);
+			jcbMostrarRumbo.setEnabled(false);
+		} else
+			if (tr[0].length<2)
+				throw new IllegalArgumentException("La trayectoria pasada no tiene 2 columnas");
+			else {
+				jcbMostrarPuntos.setEnabled(true);
+				if(tr[0].length>=3)
+					jcbMostrarRumbo.setEnabled(true);
+			}
 		Tr=tr;
 	}
 
@@ -182,6 +255,8 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 		posXCoche=posX;
 		posYCoche=posY;
 		orientacionCoche=orientacion;
+		if(!Double.isNaN(posXCoche) && jcbSeguirCoche.isSelected())
+			setCentro(posXCoche,posYCoche);
 	}
 
 //	/**

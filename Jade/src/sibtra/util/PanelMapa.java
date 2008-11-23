@@ -45,13 +45,13 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	 * Coordenadas de la esquina superior izquierda.
 	 * En unidades mundo real.
 	 */
-	private Point2D esqSI;
+	protected Point2D esqSI;
 	
 	/**
 	 * Coordenadas de la esquina superior izquierda.
 	 * En unidades mundo real.
 	 */
-	private Point2D esqID;
+	protected Point2D esqID;
 
 	/** Banderín para indicar que hay que recalcular las esquinas */
 	private boolean restaurar;
