@@ -56,6 +56,21 @@ public class GPSConnectionTriumph extends GPSConnection {
 	/** Calidad del enlace con la base. NaN si no se ha recibdo paquete DL */
 	double calidadLink=Double.NaN;
 
+	/** Indica estado de la depuracion */
+	protected int nivelLog=0;
+	
+	public static int ERR=0;
+	public static int WAR=0;
+	public static int INFO=15;
+	
+	protected void log(int nivel,String msg) {
+		if(nivel==0) {
+			System.err.println(msg);
+		}
+		if(nivel<=nivelLog) {
+			System.out.println(msg);
+		}
+	}
 	
 	/**
 	 * Constructor por defecto no hace nada.
@@ -82,13 +97,19 @@ public class GPSConnectionTriumph extends GPSConnection {
 	 * @param baudio velocidad de la comunicacion en baudios
 	 */
 	public GPSConnectionTriumph(String portName, int baudios) throws SerialConnectionException {
+		this(portName,baudios,ERR);
+	}
+	
+	public GPSConnectionTriumph(String portName, int baudios, int nivelLog) throws SerialConnectionException {
 		super(portName,baudios);
+		this.nivelLog=nivelLog;
 		comandoGPS("%dM%dm\n");
 //		comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/DL,jps/ET}:0.2\n");
 		//GGA cada segundo, GSA,GST,VTG y DL cada segundo
 //		comandoGPS("%em%em,,{nmea/{GGA:0.2,GSA,GST,VTG},jps/DL}:1\n");
-		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL}:1\n");
 //		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG}:1\n");
+//		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL}:1\n");
+		comandoGPS("%em%em,,{jps/RT,nmea/GGA,jps/PG,jps/ET}:5\n");
 		
 	}
 
@@ -106,7 +127,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 					int val = is.read();
 					//añadimos nuevo byte recibido
 					if(indFin==(buff.length-1)) {
-						System.err.println("Buffer se llenó. Resetamos");
+						log(ERR,"Buffer se llenó. Resetamos");
 						indIni=0; indFin=-1; esEstandar=false; esTexto=false;
 					}
 					indFin++;
@@ -122,12 +143,12 @@ public class GPSConnectionTriumph extends GPSConnection {
 							}
 							String menTexto=new String(buff,indIni,(indFin-indIni+1));
 							if(menTexto.charAt(0)=='$') {
-//								System.out.print('n');
+								log(INFO,"Recibida NMEA:"+menTexto);
 								cuentaPaquetesRecibidos++;
 								nuevaCadenaNMEA(menTexto);
 							}
 							else {
-//								System.out.print('t');
+								log(INFO,"Recibida Texto:"+menTexto);
 								cuentaPaquetesRecibidos++;
 								nuevaCadenaTexto(menTexto);
 							}
@@ -200,9 +221,9 @@ public class GPSConnectionTriumph extends GPSConnection {
 					}
 				}
 			} catch (IOException ioe) {
-				System.err.println("\nError al recibir los datos");
+				log(ERR,"\nError al recibir los datos");
 			} catch (Exception ex) {
-				System.err.println("\nGPSConnection Error al procesar >"+buff+"< : " + ex.getMessage());
+				log(ERR,"\nGPSConnection Error al procesar >"+buff+"< : " + ex.getMessage());
 				ex.printStackTrace();
 				indIni=-1;
 			}
@@ -267,13 +288,13 @@ public class GPSConnectionTriumph extends GPSConnection {
 		 */
 		if(buff[indIni]==(byte)'~' && buff[indIni+1]==(byte)'~') {
 			if(larMen!=(5+5)) {
-				System.err.println("El mensaje RT no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
+				log(WAR,"El mensaje RT no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
 				return;				
 			}
 			//comprobamos checksum
 			byte csc=(byte)checksum8(buff, indIni, larMen-1);
 			if(csc!=buff[indFin]) {
-				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
+				log(WAR,"Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
 				return;
 			}
 			//el checksum es correcto
@@ -282,7 +303,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 			bb.put(buff, indIni+5, 4);
 			bb.rewind();
 			int tod=bb.getInt();
-			System.out.println("\n\n\nMensaje RT: tod="+tod);
+			log(INFO,"\n\n\nMensaje RT: tod="+tod);
 			return;
 		}
 		/* [::](ET) Epoch Time5 
@@ -293,13 +314,13 @@ public class GPSConnectionTriumph extends GPSConnection {
 		 */
 		if(buff[indIni]==(byte)':' && buff[indIni+1]==(byte)':') {
 			if(larMen!=(5+5)) {
-				System.err.println("El mensaje ET no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
+				log(WAR,"El mensaje ET no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
 				return;				
 			}
 			//comprobamos checksum
 			byte csc=(byte)checksum8(buff, indIni, larMen-1);
 			if(csc!=buff[indFin]) {
-				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
+				log(WAR,"Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
 				return;
 			}
 			//el checksum es correcto
@@ -307,7 +328,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 			bb.put(buff, indIni+5, 4);
 			bb.order(ByteOrder.LITTLE_ENDIAN);
 			int tod=bb.getInt(0);
-			System.out.println("Mensaje ET: tod="+tod);
+			log(INFO,"Mensaje ET: tod="+tod);
 			return;
 		}
 		
@@ -322,13 +343,13 @@ public class GPSConnectionTriumph extends GPSConnection {
 		 */
 		if(buff[indIni]==(byte)'P' && buff[indIni+1]==(byte)'O') {
 			if(larMen!=(5+30)) {
-				System.err.println("El mensaje PO no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
+				log(WAR,"El mensaje PO no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
 				return;				
 			}
 			//comprobamos checksum
 			byte csc=(byte)checksum8(buff, indIni, larMen-1);
 			if(csc!=buff[indFin]) {
-				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
+				log(WAR,"Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
 				return;
 			}
 			//el checksum es correcto
@@ -342,10 +363,48 @@ public class GPSConnectionTriumph extends GPSConnection {
 			float sigma=bb.getFloat();
 			byte solType=bb.get();
 			
-			System.out.println("Mensaje PO: ("+x+","+y+","+z+") sigma="+sigma+" solType="+solType);
+			log(INFO,"Mensaje PO: ("+x+","+y+","+z+") sigma="+sigma+" solType="+solType);
 			return;
 		}
 
+		/*
+		 * [PG] Geodetic Position
+             struct GeoPos {30} {
+               f8 lat;      // Latitude [rad]
+               f8 lon;      // Longitude [rad]
+               f8 alt;      // Ellipsoidal height [m]
+               f4 pSigma; // Position SEP [m]
+               u1 solType; // Solution type
+               u1 cs;       // Checksum
+             };
+		 */
+		if(buff[indIni]==(byte)'P' && buff[indIni+1]==(byte)'G') {
+			if(larMen!=(5+30)) {
+				log(WAR,"El mensaje PG no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
+				return;				
+			}
+			//comprobamos checksum
+			byte csc=(byte)checksum8(buff, indIni, larMen-1);
+			if(csc!=buff[indFin]) {
+				log(WAR,"Error checksum PG "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
+				return;
+			}
+			//el checksum es correcto
+			ByteBuffer bb = ByteBuffer.allocate(30);
+			bb.put(buff, indIni+5, 30);
+			bb.rewind();
+			bb.order(ByteOrder.LITTLE_ENDIAN);
+			double lat=bb.getDouble();
+			double lon=bb.getDouble();
+			double alt=bb.getDouble();
+			float sigma=bb.getFloat();
+			byte solType=bb.get();
+			
+			log(INFO,"Mensaje PG: ("+lat+","+lon+","+alt+") sigma="+sigma+" solType="+solType);
+			return;
+		}
+
+		
 		/* [BL] Base Line
   			struct BaseLine {34} {
     			f8 x, y, z; // Calculated baseline vector coordinates [m]
@@ -357,13 +416,13 @@ public class GPSConnectionTriumph extends GPSConnection {
 		 */
 		if(buff[indIni]==(byte)'B' && buff[indIni+1]==(byte)'L') {
 			if(larMen!=(5+34)) {
-				System.err.println("El mensaje BL no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
+				log(WAR,"El mensaje BL no tienen el tamaño correcto "+larMen+" Ignoramos mensaje");
 				return;				
 			}
 			//comprobamos checksum
 			byte csc=(byte)checksum8(buff, indIni, larMen-1);
 			if(csc!=buff[indFin]) {
-				System.err.println("Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
+				log(WAR,"Error checksum "+csc+"!="+buff[indFin]+" Ignoramos mensaje");
 				return;
 			}
 			//el checksum es correcto
@@ -378,7 +437,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 			byte solType=bb.get();
 			int time=bb.getInt();
 
-			System.out.println("Mensaje BL: ("+x+","+y+","+z+") sigma="+sigma+" solType="+solType
+			log(INFO,"Mensaje BL: ("+x+","+y+","+z+") sigma="+sigma+" solType="+solType
 					+" time="+time);
 			return;
 		}
@@ -423,7 +482,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 		if(buff[indIni]==(byte)'D' && buff[indIni+1]==(byte)'L') {
 			//no tiene un largo estandar pero si uno mínimo
 			if(larMen<(5+9)) {
-				System.err.println("El mensaje DL no tienen el tamaño necesario "+larMen+". Ignoramos mensaje");
+				log(WAR,"El mensaje DL no tienen el tamaño necesario "+larMen+". Ignoramos mensaje");
 				return;				
 			}
 
@@ -435,17 +494,17 @@ public class GPSConnectionTriumph extends GPSConnection {
 				//TODO comprobamos checksum
 //				int csc=checksum8(buff, indIni, larMen-2);
 //				if( csc!=Byte.valueOf(CS,16) ) {
-//					System.err.println("Error checksum "+csc+"!="+CS+". Ignoramos mensaje");
+//					log(WAR,"Error checksum "+csc+"!="+CS+". Ignoramos mensaje");
 //					return;
 //				}
 				String[] campos=cadena.substring(0, posArroba).split(",");
 				//el checksum es correcto
 				if(campos.length<4) {
-					System.err.println("DL no tiene los campos mínimos necesarios. Ignoramos");
+					log(WAR,"DL no tiene los campos mínimos necesarios. Ignoramos");
 					return;
 				}
 				if(!campos[1].equals("DLINK")) {
-					System.err.println("DL no tiene título DLINK. Ignoramos");
+					log(WAR,"DL no tiene título DLINK. Ignoramos");
 					return;
 				}
 				int la=Integer.valueOf(campos[2]);
@@ -461,14 +520,14 @@ public class GPSConnectionTriumph extends GPSConnection {
 					//TODO posible problema con }
 					double quality=Double.valueOf(campos[ca].substring(0,campos[ca].lastIndexOf('}')));
 					ca++;
-//					System.out.println(String.format("DL: %c %c %s %d %d %d %f"
-//							,decoId, tipo, stationID, timeLast, numOK, numCorrup,quality ));
+					log(INFO,String.format("DL: %c %c %s %d %d %d %f"
+							,decoId, tipo, stationID, timeLast, numOK, numCorrup,quality ));
 					if(tipo=='D' && numOK>0) //puerto D es el del enlace sólo si se ha recibido algo
 						calidadLink=quality;
 					la--;
 				}
 			} catch (Exception e) {
-				System.err.println("Error parseando campo DL:"+e.getMessage()+" Ignoramos");
+				log(WAR,"Error parseando campo DL:"+e.getMessage()+" Ignoramos");
 			}
 			return;
 		}
@@ -480,7 +539,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 				System.out.print('.');
 			else
 				System.out.print((char)buff[i]);
-		System.out.println("< >"+UtilMensajesIMU.hexaString(buff, indIni+5, larMen-5)+"<");
+		log(INFO,"< >"+UtilMensajesIMU.hexaString(buff, indIni+5, larMen-5)+"<");
 	}
 
 	/**
@@ -516,9 +575,9 @@ u1 cs(u1 const* src, int count)
 	public void comandoGPS(String comando) {
 		try {
 		os.write(comando.getBytes());
-		System.out.println("Enviado Comando:>"+comando+"<");
+		log(INFO,"Enviado Comando:>"+comando+"<");
 		} catch (Exception e) {
-			System.err.println("Problema al enviar comando Triumph:"+e.getMessage());
+			log(WAR,"Problema al enviar comando Triumph:"+e.getMessage());
 		}
 	}
 
@@ -535,7 +594,7 @@ u1 cs(u1 const* src, int count)
 		GPSConnectionTriumph gpsC;
 				
 		try {
-			gpsC=new GPSConnectionTriumph("/dev/ttyUSB0");
+			gpsC=new GPSConnectionTriumph("/dev/ttyUSB0",115200,INFO);
 //			gpsC.comandoGPS("%DL%out,,jps/DL\n");
 
 //			try { Thread.sleep(5000); } catch (Exception e) {}
