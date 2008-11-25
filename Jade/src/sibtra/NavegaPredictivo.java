@@ -334,8 +334,9 @@ public class NavegaPredictivo implements GpsEventListener  {
 				PMGPS.actualizaPunto(null);  //desabilitará todas las labels
 			numPaquetesGPS=paquetesAhora;
 			
-			pmCoche.actualiza();
-			pmCoche.repinta();
+			/* no hace falta porque hay un thread que refresca automaticamente
+			 * pmCoche.actualiza(); 
+			pmCoche.repinta(); */
 			//esperamos hasta que hayan pasado miliSeg de ciclo.
 			long msSobra=tSig-System.currentTimeMillis();
 			if(msSobra<0) System.out.println("Sobra="+msSobra);

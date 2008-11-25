@@ -45,26 +45,33 @@ CommPortOwnershipListener {
 
 	private boolean open;
 	Thread hilo; /* Hilo para el c�lculo de la velocidad */
-	private boolean acelera = false, gira = true;
+
 	/** Punto central del volante del vehiculo */
 	public final static int CARRO_CENTRO = 5280;
 
+	double TiempoTotal = 0;
+	int Recibidos = 0;
 
 
 	/** 
 	 * Numero de cuentas necesarias para alcanzar un metro
 	 */
 	public final static double PULSOS_METRO = 74;
-	private static final double MAX_CUENTA_VOLANTE = 65535;
+	
 //	public static final double RADIANES_POR_CUENTA = 2*Math.PI/MAX_CUENTA_VOLANTE;
 	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374/(5280-3300);
 
 	/** Indica si la ultima vez se estaba acelerando o se estaba frenando */
-	private int acelAnt = 0;
-	/** Indica el sentido que llevaba la aceleracion del vehiculo en la ultima instruccion */
-	private int posAnt = 0;
-	private float giro;
 
+	/** Indica el sentido que llevaba la aceleracion del vehiculo en la ultima instruccion */
+
+
+	static private int freqVel = 4;
+	static double T = 0.105;
+	int Cuentas[] = new int[freqVel];
+	long tiempos[] = new long[freqVel];
+	int indiceCuentas = 0;
+	
 	double errorAnt = 0;
 	double derivativoAnt = 0;
 	int comando = CARRO_CENTRO;
@@ -102,12 +109,12 @@ CommPortOwnershipListener {
 	private int RVolante;
 
 
-	private double velocidadAnt = 0;
+
 	private int refresco = 300;
 
 
 	// Variables del controlador PID
-	private double kPAvance = 10;
+	private double kPAvance = 5;
 	private double kPFreno = 0.5;
 	private double kPDesfreno = 1.5;
 
@@ -120,16 +127,15 @@ CommPortOwnershipListener {
 	/**
 	 * Maximo incremento permitido en el comando para evitar aceleraciones bruscas
 	 */
-	private int maxInc = 20;
+	private int maxInc = 3;
 
 	private int NumPaquetes = 0; /* Numero de paquetes recibidos validos */
-	private int freqVel = 4;
+	
 
 	private long lastPaquete = System.currentTimeMillis();
-	private int comandoAnt = 0;
+	private double comandoAnt = 0;
 
-	private Vector velocidades = null;
-	private static int maxVeloc = 1;
+
 
 	private int contadorFreno = 0;
 
@@ -389,17 +395,21 @@ CommPortOwnershipListener {
 								else
 									avance = avance + buffer[3] + (255 - avanceant) + 1;
 								
-								if ((NumPaquetes % freqVel) == 0) {
-									velocidadAnt = velocidadCS;
-									velocidadCS = avance - lastAvance;
-									velocidadCS = 1000*velocidadCS/(System.currentTimeMillis() - lastPaquete);
+								
+									Cuentas[indiceCuentas] = avance;
+									tiempos[indiceCuentas] = System.currentTimeMillis();
+									
+									int IncCuentas = Cuentas[indiceCuentas] - Cuentas[(indiceCuentas+1)%freqVel];
+									velocidadCS = IncCuentas/(freqVel*T);
 									velocidadMS = velocidadCS / PULSOS_METRO;
 									velocidadKH = velocidadMS * 3600/1000;
-									lastAvance = avance;
 									
-									lastPaquete = System.currentTimeMillis();
+									indiceCuentas = (indiceCuentas + 1) % freqVel;
+
+									//	System.out.println("T: " + (System.currentTimeMillis() - lastPaquete) + " Tmedio: " + (TiempoTotal/Recibidos));
+									
 									controlVel();								
-								}
+								
 								avanceant = buffer[3];
 								alarma = buffer[4];
 								NumPasosFreno = buffer[5];
@@ -1072,19 +1082,6 @@ CommPortOwnershipListener {
 	 public void controlVel() {
 
 
-		 
-
-			
-
-                      
-//System.out.println("avance " + avance + " resta " + (avance - lastAvance) + " velocidad " + velocidadCS);			
-
-//			 lastAvance = avance;
-
-
-
-//			 velocidadAnt = velocidadCS;
-
 			 if (controla) {
 				 //System.out.println("Control de velocidad activo");
 				 //System.out.println("***********************");
@@ -1103,22 +1100,23 @@ CommPortOwnershipListener {
 				 errorAnt = error;
 				 derivativoAnt = derivativo;
 
-				 int comando = (int)(kPAvance * error + derivativo + integral);
-				 int IncComando = comando-comandoAnt;
-
+				 double comandotemp = kPAvance * error;/* + derivativo + integral;*/
+				 double IncComando = comandotemp-comandoAnt;
+				 
 				 if (Math.abs(IncComando) > maxInc) {
-					 if (comando > comandoAnt)
-						 comando = comandoAnt + maxInc;
-				 }
+					 if (IncComando >= 0)
+						 comando = (int) (comandoAnt + maxInc);
+					 else
+						 comando = (int) (comandoAnt - maxInc);
+				 } else
+					 comando = (int)(comandoAnt + IncComando);
 
 
 				 comandoAnt = comando;
 
-				// System.out.println("Avanzando: " + comando);
+				 System.out.println("Avanzando: " + comando);
 				 Avanza(comando);
-			 }
-
-		
+			 }		
 		
 	 }
 	 /*
@@ -1161,7 +1159,7 @@ public void setConsigna(double valor) {
 	  * Fija el valor de la velocidad de avance en cuentas Segundo y activa el control
 	  * @param valor consigna en cuentas/Seg
 	  */
-	 public void setConsignaAvanceCS(double valor) {
+	 public void controlceCS(double valor) {
 		 consignaVel = valor;
 		 controla = true;
 	 }
@@ -1172,6 +1170,7 @@ public void setConsigna(double valor) {
 	  */
 	 public void setConsignaAvanceMS(double valor) {
 		 consignaVel = valor*PULSOS_METRO;
+		 System.out.println("Consigna Avance " + consignaVel);
 		 controla = true;
 	 }
 	 /**

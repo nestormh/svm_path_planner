@@ -22,7 +22,7 @@ import javax.swing.event.ChangeListener;
 import sibtra.util.EligeSerial;
 
 @SuppressWarnings("serial")
-public class PanelCoche extends JPanel implements ActionListener, ChangeListener {
+public class PanelCoche extends JPanel implements ActionListener, ChangeListener, Runnable {
 	
 	private JLabel jlCuentaVolante;
 	private ControlCarro contCarro;
@@ -40,6 +40,17 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 	private SpinnerNumberModel jspMConsignaVelocidad;
 	private JButton jbAplicaConsignaVelocidad;
 	private SpinnerNumberModel jspMAvance;
+	private JFrame ventana;
+	private Thread ThreadPanel;
+	
+	public void run() {
+		while (true){
+			setEnabled(true);
+			actualiza();
+			repinta();
+			try{Thread.sleep(500);} catch (Exception e) {}	
+		}
+	}
 
 	public PanelCoche(ControlCarro cc) {
 		if(cc==null) 
@@ -176,6 +187,15 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 			jspMAvance.addChangeListener(this);
 			jpCentro.add(jspcv);
 		}
+		
+		ventana=new JFrame("Panel Coche");
+		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		ventana.add(this,BorderLayout.CENTER);
+		ventana.pack();
+		ventana.setVisible(true);
+		ThreadPanel = new Thread(this);
+		ThreadPanel.start();
+		
 	}
 
 	/** atendemos pulsación boton aplicar comando volante */
@@ -185,7 +205,7 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 			contCarro.setAnguloVolante(angDeseado);
 		}
 		if(ev.getSource()==jbAplicaConsignaVelocidad) {
-			double velDeseado=Math.toRadians(jspMConsignaVelocidad.getNumber().doubleValue());
+			double velDeseado=jspMConsignaVelocidad.getNumber().doubleValue();
 			contCarro.setConsignaAvanceMS(velDeseado);
 		}
 	}
@@ -248,17 +268,12 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 		
 		ControlCarro contCarro=new ControlCarro(puertos[0]);
 
-		JFrame ventana=new JFrame("Panel Coche");
-		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		PanelCoche pc = new PanelCoche(contCarro);
-		ventana.add(pc,BorderLayout.CENTER);
-		ventana.pack();
-		ventana.setVisible(true);
+		
 		
 		while (true){
-			pc.setEnabled(true);
-			pc.actualiza();
-			pc.repinta();
+		
 			try{Thread.sleep(500);} catch (Exception e) {}	
 		}
 	}
