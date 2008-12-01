@@ -70,7 +70,12 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 		pack();
 		setVisible(true);
 	}
-
+        public Ruta getRutaTemporal(){
+            return rutaTemporal;
+        }
+        public Ruta getRutaEspacial(){
+            return rutaEspacial;
+        }
 	
 	public void actionPerformed(ActionEvent e) {
 		int devuelto=fc.showOpenDialog(this);

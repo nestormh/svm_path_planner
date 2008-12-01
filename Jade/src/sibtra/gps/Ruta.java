@@ -9,6 +9,7 @@ import java.util.Vector;
 import sibtra.imu.AngulosIMU;
 
 import Jama.Matrix;
+import java.util.Vector;
 
 /**
  * Contendrá una ruta grabada por el GPS
@@ -363,12 +364,72 @@ public class Ruta implements Serializable {
 		}
 		return Tr;
 	}
-
+        /**
+         * Rellena la ruta con puntos intermedios de manera que la distancia entre
+         * los nuevos puntos nunca sea mayor que distMin      
+         * @param distMin
+         * @return
+         */
+        
+        public double[][] toTr(double distMax,int ptosTotal) {  
+            int indice = 0;
+            double desvMagnética = getDesviacionM();
+            double[][] rutaRellena = new double[getNumPuntos() + ptosTotal][3];
+            for (int i = 1; i < getNumPuntos(); i++) {
+                GPSData ptoA = getPunto(i-1);
+                GPSData ptoB = getPunto(i);
+                AngulosIMU aiA = ptoA.getAngulosIMU();
+                AngulosIMU aiB = ptoB.getAngulosIMU();
+                double titaA = (aiA != null) ? Math.toRadians(aiA.getYaw()) : ptoA.getAngulo();
+                double titaB = (aiB != null) ? Math.toRadians(aiB.getYaw()) : ptoB.getAngulo();
+                double dx = ptoB.getXLocal() - ptoA.getXLocal();
+                double dy = ptoB.getYLocal() - ptoA.getYLocal();
+                double dtita = normalizaAngulo(titaB - titaA);
+                double separacion = Math.sqrt(dx * dx + dy * dy);
+                int numPuntos = (int) Math.floor(separacion / distMax);
+                rutaRellena[indice][0] = ptoA.getXLocal();
+                rutaRellena[indice][1] = ptoA.getYLocal();                
+                rutaRellena[indice][2] = titaA;
+                for (int k = 1; k < numPuntos; k++) {
+                    rutaRellena[indice+k][0] = ptoA.getXLocal() + k*(dx / numPuntos);
+                    rutaRellena[indice+k][1] = ptoA.getYLocal() + k*(dy / numPuntos);
+                    rutaRellena[indice+k][2] = titaA + k*(dtita / numPuntos)+desvMagnética;
+                }
+                indice = indice + numPuntos;
+            }
+//                AngulosIMU ai = ptoA.getAngulosIMU();
+//                Tr[i][2] = (ai != null) ? Math.toRadians(ai.getYaw()) : ptoA.getAngulo();
+            return rutaRellena;
+	}
+        /** Miro a ver cuantos puntos tengo que añadir en total para saber que
+         * tamaño tiene que tener el vector rellenado
+         */
+        public int calculaPuntosTotales(double distMax){
+            int puntosTotales = 0;
+            int numPuntos;
+            double separacion;
+		for(int i=1; i<getNumPuntos();i++) {
+                    GPSData ptoA = getPunto(i-1);
+                    GPSData ptoB = getPunto(i);
+                    double dx = ptoB.getXLocal()-ptoA.getXLocal();
+                    double dy = ptoB.getYLocal()-ptoA.getYLocal();                    
+                    separacion = Math.sqrt(dx*dx + dy*dy);
+                    numPuntos = (int)Math.floor(separacion/distMax);
+                    puntosTotales = puntosTotales + numPuntos - 1;                   
+		}
+            return puntosTotales;
+        }
+        static double normalizaAngulo(double angulo){
+        angulo -= 2*Math.PI*Math.floor(angulo/(2*Math.PI));
+        if (angulo >= Math.PI)
+            angulo -= 2*Math.PI;
+        return angulo;
+    }
 	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
-	}
+            
+        }
 }

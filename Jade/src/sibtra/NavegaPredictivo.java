@@ -203,8 +203,12 @@ public class NavegaPredictivo implements GpsEventListener  {
 		desMag=rutaEspacial.getDesviacionM();
 		System.out.println("Usando desviación magnética "+Math.toDegrees(desMag));
 		
-		//Rellenamos la trayectoria
-		Tr=rutaEspacial.toTr();
+		//Rellenamos la trayectoria con la nueva versión de toTr,que 
+                //introduce puntos en la trayectoria de manera que la separación
+                //entre dos puntos nunca sea mayor de la distMax
+                double distMax = 0.1;
+                int numPuntos = rutaEspacial.calculaPuntosTotales(distMax);
+		Tr=rutaEspacial.toTr(distMax,numPuntos);
 		
 		
 		System.out.println("Longitud de la trayectoria="+Tr.length);

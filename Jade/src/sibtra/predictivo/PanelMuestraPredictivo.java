@@ -212,27 +212,37 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 //            rutaPrueba[i][1] = 3*Math.sin(rutaPrueba[i][0]*2*Math.PI/20);
             rutaPrueba[i][2] = Math.atan2((rutaPrueba[i][1]-rutaPrueba[i-1][1]),
                                         (rutaPrueba[i][0]-rutaPrueba[i-1][0]));
+            
         }
-
-		String fichero="Rutas/PT5";
+        double[][] rutaPruebaRellena;                
+		String fichero="Rutas/ITER2";
 		try {
 			File file = new File(fichero);
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
 			Ruta re=(Ruta)ois.readObject();
-			ois.close();
-			rutaPrueba=re.toTr();
+			ois.close();                        
+                        rutaPrueba = re.toTr();
+                        double distMin = 0.1;
+                        int ptosTotal;
+                        ptosTotal = re.calculaPuntosTotales(distMin);
+                        rutaPruebaRellena= new double[ptosTotal][3];
+                        rutaPruebaRellena = re.toTr(distMin,ptosTotal);			                       
+                       // System.out.println(rutaPruebaRellena.length);
+                        
 		} catch (IOException ioe) {
-			System.err.println("Error al abrir el fichero " + fichero);
+                        rutaPruebaRellena= new double[1][1];
+	                System.err.println("Error al abrir el fichero " + fichero);
 			System.err.println(ioe.getMessage());
 		} catch (ClassNotFoundException cnfe) {
+                        rutaPruebaRellena= new double[1][1];
 			System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
-		}     
+		} 
 
         
         carroOri.setPostura(0,2,0.5,0.0);
 //        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.3,0);
         
-        ControlPredictivo controlador = new ControlPredictivo(carroOri,rutaPrueba,
+        ControlPredictivo controlador = new ControlPredictivo(carroOri,rutaPruebaRellena,
                                             horPredic,horCont,paramLanda,paramTs);
         //ventana
 		JFrame ventana=new JFrame("Panel Muestra Predictivo");		
