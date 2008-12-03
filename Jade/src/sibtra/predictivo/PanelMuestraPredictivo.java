@@ -60,60 +60,71 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 	private SpinnerNumberModel jsModHPred;
 	private SpinnerNumberModel jsModHCont;
 	private SpinnerNumberModel jsModLanda;
+        private SpinnerNumberModel jsModDistMax;
+        private Ruta rutaAux;
 
 	/** Constructor necesita el controlador predictivo */
-	public PanelMuestraPredictivo(ControlPredictivo contPredic) {
-		super();
-		CP=contPredic;
-		setTr(CP.ruta);
-		{//nuevo panel para añadir debajo
+	public PanelMuestraPredictivo(ControlPredictivo contPredic,Ruta rutaIn) {
+            super();
+            rutaAux = new Ruta();
+            rutaAux = rutaIn;            
+            CP = contPredic;
+            setTr(CP.ruta);
+            {//nuevo panel para añadir debajo
 			JPanel jpPre=new JPanel(new FlowLayout(FlowLayout.LEADING));
-			//barra de progreso para el comando
+                //barra de progreso para el comando
 			jpbComandoI=new JProgressBar(-pbMax,0);
-			jpPre.add(jpbComandoI);
+                jpPre.add(jpbComandoI);
 
 			jlComando=new JLabel("+##.##º");
-			jlComando.setHorizontalAlignment(SwingConstants.TRAILING);
-			//jlComando.setMinimumSize(new Dimension(50, 20));
-			jlComando.setPreferredSize(new Dimension(60, 20));
-			jpPre.add(jlComando);
+                jlComando.setHorizontalAlignment(SwingConstants.TRAILING);
+                //jlComando.setMinimumSize(new Dimension(50, 20));
+                jlComando.setPreferredSize(new Dimension(60, 20));
+                jpPre.add(jlComando);
 
-			//barra de progreso para el comando derecho
+                //barra de progreso para el comando derecho
 			jpbComandoD = new JProgressBar(0,pbMax);
-			jpPre.add(jpbComandoD);
+                jpPre.add(jpbComandoD);
 
 			jlDistancia=new JLabel("DL: +###.##");
-			//jlDistancia.setMinimumSize(new Dimension(60, 20));
-			jlDistancia.setPreferredSize(new Dimension(80, 20));
-			//jlDistancia.setSize(new Dimension(60, 20));
-			jlDistancia.setHorizontalAlignment(SwingConstants.TRAILING);
-			jpPre.add(jlDistancia);
+                //jlDistancia.setMinimumSize(new Dimension(60, 20));
+                jlDistancia.setPreferredSize(new Dimension(80, 20));
+                //jlDistancia.setSize(new Dimension(60, 20));
+                jlDistancia.setHorizontalAlignment(SwingConstants.TRAILING);
+                jpPre.add(jlDistancia);
 
-			jpPre.add(new Label("H Pred"));
+                jpPre.add(new Label("H Pred"));
 			jsModHPred=new SpinnerNumberModel(1,1,25,1);
 			JSpinner jsHorPred=new JSpinner(jsModHPred);
-			jsModHPred.addChangeListener(this);
-			jpPre.add(jsHorPred);
+                jsModHPred.addChangeListener(this);
+                jpPre.add(jsHorPred);
 
-			jpPre.add(new Label("H Cont"));
+                jpPre.add(new Label("H Cont"));
 			jsModHCont=new SpinnerNumberModel(1,1,25,1);
 			JSpinner jsHorCont=new JSpinner(jsModHCont);
-			jsModHCont.addChangeListener(this);
-			jpPre.add(jsHorCont);
+                jsModHCont.addChangeListener(this);
+                jpPre.add(jsHorCont);
 
-			jpPre.add(new Label("Landa"));
+                jpPre.add(new Label("Landa"));
 			jsModLanda=new SpinnerNumberModel(0,0,100,0.1);
 			JSpinner jsLanda=new JSpinner(jsModLanda);
-			jsModLanda.addChangeListener(this);
-			jpPre.add(jsLanda);
-			
-			jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE,40));
+                jsModLanda.addChangeListener(this);
+                jpPre.add(jsLanda);
+                
+                jpPre.add(new Label("Dist Max"));
+                //jsModDistMax = new SpinnerNumberModel(0.05,0,0.7,0.01);
+                jsModDistMax=new SpinnerNumberModel(0.7,0.05,1,0.05);
+                JSpinner jsDistMax = new JSpinner(jsModDistMax);
+                jsModDistMax.addChangeListener(this);
+                jpPre.add(jsDistMax);
+
+                jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE, 40));
 //			jpPre.setBorder(BorderFactory.createCompoundBorder(
 //	                   BorderFactory.createLineBorder(Color.red),
 //	                   jpPre.getBorder()));
 
-			add(jpPre);
-		}
+                add(jpPre);
+            }
 	}
 	
 	/** Lo que añadimos al panel */
@@ -160,6 +171,10 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 		if(ce.getSource()==jsModLanda) {
 			CP.setLanda(jsModLanda.getNumber().doubleValue());
 		}
+                if(ce.getSource()==jsModDistMax) {
+                    double distMax=jsModDistMax.getNumber().doubleValue();                    
+                    CP.setRuta(rutaAux.toTr(distMax));
+		}
 	}
 	
 	/** programa el repintado del panel actulizando los valores de los spiners, etiquetas etc.*/
@@ -180,8 +195,9 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 		//reflejamos valores usados por controlador
 		jsModHCont.setValue(CP.horControl);
 		jsModHPred.setValue(CP.horPrediccion);
-		jsModLanda.setValue(CP.landa);
-		
+		jsModLanda.setValue(CP.landa);                 
+		setTr(CP.ruta);
+                
 		super.actualiza();
 	}
 	
@@ -214,28 +230,28 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                                         (rutaPrueba[i][0]-rutaPrueba[i-1][0]));
             
         }
+        Ruta re;
         double[][] rutaPruebaRellena;                
 		String fichero="Rutas/ITER2";
 		try {
 			File file = new File(fichero);
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-			Ruta re=(Ruta)ois.readObject();
+			re=(Ruta)ois.readObject();
 			ois.close();                        
                         rutaPrueba = re.toTr();
-                        double distMin = 0.1;
-                        int ptosTotal;
-                        ptosTotal = re.calculaPuntosTotales(distMin);
-                        rutaPruebaRellena= new double[ptosTotal][3];
-                        rutaPruebaRellena = re.toTr(distMin,ptosTotal);			                       
+                        double distMax = 0.5;                        
+                        rutaPruebaRellena = re.toTr(distMax);			                       
                        // System.out.println(rutaPruebaRellena.length);
                         
-		} catch (IOException ioe) {
-                        rutaPruebaRellena= new double[1][1];
-	                System.err.println("Error al abrir el fichero " + fichero);
-			System.err.println(ioe.getMessage());
+		} catch (IOException ioe) { 
+                    re = new Ruta();
+                    rutaPruebaRellena = new double[1][1];
+                    System.err.println("Error al abrir el fichero " + fichero);
+                    System.err.println(ioe.getMessage());
 		} catch (ClassNotFoundException cnfe) {
-                        rutaPruebaRellena= new double[1][1];
-			System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
+                    re = new Ruta();
+                    rutaPruebaRellena = new double[1][1];
+                    System.err.println("Objeto leído inválido: " + cnfe.getMessage());
 		} 
 
         
@@ -247,7 +263,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         //ventana
 		JFrame ventana=new JFrame("Panel Muestra Predictivo");		
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		PanelMuestraPredictivo pmp=new PanelMuestraPredictivo(controlador){
+		PanelMuestraPredictivo pmp=new PanelMuestraPredictivo(controlador,re){
 			/** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
 			MouseEvent evenPos;
 

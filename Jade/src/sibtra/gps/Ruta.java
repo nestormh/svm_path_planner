@@ -371,7 +371,8 @@ public class Ruta implements Serializable {
          * @return
          */
         
-        public double[][] toTr(double distMax,int ptosTotal) {  
+        public double[][] toTr(double distMax) {
+            int ptosTotal = calculaPuntosTotales(distMax);
             int indice = 0;
             double desvMagnética = getDesviacionM();
             double[][] rutaRellena = new double[getNumPuntos() + ptosTotal][3];
@@ -390,21 +391,51 @@ public class Ruta implements Serializable {
                 rutaRellena[indice][0] = ptoA.getXLocal();
                 rutaRellena[indice][1] = ptoA.getYLocal();                
                 rutaRellena[indice][2] = titaA;
-                for (int k = 1; k < numPuntos; k++) {
-                    rutaRellena[indice+k][0] = ptoA.getXLocal() + k*(dx / numPuntos);
-                    rutaRellena[indice+k][1] = ptoA.getYLocal() + k*(dy / numPuntos);
-                    rutaRellena[indice+k][2] = titaA + k*(dtita / numPuntos)+desvMagnética;
+                if (separacion >= distMax){
+                    for (int k = 1; k < numPuntos; k++) {
+                        rutaRellena[indice+k][0] = ptoA.getXLocal() + k*(dx / numPuntos);
+                        rutaRellena[indice+k][1] = ptoA.getYLocal() + k*(dy / numPuntos);
+                        rutaRellena[indice+k][2] = titaA + k*(dtita / numPuntos)+desvMagnética;
+                    }
                 }
                 indice = indice + numPuntos;
             }
-//                AngulosIMU ai = ptoA.getAngulosIMU();
-//                Tr[i][2] = (ai != null) ? Math.toRadians(ai.getYaw()) : ptoA.getAngulo();
+            return rutaRellena;
+	}
+        /**Versión del toTr() pasándole como ruta original un double[][]
+         * 
+         * @param distMax
+         * @param ptosTotal
+         * @param rutaOriginal Vector de 3 columnas (x,y,tita) y tantas filas como puntos
+         * tenga la ruta
+         * @return
+         */
+        public double[][] toTr(double distMax,int ptosTotal,double[][] rutaOriginal) {  
+            int indice = 0;
+            double desvMagnética = getDesviacionM();
+            double[][] rutaRellena = new double[rutaOriginal.length + ptosTotal][3];
+            for (int i = 1; i < rutaOriginal.length; i++) {                
+                double dx = rutaOriginal[i][0] - rutaOriginal[i-1][0];
+                double dy = rutaOriginal[i][1] - rutaOriginal[i-1][1];
+                double dtita = normalizaAngulo(rutaOriginal[i][2]-rutaOriginal[i-1][2]);
+                double separacion = Math.sqrt(dx * dx + dy * dy);
+                int numPuntos = (int) Math.floor(separacion / distMax);
+                rutaRellena[indice][0] = rutaOriginal[i-1][0];
+                rutaRellena[indice][1] = rutaOriginal[i-1][1];                
+                rutaRellena[indice][2] = rutaOriginal[i-1][2];
+                for (int k = 1; k < numPuntos; k++) {
+                    rutaRellena[indice+k][0] = rutaOriginal[i-1][0] + k*(dx / numPuntos);
+                    rutaRellena[indice+k][1] = rutaOriginal[i-1][1] + k*(dy / numPuntos);
+                    rutaRellena[indice+k][2] = rutaOriginal[i-1][2] + k*(dtita / numPuntos)+desvMagnética;
+                }
+                indice = indice + numPuntos;
+            }
             return rutaRellena;
 	}
         /** Miro a ver cuantos puntos tengo que añadir en total para saber que
          * tamaño tiene que tener el vector rellenado
          */
-        public int calculaPuntosTotales(double distMax){
+        private int calculaPuntosTotales(double distMax){
             int puntosTotales = 0;
             int numPuntos;
             double separacion;

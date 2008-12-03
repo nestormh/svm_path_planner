@@ -131,7 +131,10 @@ public class ControlPredictivo {
 		this.landa = landa;
         this.landaEye = Matrix.identity(horControl,horControl).times(landa);
 	}
-
+        public void setRuta(double[][] nuevaRuta){
+            this.ruta = nuevaRuta;
+        }
+        
     
     /**
      * Calcula la evolución del modelo del vehículo tantos pasos hacia delante como
@@ -228,7 +231,10 @@ public class ControlPredictivo {
             angulo -= 2*Math.PI;
         return angulo;
     }
-    
+    public double calculaConsignaVel(){
+       double consigna = 0; 
+       return consigna; 
+    }
     public double calculaComando(){
         //    vector_error = tita_deseado - ftita;
 //    vector_error = vector_error + (vector_error > pi)*(-2*pi) + (vector_error < -pi)*2*pi;
