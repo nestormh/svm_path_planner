@@ -25,11 +25,14 @@ public:
 	Lineas(int size);
 	virtual ~Lineas();
 	void Insert (CvPoint *item, int pos);
+	void Insert(CvPoint *item, int pos, int ventana);
+	void InsertGreedy(CvPoint *item, int pos, int ventana, bool vertical);
 	void Sort ();
 	CvSeq *GetLine(int pos);
 	int GetN();
 	int *GetIndex();
 	void Print();
+	void DrawLines(IplImage* imagen);
 };
 
 

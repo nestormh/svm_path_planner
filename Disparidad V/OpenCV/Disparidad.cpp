@@ -530,6 +530,20 @@ void crearImagenH2 (IplImage *mapa, IplImage *imagen, int center){
 
 }*/
 
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCI�N: Sort 2d points in right-to-left top-to-bottom order 
+	PAR�METROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+
+static int cmp_func( const void* _a, const void* _b, void* userdata ) {
+    CvPoint* a = (CvPoint*)_a;
+    CvPoint* b = (CvPoint*)_b;
+    int y_diff = a->y - b->y;
+    int x_diff = b->x - a->x;
+    return x_diff ? x_diff : y_diff;
+}
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -632,6 +646,25 @@ void lineasV2(IplImage *src, Lineas *vertical, CvSeq *diagonal){
 
 	line = (CvPoint*) malloc (2 * sizeof (CvPoint));
 	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 20, 20, 30 ); //2 10*CV_PI/180 40 30 20
+
+
+//printf ("Secuencia desordenada\n");
+//for( i = 0; i < lines->total; i++ )
+//{
+//    CvPoint* pt = (CvPoint*)cvGetSeqElem( lines, i );
+//    printf( "(%d,%d)\n", pt->x, pt->y );
+//}
+
+	cvSeqSort(lines, cmp_func, 0 /* userdata is not used here */ );   	
+
+//printf ("Secuencia ordenada\n");     
+//for( i = 0; i < lines->total; i++ )
+//{
+//    CvPoint* pt = (CvPoint*)cvGetSeqElem( lines, i );
+//    printf( "(%d,%d)\n", pt->x + DISCARD, pt->y + DISCARD);
+//}
+//     
+     
         	
 	nLines = lines->total;
 	for (i = 0; i < nLines; i++) {
@@ -645,15 +678,16 @@ void lineasV2(IplImage *src, Lineas *vertical, CvSeq *diagonal){
   		if ((line[0].x == line[1].x)					// L�neas verticales
 			|| (abs((line[0].y - line[1].y) / (line[0].x - line[1].x)) > RECT)){				// L�neas semi-verticales		
 	
-			vertical->Insert(line, line[0].x);
-			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
+			vertical->InsertGreedy(line, line[0].x, 5, true);
+			
+//			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
 			
 		} else if (line[0].y <= line[1].y){					// L�neas de pendiente negativa
 			cvSeqPush(diagonal, line);			
 		}
-	
 	}
 	
+	vertical->DrawLines(color_dst);
 	vertical->Sort();
 //	printf ("Verticales:\n");
 //	vertical->Print();
@@ -1103,6 +1137,7 @@ void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal)
 -----------------------------------------------------------------------------------------------------------------*/
 void crearRDM (IplImage *rdm, IplImage *dm, CvPoint *line){
 		
+		
 		cvSetImageROI(dm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
 		cvSetZero(rdm);
 		cvSetImageROI(rdm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
@@ -1110,6 +1145,42 @@ void crearRDM (IplImage *rdm, IplImage *dm, CvPoint *line){
 		cvSet (rdm, cvScalar(line[0].x), rdm);
 		cvResetImageROI (dm);
 		cvResetImageROI (rdm);
+}
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE: 
+	   FUNCI�N:
+	PAR�METROS: 
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+void crearRDM (IplImage *rdm, IplImage *dm, CvPoint *line, int ventana){
+	IplImage *auxGE, 
+			 *auxLE;
+		
+	auxGE = cvCreateImage(cvGetSize(dm), IPL_DEPTH_8U, 1);		
+	auxLE = cvCreateImage(cvGetSize(dm), IPL_DEPTH_8U, 1);
+		
+	cvSetImageROI(dm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+	
+	cvSetZero(rdm);
+	cvSetZero(auxGE);
+	cvSetZero(auxLE);
+	
+	cvSetImageROI(rdm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+	cvSetImageROI(auxGE, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+	cvSetImageROI(auxLE, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+
+		
+	cvCmpS(auxLE, line[0].x - round(ventana/2), rdm, CV_CMP_LE); 
+	cvCmpS(auxGE, line[0].x + round(ventana/2), rdm, CV_CMP_GE);
+	cvAnd(rdm, auxGE, auxLE);
+	
+//	cvSet (rdm, cvScalar(line[0].x), rdm);
+	cvResetImageROI (dm);
+	cvResetImageROI (rdm);
+	
+	cvReleaseImage(&auxGE);
+	cvReleaseImage(&auxLE);
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
