@@ -42,6 +42,7 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 	private SpinnerNumberModel jspMAvance;
 	private JFrame ventana;
 	private Thread ThreadPanel;
+        private JLabel jlConsigVelCalc;
 	
 	public void run() {
 		while (true){
@@ -187,6 +188,16 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 			jspMAvance.addChangeListener(this);
 			jpCentro.add(jspcv);
 		}
+                
+                { //Consigna de velocidad calculada para cada instante
+			jlConsigVelCalc=jla=new JLabel("##.##");
+			jla.setBorder(BorderFactory.createTitledBorder(
+				       blackline, "Vel. m/s"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+			jpCentro.add(jla);
+		}
 		
 		ventana=new JFrame("Panel Coche");
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -231,7 +242,7 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 			jlConVol.setText(String.format("%10d", contCarro.getConsignaVolante()));
 			jlConAngVolante.setText(String.format("%5.2f", Math.toDegrees(contCarro.getConsignaAnguloVolante())));
 			jlVelMS.setText(String.format("%5.2f",contCarro.getVelocidadMS()));
-		}
+		}                
 		//fijamos estado
 		jlCuentaVolante.setEnabled(estado);
 		jlAnguloVolante.setEnabled(estado);

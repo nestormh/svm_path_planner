@@ -23,6 +23,9 @@ import java.io.OutputStream;
 import java.util.TooManyListenersException;
 import java.util.Vector;
 
+
+//import com.sun.xml.internal.fastinfoset.util.CharArrayArray;
+
 /**
  * A class that handles the details of a serial connection. Reads from one
  * TextArea and writes to a second TextArea. Holds the state of the connection.

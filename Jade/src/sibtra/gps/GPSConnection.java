@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.TooManyListenersException;
 
 import sibtra.imu.ConexionSerialIMU;
+import sibtra.controlcarro.ControlCarro;
 
 /**
  * Maneja la conexión serial con el GPS. 
@@ -67,6 +68,10 @@ public class GPSConnection implements SerialPortEventListener {
 	
 	/** Conexión serial IMU de la que leer ángulos*/
 	ConexionSerialIMU csIMU=null;
+        
+        /** Conexion al coche */
+        
+        ControlCarro csCarro = null;
 
 	/** contador de paquetes recibidos del GPS */
 	int cuentaPaquetesRecibidos=0;
@@ -330,8 +335,14 @@ public class GPSConnection implements SerialPortEventListener {
 			data.setAngulosIMU(csIMU.getAngulo());
 		else
 			data.setAngulosIMU(null);
+                
+                if (csCarro != null) 
+                    data.setVelocidad(csCarro.getVelocidadMS());                  
+                else
+                    data.setVelocidad(0.0);
+                
 		if(!bufferEspacial.tieneSistemaLocal())  {
-			System.out.println("Se actuliza local de buffer Espacial");
+			System.out.println("Se actualiza local de buffer Espacial");
 			bufferEspacial.actualizaSistemaLocal(data);
 			updateBuffers(bufferEspacial);
 		}
@@ -358,7 +369,7 @@ public class GPSConnection implements SerialPortEventListener {
 
 		}
 		avisaListeners(seAñadeEspacial); //avisamos a todos los listeners
-        data = new GPSData(data); //creamos nuevo punto copia del anterior
+        data = new GPSData(data);//creamos nuevo punto copia del anterior
 
 	}
 	
@@ -594,6 +605,12 @@ public class GPSConnection implements SerialPortEventListener {
 	public void setCsIMU(ConexionSerialIMU csIMU) {
 		this.csIMU = csIMU;
 	}
-	
+	public void setCsCARRO(ControlCarro carro){
+            this.csCarro = carro;
+        }
+        
+        public ControlCarro getCsCARRO() {
+            return this.csCarro;
+        }
 }
 

@@ -67,6 +67,7 @@ public class ControlPredictivo {
 	/** Se usa en calculos internos pero la tenemos como campo para no pedir memoria en cada iteración */
 	private double[] respuestaEscalon;
 	private Coche carroEscalon;
+        private double gananciaVel;
 
 	/**
      * 
@@ -85,6 +86,7 @@ public class ControlPredictivo {
         this.landa = landa;
         this.ruta = ruta;
         this.Ts = Ts;
+        gananciaVel = 1;
         
         // creamos todas las matrices que se usan en las iteracioner para evitar tener que 
         //pedir memoria cada vez
@@ -134,8 +136,11 @@ public class ControlPredictivo {
         public void setRuta(double[][] nuevaRuta){
             this.ruta = nuevaRuta;
         }
-        
-    
+
+    void setGananciaVel(double gananciaVel) {
+        this.gananciaVel = gananciaVel;
+    }
+         
     /**
      * Calcula la evolución del modelo del vehículo tantos pasos hacia delante como
      * horizonte de predicción se haya definido
@@ -214,9 +219,29 @@ public class ControlPredictivo {
      * @param indMinAnt
      * @return
      */
-    private int calculaDistMinOptimizado(int indMinAnt){
+    public static int calculaDistMinOptimizado(double[][] ruta,double posX,double posY,int indMinAnt){
         //TODO HAY QUE HACERLO!!
-        return 0;
+        double dx;
+        double dy;
+        double distMin=Double.POSITIVE_INFINITY;
+        double distAnt=Double.POSITIVE_INFINITY;
+        int indMin=0;
+        int indiceInicial = indMinAnt - 10;
+        if (indiceInicial < 0)
+            indiceInicial = 0;
+        for(int i=indiceInicial; i<ruta.length; i++) {
+                dx=posX-ruta[i][0];
+                dy=posY-ruta[i][1];
+                double dist=Math.sqrt(dx*dx+dy*dy);
+                if(dist<distMin) {
+                    indMin=i;
+                    distMin=dist;
+                }else if(distAnt<dist){
+                    indMin = i;
+                    break;
+                }                
+        }
+        return indMin;
     }
     
     /**
@@ -232,7 +257,19 @@ public class ControlPredictivo {
         return angulo;
     }
     public double calculaConsignaVel(){
-       double consigna = 0; 
+       double consigna = 0;
+       double velocidadMax = 3;
+       double refVelocidad;
+       double errorOrientacion;       
+       int indMin = calculaDistMin(ruta,carroOriginal.getX(),carroOriginal.getY());       
+       errorOrientacion = orientacionesDeseadas[0] - carroOriginal.getTita();
+       if (ruta[indMin][3]>velocidadMax){
+           refVelocidad = velocidadMax;
+       }else
+           refVelocidad = ruta[indMin][3]; 
+       consigna = refVelocidad - errorOrientacion*gananciaVel;
+       if (consigna <= 0)
+           consigna = 0.5;       
        return consigna; 
     }
     public double calculaComando(){
@@ -257,7 +294,7 @@ public class ControlPredictivo {
         comandoCalculado = vectorU.get(0,0) +  carroOriginal.getConsignaVolante();        
         return comandoCalculado;
        
-    }
+    }    
     
     private Matrix calculaG(){
         //TODO Optimizar el cálculo de G para que solo se realice si cambia la velocidad

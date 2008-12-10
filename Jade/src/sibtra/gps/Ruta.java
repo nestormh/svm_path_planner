@@ -227,9 +227,9 @@ public class Ruta implements Serializable {
 		if(!esEspacial) {
 			//para los buffers temporales siempre se añade quitando los primeros si no cabe
 			GPSData data=new GPSData(nuevodata);
-			if(puntos.size()>0) 
-				puntos.lastElement().calculaAngSpeed(data);
-			else { data.setAngulo(0); data.setVelocidad(0); }
+//			if(puntos.size()>0) 
+//				puntos.lastElement().calculaAngSpeed(data);
+//			else { data.setAngulo(0); data.setVelocidad(0); }
 			puntos.add(data);
 			while(puntos.size()>tamMaximo) puntos.remove(0);
 			return true;
@@ -238,13 +238,13 @@ public class Ruta implements Serializable {
 			// el último
 			if(puntos.size()==0) {
 				GPSData data=new GPSData(nuevodata);
-				data.setAngulo(0); data.setVelocidad(0); 
+				//data.setAngulo(0); data.setVelocidad(0); 
 				puntos.add(data);
 				return true;
 			} 
 			if (puntos.lastElement().distancia(nuevodata)>minDistOperativa) {
 				GPSData data=new GPSData(nuevodata);
-				puntos.lastElement().calculaAngSpeed(data);
+				//puntos.lastElement().calculaAngSpeed(data);
 				puntos.add(data);
 				while(puntos.size()>tamMaximo) puntos.remove(0);
 				return true;
@@ -354,14 +354,15 @@ public class Ruta implements Serializable {
 	/** @return array de tres columnas con las posiciones locales y las orientaciones (las de la IMU
 	 * si están disponibles). */
 	public double[][] toTr() {
-		double[][] Tr=new double[getNumPuntos()][3];
+		double[][] Tr=new double[getNumPuntos()][4];
 		for(int i=0; i<getNumPuntos();i++) {
 			GPSData ptoA=getPunto(i);
 			Tr[i][0]=ptoA.getXLocal();
 			Tr[i][1]=ptoA.getYLocal();
 			AngulosIMU ai=ptoA.getAngulosIMU();
 			Tr[i][2]=(ai!=null)?Math.toRadians(ai.getYaw()):ptoA.getAngulo();
-		}
+                        Tr[i][3] = ptoA.getVelocidad();
+                }
 		return Tr;
 	}
         /**
@@ -375,7 +376,7 @@ public class Ruta implements Serializable {
             int ptosTotal = calculaPuntosTotales(distMax);
             int indice = 0;
             double desvMagnética = getDesviacionM();
-            double[][] rutaRellena = new double[getNumPuntos() + ptosTotal][3];
+            double[][] rutaRellena = new double[getNumPuntos() + ptosTotal][4];
             for (int i = 1; i < getNumPuntos(); i++) {
                 GPSData ptoA = getPunto(i-1);
                 GPSData ptoB = getPunto(i);
@@ -386,16 +387,19 @@ public class Ruta implements Serializable {
                 double dx = ptoB.getXLocal() - ptoA.getXLocal();
                 double dy = ptoB.getYLocal() - ptoA.getYLocal();
                 double dtita = normalizaAngulo(titaB - titaA);
+                double dVelocidad = ptoB.getVelocidad() - ptoA.getVelocidad();
                 double separacion = Math.sqrt(dx * dx + dy * dy);
                 int numPuntos = (int) Math.floor(separacion / distMax);
                 rutaRellena[indice][0] = ptoA.getXLocal();
                 rutaRellena[indice][1] = ptoA.getYLocal();                
                 rutaRellena[indice][2] = titaA;
+                rutaRellena[indice][3] = ptoA.getVelocidad();
                 if (separacion >= distMax){
                     for (int k = 1; k < numPuntos; k++) {
-                        rutaRellena[indice+k][0] = ptoA.getXLocal() + k*(dx / numPuntos);
-                        rutaRellena[indice+k][1] = ptoA.getYLocal() + k*(dy / numPuntos);
-                        rutaRellena[indice+k][2] = titaA + k*(dtita / numPuntos)+desvMagnética;
+                        rutaRellena[indice+k][0] = ptoA.getXLocal() + k*(dx/numPuntos);
+                        rutaRellena[indice+k][1] = ptoA.getYLocal() + k*(dy/numPuntos);
+                        rutaRellena[indice+k][2] = titaA + k*(dtita/numPuntos)+desvMagnética;
+                        rutaRellena[indice+k][3] = ptoA.getVelocidad() + k*(dVelocidad/numPuntos);
                     }
                 }
                 indice = indice + numPuntos;
