@@ -217,7 +217,7 @@ public class Ruta implements Serializable {
 	}
 
 	/**
-	 * Añade punto pasado a la ruta DUPLICANDOLO. Si esta es espcial sólo si esta a {@link #minDistOperativa} de 
+	 * Añade punto pasado a la ruta DUPLICANDOLO. Si esta es espacial sólo si esta a {@link #minDistOperativa} de 
 	 * el último de la ruta.
 	 * Se controla que el número de puntos no supere {@link #tamMaximo}.
 	 * @param nuevodata punto a añadir.
@@ -357,17 +357,23 @@ public class Ruta implements Serializable {
 		double[][] Tr=new double[getNumPuntos()][4];
 		for(int i=0; i<getNumPuntos();i++) {
 			GPSData ptoA=getPunto(i);
+                        GPSData ptoB=getPunto(i+1);
 			Tr[i][0]=ptoA.getXLocal();
 			Tr[i][1]=ptoA.getYLocal();
 			AngulosIMU ai=ptoA.getAngulosIMU();
-			Tr[i][2]=(ai!=null)?Math.toRadians(ai.getYaw()):ptoA.getAngulo();
-                        Tr[i][3] = ptoA.getVelocidad();
+			Tr[i][2]=(ai!=null)?Math.toRadians(ai.getYaw()):ptoA.calculaAnguloGPS(ptoB);
+                        Tr[i][3] = (ptoA.getVelocidad()!=Double.NaN)? ptoA.getVelocidad():ptoA.calculaVelocidadGPS(ptoB);
                 }
 		return Tr;
 	}
         /**
-         * Rellena la ruta con puntos intermedios de manera que la distancia entre
-         * los nuevos puntos nunca sea mayor que distMin      
+         * Rellena la trayectoria con puntos intermedios de manera que la distancia entre
+         * los nuevos puntos nunca sea mayor que distMax. Los puntos intermedios calculados
+         * tienen sus valores de orientación y velocidad interpolados entre el punto anterior
+         * y el punto actual. En caso de que la velocidad y la orientación no hayan podido ser 
+         * recogidas del sensor de velocidad del coche y de la IMU respectivamente, los 
+         * valores se calculan a partir de los puntos del GPS usando calculaAnguloGPS()
+         * y calculaVelocidadGPS() de la clase GPSData
          * @param distMin
          * @return
          */
@@ -380,26 +386,29 @@ public class Ruta implements Serializable {
             for (int i = 1; i < getNumPuntos(); i++) {
                 GPSData ptoA = getPunto(i-1);
                 GPSData ptoB = getPunto(i);
+                GPSData ptoC = getPunto(i+1);
                 AngulosIMU aiA = ptoA.getAngulosIMU();
                 AngulosIMU aiB = ptoB.getAngulosIMU();
-                double titaA = (aiA != null) ? Math.toRadians(aiA.getYaw()) : ptoA.getAngulo();
-                double titaB = (aiB != null) ? Math.toRadians(aiB.getYaw()) : ptoB.getAngulo();
+                double titaA = (aiA != null) ? Math.toRadians(aiA.getYaw()) : ptoA.calculaAnguloGPS(ptoB);
+                double titaB = (aiB != null) ? Math.toRadians(aiB.getYaw()) : ptoB.calculaAnguloGPS(ptoC);
+                double dtita = normalizaAngulo(titaB - titaA);
                 double dx = ptoB.getXLocal() - ptoA.getXLocal();
                 double dy = ptoB.getYLocal() - ptoA.getYLocal();
-                double dtita = normalizaAngulo(titaB - titaA);
-                double dVelocidad = ptoB.getVelocidad() - ptoA.getVelocidad();
                 double separacion = Math.sqrt(dx * dx + dy * dy);
+                double velA = (ptoA.getVelocidad()!=Double.NaN)? ptoA.getVelocidad() : ptoA.calculaVelocidadGPS(ptoB);
+                double velB = (ptoB.getVelocidad()!=Double.NaN)? ptoB.getVelocidad() : ptoB.calculaVelocidadGPS(ptoC);
+                double dVelocidad = velB - velA;                
                 int numPuntos = (int) Math.floor(separacion / distMax);
                 rutaRellena[indice][0] = ptoA.getXLocal();
                 rutaRellena[indice][1] = ptoA.getYLocal();                
                 rutaRellena[indice][2] = titaA;
-                rutaRellena[indice][3] = ptoA.getVelocidad();
+                rutaRellena[indice][3] = velA;
                 if (separacion >= distMax){
                     for (int k = 1; k < numPuntos; k++) {
                         rutaRellena[indice+k][0] = ptoA.getXLocal() + k*(dx/numPuntos);
                         rutaRellena[indice+k][1] = ptoA.getYLocal() + k*(dy/numPuntos);
                         rutaRellena[indice+k][2] = titaA + k*(dtita/numPuntos)+desvMagnética;
-                        rutaRellena[indice+k][3] = ptoA.getVelocidad() + k*(dVelocidad/numPuntos);
+                        rutaRellena[indice+k][3] = velA + k*(dVelocidad/numPuntos);
                     }
                 }
                 indice = indice + numPuntos;

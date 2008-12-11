@@ -55,7 +55,7 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 
 	public PanelCoche(ControlCarro cc) {
 		if(cc==null) 
-			throw new IllegalArgumentException("Contorl de carro pasado no puede ser null");
+			throw new IllegalArgumentException("Control de carro pasado no puede ser null");
 		
 		contCarro=cc;
 		

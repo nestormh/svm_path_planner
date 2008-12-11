@@ -331,7 +331,7 @@ public class GPSConnection implements SerialPortEventListener {
 	 * El nuevo punto está en campo {@link #data} 
 	 */
 	void nuevoPunto() {
-		if (csIMU!=null)  //si existe conexión seriañ a la IMU copiamos el ángulo  
+		if (csIMU!=null)  //si existe conexión serial a la IMU copiamos el ángulo  
 			data.setAngulosIMU(csIMU.getAngulo());
 		else
 			data.setAngulosIMU(null);
@@ -339,7 +339,8 @@ public class GPSConnection implements SerialPortEventListener {
                 if (csCarro != null) 
                     data.setVelocidad(csCarro.getVelocidadMS());                  
                 else
-                    data.setVelocidad(0.0);
+                    //Para que cante si no tiene lectura de velocidad
+                    data.setVelocidad(Double.NaN);
                 
 		if(!bufferEspacial.tieneSistemaLocal())  {
 			System.out.println("Se actualiza local de buffer Espacial");

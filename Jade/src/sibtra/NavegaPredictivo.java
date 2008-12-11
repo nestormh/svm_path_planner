@@ -318,6 +318,7 @@ public class NavegaPredictivo implements GpsEventListener {
                 modCoche.setPostura(ptoAct[0], ptoAct[1], angAct, volante);
                 double comandoVolante = cp.calculaComando();
                 double consignaVelocidad = cp.calculaConsignaVel();
+                System.out.println(consignaVelocidad);
                 if (comandoVolante > COTA_ANGULO) {
                     comandoVolante = COTA_ANGULO;
                 }

@@ -219,8 +219,7 @@ public class ControlPredictivo {
      * @param indMinAnt
      * @return
      */
-    public static int calculaDistMinOptimizado(double[][] ruta,double posX,double posY,int indMinAnt){
-        //TODO HAY QUE HACERLO!!
+    public static int calculaDistMinOptimizado(double[][] ruta,double posX,double posY,int indMinAnt){        
         double dx;
         double dy;
         double distMin=Double.POSITIVE_INFINITY;
