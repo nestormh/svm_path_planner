@@ -32,7 +32,7 @@ public:
 	int GetN();
 	int *GetIndex();
 	void Print();
-	void DrawLines(IplImage* imagen);
+	void DrawLines(IplImage* imagen, CvScalar color);
 };
 
 

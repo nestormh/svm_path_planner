@@ -687,7 +687,7 @@ void lineasV2(IplImage *src, Lineas *vertical, CvSeq *diagonal){
 		}
 	}
 	
-	vertical->DrawLines(color_dst);
+	vertical->DrawLines(color_dst, CV_RGB(255,0,0));
 	vertical->Sort();
 //	printf ("Verticales:\n");
 //	vertical->Print();
@@ -823,7 +823,7 @@ void lineasH2(IplImage *src, Lineas *horizontal, CvSeq *pendpos, CvSeq *pendneg)
 			|| (abs((float)(line[0].y - line[1].y) / (float)(line[0].x - line[1].x)) < 1)){				// L�neas semi-horizontales	(ESTABLECER UN UMBRAL ADECUADO)
 				
 			horizontal->Insert(line, line[0].y);
-			cvLine( color_dst, line[0], line[1], CV_RGB(255,255,0), 1, 8 );
+//			cvLine( color_dst, line[0], line[1], CV_RGB(255,255,0), 1, 8 );
 			
 		} else if (line[0].y < line[1].y){					// L�neas de pendiente negativa
 			cvSeqPush(pendpos, line);			
@@ -831,7 +831,7 @@ void lineasH2(IplImage *src, Lineas *horizontal, CvSeq *pendpos, CvSeq *pendneg)
 			cvSeqPush(pendneg, line);			
 		}
 	}
-
+	horizontal->DrawLines(color_dst, CV_RGB(255,255,0));
 	horizontal->Sort();
 //	printf ("Horizontales:\n");
 //	horizontal->Print();

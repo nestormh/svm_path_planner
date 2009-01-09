@@ -75,12 +75,12 @@ void Lineas::Insert(CvPoint *item, int pos) {
 				&& (item[1].x == aux[1].x) && (item[1].y == aux[1].y)) 
 				insert = false;				// Si está no se repite
 								
-			else if ((item[0].x >= aux[0].x) && (item[1].x <= aux[1].x)		// La nueva está contenida en una existente 
-				|| (item[0].y >= aux[0].y) && (item[1].y <= aux[1].y))
+			else if (((item[0].x >= aux[0].x) && (item[1].x <= aux[1].x))		// La nueva está contenida en una existente 
+				|| ((item[0].y >= aux[0].y) && (item[1].y <= aux[1].y)))
 				insert = false;
 
-			else if ((item[0].x <= aux[0].x) && (item[1].x >= aux[1].x) 	// La nueva contiene a una existente -> se deja la mayor
-				|| (item[0].y <= aux[0].y) && (item[1].y >= aux[1].y)) {
+			else if (((item[0].x <= aux[0].x) && (item[1].x >= aux[1].x)) 	// La nueva contiene a una existente -> se deja la mayor
+				|| ((item[0].y <= aux[0].y) && (item[1].y >= aux[1].y))) {
 //			printf("-----------------Entra-----------------\n");
 				aux[0] = item[0];
 				aux[1] = item[1];
@@ -128,8 +128,8 @@ void Lineas::Insert(CvPoint *item, int pos, int ventana) {
 			aux = (CvPoint *) cvGetSeqElem(lines[i], j);
 			lx = MAX (abs(item[0].x - item[1].x), abs(aux[0].x - aux[1].x));
 			ly = MAX (abs(item[0].y - item[1].y), abs(aux[0].y - aux[1].y));
-			if ((abs(item[0].x - aux[0].x) <= lado) && (abs(item[0].y - aux[0].y) <= round(ly * 0.8)) 
-				|| (abs(item[1].x - aux[1].x) <= round(0.8 * lx)) && (abs(item[1].y - aux[1].y) <= lado)) 
+			if (((abs(item[0].x - aux[0].x) <= lado) && (abs(item[0].y - aux[0].y) <= round(ly * 0.8))) 
+				|| ((abs(item[1].x - aux[1].x) <= round(0.8 * lx)) && (abs(item[1].y - aux[1].y) <= lado))) 
 				insert = false;				// Si está no se repite
 
 			j++;
@@ -273,7 +273,7 @@ void Lineas::Print() {
 	PARÁMETROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
-void Lineas::DrawLines(IplImage* imagen) {
+void Lineas::DrawLines(IplImage* imagen, CvScalar color) {
 	int i, j;
 	CvPoint *aux;
 
@@ -281,7 +281,7 @@ void Lineas::DrawLines(IplImage* imagen) {
 		j = 0;
 		do {
 			aux = (CvPoint *) cvGetSeqElem(lines[index[i]], j);
-			cvLine( imagen, aux[0], aux[1], CV_RGB(255,0,0), 1, 8 );
+			cvLine( imagen, aux[0], aux[1], color, 1, 8 );
 			
 			j++;
 		}while (j < lines[index[i]]->total);
