@@ -238,16 +238,16 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         }
         Ruta re;
         double[][] rutaPruebaRellena;
-        String fichero = "Rutas/ITER2";
+        String fichero = "Rutas/casa21Despacio";
         try {
             File file = new File(fichero);
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
             re = (Ruta) ois.readObject();
             ois.close();
-            rutaPrueba = re.toTr();
+            //rutaPrueba = re.toTr();
             double distMax = 0.5;
             rutaPruebaRellena = re.toTr(distMax);
-        // System.out.println(rutaPruebaRellena.length);
+            System.out.println(rutaPruebaRellena.length);
 
         } catch (IOException ioe) {
             re = new Ruta();
@@ -261,7 +261,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         }
 
 
-        carroOri.setPostura(-10, -20, 0.5, 0.0);
+        carroOri.setPostura(-1, -1, 0.5, 0.0);
 //        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.3,0);
 
         ControlPredictivo controlador = new ControlPredictivo(carroOri, rutaPruebaRellena,

@@ -313,7 +313,7 @@ public class GPSData implements Serializable, Cloneable {
         vel /= (val.getSysTime() - getSysTime()) / 1000.0;
         val.setVelocidad(vel);
         return vel;
-    }
+    }    
 
     /** Devuelve objeto {@link GPSData} identico al actual */
     public Object clone() {
