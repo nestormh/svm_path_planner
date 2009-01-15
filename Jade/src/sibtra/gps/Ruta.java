@@ -48,14 +48,14 @@ public class Ruta implements Serializable {
 	/** Deviación magnética calculada */
 	double desviacionM=Double.NaN;
 	
-	int indiceInicial;
+	int inidiceFinal = 0;
 
 	/** Constructor por defecto, no pone tamaño y supone que no es espacial */
 	public Ruta() {
 		puntos=new Vector<GPSData>();
 		tamMaximo=Integer.MAX_VALUE;
 		esEspacial=false;
-		indiceInicial = 0;
+		inidiceFinal = 0;
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class Ruta implements Serializable {
 		puntos=new Vector<GPSData>();
 		tamMaximo=tamañoMaximo;
 		esEspacial=false;
-		indiceInicial = 0;
+		inidiceFinal = 0;
 	}
 	
 	/**
@@ -77,7 +77,7 @@ public class Ruta implements Serializable {
 		puntos=new Vector<GPSData>();
 		tamMaximo=Integer.MAX_VALUE;
 		this.esEspacial=esEspacial;
-		indiceInicial = 0;
+		inidiceFinal = 0;
 	}
 	
 	/**
@@ -89,7 +89,7 @@ public class Ruta implements Serializable {
 		puntos=new Vector<GPSData>();
 		tamMaximo=tamañoMaximo;
 		this.esEspacial=esEspacial;
-		indiceInicial = 0;
+		inidiceFinal = 0;
 	}
 	
 	/**
@@ -387,18 +387,18 @@ public class Ruta implements Serializable {
         public double[][] toTr(double distMax) {
             int ptosAñadidos = calculaPuntosTotales(distMax);
             System.out.println("Puntos añadidos " + ptosAñadidos);
-            System.out.println("Indice inicial " + indiceInicial);
+            System.out.println("Indice final " + indiceFinal);
             System.out.println("numero de puntos en el vector original " + getNumPuntos());
             int indice = 0;
             double desvMagnética = getDesviacionM();
             int ptosTotales = getNumPuntos()+ptosAñadidos;
             double[][] rutaRellena = new double[ptosTotales][4];
             GPSData ptoC;
-            for (int i = indiceInicial+1; i < getNumPuntos(); i++) {
+            for (int i = 1; i < indiceFinal+1; i++) {
                 GPSData ptoA = getPunto(i-1);
                 GPSData ptoB = getPunto(i);
                 if (i == getNumPuntos()-1){
-                	ptoC = getPunto(indiceInicial);
+                	ptoC = getPunto(0);
                 }else
                 	ptoC = getPunto(i+1);                         
                 AngulosIMU aiA = ptoA.getAngulosIMU();
@@ -431,8 +431,8 @@ public class Ruta implements Serializable {
             if (esRutaCerrada()){
             	System.out.println("la ruta esta cerrada");
             	GPSData ptoA = getPunto(getNumPuntos()-1);
-            	GPSData ptoB = getPunto(indiceInicial);
-            	ptoC = getPunto(indiceInicial+1);
+            	GPSData ptoB = getPunto(indiceFinal);
+            	ptoC = getPunto(indiceFinal+1);
             	AngulosIMU aiA = ptoA.getAngulosIMU();
             	AngulosIMU aiB = ptoB.getAngulosIMU();
                 double titaA = (aiA != null) ? Math.toRadians(aiA.getYaw()) : ptoA.calculaAnguloGPS(ptoB);
@@ -510,8 +510,9 @@ public class Ruta implements Serializable {
         private int calculaPuntosTotales(double distMax){
             int puntosTotales = 0;
             int numPuntos;
-            double separacion;                        
-            for(int i=indiceInicial+1; i<getNumPuntos();i++) {
+            double separacion;  
+            esCerrada = esRutaCerrada();
+            for(int i=1; i<indiceFinal+1;i++) {
                     GPSData ptoA = getPunto(i-1);
                     GPSData ptoB = getPunto(i);
                     double dx = ptoB.getXLocal()-ptoA.getXLocal();
@@ -520,9 +521,9 @@ public class Ruta implements Serializable {
                     numPuntos = (int)Math.floor(separacion/distMax);
                     puntosTotales = puntosTotales + numPuntos - 1;                   
             }
-            if (esRutaCerrada()){
-            	GPSData ptoA = getPunto(getNumPuntos()-1);
-                GPSData ptoB = getPunto(indiceInicial);
+            if (esCerrada){
+            	GPSData ptoA = getPunto(indiceFinal);
+                GPSData ptoB = getPunto(0);
                 double dx = ptoB.getXLocal()-ptoA.getXLocal();
                 double dy = ptoB.getYLocal()-ptoA.getYLocal();                    
                 separacion = Math.sqrt(dx*dx + dy*dy);
@@ -547,23 +548,23 @@ public class Ruta implements Serializable {
         	double umbral = 5;
         	double distAux;
         	double distMin = Double.POSITIVE_INFINITY;
-        	GPSData ptoFinal = getPunto(getNumPuntos()-1);
-        	GPSData ptoAux = getPunto(0);
-        	distAux = distEntrePuntos(ptoFinal,ptoAux);
-        	int i = 1;
-        	int indiceAux = 0;
+        	GPSData ptoInicial = getPunto(0);
+        	GPSData ptoAux = getPunto(getNumPuntos()-1);
+        	distAux = distEntrePuntos(ptoInical,ptoAux);
+        	int i = getNumPuntos()-2;
+        	int indiceAux = getNumPuntos()-1;
         	while (distAux <= distMin){
         		ptoAux = getPunto(i);
-        		distAux = distEntrePuntos(ptoFinal,ptoAux);
+        		distAux = distEntrePuntos(ptoInicial,ptoAux);
         		if (distAux < distMin){
         			indiceAux = i;
         			distMin = distAux;
         		}
-        		i = i + 1;
+        		i = i - 1;
         	}
         	if (distMin < umbral){
         		cerrada = true;
-        		indiceInicial = indiceAux;
+        		indiceFinal = indiceAux;
         	}
         	else 
         		cerrada = false;

@@ -527,6 +527,7 @@ public class GPSConnection implements SerialPortEventListener {
 			rutaEspacial.actualizaSistemaLocal();
 			updateBuffers(rutaEspacial);
 			rutaTemporal=(Ruta)ois.readObject();
+			rutaTemporal.actualizaSistemaLocal();// Bug detectado por Nestor
 			ois.close();
 		} catch (IOException ioe) {
 			System.err.println("Error al abrir el fichero " + fichero);
