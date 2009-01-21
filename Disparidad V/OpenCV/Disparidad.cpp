@@ -12,6 +12,7 @@
 #define MARGIN 2			// Tamaño del margen de búsqueda en torno al valor de disparidad
 #define DISCARD 15			// Se descartan las disparidades de 0 a DISCARD por corresponderse con objetos lejanos
 #define RECT 5				// Margen que se considera aceptable para que una línea sea recta (diferencia de coordenadas)
+#define WINDOW 9			// Ancho de la ventana para considerar dos líneas paralelas como la misma
 
 typedef struct {			// Tipo de datos para indicar los par�metros de ajuste de los diferentes algoritmos
 	int filtro,
@@ -678,7 +679,8 @@ void lineasV2(IplImage *src, Lineas *vertical, CvSeq *diagonal){
   		if ((line[0].x == line[1].x)					// L�neas verticales
 			|| (abs((line[0].y - line[1].y) / (line[0].x - line[1].x)) > RECT)){				// L�neas semi-verticales		
 	
-			vertical->InsertGreedy(line, line[0].x, 5, true);
+			//vertical->InsertGreedy(line, line[0].x, 5, true);
+			vertical->InsertGreedy(line, MAX(line[0].x, line[1].x), 5);
 			
 //			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
 			
@@ -689,8 +691,6 @@ void lineasV2(IplImage *src, Lineas *vertical, CvSeq *diagonal){
 	
 	vertical->DrawLines(color_dst, CV_RGB(255,0,0));
 	vertical->Sort();
-//	printf ("Verticales:\n");
-//	vertical->Print();
 	
 	color_dst->origin = src->origin;
 	cvShowImage ("Imagen disparidad", color_dst);
@@ -822,7 +822,7 @@ void lineasH2(IplImage *src, Lineas *horizontal, CvSeq *pendpos, CvSeq *pendneg)
 		if ((line[0].y == line[1].y)					// L�neas horizontales
 			|| (abs((float)(line[0].y - line[1].y) / (float)(line[0].x - line[1].x)) < 1)){				// L�neas semi-horizontales	(ESTABLECER UN UMBRAL ADECUADO)
 				
-			horizontal->Insert(line, line[0].y);
+			horizontal->Insert(line, MAX(line[0].y, line[1].y), 5);
 //			cvLine( color_dst, line[0], line[1], CV_RGB(255,255,0), 1, 8 );
 			
 		} else if (line[0].y < line[1].y){					// L�neas de pendiente negativa
@@ -833,8 +833,6 @@ void lineasH2(IplImage *src, Lineas *horizontal, CvSeq *pendpos, CvSeq *pendneg)
 	}
 	horizontal->DrawLines(color_dst, CV_RGB(255,255,0));
 	horizontal->Sort();
-//	printf ("Horizontales:\n");
-//	horizontal->Print();
 
 	cvShowImage ("Imagen disparidad H", color_dst);
 
@@ -1069,12 +1067,10 @@ void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal)
 	CvPoint *hor, 
 		    *ver;	
 	
-
 	printf ("Verticales:\n");
 	vertical->Print();
 	printf ("Horizontales:\n");
 	horizontal->Print();
-
 	
 	/* Configurar la fuente para el texto en im�genes */
 	hScale = 0.5;
@@ -1128,6 +1124,95 @@ void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal)
 
 	cvReleaseImage(&color_dst);
 }
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE: 
+	   FUNCI�N:
+	PAR�METROS: 
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal, int ventana){
+	IplImage* color_dst;
+	int nVer,
+	    *index,
+	    i, j, k;
+	
+	CvFont font;
+	double hScale,
+		   vScale;
+	int lineWidth, lado; 
+	CvScalar rectColor;
+	char auxText[255];
+
+	CvSeq *hLines;
+	CvPoint *hor, 
+		    *ver;	
+	
+	printf ("Verticales:\n");
+	vertical->Print();
+	printf ("Horizontales:\n");
+	horizontal->Print();
+	
+	lado = round(ventana / 2);
+		
+	/* Configurar la fuente para el texto en im�genes */
+	hScale = 0.5;
+	vScale = 0.5;
+	lineWidth = 0;
+	cvInitFont (&font, CV_FONT_HERSHEY_SIMPLEX|CV_FONT_ITALIC, hScale, vScale, lineWidth);
+
+	// Para mostrar el rect�ngulo
+	color_dst = cvCloneImage (sourceImage);
+	color_dst->origin = sourceImage->origin;
+
+	nVer = vertical->GetN();
+	index = vertical->GetIndex();
+	
+	for (i= 0; i < nVer; i ++){		// Dibujar rect�ngulos (detectar obst�culos)
+		ver = (CvPoint *) cvGetSeqElem(vertical->GetLine(index[i]), 0);
+		//printf ("Vertical: (%d %d) (%d %d)\n", ver[0].x, ver[0].y, ver[1].x, ver[1].y);
+		
+		k = index[i] + lado;
+		
+		do {
+			hLines = horizontal->GetLine(k);
+			k--;
+		} while ((hLines->total == 0) && (k >= 0) && (k >= index[i] - lado)); 
+
+		j = 0;
+		while (j < hLines->total) {
+			hor = (CvPoint *) cvGetSeqElem(hLines, j);
+	
+			//printf ("Horizontal: (%d %d) (%d %d)\n", hor[0].x, hor[0].y, hor[1].x, hor[1].y);
+
+			if (ver[0].x > 46)
+				rectColor = CV_RGB(255,0,0);
+			else if (ver[0].x > 23)
+				rectColor = CV_RGB(255,255,0);
+			else
+				rectColor = CV_RGB(0,255,0);
+
+			cvRectangle(color_dst, cvPoint(MIN(hor[0].x, hor[1].x), MIN(ver[0].y, ver[1].y)), cvPoint(MAX(hor[0].x, hor[1].x), MAX(ver[0].y, ver[1].y)), rectColor);
+//printf("Rectángulo: %d %d %d %d\n", MIN(hor[0].x, hor[1].x), MIN(ver[0].y, ver[1].y), MAX(hor[0].x, hor[1].x), MAX(ver[0].y, ver[1].y));
+
+
+			sprintf(auxText, "%.2f m",(float)(0.545*425/ver[0].x));
+			cvPutText (color_dst, auxText, cvPoint(MIN(hor[0].x, hor[1].x), MIN(ver[0].y, ver[1].y) - 1), &font, rectColor);
+
+			cvShowImage( "Obstaculos", color_dst );
+			printf ("Posible obstaculo a %f m (disparidad %d)\n", (float)(0.545*425/ver[0].x), ver[0].x);
+			
+			j++;
+		}
+		
+			
+	}
+
+	cvShowImage( "Obstaculos", color_dst );
+
+	cvReleaseImage(&color_dst);
+}
+
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE: 
@@ -1291,7 +1376,7 @@ clock_t start = clock();
 	}
 /*******************************************************************************/
 
-	marcObstacle2 (left, vLines, hLines);
+	marcObstacle2 (left, vLines, hLines, 5);
 
 clock_t stop = clock();
 printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
@@ -1348,7 +1433,7 @@ int main (int argc, char* argv[]){
 	CvCapture *videoIzq = 0;
 	CvCapture *videoDer = 0;
 
-	source = 4;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
+	source = 0;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
 
 	switch (source) {
 		case 1:
@@ -1360,7 +1445,7 @@ int main (int argc, char* argv[]){
 //			for (int i = 0; i < totalDisp; i++) {
 //				printf("%d: %S\n", i + 1, lista[i]);
 //			}
-			system ("v4l2-ctl --dev /dev/video0 -i 1");
+			system ("v4l2-ctl --dev /dev/video0 -i 0");
 			system ("v4l2-ctl --dev /dev/video1 -i 1");
 
 			videoIzq = cvCaptureFromCAM(0); // capture from video device #0
@@ -1419,8 +1504,8 @@ int main (int argc, char* argv[]){
 
 		switch (source){
 			case 0: {		// Im�genes est�ticas
-				izquierda = cvLoadImage("Frames1/fuera_left_185.bmp");
-				derecha = cvLoadImage("Frames1/fuera_right_185.bmp");
+				izquierda = cvLoadImage("Series/puerta_left_61.bmp");
+				derecha = cvLoadImage("Series/puerta_right_61.bmp");
 
 				if (!izquierda || !derecha){
 					printf ("Error leyendo im�genes\n");

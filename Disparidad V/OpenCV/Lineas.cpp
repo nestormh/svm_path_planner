@@ -53,16 +53,26 @@ Lineas::~Lineas() {
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
-	   FUNCIÓN:
+	   FUNCIÓN: Inserta una línea en la estructura. Hace las comprobaciones adecuadas para:
+	            - Evitar duplicados
+	            - Evitar líneas contenidas en otras
+	            - Evitar paralelas muy cercanas
 	PARÁMETROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
 void Lineas::Insert(CvPoint *item, int pos) {
 	int j;
 	CvPoint *aux;
-	bool insert;
+	bool insert, 
+		 direction;
 	
 	insert = true;
+
+	if (abs(item[0].x - item[1].x) < abs(item[0].y - item[1].y)){	// Comprobar la dirección de la línea
+		direction = true;		// Vertical
+	}else{
+		direction = false;		// Horizontal
+	}	
 	
 	if (lines[pos]->first == NULL) {	// Si no hay ninguna línea en esa posición	
 		index[n] = pos;
@@ -72,16 +82,16 @@ void Lineas::Insert(CvPoint *item, int pos) {
 		do {							// Comprobar si ya está insertado
 			aux = (CvPoint *) cvGetSeqElem(lines[pos], j);
 			if ((item[0].x == aux[0].x) && (item[0].y == aux[0].y) 
-				&& (item[1].x == aux[1].x) && (item[1].y == aux[1].y)) 
+				&& (item[1].x == aux[1].x) && (item[1].y == aux[1].y)) { 
 				insert = false;				// Si está no se repite
-								
-			else if (((item[0].x >= aux[0].x) && (item[1].x <= aux[1].x))		// La nueva está contenida en una existente 
-				|| ((item[0].y >= aux[0].y) && (item[1].y <= aux[1].y)))
+				printf ("No se inserta (repetida)\n");				
+			} else if (((item[0].x >= aux[0].x) && (item[1].x <= aux[1].x))		// La nueva está contenida en una existente 
+				|| ((item[0].y >= aux[0].y) && (item[1].y <= aux[1].y))) {
 				insert = false;
-
-			else if (((item[0].x <= aux[0].x) && (item[1].x >= aux[1].x)) 	// La nueva contiene a una existente -> se deja la mayor
+				printf ("No se inserta (contenida)\n");
+			} else if (((item[0].x <= aux[0].x) && (item[1].x >= aux[1].x)) 	// La nueva contiene a una existente -> se deja la mayor
 				|| ((item[0].y <= aux[0].y) && (item[1].y >= aux[1].y))) {
-//			printf("-----------------Entra-----------------\n");
+			printf("Modificada \n");
 				aux[0] = item[0];
 				aux[1] = item[1];
 				insert = false;
@@ -103,11 +113,20 @@ void Lineas::Insert(CvPoint *item, int pos) {
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
 void Lineas::Insert(CvPoint *item, int pos, int ventana) {
-	int i, j;
-	CvPoint *aux;
-	bool insert;
+	int i;
+//	CvPoint *aux;
+	bool direction,
+	     insert;
 	int lado;
-	int lx, ly;
+//	int lx, ly;
+	
+	if (abs(item[0].x - item[1].x) < abs(item[0].y - item[1].y)){	// Comprobar la dirección de la línea
+		direction = true;		// Vertical
+	}else{
+		direction = false;		// Horizontal
+	}	
+	
+	printf ("Insertando [(%d, %d) (%d, %d)]-> ", item[0].x, item[0].y, item[1].x, item[1].y);
 	
 	insert = true;
 	lado = round(ventana / 2);
@@ -122,46 +141,67 @@ void Lineas::Insert(CvPoint *item, int pos, int ventana) {
 		index[n] = pos;
 		n++;	
 		cvSeqPush(lines[pos], item);
+		printf ("Sin modificar\n");
 	} else {
-		j = 0;
-		do {							// Comprobar si ya está insertado
-			aux = (CvPoint *) cvGetSeqElem(lines[i], j);
-			lx = MAX (abs(item[0].x - item[1].x), abs(aux[0].x - aux[1].x));
-			ly = MAX (abs(item[0].y - item[1].y), abs(aux[0].y - aux[1].y));
-			if (((abs(item[0].x - aux[0].x) <= lado) && (abs(item[0].y - aux[0].y) <= round(ly * 0.8))) 
-				|| ((abs(item[1].x - aux[1].x) <= round(0.8 * lx)) && (abs(item[1].y - aux[1].y) <= lado))) 
-				insert = false;				// Si está no se repite
-
-			j++;
-		}while (j < lines[i]->total);
-		if (insert){
-			index[n] = pos;
-			n++;	
-			cvSeqPush(lines[pos], item);
+		if (direction) {
+			item[0].x = i;
+			item[1].x = i;
+		} else {
+			item[0].y = i;
+			item[1].y = i;
 		}
+		printf ("[(%d, %d) (%d, %d)]\n", item[0].x, item[0].y, item[1].x, item[1].y);
+		this->Insert(item, i);
+		
+//		j = 0;
+//		do {							// Comprobar si ya está insertado
+//			aux = (CvPoint *) cvGetSeqElem(lines[i], j);
+//			lx = MAX (abs(item[0].x - item[1].x), abs(aux[0].x - aux[1].x));
+//			ly = MAX (abs(item[0].y - item[1].y), abs(aux[0].y - aux[1].y));
+//			if (((abs(item[0].x - aux[0].x) <= lado) && (abs(item[0].y - aux[0].y) <= round(ly * 0.8))) 
+//				|| ((abs(item[1].x - aux[1].x) <= round(0.8 * lx)) && (abs(item[1].y - aux[1].y) <= lado))) 
+//				insert = false;				// Si está no se repite
+//
+//			j++;
+//		}while (j < lines[i]->total);
 	
+//		if (insert){
+//			index[n] = pos;
+//			n++;	
+//			cvSeqPush(lines[pos], item);
+//		}
 	}
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
-	   FUNCIÓN:
+	   FUNCIÓN: El objetivo de esta función es insertar las líneas de manera que sólo haya una 
+	            línea dentro del entorno de la ventana. Para ello, si al ir a insertar se encuentra
+	            otra línea dentro de la ventana se combinan ambas, manteniendo la posición de la
+	            insertada en primer lugar.          
 	PARÁMETROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
-void Lineas::InsertGreedy(CvPoint *item, int pos, int ventana, bool vertical ) {
+void Lineas::InsertGreedy(CvPoint *item, int pos, int ventana) {
 	int i;
 	CvPoint *aux;
-	bool insert;
+	bool direction,
+		 insert;
 	int lado;
 		
+	if (abs(item[0].x - item[1].x) < abs(item[0].y - item[1].y)){	// Comprobar la dirección de la línea
+		direction = true;		// Vertical
+	}else{
+		direction = false;		// Horizontal
+	}	
+
 	insert = true;
 	lado = round(ventana / 2);
 	i = pos + lado;
 	
-	printf ("Insertando (%d, %d) (%d, %d)-> ", item[0].x, item[0].y, item[1].x, item[1].y);
+//	printf ("Insertando (%d, %d) (%d, %d)-> ", item[0].x, item[0].y, item[1].x, item[1].y);
 	
-	while ((i >= pos - lado) && (i > 0) && (lines[i]->first == NULL)){
+	while ((i >= pos - lado) && (i > 0) && (lines[i]->first == NULL)){		// Comprobar entorno, deja i en el índice adecuado (posición a insertar o )
 		i--;
 	}
 	
@@ -169,10 +209,10 @@ void Lineas::InsertGreedy(CvPoint *item, int pos, int ventana, bool vertical ) {
 		index[n] = pos;
 		n++;	
 		cvSeqPush(lines[pos], item);
-		printf ("Queda Igual\n");
+//		printf ("Queda Igual\n");
 	} else {
 		aux = (CvPoint *) cvGetSeqElem(lines[i], 0); // No se saca porque se asumen ordenadas de mayor a menor
-		if (vertical) {		// Si vertical
+		if (direction) {		// Si vertical
 			aux[0].y = MAX (item[0].y, aux[0].y);
 			aux[1].y = MIN (item[1].y, aux[1].y);
 		} else {	// Si horizontal
@@ -180,7 +220,7 @@ void Lineas::InsertGreedy(CvPoint *item, int pos, int ventana, bool vertical ) {
 			aux[1].x = MIN (item[1].x, aux[1].x);
 		}
 		
-		printf ("Queda (%d, %d) (%d, %d)\n", aux[0].x, aux[0].y, aux[1].x, aux[1].y);
+//		printf ("Queda (%d, %d) (%d, %d)\n", aux[0].x, aux[0].y, aux[1].x, aux[1].y);
 		
 		item[0].x = aux[0].x;
 		item[0].y = aux[0].y;

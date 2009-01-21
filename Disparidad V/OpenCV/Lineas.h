@@ -26,7 +26,7 @@ public:
 	virtual ~Lineas();
 	void Insert (CvPoint *item, int pos);
 	void Insert(CvPoint *item, int pos, int ventana);
-	void InsertGreedy(CvPoint *item, int pos, int ventana, bool vertical);
+	void InsertGreedy(CvPoint *item, int pos, int ventana);
 	void Sort ();
 	CvSeq *GetLine(int pos);
 	int GetN();
