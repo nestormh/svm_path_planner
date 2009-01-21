@@ -108,8 +108,8 @@ public class GPSConnectionTriumph extends GPSConnection {
 		//GGA cada segundo, GSA,GST,VTG y DL cada segundo
 //		comandoGPS("%em%em,,{nmea/{GGA:0.2,GSA,GST,VTG},jps/DL}:1\n");
 //		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG}:1\n");
-//		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL}:1\n");
-		comandoGPS("%em%em,,{jps/RT,nmea/GGA,jps/PG,jps/ET}:5\n");
+		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL}:1\n");
+//		comandoGPS("%em%em,,{jps/RT,nmea/GGA,jps/PG,jps/ET}:5\n");
 		
 	}
 

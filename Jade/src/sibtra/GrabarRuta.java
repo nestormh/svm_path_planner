@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JWindow;
 
 import sibtra.controlcarro.ControlCarro;
-import sibtra.controlcarro.PanelCoche;
+import sibtra.controlcarro.VentanaCoche;
 import sibtra.gps.GPSConnection;
 import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.GPSData;
@@ -51,7 +51,7 @@ public class GrabarRuta implements GpsEventListener,
     private JLabel jlNpRE;
     private boolean cambioRuta = false;
     private ControlCarro contCarro;
-    private PanelCoche pmCoche;
+    private VentanaCoche pmCoche;
     private JPanel jpCentral;
 
     /** @param args primer argumento puerto del GPS, segundo puerto del la IMU */
@@ -84,10 +84,8 @@ public class GrabarRuta implements GpsEventListener,
 
         //Conectamos Carro
         System.out.println("Abrimos conexión al Carro");
-        contCarro = new ControlCarro(args[3]);
-        
-        pmCoche = new PanelCoche(contCarro);
-        jpCentral.add(pmCoche);
+        contCarro = new ControlCarro(args[2]);        
+        pmCoche = new VentanaCoche(contCarro);
         gpsCon.setCsCARRO(contCarro);
 
         //VEntana datos gps
@@ -207,9 +205,9 @@ public class GrabarRuta implements GpsEventListener,
      */
     public static void main(String[] args) {
         String[] puertos;
-        if (args == null || args.length < 2) {
+        if (args == null || args.length < 3) {
             //no se han pasado argumentos, pedimos los puertos interactivamente
-            String[] titulos = {"GPS", "IMU"};
+            String[] titulos = {"GPS", "IMU", "Coche"};
             puertos = new EligeSerial(titulos).getPuertos();
             if (puertos == null) {
                 System.err.println("No se asignaron los puertos seriales");

@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import sibtra.controlcarro.ControlCarro;
-import sibtra.controlcarro.PanelCoche;
+import sibtra.controlcarro.VentanaCoche;
 import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.GPSData;
 import sibtra.gps.GpsEvent;
@@ -68,7 +68,7 @@ public class NavegaPredictivo implements GpsEventListener {
     ControlCarro contCarro;
     private PanelMuestraPredictivo pmp;
     private JLabel jlCalidad;
-    private PanelCoche pmCoche;
+    private VentanaCoche pmCoche;
     private JLabel jlNumPaquetes;
     private JCheckBox jcbUsarRF;
     protected double distRF;
@@ -170,7 +170,7 @@ public class NavegaPredictivo implements GpsEventListener {
         //conecto manejador cuando todas las ventanas están creadas
         csi.addIMUEventListener(pmai);
 
-        pmCoche = new PanelCoche(contCarro);
+        pmCoche = new VentanaCoche(contCarro);
         jpCentral.add(pmCoche);
 
         ventNumeros.pack();

@@ -21,8 +21,15 @@ import javax.swing.event.ChangeListener;
 
 import sibtra.util.EligeSerial;
 
+/** 
+ * Ventana para la monitorización de la información recibida del coche a través
+ * del {@link ControlCarro}
+ * @author alberto,jonay
+ *
+ */
+
 @SuppressWarnings("serial")
-public class PanelCoche extends JPanel implements ActionListener, ChangeListener, Runnable {
+public class VentanaCoche extends JFrame implements ActionListener, ChangeListener, Runnable {
 	
 	private JLabel jlCuentaVolante;
 	private ControlCarro contCarro;
@@ -40,7 +47,6 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 	private SpinnerNumberModel jspMConsignaVelocidad;
 	private JButton jbAplicaConsignaVelocidad;
 	private SpinnerNumberModel jspMAvance;
-	private JFrame ventana;
 	private Thread ThreadPanel;
         private JLabel jlConsigVelCalc;
 	
@@ -53,7 +59,8 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 		}
 	}
 
-	public PanelCoche(ControlCarro cc) {
+	public VentanaCoche(ControlCarro cc) {
+		super("Control Carro");
 		if(cc==null) 
 			throw new IllegalArgumentException("Control de carro pasado no puede ser null");
 		
@@ -61,7 +68,6 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 		
 		JPanel jpCentro=new JPanel(new GridLayout(0,3)); //empezamos con 3 columnas
 		setLayout(new BorderLayout());
-		add(jpCentro,BorderLayout.CENTER);
 
 		Border blackline = BorderFactory.createLineBorder(Color.black);
 		Font Grande;
@@ -188,22 +194,21 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 			jspMAvance.addChangeListener(this);
 			jpCentro.add(jspcv);
 		}
-                
-                { //Consigna de velocidad calculada para cada instante
+
+		{ //Consigna de velocidad calculada para cada instante
 			jlConsigVelCalc=jla=new JLabel("##.##");
 			jla.setBorder(BorderFactory.createTitledBorder(
-				       blackline, "Vel. m/s"));
-		    jla.setFont(Grande);
+					blackline, "Vel. m/s"));
+			jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
 			jpCentro.add(jla);
 		}
-		
-		ventana=new JFrame("Panel Coche");
-		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		ventana.add(this,BorderLayout.CENTER);
-		ventana.pack();
-		ventana.setVisible(true);
+
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		add(jpCentro,BorderLayout.CENTER);
+		pack();
+		setVisible(true);
 		ThreadPanel = new Thread(this);
 		ThreadPanel.start();
 		
@@ -269,7 +274,7 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 		String[] puertos;
 		if(args==null || args.length<1) {
 			//no se han pasado argumentos, pedimos los puertos interactivamente
-			String[] titulos={"GPS"};			
+			String[] titulos={"Carro"};			
 			puertos=new EligeSerial(titulos).getPuertos();
 			if(puertos==null) {
 				System.err.println("No se asignaron los puertos seriales");
@@ -280,7 +285,7 @@ public class PanelCoche extends JPanel implements ActionListener, ChangeListener
 		ControlCarro contCarro=new ControlCarro(puertos[0]);
 
 		
-		PanelCoche pc = new PanelCoche(contCarro);
+		VentanaCoche pc = new VentanaCoche(contCarro);
 		
 		
 		while (true){
