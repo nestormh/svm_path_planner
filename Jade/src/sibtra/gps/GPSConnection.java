@@ -335,13 +335,13 @@ public class GPSConnection implements SerialPortEventListener {
 			data.setAngulosIMU(csIMU.getAngulo());
 		else
 			data.setAngulosIMU(null);
-                
-                if (csCarro != null) 
-                    data.setVelocidad(csCarro.getVelocidadMS());                  
-                else
-                    //Para que cante si no tiene lectura de velocidad
-                    data.setVelocidad(Double.NaN);
-                
+
+		if (csCarro != null) 
+			data.setVelocidad(csCarro.getVelocidadMS());                  
+		else
+			//Para que cante si no tiene lectura de velocidad
+			data.setVelocidad(Double.NaN);
+
 		if(!bufferEspacial.tieneSistemaLocal())  {
 			System.out.println("Se actualiza local de buffer Espacial");
 			bufferEspacial.actualizaSistemaLocal(data);

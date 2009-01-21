@@ -170,8 +170,8 @@ public class NavegaPredictivo implements GpsEventListener {
         //conecto manejador cuando todas las ventanas están creadas
         csi.addIMUEventListener(pmai);
 
-        pmCoche = new VentanaCoche(contCarro);
-        jpCentral.add(pmCoche);
+        VentanaCoche vc=new VentanaCoche(contCarro);
+
 
         ventNumeros.pack();
         ventNumeros.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

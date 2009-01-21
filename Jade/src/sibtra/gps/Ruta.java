@@ -237,9 +237,12 @@ public class Ruta implements Serializable {
 		if(!esEspacial) {
 			//para los buffers temporales siempre se añade quitando los primeros si no cabe
 			GPSData data=new GPSData(nuevodata);
-//			if(puntos.size()>0) 
-//				puntos.lastElement().calculaAngSpeed(data);
-//			else { data.setAngulo(0); data.setVelocidad(0); }
+			//solo para el angulo
+			if(puntos.size()>0) {
+				GPSData ultpto=puntos.lastElement();
+				ultpto.setAngulo(ultpto.calculaAnguloGPS(data));
+			}
+			else { data.setAngulo(0); }
 			puntos.add(data);
 			while(puntos.size()>tamMaximo) puntos.remove(0);
 			return true;
@@ -248,13 +251,16 @@ public class Ruta implements Serializable {
 			// el último
 			if(puntos.size()==0) {
 				GPSData data=new GPSData(nuevodata);
-				//data.setAngulo(0); data.setVelocidad(0); 
+				data.setAngulo(0); 
+				//data.setVelocidad(0); 
 				puntos.add(data);
 				return true;
 			} 
 			if (puntos.lastElement().distancia(nuevodata)>minDistOperativa) {
 				GPSData data=new GPSData(nuevodata);
 				//puntos.lastElement().calculaAngSpeed(data);
+				GPSData ultpto=puntos.lastElement();
+				ultpto.setAngulo(ultpto.calculaAnguloGPS(data));
 				puntos.add(data);
 				while(puntos.size()>tamMaximo) puntos.remove(0);
 				return true;
@@ -331,8 +337,8 @@ public class Ruta implements Serializable {
 		double dMax=0; //desviación máxima
 		double dAcum=0; //desviación acumulada
 		double dAcum2=0; //desviación acumulada al cuadrado
-		for(int i=2; i<puntos.size(); i++) {
-			double da=puntos.get(i).getAngulo()-Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw());
+		for(int i=1; i<puntos.size(); i++) {
+			double da=puntos.get(i).calculaAnguloGPS(puntos.get(i-1))-Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw());
 			//colocamos la diferencia en rango +-PI
 			if(da<-Math.PI) da+=2*Math.PI;
 			if(da>Math.PI) da-=2*Math.PI;
@@ -346,7 +352,7 @@ public class Ruta implements Serializable {
 
 		//desviación estandar de la desviación (valga la redundancia :-)
 		double dif2=0;
-		for(int i=2; i<puntos.size(); i++) {
+		for(int i=1; i<puntos.size(); i++) {
 			double da=puntos.get(i).getAngulo()-Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw());
 			//colocamos la diferencia en rango +-PI
 			if(da<-Math.PI) da+=2*Math.PI;
@@ -434,25 +440,25 @@ public class Ruta implements Serializable {
                 indice = indice + numPuntos;
             }
             //En caso de que la ruta no sea cerrada se hace un fade out de la velocidad
-            if (!esCerrada) {
-            	System.out.println("La ruta está abierta");
-            	double dist = 0;
-            	int j = 0;
-            	while(dist < distFrenado){
-            		j = j + 1;
-            		System.out.println("estoy en el while");
-            		double dx = rutaRellena[ptosTotales][0] - rutaRellena[ptosTotales-j][0];
-            		double dy = rutaRellena[ptosTotales][1] - rutaRellena[ptosTotales-j][1];
-            		dist = Math.sqrt(dx*dx + dy*dy);            		            		
-            	}
-            	double decremento  = rutaRellena[ptosTotales-j][3]/j;
-            	double velComienzoFrenado = rutaRellena[ptosTotales-j][3];
-            	int n = 1;
-            	for (int k=ptosTotales-j;k<ptosTotales+1;k++){
-            		rutaRellena[k][3] = velComienzoFrenado - decremento*n;
-            		n = n + 1;
-            	}            	
-            }
+//            if (!esCerrada) {
+//            	System.out.println("La ruta está abierta");
+//            	double dist = 0;
+//            	int j = 0;
+//            	while(dist < distFrenado){
+//            		j = j + 1;
+//            		System.out.println("estoy en el while");
+//            		double dx = rutaRellena[ptosTotales][0] - rutaRellena[ptosTotales-j][0];
+//            		double dy = rutaRellena[ptosTotales][1] - rutaRellena[ptosTotales-j][1];
+//            		dist = Math.sqrt(dx*dx + dy*dy);            		            		
+//            	}
+//            	double decremento  = rutaRellena[ptosTotales-j][3]/j;
+//            	double velComienzoFrenado = rutaRellena[ptosTotales-j][3];
+//            	int n = 1;
+//            	for (int k=ptosTotales-j;k<ptosTotales+1;k++){
+//            		rutaRellena[k][3] = velComienzoFrenado - decremento*n;
+//            		n = n + 1;
+//            	}            	
+//            }
             System.out.println("Primer punto ruta rellena " + rutaRellena[0][0]);
             System.out.println("Primer punto ruta rellena " + rutaRellena[0][1]);
             GPSData p = getPunto(0);
