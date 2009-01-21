@@ -40,8 +40,6 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	private JLabel jlEdad;
 	private JLabel jlCoordLocales;
 	private JLabel jlAltura;
-	private JLabel jlHGeoide;
-	private JLabel jlAlturaGPS;
 //	private JLabel jlCoordECEFx;
 //	private JLabel jlCoordECEFy;
 //	private JLabel jlCoordECEFz;
@@ -49,6 +47,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	private JLabel jlAngulo;
 	private JLabel jlDMag;
 	private JCheckBox jcbSoloEspa;
+	private JLabel jlVelms;
 	
 	/**
 	 * constructor por defecto. Se actualiza con todos los puntos.
@@ -199,19 +198,10 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			jpCentro.add(jla);
 		}
 	
-		{//altura sobre geoide
-			jlHGeoide=jla=new JLabel("+????.??");
+		{//Velocidad m/s
+			jlVelms=jla=new JLabel("+??.??");
 			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Alt. sobre Geoide"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-//			jpCentro.add(jla);
-		}
-		{//altura
-			jlAlturaGPS=jla=new JLabel("+????.??");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Altura GPS"));
+					       blackline, "Velocidad m/s"));
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
@@ -264,11 +254,10 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 //			jlCoordECEFy.setEnabled(false);
 //			jlCoordECEFz.setEnabled(false);
 			jlAltura.setEnabled(false);
-			jlHGeoide.setEnabled(false);
-			jlAlturaGPS.setEnabled(false);
 			jlYaw.setEnabled(false);
 			jlAngulo.setEnabled(false);
 			jlDMag.setEnabled(false);
+			jlVelms.setEnabled(false);
 		} else {
 			jlHora.setEnabled(true);
 			jlLatitud.setEnabled(true);
@@ -281,8 +270,6 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 //			jlCoordECEFy.setEnabled(true);
 //			jlCoordECEFz.setEnabled(true);
 			jlAltura.setEnabled(true);
-			jlHGeoide.setEnabled(true);
-			jlAlturaGPS.setEnabled(true);
 			jlYaw.setEnabled(true);
 			//Nuevos valores
 			jlHora.setText(pto.getHora());
@@ -297,7 +284,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 						, cl.get(0,0), cl.get(1,0), cl.get(2,0)));
 			} else 
 				jlCoordLocales.setEnabled(false);
-			Matrix ce=pto.getCoordECEF();
+//			Matrix ce=pto.getCoordECEF();
 //			if(ce!=null && ce.get(0, 0)<Double.MAX_VALUE) {
 //				jlCoordECEFx.setText(String.format("%10.3f",ce.get(0,0)));
 //				jlCoordECEFy.setText(String.format("%10.3f",ce.get(1,0)));
@@ -307,9 +294,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 //				jlCoordECEFy.setEnabled(false);
 //				jlCoordECEFz.setEnabled(false);
 //			}
-			jlAltura.setText(String.format("%+8.2f", pto.getHGeoide()+pto.getMSL()));
-			jlHGeoide.setText(String.format("%+8.2f", pto.getHGeoide()));
-			jlAlturaGPS.setText(String.format("%+8.2f", pto.getMSL()));
+			jlAltura.setText(String.format("%+8.2f", pto.getAltura()));
 			if(pto.getAngulosIMU()!=null) {
 				jlYaw.setText(String.format("%+8.2f", pto.getAngulosIMU().getYaw()));
 				jlYaw.setEnabled(true);
@@ -322,6 +307,8 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			}
 			jlAngulo.setText(String.format("%+8.2f", Math.toDegrees(pto.getAngulo())));
 			jlAngulo.setEnabled(true);
+			jlVelms.setText(String.format("%+6.2f", pto.getVelocidad()));
+			jlVelms.setEnabled(true);
 		}
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
