@@ -238,7 +238,9 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         }
         Ruta re;
         double[][] rutaPruebaRellena;
-        String fichero = "Rutas/casa21Despacio";
+        //String fichero = "Rutas/Parq20";
+        String fichero = "Rutas/Iter1";
+        //String fichero = "Rutas/casa23";
         try {
             File file = new File(fichero);
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
