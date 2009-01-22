@@ -338,7 +338,7 @@ public class Ruta implements Serializable {
 		double dAcum=0; //desviación acumulada
 		double dAcum2=0; //desviación acumulada al cuadrado
 		for(int i=1; i<puntos.size(); i++) {
-			double da=puntos.get(i).calculaAnguloGPS(puntos.get(i-1))-Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw());
+			double da=puntos.get(i).getAngulo() - Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw());
 			//colocamos la diferencia en rango +-PI
 			if(da<-Math.PI) da+=2*Math.PI;
 			if(da>Math.PI) da-=2*Math.PI;
