@@ -167,8 +167,14 @@ public class ControlCarro implements SerialPortEventListener,
 	 * Maximo incremento permitido en el comando para evitar aceleraciones
 	 * bruscas
 	 */
-	private int maxInc = 3;
-
+	private int maxInc = 10;
+        
+        /**
+         * Zona Muerta donde el motor empieza a actuar realmente
+         */
+        
+        static int ZonaMuerta = 80;
+        
 	private int NumPaquetes = 0; /* Numero de paquetes recibidos validos */
 
 	private long TiempoInicial = System.currentTimeMillis();
@@ -1162,19 +1168,34 @@ public class ControlCarro implements SerialPortEventListener,
 			double IncComando = comandotemp - comandoAnt;
 
 			if (Math.abs(IncComando) > maxInc) {
-				if (IncComando >= 0)
+				if (IncComando >= 0) {
 					comando = (int) (comandoAnt + maxInc);
-				else
+                                        if ((comando > 0) && (comando < ZonaMuerta))
+                                            comando = ZonaMuerta;
+                                } else {
 					comando = (int) (comandoAnt - maxInc);
+                                        if ((comando > 0) && (comando < ZonaMuerta))
+                                            comando = 0;
+                                }
 			} else
 				comando = (int) (comandoAnt + IncComando);
+                        
+                        /* Comprobamos la zona muerta */
+                        
+                        
+                        
 			if (comando >= 255)
 				comando = 255;
-
+                        if (comando <= -255)
+                                comando = -255;
+                        
 			comandoAnt = comando;
 
-			System.out.println("Avanzando: " + comando + " error " + (consignaVel - velocidadCS));
-			Avanza(comando);
+			//System.out.println("Avanzando: " + comando + " error " + (consignaVel - velocidadCS));
+			if (comando >= 0)
+                            Avanza(comando);
+                        else
+                            ; /** Es un comando negativo, por lo que hay que frenar */
 		}
 
 	}
