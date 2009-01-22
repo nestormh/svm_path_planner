@@ -426,13 +426,13 @@ public class Ruta implements Serializable {
                 int numPuntos = (int) Math.floor(separacion / distMax);
                 rutaRellena[indice][0] = ptoA.getXLocal();
                 rutaRellena[indice][1] = ptoA.getYLocal();                
-                rutaRellena[indice][2] = titaA;
+                rutaRellena[indice][2] = titaA + desvMagnética;
                 rutaRellena[indice][3] = velA;
                 if (separacion >= distMax){
                     for (int k = 1; k < numPuntos; k++) {
                         rutaRellena[indice+k][0] = ptoA.getXLocal() + k*(dx/numPuntos);
                         rutaRellena[indice+k][1] = ptoA.getYLocal() + k*(dy/numPuntos);
-                        rutaRellena[indice+k][2] = titaA + k*(dtita/numPuntos)+desvMagnética;
+                        rutaRellena[indice+k][2] = titaA + k*(dtita/numPuntos) + desvMagnética;
                         rutaRellena[indice+k][3] = velA + k*(dVelocidad/numPuntos);
                     }
                 }
@@ -458,12 +458,7 @@ public class Ruta implements Serializable {
 //            		rutaRellena[k][3] = velComienzoFrenado - decremento*n;
 //            		n = n + 1;
 //            	}            	
-//            }
-            System.out.println("Primer punto ruta rellena " + rutaRellena[0][0]);
-            System.out.println("Primer punto ruta rellena " + rutaRellena[0][1]);
-            GPSData p = getPunto(0);
-            System.out.println("Primer punto de la ruta original " + p.getXLocal());
-            System.out.println("Primer punto de la ruta original " + p.getYLocal());
+//            }            
             return rutaRellena;
 	}
         /**Versión del toTr() pasándole como ruta original un double[][]
@@ -532,7 +527,7 @@ public class Ruta implements Serializable {
          */
         private void esRutaCerrada(){
         	esCerrada=false;
-        	double umbral = 0.1;
+        	double umbral = 2;
         	double distAux;
         	double distMin = Double.POSITIVE_INFINITY;
         	GPSData ptoInicial = getPunto(0);
@@ -550,9 +545,13 @@ public class Ruta implements Serializable {
         	if (distMin < umbral){
         		esCerrada = true;
         		indiceFinal = indiceAux;
+        		System.out.println("La ruta está cerrada");
         	}
-        	else 
+        	else {
         		esCerrada = false;
+        		indiceFinal = getNumPuntos()-1;
+        		System.out.println("La ruta está abierta");
+        	}
         
         }
         public double distEntrePuntos(GPSData ptoA,GPSData ptoB){
