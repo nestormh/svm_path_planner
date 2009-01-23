@@ -11,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -23,6 +24,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import sibtra.util.EligeSerial;
+import sibtra.util.LabelDato;
+import sibtra.util.LabelDatoFormato;
 import Jama.Matrix;
 
 /**
@@ -32,23 +35,12 @@ import Jama.Matrix;
  */
 public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 
-	private JLabel jlHora;
-	private JLabel jlLatitud;
-	private JLabel jlLongitud;
-	private JLabel jlRms;
-	private JLabel jlNumSat;
-	private JLabel jlEdad;
-	private JLabel jlCoordLocales;
-	private JLabel jlAltura;
-//	private JLabel jlCoordECEFx;
-//	private JLabel jlCoordECEFy;
-//	private JLabel jlCoordECEFz;
-	private JLabel jlYaw;
-	private JLabel jlAngulo;
-	private JLabel jlDMag;
+	private Font Grande;
+	private Border blackline = BorderFactory.createLineBorder(Color.black);
+	private JPanel jpCentro;
 	private JCheckBox jcbSoloEspa;
-	private JLabel jlVelms;
 	
+	private Vector<LabelDato> vecLabels;
 	/**
 	 * constructor por defecto. Se actualiza con todos los puntos.
 	 */
@@ -61,7 +53,7 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	 * @param soloEspaciales
 	 */
 	public PanelMuestraGPSData(boolean soloEspaciales) {
-		JPanel jpCentro=new JPanel(new GridLayout(0,3)); //empezamos con 3 columnas
+		jpCentro=new JPanel(new GridLayout(0,3)); //empezamos con 3 columnas
 		setLayout(new BorderLayout());
 //		angulo=aCopiar.angulo;
 //		cadenaNMEA=aCopiar.cadenaNMEA;
@@ -83,207 +75,110 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 //		vdoP=aCopiar.vdoP;
 //		velocidad=aCopiar.velocidad;
 //		velocidadGPS=aCopiar.velocidadGPS;		
-		
-		Border blackline = BorderFactory.createLineBorder(Color.black);
-		Font Grande;
+		vecLabels=new Vector<LabelDato>();
 		JLabel jla; //variable para poner JLable actual
+		LabelDato lda; //variable para poner el LabelDato actual
 		{ //hora
-			jlHora=jla=new JLabel("??:??:??.??");
-		    Grande = jla.getFont().deriveFont(20.0f);
+			jla=lda=new LabelDatoFormato("??:??:??.??",GPSData.class,"getHora","%s");
+			vecLabels.add(lda);
+			Grande = jla.getFont().deriveFont(20.0f);
 			jla.setBorder(BorderFactory.createTitledBorder(
-				       blackline, "Hora"));
-		    jla.setFont(Grande);
+					blackline, "Hora"));
+			jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
 			jpCentro.add(jla);
 		}
 
-		{ //Latitud
-			jlLatitud=jla=new JLabel("+?? ??.?????");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Latitud"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
+		//Latitud
+		añadeLabelDatos(new LabelDatoFormato("+?? ??.?????",GPSData.class,"getLatitudText","%s")
+		, "Latitud");
+		//Longitud
+		añadeLabelDatos(new LabelDatoFormato("+??? ??.?????",GPSData.class,"getLongitudText","%s")
+		,"Longitud");
+		//RMS
+		añadeLabelDatos(new LabelDatoFormato("?.?",GPSData.class,"getRms","%2.1f")
+		,"RMS");
+		//Número satélites
+		añadeLabelDatos(new LabelDatoFormato("?",GPSData.class,"getSatelites","%1d")
+		,"Num Satelites");
+		//Edad correción diferencial
+		añadeLabelDatos(new LabelDatoFormato("??? sg",GPSData.class,"getAge","%3.0f sg")
+		, "Edad Correccion");
+		//Coordenadas locales
+		añadeLabelDatos(new LabelDato("(???.??, ???.??, ???.??)") {
+			public void Actualiza(Object oa,boolean hayCambio) {
+				setEnabled(hayCambio);
+				if(!hayCambio) return;
+				Matrix cl=((GPSData)oa).getCoordLocal();
+				if(cl!=null && cl.get(0, 0)<Double.MAX_VALUE) {
+					setText(String.format("(%3.3f %3.3f %3.3f)"
+							, cl.get(0,0), cl.get(1,0), cl.get(2,0)));
+				} else 
+					setEnabled(false);
+			}
 		}
+		,"Locales");
+		//altura
+		añadeLabelDatos(new LabelDatoFormato("+????.??",GPSData.class,"getAltura","%+8.2f"), "Altura");
 
-		{ //Longitud
-			jlLongitud=jla=new JLabel("+??? ??.?????");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Longitud"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
+		//Velocidad m/€s
+		añadeLabelDatos(new LabelDatoFormato("+??.??",GPSData.class,"getVelocidad","%+6.2f")
+		, "Velocidad m/s");
+//		Yaw
+		añadeLabelDatos(new LabelDato("+????.??") {
+			public void Actualiza(Object oa, boolean hayCambio) {
+				setEnabled(hayCambio);
+				if(!hayCambio) return;
+				GPSData pto=(GPSData)oa;
+				if(pto.getAngulosIMU()!=null) {
+					setText(String.format("%+8.2f", pto.getAngulosIMU().getYaw()));
+				} else {
+					setEnabled(false);
+				}
+			}
 		}
-
-		{ //RMS
-			jlRms=jla=new JLabel("?.?");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "RMS"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
+		,"Yaw IMU");
+		//Angulo calculado
+		añadeLabelDatos(new LabelDatoFormato("+????.??",GPSData.class,"getAngulo","%+8.2f")
+		,"Angulo Calc.");
+		//Diff angulos
+		añadeLabelDatos(new LabelDato("+????.??"){
+			public void Actualiza(Object oa, boolean hayCambio) {
+				setEnabled(hayCambio);
+				if(!hayCambio) return;
+				GPSData pto=(GPSData)oa;
+				if(pto.getAngulosIMU()!=null) {
+					setText(String.format("%+8.2f", 
+							Math.toDegrees(pto.getAngulo())-pto.getAngulosIMU().getYaw()));
+				} else {
+					setEnabled(false);
+				}
+			}
 		}
-
-		{ //Número satélites
-			jlNumSat=jla=new JLabel("?");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Num Satelites"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
-
-		{ //Edad correción diferencial
-			jlEdad=jla=new JLabel("??? sg");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Edad Correccion"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
-
-		{ //Coordenadas locales
-			jlCoordLocales=jla=new JLabel("(???.??, ???.??, ???.??)");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Locales"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
-		
-//		{ //Coordenadas ECEF X
-//			jlCoordECEFx=jla=new JLabel("???????.??");
-//			jla.setBorder(BorderFactory.createTitledBorder(
-//					       blackline, "ECEF X"));
-//		    jla.setFont(Grande);
-//			jla.setHorizontalAlignment(JLabel.CENTER);
-//			jla.setEnabled(false);
-//			jpCentro.add(jla);
-//		}
-//
-//		{ //Coordenadas ECEF Y
-//			jlCoordECEFy=jla=new JLabel("???????.??");
-//			jla.setBorder(BorderFactory.createTitledBorder(
-//					       blackline, "ECEF Y"));
-//		    jla.setFont(Grande);
-//			jla.setHorizontalAlignment(JLabel.CENTER);
-//			jla.setEnabled(false);
-//			jpCentro.add(jla);
-//		}
-//
-//		{ //Coordenadas ECEF Z
-//			jlCoordECEFz=jla=new JLabel("???????.??");
-//			jla.setBorder(BorderFactory.createTitledBorder(
-//					       blackline, "ECEF X"));
-//		    jla.setFont(Grande);
-//			jla.setHorizontalAlignment(JLabel.CENTER);
-//			jla.setEnabled(false);
-//			jpCentro.add(jla);
-//		}
-
-		{//altura
-			jlAltura=jla=new JLabel("+????.??");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Altura"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
-	
-		{//Velocidad m/s
-			jlVelms=jla=new JLabel("+??.??");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Velocidad m/s"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
-		{//Yaw
-			jlYaw=jla=new JLabel("+????.??");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Yaw IMU"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
-		{//Angulo calculado
-			jlAngulo=jla=new JLabel("+????.??");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Angulo Calc."));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
-		{//Diff angulos
-			jlDMag=jla=new JLabel("+????.??");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "D. Magnetica"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			jpCentro.add(jla);
-		}
+		, "D. Magnetica");
 		add(jpCentro,BorderLayout.CENTER);
 		jcbSoloEspa=new JCheckBox("Sólo datos espaciales");
 		jcbSoloEspa.setSelected(soloEspaciales);
 		add(jcbSoloEspa,BorderLayout.SOUTH);
 	}
+
+	private void añadeLabelDatos(LabelDato lda,String Titulo) {
+		vecLabels.add(lda);
+		lda.setBorder(BorderFactory.createTitledBorder(
+				blackline, Titulo));
+		lda.setFont(Grande);
+		lda.setHorizontalAlignment(JLabel.CENTER);
+		lda.setEnabled(false);
+		jpCentro.add(lda);
+		
+	}
 	
 	public void actualizaPunto(GPSData pto) {
-		if(pto==null) {
-			//no están las 3 distancias, regresamos
-			jlHora.setEnabled(false);
-			jlLatitud.setEnabled(false);
-			jlLongitud.setEnabled(false);
-			jlRms.setEnabled(false);
-			jlNumSat.setEnabled(false);
-			jlEdad.setEnabled(false);
-			jlCoordLocales.setEnabled(false);
-//			jlCoordECEFx.setEnabled(false);
-//			jlCoordECEFy.setEnabled(false);
-//			jlCoordECEFz.setEnabled(false);
-			jlAltura.setEnabled(false);
-			jlYaw.setEnabled(false);
-			jlAngulo.setEnabled(false);
-			jlDMag.setEnabled(false);
-			jlVelms.setEnabled(false);
-		} else {
-			jlHora.setEnabled(true);
-			jlLatitud.setEnabled(true);
-			jlLongitud.setEnabled(true);
-			jlRms.setEnabled(true);
-			jlNumSat.setEnabled(true);
-			jlEdad.setEnabled(true);
-			jlCoordLocales.setEnabled(true);
-//			jlCoordECEFx.setEnabled(true);
-//			jlCoordECEFy.setEnabled(true);
-//			jlCoordECEFz.setEnabled(true);
-			jlAltura.setEnabled(true);
-			jlYaw.setEnabled(true);
+		boolean hayDato=(pto!=null);
+		//atualizamos etiquetas en array
+		for(int i=0; i<vecLabels.size(); i++)
+			vecLabels.elementAt(i).Actualiza(pto,hayDato);
 			//Nuevos valores
-			jlHora.setText(pto.getHora());
-			jlLatitud.setText(pto.getLatitudText());
-			jlLongitud.setText(pto.getLongitudText());
-			jlRms.setText(String.format("%2.1f", pto.getRms()));
-			jlNumSat.setText(String.format("%1d", pto.getSatelites()));
-			jlEdad.setText(String.format("%3.0f", pto.getAge()));
-			Matrix cl=pto.getCoordLocal();
-			if(cl!=null && cl.get(0, 0)<Double.MAX_VALUE) {
-				jlCoordLocales.setText(String.format("(%3.3f %3.3f %3.3f)"
-						, cl.get(0,0), cl.get(1,0), cl.get(2,0)));
-			} else 
-				jlCoordLocales.setEnabled(false);
 //			Matrix ce=pto.getCoordECEF();
 //			if(ce!=null && ce.get(0, 0)<Double.MAX_VALUE) {
 //				jlCoordECEFx.setText(String.format("%10.3f",ce.get(0,0)));
@@ -294,22 +189,6 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 //				jlCoordECEFy.setEnabled(false);
 //				jlCoordECEFz.setEnabled(false);
 //			}
-			jlAltura.setText(String.format("%+8.2f", pto.getAltura()));
-			if(pto.getAngulosIMU()!=null) {
-				jlYaw.setText(String.format("%+8.2f", pto.getAngulosIMU().getYaw()));
-				jlYaw.setEnabled(true);
-				jlDMag.setText(String.format("%+8.2f", 
-						Math.toDegrees(pto.getAngulo())-pto.getAngulosIMU().getYaw()));
-				jlDMag.setEnabled(true);
-			} else {
-				jlYaw.setEnabled(false);
-				jlDMag.setEnabled(false);
-			}
-			jlAngulo.setText(String.format("%+8.2f", Math.toDegrees(pto.getAngulo())));
-			jlAngulo.setEnabled(true);
-			jlVelms.setText(String.format("%+6.2f", pto.getVelocidad()));
-			jlVelms.setEnabled(true);
-		}
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
