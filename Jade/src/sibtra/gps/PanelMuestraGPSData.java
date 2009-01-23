@@ -76,18 +76,10 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 //		velocidad=aCopiar.velocidad;
 //		velocidadGPS=aCopiar.velocidadGPS;		
 		vecLabels=new Vector<LabelDato>();
-		JLabel jla; //variable para poner JLable actual
-		LabelDato lda; //variable para poner el LabelDato actual
-		{ //hora
-			jla=lda=new LabelDatoFormato("??:??:??.??",GPSData.class,"getHora","%s");
-			vecLabels.add(lda);
-			Grande = jla.getFont().deriveFont(20.0f);
-			jla.setBorder(BorderFactory.createTitledBorder(
-					blackline, "Hora"));
-			jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jpCentro.add(jla);
-		}
+		//hora
+		LabelDato lda=new LabelDatoFormato("??:??:??.??",GPSData.class,"getHora","%s");
+		Grande = lda.getFont().deriveFont(20.0f);
+		añadeLabelDatos(lda,"Hora");
 
 		//Latitud
 		añadeLabelDatos(new LabelDatoFormato("+?? ??.?????",GPSData.class,"getLatitudText","%s")
@@ -162,6 +154,11 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		add(jcbSoloEspa,BorderLayout.SOUTH);
 	}
 
+	/**
+	 * Funcion para añadir etiqueta con todas las configuraciones por defecto
+	 * @param lda etiqueta a añadir
+	 * @param Titulo titulo adjunto
+	 */
 	private void añadeLabelDatos(LabelDato lda,String Titulo) {
 		vecLabels.add(lda);
 		lda.setBorder(BorderFactory.createTitledBorder(

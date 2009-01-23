@@ -7,13 +7,19 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+
+import sibtra.gps.GPSData;
+import sibtra.util.LabelDato;
+import sibtra.util.LabelDatoFormato;
 
 /**
  * @author alberto
@@ -21,75 +27,57 @@ import javax.swing.border.Border;
  */
 public class PanelMuestraAngulosIMU extends JPanel implements IMUEventListener {
 	
-	private JLabel jlRoll;
-	private JLabel jlPitch;
-	private JLabel jlYaw;
-	private JLabel jlContador;
+
+	private Font Grande;
+	private Border blackline = BorderFactory.createLineBorder(Color.black);
+	private JPanel jpCentro;
+	private Vector<LabelDato> vecLabels;
 
 	public PanelMuestraAngulosIMU() {
 		setLayout(new GridLayout(0,3)); //empezamos con 3 columnas
-		Border blackline = BorderFactory.createLineBorder(Color.black);
-		Font Grande;
-		JLabel jla; //variable para poner JLable actual
+		jpCentro=this; //no añadimos panel central
+		vecLabels=new Vector<LabelDato>();
+		//roll
+		LabelDato lda=new LabelDatoFormato("??:??:??.??",AngulosIMU.class,"getRoll","%+10.4f");
+		Grande = lda.getFont().deriveFont(20.0f);
+		añadeLabelDatos(lda,"Roll");
 
-		{//roll
-			jlRoll=jla=new JLabel("+???.????");
-		    Grande = jla.getFont().deriveFont(20.0f);
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Roll"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			add(jla);
-		}
-
-		{//Pitch
-			jlPitch=jla=new JLabel("+???.????");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Pitch"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			add(jla);
-		}
-	
-		{//Yaw
-			jlYaw=jla=new JLabel("+???.????");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Yaw"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			add(jla);
-		}
-		{//contador
-			jlContador=jla=new JLabel("?????");
-			jla.setBorder(BorderFactory.createTitledBorder(
-					       blackline, "Contador"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-			add(jla);
-		}
+		//Pitch
+		añadeLabelDatos(new LabelDatoFormato("+???.????",AngulosIMU.class,"getPitch","%+10.4f")
+		, "Pitch");
+		//Yaw
+		añadeLabelDatos(new LabelDatoFormato("+???.????",AngulosIMU.class,"getYaw","%+10.4f")
+		, "Yaw");
+		//contador
+		añadeLabelDatos(new LabelDatoFormato("+???.????",AngulosIMU.class,"getContador","%7d")
+		, "Contador");
 	}
-	
+
+	/**
+	 * Funcion para añadir etiqueta con todas las configuraciones por defecto
+	 * @param lda etiqueta a añadir
+	 * @param Titulo titulo adjunto
+	 */
+	private void añadeLabelDatos(LabelDato lda,String Titulo) {
+		vecLabels.add(lda);
+		lda.setBorder(BorderFactory.createTitledBorder(
+				blackline, Titulo));
+		lda.setFont(Grande);
+		lda.setHorizontalAlignment(JLabel.CENTER);
+		lda.setEnabled(false);
+		jpCentro.add(lda);
+		
+	}
+
+	/**
+	 * Acciones a tomar cuando llega nuevo dato
+	 * @param ang nuevo angulo encontrado
+	 */
 	public void actualizaAngulo(AngulosIMU ang) {
-		if(ang==null) {
-			jlRoll.setEnabled(false);
-			jlPitch.setEnabled(false);
-			jlYaw.setEnabled(false);
-			jlContador.setEnabled(false);
-		} else {
-			jlRoll.setEnabled(true);
-			jlPitch.setEnabled(true);
-			jlYaw.setEnabled(true);
-			jlContador.setEnabled(true);
-			//nuevos valores
-			jlRoll.setText(String.format("%+10.4f", ang.roll));
-			jlPitch.setText(String.format("%+10.4f", ang.pitch));
-			jlYaw.setText(String.format("%+10.4f", ang.yaw));
-			jlContador.setText(String.format("%7d", ang.contador));
-		}
+		boolean hayDato=(ang!=null);
+		//atualizamos etiquetas en array
+		for(int i=0; i<vecLabels.size(); i++)
+			vecLabels.elementAt(i).Actualiza(ang,hayDato);
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -113,7 +101,7 @@ public class PanelMuestraAngulosIMU extends JPanel implements IMUEventListener {
 	public static void main(String[] args) {
 		JFrame ventanaPrincipal=new JFrame("Panel Muestra Angulos");
 		PanelMuestraAngulosIMU pmai=new PanelMuestraAngulosIMU();
-		pmai.actualizaAngulo(new AngulosIMU(0,0,0,0));
+		pmai.actualizaAngulo(null);
 		ventanaPrincipal.add(pmai);
 		
 		ConexionSerialIMU csi=new ConexionSerialIMU();
