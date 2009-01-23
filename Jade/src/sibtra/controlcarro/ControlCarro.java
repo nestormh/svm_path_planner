@@ -600,6 +600,14 @@ public class ControlCarro implements SerialPortEventListener,
 	}
 
 	/**
+	 * @return Devuelve el angulo del volante en grados respecto al centro (+
+	 *         izquierda, - derecha).
+	 */
+	public double getAnguloVolanteGrados() {
+		return Math.toDegrees(getAnguloVolante());
+	}
+
+	/**
 	 * Devuelve si esta pulsada la alarma de desfrenado
 	 * 
 	 */
@@ -677,6 +685,15 @@ public class ControlCarro implements SerialPortEventListener,
 		return (ConsignaVolante - CARRO_CENTRO) * RADIANES_POR_CUENTA;
 	}
 
+	/**
+	 * @return Devuelve la consigna del volante en grados
+	 */
+	public double getConsignaAnguloVolanteGrados() {
+		return Math.toDegrees(getConsignaAnguloVolante());
+	}
+
+	
+	
 	/**
 	 * Obtiene la consigna de la velocidad
 	 * 

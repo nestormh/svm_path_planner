@@ -31,12 +31,11 @@ public class PanelMuestraAngulosIMU extends JPanel implements IMUEventListener {
 	private Font Grande;
 	private Border blackline = BorderFactory.createLineBorder(Color.black);
 	private JPanel jpCentro;
-	private Vector<LabelDato> vecLabels;
+	private Vector<LabelDato> vecLabels=new Vector<LabelDato>();
 
 	public PanelMuestraAngulosIMU() {
 		setLayout(new GridLayout(0,3)); //empezamos con 3 columnas
 		jpCentro=this; //no añadimos panel central
-		vecLabels=new Vector<LabelDato>();
 		//roll
 		LabelDato lda=new LabelDatoFormato("??:??:??.??",AngulosIMU.class,"getRoll","%+10.4f");
 		Grande = lda.getFont().deriveFont(20.0f);

@@ -40,7 +40,8 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	private JPanel jpCentro;
 	private JCheckBox jcbSoloEspa;
 	
-	private Vector<LabelDato> vecLabels;
+	private Vector<LabelDato> vecLabels=new Vector<LabelDato>();
+;
 	/**
 	 * constructor por defecto. Se actualiza con todos los puntos.
 	 */
@@ -75,7 +76,6 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 //		vdoP=aCopiar.vdoP;
 //		velocidad=aCopiar.velocidad;
 //		velocidadGPS=aCopiar.velocidadGPS;		
-		vecLabels=new Vector<LabelDato>();
 		//hora
 		LabelDato lda=new LabelDatoFormato("??:??:??.??",GPSData.class,"getHora","%s");
 		Grande = lda.getFont().deriveFont(20.0f);
