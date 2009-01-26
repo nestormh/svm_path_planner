@@ -440,25 +440,26 @@ public class Ruta implements Serializable {
                 indice = indice + numPuntos;
             }
             //En caso de que la ruta no sea cerrada se hace un fade out de la velocidad
-//            if (!esCerrada) {
-//            	System.out.println("La ruta está abierta");
-//            	double dist = 0;
-//            	int j = 0;
-//            	while(dist < distFrenado){
-//            		j = j + 1;
-//            		System.out.println("estoy en el while");
-//            		double dx = rutaRellena[ptosTotales][0] - rutaRellena[ptosTotales-j][0];
-//            		double dy = rutaRellena[ptosTotales][1] - rutaRellena[ptosTotales-j][1];
-//            		dist = Math.sqrt(dx*dx + dy*dy);            		            		
-//            	}
-//            	double decremento  = rutaRellena[ptosTotales-j][3]/j;
-//            	double velComienzoFrenado = rutaRellena[ptosTotales-j][3];
-//            	int n = 1;
-//            	for (int k=ptosTotales-j;k<ptosTotales+1;k++){
-//            		rutaRellena[k][3] = velComienzoFrenado - decremento*n;
-//            		n = n + 1;
-//            	}            	
-//            }            
+            if (!esCerrada) {
+            	System.out.println("La ruta está abierta");
+            	double dist = 0;
+            	int j = 1;
+            	while(dist < distFrenado){
+            		j = j + 1;
+            		System.out.println("estoy en el while");
+            		double dx = rutaRellena[ptosTotales-1][0] - rutaRellena[ptosTotales-j][0];
+            		double dy = rutaRellena[ptosTotales-1][1] - rutaRellena[ptosTotales-j][1];
+            		dist = Math.sqrt(dx*dx + dy*dy);            		            		
+            	}
+            	double decremento  = rutaRellena[ptosTotales-j][3]/j;
+            	double velComienzoFrenado = rutaRellena[ptosTotales-j][3];
+            	int n = 1;
+            	for (int k=ptosTotales-j;k<ptosTotales;k++){
+            		rutaRellena[k][3] = velComienzoFrenado - decremento*n;
+            		n = n + 1;
+            		System.out.println("La velocidad del punto " + k+ " es "+ rutaRellena[k][3]);
+            	}            	
+            }            
             return rutaRellena;
 	}
         /**Versión del toTr() pasándole como ruta original un double[][]
@@ -527,7 +528,7 @@ public class Ruta implements Serializable {
          */
         private void esRutaCerrada(){
         	esCerrada=false;
-        	double umbral = 2;
+        	double umbral = 0.01;
         	double distAux;
         	double distMin = Double.POSITIVE_INFINITY;
         	GPSData ptoInicial = getPunto(0);
