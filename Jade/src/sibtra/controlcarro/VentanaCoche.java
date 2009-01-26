@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
@@ -34,6 +35,7 @@ import sibtra.util.LabelDatoFormato;
 @SuppressWarnings("serial")
 public class VentanaCoche extends JFrame implements ActionListener, ChangeListener, Runnable {
 
+	private static final int maxComVelocidad = 0;
 	private Font Grande;
 	private Border blackline = BorderFactory.createLineBorder(Color.black);
 	private JPanel jpCentro;
@@ -48,6 +50,7 @@ public class VentanaCoche extends JFrame implements ActionListener, ChangeListen
 	private JButton jbAplicaConsignaVelocidad;
 	private SpinnerNumberModel jspMAvance;
 	private Thread ThreadPanel;
+	private JProgressBar jpbComVel;
 	
 	public void run() {
 		while (true){
@@ -126,6 +129,16 @@ public class VentanaCoche extends JFrame implements ActionListener, ChangeListen
 		//Avance
 		añadeLabelDatos(new LabelDatoFormato("######",ControlCarro.class,"getAvance","%10d")
 		, "Avance");
+		
+		{//barra progreso comando velocidad
+			jpbComVel=new JProgressBar(0,maxComVelocidad);
+			jpbComVel.setBorder(BorderFactory.createTitledBorder(
+					blackline, "Comando Velocidad"));
+			jpbComVel.setOrientation(JProgressBar.HORIZONTAL);
+			jpbComVel.setValue(0);
+			jpbComVel.setEnabled(false);
+			jpCentro.add(jpbComVel);
+		}
 
 // Hay lazo cerrado no tienen sentido fijar ahora el avance
 //		{// comando avance
@@ -200,6 +213,8 @@ public class VentanaCoche extends JFrame implements ActionListener, ChangeListen
 		//atualizamos etiquetas en array
 		for(int i=0; i<vecLabels.size(); i++)
 			vecLabels.elementAt(i).Actualiza(contCarro,hayDato);
+		//actulizamos progressbarr de comando velocidad
+		jpbComVel.setValue(contCarro.getConsignaVelocidad());
 	}
 	
 	/** programa la actualizacion de la ventana */
