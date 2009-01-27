@@ -50,7 +50,7 @@ public class Ruta implements Serializable {
 	
 	int indiceFinal;
 
-	double distFrenado = 5;
+	static double distFrenado = 5;
 
 	private boolean esCerrada;
 
@@ -443,20 +443,18 @@ public class Ruta implements Serializable {
             if (!esCerrada) {
             	System.out.println("La ruta está abierta");
             	double dist = 0;
-            	int j = 1;
-            	while(dist < distFrenado){
-            		j = j + 1;
-            		System.out.println("estoy en el while");
-            		double dx = rutaRellena[ptosTotales-1][0] - rutaRellena[ptosTotales-j][0];
-            		double dy = rutaRellena[ptosTotales-1][1] - rutaRellena[ptosTotales-j][1];
-            		dist = Math.sqrt(dx*dx + dy*dy);            		            		
+            	int j;
+            	for(j = ptosTotales-2;dist < distFrenado;j--){            		            	
+            		double dx = rutaRellena[j][0] - rutaRellena[j+1][0];
+            		double dy = rutaRellena[j][1] - rutaRellena[j+1][1];
+            		dist += Math.sqrt(dx*dx + dy*dy);
+            		System.out.println("La distancia medida es "+dist);            		
             	}
-            	double decremento  = rutaRellena[ptosTotales-j][3]/j;
-            	double velComienzoFrenado = rutaRellena[ptosTotales-j][3];
-            	int n = 1;
-            	for (int k=ptosTotales-j;k<ptosTotales;k++){
-            		rutaRellena[k][3] = velComienzoFrenado - decremento*n;
-            		n = n + 1;
+            	double incremento  = rutaRellena[j][3]/(ptosTotales-j-1);            	            
+            	double velPunto=0;
+            	for (int k=ptosTotales-1;k>j;k--){
+            		rutaRellena[k][3] = velPunto;
+            		velPunto += incremento;
             		System.out.println("La velocidad del punto " + k+ " es "+ rutaRellena[k][3]);
             	}            	
             }            
@@ -528,7 +526,7 @@ public class Ruta implements Serializable {
          */
         private void esRutaCerrada(){
         	esCerrada=false;
-        	double umbral = 0.01;
+        	double umbral = 0.1;
         	double distAux;
         	double distMin = Double.POSITIVE_INFINITY;
         	GPSData ptoInicial = getPunto(0);
