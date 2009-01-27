@@ -513,7 +513,7 @@ public class ControlCarro implements SerialPortEventListener,
 								BufferRecibe[PtroBufferRecibir][1] = volante;
 								BufferRecibe[PtroBufferRecibir][2] = avance;
 								BufferRecibe[PtroBufferRecibir][3] = velocidadCS;
-								BufferRecibe[PtroBufferRecibir][4] = buffer[3];
+								BufferRecibe[PtroBufferRecibir][4] = alarma;
 								PtroBufferRecibir = (PtroBufferRecibir+1)
 										% MAXBUFFER;
 								NumPaquetes++;
@@ -1257,7 +1257,7 @@ public class ControlCarro implements SerialPortEventListener,
 	 */
 	public void setConsignaAvanceMS(double valor) {
 		consignaVel = valor * PULSOS_METRO;
-		System.out.println("Consigna Avance " + consignaVel);
+		//System.out.println("Consigna Avance " + consignaVel);
 		controla = true;
 	}
 
