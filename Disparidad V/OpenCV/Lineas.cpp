@@ -85,17 +85,40 @@ void Lineas::Insert(CvPoint *item, int pos) {
 				&& (item[1].x == aux[1].x) && (item[1].y == aux[1].y)) { 
 				insert = false;				// Si está no se repite
 				printf ("No se inserta (repetida)\n");				
-			} else if (((item[0].x >= aux[0].x) && (item[1].x <= aux[1].x))		// La nueva está contenida en una existente 
-				|| ((item[0].y >= aux[0].y) && (item[1].y <= aux[1].y))) {
-				insert = false;
-				printf ("No se inserta (contenida)\n");
-			} else if (((item[0].x <= aux[0].x) && (item[1].x >= aux[1].x)) 	// La nueva contiene a una existente -> se deja la mayor
-				|| ((item[0].y <= aux[0].y) && (item[1].y >= aux[1].y))) {
-			printf("Modificada \n");
-				aux[0] = item[0];
-				aux[1] = item[1];
-				insert = false;
-			}
+			} else if (direction) {		// Verticales
+				
+				printf ("--- Insert(vertical) ---\n");
+				
+				if ((item[0].x >= aux[0].x) && (item[1].x <= aux[1].x)) {		// La nueva está contenida en una existente			
+					insert = false;
+					printf ("No se inserta (contenida vertical)\n");
+				} else if ((item[0].x <= aux[0].x) && (item[1].x >= aux[1].x)) { 	// La nueva contiene a una existente -> se deja la mayor
+					printf("Modificada vertical \n");
+					aux[0] = item[0];
+					aux[1] = item[1];
+					insert = false;
+				} else if (abs(MIN(MAX(aux[0].y, aux[1].y), MAX(item[0].y, item[1].y)) - MAX(MIN(aux[0].y, aux[1].y), MIN(item[0].y, item[1].y))) 
+							> MAX (abs(MAX(MAX(aux[0].y, aux[1].y), MAX(item[0].y, item[1].y)) - MIN(MAX(aux[0].y, aux[1].y), MAX(item[0].y, item[1].y))),
+							abs(MAX(MIN(aux[0].y, aux[1].y), MIN(item[0].y, item[1].y)) - MIN(MIN(aux[0].y, aux[1].y), MIN(item[0].y, item[1].y))))){
+					insert = false;
+					printf ("No se inserta superpuesta vertical\n");
+				}
+			} else {						// Horizontales
+				if ((item[0].y >= aux[0].y) && (item[1].y <= aux[1].y)) {
+					insert = false;
+					printf ("No se inserta (contenida horizontal)\n");
+				} else if ((item[0].y <= aux[0].y) && (item[1].y >= aux[1].y)) {
+					printf("Modificada horizontal\n");
+					aux[0] = item[0];
+					aux[1] = item[1];
+					insert = false;
+				} else if (abs(MIN(MAX(aux[0].x, aux[1].x), MAX(item[0].x, item[1].x)) - MAX(MIN(aux[0].x, aux[1].x), MIN(item[0].x, item[1].x))) 
+							> MAX (abs(MAX(MAX(aux[0].x, aux[1].x), MAX(item[0].x, item[1].x)) - MIN(MAX(aux[0].x, aux[1].x), MAX(item[0].x, item[1].x))),
+							abs(MAX(MIN(aux[0].x, aux[1].x), MIN(item[0].x, item[1].x)) - MIN(MIN(aux[0].x, aux[1].x), MIN(item[0].x, item[1].x))))){
+					insert = false;
+					printf ("No se inserta superpuesta horizontal\n");
+				}
+			} 	
 
 			j++;
 		}while (j < lines[pos]->total);
@@ -206,10 +229,13 @@ void Lineas::InsertGreedy(CvPoint *item, int pos, int ventana) {
 	}
 	
 	if ((i < 0) || (i <= pos - lado) || ((i >= 0) && (lines[i]->first == NULL))){	// Si no hay ninguna línea en ese entorno	
-		index[n] = pos;
-		n++;	
-		cvSeqPush(lines[pos], item);
-//		printf ("Queda Igual\n");
+//		index[n] = pos;
+//		n++;	
+//		cvSeqPush(lines[pos], item);
+
+		printf ("Queda Igual\n");
+		this->Insert(item, pos, ventana);		// Se invoca a insert con ventana para que haga las comprobaciones para descartar al insertar
+
 	} else {
 		aux = (CvPoint *) cvGetSeqElem(lines[i], 0); // No se saca porque se asumen ordenadas de mayor a menor
 		if (direction) {		// Si vertical

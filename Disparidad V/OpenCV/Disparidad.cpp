@@ -12,7 +12,7 @@
 #define MARGIN 2			// Tamaño del margen de búsqueda en torno al valor de disparidad
 #define DISCARD 15			// Se descartan las disparidades de 0 a DISCARD por corresponderse con objetos lejanos
 #define RECT 5				// Margen que se considera aceptable para que una línea sea recta (diferencia de coordenadas)
-#define WINDOW 9			// Ancho de la ventana para considerar dos líneas paralelas como la misma
+#define WINDOW 11			// Ancho de la ventana para considerar dos líneas paralelas como la misma
 
 typedef struct {			// Tipo de datos para indicar los par�metros de ajuste de los diferentes algoritmos
 	int filtro,
@@ -611,10 +611,7 @@ void lineasV(IplImage *src, CvSeq *vertical, CvSeq *diagonal){
 	
 	}
 	//cvSeqSort(vertical, cmp_vert, 0);					// Ordenar las l�neas verticales
-	/*if ((source == 0) || (source == 4))
-		color_dst->origin = 0;
-	else
-		color_dst->origin = 1;*/
+	
 	color_dst->origin = src->origin;
 	cvShowImage ("Imagen disparidad", color_dst);
 
@@ -680,7 +677,7 @@ void lineasV2(IplImage *src, Lineas *vertical, CvSeq *diagonal){
 			|| (abs((line[0].y - line[1].y) / (line[0].x - line[1].x)) > RECT)){				// L�neas semi-verticales		
 	
 			//vertical->InsertGreedy(line, line[0].x, 5, true);
-			vertical->InsertGreedy(line, MAX(line[0].x, line[1].x), 5);
+			vertical->InsertGreedy(line, MAX(line[0].x, line[1].x), WINDOW);
 			
 //			cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 1, 8 );
 			
@@ -822,7 +819,7 @@ void lineasH2(IplImage *src, Lineas *horizontal, CvSeq *pendpos, CvSeq *pendneg)
 		if ((line[0].y == line[1].y)					// L�neas horizontales
 			|| (abs((float)(line[0].y - line[1].y) / (float)(line[0].x - line[1].x)) < 1)){				// L�neas semi-horizontales	(ESTABLECER UN UMBRAL ADECUADO)
 				
-			horizontal->Insert(line, MAX(line[0].y, line[1].y), 5);
+			horizontal->Insert(line, MAX(line[0].y, line[1].y), WINDOW);
 //			cvLine( color_dst, line[0], line[1], CV_RGB(255,255,0), 1, 8 );
 			
 		} else if (line[0].y < line[1].y){					// L�neas de pendiente negativa
@@ -859,10 +856,6 @@ void obstaculos (IplImage *img, int th, int factor){
 	IplImage *salida;
 		
 	salida = cvCreateImage(cvGetSize(img), 8, 1);
-/*	if ((source == 0) || (source == 4))
-		salida->origin = 0;
-	else
-		salida->origin = 1;*/
 	salida->origin = img->origin;
 
 	cvThreshold(img, img, th, 255, CV_THRESH_BINARY);			// Umbralizar
@@ -999,11 +992,6 @@ void marcObstacle (IplImage *sourceImage, CvSeq *vertical, CvSeq *horizontal ,Cv
 
 	// Para mostrar el rect�ngulo
 	color_dst = cvCloneImage (sourceImage);
-/*	if ((source == 0) || (source == 4))
-		color_dst->origin = 0;
-	else
-		color_dst->origin = 1;*/
-		
 	color_dst->origin = sourceImage->origin;
 
 	for (int i= 0; i < horizontal->total; i ++){		// Dibujar rect�ngulos (detectar obst�culos)
@@ -1230,6 +1218,8 @@ void crearRDM (IplImage *rdm, IplImage *dm, CvPoint *line){
 		cvSet (rdm, cvScalar(line[0].x), rdm);
 		cvResetImageROI (dm);
 		cvResetImageROI (rdm);
+		
+		//cvWaitKey(1);
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
@@ -1433,7 +1423,7 @@ int main (int argc, char* argv[]){
 	CvCapture *videoIzq = 0;
 	CvCapture *videoDer = 0;
 
-	source = 0;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
+	source = 4;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
 
 	switch (source) {
 		case 1:
@@ -1487,7 +1477,7 @@ int main (int argc, char* argv[]){
 
 	/* Crear la ventana de controles */
 	cvNamedWindow("Controles", CV_WINDOW_AUTOSIZE);
-	ajustes.filtro = 7;
+	ajustes.filtro = 9;
 	ajustes.sobel = 3;
 	ajustes.umbral = 4;
 	ajustes.umbralObstaculos = 10;
@@ -1504,8 +1494,8 @@ int main (int argc, char* argv[]){
 
 		switch (source){
 			case 0: {		// Im�genes est�ticas
-				izquierda = cvLoadImage("Series/puerta_left_61.bmp");
-				derecha = cvLoadImage("Series/puerta_right_61.bmp");
+				izquierda = cvLoadImage("Series/puerta_left_50.bmp");
+				derecha = cvLoadImage("Series/puerta_right_50.bmp");
 
 				if (!izquierda || !derecha){
 					printf ("Error leyendo im�genes\n");
