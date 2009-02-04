@@ -113,6 +113,8 @@ public class ControlCarro implements SerialPortEventListener,
 
 	static private int MAXBUFFER = 10000;
 
+        
+        /* Comandos enviados hacia el coche para el microcontrolador */
 	private int ConsignaVolanteHigh;
 
 	private int ConsignaVolanteLow;
@@ -121,7 +123,7 @@ public class ControlCarro implements SerialPortEventListener,
 
 	private int ConsignaSentidoFreno = 0;
 
-	private int ConsignaVelocidad = 0;
+	private int ComandoVelocidad = 0;
 
 	private int ConsignaSentidoVelocidad = 0;
 
@@ -131,23 +133,21 @@ public class ControlCarro implements SerialPortEventListener,
 
 	private int NumPasosFreno = 0; // Numero de pasos de freno que se han dado
 
-	private int BufferComandos[][] = new int[MAXBUFFER][5]; // Tiempo, Comando
-															// volante, comando
-															// velocidad, Fuerza
-															// freno, Pasos
-															// freno
 
-	private double BufferRecibe[][] = new double[MAXBUFFER][5]; // Tiempo,
-																// Volante,
-																// cuentas,
-																// velocidad,
-																// Alarma
+        
+        
+        /* Buffer de Entrada/Salida de datos para el microcontrolador */
+        private int BufferComandos[][] = new int[MAXBUFFER][5]; // Tiempo, Comando															// volante, comando															// velocidad, Fuerza															// freno, Pasos
+															// freno
+	private double BufferRecibe[][] = new double[MAXBUFFER][5]; // Tiempo,																// Volante,												// cuentas,																// velocidad																// Alarma
 
 	private int PtroBufferRecibir = 0, PtroBufferEnviar = 0;
 
 	private int RVolante;
 
-	private int refresco = 300;
+	
+        
+        private int refresco = 300;
 
 	private double kPFreno = 0.5;
 	private double kPDesfreno = 1.5;
@@ -700,7 +700,7 @@ public class ControlCarro implements SerialPortEventListener,
 	 * @return Devuelve la consigna de la velocidad
 	 */
 	public int getConsignaVelocidad() {
-		return ConsignaVelocidad;
+		return ComandoVelocidad;
 	}
 
 	/**
@@ -742,7 +742,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh = (Angulo & 65280) >> 8;
 		a[4] = ConsignaFreno;
 		a[5] = ConsignaSentidoFreno;
-		a[6] = ConsignaVelocidad;
+		a[6] = ComandoVelocidad;
 		a[7] = ConsignaSentidoVelocidad;
 		a[8] = ConsignaNumPasosFreno = NumPasosFreno;
 		/*
@@ -779,7 +779,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[1] = 251;
 		a[2] = ConsignaVolanteLow = Angulo & 255;
 		a[3] = ConsignaVolanteHigh = (Angulo & 65280) >> 8;
-		a[6] = ConsignaVelocidad;
+		a[6] = ComandoVelocidad;
 		a[7] = ConsignaSentidoVelocidad;
 
 		if (NumPasosFreno != 0) {
@@ -819,7 +819,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh;
 		a[4] = ConsignaFreno = Fuerza;
 		a[5] = ConsignaSentidoFreno = 2;
-		a[6] = ConsignaVelocidad = 0;
+		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = 0;
 		a[9] = 255;
@@ -844,7 +844,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh = (volante & 65280) >> 8;
 		a[4] = ConsignaFreno = 255;
 		a[5] = ConsignaSentidoFreno = 2;
-		a[6] = ConsignaVelocidad = 0;
+		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = NumPasosFreno = 0;
 		a[9] = 255;
@@ -872,7 +872,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh = (volante & 65280) >> 8;
 		a[4] = ConsignaFreno = 255;
 		a[5] = ConsignaSentidoFreno = 1;
-		a[6] = ConsignaVelocidad = 0;
+		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = NumPasosFreno = 0;
 		a[9] = 255;
@@ -901,7 +901,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh;
 		a[4] = ConsignaFreno = 255;
 		a[5] = ConsignaSentidoFreno = 3;
-		a[6] = ConsignaVelocidad = 0;
+		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = tiempo;
 		a[9] = 255;
@@ -938,7 +938,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh;
 		a[4] = ConsignaFreno = 0;
 		a[5] = ConsignaSentidoFreno = 0;
-		a[6] = ConsignaVelocidad = Fuerza;
+		a[6] = ComandoVelocidad = Fuerza;
 		a[7] = ConsignaSentidoVelocidad = 2;
 		a[8] = ConsignaNumPasosFreno = 0;
 		a[9] = 255;
@@ -973,7 +973,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh;
 		a[4] = ConsignaFreno;
 		a[5] = ConsignaSentidoFreno;
-		a[6] = ConsignaVelocidad = Fuerza;
+		a[6] = ComandoVelocidad = Fuerza;
 		a[7] = ConsignaSentidoVelocidad = 1;
 		a[8] = ConsignaNumPasosFreno = 0;
 		a[9] = 255;
@@ -996,7 +996,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh;
 		a[4] = ConsignaFreno = valor;
 		a[5] = ConsignaSentidoFreno = 2;
-		a[6] = ConsignaVelocidad = 0;
+		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = tiempo;
 		a[9] = 255;
@@ -1023,7 +1023,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh;
 		a[4] = ConsignaFreno = valor;
 		a[5] = ConsignaSentidoFreno = 1;
-		a[6] = ConsignaVelocidad = 0;
+		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = tiempo;
 		a[9] = 255;
@@ -1055,7 +1055,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh;
 		a[4] = ConsignaFreno = 255;
 		a[5] = ConsignaSentidoFreno = 2;
-		a[6] = ConsignaVelocidad = 0;
+		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = Pasos;
 		a[9] = 255;
@@ -1087,7 +1087,7 @@ public class ControlCarro implements SerialPortEventListener,
 		a[3] = ConsignaVolanteHigh;
 		a[4] = ConsignaFreno = 255;
 		a[5] = ConsignaSentidoFreno = 1;
-		a[6] = ConsignaVelocidad = 0;
+		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = Pasos;
 		a[9] = 255;
@@ -1103,7 +1103,7 @@ public class ControlCarro implements SerialPortEventListener,
 
 		BufferComandos[PtroBufferEnviar][0] = (int) (System.currentTimeMillis() - this.TiempoInicial);
 		BufferComandos[PtroBufferEnviar][1] = ConsignaVolante;
-		BufferComandos[PtroBufferEnviar][2] = ConsignaVelocidad;
+		BufferComandos[PtroBufferEnviar][2] = ComandoVelocidad;
 		BufferComandos[PtroBufferEnviar][3] = ConsignaFreno;
 		BufferComandos[PtroBufferEnviar][4] = ConsignaNumPasosFreno;
 
@@ -1172,8 +1172,7 @@ public class ControlCarro implements SerialPortEventListener,
 			double derivativo = kDAvance * (error - errorAnt) + kDAvance
 					* derivativoAnt;
 
-			if ((comandoAnt > 0 || error > 0)
-					&& (comandoAnt < 254 || error < 0))
+			if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
 				integral += kIAvance * errorAnt;
 
 			// System.out.println("Error: " + error);
