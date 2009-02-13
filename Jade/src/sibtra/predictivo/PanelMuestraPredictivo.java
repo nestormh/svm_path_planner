@@ -212,11 +212,14 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
      */
     public static void main(String[] args) {
         final Coche carroOri = new Coche();
+        final CocheModeloAntiguo carroViejo = new CocheModeloAntiguo();
 //        final Coche carroOri = new Coche();
         double vel = 2;
         double consVolante = 0;
         carroOri.setVelocidad(vel);
         carroOri.setConsignaVolante(consVolante);
+        carroViejo.setVelocidad(vel);
+        carroViejo.setConsignaVolante(consVolante);
         int horPredic = 10;
         int horCont = 3;
         double paramLanda = 1;
@@ -238,10 +241,10 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         }
         Ruta re;
         double[][] rutaPruebaRellena;
-        //String fichero = "Rutas/Parq20";
-//        String fichero = "Rutas/Iter1";
-        //String fichero = "Rutas/casa23";
-        String fichero = "Rutas/Parq0121_1";
+//        String fichero = "Rutas/Parq20";
+        String fichero = "Rutas/Iter1";
+//          String fichero = "Rutas/casa23";
+//        String fichero = "Rutas/Parq0121_1";
         try {
             File file = new File(fichero);
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
@@ -251,6 +254,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
             double distMax = 0.5;
             rutaPruebaRellena = re.toTr(distMax);
             System.out.println(rutaPruebaRellena.length);
+            System.out.println("Abrimos el fichero");
 
         } catch (IOException ioe) {
             re = new Ruta();
@@ -265,6 +269,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
 
         carroOri.setPostura(-1, -1, 0.5, 0.0);
+        carroViejo.setPostura(-1, -1, 0.5, 0.0);
 //        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.3,0);
 
         ControlPredictivo controlador = new ControlPredictivo(carroOri, rutaPruebaRellena,
@@ -342,11 +347,14 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                 //System.out.println("Comando " + comandoVolante);
                 }
                 carroOri.setConsignaVolante(comandoVolante);
+                carroViejo.setConsignaVolante(comandoVolante);   
+                carroOri.setPostura(carroOri.getX(),carroOri.getY(),carroOri.getTita(),carroOri.getVolante());
                 carroOri.calculaEvolucion(comandoVolante, 2, 0.2);
+                carroViejo.calculaEvolucion(comandoVolante, 2, 0.2);
                 //indice = ControlPredictivo.calculaDistMinOptimizado(rutaPrueba, carroOri.getX(), carroOri.getY(), indice);
                 indice = ControlPredictivo.calculaDistMin(rutaPrueba, carroOri.getX(), carroOri.getY());
                 System.out.println(indice);
-                double error = rutaPrueba[indice][2] - carroOri.getTita();
+                double error = rutaPruebaRellena[indice][2] - carroOri.getTita();
                 //System.out.println("Error " + error);
                 pmp.actualiza();
             }

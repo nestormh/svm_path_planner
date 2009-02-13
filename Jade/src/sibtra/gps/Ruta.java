@@ -526,7 +526,7 @@ public class Ruta implements Serializable {
          */
         private void esRutaCerrada(){
         	esCerrada=false;
-        	double umbral = 0.1;
+        	double umbral = 3;
         	double distAux;
         	double distMin = Double.POSITIVE_INFINITY;
         	GPSData ptoInicial = getPunto(0);

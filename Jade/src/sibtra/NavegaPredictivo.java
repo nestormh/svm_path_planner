@@ -229,7 +229,7 @@ public class NavegaPredictivo implements GpsEventListener {
         ventanaPMO.setVisible(true);
 
         //Inicializamos modelos predictivos
-        modCoche = new CocheModeloAntiguo();
+        modCoche = new Coche();
         cp = new ControlPredictivo(modCoche, Tr, 13, 3, 1.0, (double) periodoMuestreoMili / 1000);
         JFrame ventanaPredictivo = new JFrame("Panel Muestra Predictivo");
         ventanaPredictivo.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -301,9 +301,7 @@ public class NavegaPredictivo implements GpsEventListener {
         };
 
         thRF.start();
-
-        double comandoVelocidad = 2;
-        modCoche.setVelocidad(comandoVelocidad);
+        double comandoVelocidad;        
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         long tSig;
         while (true) {
@@ -315,7 +313,10 @@ public class NavegaPredictivo implements GpsEventListener {
                 double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
                 double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
                 double volante = contCarro.getAnguloVolante();
-                modCoche.setPostura(ptoAct[0], ptoAct[1], angAct, volante);
+                // Con esta linea realimentamos la información de los sensores al modelo
+                // se puede incluir tambien la posicion del volante añadiendo el parámetro
+                // volante a la invocación de setPostura
+                modCoche.setPostura(ptoAct[0], ptoAct[1], angAct);
                 double comandoVolante = cp.calculaComando();
                 double consignaVelocidad = cp.calculaConsignaVel();
                 System.out.println(consignaVelocidad);
@@ -329,7 +330,7 @@ public class NavegaPredictivo implements GpsEventListener {
                 contCarro.setAnguloVolante(-comandoVolante);
                 contCarro.setConsignaAvanceMS(consignaVelocidad);
 //				contCarro.Avanza(120);
-                //TODO leer velocidad del coche??
+                //TODO leer la posición del volante
                 comandoVelocidad = contCarro.getVelocidadMS();
                 // no hace falta modCoche.setConsignaVolante(comandoVolante);
                 modCoche.calculaEvolucion(comandoVolante, comandoVelocidad, periodoMuestreoMili / 1000);

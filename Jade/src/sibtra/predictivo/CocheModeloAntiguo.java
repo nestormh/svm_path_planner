@@ -20,15 +20,15 @@ public class CocheModeloAntiguo extends Coche {
      */
     public CocheModeloAntiguo(){
         super();
-//        double[][] arrayA = {{-2.8,-1.8182},{1.0,0}};
-//        double[] arrayB = {1.0,0};
-//        double[] arrayC = {0.30,1.8182};
-//        double[] arrayD = {0};
-        //Modelo para el motor nuevo sin realimentacion de la posicion del volante       
-        double[][] arrayA = {{-2.196460032938488,-0.966643893412244},{1.0,0}};
+        double[][] arrayA = {{-2.8,-1.8182},{1.0,0}};
         double[] arrayB = {1.0,0};
-        double[] arrayC = {1.696460032938488,0.966643893412244};
+        double[] arrayC = {0.30,1.8182};
         double[] arrayD = {0};
+        //Modelo para el motor nuevo sin realimentacion de la posicion del volante       
+//        double[][] arrayA = {{-2.196460032938488,-0.966643893412244},{1.0,0}};
+//        double[] arrayB = {1.0,0};
+//        double[] arrayC = {1.696460032938488,0.966643893412244};
+//        double[] arrayD = {0};
         A = new Matrix(arrayA,2,2);
         B = new Matrix(arrayB,2);
         C = new Matrix(arrayC,2);
