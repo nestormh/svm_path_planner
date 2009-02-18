@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Vector;
 
 import sibtra.imu.AngulosIMU;
+import sibtra.util.UtilCalculos;
 
 import Jama.Matrix;
 import java.util.Vector;
@@ -22,6 +23,8 @@ public class Ruta implements Serializable {
 	 * Número de serie. IMPORTANTE porque vamos a salvarlo en fichero directamente.
 	 * Si cambiamos estructura del objeto tenemos que cambiar el número de serie y ver 
 	 * como se cargan versiones anteriores.
+	 * Para saber si es necesario cambiar el número ver 
+	 *  http://java.sun.com/j2se/1.5.0/docs/guide/serialization/spec/version.html#9419
 	 */
 	private static final long serialVersionUID = 3L;
 
@@ -48,11 +51,28 @@ public class Ruta implements Serializable {
 	/** Deviación magnética calculada */
 	double desviacionM=Double.NaN;
 	
+	/** umbral de angulo utilizado para determinar punto en recta al calcular {@link #desviacionM} */
+	double umbralDesviacion=Math.PI; //por defecto para versiones anteriores que no lo tienen
+
+	/** umbral de angulo por defecto para determinar punto en recta al calcular {@link #desviacionM} */ 
+	static final double umbralDesviacionDefecto = Math.toRadians(10);
+	/** Vector de indices de puntos considerados al calcular la desviación magnética */
+	Vector<Integer> indiceConsideradosDM=null;
+	/** Vector con la deviación magnética de los puntos considerados */
+	Vector<Double> dmI=null;
+	/** Desviación magnética máxima en los puntos considerados */
+	double dmMax;
+	/** Desviación estandar de la desviación magnética media */
+	double desEstDM;
+
 	int indiceFinal;
 
 	static double distFrenado = 5;
 
 	private boolean esCerrada;
+
+
+
 
 	/** Constructor por defecto, no pone tamaño y supone que no es espacial */
 	public Ruta() {
@@ -312,19 +332,31 @@ public class Ruta implements Serializable {
 		return retorno;
 	}
 	
-	/** @return la desviación magnética {@link #desviacionM}. La calcula si no está caclulada */
+	/** @return la desviación magnética {@link #desviacionM} con umbral de angulo por defecto. 
+	 * La calcula si no está caclulada */
 	public double getDesviacionM() {
-		if(Double.isNaN(desviacionM))
-			calculaDesM();
+		if(Double.isNaN(desviacionM) || umbralDesviacion!=umbralDesviacionDefecto)
+			calculaDesM(umbralDesviacionDefecto);
+		return desviacionM;
+	}
+	
+	/** @return la desviación magnética {@link #desviacionM} con umbral de angulo pasado. 
+	 * La calcula si no está caclulada */
+	public double getDesviacionM(double umbralAngulo) {
+		if(Double.isNaN(desviacionM) || umbralDesviacion!=umbralAngulo)
+			calculaDesM(umbralAngulo);
 		return desviacionM;
 	}
 	
 	/** 
 	 * Calcula la desviación magnetica comparando los datos de la IMU con los de la 
-	 * evolución de la ruta obtenidos con el GPS
-	 *
+	 * evolución de la ruta obtenidos con el GPS.
+	 * Se usarán sólo los tramos de ruta réctilíneos, para ello un punto sólo se tendrá en 
+	 * cuenta si la diferencia de angulo con siguiente y anterior son es menor de un umbral
+	 * @param umbralAngulo umbral para considerar punto en una recta. 
 	 */
-	private void calculaDesM() {
+	private void calculaDesM(double umbralAngulo) {
+//		double umbralAngulo=Math.toRadians(10); //umbral de angulos considerados
 		if(puntos.size()<2)
 			return; //no tocamos la desv.
 		//vemos si tenemos datos IMU para todos
@@ -334,36 +366,52 @@ public class Ruta implements Serializable {
 				return;
 			}
 		//el angulo se calcula al añadir cada punto
-		double dMax=0; //desviación máxima
+		dmMax=0; //desviación máxima
 		double dAcum=0; //desviación acumulada
 		double dAcum2=0; //desviación acumulada al cuadrado
-		for(int i=1; i<puntos.size(); i++) {
-			double da=puntos.get(i).getAngulo() - Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw());
-			//colocamos la diferencia en rango +-PI
-			if(da<-Math.PI) da+=2*Math.PI;
-			if(da>Math.PI) da-=2*Math.PI;
-			double daAbs=Math.abs(da);
-			if(daAbs>dMax) dMax=daAbs;
-			dAcum+=da;
-			dAcum2+=da*da;
+		if(indiceConsideradosDM==null)
+			indiceConsideradosDM=new Vector<Integer>();
+		else
+			indiceConsideradosDM.clear();
+        //desviación estandar de los considerados para no repetir en el cálculo desviación estandar 
+		if(dmI==null)
+			dmI=new Vector<Double>();
+		else
+			dmI.clear();
+		for(int i=2; //el 0 no tiene angulo, por lo que el 1 tampoco se puede considerar
+		i<(puntos.size()-1); //el último tampoco se puede considerar  
+		i++) {
+			double angI=puntos.get(i).getAngulo();
+			double angI_1=puntos.get(i-1).getAngulo();
+			double angIp1=puntos.get(i+1).getAngulo();
+			if(Math.abs(UtilCalculos.normalizaAngulo(angI-angI_1))<=umbralAngulo
+					&& Math.abs(UtilCalculos.normalizaAngulo(angI-angIp1))<=umbralAngulo ) {
+				indiceConsideradosDM.add(i);
+				double da=UtilCalculos.normalizaAngulo(puntos.get(i).getAngulo() 
+						- Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw()));
+				double daAbs=Math.abs(da);
+				if(daAbs>dmMax) dmMax=daAbs;
+				dAcum+=da;
+				dAcum2+=da*da;
+				dmI.add(da);
+			}
 		}
 		
-		desviacionM=dAcum/(puntos.size()-1); //desviación media
+		desviacionM=dAcum/(indiceConsideradosDM.size()); //desviación media
+		umbralDesviacion=umbralAngulo; //anotamos el umbral utilizado
 
 		//desviación estandar de la desviación (valga la redundancia :-)
-		double dif2=0;
-		for(int i=1; i<puntos.size(); i++) {
-			double da=puntos.get(i).getAngulo()-Math.toRadians(puntos.get(i-1).getAngulosIMU().getYaw());
-			//colocamos la diferencia en rango +-PI
-			if(da<-Math.PI) da+=2*Math.PI;
-			if(da>Math.PI) da-=2*Math.PI;
-			dif2+=(da-desviacionM)*(da-desviacionM);
-		}
-		double desEstDM=dif2/(puntos.size()-1);
+		double dif2=0.0;
+		for(int i=0; i<dmI.size(); i++) 
+			dif2+=(dmI.get(i)-desviacionM)*(dmI.get(i)-desviacionM);
 		
-		System.out.println("Desviación media="+Math.toDegrees(desviacionM)
+		desEstDM=dif2/(indiceConsideradosDM.size());
+		
+		System.out.println(" Con umbral="+Math.toDegrees(umbralAngulo)+" grados"
+				+" Considerados "+indiceConsideradosDM.size()+" de "+(puntos.size()-3)+" posibles"
+				+" Desviación media="+Math.toDegrees(desviacionM)
 				+" Desviación estandar="+Math.toDegrees(desEstDM)
-				+" Desviación máxima="+Math.toDegrees(dMax));
+				+" Desviación máxima="+Math.toDegrees(dmMax));
 		
 	}
 
@@ -373,13 +421,13 @@ public class Ruta implements Serializable {
 		double[][] Tr=new double[getNumPuntos()][4];
 		for(int i=0; i<getNumPuntos();i++) {
 			GPSData ptoA=getPunto(i);
-                        GPSData ptoB=getPunto(i+1);
+			GPSData ptoB=getPunto(i+1);
 			Tr[i][0]=ptoA.getXLocal();
 			Tr[i][1]=ptoA.getYLocal();
 			AngulosIMU ai=ptoA.getAngulosIMU();
 			Tr[i][2]=(ai!=null)?Math.toRadians(ai.getYaw()):ptoA.calculaAnguloGPS(ptoB);
-                        Tr[i][3] = (ptoA.getVelocidad()!=Double.NaN)? ptoA.getVelocidad():ptoA.calculaVelocidadGPS(ptoB);
-                }
+			Tr[i][3] = (ptoA.getVelocidad()!=Double.NaN)? ptoA.getVelocidad():ptoA.calculaVelocidadGPS(ptoB);
+		}
 		return Tr;
 	}
         /**

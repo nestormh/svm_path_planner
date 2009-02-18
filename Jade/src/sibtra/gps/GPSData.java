@@ -74,7 +74,8 @@ public class GPSData implements Serializable, Cloneable {
      */
     private double altura = Double.NaN;
     /**
-     * Angulo del último desplazamiento con respecto sistemas de coordenadas locales
+     * Angulo del último desplazamiento con respecto sistemas de coordenadas locales.
+     * Será el del vector que une el punto anterior con éste.
      */
     private double angulo = Double.NaN;
     /** cadena que se recibió del GPS y que dió lugar a este punto */

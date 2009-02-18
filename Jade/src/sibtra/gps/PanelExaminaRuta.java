@@ -22,6 +22,8 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.sun.org.apache.bcel.internal.generic.SIPUSH;
+
 /**
  * {@link JPanel} para examinar el contenido de una ruta.
  * @author alberto
@@ -43,6 +45,10 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 	private SpinnerNumberModel spm;
 
 	private JLabel jlDeMaximo;
+
+	private JLabel jlDesviaM;
+
+	private SpinnerNumberModel spUmbral;
 
 	public PanelExaminaRuta() {
 		this(null);
@@ -90,7 +96,13 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jbUltimo.addActionListener(this);
 			jpInf.add(jbUltimo);
 			
-			
+			//Para la desviación magnética
+			jlDesviaM=new JLabel("Desviación magnetica ##.##º con umbral ");
+			jpInf.add(jlDesviaM);
+			spUmbral=new SpinnerNumberModel(10.00,0,180,0.25);
+			spUmbral.addChangeListener(this);
+			JSpinner jspUmbral=new JSpinner(spUmbral);
+			jpInf.add(jspUmbral);
 			
 			add(jpInf,BorderLayout.PAGE_END);
 		}
@@ -105,6 +117,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jsDato.setEnabled(false);
 			jbSiguiente.setEnabled(false);
 			jbUltimo.setEnabled(false);
+			jlDesviaM.setEnabled(false);
 		} else {
 			jbPrimero.setEnabled(true);
 			jbAnterior.setEnabled(true);
@@ -114,6 +127,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			spm.setMaximum(ruta.getNumPuntos());
 			jlDeMaximo.setText(String.format(" de %d ", ruta.getNumPuntos()));
 			spm.setValue(1);
+			actualizaDM();
 		}
 	}
 
@@ -142,8 +156,24 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			System.out.println(npto.getCadenaNMEA());
 			
 		}
+		if(ce.getSource()==spUmbral) {
+			actualizaDM();
+		}
 	}
 
+	/** Para actializar la etiqueta con la desviación magnética */
+	private void actualizaDM() {
+		if(ruta==null) return;
+		double dm=Math.toDegrees(ruta.getDesviacionM(Math.toRadians((Double)spUmbral.getValue())));
+		jlDesviaM.setText(String.format(
+				"Desviación magnetica %6.2fº (usando %d de %d) (est:%6.2fº max:%6.2fº))con umbral " 
+				, dm
+				,ruta.indiceConsideradosDM.size(),ruta.puntos.size()
+				,Math.toDegrees(ruta.desEstDM), Math.toDegrees(ruta.dmMax)
+				));
+		jlDesviaM.setEnabled(true);
+	}
+	
 	/**
 	 * @param args
 	 */
