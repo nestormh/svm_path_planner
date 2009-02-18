@@ -1414,7 +1414,7 @@ int main (int argc, char* argv[]){
 	parameter ajustes;
 	int frameNr;
 	char filename[30];
-	const char *prefix = "Series/puerta";
+	const char *prefix = "Series/rafaFeb";
 	
 	bool trackbar;
 		
@@ -1491,11 +1491,13 @@ int main (int argc, char* argv[]){
 	frameNr = 1;
 
 	do {
-
+		if (frameNr < 1)		// Evitar que se seleccione el frame 0
+			frameNr = 1;
+			
 		switch (source){
 			case 0: {		// Im�genes est�ticas
-				izquierda = cvLoadImage("Series/puerta_left_50.bmp");
-				derecha = cvLoadImage("Series/puerta_right_50.bmp");
+				izquierda = cvLoadImage("Series/rafaFeb_left_16.bmp");
+				derecha = cvLoadImage("Series/rafaFeb_right_16.bmp");
 
 				if (!izquierda || !derecha){
 					printf ("Error leyendo im�genes\n");

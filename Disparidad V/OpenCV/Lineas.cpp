@@ -154,6 +154,8 @@ void Lineas::Insert(CvPoint *item, int pos, int ventana) {
 	insert = true;
 	lado = round(ventana / 2);
 	i = pos + lado;
+	if ( i >= this->max)		// Evitar que se desborde "por arriba"
+		i = this->max - 1;
 	
 	// Mirar si hay algo en el entorno escogido
 	while ((i >= pos - lado) && (i > 0) && (lines[i]->first == NULL)){
@@ -221,6 +223,8 @@ void Lineas::InsertGreedy(CvPoint *item, int pos, int ventana) {
 	insert = true;
 	lado = round(ventana / 2);
 	i = pos + lado;
+	if ( i >= this->max)		// Evitar que se desborde "por arriba"
+		i = this->max - 1;
 	
 //	printf ("Insertando (%d, %d) (%d, %d)-> ", item[0].x, item[0].y, item[1].x, item[1].y);
 	
