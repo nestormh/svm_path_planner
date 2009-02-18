@@ -55,7 +55,7 @@ public class Ruta implements Serializable {
 	double umbralDesviacion=Math.PI; //por defecto para versiones anteriores que no lo tienen
 
 	/** umbral de angulo por defecto para determinar punto en recta al calcular {@link #desviacionM} */ 
-	static final double umbralDesviacionDefecto = Math.toRadians(10);
+	static final double umbralDesviacionDefecto = Math.toRadians(1);
 	/** Vector de indices de puntos considerados al calcular la desviación magnética */
 	Vector<Integer> indiceConsideradosDM=null;
 	/** Vector con la deviación magnética de los puntos considerados */
