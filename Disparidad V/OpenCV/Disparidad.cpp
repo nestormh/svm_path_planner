@@ -1161,6 +1161,8 @@ void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal,
 		//printf ("Vertical: (%d %d) (%d %d)\n", ver[0].x, ver[0].y, ver[1].x, ver[1].y);
 		
 		k = index[i] + lado;
+		if (k >= horizontal->GetMax())		// Evitar salirse del vector por arriba
+			k = horizontal->GetMax() - 1;
 		
 		do {
 			hLines = horizontal->GetLine(k);
@@ -1414,7 +1416,7 @@ int main (int argc, char* argv[]){
 	parameter ajustes;
 	int frameNr;
 	char filename[30];
-	const char *prefix = "Series/rafaFeb";
+	const char *prefix = "Series/jesusFeb";
 	
 	bool trackbar;
 		
@@ -1423,7 +1425,7 @@ int main (int argc, char* argv[]){
 	CvCapture *videoIzq = 0;
 	CvCapture *videoDer = 0;
 
-	source = 4;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
+	source = 0;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
 
 	switch (source) {
 		case 1:
@@ -1496,8 +1498,8 @@ int main (int argc, char* argv[]){
 			
 		switch (source){
 			case 0: {		// Im�genes est�ticas
-				izquierda = cvLoadImage("Series/rafaFeb_left_16.bmp");
-				derecha = cvLoadImage("Series/rafaFeb_right_16.bmp");
+				izquierda = cvLoadImage("Series/jesusFeb_left_13.bmp");
+				derecha = cvLoadImage("Series/jesusFeb_right_13.bmp");
 
 				if (!izquierda || !derecha){
 					printf ("Error leyendo im�genes\n");

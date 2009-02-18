@@ -31,6 +31,7 @@ public:
 	CvSeq *GetLine(int pos);
 	int GetN();
 	int *GetIndex();
+	int GetMax();
 	void Print();
 	void DrawLines(IplImage* imagen, CvScalar color);
 };
