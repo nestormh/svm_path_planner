@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+import java.util.Vector;
 
 import javax.swing.JCheckBox;
 
@@ -30,6 +31,9 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 
 	/** Array de dos o tres columnas con los puntos que forman la trayectoria */
 	protected double Tr[][]=null;
+
+	/** Vector de puntos de la trayectoria a marcar de manera especial */
+	Vector<Integer> indiceMarcar=null;
 
 	/** coordenadas de la posición del coche. Si es NaN el coche no se pinta */
 	double posXCoche=Double.NaN;
@@ -118,6 +122,26 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 								, x+tamCruz, y-tamCruz);
 					}
 				}
+			}
+			//Marcamos puntos si se a asignado vector de índice
+			if(indiceMarcar!=null && indiceMarcar.size()>0) {
+				//pintamos los puntos que están dentro del recuadro
+				g.setStroke(new BasicStroke());
+				g.setColor(Color.RED);
+				for(int ia=0; ia<indiceMarcar.size(); ia++)
+					if (indiceMarcar.get(ia)<Tr.length) {
+						double pa[]=Tr[indiceMarcar.get(ia)];
+						if(pa[0]<=esqSI.getX() && pa[0]>=esqID.getX()
+								&& pa[1]<=esqSI.getY() && pa[1]>=esqID.getY() ) {
+							//esta dentro del recuadro
+							Point2D px=point2Pixel(pa);
+							int x=(int)px.getX(), y=(int)px.getY();
+							g.drawLine(x-tamCruz, y-tamCruz
+									, x+tamCruz, y+tamCruz);
+							g.drawLine(x-tamCruz, y+tamCruz
+									, x+tamCruz, y-tamCruz);
+						}
+					}
 			}
 
 			if(jcbMostrarRumbo.isSelected() && Tr[0].length>=3) {
@@ -245,6 +269,11 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 					jcbMostrarRumbo.setEnabled(true);
 			}
 		Tr=tr;
+	}
+	
+	/** @param im vector de indice de puntos a marcar, null para no marcar */
+	public void setMarcados(Vector<Integer> im) {
+		indiceMarcar=im;
 	}
 
 	

@@ -36,6 +36,7 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 	private JLabel jlNomF;
 	private JCheckBox jcbTemporal;
 	private PanelMuestraRuta pmr;
+	private JCheckBox jcbMarcarDM;
 	
 	public ExaminaFicherosRuta(String titulo) {
 		
@@ -60,6 +61,10 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 			JButton jbFichero=new JButton("Abrir Fichero");
 			jbFichero.addActionListener(this);
 			jpSur.add(jbFichero);
+
+			jcbMarcarDM=new JCheckBox("Marcar usados DM");
+			jcbMarcarDM.addItemListener(this);
+			jpSur.add(jcbMarcarDM);
 
 			cp.add(jpSur);
 		}
@@ -104,15 +109,24 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 	}
 
 	public void itemStateChanged(ItemEvent e) {
-		if(e.getStateChange()==ItemEvent.SELECTED) {
-			per.setRuta(rutaTemporal);
-			pmr.setRuta(rutaTemporal);
-			rutaTemporal.getDesviacionM();
-		} else {
-			per.setRuta(rutaEspacial);
-			pmr.setRuta(rutaEspacial);
-			rutaEspacial.getDesviacionM();
-		}
+		if(e.getSource()==jcbTemporal)
+			if(e.getStateChange()==ItemEvent.SELECTED) {
+				per.setRuta(rutaTemporal);
+				pmr.setRuta(rutaTemporal);
+				rutaTemporal.getDesviacionM();
+			} else {
+				per.setRuta(rutaEspacial);
+				pmr.setRuta(rutaEspacial);
+				rutaEspacial.getDesviacionM();
+			}
+		if(e.getSource()==jcbMarcarDM)
+			if(e.getStateChange()==ItemEvent.SELECTED) {
+				pmr.setMarcados(per.ruta.indiceConsideradosDM);
+				pmr.actualiza();
+			} else { 
+				pmr.setMarcados(null);
+				pmr.actualiza();
+			}
 	}
 	
 	/**
