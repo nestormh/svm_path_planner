@@ -5,6 +5,7 @@
 
 package sibtra.predictivo;
 
+import sibtra.util.UtilCalculos;
 import Jama.Matrix;
 
 /**
@@ -180,7 +181,7 @@ public class ControlPredictivo {
 //            System.out.println("Vector x "+vectorDeseadoX+" "+ "Vector y "+vectorDeseadoY+"\n");
 //            System.out.println("Orientacion deseada " + orientacionesDeseadas[i] + " " 
 //                                +"prediccion de orientacion " + predicOrientacion[i]+"\n");
-            vectorError[i] = normalizaAngulo(orientacionesDeseadas[i] - predicOrientacion[i]);
+            vectorError[i] = UtilCalculos.normalizaAngulo(orientacionesDeseadas[i] - predicOrientacion[i]);
             prediccionPosicion[i][0] = carroSim.getX();
             prediccionPosicion[i][1] = carroSim.getY();
         }
@@ -243,18 +244,6 @@ public class ControlPredictivo {
         return indMin;
     }
     
-    /**
-     * Se le pasa un ángulo en radianes y devuelve ese mismo ángulo entre 
-     * -PI y PI
-     * @param angulo Ángulo a corregir
-     * @return Ángulo en radianes corregido
-     */
-    static double normalizaAngulo(double angulo){
-        angulo -= 2*Math.PI*Math.floor(angulo/(2*Math.PI));
-        if (angulo >= Math.PI)
-            angulo -= 2*Math.PI;
-        return angulo;
-    }
     public double calculaConsignaVel(){
        double consigna = 0;
        double velocidadMax = 3;
