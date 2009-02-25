@@ -4,28 +4,23 @@
 package sibtra.gps;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Vector;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
 
 import sibtra.util.EligeSerial;
 import sibtra.util.LabelDato;
 import sibtra.util.LabelDatoFormato;
+import sibtra.util.PanelDatos;
 import Jama.Matrix;
 
 /**
@@ -33,15 +28,13 @@ import Jama.Matrix;
  * @author alberto
  *
  */
-public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
+public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener {
 
-	private Font Grande;
-	private Border blackline = BorderFactory.createLineBorder(Color.black);
-	private JPanel jpCentro;
+	/** Para seleccionar se sólo se muestran datos espaciales */
 	private JCheckBox jcbSoloEspa;
+	/** Hora del ultimo dato presentado */
+	private Object horaUltima="";
 	
-	private Vector<LabelDato> vecLabels=new Vector<LabelDato>();
-;
 	/**
 	 * constructor por defecto. Se actualiza con todos los puntos.
 	 */
@@ -54,7 +47,9 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 	 * @param soloEspaciales
 	 */
 	public PanelMuestraGPSData(boolean soloEspaciales) {
-		jpCentro=new JPanel(new GridLayout(0,3)); //empezamos con 3 columnas
+		super();
+		//empezamos con 3 columnas
+		setPanelPorDefecto(new JPanel(new GridLayout(0,3)));
 		setLayout(new BorderLayout());
 //		angulo=aCopiar.angulo;
 //		cadenaNMEA=aCopiar.cadenaNMEA;
@@ -78,26 +73,25 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 //		velocidadGPS=aCopiar.velocidadGPS;		
 		//hora
 		LabelDato lda=new LabelDatoFormato("??:??:??.??",GPSData.class,"getHora","%s");
-		Grande = lda.getFont().deriveFont(20.0f);
-		añadeLabelDatos(lda,"Hora");
+		añadeAPanel(lda,"Hora");
 
 		//Latitud
-		añadeLabelDatos(new LabelDatoFormato("+?? ??.?????",GPSData.class,"getLatitudText","%s")
+		añadeAPanel(new LabelDatoFormato("+?? ??.?????",GPSData.class,"getLatitudText","%s")
 		, "Latitud");
 		//Longitud
-		añadeLabelDatos(new LabelDatoFormato("+??? ??.?????",GPSData.class,"getLongitudText","%s")
+		añadeAPanel(new LabelDatoFormato("+??? ??.?????",GPSData.class,"getLongitudText","%s")
 		,"Longitud");
 		//RMS
-		añadeLabelDatos(new LabelDatoFormato("?.?",GPSData.class,"getRms","%2.1f")
+		añadeAPanel(new LabelDatoFormato("?.?",GPSData.class,"getRms","%2.1f")
 		,"RMS");
 		//Número satélites
-		añadeLabelDatos(new LabelDatoFormato("?",GPSData.class,"getSatelites","%1d")
+		añadeAPanel(new LabelDatoFormato("?",GPSData.class,"getSatelites","%1d")
 		,"Num Satelites");
 		//Edad correción diferencial
-		añadeLabelDatos(new LabelDatoFormato("??? sg",GPSData.class,"getAge","%3.0f sg")
+		añadeAPanel(new LabelDatoFormato("??? sg",GPSData.class,"getAge","%3.0f sg")
 		, "Edad Correccion");
 		//Coordenadas locales
-		añadeLabelDatos(new LabelDato("(???.??, ???.??, ???.??)") {
+		añadeAPanel(new LabelDato("(???.??, ???.??, ???.??)") {
 			public void Actualiza(Object oa,boolean hayCambio) {
 				setEnabled(hayCambio);
 				if(!hayCambio) return;
@@ -111,13 +105,13 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		}
 		,"Locales");
 		//altura
-		añadeLabelDatos(new LabelDatoFormato("+????.??",GPSData.class,"getAltura","%+8.2f"), "Altura");
+		añadeAPanel(new LabelDatoFormato("+????.??",GPSData.class,"getAltura","%+8.2f"), "Altura");
 
 		//Velocidad m/€s
-		añadeLabelDatos(new LabelDatoFormato("+??.??",GPSData.class,"getVelocidad","%+6.2f")
+		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getVelocidad","%+6.2f")
 		, "Velocidad m/s");
 //		Yaw
-		añadeLabelDatos(new LabelDato("+????.??") {
+		añadeAPanel(new LabelDato("+????.??") {
 			public void Actualiza(Object oa, boolean hayCambio) {
 				setEnabled(hayCambio);
 				if(!hayCambio) return;
@@ -131,10 +125,10 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		}
 		,"Yaw IMU");
 		//Angulo calculado
-		añadeLabelDatos(new LabelDatoFormato("+????.??",GPSData.class,"getAngulo","%+8.2f")
+		añadeAPanel(new LabelDatoFormato("+????.??",GPSData.class,"getAngulo","%+8.2f")
 		,"Angulo Calc.");
 		//Diff angulos
-		añadeLabelDatos(new LabelDato("+????.??"){
+		añadeAPanel(new LabelDato("+????.??"){
 			public void Actualiza(Object oa, boolean hayCambio) {
 				setEnabled(hayCambio);
 				if(!hayCambio) return;
@@ -148,34 +142,20 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 			}
 		}
 		, "D. Magnetica");
-		add(jpCentro,BorderLayout.CENTER);
+		add(getPanelPorDefecto(),BorderLayout.CENTER);
 		jcbSoloEspa=new JCheckBox("Sólo datos espaciales");
 		jcbSoloEspa.setSelected(soloEspaciales);
 		add(jcbSoloEspa,BorderLayout.SOUTH);
 	}
-
-	/**
-	 * Funcion para añadir etiqueta con todas las configuraciones por defecto
-	 * @param lda etiqueta a añadir
-	 * @param Titulo titulo adjunto
-	 */
-	private void añadeLabelDatos(LabelDato lda,String Titulo) {
-		vecLabels.add(lda);
-		lda.setBorder(BorderFactory.createTitledBorder(
-				blackline, Titulo));
-		lda.setFont(Grande);
-		lda.setHorizontalAlignment(JLabel.CENTER);
-		lda.setEnabled(false);
-		jpCentro.add(lda);
-		
-	}
 	
 	public void actualizaPunto(GPSData pto) {
-		boolean hayDato=(pto!=null);
-		//atualizamos etiquetas en array
-		for(int i=0; i<vecLabels.size(); i++)
-			vecLabels.elementAt(i).Actualiza(pto,hayDato);
-			//Nuevos valores
+		if(pto!=null)
+			if(pto.getHora().equals(horaUltima))
+				pto=null;
+			else
+				horaUltima=pto.getHora();
+		actualizaDatos(pto);
+		//Nuevos valores
 //			Matrix ce=pto.getCoordECEF();
 //			if(ce!=null && ce.get(0, 0)<Double.MAX_VALUE) {
 //				jlCoordECEFx.setText(String.format("%10.3f",ce.get(0,0)));
@@ -186,27 +166,37 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 //				jlCoordECEFy.setEnabled(false);
 //				jlCoordECEFz.setEnabled(false);
 //			}
-		//programamos la actualizacion de la ventana
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				repaint();
-			}
-		});
-
-
 	}
 
-	/* (non-Javadoc)
+	/**
 	 * @see sibtra.gps.GpsEventListener#handleGpsEvent(sibtra.gps.GpsEvent)
 	 */
 	public void handleGpsEvent(GpsEvent ev) {
 		//atendemos sólo un tipo de evento según el tipo
 		if(ev!=null) {
-			if(jcbSoloEspa.isSelected() && ev.isEspacial())
+			if(jcbSoloEspa.isSelected() && ev.isEspacial()) {
 				actualizaPunto(ev.getNuevoPunto());
-			if(!jcbSoloEspa.isSelected() && !ev.isEspacial())
+				repinta();
+			}
+			if(!jcbSoloEspa.isSelected() && !ev.isEspacial()) {
 				actualizaPunto(ev.getNuevoPunto());				
+				repinta();
+			}
 		}
+	}
+
+	/**
+	 * @return el soloEspaciales
+	 */
+	public boolean isSoloEspaciales() {
+		return jcbSoloEspa.isSelected();
+	}
+
+	/**
+	 * @param soloEspaciales el soloEspaciales a establecer
+	 */
+	public void setSoloEspaciales(boolean soloEspaciales) {
+		jcbSoloEspa.setSelected(soloEspaciales);
 	}
 
 	
@@ -287,20 +277,6 @@ public class PanelMuestraGPSData extends JPanel implements GpsEventListener {
 		ventanaPrincipal.setVisible(true);
 		
 		
-	}
-
-	/**
-	 * @return el soloEspaciales
-	 */
-	public boolean isSoloEspaciales() {
-		return jcbSoloEspa.isSelected();
-	}
-
-	/**
-	 * @param soloEspaciales el soloEspaciales a establecer
-	 */
-	public void setSoloEspaciales(boolean soloEspaciales) {
-		jcbSoloEspa.setSelected(soloEspaciales);
 	}
 
 }

@@ -150,6 +150,7 @@ public class NavegaPredictivo implements GpsEventListener {
         jpCentral.add(PMGPS);
 
         {
+        	//TODO Usar panel gpsTriumph
             JPanel jpGPST = new JPanel();
             jpCentral.add(jpGPST);
 

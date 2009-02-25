@@ -161,6 +161,7 @@ public class ControlCarro implements SerialPortEventListener,
 
 	private static boolean controla = false;
 
+	/** Consigna de velocidad a aplicar en cuentas por segundo */
 	private static double consignaVel = 0;
 
 	/**
@@ -695,14 +696,14 @@ public class ControlCarro implements SerialPortEventListener,
 	
 	
 	/**
-	 * Obtiene la consigna de la velocidad
-	 * 
-	 * @return Devuelve la consigna de la velocidad
+	 * @return Devuelve el comando de la velocidad
 	 */
-	public int getConsignaVelocidad() {
+	public int getComandoVelocidad() {
 		return ComandoVelocidad;
 	}
 
+	
+	
 	/**
 	 * Fija consigna del volante
 	 * 
@@ -1207,7 +1208,7 @@ public class ControlCarro implements SerialPortEventListener,
                         
 			comandoAnt = comando;
 
-			//System.out.println("Avanzando: " + comando + " error " + (consignaVel - velocidadCS));
+//			System.out.println("Avanzando: " + comando + " error " + (consignaVel - velocidadCS));
 			if (comando >= 0)
                             Avanza(comando);
                         else
@@ -1242,11 +1243,16 @@ public class ControlCarro implements SerialPortEventListener,
 	 * @param valor
 	 *            consigna en cuentas/Seg
 	 */
-	public void controlceCS(double valor) {
+	public void setConsignaAvanceCS(double valor) {
 		consignaVel = valor;
 		controla = true;
 	}
 
+	/** @return la consigna fijada en cuentas por segundo */
+	public double getConsignaAvanceCS() {
+		return consignaVel;
+	}
+	
 	/**
 	 * Fija el valor de la velocidad de avance en Metros Segundo y activa el
 	 * control
@@ -1260,6 +1266,11 @@ public class ControlCarro implements SerialPortEventListener,
 		controla = true;
 	}
 
+	/** @return la consigna fijada en metros por segundo */
+	public double getConsignaAvanceMS() {
+		return consignaVel/PULSOS_METRO;
+	}
+	
 	/**
 	 * Fija el valor de la velocidad de avance en Kilometros hora y activa el
 	 * control
@@ -1272,6 +1283,10 @@ public class ControlCarro implements SerialPortEventListener,
 		controla = true;
 	}
 
+	/** @return la consigna fijada en Kilometros por hora */
+	public double getConsignaAvanceKH() {
+		return consignaVel/PULSOS_METRO*3600.0/1000.0;
+	}
 	/**
 	 * Velocidad actual en el vehiculo en Cuentas Segundo
 	 * 

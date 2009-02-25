@@ -1,21 +1,12 @@
 package sibtra.gps;
 
+import gnu.io.SerialPortEvent;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.TooManyListenersException;
 
 import sibtra.imu.UtilMensajesIMU;
-import sibtra.util.EligeSerial;
-import gnu.io.CommPortIdentifier;
-import gnu.io.NoSuchPortException;
-import gnu.io.PortInUseException;
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
-import gnu.io.UnsupportedCommOperationException;
 
 /** Clase de conexión a GPS Triumph que maneja mensajes propietarios
  * Como:
@@ -58,6 +49,8 @@ public class GPSConnectionTriumph extends GPSConnection {
 
 	/** Indica estado de la depuracion */
 	protected int nivelLog=0;
+
+	private int numOKLink;
 	
 	public static int ERR=0;
 	public static int WAR=0;
@@ -522,8 +515,10 @@ public class GPSConnectionTriumph extends GPSConnection {
 					ca++;
 					log(INFO,String.format("DL: %c %c %s %d %d %d %f"
 							,decoId, tipo, stationID, timeLast, numOK, numCorrup,quality ));
-					if(tipo=='D' && numOK>0) //puerto D es el del enlace sólo si se ha recibido algo
+					if(tipo=='D') { //puerto D es el del enlace
 						calidadLink=quality;
+						numOKLink=numOK;
+					}
 					la--;
 				}
 			} catch (Exception e) {
@@ -586,6 +581,13 @@ u1 cs(u1 const* src, int count)
 		return calidadLink;
 	}
 	
+	/**
+	 * @return numero de paquetes OK del Link
+	 */
+	public int getNumOKLink() {
+		return numOKLink;
+	}
+
 	/**
 	 * @param args
 	 */

@@ -3,95 +3,65 @@
  */
 package sibtra.imu;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridLayout;
-import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
 
-import sibtra.gps.GPSData;
 import sibtra.util.LabelDato;
 import sibtra.util.LabelDatoFormato;
+import sibtra.util.PanelDatos;
 
 /**
+ * Mostrar los 3 angulos y el contador de recepción de la IMU
  * @author alberto
  *
  */
-public class PanelMuestraAngulosIMU extends JPanel implements IMUEventListener {
+public class PanelMuestraAngulosIMU extends PanelDatos implements IMUEventListener {
 	
-
-	private Font Grande;
-	private Border blackline = BorderFactory.createLineBorder(Color.black);
-	private JPanel jpCentro;
-	private Vector<LabelDato> vecLabels=new Vector<LabelDato>();
+	/**	Contador del último dato presentado */
+	private int contadorUltimo=0;
 
 	public PanelMuestraAngulosIMU() {
+		super();
 		setLayout(new GridLayout(0,3)); //empezamos con 3 columnas
-		jpCentro=this; //no añadimos panel central
 		//roll
 		LabelDato lda=new LabelDatoFormato("??:??:??.??",AngulosIMU.class,"getRoll","%+10.4f");
-		Grande = lda.getFont().deriveFont(20.0f);
-		añadeLabelDatos(lda,"Roll");
+		añadeAPanel(lda,"Roll");
 
 		//Pitch
-		añadeLabelDatos(new LabelDatoFormato("+???.????",AngulosIMU.class,"getPitch","%+10.4f")
+		añadeAPanel(new LabelDatoFormato("+???.????",AngulosIMU.class,"getPitch","%+10.4f")
 		, "Pitch");
 		//Yaw
-		añadeLabelDatos(new LabelDatoFormato("+???.????",AngulosIMU.class,"getYaw","%+10.4f")
+		añadeAPanel(new LabelDatoFormato("+???.????",AngulosIMU.class,"getYaw","%+10.4f")
 		, "Yaw");
 		//contador
-		añadeLabelDatos(new LabelDatoFormato("+???.????",AngulosIMU.class,"getContador","%7d")
+		añadeAPanel(new LabelDatoFormato("+???.????",AngulosIMU.class,"getContador","%7d")
 		, "Contador");
 	}
 
-	/**
-	 * Funcion para añadir etiqueta con todas las configuraciones por defecto
-	 * @param lda etiqueta a añadir
-	 * @param Titulo titulo adjunto
-	 */
-	private void añadeLabelDatos(LabelDato lda,String Titulo) {
-		vecLabels.add(lda);
-		lda.setBorder(BorderFactory.createTitledBorder(
-				blackline, Titulo));
-		lda.setFont(Grande);
-		lda.setHorizontalAlignment(JLabel.CENTER);
-		lda.setEnabled(false);
-		jpCentro.add(lda);
-		
-	}
 
 	/**
 	 * Acciones a tomar cuando llega nuevo dato
 	 * @param ang nuevo angulo encontrado
 	 */
 	public void actualizaAngulo(AngulosIMU ang) {
-		boolean hayDato=(ang!=null);
-		//atualizamos etiquetas en array
-		for(int i=0; i<vecLabels.size(); i++)
-			vecLabels.elementAt(i).Actualiza(ang,hayDato);
-		//programamos la actualizacion de la ventana
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				repaint();
-			}
-		});
-
+		//si el nuevo dato tiene el mismo contador no es nuevo.
+		if(ang!=null)
+			if(ang.getContador()==contadorUltimo)
+				ang=null;
+			else 
+				contadorUltimo=ang.getContador();
+		actualizaDatos(ang);
 	}
 
 	/* (non-Javadoc)
 	 * @see sibtra.imu.IMUEventListener#handleIMUEvent(sibtra.imu.IMUEvent)
 	 */
 	public void handleIMUEvent(IMUEvent ev) {
-		if(ev!=null)
+		if(ev!=null) {
 			actualizaAngulo(ev.getAngulos());
+			repinta();
+		}
 	}
 
 	/**
