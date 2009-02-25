@@ -7,8 +7,8 @@
 #include "Lineas.h"
 //#include "..\..\CapturaImagen\CapturaImagen\CapturaVLC.h"
 
-#define MAXD 70				// Disparidad m�xima
-#define MIND 15				// M�nimo valor de disparidad a tener en cuenta para detectar obst�culos
+#define MAXD 70				// Disparidad máxima
+#define MIND 15				// Mínimo valor de disparidad a tener en cuenta para detectar obst�culos
 #define MARGIN 2			// Tamaño del margen de búsqueda en torno al valor de disparidad
 #define DISCARD 15			// Se descartan las disparidades de 0 a DISCARD por corresponderse con objetos lejanos
 #define RECT 5				// Margen que se considera aceptable para que una línea sea recta (diferencia de coordenadas)
@@ -289,10 +289,16 @@ void ternarizacion (IplImage *img, int filterSize, int sobelSize, int th){
 
 	cvSetZero (aux);
 	cvCmpS(auxSobel,  - (threshold / th), mask, CV_CMP_LT);			// Construir m�scara para valores por debajo del umbral
+	
+	cvDilate(mask, mask, NULL, 1);
+	
 	cvCopy(aux, temp, mask);							// Aplicar m�scara
 
 	cvSet (aux, cvScalar(255));
 	cvCmpS(auxSobel,  threshold / th, mask, CV_CMP_GT);			// Construir m�scara para valores por encima del umbral
+	
+	cvDilate(mask, mask, NULL, 1);
+	
 	cvCopy(aux, temp, mask);							// Aplicar m�scara
 
 	cvCopy(temp, img);
@@ -443,93 +449,26 @@ void crearImagenH (IplImage *mapa, IplImage *imagen){
 	PAR�METROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
-void crearImagenH2 (IplImage *mapa, IplImage *imagen, int center){
-	int	i, j, count;
+void crearImagenH (IplImage *mapa, IplImage *imagen, int center){
+	int	i, count;
 	IplImage *mask;
 
 	mask = cvCreateImage(cvGetSize(mapa), 8, 1);
+	cvSetZero(imagen);
 
 	for (i = 0; i < mapa->width; i ++) {
-		for (j = center - MARGIN; j < center + MARGIN; j++){
-			cvSetImageROI(mapa, cvRect(i, 0, 1, mapa->height));			// Recorrer columna a columna de la imagen
-			cvSetImageROI(mask, cvRect(i, 0, 1, mapa->height));
-			cvCmpS(mapa, j, mask, CV_CMP_EQ);							// Ver cuantos pixeles tienen el valor de disparidad actual
-			count = cvCountNonZero(mask);								// Acumularlos
-			cvSet2D(imagen, j, i, cvScalar(count));						// Rellenar con la cuenta el pixel de la imagen de disparidad
-		}
+		cvSetImageROI(mapa, cvRect(i, 0, 1, mapa->height));			// Recorrer columna a columna de la imagen
+		cvSetImageROI(mask, cvRect(i, 0, 1, mapa->height));
+		cvCmpS(mapa, center, mask, CV_CMP_EQ);							// Ver cuantos pixeles tienen el valor de disparidad actual
+		count = cvCountNonZero(mask);								// Acumularlos
+			
+		cvSet2D(imagen, center, i, cvScalar(count));						// Rellenar con la cuenta el pixel de la imagen de disparidad
 	}
 	cvResetImageROI(mapa);	
 	
 	cvReleaseImage (&mask);						// Liberar memoria
 }
 
-
-
-/*-----------------------------------------------------------------------------------------------------------------
-		NOMBRE:
-	   FUNCI�N:
-	PAR�METROS:
-	  DEVUELVE:
------------------------------------------------------------------------------------------------------------------*/
-/*void lineas(IplImage *src){         
-	IplImage* color_dst = cvCreateImage( cvGetSize(src), 8, 3 );
-    CvMemStorage* storage = cvCreateMemStorage(0);
-    CvSeq* lines = 0;
-    int i;
-
-    cvCvtColor( src, color_dst, CV_GRAY2BGR );
-#if 0
-        lines = cvHoughLines2( src, storage, CV_HOUGH_STANDARD, 1, CV_PI/180, 50, 0, 0 );
-
-        for( i = 0; i < lines->total; i++ )
-        {
-            float* line = (float*)cvGetSeqElem(lines,i);
-            float rho = line[0];
-            float theta = line[1];
-            CvPoint pt1, pt2;
-            double a = cos(theta), b = sin(theta);
-            if( fabs(a) < 0.001 )
-            {
-                pt1.x = pt2.x = cvRound(rho);
-                pt1.y = 0;
-                pt2.y = color_dst->height;
-            }
-            else if( fabs(b) < 0.001 )
-            {
-                pt1.y = pt2.y = cvRound(rho);
-                pt1.x = 0;
-                pt2.x = color_dst->width;
-            }
-            else
-            {
-                pt1.x = 0;
-                pt1.y = cvRound(rho/b);
-                pt2.x = cvRound(rho/a);
-                pt2.y = 0;
-            }
-            cvLine( color_dst, pt1, pt2, CV_RGB(255,0,0), 3, 8 );
-        }
-#else
-        lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 40, 30, 20 );
-        
-		// Habr�a que ir construyendo una estructura en la que devolver s�lo aquellas l�neas que resulten interesantes 
-		// (aprovechar para separarlas en verticales, horizontales y oblicuas)
-		for( i = 0; i < lines->total; i++ ) {
-            CvPoint* line = (CvPoint*)cvGetSeqElem(lines,i);
-            if (line[0].y <= line[1].y)						// L�neas de pendiente positiva
-				cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, 8 );
-			else if (abs(line[0].x - line[1].x) < 5)		// L�neas semi-verticales
-				cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, 8 );
-			else if (abs(line[0].y - line[1].y) < 5)		// L�neas semi-horizontales
-				cvLine( color_dst, line[0], line[1], CV_RGB(255,0,0), 3, 8 );
-        }
-#endif
-        cvShowImage( "Obstaculos", color_dst );
-
-	cvReleaseImage (&color_dst);		
-	cvReleaseMemStorage(&storage);
-
-}*/
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -807,7 +746,7 @@ void lineasH2(IplImage *src, Lineas *horizontal, CvSeq *pendpos, CvSeq *pendneg)
 	cvSetImageROI(src, cvRect(0, DISCARD, src->width, src->height - DISCARD));	// Descartar la zona correspondiente a disparidades peque�as
 
 	line = (CvPoint*) malloc (2 * sizeof (CvPoint));
-	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, CV_PI/180, 20, 30, 1 ); // 2 10*CV_PI/180 40 30 1
+	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, CV_PI/180, 20, 30, 10 ); // 2 10*CV_PI/180 40 30 1
         	
 	nLines = lines->total;
 	for (i = 0; i < nLines; i++) {
@@ -820,7 +759,6 @@ void lineasH2(IplImage *src, Lineas *horizontal, CvSeq *pendpos, CvSeq *pendneg)
 			|| (abs((float)(line[0].y - line[1].y) / (float)(line[0].x - line[1].x)) < 1)){				// L�neas semi-horizontales	(ESTABLECER UN UMBRAL ADECUADO)
 				
 			horizontal->Insert(line, MAX(line[0].y, line[1].y), WINDOW);
-//			cvLine( color_dst, line[0], line[1], CV_RGB(255,255,0), 1, 8 );
 			
 		} else if (line[0].y < line[1].y){					// L�neas de pendiente negativa
 			cvSeqPush(pendpos, line);			
@@ -1213,11 +1151,15 @@ void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal,
 void crearRDM (IplImage *rdm, IplImage *dm, CvPoint *line){
 		
 		
-		cvSetImageROI(dm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+//		cvSetImageROI(dm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+		cvSetImageROI(dm, cvRect(0, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
 		cvSetZero(rdm);
-		cvSetImageROI(rdm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+//		cvSetImageROI(rdm, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+		cvSetImageROI(rdm, cvRect(0, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
+
 		cvCmpS(dm, line[0].x, rdm, CV_CMP_EQ); 
 		cvSet (rdm, cvScalar(line[0].x), rdm);
+
 		cvResetImageROI (dm);
 		cvResetImageROI (rdm);
 		
@@ -1247,14 +1189,15 @@ void crearRDM (IplImage *rdm, IplImage *dm, CvPoint *line, int ventana){
 	cvSetImageROI(auxGE, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
 	cvSetImageROI(auxLE, cvRect(line[0].x, MIN(line[0].y, line[1].y), dm->width - line[0].x, abs(line[0].y - line[1].y)));
 
-		
-	cvCmpS(auxLE, line[0].x - round(ventana/2), rdm, CV_CMP_LE); 
-	cvCmpS(auxGE, line[0].x + round(ventana/2), rdm, CV_CMP_GE);
-	cvAnd(rdm, auxGE, auxLE);
+	cvCmpS(dm, line[0].x + round(ventana/2), auxLE, CV_CMP_LE); 
+	cvCmpS(dm, line[0].x - round(ventana/2), auxGE, CV_CMP_GE);
+	cvAnd(auxGE, auxLE, rdm);
 	
-//	cvSet (rdm, cvScalar(line[0].x), rdm);
 	cvResetImageROI (dm);
 	cvResetImageROI (rdm);
+	
+	cvSet (rdm, cvScalar(line[0].x), rdm);
+	printf ("Valor fijado: %d\n", line[0].x);
 	
 	cvReleaseImage(&auxGE);
 	cvReleaseImage(&auxLE);
@@ -1327,6 +1270,9 @@ clock_t start = clock();
 // Opci�n 2 de preprocesado
 //preprocesado (izquierda, derecha, adjusts.filtro);
 
+//cvShowImage ("Izquierda", izquierda);
+//cvShowImage ("Derecha", derecha);
+
 	correlacion (izquierda, derecha, MAXD, mapaDisparidad);
 	
 	/* Disparidad V */
@@ -1334,8 +1280,8 @@ clock_t start = clock();
 	cvThreshold(imagenDisparidad, imagenDisparidad, 10, 255, CV_THRESH_BINARY);			// Umbralizar
 
 	/* Disparidad U */
-	crearImagenH(mapaDisparidad, imagenDisparidadH);
-	cvThreshold(imagenDisparidadH, imagenDisparidadH, 5, 255, CV_THRESH_BINARY);			// Umbralizar
+//	crearImagenH(mapaDisparidad, imagenDisparidadH);
+//	cvThreshold(imagenDisparidadH, imagenDisparidadH, 5, 255, CV_THRESH_BINARY);			// Umbralizar
 
 
 	//	obstaculos(imagenDisparidad, adjusts.umbralObstaculos, adjusts.porcentaje * 10);
@@ -1354,12 +1300,17 @@ clock_t start = clock();
 	nVer = vLines->GetN();
 	index = vLines->GetIndex();
 	
+cvNamedWindow("Debug", CV_WINDOW_AUTOSIZE);
+	
 	for (i= 0; i < nVer; i ++){		
 		ver = (CvPoint *) cvGetSeqElem(vLines->GetLine(index[i]), 0);
 
-		crearRDM (mapaDisparidadReducido, mapaDisparidad, ver);
+		crearRDM (mapaDisparidadReducido, mapaDisparidad, ver, 3);
 		
-		crearImagenH2(mapaDisparidadReducido, imagenDisparidadH, ver[0].x);
+		crearImagenH(mapaDisparidadReducido, imagenDisparidadH, ver[0].x);
+		cvThreshold(imagenDisparidadH, imagenDisparidadH, 5, 255, CV_THRESH_BINARY);			// Umbralizar
+
+//cvShowImage ("Debug", imagenDisparidadH);
 		lineasH2(imagenDisparidadH, hLines, pendpos, pendneg);
 
 		// Rodear la regi�n de inter�s en el mapa de disparidad reducido
@@ -1416,7 +1367,7 @@ int main (int argc, char* argv[]){
 	parameter ajustes;
 	int frameNr;
 	char filename[30];
-	const char *prefix = "Series/jesusFeb";
+	const char *prefix = "Series/estherpedro";
 	
 	bool trackbar;
 		
@@ -1425,7 +1376,7 @@ int main (int argc, char* argv[]){
 	CvCapture *videoIzq = 0;
 	CvCapture *videoDer = 0;
 
-	source = 0;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
+	source = 4;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
 
 	switch (source) {
 		case 1:
