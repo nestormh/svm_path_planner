@@ -30,6 +30,8 @@ import javax.swing.event.ChangeListener;
 
 import sibtra.gps.PanelExaminaRuta;
 import sibtra.gps.Ruta;
+import sibtra.log.LoggerDouble;
+import sibtra.log.LoggerFactory;
 import sibtra.util.PanelMuestraTrayectoria;
 
 /**
@@ -335,10 +337,18 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
 //		for (int i = 0; i < rutaPrueba.length; i++) {
         pmp.actualiza();
+        LoggerDouble lgCV=LoggerFactory.nuevoLoggerDouble(controlador, "comandoVolante", 1000/250);
+        LoggerDouble lgError=LoggerFactory.nuevoLoggerDouble(controlador, "error", 1000/250);
+        boolean caminando=false;
         int indice = 0;
         while (true) {
             if (jcbCaminar.isSelected()) {
+            	if(!caminando) { //acaba de activarse
+            		LoggerFactory.activaLoggers();
+            		caminando=true;
+            	}
                 double comandoVolante = controlador.calculaComando();
+                lgCV.add(comandoVolante);
                 if (comandoVolante > COTA_ANGULO) {
                     comandoVolante = COTA_ANGULO;
                 }
@@ -353,10 +363,16 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                 carroViejo.calculaEvolucion(comandoVolante, 2, 0.2);
                 //indice = ControlPredictivo.calculaDistMinOptimizado(rutaPrueba, carroOri.getX(), carroOri.getY(), indice);
                 indice = ControlPredictivo.calculaDistMin(rutaPrueba, carroOri.getX(), carroOri.getY());
-                System.out.println(indice);
+//                System.out.println(indice);
                 double error = rutaPruebaRellena[indice][2] - carroOri.getTita();
+                lgError.add(error);
                 //System.out.println("Error " + error);
                 pmp.actualiza();
+            } else {
+            	if(caminando) { //acaba de desactivarse
+            		LoggerFactory.vuelcaLoggersOctave("Datos/PanelMuestra");
+            		caminando=false;
+            	}
             }
             try {
                 Thread.sleep(250);
