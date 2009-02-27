@@ -454,7 +454,6 @@ void crearImagenH (IplImage *mapa, IplImage *imagen, int center){
 	IplImage *mask;
 
 	mask = cvCreateImage(cvGetSize(mapa), 8, 1);
-	cvSetZero(imagen);
 
 	for (i = 0; i < mapa->width; i ++) {
 		cvSetImageROI(mapa, cvRect(i, 0, 1, mapa->height));			// Recorrer columna a columna de la imagen
@@ -746,7 +745,7 @@ void lineasH2(IplImage *src, Lineas *horizontal, CvSeq *pendpos, CvSeq *pendneg)
 	cvSetImageROI(src, cvRect(0, DISCARD, src->width, src->height - DISCARD));	// Descartar la zona correspondiente a disparidades peque�as
 
 	line = (CvPoint*) malloc (2 * sizeof (CvPoint));
-	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, CV_PI/180, 20, 30, 10 ); // 2 10*CV_PI/180 40 30 1
+	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, CV_PI/180, 10, MAXD/3, 5 ); // 2 10*CV_PI/180 40 30 1
         	
 	nLines = lines->total;
 	for (i = 0; i < nLines; i++) {
@@ -778,6 +777,63 @@ void lineasH2(IplImage *src, Lineas *horizontal, CvSeq *pendpos, CvSeq *pendneg)
 	cvResetImageROI(src);
 }
 
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCI�N:
+	PAR�METROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void lineas(IplImage *src, Lineas *horizontal, int y, int min, int gap){
+	IplImage* color_dst = cvCreateImage( cvGetSize(src), 8, 3 );
+	CvPoint *line;
+	int act, i, begin, end;
+	
+	
+	cvCvtColor( src, color_dst, CV_GRAY2BGR );
+	
+	line = (CvPoint*) malloc (2 * sizeof (CvPoint));
+	line[0].y = y;
+	line[1].y = y;
+	
+	begin = -1;
+	end = -1;
+
+//	printf ("Probando funcion nueva\n");
+		
+	for (i = 0; i < src->width; i++){
+		act = src->imageData[src->widthStep * y + i];		// Acceder al elemento src[i, y]
+//		printf("%d act %d begin %d end %d\n", i, act, begin, end);		
+		
+		if (act != 0) {
+			end = i;
+			if (begin == -1) {
+				begin = i;
+//				printf ("begin=%d\n", begin);
+			} 		
+		} else {
+			if ((begin != -1) && (i - end) > gap) {			// Se considera línea
+//				printf ("end=%d\n", end);
+				line[0].x = begin;
+				line[1].x = end;
+				if ((end - begin) > min){						// Insertar			
+					horizontal->Insert(line, y, WINDOW);
+//					printf ("Insertada [%d, %d][%d %d]\n", begin, y, end, y);
+				} else {
+//					printf ("Descartada por ser menor que el mínimo\n");
+				}
+				begin = -1;
+				end = -1;
+			} 
+		}		
+	}
+//	printf ("Probada\n");
+
+	horizontal->DrawLines(color_dst, CV_RGB(255,255,0));
+	cvShowImage ("Imagen disparidad H", color_dst);
+	
+	free (line);	
+}
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -1197,8 +1253,7 @@ void crearRDM (IplImage *rdm, IplImage *dm, CvPoint *line, int ventana){
 	cvResetImageROI (rdm);
 	
 	cvSet (rdm, cvScalar(line[0].x), rdm);
-	printf ("Valor fijado: %d\n", line[0].x);
-	
+		
 	cvReleaseImage(&auxGE);
 	cvReleaseImage(&auxLE);
 }
@@ -1302,21 +1357,24 @@ clock_t start = clock();
 	
 cvNamedWindow("Debug", CV_WINDOW_AUTOSIZE);
 	
+	cvSetZero(imagenDisparidadH);
 	for (i= 0; i < nVer; i ++){		
 		ver = (CvPoint *) cvGetSeqElem(vLines->GetLine(index[i]), 0);
 
 		crearRDM (mapaDisparidadReducido, mapaDisparidad, ver, 3);
 		
 		crearImagenH(mapaDisparidadReducido, imagenDisparidadH, ver[0].x);
+		
 		cvThreshold(imagenDisparidadH, imagenDisparidadH, 5, 255, CV_THRESH_BINARY);			// Umbralizar
-
-//cvShowImage ("Debug", imagenDisparidadH);
-		lineasH2(imagenDisparidadH, hLines, pendpos, pendneg);
-
+		lineas (imagenDisparidadH, hLines, ver[0].x, 20, 5);
+		
 		// Rodear la regi�n de inter�s en el mapa de disparidad reducido
-		cvRectangle(mapaDisparidadReducido, cvPoint(ver[0].x, MIN(ver[0].y, ver[1].y)), cvPoint(mapaDisparidadReducido->width, MAX(ver[0].y, ver[1].y)), CV_RGB(255,255,255));	
+		cvRectangle(mapaDisparidadReducido, cvPoint(0, MIN(ver[0].y, ver[1].y)), cvPoint(mapaDisparidadReducido->width, MAX(ver[0].y, ver[1].y)), CV_RGB(255,255,255));	
 		cvShowImage ("Mapa disparidad reducido", mapaDisparidadReducido);
 	}
+	
+//	cvThreshold(imagenDisparidadH, imagenDisparidadH, 5, 255, CV_THRESH_BINARY);			// Umbralizar
+//	lineasH2(imagenDisparidadH, hLines, pendpos, pendneg);
 /*******************************************************************************/
 
 	marcObstacle2 (left, vLines, hLines, 5);
@@ -1449,8 +1507,8 @@ int main (int argc, char* argv[]){
 			
 		switch (source){
 			case 0: {		// Im�genes est�ticas
-				izquierda = cvLoadImage("Series/jesusFeb_left_13.bmp");
-				derecha = cvLoadImage("Series/jesusFeb_right_13.bmp");
+				izquierda = cvLoadImage("Series/estherpedro_left_5.bmp");
+				derecha = cvLoadImage("Series/estherpedro_right_5.bmp");
 
 				if (!izquierda || !derecha){
 					printf ("Error leyendo im�genes\n");
