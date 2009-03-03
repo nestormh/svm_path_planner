@@ -30,6 +30,7 @@ import javax.swing.event.ChangeListener;
 
 import sibtra.gps.PanelExaminaRuta;
 import sibtra.gps.Ruta;
+import sibtra.log.Logger;
 import sibtra.log.LoggerDouble;
 import sibtra.log.LoggerFactory;
 import sibtra.util.PanelMuestraTrayectoria;
@@ -339,6 +340,8 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         pmp.actualiza();
         LoggerDouble lgCV=LoggerFactory.nuevoLoggerDouble(controlador, "comandoVolante", 1000/250);
         LoggerDouble lgError=LoggerFactory.nuevoLoggerDouble(controlador, "error", 1000/250);
+        Logger lgInstantes=LoggerFactory.nuevoLoggerTiempo(controlador, "Ciclo");
+        Logger lgNoUsado=LoggerFactory.nuevoLoggerDouble(controlador,"NoUsado");
         boolean caminando=false;
         int indice = 0;
         while (true) {
@@ -347,6 +350,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
             		LoggerFactory.activaLoggers();
             		caminando=true;
             	}
+            	lgInstantes.add();
                 double comandoVolante = controlador.calculaComando();
                 lgCV.add(comandoVolante);
                 if (comandoVolante > COTA_ANGULO) {
@@ -370,6 +374,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                 pmp.actualiza();
             } else {
             	if(caminando) { //acaba de desactivarse
+            		LoggerFactory.vuelcaLoggersMATv4("Datos/PanelMuestra");
             		LoggerFactory.vuelcaLoggersOctave("Datos/PanelMuestra");
             		caminando=false;
             	}
