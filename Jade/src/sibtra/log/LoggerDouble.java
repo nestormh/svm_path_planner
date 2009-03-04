@@ -28,18 +28,18 @@ public class LoggerDouble extends Logger {
 	}
 	
 	/**
-	 * Activa el logger y crea nuevo vector de tiempos usando duracion estimada y {@link #muestrasSg}
+	 * Activa el logger y prepara espacio registro para duracion estimada y {@link #muestrasSg}
+	 * Si no existe vector lo crea. 
+	 * Si ya existe reserva espacio para datos que contiene más los esperados.
 	 * @param duracionSg duracion estimada del experimento en segundos
 	 */
 	void activa(int duracionSg) {
 		super.activa(duracionSg);
-		//TODO para borrar vector ya existente ??
-		/*
-		if(tiempos!=null)
-			tiempos.setSize(0);
-			*/
+		int minCapacity=duracionSg*muestrasSg+10;
 		if(datos==null)
-			datos=new Vector<Double>(duracionSg*muestrasSg+10);
+			datos=new Vector<Double>(minCapacity);
+		else
+			datos.ensureCapacity(datos.size()+minCapacity);
 	}
 	
 	/** Añade nuevo dato apuntando instante de tiempo */
@@ -53,7 +53,7 @@ public class LoggerDouble extends Logger {
 	/** Borra los datos almacenados */
 	void clear() {
 		super.clear();
-		datos=null;
+		datos.setSize(0);
 	}
 
 	/**	Devuelve String en formato para fichero octave de texto	 */	

@@ -28,11 +28,11 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import sibtra.gps.PanelExaminaRuta;
 import sibtra.gps.Ruta;
 import sibtra.log.Logger;
 import sibtra.log.LoggerDouble;
 import sibtra.log.LoggerFactory;
+import sibtra.log.VentanaLoggers;
 import sibtra.util.PanelMuestraTrayectoria;
 
 /**
@@ -217,6 +217,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         final Coche carroOri = new Coche();
         final CocheModeloAntiguo carroViejo = new CocheModeloAntiguo();
 //        final Coche carroOri = new Coche();
+        final VentanaLoggers vl; //ventana de los loggers
         double vel = 2;
         double consVolante = 0;
         carroOri.setVelocidad(vel);
@@ -342,12 +343,15 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         LoggerDouble lgError=LoggerFactory.nuevoLoggerDouble(controlador, "error", 1000/250);
         Logger lgInstantes=LoggerFactory.nuevoLoggerTiempo(controlador, "Ciclo");
         Logger lgNoUsado=LoggerFactory.nuevoLoggerDouble(controlador,"NoUsado");
+        
+        //Una ves definidos todos, abrimos ventana de Loggers
+        vl=new VentanaLoggers();
         boolean caminando=false;
         int indice = 0;
         while (true) {
             if (jcbCaminar.isSelected()) {
             	if(!caminando) { //acaba de activarse
-            		LoggerFactory.activaLoggers();
+            		//LoggerFactory.activaLoggers();
             		caminando=true;
             	}
             	lgInstantes.add();
@@ -374,8 +378,8 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                 pmp.actualiza();
             } else {
             	if(caminando) { //acaba de desactivarse
-            		LoggerFactory.vuelcaLoggersMATv4("Datos/PanelMuestra");
-            		LoggerFactory.vuelcaLoggersOctave("Datos/PanelMuestra");
+            		//LoggerFactory.vuelcaLoggersMATv4("Datos/PanelMuestra");
+            		//LoggerFactory.vuelcaLoggersOctave("Datos/PanelMuestra");
             		caminando=false;
             	}
             }

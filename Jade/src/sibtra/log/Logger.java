@@ -47,6 +47,8 @@ public class Logger {
 	 * @param t0 nuestro instante inicial
 	 */
 	Logger(Object objeto, String nombre,long t0, int muestrasSg) {
+		if(!nombre.matches("\\A[A-Za-z]+[A-Za-z0-9]*\\z")) 
+			throw new IllegalArgumentException("Nombre de logger solo puede cantener numeros y letras");
 		this.objeto=objeto;
 		this.nombre=nombre;
 		this.muestrasSg=muestrasSg;
@@ -59,34 +61,44 @@ public class Logger {
 	 * @param clase clase a la que pertenece la variable
 	 */
 	Logger(Object objeto, String nombre,long t0) {
-		this.objeto=objeto;
-		this.nombre=nombre;
-		this.t0=t0;
+		this(objeto,nombre,t0,20);
 	}
 	
 	/**
-	 * Activa el logger y crea nuevo vector de tiempos usando duracion estimada y {@link #muestrasSg}
+	 * Activa el logger y prepara espacio registro para duracion estimada y {@link #muestrasSg}
+	 * Si no existe vector lo crea. 
+	 * Si ya existe reserva espacio para datos que contiene más los esperados.
 	 * @param duracionSg duracion estimada del experimento en segundos
 	 */
 	void activa(int duracionSg) {
-		//TODO para borrar vector ya existente ??
-		/*
-		if(tiempos!=null)
-			tiempos.setSize(0);
-			*/
+		int minCapacity=duracionSg*muestrasSg+10;
 		if(tiempos==null)
-			tiempos=new Vector<Long>(duracionSg*muestrasSg+10);
+			tiempos=new Vector<Long>(minCapacity);
+		else
+			tiempos.ensureCapacity(tiempos.size()+minCapacity);
 		activado=true;
 	}
 	
 	/** Añade el instante de tiempo acutal */
 	public void add() {
+		if(!activado)
+			return;
 		tiempos.add(System.currentTimeMillis()-t0);
 	}
 	
 	/** Borra los datos almacenados */
 	void clear() {
-		tiempos=null;
+		tiempos.setSize(0);
+	}
+	
+	/** @return si está activo */
+	boolean isActivo() {
+		return activado;
+	}
+	
+	/** desactiva el logger */
+	void desactiva() {
+		activado=false;
 	}
 	
 	/** @return el minimo valor en el vector de tiempos (el tiempo actual si no hay vector aún) */

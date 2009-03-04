@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Vector;
 
-import sibtra.predictivo.ControlPredictivo;
 import sibtra.util.SalvaMATv4;
 
 /**
@@ -24,10 +23,10 @@ import sibtra.util.SalvaMATv4;
 public class LoggerFactory {
 	
 	/** Vector que apuntará a todos los loggers solicitados*/
-	private static Vector<Logger> vecLoggers=null;
+	static Vector<Logger> vecLoggers=null;
 	
 	/** Instante de tiempo que representa nuestro tiempo 0*/
-	private static long t0=0;
+	static long t0=0;
 	
 	private static void iniciaEstaticos() {
 		if (vecLoggers==null)
