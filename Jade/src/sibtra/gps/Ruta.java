@@ -74,6 +74,7 @@ public class Ruta implements Serializable {
 
 
 
+
 	/** Constructor por defecto, no pone tamaño y supone que no es espacial */
 	public Ruta() {
 		puntos=new Vector<GPSData>();
@@ -455,7 +456,7 @@ public class Ruta implements Serializable {
             GPSData ptoC;
             int i = 0;       
             int L = indiceFinal+1;
-            for (int numItera = 1; numItera < indiceFinal+(esCerrada?2:1); numItera++) {
+            for (int numItera = 1; numItera < indiceFinal+(esCerrada?(2):1); numItera++) {
             	i = (i + 1)%L;
                 GPSData ptoA = getPunto((i+L-1)%L);
                 GPSData ptoB = getPunto(i);                
@@ -544,7 +545,8 @@ public class Ruta implements Serializable {
         private int calculaPuntosTotales(double distMax){
             int puntosTotales = 0;
             int numPuntos;
-            double separacion;            
+            double separacion;
+            boolean encontrado = false;            
             for(int i=1; i<indiceFinal+1;i++) {
                     GPSData ptoA = getPunto(i-1);
                     GPSData ptoB = getPunto(i);
@@ -554,7 +556,7 @@ public class Ruta implements Serializable {
             }
             if (esCerrada){
             	GPSData ptoA = getPunto(indiceFinal);
-                GPSData ptoB = getPunto(0);
+                GPSData ptoB = getPunto(0);                                
                 separacion = distEntrePuntos(ptoA, ptoB);                
                 numPuntos = (int)Math.floor(separacion/distMax);
                 puntosTotales = puntosTotales + numPuntos - 1;
@@ -572,7 +574,7 @@ public class Ruta implements Serializable {
          *  
          * @return
          */
-        private void esRutaCerrada(){
+        public boolean esRutaCerrada(){
         	esCerrada=false;
         	double umbral = 3;
         	double distAux;
@@ -591,15 +593,29 @@ public class Ruta implements Serializable {
         	}
         	if (distMin < umbral){
         		esCerrada = true;
+        		boolean encontrado = false;
         		indiceFinal = indiceAux;
-        		System.out.println("La ruta está cerrada");
+        		System.out.println("La ruta está cerrada");        		
+                if (esCerrada){
+                	for (int j=indiceFinal;encontrado!=true;j--){
+                		GPSData ptoInicio = getPunto(0);
+                    	GPSData ptoA = getPunto(j);
+                    	GPSData ptoAnt = getPunto(j-1);
+                    	double anguloFinal = ptoA.calculaAnguloGPS(ptoInicio);
+                    	double anguloPtoA = ptoAnt.calculaAnguloGPS(ptoA);
+                    	if (Math.abs(anguloFinal-anguloPtoA)<Math.PI/6){
+                    		encontrado = true;
+                    		indiceFinal = j;
+                    		}
+                	}            	
+                }
         	}
         	else {
         		esCerrada = false;
         		indiceFinal = getNumPuntos()-1;
         		System.out.println("La ruta está abierta");
         	}
-        
+        	return esCerrada;        
         }
         public double distEntrePuntos(GPSData ptoA,GPSData ptoB){
         	double dist=Double.POSITIVE_INFINITY;
