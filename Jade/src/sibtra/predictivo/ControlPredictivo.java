@@ -5,6 +5,8 @@
 
 package sibtra.predictivo;
 
+import org.omg.CORBA.portable.IndirectionException;
+
 import sibtra.util.UtilCalculos;
 import Jama.Matrix;
 
@@ -29,6 +31,10 @@ public class ControlPredictivo {
      */
     double[][] ruta;
     /**
+     * Indica si la ruta está cerrada o no
+     */
+    static boolean rutaCerrada;
+    /**
      * Dependiendo de su valor se le da más importancia a minimizar el error o 
      * a minimizar el gasto de comando. Si es igual a 0 no tiene en cuenta el gasto de 
      * comando, por lo que el controlador probablemente genere comandos bruscos.
@@ -36,7 +42,7 @@ public class ControlPredictivo {
      * con lo que se produce una actuación muy suave y lenta del controlador. Hay que 
      * alcanzar un término medio que permita actuar suficientemente rápido pero sin 
      * sobrepasamientos
-     */
+     */    
     double landa;
     double pesoError;
     Coche carroOriginal;
@@ -69,6 +75,7 @@ public class ControlPredictivo {
 	private double[] respuestaEscalon;
 	private Coche carroEscalon;
         private double gananciaVel;
+		private int indMinAnt;
 
 	/**
      * 
@@ -88,6 +95,34 @@ public class ControlPredictivo {
         this.ruta = ruta;
         this.Ts = Ts;
         gananciaVel = 1;
+        this.indMinAnt = -1;
+        
+        // creamos todas las matrices que se usan en las iteracioner para evitar tener que 
+        //pedir memoria cada vez
+        G = new Matrix(horPrediccion,horControl);
+        this.landaEye = Matrix.identity(horControl,horControl).times(landa);
+        prediccionPosicion = new double[horPrediccion][2];
+        predicOrientacion = new double[horPrediccion];
+        vectorError = new double[horPrediccion];
+        orientacionesDeseadas = new double[horPrediccion];
+        respuestaEscalon = new double[horPrediccion];
+/**
+ * Constructor donde también se le pasa la información de si la ruta está cerrada o no
+ */
+    }
+    public ControlPredictivo(Coche carroOri,double[][] ruta,int horPrediccion,int horControl,double landa,double Ts,boolean rutaCerrada){
+        carroOriginal = carroOri;
+        carroSim = (Coche)carroOri.clone();
+        carroEscalon=(Coche)carroOriginal.clone();
+        this.horPrediccion = horPrediccion;
+        this.horControl = horControl;
+        this.landa = landa;
+        this.ruta = ruta;
+        this.Ts = Ts;
+        this.rutaCerrada = rutaCerrada;
+        gananciaVel = 1;
+        this.indMinAnt = -1;
+        
         
         // creamos todas las matrices que se usan en las iteracioner para evitar tener que 
         //pedir memoria cada vez
@@ -158,22 +193,24 @@ public class ControlPredictivo {
         //La siguiente linea de código es el cálculo del vector deseado en MAtlab
 //        vec_deseado(1,:) = k_dist*(pos_ref(mod(ind_min(k)+cerca,length(pos_ref))+1,:) - [carro.x,carro.y])
 //+ k_ang*[cos(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1)),sin(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1))];
-        int indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());
-        double dx=ruta[indMin][0]-carroSim.getX();
-        double dy=ruta[indMin][1]-carroSim.getY();
+//        int indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());        
+        indMinAnt = calculaDistMinOptimizado(ruta,carroSim.getX(),carroSim.getY(),indMinAnt);
+        double dx=ruta[indMinAnt][0]-carroSim.getX();
+        double dy=ruta[indMinAnt][1]-carroSim.getY();
         distanciaLateral=Math.sqrt(dx*dx+dy*dy);
-        double vectorDeseadoX = ruta[indMin][0] - carroSim.getX() + Math.cos(ruta[indMin][2]);
-        double vectorDeseadoY = ruta[indMin][1] - carroSim.getY() + Math.sin(ruta[indMin][2]);
+        double vectorDeseadoX = ruta[indMinAnt][0] - carroSim.getX() + Math.cos(ruta[indMinAnt][2]);
+        double vectorDeseadoY = ruta[indMinAnt][1] - carroSim.getY() + Math.sin(ruta[indMinAnt][2]);
         orientacionesDeseadas[0] = Math.atan2(vectorDeseadoX,vectorDeseadoY);
         predicOrientacion[0] = carroSim.getTita();
         vectorError[0] = orientacionesDeseadas[0] - predicOrientacion[0];
         prediccionPosicion[0][0] = carroSim.getX();
         prediccionPosicion[0][1] = carroSim.getY();
-        
+        int indMin = indMinAnt;
         for (int i=1; i<horPrediccion;i++ ){
             carroSim.calculaEvolucion(comando,velocidad,Ts);
             predicOrientacion[i] = carroSim.getTita();
-            indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());
+            indMin = calculaDistMinOptimizado(ruta,carroSim.getX(),carroSim.getY(),indMin);
+//            indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());
             vectorDeseadoX = ruta[indMin][0] - carroSim.getX() + Math.cos(ruta[indMin][2]);
             vectorDeseadoY = ruta[indMin][1] - carroSim.getY() + Math.sin(ruta[indMin][2]);
             orientacionesDeseadas[i] = Math.atan2(vectorDeseadoY,vectorDeseadoX);
@@ -224,22 +261,28 @@ public class ControlPredictivo {
         double dx;
         double dy;
         double distMin=Double.POSITIVE_INFINITY;
-        double distAnt=Double.POSITIVE_INFINITY;
         int indMin=0;
         int indiceInicial = indMinAnt - 10;
-        if (indiceInicial < 0)
-            indiceInicial = 0;
-        for(int i=indiceInicial; i<ruta.length; i++) {
+        if(indMinAnt<0){
+        	return calculaDistMin(ruta, posX, posY);
+        }
+        if (rutaCerrada){
+        	indiceInicial = (indMinAnt + ruta.length - 10)%ruta.length;
+        }else{        	
+        	if (indiceInicial <= 0)
+                indiceInicial = 0;
+        }        
+        boolean encontrado=false;
+		for(int i=indiceInicial;encontrado!=true; i=(i+1)%ruta.length) {
                 dx=posX-ruta[i][0];
                 dy=posY-ruta[i][1];
-                double dist=Math.sqrt(dx*dx+dy*dy);
-                if(dist<distMin) {
+                double dist=Math.sqrt(dx*dx+dy*dy);                
+                if(dist<=distMin) {
                     indMin=i;
-                    distMin=dist;
-                }else if(distAnt<dist){
-                    indMin = i;
-                    break;
-                }                
+                    distMin=dist;                   
+                }else{                    
+                    encontrado=true;
+                }   
         }
         return indMin;
     }
@@ -371,4 +414,5 @@ public class ControlPredictivo {
 //        System.out.println("Angulo normalizado " +normalizaAngulo(0));
 //        System.exit(0);
     }
+
 }
