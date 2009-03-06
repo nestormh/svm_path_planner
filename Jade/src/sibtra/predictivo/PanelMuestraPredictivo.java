@@ -343,6 +343,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         LoggerDouble lgError=LoggerFactory.nuevoLoggerDouble(controlador, "error", 1000/250);
         Logger lgInstantes=LoggerFactory.nuevoLoggerTiempo(controlador, "Ciclo");
         Logger lgNoUsado=LoggerFactory.nuevoLoggerDouble(controlador,"NoUsado");
+        Logger lgParadas=null;
         
         //Una ves definidos todos, abrimos ventana de Loggers
         vl=new VentanaLoggers();
@@ -380,6 +381,10 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
             	if(caminando) { //acaba de desactivarse
             		//LoggerFactory.vuelcaLoggersMATv4("Datos/PanelMuestra");
             		//LoggerFactory.vuelcaLoggersOctave("Datos/PanelMuestra");
+            		//Para probar cuando se añade logger a posteriori
+            		if(lgParadas==null)
+            			lgParadas=LoggerFactory.nuevoLoggerTiempo(pmp, "Paradas");
+            		lgParadas.add();
             		caminando=false;
             	}
             }

@@ -28,8 +28,7 @@ public class VentanaLoggers extends JFrame implements Runnable {
 		while (true){
 			setEnabled(true);
 			//TODO el ultimo punto debería depender de lo seleccionado en MuestraGPSData
-			panLog.actualizaCheckLoggers();
-//			panLog.repinta();
+			panLog.repinta();
 			try{Thread.sleep(milisPeriodo);} catch (Exception e) {}	
 		}
 	}
