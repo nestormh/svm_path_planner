@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 
 import sibtra.controlcarro.PanelCarro;
+import sibtra.log.VentanaLoggers;
 import sibtra.util.EligeSerial;
 
 /** 
@@ -90,6 +91,9 @@ public class VentanaIMU extends JFrame  implements Runnable {
 			csi.ConectaPuerto(puertos[0]);
 			VentanaIMU vi = new VentanaIMU(csi);
 			vi.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			VentanaLoggers vl=new VentanaLoggers();
+			vl.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 			while (true){		
 				try{Thread.sleep(500);} catch (Exception e) {}	

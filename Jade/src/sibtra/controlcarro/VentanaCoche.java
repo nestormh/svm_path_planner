@@ -2,6 +2,8 @@ package sibtra.controlcarro;
 
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+
+import sibtra.log.VentanaLoggers;
 import sibtra.util.EligeSerial;
 
 /** 
@@ -79,6 +81,11 @@ public class VentanaCoche extends JFrame implements Runnable {
 		ControlCarro contCarro=new ControlCarro(puertos[0]);		
 		VentanaCoche pc = new VentanaCoche(contCarro);
 		pc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		
+		VentanaLoggers vl=new VentanaLoggers();
+		vl.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 
 		while (true){		
 			try{Thread.sleep(500);} catch (Exception e) {}	

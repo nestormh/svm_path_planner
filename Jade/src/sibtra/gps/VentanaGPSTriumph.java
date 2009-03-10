@@ -2,6 +2,8 @@ package sibtra.gps;
 
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+
+import sibtra.log.VentanaLoggers;
 import sibtra.util.EligeSerial;
 
 /**
@@ -79,6 +81,9 @@ public class VentanaGPSTriumph extends JFrame implements Runnable {
 			GPSConnectionTriumph gpsT=new GPSConnectionTriumph(puertos[0]);		
 			VentanaGPSTriumph pc = new VentanaGPSTriumph(gpsT);
 			pc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			VentanaLoggers vl=new VentanaLoggers();
+			vl.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 			
 			while (true){		

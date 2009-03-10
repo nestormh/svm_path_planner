@@ -40,6 +40,18 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 //	private SpinnerNumberModel jspMAvance;
 	private JProgressBar jBarraComVel;
 
+	private SpinnerNumberModel jspTiempoFrena;
+
+	private SpinnerNumberModel jspValorFrena;
+
+	private JButton jbAplicaFreno;
+
+	private SpinnerNumberModel jspTiempoDesFrena;
+
+	private SpinnerNumberModel jspValorDesFrena;
+
+	private JButton jbAplicaDesFreno;
+
 	public PanelCarro(ControlCarro cc) {
 		super();
 		contCarro=cc;
@@ -103,7 +115,46 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 			jBarraComVel.setOrientation(JProgressBar.HORIZONTAL);
 			jBarraComVel.setValue(0);
 		}
+		
+		//Para masFrena
+		{// spiner fijar tiempo Frena
+			jspTiempoFrena=new SpinnerNumberModel(0,0,255,1);
+			JSpinner jspcv=new JSpinner(jspTiempoFrena);
+			añadeAPanel(jspcv, "Tiempo Frena");
+			jspcv.setEnabled(true);
+		}
+		{// spiner fijar valor frena
+			jspValorFrena=new SpinnerNumberModel(0,0,255,1);
+			JSpinner jspcv=new JSpinner(jspValorFrena);
+			añadeAPanel(jspcv, "Valor Frena");
+			jspcv.setEnabled(true);
+		}
+		{// Boton aplicar consigna volante en grados
+			jbAplicaFreno=new JButton("Aplicar Freno");
+			añadeAPanel(jbAplicaFreno, "Freno");
+			jbAplicaFreno.addActionListener(this);
+			jbAplicaFreno.setEnabled(true);
+		}
 
+		//Para menosFrena
+		{// spiner fijar tiempo Frena
+			jspTiempoDesFrena=new SpinnerNumberModel(0,0,255,1);
+			JSpinner jspcv=new JSpinner(jspTiempoDesFrena);
+			añadeAPanel(jspcv, "Tiempo Desfrena");
+			jspcv.setEnabled(true);
+		}
+		{// spiner fijar valor frena
+			jspValorDesFrena=new SpinnerNumberModel(0,0,255,1);
+			JSpinner jspcv=new JSpinner(jspValorDesFrena);
+			añadeAPanel(jspcv, "Valor Desfrena");
+			jspcv.setEnabled(true);
+		}
+		{// Boton aplicar desfreno
+			jbAplicaDesFreno=new JButton("Aplicar Desfreno");
+			añadeAPanel(jbAplicaDesFreno, "Desfreno");
+			jbAplicaDesFreno.addActionListener(this);
+			jbAplicaDesFreno.setEnabled(true);
+		}
 //		Hay lazo cerrado no tienen sentido fijar ahora el avance
 //		{// comando avance
 //		jspMAvance=new SpinnerNumberModel(0,0,255,5);
@@ -135,6 +186,12 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 		if(ev.getSource()==jbAplicaConsignaVelocidad) {
 			double velDeseado=jspMConsignaVelocidad.getNumber().doubleValue();
 			contCarro.setConsignaAvanceMS(velDeseado);
+		}
+		if(ev.getSource()==jbAplicaFreno) {
+			contCarro.masFrena(jspValorFrena.getNumber().intValue(), jspTiempoFrena.getNumber().intValue());
+		}
+		if(ev.getSource()==jbAplicaDesFreno) {
+			contCarro.masFrena(jspValorDesFrena.getNumber().intValue(), jspTiempoDesFrena.getNumber().intValue());
 		}
 	}
 

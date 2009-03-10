@@ -164,7 +164,8 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
         	case 1:
         		return la.nombre;
         	case 2:
-        		return la.objeto.getClass().getName();
+        		String no=la.objeto.getClass().getName();
+        		return no.substring(no.lastIndexOf(".")+1);
         	case 3:
         		return (la.isActivo()?"ACTIVO":"    ");
         	case 4:
