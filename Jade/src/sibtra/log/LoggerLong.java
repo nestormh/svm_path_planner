@@ -42,6 +42,11 @@ public class LoggerLong extends Logger {
 			datos.ensureCapacity(datos.size()+minCapacity);
 	}
 	
+	/** Este logger no puede tener el add()  sin datos */
+	public void add() {
+		throw new IllegalArgumentException("A este logger es necesario añadir algún dato");
+	}
+
 	/** Añade nuevo dato apuntando instante de tiempo */
 	public void add(long dato) {
 		super.add();

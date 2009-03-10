@@ -38,6 +38,9 @@ public class Logger {
 	
 	/** tiempo 0 de todos los loggers */
 	long t0;
+	
+	/** Cadena de texto que se puede añadir al loger y que será salvado como matriz de texto */
+	String descripcion=null;
 
 	/**
 	 * Asignamos los campos 
@@ -51,7 +54,7 @@ public class Logger {
 			throw new IllegalArgumentException("Nombre de logger solo puede cantener numeros y letras");
 		this.objeto=objeto;
 		this.nombre=nombre;
-		this.muestrasSg=muestrasSg;
+		setMuestrasSg(muestrasSg);
 		this.t0=t0;
 	}
 	
@@ -101,6 +104,26 @@ public class Logger {
 		activado=false;
 	}
 	
+	/** Fija el número de muestras por segundo
+	 * @param muestrasSg si es <=0 se pone a 1.
+	 */
+	public void setMuestrasSg(int muestrasSg) {
+		if(muestrasSg<=0)
+			this.muestrasSg=1;
+		else
+			this.muestrasSg=muestrasSg;		
+	}
+	
+	/** @param desc nueva descripcion a fijar */
+	public void setDescripcion(String desc) {
+		descripcion=desc;
+	}
+	
+	/** @return descripcion del logger */
+	public String getDescripcion() {
+		return descripcion;
+	}
+	
 	/** @return el minimo valor en el vector de tiempos (el tiempo actual si no hay vector aún) */
 	long tiempoMin() {
 		if(tiempos!=null && tiempos.size()>=1)
@@ -116,11 +139,18 @@ public class Logger {
 		for(int i=0; i<tiempos.size(); i++) {
 			st+=String.format((Locale)null,"%d\n", tiempos.get(i));
 		}
+		if(descripcion!=null) {
+			st+="# name: "+nombre+"_dec\n# type: string\n# elements: 1\n# length: "
+			+descripcion.length()+"\n"
+			+descripcion+"\n";
+		}
 		return st;
 	}
 
 	/** Vuelca vector de tiempos a fichero MATv4 */
 	void vuelcaMATv4(SalvaMATv4 smv4) throws IOException {
 		smv4.vectorLongs(tiempos, nombre+"_t");
+		if(descripcion!=null)
+			smv4.vectorString(descripcion, nombre+"_desc");
 	}
 }
