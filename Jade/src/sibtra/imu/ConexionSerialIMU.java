@@ -3,6 +3,14 @@
  */
 package sibtra.imu;
 
+import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
+import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+import gnu.io.UnsupportedCommOperationException;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -12,18 +20,14 @@ import java.util.ArrayList;
 import java.util.TooManyListenersException;
 
 import sibtra.gps.GpsEventListener;
-
-import gnu.io.CommPortIdentifier;
-import gnu.io.NoSuchPortException;
-import gnu.io.PortInUseException;
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
-import gnu.io.UnsupportedCommOperationException;
+import sibtra.log.LoggerArrayDoubles;
+import sibtra.log.LoggerFactory;
 
 /**
+ * Gestiona la conexión serial a la IMU.
+ * Define logger para apuntar cada nuevos datos recibidos.
  * @author alberto
- *
+ * 
  */
 public class ConexionSerialIMU implements SerialPortEventListener {
 
@@ -33,14 +37,22 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 	private SerialPort puertoSerie;
 	InputStream flujoEntrada;
 	OutputStream flujoSalida;
+	/** Buffer donde se van almacenando los caracteres recibidos */
 	private byte[] buf;
+	/** Para indicar si el puerto está abierto */
 	private boolean abierto;
+	/** Para indicar que no hemos terminado de recibir el mensaje */
 	private boolean enMensaje;
+	/** Indice con el que se va recorriendo el {@link #buf} */
 	private int indBuf;
+	/** Longitud total del mensaje, según indica este */
 	private int lenTot;
 
 	/** Donde se almacena los últimos angulos recibidos */
 	private AngulosIMU angulo;
+	
+	/** Logger para registra cada nuevo conjunto de angulos */
+	private LoggerArrayDoubles logAngulos;
 
 	/**
 	 * Inicialización del puerto serie. 
@@ -141,6 +153,8 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 		abierto=true;
 		buf=new byte[MaxLen]; // creamos del tamaño máximo de telegrama
 		enMensaje=false;
+		logAngulos=LoggerFactory.nuevoLoggerArrayDoubles(this, "angulosIMU");
+		logAngulos.setDescripcion("Angulos [roll,pitch,yaw]");
 		return initIMU() && fijaFrecuencia(frecuencia);
 		
 	}
@@ -282,6 +296,7 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 					DataInputStream dis=new DataInputStream(new ByteArrayInputStream(buf,iniData,lenData));
 					angulo=new AngulosIMU(dis.readFloat(),dis.readFloat(),dis.readFloat(),dis.readUnsignedShort());
 //					System.out.printf("%7d: %15f %15f %15f\n",angulo.contador,angulo.roll,angulo.pitch,angulo.yaw);
+					logAngulos.add(angulo.roll,angulo.pitch,angulo.yaw);
 					avisaListeners();
 				} catch (IOException e) {
 					System.err.println("Problemas al leer floats del mensaje");
@@ -348,7 +363,8 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 			return false;
 		}
 
-		
+		//Fijamos numero de muestras del logger
+		logAngulos.setMuestrasSg((int)(1/herzios));
 		
 		return true;
 	}

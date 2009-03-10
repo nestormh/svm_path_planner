@@ -7,6 +7,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import sibtra.imu.UtilMensajesIMU;
+import sibtra.log.LoggerArrayInts;
+import sibtra.log.LoggerDouble;
+import sibtra.log.LoggerFactory;
 
 /** Clase de conexión a GPS Triumph que maneja mensajes propietarios
  * Como:
@@ -51,6 +54,12 @@ public class GPSConnectionTriumph extends GPSConnection {
 	protected int nivelLog=0;
 
 	private int numOKLink;
+
+	/** Para registrar enteros que vienen en paquete DL */
+	private LoggerArrayInts logDL;
+
+	/** Para registrar calidad que viene en paquete DL */
+	private LoggerDouble logCalDL;
 	
 	public static int ERR=0;
 	public static int WAR=0;
@@ -104,6 +113,13 @@ public class GPSConnectionTriumph extends GPSConnection {
 		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL}:1\n");
 //		comandoGPS("%em%em,,{jps/RT,nmea/GGA,jps/PG,jps/ET}:5\n");
 		
+		//ponemos muestras por segundo a la frecuencia de los GGA
+		logLocales.setMuestrasSg(5);
+		logEdadCor.setMuestrasSg(5);
+		//TODO añadir loggers para todos los mensajes considerados.	
+		logDL=LoggerFactory.nuevoLoggerArrayInts(this, "enterosDL",1);
+		logDL.setDescripcion("Columnas [timeLast, numOK, numCorrup");
+		logCalDL=LoggerFactory.nuevoLoggerDouble(this, "calidadDL",1);
 	}
 
 
@@ -518,6 +534,9 @@ public class GPSConnectionTriumph extends GPSConnection {
 					if(tipo=='D') { //puerto D es el del enlace
 						calidadLink=quality;
 						numOKLink=numOK;
+						//apuntamos en loggers
+						logDL.add(timeLast, numOK, numCorrup);
+						logCalDL.add(quality);
 					}
 					la--;
 				}

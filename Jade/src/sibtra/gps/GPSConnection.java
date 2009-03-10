@@ -13,12 +13,16 @@ import java.util.ArrayList;
 import java.util.TooManyListenersException;
 
 import sibtra.imu.ConexionSerialIMU;
+import sibtra.log.LoggerArrayDoubles;
+import sibtra.log.LoggerDouble;
+import sibtra.log.LoggerFactory;
 import sibtra.controlcarro.ControlCarro;
 
 /**
  * Maneja la conexión serial con el GPS. 
  * Al recibir un paquete recoge la información del nuevo punto y lo almacena en los distintos
  * buffers. Si se define conexión a la IMU se almacena información águlos en el momento.
+ * Tiene loggers para las coordenadas locales y la edad de corrección.
  */
 public class GPSConnection implements SerialPortEventListener {
 
@@ -30,51 +34,56 @@ public class GPSConnection implements SerialPortEventListener {
 
 
 	/** si el puerto serial está abierto*/
-	boolean open;
+	protected boolean open;
 
 	/** Los parámetros seriales instalados en el puerto */
-	SerialParameters parameters=null;
+	protected SerialParameters parameters=null;
 	
-	InputStream is;    
-	OutputStream os;
+	protected InputStream is;    
+	protected OutputStream os;
 
-	CommPortIdentifier portId;
-	SerialPort sPort;
+	protected CommPortIdentifier portId;
+	protected SerialPort sPort;
 
 	/** Cadena en la que se van almacenando los trozos de mensajes que se van recibiendo */
-	String cadenaTemp = "";
+	protected String cadenaTemp = "";
 	
 	/** último punto recibido */
-	GPSData data = new GPSData();    
+	protected GPSData data = new GPSData();    
 
 
 	/** Almacena ruta temporal cargada de fichero */
-	Ruta rutaTemporal = null;
+	protected Ruta rutaTemporal = null;
 	/** Almacena ruta espacial cargada de fichero */
-	Ruta rutaEspacial = null;
+	protected Ruta rutaEspacial = null;
 
 	/** Almacena los {@link #MAXBUFFER} últimos puntos de la ruta espacial */
-	Ruta bufferEspacial = new Ruta(MAXBUFFER,true);
+	protected Ruta bufferEspacial = new Ruta(MAXBUFFER,true);
 	/** Almacena los {@link #MAXBUFFER} últimos puntos recibidos */
-	Ruta bufferTemporal = new Ruta(MAXBUFFER);  
+	protected Ruta bufferTemporal = new Ruta(MAXBUFFER);  
 
 	/** indica si estamos capturando una ruta */
-	boolean enRuta = false;
+	protected boolean enRuta = false;
 	
 	/** Si estamos {@link #enRuta}, almacena los puntos recibidos */
-	Ruta bufferRutaTemporal = null;
+	protected Ruta bufferRutaTemporal = null;
 	/** Si estamos {@link #enRuta} almacena los puntos en ruta espacial */
-	Ruta bufferRutaEspacial = null;
+	protected Ruta bufferRutaEspacial = null;
 	
 	/** Conexión serial IMU de la que leer ángulos*/
-	ConexionSerialIMU csIMU=null;
-        
-        /** Conexion al coche */
-        
-        ControlCarro csCarro = null;
+	protected ConexionSerialIMU csIMU=null;
+
+	/** Conexion al coche */
+	protected ControlCarro csCarro = null;
 
 	/** contador de paquetes recibidos del GPS */
-	int cuentaPaquetesRecibidos=0;
+	protected int cuentaPaquetesRecibidos=0;
+
+	/** Logger para registrar coordenadas locales */
+	protected LoggerArrayDoubles logLocales;
+
+	/** Logger para registrar la edad de las correcciones */
+	protected LoggerDouble logEdadCor;
 
 	/**
 	 * Constructor por defecto no hace nada.
@@ -190,6 +199,12 @@ public class GPSConnection implements SerialPortEventListener {
 		open = true;
 
 		sPort.disableReceiveTimeout();
+		
+		logLocales=LoggerFactory.nuevoLoggerArrayDoubles(this, "CoordLoc");
+		logLocales.setDescripcion("Coordenadas locales [X,Y,Z]");
+		logLocales.setMuestrasSg(2);
+		logEdadCor=LoggerFactory.nuevoLoggerDouble(this, "edadCorreccion");
+		logEdadCor.setMuestrasSg(2);
 	}
 
 	/**
@@ -369,6 +384,10 @@ public class GPSConnection implements SerialPortEventListener {
 			}
 
 		}
+		
+		logLocales.add(data.getXLocal(),data.getYLocal(),data.getZLocal());
+		logEdadCor.add(data.getAge());
+		
 		avisaListeners(seAñadeEspacial); //avisamos a todos los listeners
         data = new GPSData(data);//creamos nuevo punto copia del anterior
 
