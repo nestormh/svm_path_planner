@@ -118,10 +118,42 @@ public class SalvaMATv4 {
 		
 		//escribimos parte real POR COLUMNAS
 		if(mrows>0 && ncols>0)
-			for(int col=0; col<d[0].length; col++)
-				for(int fil=0; fil<d.length; fil++)
+			for(int col=0; col<ncols; col++)
+				for(int fil=0; fil<mrows; fil++)
 					dos.writeDouble(d[fil][col]);
 	}
+
+	/**
+	 * Escribe matriz BIDIMENSIONAL de dobles al fichero a partir de vector de arrasy de doubles. 
+	 * Si es null no se escribe nada. 
+	 * Si no tiene elementos se escribe matriz vacía.
+	 * Se toma como columnas las del primer elemento del vector. 
+	 * Si en alguna fila faltan se ponene NaN 
+	 * @param d matriz a escribir. 
+	 * @param nombre nombre de la matriz
+	 * @throws IOException
+	 */
+	public void matrizDoubles(Vector<double[]> d,String nombre) throws IOException {
+		if(d==null) return; //si no hay datos no hacemos nada.
+		int mrows=d.size();
+		int ncols=(mrows==0?0:d.get(0).length); //columnas del primer elemento
+		// M=1   Big Endian
+		// O=0
+		// P=0  double-precision (64-bit)
+		// T=0  Numeric (Full) matrix
+		escribeCabecera(1000, mrows, ncols, 0, nombre);
+		
+		//escribimos parte real POR COLUMNAS
+		if(mrows>0 && ncols>0)
+			for(int col=0; col<ncols; col++)
+				for(int fil=0; fil<mrows; fil++)
+					//comprobamos que haya suficientes elementos en la fina actual
+					if(d.get(fil).length>col)
+						dos.writeDouble(d.get(fil)[col]);
+					else
+						dos.writeDouble(Double.NaN); //si no hay metemos NaN
+	}
+
 
 	/**
 	 * Escribe array de dobles al fichero como vector columna. Si es null no se escribe nada. 
@@ -210,7 +242,7 @@ public class SalvaMATv4 {
 		//MOPT
 		// M=1   Big Endian, Ponerlo a 0 no afecta a los enteros, hay que invertir al escribir
 		// O=0
-		// P=2  double-precision (64-bit)
+		// P=2   32-bit signed integers
 		// T=0  Numeric (Full) matrix
 		escribeCabecera(1020, mrows, ncols, 0, nombre);
 		
@@ -219,6 +251,84 @@ public class SalvaMATv4 {
 			for(Iterator<Integer> iele=d.iterator(); iele.hasNext(); )
 				escribeEntero(iele.next());
 //				dos.writeInt(iele.next());
+	}
+
+	/**
+	 * Escribe matriz BIDIMENSIONAL de enteros al fichero. Si es null no se escribe nada. 
+	 * Si no tiene elementos se escribe matriz vacía. 
+	 * @param d matriz a escribir. 
+	 * @param nombre nombre de la matriz
+	 * @throws IOException
+	 */
+	public void matrizIntegers(int[][] d,String nombre) throws IOException {
+		if(d==null) return; //si no hay datos no hacemos nada.
+		int mrows=d.length;
+		int ncols=(mrows==0?0:d[0].length);
+		// M=1   Big Endian, Ponerlo a 0 no afecta a los enteros, hay que invertir al escribir
+		// O=0
+		// P=2  32-bit signed integers
+		// T=0  Numeric (Full) matrix
+		escribeCabecera(1020, mrows, ncols, 0, nombre);
+		
+		//escribimos parte real POR COLUMNAS
+		if(mrows>0 && ncols>0)
+			for(int col=0; col<ncols; col++)
+				for(int fil=0; fil<mrows; fil++)
+					escribeEntero(d[fil][col]);
+	}
+
+	/**
+	 * Escribe matriz BIDIMENSIONAL de enteros al fichero a partir de vector de arrays de ints. 
+	 * Si es null no se escribe nada. 
+	 * Si no tiene elementos se escribe matriz vacía.
+	 * Se toma como columnas las del primer elemento del vector. 
+	 * Si en alguna fila faltan se ponene MIN_VALUE
+	 * @param d matriz a escribir. 
+	 * @param nombre nombre de la matriz
+	 * @throws IOException
+	 */
+	public void matrizIntegers(Vector<int[]> d, String nombre)  throws IOException {
+		if(d==null) return; //si no hay datos no hacemos nada.
+		int mrows=d.size();
+		int ncols=(mrows==0?0:d.get(0).length); //columnas del primer elemento
+		// M=1   Big Endian, Ponerlo a 0 no afecta a los enteros, hay que invertir al escribir
+		// O=0
+		// P=2  32-bit signed integers
+		// T=0  Numeric (Full) matrix
+		escribeCabecera(1020, mrows, ncols, 0, nombre);
+		
+		//escribimos parte real POR COLUMNAS
+		if(mrows>0 && ncols>0)
+			for(int col=0; col<ncols; col++)
+				for(int fil=0; fil<mrows; fil++)
+					//comprobamos que haya suficientes elementos en la fina actual
+					if(d.get(fil).length>col)
+						escribeEntero(d.get(fil)[col]);
+					else
+						escribeEntero(Integer.MIN_VALUE); //si no hay metemos MinValue		
+	}
+	
+	/**
+	 * Escribe un String a una vector de texto usando floats. 
+	 *  Si es null no se escribe nada.
+	 *  Si es String vacío se escribe matriz vacía. 
+	 * @param d string a escribir
+	 * @param nombre nombre de la matriz
+	 * @throws IOException
+	 */
+	public void vectorString(String d,String nombre) throws IOException {
+		if(d==null) return; //si no hay datos no hacemos nada.
+		int mrows=1;
+		int ncols=d.length();
+		// M=1   Big Endian, Ponerlo a 0 no afecta a los enteros, hay que invertir al escribir
+		// O=0
+		// P=1  single-precision (32-bit) floating point numbers
+		// T=1  Text matrix
+		escribeCabecera(1011, mrows, ncols, 0, nombre);
+		if(ncols>0)
+			for(int i=0;i<ncols;i++)
+				dos.writeFloat((float)d.charAt(i));
+		
 	}
 
 	/**
@@ -248,6 +358,25 @@ public class SalvaMATv4 {
 		for(int i=-5; i<=10; i++)
 			vi.add(i);
 		
+		//Vector de arrays de doubles
+		Vector<double[]> vecD=new Vector<double[]>();
+		for(int i=1; i<=5; i++) {
+			double[] dat={i*0.1, i*0.3, i*0.5, i*0.7 };
+			vecD.add(dat);
+		}
+				
+		//Vector de arrays de enteros
+		Vector<int[]> vecI=new Vector<int[]>();
+		for(int i=1; i<=5; i++) {
+			int[] dat={i+2, i*3, i*5, i*7 };
+			vecI.add(dat);
+		}
+		
+		int[][] matInt={ {1,2,3}
+		,{ 4,5,6}
+		,{7,8,9}
+		};
+		
 		SalvaMATv4 smv4;
 		
 		try {
@@ -257,6 +386,13 @@ public class SalvaMATv4 {
 			smv4.vectorDoubles(vd, "vd");
 			smv4.vectorLongs(vl, "vl");
 			smv4.vectorIntegers(vi, "vi");
+			
+			smv4.matrizDoubles(vecD, "vecDobles");
+			smv4.matrizIntegers(vecI, "vecInt");
+			
+			smv4.matrizIntegers(matInt, "matInt");
+			
+			smv4.vectorString("Hola Mundo", "ms");
 			//cerramos fichero
 			smv4.close();
 			
