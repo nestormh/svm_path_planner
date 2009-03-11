@@ -124,6 +124,12 @@ public class Logger {
 		return descripcion;
 	}
 	
+	/** @retun el nombre de la clase del objeto */
+	public String getNombreClase() {
+		String no=objeto.getClass().getName();
+		return no.substring(no.lastIndexOf(".")+1);
+	}
+	
 	/** @return el minimo valor en el vector de tiempos (el tiempo actual si no hay vector aún) */
 	long tiempoMin() {
 		if(tiempos!=null && tiempos.size()>=1)

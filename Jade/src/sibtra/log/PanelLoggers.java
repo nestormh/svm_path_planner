@@ -23,6 +23,7 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 import sibtra.util.SalvaMATv4;
 
@@ -39,7 +40,7 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 	private SpinnerNumberModel segActiva;
 	private JButton limpiaButton;
 	private JButton desactivaButton;
-	private JTable talbaLoggers;
+	private JTable tablaLoggers;
 
 	/** Clase para apuntar en un vector el logger y si está seleccionado */
 	class ApuntaLog {
@@ -52,13 +53,14 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 	}
 	/** Vector con los loger considerados y si están seleccionados */
 	Vector<ApuntaLog> vecLA=null;
+	private ModeloTablaLoggers modeloTL;
 
-	static int COL_SEL=0;
-	static int COL_NOM=1;
-	static int COL_CLASS=2;
-	static int COL_ACTIVA=3;
-	static int COL_SIZE=4;
-	static int COL_CAPA=5;
+	final static int COL_SEL=0;
+	final static int COL_NOM=1;
+	final static int COL_CLASS=2;
+	final static int COL_ACTIVA=3;
+	final static int COL_SIZE=4;
+	final static int COL_CAPA=5;
 
 	public PanelLoggers() {
 		super(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
@@ -75,11 +77,17 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 			panAct.add(Box.createRigidArea(new Dimension(0,5)));
 			
 			//Donde seleccionar los loggers
-			talbaLoggers=new JTable(new modeloTablaLoggers());	
-	        talbaLoggers.setPreferredScrollableViewportSize(new Dimension(500, 70));
+			modeloTL=new ModeloTablaLoggers();
+			tablaLoggers=new JTable(modeloTL);	
+	        tablaLoggers.setPreferredScrollableViewportSize(new Dimension(500, 70));
 //	        table.setAutoCreateRowSorter(true);
+	        //fijamos tamaños preferidos
+	        for(int i=0; i<modeloTL.getColumnCount();i++)
+	        	tablaLoggers.getColumnModel().getColumn(i).setPreferredWidth(
+	        			modeloTL.getLargoColumna(i)	        			
+	        	);
 
-			panAct.add(new JScrollPane(talbaLoggers));
+			panAct.add(new JScrollPane(tablaLoggers));
 
 			panAct.add(Box.createRigidArea(new Dimension(0,5)));
 
@@ -125,12 +133,13 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 	}
 
 	/** Modelo de nuestra tabla de loggers */
-    class modeloTablaLoggers extends AbstractTableModel {
+    class ModeloTablaLoggers extends AbstractTableModel {
     	
     	String[] nombColumnas=new String[6];
+		private static final String etiquetaActivo="ACTIVO";
     	
     	
-    	public modeloTablaLoggers() {
+    	public ModeloTablaLoggers() {
     		super();
     		//rellenamos array de titulos
         	nombColumnas[COL_SEL]="Sel.";
@@ -159,18 +168,17 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
         		return null;
         	Logger la=vecLA.get(row).la;
         	switch (col) {
-        	case 0:
+        	case COL_SEL:
         		return vecLA.get(row).sel;
-        	case 1:
+        	case COL_NOM:
         		return la.nombre;
-        	case 2:
-        		String no=la.objeto.getClass().getName();
-        		return no.substring(no.lastIndexOf(".")+1);
-        	case 3:
-        		return (la.isActivo()?"ACTIVO":"    ");
-        	case 4:
+        	case COL_CLASS:
+        		return la.getNombreClase();
+        	case COL_ACTIVA:
+        		return (la.isActivo()?etiquetaActivo:"    ");
+        	case COL_SIZE:
         		return (la.tiempos!=null)?la.tiempos.size():0;
-        	case 5:
+        	case COL_CAPA:
         		return (la.tiempos!=null)?la.tiempos.capacity():0;
         	default:
         		return null;
@@ -187,14 +195,14 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
         }
         public Class getColumnClass(int col) {
         	switch (col) {
-        	case 0:
+        	case COL_SEL:
         		return Boolean.class;
-        	case 1:
-        	case 2:
-        	case 3:
+        	case COL_NOM:
+        	case COL_CLASS:
+        	case COL_ACTIVA:
         		return String.class;
-        	case 4:
-        	case 5:
+        	case COL_SIZE:
+        	case COL_CAPA:
         		return Integer.class;
         	default:
         		return String.class;
@@ -228,6 +236,40 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
         	if (añadidos>0)
         		fireTableRowsInserted(ultimoAnt+1, ultimoAnt+añadidos-1);
         }
+        /** @return el largo maximo de los elementos que aparecen en la comulna. 
+         * Se computa del maximo texto a sacar y el titulo
+         */
+    	public int getLargoColumna(int col) {
+    		int largo=nombColumnas[col].length();
+    		int lact=0;
+        	// Sacamos los datos de vecLA
+        	if(vecLA==null)
+        		return 0;
+        	switch (col) {
+        	case COL_SEL:
+        		break;
+        	case COL_NOM:
+        		for(int i=0; i<vecLA.size();i++)
+        			if((lact=vecLA.get(i).la.nombre.length())>largo)
+        				largo=lact;
+        		break;
+        	case COL_CLASS:
+        		for(int i=0; i<vecLA.size();i++)
+        			if((lact=vecLA.get(i).la.getNombreClase().length())>largo)
+        				largo=lact;
+        		break;
+        	case COL_ACTIVA:
+        		largo=Math.max(largo,etiquetaActivo.length()+6); //largo de la etiqueta ACTIVO
+        		break;
+        	case COL_SIZE:
+        	case COL_CAPA:
+        		largo=Math.max(largo,(" "+Integer.MAX_VALUE).length());
+        		break;
+        	}
+    		
+    		return largo*10;
+    	}
+
     }
 	public void actionPerformed(ActionEvent ae) {
 		//Para el boton Activa
@@ -242,22 +284,19 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 				Logger la=vecLA.get(i).la;
 				if (ae.getSource()==activaButton) {
 					la.activa(sgAct);
-					System.out.println("Activando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
-							+" para "+sgAct+" segundos.");
-//					actualizaCheckLoggers();
+//					System.out.println("Activando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
+//							+" para "+sgAct+" segundos.");
 				} else if (ae.getSource()==limpiaButton) {
 					la.clear();
-					System.out.println("Limpiando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
-							+" para "+sgAct+" segundos.");
-//					actualizaCheckLoggers();
+//					System.out.println("Limpiando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
+//							+" para "+sgAct+" segundos.");
 				} else if (ae.getSource()==desactivaButton) {
 					la.desactiva();
-					System.out.println("Desactivando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
-							+" para "+sgAct+" segundos.");
-//					actualizaCheckLoggers();
+//					System.out.println("Desactivando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
+//							+" para "+sgAct+" segundos.");
 				}
 			}
-			talbaLoggers.repaint();
+			tablaLoggers.repaint();
 		}
 		if(ae.getSource()==salvaButton) {
 			String nombBase="Datos/PruPanLog";
@@ -286,7 +325,7 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 	public void repinta() {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				((modeloTablaLoggers)(talbaLoggers.getModel())).añadeNuevosLoggers();
+				((ModeloTablaLoggers)(tablaLoggers.getModel())).añadeNuevosLoggers();
 				repaint();
 			}
 		});
