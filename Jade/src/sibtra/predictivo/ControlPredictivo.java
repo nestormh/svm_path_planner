@@ -74,8 +74,7 @@ public class ControlPredictivo {
 	/** Se usa en calculos internos pero la tenemos como campo para no pedir memoria en cada iteración */
 	private double[] respuestaEscalon;
 	private Coche carroEscalon;
-        private double gananciaVel;
-		private int indMinAnt;
+	private int indMinAnt;
 
 	/**
      * 
@@ -94,7 +93,6 @@ public class ControlPredictivo {
         this.landa = landa;
         this.ruta = ruta;
         this.Ts = Ts;
-        gananciaVel = 1;
         this.indMinAnt = -1;
         
         // creamos todas las matrices que se usan en las iteracioner para evitar tener que 
@@ -120,7 +118,6 @@ public class ControlPredictivo {
         this.ruta = ruta;
         this.Ts = Ts;
         this.rutaCerrada = rutaCerrada;
-        gananciaVel = 1;
         this.indMinAnt = -1;
         
         
@@ -136,6 +133,14 @@ public class ControlPredictivo {
 
     }
     
+    /**
+     * 
+     * @return Devuelve el primer componente del vector {@link #orientacionesDeseadas}
+     */
+    public double getOrientacionDeseada() {
+		return orientacionesDeseadas[0];
+	}
+
 	public int getHorControl() {
 		return horControl;
 	}
@@ -173,9 +178,6 @@ public class ControlPredictivo {
             this.ruta = nuevaRuta;
         }
 
-    void setGananciaVel(double gananciaVel) {
-        this.gananciaVel = gananciaVel;
-    }
          
     /**
      * Calcula la evolución del modelo del vehículo tantos pasos hacia delante como
@@ -253,7 +255,8 @@ public class ControlPredictivo {
     }
     /**
      * Método optimizado de búsqueda del punto más cercano utilizando 
-     * la información del último punto más cercano
+     * la información del último punto más cercano. Si en el parámetro indMinAnt se pasa
+     * un número negativo realiza una búsqueda exaustiva
      * @param indMinAnt
      * @return
      */
@@ -287,22 +290,6 @@ public class ControlPredictivo {
         return indMin;
     }
     
-    public double calculaConsignaVel(){
-       double consigna = 0;
-       double velocidadMax = 3;
-       double refVelocidad;
-       double errorOrientacion;       
-       int indMin = calculaDistMin(ruta,carroOriginal.getX(),carroOriginal.getY());       
-       errorOrientacion = orientacionesDeseadas[0] - carroOriginal.getTita();
-       if (ruta[indMin][3]>velocidadMax){
-           refVelocidad = velocidadMax;
-       }else
-           refVelocidad = ruta[indMin][3]; 
-       consigna = refVelocidad - errorOrientacion*gananciaVel;
-       if (consigna <= 0)
-           consigna = 0.5;       
-       return consigna; 
-    }
     public double calculaComando(){
         //    vector_error = tita_deseado - ftita;
 //    vector_error = vector_error + (vector_error > pi)*(-2*pi) + (vector_error < -pi)*2*pi;
@@ -414,5 +401,5 @@ public class ControlPredictivo {
 //        System.out.println("Angulo normalizado " +normalizaAngulo(0));
 //        System.exit(0);
     }
-
+	
 }
