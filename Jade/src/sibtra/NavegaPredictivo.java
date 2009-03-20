@@ -73,6 +73,7 @@ public class NavegaPredictivo implements GpsEventListener {
     private JCheckBox jcbUsarRF;
     protected double distRF;
     private int numPaquetesGPS;
+	private double gananciaVel = 1;
 
     /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -247,7 +248,85 @@ public class NavegaPredictivo implements GpsEventListener {
         int paquetesAhora = gpsCon.getCuentaPaquetesRecibidos();
         jlNumPaquetes.setText(String.format("Mensajes %10d", paquetesAhora));
     }
-
+    
+    /**
+     * Método para decidir la consigna de velocidad para cada instante. Se programan tres estados:
+     * Arrancando,navegando y frenando.
+     * En el estado navegando se tiene en cuenta el error en la orientación 
+     * @return
+     */
+    public double calculaConsignaVel(){
+        double consigna = 0;
+        double velocidadMax = 3;
+        double refVelocidad;
+        double errorOrientacion;       
+        int indMin = ControlPredictivo.calculaDistMin(Tr,modCoche.getX(),modCoche.getY());       
+        errorOrientacion = cp.getOrientacionDeseada() - modCoche.getTita();
+        if (Tr[indMin][3]>velocidadMax){
+            refVelocidad = velocidadMax;
+        }else
+            refVelocidad = Tr[indMin][3]; 
+        consigna = refVelocidad - errorOrientacion*gananciaVel;
+        if (consigna <= 0)
+            consigna = 0.5;       
+        return consigna; 
+     }
+    /**
+     * Recorre la trayectoria desde el punto más cercano al coche y mide la distancia de 
+     * frenado. Devuelve el índice del punto que se encuentra a esa distancia
+     * @param distFrenado Distancia en metros a la que se desea que el coche se detenga
+     * @return Índice del punto que se encuentra a la distancia de frenado
+     */
+    public int buscaPuntoFrenado(double distFrenado){
+    	int indCercano = ControlPredictivo.calculaDistMin(Tr, modCoche.getX(),modCoche.getY());
+    	double dist = 0;
+    	int i = 0;    	
+    	for (i=indCercano;dist<distFrenado;i++){
+    		double dx=Tr[i][0]-Tr[(i+1)%Tr.length][0];
+            double dy=Tr[i][1]-Tr[(i+1)%Tr.length][1];
+            dist = dist + Math.sqrt(dx*dx+dy*dy);
+    	}
+    	return i;
+    }
+    /**
+     * Calcula la distancia a la que se encuentra el punto en el que se quiere que el coche
+     * se detenga
+     * @param puntoFrenado Índice del punto de la trayectoria donde se desea que el coche se pare
+     * @return Distancia en metros a la que se encuentra el punto en el que se desea que el
+     * coche se detenga
+     */
+    public double mideDistanciaFrenado(int puntoFrenado){
+    	double distFrenado=0;
+    	int indCercano = ControlPredictivo.calculaDistMin(Tr, modCoche.getX(),modCoche.getY());    	   	
+    	for (int i=indCercano;i<puntoFrenado;i++){
+    		double dx=Tr[i][0]-Tr[(i+1)%Tr.length][0];
+            double dy=Tr[i][1]-Tr[(i+1)%Tr.length][1];
+            distFrenado = distFrenado + Math.sqrt(dx*dx+dy*dy);
+    	}
+    	return distFrenado;
+    }
+    /**
+     * calcula la rampa decreciente de consignas de velocidad para realizar el frenado
+     * del coche
+     * @param velocidadActual Velocidad instantanea en metros por segundo del coche 
+     * @param distFrenado Distancia en metros a la que se desea que el coche se detenga
+     * @param numPuntos cantidad de puntos del perfil. Coincidirá con el horizonte de predicción
+     * en el caso de que el perfil de velocidad sea la entrada para el controlador predictivo
+     * @param T Periodo de muestreo del sistema
+     * @return Perfil de velocidad de frenado
+     */
+    public double[] calculaPerfilVelocidad(double velocidadActual,double distFrenado,int numPuntos,double T){
+    	double pendiente = -velocidadActual/distFrenado;
+    	double c = -pendiente*distFrenado;
+    	double t = T;
+    	double[] perfilVelocidad= new double[numPuntos];
+    	for(int i=0;i<numPuntos+1;i++){    		
+    		perfilVelocidad[i] = pendiente*t + c;
+    		t = t + T;
+    	}    	
+    	return perfilVelocidad;
+    }
+    
     /** Método que ejecuta cada {@link #periodoMuestreoMili} bulce de control del coche mirando los obstáculos con el RF 
      */
     public void camina() {
@@ -319,7 +398,7 @@ public class NavegaPredictivo implements GpsEventListener {
                 // volante a la invocación de setPostura
                 modCoche.setPostura(ptoAct[0], ptoAct[1], angAct);
                 double comandoVolante = cp.calculaComando();
-                double consignaVelocidad = cp.calculaConsignaVel();
+                double consignaVelocidad = calculaConsignaVel();
                 System.out.println(consignaVelocidad);
                 if (comandoVolante > COTA_ANGULO) {
                     comandoVolante = COTA_ANGULO;
