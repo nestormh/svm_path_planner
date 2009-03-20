@@ -5,8 +5,6 @@
 
 package sibtra.predictivo;
 
-import org.omg.CORBA.portable.IndirectionException;
-
 import sibtra.util.UtilCalculos;
 import Jama.Matrix;
 

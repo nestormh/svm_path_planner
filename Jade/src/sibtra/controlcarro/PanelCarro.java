@@ -52,6 +52,8 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 
 	private JButton jbAplicaDesFreno;
 
+	private JButton jbDesfrena;
+
 	public PanelCarro(ControlCarro cc) {
 		super();
 		contCarro=cc;
@@ -118,13 +120,13 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 		
 		//Para masFrena
 		{// spiner fijar tiempo Frena
-			jspTiempoFrena=new SpinnerNumberModel(0,0,255,1);
+			jspTiempoFrena=new SpinnerNumberModel(20,0,255,1);
 			JSpinner jspcv=new JSpinner(jspTiempoFrena);
 			añadeAPanel(jspcv, "Tiempo Frena");
 			jspcv.setEnabled(true);
 		}
 		{// spiner fijar valor frena
-			jspValorFrena=new SpinnerNumberModel(0,0,255,1);
+			jspValorFrena=new SpinnerNumberModel(90,0,255,1);
 			JSpinner jspcv=new JSpinner(jspValorFrena);
 			añadeAPanel(jspcv, "Valor Frena");
 			jspcv.setEnabled(true);
@@ -138,13 +140,13 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 
 		//Para menosFrena
 		{// spiner fijar tiempo Frena
-			jspTiempoDesFrena=new SpinnerNumberModel(0,0,255,1);
+			jspTiempoDesFrena=new SpinnerNumberModel(20,0,255,1);
 			JSpinner jspcv=new JSpinner(jspTiempoDesFrena);
 			añadeAPanel(jspcv, "Tiempo Desfrena");
 			jspcv.setEnabled(true);
 		}
 		{// spiner fijar valor frena
-			jspValorDesFrena=new SpinnerNumberModel(0,0,255,1);
+			jspValorDesFrena=new SpinnerNumberModel(90,0,255,1);
 			JSpinner jspcv=new JSpinner(jspValorDesFrena);
 			añadeAPanel(jspcv, "Valor Desfrena");
 			jspcv.setEnabled(true);
@@ -154,6 +156,12 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 			añadeAPanel(jbAplicaDesFreno, "Desfreno");
 			jbAplicaDesFreno.addActionListener(this);
 			jbAplicaDesFreno.setEnabled(true);
+		}
+		{// Boton desfrena total
+			jbDesfrena=new JButton("Desfrena");
+			añadeAPanel(jbDesfrena, "Desfreno");
+			jbDesfrena.addActionListener(this);
+			jbDesfrena.setEnabled(true);
 		}
 //		Hay lazo cerrado no tienen sentido fijar ahora el avance
 //		{// comando avance
@@ -191,8 +199,11 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 			contCarro.masFrena(jspValorFrena.getNumber().intValue(), jspTiempoFrena.getNumber().intValue());
 		}
 		if(ev.getSource()==jbAplicaDesFreno) {
-			contCarro.masFrena(jspValorDesFrena.getNumber().intValue(), jspTiempoDesFrena.getNumber().intValue());
+			contCarro.menosFrena(jspValorDesFrena.getNumber().intValue(), jspTiempoDesFrena.getNumber().intValue());
 		}
+		if(ev.getSource()==jbDesfrena) {
+			contCarro.DesFrena(255);
+			}
 	}
 
 	/** Actualiza campos con datos del {@link ControlCarro} */

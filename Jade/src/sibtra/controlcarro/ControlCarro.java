@@ -23,6 +23,9 @@ import java.io.OutputStream;
 import java.util.TooManyListenersException;
 import java.util.Vector;
 
+import sibtra.log.LoggerArrayDoubles;
+import sibtra.log.LoggerFactory;
+
 
 //import com.sun.xml.internal.fastinfoset.util.CharArrayArray;
 
@@ -190,6 +193,8 @@ public class ControlCarro implements SerialPortEventListener,
 
 	private String ficheroCaptura = "";
 
+	private LoggerArrayDoubles logAngVel;
+
 	/**
 	 * Creates a SerialConnection object and initilizes variables passed in as
 	 * params.
@@ -212,6 +217,8 @@ public class ControlCarro implements SerialPortEventListener,
 		if (isOpen())
 			System.out.println("Puerto Abierto " + portName);
 
+		logAngVel=LoggerFactory.nuevoLoggerArrayDoubles(this, "carroAngVel",12);
+		logAngVel.setDescripcion("Carro [Ang en Rad,Vel en m/s]");
 		// hilo = new Thread(this);
 		// hilo.start();
 
@@ -454,6 +461,9 @@ public class ControlCarro implements SerialPortEventListener,
 								velocidadMS = velocidadCS / PULSOS_METRO;
 								velocidadKH = velocidadMS * 3600 / 1000;
 
+								//apuntamos
+								logAngVel.add((volante - CARRO_CENTRO) * RADIANES_POR_CUENTA,velocidadMS);
+								
 								indiceCuentas = (indiceCuentas + 1) % freqVel;
 
 								// System.out.println("T: " +

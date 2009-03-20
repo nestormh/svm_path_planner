@@ -194,6 +194,24 @@ public class Coche implements Cloneable {
         volante = posVolante;
         estado.set(0,0,posVolante);
     }
+    /**
+     * Recoge la posición y orientación del vehículo. La fuente de la 
+     * información puede ser la IMU y el GPS, el sistema odométrico
+     * o incluso un programa de simulación
+     * @param posX Coordenada local X
+     * @param posY Coordenada loacal Y
+     * @param orientacion Orientación del vehículo (no del volante) en radianes. (Entre -Pi y Pi)s
+     * @param posVolante posición del volante
+     * @param velVolante velocidad del volante
+     */
+    public void setPostura(double posX,double posY,double orientacion,double posVolante, double velVolante){
+        x = posX;
+        y = posY;
+        tita = orientacion;
+        volante = posVolante;
+        estado.set(0,0,posVolante);
+        estado.set(1,0,velVolante);
+    }
     public void setVelocidad(double vel){
         velocidad = vel;    
     }

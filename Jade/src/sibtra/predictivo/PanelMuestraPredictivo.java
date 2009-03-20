@@ -62,7 +62,6 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     private SpinnerNumberModel jsModLanda;
     private SpinnerNumberModel jsModDistMax;
     private Ruta rutaAux;
-    private SpinnerNumberModel jsModGananciaVel;
 
     /** Constructor necesita el controlador predictivo */
     public PanelMuestraPredictivo(ControlPredictivo contPredic, Ruta rutaIn) {
@@ -117,12 +116,6 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
             JSpinner jsDistMax = new JSpinner(jsModDistMax);
             jsModDistMax.addChangeListener(this);
             jpPre.add(jsDistMax);
-
-            jpPre.add(new Label("Ganancia Velocidad"));
-            jsModGananciaVel = new SpinnerNumberModel(1, 0, 10, 0.05);
-            JSpinner jsGananciaVel = new JSpinner(jsModGananciaVel);
-            jsModGananciaVel.addChangeListener(this);
-            jpPre.add(jsGananciaVel);
 
             jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE, 40));
 //			jpPre.setBorder(BorderFactory.createCompoundBorder(
@@ -179,10 +172,6 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         if (ce.getSource() == jsModDistMax) {
             double distMax = jsModDistMax.getNumber().doubleValue();
             CP.setRuta(rutaAux.toTr(distMax));
-        }
-        if (ce.getSource() == jsModGananciaVel) {
-            double gananciaVel = jsModGananciaVel.getNumber().doubleValue();
-            CP.setGananciaVel(gananciaVel);
         }
     }
 

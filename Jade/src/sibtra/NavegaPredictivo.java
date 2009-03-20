@@ -3,6 +3,7 @@ package sibtra;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Label;
 import java.io.File;
 
 import javax.swing.BoxLayout;
@@ -12,6 +13,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import sibtra.controlcarro.ControlCarro;
 import sibtra.controlcarro.VentanaCoche;
@@ -42,7 +47,7 @@ import sibtra.util.EligeSerial;
  * @author alberto
  *
  */
-public class NavegaPredictivo implements GpsEventListener {
+public class NavegaPredictivo implements GpsEventListener, ChangeListener {
 
     /** Milisegundos del ciclo */
     private static final long periodoMuestreoMili = 200;
@@ -74,6 +79,9 @@ public class NavegaPredictivo implements GpsEventListener {
     protected double distRF;
     private int numPaquetesGPS;
 	private double gananciaVel = 1;
+	
+    private SpinnerNumberModel jsModGananciaVel;
+
 
     /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -162,6 +170,12 @@ public class NavegaPredictivo implements GpsEventListener {
 
             jlNumPaquetes = new JLabel("Mensajes #######");
             jpGPST.add(jlNumPaquetes);
+
+            jpGPST.add(new Label("Ganancia Velocidad"));
+            jsModGananciaVel = new SpinnerNumberModel(1, 0, 10, 0.05);
+            JSpinner jsGananciaVel = new JSpinner(jsModGananciaVel);
+            jsModGananciaVel.addChangeListener(this);
+            jpGPST.add(jsGananciaVel);
 
         }
 
@@ -442,6 +456,14 @@ public class NavegaPredictivo implements GpsEventListener {
 
     }
 
+
+	public void stateChanged(ChangeEvent ce) {
+		if (ce.getSource() == jsModGananciaVel) {
+        gananciaVel = jsModGananciaVel.getNumber().doubleValue();
+    }
+
+		
+	}
     /**
      * @param args Seriales para IMU, GPS, RF y Carro. Si no se pasan de piden interactivamente.
      */
