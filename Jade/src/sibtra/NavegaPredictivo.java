@@ -3,7 +3,6 @@ package sibtra;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Label;
 import java.io.File;
 
 import javax.swing.BoxLayout;
@@ -68,6 +67,9 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
 //	private PanelMiraObstaculoSubjetivo PMOS;
     private double desMag;
     JCheckBox jcbNavegando;
+    JCheckBox jcbFrenando;
+    SpinnerNumberModel spFrenado;
+    JSpinner JsDistFrenado;
     Coche modCoche;
     ControlPredictivo cp;
     ControlCarro contCarro;
@@ -79,9 +81,7 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
     protected double distRF;
     private int numPaquetesGPS;
 	private double gananciaVel = 1;
-	
-    private SpinnerNumberModel jsModGananciaVel;
-
+	private double distFrenado;
 
     /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -145,6 +145,19 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
             jcbNavegando = new JCheckBox("Navegando");
             jcbNavegando.setSelected(false);
             jpSur.add(jcbNavegando);
+            //Checkbox para frenar
+            jcbFrenando = new JCheckBox("Frenar");
+            jcbFrenando.setSelected(false);
+            jpSur.add(jcbFrenando);
+            //Spinner para fijar la distancia de frenado
+            double value = 5;
+            double min = 1;
+            double max = 50;
+            double step = 0.1;
+            spFrenado = new SpinnerNumberModel(value,min,max,step);
+            JsDistFrenado = new JSpinner(spFrenado);
+            JsDistFrenado.addChangeListener(this);
+            jpSur.add(JsDistFrenado);
             //Checkbox para detectar con RF
             jcbUsarRF = new JCheckBox("Usar RF");
             jcbUsarRF.setSelected(false);
@@ -170,12 +183,6 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
 
             jlNumPaquetes = new JLabel("Mensajes #######");
             jpGPST.add(jlNumPaquetes);
-
-            jpGPST.add(new Label("Ganancia Velocidad"));
-            jsModGananciaVel = new SpinnerNumberModel(1, 0, 10, 0.05);
-            JSpinner jsGananciaVel = new JSpinner(jsModGananciaVel);
-            jsModGananciaVel.addChangeListener(this);
-            jpGPST.add(jsGananciaVel);
 
         }
 
@@ -456,14 +463,6 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
 
     }
 
-
-	public void stateChanged(ChangeEvent ce) {
-		if (ce.getSource() == jsModGananciaVel) {
-        gananciaVel = jsModGananciaVel.getNumber().doubleValue();
-    }
-
-		
-	}
     /**
      * @param args Seriales para IMU, GPS, RF y Carro. Si no se pasan de piden interactivamente.
      */
@@ -483,4 +482,12 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
         NavegaPredictivo na = new NavegaPredictivo(puertos);
         na.camina();
     }
+
+	public void stateChanged(ChangeEvent e) {
+		// TODO Auto-generated method stub
+		if(e.getSource()==spFrenado){
+			distFrenado = spFrenado.getNumber().doubleValue();
+		}
+		
+	}
 }
