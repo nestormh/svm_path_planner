@@ -53,6 +53,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
     /** Milisegundos del ciclo */
     private static final long periodoMuestreoMili = 200;
     private static final double COTA_ANGULO = Math.toRadians(30);
+	private static final double umbralMinimaVelocidad = 0.2;
     private ConexionSerialIMU csi;
     private GPSConnectionTriumph gpsCon;
     private ManejaLMS manLMS;
@@ -437,7 +438,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
                 }
                 double consignaVelocidad;
                 velocidadActual = contCarro.getVelocidadMS();
-                if (velocidadActual != 0)
+                if (velocidadActual >= umbralMinimaVelocidad)
                 	contCarro.setAnguloVolante(-comandoVolante);
                 if (puntoFrenado==-1){
                 	consignaVelocidad = calculaConsignaVel();                    
@@ -446,13 +447,14 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
                 		double distFrenado = mideDistanciaFrenado(puntoFrenado);
                     	consignaVelocidad = calculaPerfilVelocidad(velocidadActual, distFrenado, periodoMuestreoMili / 1000);
                 	}else{
+                		//TODO mejorar esta estrategia. Puede ocurrir que 
+                		//el coche todavía esté acelerando cuando mandemos a frenar                		
                 		consignaVelocidad = 0;
                 		contCarro.masFrena(90,20);
-                	}                	
-                	
+                	}                	                	
                 }
                 System.out.println(consignaVelocidad);
-                contCarro.setConsignaAvanceMS(consignaVelocidad);//				
+                contCarro.setConsignaAvanceMS(consignaVelocidad);			
                 modCoche.calculaEvolucion(comandoVolante, velocidadActual, periodoMuestreoMili / 1000);
                 pmp.actualiza();
             }
