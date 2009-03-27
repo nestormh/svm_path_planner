@@ -3,6 +3,8 @@ package sibtra;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.BoxLayout;
@@ -46,7 +48,7 @@ import sibtra.util.EligeSerial;
  * @author alberto
  *
  */
-public class NavegaPredictivo implements GpsEventListener, ChangeListener {
+public class NavegaPredictivo implements GpsEventListener, ActionListener {
 
     /** Milisegundos del ciclo */
     private static final long periodoMuestreoMili = 200;
@@ -69,7 +71,7 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
     JCheckBox jcbNavegando;
     JCheckBox jcbFrenando;
     SpinnerNumberModel spFrenado;
-    JSpinner JsDistFrenado;
+    JSpinner jsDistFrenado;
     Coche modCoche;
     ControlPredictivo cp;
     ControlCarro contCarro;
@@ -81,7 +83,7 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
     protected double distRF;
     private int numPaquetesGPS;
 	private double gananciaVel = 1;
-	private double distFrenado;
+	private int puntoFrenado=-1;
 
     /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -148,6 +150,7 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
             //Checkbox para frenar
             jcbFrenando = new JCheckBox("Frenar");
             jcbFrenando.setSelected(false);
+            jcbFrenando.addActionListener(this);
             jpSur.add(jcbFrenando);
             //Spinner para fijar la distancia de frenado
             double value = 5;
@@ -155,9 +158,8 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
             double max = 50;
             double step = 0.1;
             spFrenado = new SpinnerNumberModel(value,min,max,step);
-            JsDistFrenado = new JSpinner(spFrenado);
-            JsDistFrenado.addChangeListener(this);
-            jpSur.add(JsDistFrenado);
+            jsDistFrenado = new JSpinner(spFrenado);
+            jpSur.add(jsDistFrenado);
             //Checkbox para detectar con RF
             jcbUsarRF = new JCheckBox("Usar RF");
             jcbUsarRF.setSelected(false);
@@ -347,8 +349,14 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
     	}    	
     	return perfilVelocidad;
     }
+    public double calculaPerfilVelocidad(double velocidadActual,double distFrenado,double T){
+    	double pendiente = -velocidadActual/distFrenado;
+    	double c = -pendiente*distFrenado;
+    	double consignaVelocidad = pendiente*T + c;       	
+    	return consignaVelocidad;
+    }
     
-    /** Método que ejecuta cada {@link #periodoMuestreoMili} bulce de control del coche mirando los obstáculos con el RF 
+	/** Método que ejecuta cada {@link #periodoMuestreoMili} bucle de control del coche mirando los obstáculos con el RF 
      */
     public void camina() {
         Thread thRF = new Thread() {
@@ -402,7 +410,7 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
         };
 
         thRF.start();
-        double comandoVelocidad;        
+        double velocidadActual;        
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         long tSig;
         while (true) {
@@ -417,10 +425,9 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
                 // Con esta linea realimentamos la información de los sensores al modelo
                 // se puede incluir tambien la posicion del volante añadiendo el parámetro
                 // volante a la invocación de setPostura
+                //TODO Realimentar posición del volante
                 modCoche.setPostura(ptoAct[0], ptoAct[1], angAct);
-                double comandoVolante = cp.calculaComando();
-                double consignaVelocidad = calculaConsignaVel();
-                System.out.println(consignaVelocidad);
+                double comandoVolante = cp.calculaComando();                
                 if (comandoVolante > COTA_ANGULO) {
                     comandoVolante = COTA_ANGULO;
                 }
@@ -428,14 +435,25 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
                     comandoVolante = -COTA_ANGULO;
                 //System.out.println("Comando " + comandoVolante);
                 }
-                contCarro.setAnguloVolante(-comandoVolante);
-                contCarro.setConsignaAvanceMS(consignaVelocidad);
-//				contCarro.Avanza(120);
-                //TODO leer la posición del volante
-                comandoVelocidad = contCarro.getVelocidadMS();
-                // no hace falta modCoche.setConsignaVolante(comandoVolante);
-                modCoche.calculaEvolucion(comandoVolante, comandoVelocidad, periodoMuestreoMili / 1000);
-
+                double consignaVelocidad;
+                velocidadActual = contCarro.getVelocidadMS();
+                if (velocidadActual != 0)
+                	contCarro.setAnguloVolante(-comandoVolante);
+                if (puntoFrenado==-1){
+                	consignaVelocidad = calculaConsignaVel();                    
+                }else{
+                	if (velocidadActual >= 1){
+                		double distFrenado = mideDistanciaFrenado(puntoFrenado);
+                    	consignaVelocidad = calculaPerfilVelocidad(velocidadActual, distFrenado, periodoMuestreoMili / 1000);
+                	}else{
+                		consignaVelocidad = 0;
+                		contCarro.masFrena(90,20);
+                	}                	
+                	
+                }
+                System.out.println(consignaVelocidad);
+                contCarro.setConsignaAvanceMS(consignaVelocidad);//				
+                modCoche.calculaEvolucion(comandoVolante, velocidadActual, periodoMuestreoMili / 1000);
                 pmp.actualiza();
             }
             //para mostrar si se dejaron de recibir paquetes del GPS
@@ -462,7 +480,21 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
         }
 
     }
-
+    public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		if (e.getSource() == jcbFrenando){
+			if(jcbFrenando.isSelected()){
+				// Se acaba de seleccionar
+				double distFrenado = spFrenado.getNumber().doubleValue();
+				puntoFrenado = buscaPuntoFrenado(distFrenado);
+				jsDistFrenado.setEnabled(false);
+			}else{
+				// Se acaba de desactivar
+				jsDistFrenado.setEnabled(true);
+				puntoFrenado = -1;
+			}
+		}
+	}
     /**
      * @param args Seriales para IMU, GPS, RF y Carro. Si no se pasan de piden interactivamente.
      */
@@ -483,11 +515,5 @@ public class NavegaPredictivo implements GpsEventListener, ChangeListener {
         na.camina();
     }
 
-	public void stateChanged(ChangeEvent e) {
-		// TODO Auto-generated method stub
-		if(e.getSource()==spFrenado){
-			distFrenado = spFrenado.getNumber().doubleValue();
-		}
-		
-	}
+
 }
