@@ -85,6 +85,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
     private int numPaquetesGPS;
 	private double gananciaVel = 1;
 	private int puntoFrenado=-1;
+	private GPSData centroToTr;
 
     /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -228,7 +229,8 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
         //entre dos puntos nunca sea mayor de la distMax
         double distMax = 0.1;        
         // MOstrar coodenadas del centro del sistema local
-        System.out.println("centro de la Ruta Espacial " + rutaEspacial.getCentro());
+        centroToTr = rutaEspacial.getCentro();
+        System.out.println("centro de la Ruta Espacial " + centroToTr);
         Tr = rutaEspacial.toTr(distMax);
 
 
@@ -365,6 +367,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
         Thread thRF = new Thread() {
 
             private long periodoMuestreoMiliRF = 500;
+			
 
             public void run() {
                 long tSig;
@@ -378,6 +381,12 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
 
                             //Calculamos el comando
                             GPSData pa = gpsCon.getPuntoActualTemporal();
+                            GPSData centroactual = gpsCon.getBufferEspacial().getCentro();
+                            if (centroactual.getAltura()!=centroToTr.getAltura()
+                            		|| centroactual.getLatitud()!=centroToTr.getLatitud()
+                            		|| centroactual.getLongitud()!=centroToTr.getLongitud())
+                            	System.err.println("El centro es diferente!!! " + centroToTr 
+                            			+"!= "+  gpsCon.getBufferEspacial().getCentro());
                             double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
                             double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
                             distRF = mi.masCercano(ptoAct, angAct, ba);
