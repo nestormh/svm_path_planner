@@ -543,10 +543,8 @@ public class GPSConnection implements SerialPortEventListener {
 			File file = new File(fichero);
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
 			rutaEspacial=(Ruta)ois.readObject();
-			rutaEspacial.actualizaSistemaLocal();
-			updateBuffers(rutaEspacial);
 			rutaTemporal=(Ruta)ois.readObject();
-			rutaTemporal.actualizaSistemaLocal();// Bug detectado por Nestor
+			updateBuffers(rutaEspacial); // En updateBuffers se actualiza el sistema local
 			ois.close();
 		} catch (IOException ioe) {
 			System.err.println("Error al abrir el fichero " + fichero);

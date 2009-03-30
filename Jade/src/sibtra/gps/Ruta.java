@@ -120,26 +120,14 @@ public class Ruta implements Serializable {
 	/**
 	 * Actualiza el {@link #centro} y la matriz de rotación {@link #T} que definen sistema de
 	 * coordenadas locales.
+	 * Utilizaremos como centro el punto de la ruta con mejor precisión (RMS)
 	 */
 	public void actualizaSistemaLocal () {
-		GPSData centro;
-		if ( puntos.size() == 0)
-			return;                
-
-		// Primero buscamos el punto central exacto
-		Matrix central=new Matrix(3,1);  //se inicializa a 0
-		for (int i = 0; i < puntos.size(); i++) {
-			central.plusEquals(puntos.elementAt(i).getCoordECEF());
-		}
-		central.timesEquals(1/(double)puntos.size());
-
-		// Ahora buscamos el punto que más cerca esté de ese centro
-		double dist = central.minus(puntos.elementAt(0).getCoordECEF()).normF(); 
-		centro = puntos.elementAt(0);
-		for (int i = 0; i < puntos.size(); i++) {
-			double myDist = central.minus(puntos.elementAt(i).getCoordECEF()).normF(); 
-			if (myDist < dist) {
-				dist = myDist;
+		GPSData centro=puntos.elementAt(0);
+		double minRMS= centro.getRms();
+		for (int i = 1; i < puntos.size(); i++) {			
+			if (puntos.elementAt(i).getRms() < minRMS) {
+				minRMS = puntos.elementAt(i).getRms();
 				centro = puntos.elementAt(i);
 			}            
 		}
@@ -322,7 +310,13 @@ public class Ruta implements Serializable {
 		else
 			return puntos.elementAt(i);
 	}
-
+	/**
+	 * 
+	 * @return Devuelve el centro del sistema de coordenadas locales
+	 */
+	public GPSData getCentro() {
+		return centro;
+	}
 	public String toString() {
 		String retorno="Ruta "+(esEspacial?"ESPACIAL":"TEMPORAL")+" de "+puntos.size()+" puntos ";
 		if(centro!=null)

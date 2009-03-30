@@ -295,7 +295,7 @@ public class GPSData implements Serializable, Cloneable {
      * GPS. Se usará esté método cuando no esté disponible la IMU. 
      * @param val Se pasa el punto siguiente para comparar con el actual
      */
-    public double calculaAnguloGPS(GPSData val){
+    public double calculaAnguloGPS(GPSData val){    	
         double x = val.getXLocal() - getXLocal();
         double y = val.getYLocal() - getYLocal();
         double ang = Math.atan2(y,x);

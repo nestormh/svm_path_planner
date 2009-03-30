@@ -227,6 +227,8 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
         //introduce puntos en la trayectoria de manera que la separación
         //entre dos puntos nunca sea mayor de la distMax
         double distMax = 0.1;        
+        // MOstrar coodenadas del centro del sistema local
+        System.out.println("centro de la Ruta Espacial " + rutaEspacial.getCentro());
         Tr = rutaEspacial.toTr(distMax);
 
 
