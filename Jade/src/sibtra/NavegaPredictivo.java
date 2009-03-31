@@ -380,13 +380,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
                             BarridoAngular ba = manLMS.recibeBarrido();
 
                             //Calculamos el comando
-                            GPSData pa = gpsCon.getPuntoActualTemporal();
-                            GPSData centroactual = gpsCon.getBufferEspacial().getCentro();
-                            if (centroactual.getAltura()!=centroToTr.getAltura()
-                            		|| centroactual.getLatitud()!=centroToTr.getLatitud()
-                            		|| centroactual.getLongitud()!=centroToTr.getLongitud())
-                            	System.err.println("El centro es diferente!!! " + centroToTr 
-                            			+"!= "+  gpsCon.getBufferEspacial().getCentro());
+                            GPSData pa = gpsCon.getPuntoActualTemporal();                            
                             double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
                             double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
                             distRF = mi.masCercano(ptoAct, angAct, ba);
@@ -431,6 +425,12 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
 
                 //Calculamos el comando
                 GPSData pa = gpsCon.getPuntoActualTemporal();
+                GPSData centroactual = gpsCon.getBufferEspacial().getCentro();
+                if (centroactual.getAltura()!=centroToTr.getAltura()
+                		|| centroactual.getLatitud()!=centroToTr.getLatitud()
+                		|| centroactual.getLongitud()!=centroToTr.getLongitud())
+                	System.err.println("El centro es diferente!!! " + centroToTr 
+                			+"!= "+  gpsCon.getBufferEspacial().getCentro());
                 double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
                 double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
                 double volante = contCarro.getAnguloVolante();
