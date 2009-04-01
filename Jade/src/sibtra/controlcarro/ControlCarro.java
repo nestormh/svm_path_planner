@@ -162,10 +162,10 @@ public class ControlCarro implements SerialPortEventListener {
         
 //	private int refresco = 300;
 
-	/** Ganancia proporcional del PID de freno */
-	private double kPFreno = 0.5;
-	/** Ganancia derivativa del PID de freno */
-	private double kPDesfreno = 1.5;
+//	/** Ganancia proporcional del PID de freno */
+//	private double kPFreno = 0.5;
+//	/** Ganancia derivativa del PID de freno */
+//	private double kPDesfreno = 1.5;
 	
 	/** Ganancia proporcional del PID de avance */
 	private double kPAvance = 2.5;
@@ -1175,5 +1175,62 @@ public class ControlCarro implements SerialPortEventListener {
 	public int getPaquetes() {
 		return NumPaquetes;
 	}
+
+	/**
+	 * @return el factorFreno
+	 */
+	public double getFactorFreno() {
+		return FactorFreno;
+	}
+
+	/**
+	 * @param factorFreno el factorFreno a establecer
+	 */
+	public void setFactorFreno(double factorFreno) {
+		FactorFreno = factorFreno;
+	}
+
+	/**
+	 * @return el kDAvance
+	 */
+	public double getKDAvance() {
+		return kDAvance;
+	}
+
+	/**
+	 * @param avance el kDAvance a establecer
+	 */
+	public void setKDAvance(double avance) {
+		kDAvance = avance;
+	}
+
+	/**
+	 * @return el kIAvance
+	 */
+	public double getKIAvance() {
+		return kIAvance;
+	}
+
+	/**
+	 * @param avance el kIAvance a establecer
+	 */
+	public void setKIAvance(double avance) {
+		kIAvance = avance;
+	}
+
+	/**
+	 * @return el kPAvance
+	 */
+	public double getKPAvance() {
+		return kPAvance;
+	}
+
+	/**
+	 * @param avance el kPAvance a establecer
+	 */
+	public void setKPAvance(double avance) {
+		kPAvance = avance;
+	}
+
 
 }

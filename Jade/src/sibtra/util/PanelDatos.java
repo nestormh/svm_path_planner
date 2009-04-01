@@ -73,7 +73,7 @@ public class PanelDatos extends JPanel {
 		añadeLabel(lda);
 		lda.setHorizontalAlignment(JLabel.CENTER);
 		lda.setFont(Grande);
-		añadeAPanel((JComponent)lda, Titulo, panAñadir);		
+		añadeAPanel((JComponent)lda, Titulo, false, panAñadir);		
 	}
 	
 	/** Añade etiqueta con todas las configuraciones por defecto en el
@@ -87,18 +87,23 @@ public class PanelDatos extends JPanel {
 		añadeAPanel(lda, Titulo, jpPorDefecto);
 	}
 	
-	/** Añade componenete (no gestionado) a panel con borde y título */
+	/** Añade componenete (no gestionado) a panel con borde y título por defecto habilitado */
 	public void añadeAPanel(JComponent jcmp, String Titulo) {
-		if(jpPorDefecto==null)
-			throw new IllegalArgumentException("No esta definido panel por defecto");
-		añadeAPanel(jcmp, Titulo, jpPorDefecto);
+		añadeAPanel(jcmp, Titulo, true);
 	}
 	
-	/** Añade componente (no gestionado) a panel indicado con borde y título */
-	public void añadeAPanel(JComponent jcmp, String Titulo, JPanel panAñadir) {
+	/** Añade componenete (no gestionado) a panel con borde y título, indicando si está habilitado */
+	public void añadeAPanel(JComponent jcmp, String Titulo, boolean enabled) {
+		if(jpPorDefecto==null)
+			throw new IllegalArgumentException("No esta definido panel por defecto");
+		añadeAPanel(jcmp, Titulo, enabled, jpPorDefecto);
+	}
+	
+	/** Añade componente (no gestionado) a panel indicado con borde y título, indicando si está habilitado */
+	public void añadeAPanel(JComponent jcmp, String Titulo, boolean enabled, JPanel panAñadir) {
 		jcmp.setBorder(BorderFactory.createTitledBorder(
 				blackline, Titulo));
-		jcmp.setEnabled(false);
+		jcmp.setEnabled(enabled);
 		panAñadir.add(jcmp);
 	}
 
