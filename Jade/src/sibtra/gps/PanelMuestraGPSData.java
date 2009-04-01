@@ -82,7 +82,7 @@ public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener 
 		añadeAPanel(new LabelDatoFormato("+??? ??.?????",GPSData.class,"getLongitudText","%s")
 		,"Longitud");
 		//RMS
-		añadeAPanel(new LabelDatoFormato("?.?",GPSData.class,"getRms","%2.1f")
+		añadeAPanel(new LabelDatoFormato("?.?",GPSData.class,"getRms","%2.3f")
 		,"RMS");
 		//Número satélites
 		añadeAPanel(new LabelDatoFormato("?",GPSData.class,"getSatelites","%1d")
@@ -150,7 +150,7 @@ public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener 
 	
 	public void actualizaPunto(GPSData pto) {
 		if(pto!=null)
-			if(pto.getHora().equals(horaUltima))
+			if(pto.getHora()==null || pto.getHora().equals(horaUltima))
 				pto=null;
 			else
 				horaUltima=pto.getHora();
