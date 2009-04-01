@@ -8,6 +8,8 @@ import javax.swing.JButton;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelDatos;
@@ -17,7 +19,7 @@ import sibtra.util.PanelDatos;
  * velocidad y volante.
  * @author alberto
  */
-public class PanelCarro extends PanelDatos implements ActionListener {
+public class PanelCarro extends PanelDatos implements ActionListener, ChangeListener {
 
 	/** Maximo comando de velocidad esperado */
 	private static final int maxComVelocidad = 255;
@@ -54,6 +56,8 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 
 	private JButton jbDesfrena;
 
+	private SpinnerNumberModel jspValorFactorFrena;
+
 	public PanelCarro(ControlCarro cc) {
 		super();
 		contCarro=cc;
@@ -89,7 +93,7 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 		añadeAPanel(new LabelDatoFormato("####",ControlCarro.class,"getConsignaAvanceMS","%5.2f")
 		, "Consg Velo");
 		{// spiner consigna velocidad en m/s
-			jspMConsignaVelocidad=new SpinnerNumberModel(0.0,0.0,6.0,0.1);
+			jspMConsignaVelocidad=new SpinnerNumberModel(1.0,0.0,6.0,0.1);
 			JSpinner jspcv=new JSpinner(jspMConsignaVelocidad);
 			añadeAPanel(jspcv, "Consg Veloc m/s");
 			jspcv.setEnabled(true);
@@ -108,8 +112,8 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getVolante","%10d")
 		, "Cuenta Volante");
 		//Avance
-		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getAvance","%10d")
-		, "Avance");
+		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getComando","%10d")
+		, "Comando");
 
 		{//barra progreso comando velocidad
 			jBarraComVel=new JProgressBar(0,maxComVelocidad);
@@ -183,6 +187,21 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 //		jla.setEnabled(false);
 //		add(jla);
 //		}
+		//Alarma Freno
+		añadeAPanel(new LabelDatoFormato("#",ControlCarro.class,"getFreno","%10d")
+		, "Alarm. Freno");
+
+		//Alarma Freno
+		añadeAPanel(new LabelDatoFormato("#",ControlCarro.class,"getDesfreno","%10d")
+		, "Alar. Desfreno");
+
+		{// spiner fijar valor FactorFreno
+			jspValorFactorFrena=new SpinnerNumberModel(contCarro.FactorFreno,0,50,0.1);
+			JSpinner jspcv=new JSpinner(jspValorFactorFrena);
+			añadeAPanel(jspcv, "Valor Desfrena");
+			jspValorFactorFrena.addChangeListener(this);
+			jspcv.setEnabled(true);
+		}
 	}
 	
 	/** atendemos pulsaciones de los botones para aplicar consignas */
@@ -204,6 +223,12 @@ public class PanelCarro extends PanelDatos implements ActionListener {
 		if(ev.getSource()==jbDesfrena) {
 			contCarro.DesFrena(255);
 			}
+	}
+
+	public void stateChanged(ChangeEvent ce) {
+		if(ce.getSource()==jspValorFactorFrena) {
+			contCarro.FactorFreno=jspValorFactorFrena.getNumber().doubleValue();
+		}
 	}
 
 	/** Actualiza campos con datos del {@link ControlCarro} */

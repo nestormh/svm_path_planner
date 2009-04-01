@@ -6,7 +6,6 @@
 package sibtra.controlcarro;
 
 import gnu.io.CommPortIdentifier;
-import gnu.io.CommPortOwnershipListener;
 import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
@@ -24,17 +23,22 @@ import java.util.TooManyListenersException;
 import java.util.Vector;
 
 import sibtra.log.LoggerArrayDoubles;
+import sibtra.log.LoggerArrayInts;
 import sibtra.log.LoggerFactory;
 
 
 //import com.sun.xml.internal.fastinfoset.util.CharArrayArray;
 
 /**
- * A class that handles the details of a serial connection. Reads from one
- * TextArea and writes to a second TextArea. Holds the state of the connection.
+ * Clase para gestionar la comunicación con el PIC que controla el carro.
+ * El lazo del control del volante se cierra a bajo nivel (en el PIC) por lo que 
+ * basta mandar la consigna de ángulo.
+ * El control de velocidad se realiza en esta clase. Para ello hay que combinar la 
+ * fuerza aplicada al motor (avance) y el freno.
+ * 
+ * @autor jonay
  */
-public class ControlCarro implements SerialPortEventListener,
-		CommPortOwnershipListener {
+public class ControlCarro implements SerialPortEventListener {
 
 	/*
 	 * En el freno existen 3 variables a modificar Sentido_freno = indica si se
@@ -48,26 +52,30 @@ public class ControlCarro implements SerialPortEventListener,
 	 * funcione correctamente /
 	 */
 
+	/** Para saber si el puerto serial está abierto */
 	private boolean open;
 
 	/** Punto central del volante del vehiculo */
 	public final static int CARRO_CENTRO = 5280;
 
-	/** Maximo y minimo comando en el avance **/
-	public final static int MINAVANCE = 100, MAXAVANCE = 255;
+	/** Maximo comando en el avance */
+	public final static int MINAVANCE = 100;
+	/** Minimo comando en el avance */
+	public final static int MAXAVANCE = 255;
 	
-	double TiempoTotal = 0;
-
-	int Recibidos = 0;
-
-	/**
-	 * Numero de cuentas necesarias para alcanzar un metro
-	 */
+	/** Numero de cuentas necesarias para alcanzar un metro	 */
 	public final static double PULSOS_METRO = 74;
 
 	// public static final double RADIANES_POR_CUENTA =
 	// 2*Math.PI/MAX_CUENTA_VOLANTE;
+	/** Radianes que suponen cada cuenta del sensor del volante */
 	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374 / (5280 - 3300);
+
+	//double TiempoTotal = 0;
+
+	/** Contador de los bytes recibidos por la serial */
+	//int Recibidos = 0;
+
 
 	/** Indica si la ultima vez se estaba acelerando o se estaba frenando */
 
@@ -76,22 +84,31 @@ public class ControlCarro implements SerialPortEventListener,
 	 * instruccion
 	 */
 
-	static private int freqVel = 2;
-
+	/** Periodo de envío de mensajes por parte del PIC ¿? */
 	static double T = 0.096; // Version anterior 0.087
 
+	/** Número de puntos que se usan para calcular la velocidad */
+	static private int freqVel = 8;
+	/** Array cuentas para el cálculo de la velocidad */
 	int Cuentas[] = new int[freqVel];
-
+	/** Array de tiempos para el cálculo de la velocidad */
 	long tiempos[] = new long[freqVel];
-
+	/** Puntero sobre los array de cálculo de la velocidad {@link #Cuentas} y {@link #tiempos} */
 	int indiceCuentas = 0;
 
+	/** Error del controlador PID de la velocidad en {@link #controlVel()}*/
 	double errorAnt = 0;
 
+	/** Derivada del controlador PID de la velocidad  en {@link #controlVel()}*/
 	double derivativoAnt = 0;
-
+	
+	/** Comando calculado por el controlador PID de la velocidad  en {@link #controlVel()}*/
 	int comando = CARRO_CENTRO;
 
+	/** comando anterior calculado por el PID de control de la velocidad  en {@link #controlVel()}*/
+	private double comandoAnt = MINAVANCE;
+
+	/** Integral del controlador PID de la velocidad  en {@link #controlVel()}*/
 	double integral = 0;
 
 	private ControlCarroSerialParameters parameters;
@@ -104,105 +121,145 @@ public class ControlCarro implements SerialPortEventListener,
 
 	private SerialPort sPort;
 
-	private double velocidadCS = 0, velocidadMS = 0, velocidadKH = 0;
+	/** Ultima velocidad de avance calculada en cuentas por segundo */
+	private double velocidadCS = 0;
+	/** Ultima velocidad de avance calculada en metros por segundo */
+	private double velocidadMS = 0;
+	/** Ultima velocidad de avance calculada en Kilometros por hora */
+	private double velocidadKH = 0;
 
+	/** Total de bytes recibidos desde el PIC por la serial */
 	private int TotalBytes = 0;
 
+	/** Posición del volante recibida desde el PIC */
 	private int volante = 32768;
 
-	private static int avance = 0, avanceant = 0;
+	/** Cuentas del encoder de avance de la tracción, tiene corregido el desbordamiento */
+	private int avance = 0;
 
+	/** Valora anterior recibido del encoder de tracción. Necesario para corregir desbordamiento contador */
+	private int avanceant = 0;
+
+	/** Contiene byte, recibido del PIC, con los bits correspondientes a las distintas alarmas */
 	private int alarma = 0;
 
-	static private int MAXBUFFER = 10000;
-
         
-        /* Comandos enviados hacia el coche para el microcontrolador */
-	private int ConsignaVolanteHigh;
-
-	private int ConsignaVolanteLow;
-
-	private int ConsignaFreno = 0;
-
-	private int ConsignaSentidoFreno = 0;
-
-	private int ComandoVelocidad = 0;
-
-	private int ConsignaSentidoVelocidad = 0;
-
+	/** Valor de la última consigna para el volante enviada.
+	 * Se envía al PIC descomponiéndola en {@link #ConsignaVolanteHigh} y {@link #ConsignaVolanteLow} 
+	 */
 	private int ConsignaVolante = 32767;
-
+	/* Comandos enviados hacia el coche para el microcontrolador */
+	/** Uno de los 8 bytes que se envían en mensaje al PIC */
+	//private int ConsignaVolanteHigh;
+	/** Uno de los 8 bytes que se envían en mensaje al PIC */
+	//private int ConsignaVolanteLow;
+	/** Uno de los 8 bytes que se envían en mensaje al PIC */
+	private int ConsignaFreno = 0;
+	/** Uno de los 8 bytes que se envían en mensaje al PIC */
+	private int ConsignaSentidoFreno = 0;
+	/** Uno de los 8 bytes que se envían en mensaje al PIC */
+	private int ComandoVelocidad = 0;
+	/** Uno de los 8 bytes que se envían en mensaje al PIC */
+	private int ConsignaSentidoVelocidad = 0;
+	/** Uno de los 8 bytes que se envían en mensaje al PIC */
 	private int ConsignaNumPasosFreno = 0;
 
-	private int NumPasosFreno = 0; // Numero de pasos de freno que se han dado
+
+	/** Numero de pasos de freno que se han dado */
+	private int NumPasosFreno = 0;
 
 
-        
-        
-        /* Buffer de Entrada/Salida de datos para el microcontrolador */
-        private int BufferComandos[][] = new int[MAXBUFFER][5]; // Tiempo, Comando															// volante, comando															// velocidad, Fuerza															// freno, Pasos
-															// freno
-	private double BufferRecibe[][] = new double[MAXBUFFER][5]; // Tiempo,																// Volante,												// cuentas,																// velocidad																// Alarma
 
+
+	/**Tamaño del Buffer de Entrada/Salida de datos para el microcontrolador */
+	static private int MAXBUFFER = 10000;
+	/** Buffer de Comandos enviados: Tiempo, Comando volante, comando velocidad, Fuerza freno, Pasos freno */
+	private int BufferComandos[][] = new int[MAXBUFFER][5]; 
+	/** Buffer de mensajes recibidos: Tiempo, Volante, cuentas, velocidad,	Alarma */
+	private double BufferRecibe[][] = new double[MAXBUFFER][5]; 
+
+	/** Puntero a los buffer de envío y recepción */
 	private int PtroBufferRecibir = 1, PtroBufferEnviar = 1;
 
-	private int RVolante;
+	/** Logger para registrar mensaje recibidos */
+	private LoggerArrayInts logMenRecibidos;
+	/** Logger para registrar los mensajece enviados */
+	private LoggerArrayInts logMenEnviados;
+//	private int RVolante;
 
 	
         
-        private int refresco = 300;
+//	private int refresco = 300;
 
+	/** Ganancia proporcional del PID de freno */
 	private double kPFreno = 0.5;
+	/** Ganancia derivativa del PID de freno */
 	private double kPDesfreno = 1.5;
 	
-	// Variables del controlador PID
+	/** Ganancia proporcional del PID de avance */
 	private double kPAvance = 2.5;
-
+	/** Ganancia defivativa del PID de avance */
 	private double kDAvance = 0.2;
-
+	/** Ganancia integral del PID de avance */
 	private double kIAvance = 0.1;
 
-	private static boolean controla = false;
+	/** Para indicar si se está aplicando control de velocidad */
+	private boolean controla = false;
 
 	/** Consigna de velocidad a aplicar en cuentas por segundo */
 	private static double consignaVel = 0;
 
-	/**
-	 * Maximo incremento permitido en el comando para evitar aceleraciones
-	 * bruscas
-	 */
+	/** Maximo incremento permitido en el comando para evitar aceleraciones bruscas */
 	private int maxInc = 10;
         
-        /**
-         * Zona Muerta donde el motor empieza a actuar realmente
-         */
+	/** Zona Muerta donde el motor empieza a actuar realmente 	 */
+	static final int ZonaMuerta = 80;
         
-        static int ZonaMuerta = 80;
-        
-	private int NumPaquetes = 0; /* Numero de paquetes recibidos validos */
+	/** Numero de paquetes recibidos validos */
+	private int NumPaquetes = 0;
 
+	/** Milisegundos al crearse el objeto. Se usa para tener tiempos relativos */
 	private long TiempoInicial = System.currentTimeMillis();
 
-	private double comandoAnt = MINAVANCE;
 
+	/** Para llevar la cuenta de la aplicación del freno */
 	private int contadorFreno = 0;
 
+	
+	/** Indica si se están guardando los datos para salvar a fichero. DEPRECADO */
 	private boolean capturando = false;
-
+	/** Vector donde se guardarán los datos a salver en fichero. DEPRECADO */
 	private Vector captura = null;
-
+	/** Nombre fichero donde se guardarán los datos. DEPRECADO */
 	private String ficheroCaptura = "";
 
+	/** Registrador del angulo y velocidad medidos al recivir cada paquete */
 	private LoggerArrayDoubles logAngVel;
 
-	/**
-	 * Creates a SerialConnection object and initilizes variables passed in as
-	 * params.
-	 * 
-	 * @param parameters
-	 *            A SerialParameters object.
-	 */
+	double FactorFreno=20;
 
+	/** @return devuelve entero SIN SIGNO tomando a como byte para parte alta y b como parte baja */
+	static int byte2entero(int a, int b) {
+		return a * 256 + b;
+	}
+
+	/** @return devuelve entero CON SIGNO tomando a como byte para parte alta y b como parte baja */
+	static int byte2enteroSigno(int a, int b) {
+		if (a > 129) {
+			int atemp = a * 256 + b - 1;
+			atemp = atemp ^ 65535;
+
+			return -1 * atemp;
+		}
+
+		return a * 256 + b;
+	}
+
+	/**
+	 * Crea la conexión serial al carro en el puerto indicado.
+	 * Una vez abierto queda a la espera de los eventos de recepción de caracteres.
+	 * @param portName nombre del puerto serial 
+	 */
 	public ControlCarro(String portName) {
 
 		parameters = new ControlCarroSerialParameters(portName, 9600, 0, 0, 8,
@@ -219,9 +276,11 @@ public class ControlCarro implements SerialPortEventListener,
 
 		logAngVel=LoggerFactory.nuevoLoggerArrayDoubles(this, "carroAngVel",12);
 		logAngVel.setDescripcion("Carro [Ang en Rad,Vel en m/s]");
-		// hilo = new Thread(this);
-		// hilo.start();
-
+		
+		logMenRecibidos= LoggerFactory.nuevoLoggerArrayInts(this, "mensajesRecibidos",(int)(1/T)+1);
+		logMenRecibidos.setDescripcion("volante,avance,(int)velocidadCS,alarma,incCuentas,incTiempo");
+		logMenEnviados= LoggerFactory.nuevoLoggerArrayInts(this, "mensajesEnviados",(int)(1/T)+1);
+		logMenEnviados.setDescripcion("ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno");
 	}
 
 	/**
@@ -273,12 +332,6 @@ public class ControlCarro implements SerialPortEventListener,
 					"Error opening i/o streams");
 		}
 
-		// Create a new KeyHandler to respond to key strokes in the
-		// messageAreaOut. Add the KeyHandler as a keyListener to the
-		// messageAreaOut.
-
-		// messageAreaOut.addKeyListener(keyHandler);
-
 		// Add this object as an event listener for the serial port.
 		try {
 			sPort.addEventListener(this);
@@ -292,7 +345,8 @@ public class ControlCarro implements SerialPortEventListener,
 		sPort.notifyOnDataAvailable(true);
 
 		// Set notifyOnBreakInterrup to allow event driven break handling.
-		sPort.notifyOnBreakInterrupt(true);
+		//No se están atendiendo los break
+//		sPort.notifyOnBreakInterrupt(true);
 
 		// Set receive timeout to allow breaking out of polling loop during
 		// input handling.
@@ -300,9 +354,6 @@ public class ControlCarro implements SerialPortEventListener,
 		// sPort.enableReceiveTimeout(30);
 		// } catch (UnsupportedCommOperationException e) {
 		// }
-
-		// Add ownership listener to allow ownership event handling.
-		portId.addPortOwnershipListener(this);
 
 		open = true;
 
@@ -348,17 +399,12 @@ public class ControlCarro implements SerialPortEventListener,
 		}
 	}
 
-	/**
-	 * Cierra el puerto y libera los elementos asociados
-	 */
+	/** Cierra el puerto y libera los elementos asociados */
 	public void closeConnection() {
 		// If port is alread closed just return.
 		if (!open) {
 			return;
 		}
-
-		// Remove the key listener.
-		// messageAreaOut.removeKeyListener(keyHandler);
 
 		// Check to make sure sPort has reference to avoid a NPE.
 		if (sPort != null) {
@@ -369,208 +415,175 @@ public class ControlCarro implements SerialPortEventListener,
 			} catch (IOException e) {
 				System.err.println(e);
 			}
-
 			// Close the port.
 			sPort.close();
-
-			// Remove the ownership listener.
-			portId.removePortOwnershipListener(this);
 		}
-
 		open = false;
 	}
 
-	/**
-	 * Send a one second break signal.
-	 */
+	/** Send a one second break signal. */
 	private void sendBreak() {
 		sPort.sendBreak(1000);
 	}
 
-	/**
-	 * Reports the open status of the port.
-	 * 
-	 * @return true if port is open, false if port is closed.
-	 */
+	/** @return true if port is open, false if port is closed.*/
 	public boolean isOpen() {
 		return open;
 	}
 
 	/**
-	 * Handles SerialPortEvents. The two types of SerialPortEvents that this
-	 * program is registered to listen for are DATA_AVAILABLE and BI. During
-	 * DATA_AVAILABLE the port buffer is read until it is drained, when no more
-	 * data is availble and 30ms has passed the method returns. When a BI event
-	 * occurs the words BREAK RECEIVED are written to the messageAreaIn.
+	 * Maneja la llegada de datos por la serial
 	 */
-
 	public void serialEvent(SerialPortEvent e) {
-		// Create a StringBuffer and int to receive input data.
+		int buffer[] = new int[6]; //porque el 0 no se usa :-(
+		int newData = 0;
 
-		int buffer[] = new int[100];
-		int newData = 0, oldData = 0;
-
-		// Determine type of event.
-		switch (e.getEventType()) {
-
-		// Read data until -1 is returned. If \r is received substitute
-		// \n for correct newline handling.
-		case SerialPortEvent.DATA_AVAILABLE:
-			while (newData != -1) {
-
-				try {
-					newData = is.read();
-					/*
-					 * if(capturando) { captura.add(System.currentTimeMillis() -
-					 * lastTime); captura.add(new Integer(newData)); lastTime =
-					 * System.currentTimeMillis(); }
-					 */
-					TotalBytes++;
-					if ((newData == 250)) {
-						newData = is.read();
-						if (newData == 251) {
-							buffer[1] = is.read();
-							buffer[2] = is.read();
-							buffer[3] = is.read();
-							buffer[4] = is.read();
-							buffer[5] = is.read();
-							newData = is.read();
-							if (newData == 255) {
-
-								volante = byte2entero(buffer[1], buffer[2]);
-
-								if (ConsignaVolante == -1) {
-									ConsignaVolante = volante;
-									ConsignaVolanteLow = volante & 255;
-									ConsignaVolanteHigh = (volante & 65280) >> 8;
-								}
-
-								if (avanceant <= buffer[3])
-									avance = avance + buffer[3] - avanceant;
-								else
-									avance = avance + buffer[3]
-											+ (255 - avanceant) + 1;
-
-								Cuentas[indiceCuentas] = avance;
-								tiempos[indiceCuentas] = System
-										.currentTimeMillis();
-
-								int IncCuentas = Cuentas[indiceCuentas]
-										- Cuentas[(indiceCuentas + 1) % freqVel];
-								velocidadCS = 1000.0 * (double)IncCuentas / (double)((System.currentTimeMillis()-this.TiempoInicial) - BufferRecibe[PtroBufferRecibir-1][0]);  /* (freqVel * T); */
-								velocidadMS = velocidadCS / PULSOS_METRO;
-								velocidadKH = velocidadMS * 3600 / 1000;
-
-								//apuntamos
-								logAngVel.add((volante - CARRO_CENTRO) * RADIANES_POR_CUENTA,velocidadMS);
-								
-								indiceCuentas = (indiceCuentas + 1) % freqVel;
-
-								// System.out.println("T: " +
-								// (System.currentTimeMillis() - lastPaquete) +
-								// " Tmedio: " + (TiempoTotal/Recibidos));
-
-								controlVel();
-
-								avanceant = buffer[3];
-								alarma = buffer[4];
-								NumPasosFreno = buffer[5];
-
-								if (ConsignaSentidoFreno != 0)
-									System.out.println("NumPasosFreno = "
-											+ NumPasosFreno);
-								if (NumPasosFreno == 255) {
-									if (ConsignaSentidoFreno == 2) {
-										System.out.println("Frenando");
-										if (contadorFreno > 0) {
-											System.out
-													.println("ContadorFreno1 = "
-															+ contadorFreno);
-											if (getFreno() == 1) {
-												contadorFreno = 0;
-											} else {
-												NumPasosFreno = 0;
-												contadorFreno--;
-											}
-											System.out
-													.println("ContadorFreno2 = "
-															+ contadorFreno);
-										}
-									} else if (ConsignaSentidoFreno == 1) {
-										System.out.println("DesFrenando");
-										if (contadorFreno > 0) {
-											System.out
-													.println("ContadorFreno1 = "
-															+ contadorFreno);
-											if (getDesfreno() == 1) {
-												contadorFreno = 0;
-											} else {
-												NumPasosFreno = 0;
-												contadorFreno--;
-											}
-											System.out
-													.println("ContadorFreno2 = "
-															+ contadorFreno);
-										}
-									}
-								}
-
-								
-System.currentTimeMillis();
-								BufferRecibe[PtroBufferRecibir][0] = System.currentTimeMillis()	- this.TiempoInicial;
-								BufferRecibe[PtroBufferRecibir][1] = volante;
-								BufferRecibe[PtroBufferRecibir][2] = avance;
-								BufferRecibe[PtroBufferRecibir][3] = velocidadCS;
-								BufferRecibe[PtroBufferRecibir][4] = alarma;
-								PtroBufferRecibir = (PtroBufferRecibir+1)
-										% MAXBUFFER;
-								NumPaquetes++;
-							}
-						}
-					}
-
-					if (newData == -1) {
-						break;
-					}
-
-				} catch (IOException ex) {
-					System.err.println(ex);
-					return;
+		//Sólo atendemos la disponibilidad de datos
+		if (e.getEventType() !=  SerialPortEvent.DATA_AVAILABLE)
+			return;
+		while (newData != -1) {
+			try {
+				newData = is.read();
+				/*
+				 * if(capturando) { captura.add(System.currentTimeMillis() -
+				 * lastTime); captura.add(new Integer(newData)); lastTime =
+				 * System.currentTimeMillis(); }
+				 */
+				TotalBytes++;
+				if (newData == -1) {
+					break;
 				}
+				if (newData!=250)
+					continue;
+				//newdata vale 250
+				newData = is.read();
+				if (newData != 251)
+					continue; //TODO faltaría considerar el caso de varios 255 seguidos
+				//newdata vale 251
+				//Ya tenemos la cabecera de un mensaje válido
+				//leemos los datos del mensaje en buffer
+				buffer[1] = is.read();
+				buffer[2] = is.read();
+				buffer[3] = is.read();
+				buffer[4] = is.read();
+				buffer[5] = is.read();
+				newData = is.read();
+				if (newData != 255)  //no está la marca de fin de paquete
+					continue; //no lo consideramos
+				//Ya tenemos paquete valido en buffer
+				trataMensaje(buffer);
+			} catch (IOException ex) {
+				System.err.println(ex);
+				return;
 			}
-
-			break;
-
 		}
 
 	}
 
-	public void ownershipChange(int type) {
-	}
+	/** Función que hace el tratamiento de un mensaje válido */
+	private void trataMensaje(int buffer[]) {
+		
+		volante = byte2entero(buffer[1], buffer[2]);
 
-	/**
-	 * Devuelve el Objeto de escritura del puerto serie
-	 * 
-	 */
+		//si no hay consigna de volante, dejamos el volante como está
+		if (ConsignaVolante == -1) {
+			ConsignaVolante = volante;
+//			ConsignaVolanteLow = volante & 255;
+//			ConsignaVolanteHigh = (volante & 65280) >> 8;
+		}
+
+		//controlamos desbordamiento contador de avance en el PIC
+		if (avanceant <= buffer[3])
+			//no se ha producido
+			avance = avance + (buffer[3] - avanceant);
+		else
+			//se ha producido
+			avance = avance + (buffer[3] + (255 - avanceant) + 1);
+		avanceant = buffer[3];  //preparamos para siguiente iteración
+
+		Cuentas[indiceCuentas] = avance;
+		tiempos[indiceCuentas] = System.currentTimeMillis();
+
+//		int IncCuentas = Cuentas[indiceCuentas]
+//		                         - Cuentas[(indiceCuentas + 1) % freqVel];
+//		velocidadCS = 1000.0 * (double)IncCuentas / 
+//			(double)((System.currentTimeMillis()-this.TiempoInicial) - BufferRecibe[PtroBufferRecibir-1][0]);  
+		/* (freqVel * T); */
+		//TODO forma que creo que es más correcto de hacerlo
+			int  incCuentas=Cuentas[indiceCuentas]
+			                         - Cuentas[(indiceCuentas + 1) % freqVel];
+			long incTiempo=tiempos[indiceCuentas]
+			                         - tiempos[(indiceCuentas + 1) % freqVel];
+			velocidadCS=1000.0 *(double) incCuentas / (double)incTiempo;
+//			if(velocidadCS!=velCS) {
+//				System.err.println("Diferencia calculo velocidad:"+velocidadCS+"<>"+velCS);				
+//			}
+		
+		
+		indiceCuentas = (indiceCuentas + 1) % freqVel; //preparamos siguiente iteración
+
+		velocidadMS = velocidadCS / PULSOS_METRO;
+		velocidadKH = velocidadMS * 3600 / 1000;
+
+		//apuntamos angulo volante en radianes y velocidad en m/sg
+		logAngVel.add((volante - CARRO_CENTRO) * RADIANES_POR_CUENTA,velocidadMS);
+
+		// System.out.println("T: " +
+		// (System.currentTimeMillis() - lastPaquete) +
+		// " Tmedio: " + (TiempoTotal/Recibidos));
+
+		controlVel();
+
+		alarma = buffer[4];
+		NumPasosFreno = buffer[5];
+
+//		if (ConsignaSentidoFreno != 0)
+//			System.out.println("NumPasosFreno = "+ NumPasosFreno);
+//		if (NumPasosFreno == 255) {
+//			if (ConsignaSentidoFreno == 2) {
+//				System.out.println("Frenando");
+//				if (contadorFreno > 0) {
+//					System.out.println("ContadorFreno1 = "+ contadorFreno);
+//					if (getFreno() == 1) {
+//						contadorFreno = 0;
+//					} else {
+//						NumPasosFreno = 0;
+//						contadorFreno--;
+//					}
+//					System.out.println("ContadorFreno2 = "+ contadorFreno);
+//				}
+//			} else if (ConsignaSentidoFreno == 1) {
+//				System.out.println("DesFrenando");
+//				if (contadorFreno > 0) {
+//					System.out.println("ContadorFreno1 = "+ contadorFreno);
+//					if (getDesfreno() == 1) {
+//						contadorFreno = 0;
+//					} else {
+//						NumPasosFreno = 0;
+//						contadorFreno--;
+//					}
+//					System.out.println("ContadorFreno2 = "+ contadorFreno);
+//				}
+//			}
+//		}
+
+
+//		System.currentTimeMillis();
+		//TODO sustituir estos buffes por loggers
+		BufferRecibe[PtroBufferRecibir][0] = System.currentTimeMillis()	- this.TiempoInicial;
+		BufferRecibe[PtroBufferRecibir][1] = volante;
+		BufferRecibe[PtroBufferRecibir][2] = avance;
+		BufferRecibe[PtroBufferRecibir][3] = velocidadCS;
+		BufferRecibe[PtroBufferRecibir][4] = alarma;
+		PtroBufferRecibir = (PtroBufferRecibir+1)% MAXBUFFER;
+		NumPaquetes++;
+		logMenRecibidos.add(volante,avance,(int)velocidadCS,alarma,incCuentas,(int)incTiempo);
+	}
+	
+	/** @return Objeto de escritura del puerto serie */
 	public OutputStream getOutputStream() {
 		return os;
 
-	}
-
-	private int byte2entero(int a, int b) {
-
-		return a * 256 + b;
-	}
-
-	private int byte2enteroSigno(int a, int b) {
-		if (a > 129) {
-			int atemp = a * 256 + b - 1;
-			atemp = atemp ^ 65535;
-
-			return -1 * atemp;
-		}
-
-		return a * 256 + b;
 	}
 
 	/**
@@ -666,14 +679,14 @@ System.currentTimeMillis();
 		return 0;
 	}
 
-	/**
-	 * Obtiene el giro del volante
-	 * 
-	 * @return Devuelve el giro del volante
-	 */
-	public int getRVolante() {
-		return RVolante;
-	}
+//	/**
+//	 * Obtiene el giro del volante
+//	 * 
+//	 * @return Devuelve el giro del volante
+//	 */
+//	public int getRVolante() {
+//		return RVolante;
+//	}
 
 	/**
 	 * Obtiene la consigna del volante
@@ -745,8 +758,8 @@ System.currentTimeMillis();
 
 		a[0] = 250;
 		a[1] = 251;
-		a[2] = ConsignaVolanteLow = Angulo & 255;
-		a[3] = ConsignaVolanteHigh = (Angulo & 65280) >> 8;
+		a[2] = ConsignaVolante & 255;
+		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno;
 		a[5] = ConsignaSentidoFreno=4;
 		a[6] = ComandoVelocidad;
@@ -774,18 +787,19 @@ System.currentTimeMillis();
 		int a[] = new int[10];
 
 		Angulo = ConsignaVolante + Angulo;
-		ConsignaVolante = Angulo;
 
 		if (Angulo > 65535)
 			Angulo = 65535;
-
 		if (Angulo < 0)
 			Angulo = 0;
+		ConsignaVolante = Angulo;
 
 		a[0] = 250;
 		a[1] = 251;
-		a[2] = ConsignaVolanteLow = Angulo & 255;
-		a[3] = ConsignaVolanteHigh = (Angulo & 65280) >> 8;
+//		a[2] = ConsignaVolanteLow = Angulo & 255;
+//		a[3] = ConsignaVolanteHigh = (Angulo & 65280) >> 8;
+		a[2] = ConsignaVolante & 255;
+		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[6] = ComandoVelocidad;
 		a[7] = ConsignaSentidoVelocidad;
 		a[5] = ConsignaSentidoFreno=4;
@@ -818,8 +832,10 @@ System.currentTimeMillis();
 
 		a[0] = 250;
 		a[1] = 251;
-		a[2] = ConsignaVolanteLow;
-		a[3] = ConsignaVolanteHigh;
+//		a[2] = ConsignaVolanteLow;
+//		a[3] = ConsignaVolanteHigh;
+		a[2] = ConsignaVolante & 255;
+		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno = 255;
 		a[5] = ConsignaSentidoFreno = 3;
 		a[6] = ComandoVelocidad = 0;
@@ -855,12 +871,14 @@ System.currentTimeMillis();
 
 		a[0] = 250;
 		a[1] = 251;
-		a[2] = ConsignaVolanteLow;
-		a[3] = ConsignaVolanteHigh;
-		a[4] = ConsignaFreno = 4;
+//		a[2] = ConsignaVolanteLow;
+//		a[3] = ConsignaVolanteHigh;
+		a[2] = ConsignaVolante & 255;
+		a[3] = (ConsignaVolante & 65280) >> 8;
+		a[4] = ConsignaFreno = 4;  //dejar el freno como está
 		a[5] = ConsignaSentidoFreno = 0;
 		a[6] = ComandoVelocidad = Fuerza;
-		a[7] = ConsignaSentidoVelocidad = 2;
+		a[7] = ConsignaSentidoVelocidad = 2;  //para alante
 		a[8] = ConsignaNumPasosFreno = 0;
 		a[9] = 255;
 
@@ -890,12 +908,14 @@ System.currentTimeMillis();
 
 		a[0] = 250;
 		a[1] = 251;
-		a[2] = ConsignaVolanteLow;
-		a[3] = ConsignaVolanteHigh;
+//		a[2] = ConsignaVolanteLow;
+//		a[3] = ConsignaVolanteHigh;
+		a[2] = ConsignaVolante & 255;
+		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno;
 		a[5] = ConsignaSentidoFreno=4;
 		a[6] = ComandoVelocidad = Fuerza;
-		a[7] = ConsignaSentidoVelocidad = 1;
+		a[7] = ConsignaSentidoVelocidad = 1;  //para atrás
 		a[8] = ConsignaNumPasosFreno = 0;
 		a[9] = 255;
 
@@ -926,10 +946,12 @@ System.currentTimeMillis();
 
 		a[0] = 250;
 		a[1] = 251;
-		a[2] = ConsignaVolanteLow;
-		a[3] = ConsignaVolanteHigh;
+//		a[2] = ConsignaVolanteLow;
+//		a[3] = ConsignaVolanteHigh;
+		a[2] = ConsignaVolante & 255;
+		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno = valor;
-		a[5] = ConsignaSentidoFreno = 2;
+		a[5] = ConsignaSentidoFreno = 2;  //Abrir valvula de frenar
 		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = tiempo;
@@ -966,10 +988,12 @@ System.currentTimeMillis();
 		
 		a[0] = 250;
 		a[1] = 251;
-		a[2] = ConsignaVolanteLow;
-		a[3] = ConsignaVolanteHigh;
+//		a[2] = ConsignaVolanteLow;
+//		a[3] = ConsignaVolanteHigh;
+		a[2] = ConsignaVolante & 255;
+		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno = valor;
-		a[5] = ConsignaSentidoFreno = 1;
+		a[5] = ConsignaSentidoFreno = 1; //abrir la valvula de desfrenar
 		a[6] = ComandoVelocidad = 0;
 		a[7] = ConsignaSentidoVelocidad = 0;
 		a[8] = ConsignaNumPasosFreno = tiempo;
@@ -984,7 +1008,7 @@ System.currentTimeMillis();
 
 
 	private void Envia(int a[]) {
-
+		//TODO sustituir estos buffes por loggers
 		BufferComandos[PtroBufferEnviar][0] = (int) (System.currentTimeMillis() - this.TiempoInicial);
 		BufferComandos[PtroBufferEnviar][1] = ConsignaVolante;
 		BufferComandos[PtroBufferEnviar][2] = ComandoVelocidad;
@@ -992,6 +1016,8 @@ System.currentTimeMillis();
 		BufferComandos[PtroBufferEnviar][4] = ConsignaNumPasosFreno;
 
 		PtroBufferEnviar = (PtroBufferEnviar+1) % MAXBUFFER;
+		
+		logMenEnviados.add(ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno);
 
 		
 		for (int i = 0; i < 10; i++)
@@ -1041,65 +1067,93 @@ System.currentTimeMillis();
 	public void controlVel() {
 
 		
-		if (controla) {
-			if (consignaVel == 0)
-				stopControlVel();
+		if (!controla) 
+			return;
 
-			
-			// System.out.println("Control de velocidad activo");
-			// System.out.println("***********************");
-			// System.out.println("Velocidad: " + velocidad);
-			// System.out.println("Diferencia: " + dif);
-			// System.out.println("Velocidad(m/s): " + (velocidad / 78 /
-			// (refresco / 1000)));
-			// System.out.println("Velocidad(Km/h): " + (((velocidad / 78 /
-			// (refresco / 1000)) * 1000) / 3600));
-			double error = consignaVel - velocidadCS;
-			double derivativo = kDAvance * (error - errorAnt) + kDAvance
-					* derivativoAnt;
+		if (consignaVel == 0)
+			stopControlVel();
 
-			if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
-				integral += kIAvance * errorAnt;
 
-			// System.out.println("Error: " + error);
+		// System.out.println("Control de velocidad activo");
+		// System.out.println("***********************");
+		// System.out.println("Velocidad: " + velocidad);
+		// System.out.println("Diferencia: " + dif);
+		// System.out.println("Velocidad(m/s): " + (velocidad / 78 /
+		// (refresco / 1000)));
+		// System.out.println("Velocidad(Km/h): " + (((velocidad / 78 /
+		// (refresco / 1000)) * 1000) / 3600));
+		double error = consignaVel - velocidadCS;
+		//TODO entender esta acción
+//		double derivativo = kDAvance * (error - errorAnt) + kDAvance* derivativoAnt;
+		double derivativo = kDAvance * (error - errorAnt +  derivativoAnt);
 
-			errorAnt = error;
-			derivativoAnt = derivativo;
+		if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
+//			integral += kIAvance * errorAnt;
+			integral += errorAnt;
+		// System.out.println("Error: " + error);
 
-			double comandotemp = kPAvance * error + derivativo + integral;
-			double IncComando = comandotemp - comandoAnt;
+		errorAnt = error;
+		derivativoAnt = derivativo;
 
-			if (Math.abs(IncComando) > maxInc) {
-				if (IncComando >= 0) {
-					comando = (int) (comandoAnt + maxInc);
-                                        if ((comando > 0) && (comando < ZonaMuerta))
-                                            comando = ZonaMuerta;
-                                } else {
-					comando = (int) (comandoAnt - maxInc);
-                                        if ((comando > 0) && (comando < ZonaMuerta))
-                                            comando = 0;
-                                }
-			} else
-				comando = (int) (comandoAnt + IncComando);
-                        
-                        /* Comprobamos la zona muerta */
-                        
-                        
-                        
-			if (comando >= 255)
-				comando = 255;
-                        if (comando <= -255)
-                                comando = -255;
-                        
-			comandoAnt = comando;
+		double comandotemp = kPAvance * error + derivativo + kIAvance*integral;
+		double IncComando = comandotemp - comandoAnt;
 
-//			System.out.println("Avanzando: " + comando + " error " + (consignaVel - velocidadCS));
-			if (comando >= 0)
-                            Avanza(comando);
-                        else
-                            ; /** Es un comando negativo, por lo que hay que frenar */
+		if (Math.abs(IncComando) > maxInc) {
+			if (IncComando >= 0) {
+				comando = (int) (comandoAnt + maxInc);
+				if ((comando > 0) && (comando < ZonaMuerta))
+					comando = ZonaMuerta;
+			} else {
+				comando = (int) (comandoAnt - maxInc);
+				if ((comando > 0) && (comando < ZonaMuerta))
+					comando = 0;
+			}
+		} else
+			comando = (int) (comandoAnt + IncComando);
+
+
+
+		if (comando >= 255)
+			comando = 255;
+		if (comando <= -255)
+			comando = -255;
+
+
+//		System.out.println("Avanzando: " + comando + " error " + (consignaVel - velocidadCS));
+		if (comando >= 0) {
+			if(comandoAnt<=0) {
+				menosFrena(255, 255);
+//				DesFrena(255);
+				System.err.
+				
+				
+				
+				
+				println("========== Abrimos :"+comandoAnt+" > "+comando);
+			}
+			Avanza(comando);
 		}
-
+		else {
+//			double IncCom=comando-comandoAnt;
+//			if(IncCom<=0) {
+//				int apertura=-(int)(IncCom*FactorFreno);
+//				if(apertura>150)
+//					apertura=150;
+//				masFrena( apertura,20); /** Es un comando negativo, por lo que hay que frenar */
+//				System.err.println("Mas frena "+apertura);
+//
+//			} else {
+//				int apertura=(int)(IncCom*FactorFreno);
+//				if(apertura>150) apertura=150;
+//				menosFrena(apertura,20);
+//				System.err.println("menos frena "+apertura);
+//			}
+		}
+		comandoAnt = comando;
+	}
+	
+	public int getComando() {
+		return comando;
 	}
 
 	/*
@@ -1199,14 +1253,14 @@ System.currentTimeMillis();
 		return velocidadKH;
 	}
 
-	/**
-	 * Velocidad de refresco en el calculo de la velocidad
-	 * 
-	 * @return
-	 */
-	public int getRefrescoVel() {
-		return refresco;
-	}
+//	/**
+//	 * Velocidad de refresco en el calculo de la velocidad
+//	 * 
+//	 * @return
+//	 */
+//	public int getRefrescoVel() {
+//		return refresco;
+//	}
 
 	/**
 	 * Fija los parametros del controlador PID de la velocidad
@@ -1267,14 +1321,14 @@ System.currentTimeMillis();
 		}
 	}
 
-	/**
-	 * Fija el intervalo de tiempo para el calculo de la velocidad
-	 * 
-	 * @tiempo Tiempo de actualizaci�n de la velocidad
-	 */
-	public void SetRefrescoVel(int tiempo) {
-		refresco = tiempo;
-	}
+//	/**
+//	 * Fija el intervalo de tiempo para el calculo de la velocidad
+//	 * 
+//	 * @tiempo Tiempo de actualizaci�n de la velocidad
+//	 */
+//	public void SetRefrescoVel(int tiempo) {
+//		refresco = tiempo;
+//	}
 
 	/**
 	 * Fija el incremento m�ximo entre dos comandos de tracci�n consecutivos
