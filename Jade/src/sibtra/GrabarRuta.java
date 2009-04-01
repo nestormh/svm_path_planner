@@ -12,34 +12,31 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JWindow;
 
 import sibtra.controlcarro.ControlCarro;
 import sibtra.controlcarro.VentanaCoche;
-import sibtra.gps.GPSConnection;
 import sibtra.gps.GPSConnectionTriumph;
-import sibtra.gps.GPSData;
 import sibtra.gps.GpsEvent;
 import sibtra.gps.GpsEventListener;
-import sibtra.gps.PanelMuestraGPSData;
 import sibtra.gps.PanelMuestraRuta;
-import sibtra.gps.SimulaGps;
-import sibtra.imu.AngulosIMU;
+import sibtra.gps.VentanaGPSTriumph;
 import sibtra.imu.ConexionSerialIMU;
-import sibtra.imu.IMUEvent;
-import sibtra.imu.IMUEventListener;
-import sibtra.imu.PanelMuestraAngulosIMU;
+import sibtra.imu.VentanaIMU;
 import sibtra.util.EligeSerial;
 
 public class GrabarRuta implements GpsEventListener,
         ActionListener {
 
     private GPSConnectionTriumph gpsCon;
-    private JFrame ventGData;
-    private PanelMuestraGPSData PMGPS;
-    private JFrame ventIMU;
-    private PanelMuestraAngulosIMU pmai;
     private ConexionSerialIMU csi;
+    private ControlCarro contCarro;
+
+    private VentanaGPSTriumph ventGData;
+    private VentanaIMU ventIMU;
+    private VentanaCoche ventCoche;
+
+//    private PanelMuestraGPSData PMGPS;
+//    private PanelMuestraAngulosIMU pmai;
     private JFrame ventRuta;
     private PanelMuestraRuta pmr;
     private JButton jbGrabar;
@@ -50,9 +47,7 @@ public class GrabarRuta implements GpsEventListener,
     private JLabel jlNpRT;
     private JLabel jlNpRE;
     private boolean cambioRuta = false;
-    private ControlCarro contCarro;
-    private VentanaCoche pmCoche;
-    private JPanel jpCentral;
+//    private JPanel jpCentral;
 
     /** @param args primer argumento puerto del GPS, segundo puerto del la IMU */
     public GrabarRuta(String[] args) {
@@ -85,21 +80,29 @@ public class GrabarRuta implements GpsEventListener,
         //Conectamos Carro
         System.out.println("Abrimos conexión al Carro");
         contCarro = new ControlCarro(args[2]);        
-        pmCoche = new VentanaCoche(contCarro);
         gpsCon.setCsCARRO(contCarro);
 
+        //Abrimos las ventanas
         //VEntana datos gps
-        ventGData = new JFrame("Datos GPS");
-        PMGPS = new PanelMuestraGPSData(true);
-        PMGPS.actualizaPunto(new GPSData());
-
-        ventGData.getContentPane().add(PMGPS, BorderLayout.CENTER);
+        ventGData=new VentanaGPSTriumph(gpsCon);
         ventGData.pack();
         ventGData.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ventGData.setVisible(true);
 
+        //Creamos ventana para IMU
+        ventIMU=new VentanaIMU(csi);
+        ventIMU.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ventIMU.pack();
+        ventIMU.setVisible(true);
+
+        //ventana del Coche
+        ventCoche = new VentanaCoche(contCarro);
+        ventCoche.pack();
+        ventCoche.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ventCoche.setVisible(true);
+        
         //Creamos ventana para la ruta
-        ventRuta = new JFrame("Ruta");
+        ventRuta = new JFrame("Graba Ruta");
         pmr = new PanelMuestraRuta(gpsCon.getBufferRutaEspacial());
         ventRuta.getContentPane().add(pmr, BorderLayout.CENTER);
         { //sur ventana
@@ -137,23 +140,9 @@ public class GrabarRuta implements GpsEventListener,
         ventRuta.setVisible(true);
         //conecto manejador cuando todas las ventanas están creadas
         gpsCon.addGpsEventListener(this);
-        gpsCon.addGpsEventListener(PMGPS);
         gpsCon.addGpsEventListener(pmr);
 
 //		try { Thread.sleep(10000); } catch (Exception e) {	}
-
-        //Creamos ventana para IMU
-        ventIMU = new JFrame("Datos IMU");
-        pmai = new PanelMuestraAngulosIMU();
-        pmai.actualizaAngulo(new AngulosIMU(0, 0, 0, 0));
-        ventIMU.add(pmai);
-
-        ventIMU.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ventIMU.pack();
-        ventIMU.setVisible(true);
-        //conecto manejador cuando todas las ventanas están creadas
-        csi.addIMUEventListener(pmai);
-
 
         //elegir fichero
         fc = new JFileChooser(new File("./Rutas"));
