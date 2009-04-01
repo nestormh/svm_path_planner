@@ -25,6 +25,7 @@ import java.util.Vector;
 import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerArrayInts;
 import sibtra.log.LoggerFactory;
+import sibtra.util.UtilCalculos;
 
 
 //import com.sun.xml.internal.fastinfoset.util.CharArrayArray;
@@ -70,19 +71,6 @@ public class ControlCarro implements SerialPortEventListener {
 	// 2*Math.PI/MAX_CUENTA_VOLANTE;
 	/** Radianes que suponen cada cuenta del sensor del volante */
 	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374 / (5280 - 3300);
-
-	//double TiempoTotal = 0;
-
-	/** Contador de los bytes recibidos por la serial */
-	//int Recibidos = 0;
-
-
-	/** Indica si la ultima vez se estaba acelerando o se estaba frenando */
-
-	/**
-	 * Indica el sentido que llevaba la aceleracion del vehiculo en la ultima
-	 * instruccion
-	 */
 
 	/** Periodo de envío de mensajes por parte del PIC ¿? */
 	static double T = 0.096; // Version anterior 0.087
@@ -150,10 +138,6 @@ public class ControlCarro implements SerialPortEventListener {
 	private int ConsignaVolante = 32767;
 	/* Comandos enviados hacia el coche para el microcontrolador */
 	/** Uno de los 8 bytes que se envían en mensaje al PIC */
-	//private int ConsignaVolanteHigh;
-	/** Uno de los 8 bytes que se envían en mensaje al PIC */
-	//private int ConsignaVolanteLow;
-	/** Uno de los 8 bytes que se envían en mensaje al PIC */
 	private int ConsignaFreno = 0;
 	/** Uno de los 8 bytes que se envían en mensaje al PIC */
 	private int ConsignaSentidoFreno = 0;
@@ -167,19 +151,6 @@ public class ControlCarro implements SerialPortEventListener {
 
 	/** Numero de pasos de freno que se han dado */
 	private int NumPasosFreno = 0;
-
-
-
-
-	/**Tamaño del Buffer de Entrada/Salida de datos para el microcontrolador */
-	static private int MAXBUFFER = 10000;
-	/** Buffer de Comandos enviados: Tiempo, Comando volante, comando velocidad, Fuerza freno, Pasos freno */
-	private int BufferComandos[][] = new int[MAXBUFFER][5]; 
-	/** Buffer de mensajes recibidos: Tiempo, Volante, cuentas, velocidad,	Alarma */
-	private double BufferRecibe[][] = new double[MAXBUFFER][5]; 
-
-	/** Puntero a los buffer de envío y recepción */
-	private int PtroBufferRecibir = 1, PtroBufferEnviar = 1;
 
 	/** Logger para registrar mensaje recibidos */
 	private LoggerArrayInts logMenRecibidos;
@@ -488,8 +459,6 @@ public class ControlCarro implements SerialPortEventListener {
 		//si no hay consigna de volante, dejamos el volante como está
 		if (ConsignaVolante == -1) {
 			ConsignaVolante = volante;
-//			ConsignaVolanteLow = volante & 255;
-//			ConsignaVolanteHigh = (volante & 65280) >> 8;
 		}
 
 		//controlamos desbordamiento contador de avance en el PIC
@@ -504,21 +473,12 @@ public class ControlCarro implements SerialPortEventListener {
 		Cuentas[indiceCuentas] = avance;
 		tiempos[indiceCuentas] = System.currentTimeMillis();
 
-//		int IncCuentas = Cuentas[indiceCuentas]
-//		                         - Cuentas[(indiceCuentas + 1) % freqVel];
-//		velocidadCS = 1000.0 * (double)IncCuentas / 
-//			(double)((System.currentTimeMillis()-this.TiempoInicial) - BufferRecibe[PtroBufferRecibir-1][0]);  
-		/* (freqVel * T); */
-		//TODO forma que creo que es más correcto de hacerlo
-			int  incCuentas=Cuentas[indiceCuentas]
-			                         - Cuentas[(indiceCuentas + 1) % freqVel];
-			long incTiempo=tiempos[indiceCuentas]
-			                         - tiempos[(indiceCuentas + 1) % freqVel];
-			velocidadCS=1000.0 *(double) incCuentas / (double)incTiempo;
-//			if(velocidadCS!=velCS) {
-//				System.err.println("Diferencia calculo velocidad:"+velocidadCS+"<>"+velCS);				
-//			}
-		
+		int  incCuentas=Cuentas[indiceCuentas]
+		                        - Cuentas[(indiceCuentas + 1) % freqVel];
+		long incTiempo=tiempos[indiceCuentas]
+		                       - tiempos[(indiceCuentas + 1) % freqVel];
+		velocidadCS=1000.0 *(double) incCuentas / (double)incTiempo;
+
 		
 		indiceCuentas = (indiceCuentas + 1) % freqVel; //preparamos siguiente iteración
 
@@ -568,14 +528,6 @@ public class ControlCarro implements SerialPortEventListener {
 //		}
 
 
-//		System.currentTimeMillis();
-		//TODO sustituir estos buffes por loggers
-		BufferRecibe[PtroBufferRecibir][0] = System.currentTimeMillis()	- this.TiempoInicial;
-		BufferRecibe[PtroBufferRecibir][1] = volante;
-		BufferRecibe[PtroBufferRecibir][2] = avance;
-		BufferRecibe[PtroBufferRecibir][3] = velocidadCS;
-		BufferRecibe[PtroBufferRecibir][4] = alarma;
-		PtroBufferRecibir = (PtroBufferRecibir+1)% MAXBUFFER;
 		NumPaquetes++;
 		logMenRecibidos.add(volante,avance,(int)velocidadCS,alarma,incCuentas,(int)incTiempo);
 	}
@@ -679,15 +631,6 @@ public class ControlCarro implements SerialPortEventListener {
 		return 0;
 	}
 
-//	/**
-//	 * Obtiene el giro del volante
-//	 * 
-//	 * @return Devuelve el giro del volante
-//	 */
-//	public int getRVolante() {
-//		return RVolante;
-//	}
-
 	/**
 	 * Obtiene la consigna del volante
 	 * 
@@ -743,18 +686,9 @@ public class ControlCarro implements SerialPortEventListener {
 	 *            Numero de cuentas a las que fijar el volante
 	 */
 	public void setVolante(int Angulo) {
-
-
-
 		int a[] = new int[10];
 
-		if (Angulo > 65535)
-			Angulo = 65535;
-
-		if (Angulo < 0)
-			Angulo = 0;
-
-		ConsignaVolante = Angulo;
+		ConsignaVolante=UtilCalculos.limita(Angulo, 0, 65535);
 
 		a[0] = 250;
 		a[1] = 251;
@@ -787,17 +721,12 @@ public class ControlCarro implements SerialPortEventListener {
 		int a[] = new int[10];
 
 		Angulo = ConsignaVolante + Angulo;
+		Angulo=UtilCalculos.limita(Angulo, 0, 65535);
 
-		if (Angulo > 65535)
-			Angulo = 65535;
-		if (Angulo < 0)
-			Angulo = 0;
 		ConsignaVolante = Angulo;
 
 		a[0] = 250;
 		a[1] = 251;
-//		a[2] = ConsignaVolanteLow = Angulo & 255;
-//		a[3] = ConsignaVolanteHigh = (Angulo & 65280) >> 8;
 		a[2] = ConsignaVolante & 255;
 		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[6] = ComandoVelocidad;
@@ -822,18 +751,11 @@ public class ControlCarro implements SerialPortEventListener {
 
 		int a[] = new int[10];
 
-		if (tiempo > 255)
-			tiempo = 255;
-
-		if (tiempo < 0)
-			tiempo = 0;
-		
+		tiempo=UtilCalculos.limita(tiempo, 0, 255);		
 		tiempo = 255 - tiempo;
 
 		a[0] = 250;
 		a[1] = 251;
-//		a[2] = ConsignaVolanteLow;
-//		a[3] = ConsignaVolanteHigh;
 		a[2] = ConsignaVolante & 255;
 		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno = 255;
@@ -857,12 +779,7 @@ public class ControlCarro implements SerialPortEventListener {
 	public void Avanza(int Fuerza) {
 
 		int a[] = new int[10];
-
-		if (Fuerza > 255)
-			Fuerza = 255;
-
-		if (Fuerza < 0)
-			Fuerza = 0;
+		Fuerza=UtilCalculos.limita(Fuerza,0,255);
 
 		/*if (getDesfreno() != 1) {
 			DesFrena(255);
@@ -871,8 +788,6 @@ public class ControlCarro implements SerialPortEventListener {
 
 		a[0] = 250;
 		a[1] = 251;
-//		a[2] = ConsignaVolanteLow;
-//		a[3] = ConsignaVolanteHigh;
 		a[2] = ConsignaVolante & 255;
 		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno = 4;  //dejar el freno como está
@@ -894,12 +809,7 @@ public class ControlCarro implements SerialPortEventListener {
 	public void Retrocede(int Fuerza) {
 
 		int a[] = new int[10];
-
-		if (Fuerza > 255)
-			Fuerza = 255;
-
-		if (Fuerza < 0)
-			Fuerza = 0;
+		Fuerza=UtilCalculos.limita(Fuerza,0,255);
 
 		if (getDesfreno() != 1) {
 			DesFrena(255);
@@ -908,8 +818,6 @@ public class ControlCarro implements SerialPortEventListener {
 
 		a[0] = 250;
 		a[1] = 251;
-//		a[2] = ConsignaVolanteLow;
-//		a[3] = ConsignaVolanteHigh;
 		a[2] = ConsignaVolante & 255;
 		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno;
@@ -930,24 +838,13 @@ public class ControlCarro implements SerialPortEventListener {
 	public void masFrena(int valor, int tiempo) {
 		int a[] = new int[10];
 
-		if (valor > 255)
-			valor = 255;
-
-		if (valor < 0)
-			valor = 0;
-		
-		if (tiempo > 255)
-			tiempo = 255;
-		
-		if (tiempo < 0)
-			tiempo = 0;
+		valor=UtilCalculos.limita(valor,0,255);
+		tiempo=UtilCalculos.limita(tiempo, 0, 255);
 		
 		tiempo = 255 - tiempo;
 
 		a[0] = 250;
 		a[1] = 251;
-//		a[2] = ConsignaVolanteLow;
-//		a[3] = ConsignaVolanteHigh;
 		a[2] = ConsignaVolante & 255;
 		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno = valor;
@@ -971,25 +868,14 @@ public class ControlCarro implements SerialPortEventListener {
 	public void menosFrena(int valor, int tiempo) {
 		int a[] = new int[10];
 
-		if (valor > 255)
-			valor = 255;
+		valor=UtilCalculos.limita(valor,0,255);
+		tiempo=UtilCalculos.limita(tiempo, 0, 255);
 
-		if (valor < 0)
-			valor = 0;
-
-		if (tiempo > 255)
-			tiempo = 255;
-		
-		if (tiempo < 0)
-			tiempo = 0;
-		
 		tiempo = 255 - tiempo;
 
 		
 		a[0] = 250;
 		a[1] = 251;
-//		a[2] = ConsignaVolanteLow;
-//		a[3] = ConsignaVolanteHigh;
 		a[2] = ConsignaVolante & 255;
 		a[3] = (ConsignaVolante & 65280) >> 8;
 		a[4] = ConsignaFreno = valor;
@@ -1008,14 +894,6 @@ public class ControlCarro implements SerialPortEventListener {
 
 
 	private void Envia(int a[]) {
-		//TODO sustituir estos buffes por loggers
-		BufferComandos[PtroBufferEnviar][0] = (int) (System.currentTimeMillis() - this.TiempoInicial);
-		BufferComandos[PtroBufferEnviar][1] = ConsignaVolante;
-		BufferComandos[PtroBufferEnviar][2] = ComandoVelocidad;
-		BufferComandos[PtroBufferEnviar][3] = ConsignaFreno;
-		BufferComandos[PtroBufferEnviar][4] = ConsignaNumPasosFreno;
-
-		PtroBufferEnviar = (PtroBufferEnviar+1) % MAXBUFFER;
 		
 		logMenEnviados.add(ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno);
 
@@ -1039,29 +917,9 @@ public class ControlCarro implements SerialPortEventListener {
 
 	}
 
-	/***************************************************************************
-	 * Recupera el historial de comandos enviados, 0.- Posicion Volante 1.-
-	 * Fuerza de freno 2.- Sentido de freno 3.-  4.- Sentido
-	 * velocidad 5.- Num Pasos Freno
-	 * 
-	 **************************************************************************/
-	public int getBufferEnvio(int i, int j) {
-		return BufferComandos[i][j];
-
-	}
-
-	/***************************************************************************
-	 * Recupera el historial de comandos enviados, 0.- Volante 1.- Avance del
-	 * Encoder 2.- Alarmas
-	 * 
-	 **************************************************************************/
-	public double getBufferRecibir(int i, int j) {
-		return BufferRecibe[i][j];
-
-	}
 
 	/**
-	 * Funci�n para el calculo de la velocidad a partir del encoder incluido en
+	 * Función para el calculo de la velocidad a partir del encoder incluido en
 	 * el vehiculo.
 	 */
 	public void controlVel() {
@@ -1111,25 +969,14 @@ public class ControlCarro implements SerialPortEventListener {
 		} else
 			comando = (int) (comandoAnt + IncComando);
 
-
-
-		if (comando >= 255)
-			comando = 255;
-		if (comando <= -255)
-			comando = -255;
-
+		comando=UtilCalculos.limita(comando, -255, 255);
 
 //		System.out.println("Avanzando: " + comando + " error " + (consignaVel - velocidadCS));
 		if (comando >= 0) {
 			if(comandoAnt<=0) {
 				menosFrena(255, 255);
 //				DesFrena(255);
-				System.err.
-				
-				
-				
-				
-				println("========== Abrimos :"+comandoAnt+" > "+comando);
+				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
 			}
 			Avanza(comando);
 		}
@@ -1253,14 +1100,6 @@ public class ControlCarro implements SerialPortEventListener {
 		return velocidadKH;
 	}
 
-//	/**
-//	 * Velocidad de refresco en el calculo de la velocidad
-//	 * 
-//	 * @return
-//	 */
-//	public int getRefrescoVel() {
-//		return refresco;
-//	}
 
 	/**
 	 * Fija los parametros del controlador PID de la velocidad
@@ -1288,7 +1127,7 @@ public class ControlCarro implements SerialPortEventListener {
 	}
 
 	/**
-	 * Guarda los datos del veh�culo en un fichero
+	 * Guarda los datos del vehéculo en un fichero
 	 * 
 	 * @param fichero
 	 */
@@ -1321,21 +1160,13 @@ public class ControlCarro implements SerialPortEventListener {
 		}
 	}
 
-//	/**
-//	 * Fija el intervalo de tiempo para el calculo de la velocidad
-//	 * 
-//	 * @tiempo Tiempo de actualizaci�n de la velocidad
-//	 */
-//	public void SetRefrescoVel(int tiempo) {
-//		refresco = tiempo;
-//	}
 
 	/**
-	 * Fija el incremento m�ximo entre dos comandos de tracci�n consecutivos
+	 * Fija el incremento máximo entre dos comandos de tracción consecutivos
 	 * para evitar aceleraciones muy bruscas
 	 * 
 	 * @param incremento
-	 *            diferencia m�xima entre dos comandos
+	 *            diferencia máxima entre dos comandos
 	 */
 	public void setMaxIncremento(int incremento) {
 		maxInc = incremento;
@@ -1345,15 +1176,4 @@ public class ControlCarro implements SerialPortEventListener {
 		return NumPaquetes;
 	}
 
-	public int getPtroBufferEnvio() {
-		return this.PtroBufferEnviar;
-	}
-
-	public int getPtroBufferRecibir() {
-		return this.PtroBufferRecibir;
-	}
-	public void ClearBuffer() {
-		PtroBufferRecibir=0;
-		PtroBufferEnviar = 0;
-	}
 }

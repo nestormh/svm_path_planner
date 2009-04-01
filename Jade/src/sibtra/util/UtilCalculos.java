@@ -15,4 +15,38 @@ public class UtilCalculos {
 	    return angulo;
 	}
 
+	/**
+	 * Devuelve el valor acotado entre el mínimo y el máximo
+	 * @param valor original 
+	 * @param minimo valor permitido
+	 * @param maximo valor permitido
+	 * @return valor acotado
+	 */
+	public static int limita(int valor, int minimo, int maximo) {
+		if(minimo>maximo)
+			throw new IllegalArgumentException("El valor del minimo no puede ser mayor que el máximo");
+		if(valor>maximo)
+			return maximo;
+		if(valor<minimo)
+			return minimo;
+		return valor;
+	}
+	
+	/**
+	 * Devuelve el valor acotado entre el mínimo y el máximo
+	 * @param valor original 
+	 * @param minimo valor permitido
+	 * @param maximo valor permitido
+	 * @return valor acotado
+	 */
+	public static double limita(double valor, double minimo, double maximo) {
+		if(minimo>maximo)
+			throw new IllegalArgumentException("El valor del minimo no puede ser mayor que el máximo");
+		if(valor>maximo)
+			return maximo;
+		if(valor<minimo)
+			return minimo;
+		return valor;
+	}
+	
 }
