@@ -655,29 +655,10 @@ public class ControlCarro implements SerialPortEventListener {
 	 *            Numero de cuentas a las que fijar el volante
 	 */
 	public void setVolante(int Angulo) {
-		int a[] = new int[10];
-
 		ConsignaVolante=UtilCalculos.limita(Angulo, 0, 65535);
-
-		a[0] = 250;
-		a[1] = 251;
-		a[2] = ConsignaVolante & 255;
-		a[3] = (ConsignaVolante & 65280) >> 8;
-		a[4] = ConsignaFreno;
-		a[5] = ConsignaSentidoFreno=4;
-		a[6] = ComandoVelocidad;
-		a[7] = ConsignaSentidoVelocidad;
-		a[8] = ConsignaNumPasosFreno = NumPasosFreno;
-		/*
-		 * if (NumPasosFreno != 0) { a[5] = ConsignaSentidoFreno; a[4] =
-		 * ConsignaFreno; a[8] = ConsignaNumPasosFreno = NumPasosFreno; } else {
-		 * a[5] = ConsignaSentidoFreno = 0; a[4] = ConsignaFreno = 0; a[8] =
-		 * ConsignaNumPasosFreno = NumPasosFreno; }
-		 */
-		a[9] = 255;
-
-		Envia(a);
-
+		ConsignaSentidoFreno=4;  //No modifica el freno
+		ConsignaNumPasosFreno = NumPasosFreno; //TODO sobra
+		Envia();
 	}
 
 	/**
@@ -687,64 +668,17 @@ public class ControlCarro implements SerialPortEventListener {
 	 *            Numero de cuentas a desplazar a partir de la posicion actual
 	 */
 	public void setRVolante(int deltaAngulo) {
-		int a[] = new int[10];
-
 		ConsignaVolante = UtilCalculos.limita(ConsignaVolante + deltaAngulo, 0, 65535);
-
-		a[0] = 250;
-		a[1] = 251;
-		a[2] = ConsignaVolante & 255;
-		a[3] = (ConsignaVolante & 65280) >> 8;
-		a[6] = ComandoVelocidad;
-		a[7] = ConsignaSentidoVelocidad;
-		a[5] = ConsignaSentidoFreno=4;
-		a[4] = ConsignaFreno;
-		a[8] = ConsignaNumPasosFreno = NumPasosFreno;
-
-		a[9] = 255;
-
-		Envia(a);
+		ConsignaSentidoFreno=4;
+		ConsignaNumPasosFreno = NumPasosFreno;
+		Envia();
 	}
 
-
-
-
-	/***************************************************************************
-	 * 
-	 * @param tiempo 0 maximo tiempo, 255 minimo tiempo
-	 */
-	public void DesFrena(int tiempo) {
-
-		int a[] = new int[10];
-
-		tiempo=UtilCalculos.limita(tiempo, 0, 255);		
-		tiempo = 255 - tiempo;
-
-		a[0] = 250;
-		a[1] = 251;
-		a[2] = ConsignaVolante & 255;
-		a[3] = (ConsignaVolante & 65280) >> 8;
-		a[4] = ConsignaFreno = 255;
-		a[5] = ConsignaSentidoFreno = 3;
-		a[6] = ComandoVelocidad = 0;
-		a[7] = ConsignaSentidoVelocidad = 0;
-		a[8] = ConsignaNumPasosFreno = tiempo;
-		a[9] = 255;
-
-		Envia(a);
-
-		ConsignaFreno = 0;
-		ConsignaNumPasosFreno = 0;
-		ConsignaSentidoFreno = 0;
-	}
 
 	/**
 	 * Fija la velocidad hacia delante con una Fuerza dada entre 0-255
 	 */
-
 	public void Avanza(int Fuerza) {
-
-		int a[] = new int[10];
 		Fuerza=UtilCalculos.limita(Fuerza,0,255);
 
 		/*if (getDesfreno() != 1) {
@@ -752,29 +686,19 @@ public class ControlCarro implements SerialPortEventListener {
 			return;
 		}*/
 
-		a[0] = 250;
-		a[1] = 251;
-		a[2] = ConsignaVolante & 255;
-		a[3] = (ConsignaVolante & 65280) >> 8;
-		a[4] = ConsignaFreno = 4;  //dejar el freno como está
-		a[5] = ConsignaSentidoFreno = 0;
-		a[6] = ComandoVelocidad = Fuerza;
-		a[7] = ConsignaSentidoVelocidad = 2;  //para alante
-		a[8] = ConsignaNumPasosFreno = 0;
-		a[9] = 255;
-
-		Envia(a);
+		ConsignaFreno = 4;  //dejar el freno como está
+		ConsignaSentidoFreno = 0;
+		ComandoVelocidad = Fuerza;
+		ConsignaSentidoVelocidad = 2;  //para alante
+		ConsignaNumPasosFreno = 0;
+		Envia();
 	}
 
 	/**
 	 * Fija la velocidad hacia delante con una Fuerza dada entre 0-255
-	 * 
-	 * 
 	 */
-
 	public void Retrocede(int Fuerza) {
 
-		int a[] = new int[10];
 		Fuerza=UtilCalculos.limita(Fuerza,0,255);
 
 		if (getDesfreno() != 1) {
@@ -782,18 +706,33 @@ public class ControlCarro implements SerialPortEventListener {
 			return;
 		}
 
-		a[0] = 250;
-		a[1] = 251;
-		a[2] = ConsignaVolante & 255;
-		a[3] = (ConsignaVolante & 65280) >> 8;
-		a[4] = ConsignaFreno;
-		a[5] = ConsignaSentidoFreno=4;
-		a[6] = ComandoVelocidad = Fuerza;
-		a[7] = ConsignaSentidoVelocidad = 1;  //para atrás
-		a[8] = ConsignaNumPasosFreno = 0;
-		a[9] = 255;
+		ConsignaSentidoFreno=4;
+		ComandoVelocidad = Fuerza;
+		ConsignaSentidoVelocidad = 1;  //para atrás
+		ConsignaNumPasosFreno = 0;
 
-		Envia(a);
+		Envia();
+	}
+
+	/**
+	 * @param tiempo 255 maximo, 0 minimo tiempo
+	 */
+	public void DesFrena(int tiempo) {
+
+		tiempo=UtilCalculos.limita(tiempo, 0, 255);		
+		tiempo = 255 - tiempo;
+
+		ConsignaFreno = 255;
+		ConsignaSentidoFreno = 3;  //abrir las 2 válvulas ??
+		ComandoVelocidad = 0;
+		ConsignaSentidoVelocidad = 0;
+		ConsignaNumPasosFreno = tiempo;
+
+		Envia();
+
+		ConsignaFreno = 0;
+		ConsignaNumPasosFreno = 0;
+		ConsignaSentidoFreno = 0;
 	}
 
 	/**
@@ -802,56 +741,42 @@ public class ControlCarro implements SerialPortEventListener {
 	 * @param tiempo tiempo de esta apertura
 	 */
 	public void masFrena(int valor, int tiempo) {
-		int a[] = new int[10];
-
 		valor=UtilCalculos.limita(valor,0,255);
 		tiempo=UtilCalculos.limita(tiempo, 0, 255);
 		
 		tiempo = 255 - tiempo;
 
-		a[0] = 250;
-		a[1] = 251;
-		a[2] = ConsignaVolante & 255;
-		a[3] = (ConsignaVolante & 65280) >> 8;
-		a[4] = ConsignaFreno = valor;
-		a[5] = ConsignaSentidoFreno = 2;  //Abrir valvula de frenar
-		a[6] = ComandoVelocidad = 0;
-		a[7] = ConsignaSentidoVelocidad = 0;
-		a[8] = ConsignaNumPasosFreno = tiempo;
-		a[9] = 255;
+		ConsignaFreno = valor;
+		ConsignaSentidoFreno = 2;  //Abrir valvula de frenar
+		ComandoVelocidad = 0;
+		ConsignaSentidoVelocidad = 0;
+		ConsignaNumPasosFreno = tiempo;
 
-		Envia(a);
+		Envia();
 
 		ConsignaFreno = 0;
 		ConsignaNumPasosFreno = 0;
 		ConsignaSentidoFreno = 0;
 	}
-/**
- * Disminuye la presion del frenado
- * @param valor Apertura de la electrovalvula
- * @param tiempo tiempo de apertura
- */
+	/**
+	 * Disminuye la presion del frenado
+	 * @param valor Apertura de la electrovalvula
+	 * @param tiempo tiempo de apertura
+	 */
 	public void menosFrena(int valor, int tiempo) {
-		int a[] = new int[10];
-
 		valor=UtilCalculos.limita(valor,0,255);
 		tiempo=UtilCalculos.limita(tiempo, 0, 255);
 
 		tiempo = 255 - tiempo;
 
 		
-		a[0] = 250;
-		a[1] = 251;
-		a[2] = ConsignaVolante & 255;
-		a[3] = (ConsignaVolante & 65280) >> 8;
-		a[4] = ConsignaFreno = valor;
-		a[5] = ConsignaSentidoFreno = 1; //abrir la valvula de desfrenar
-		a[6] = ComandoVelocidad = 0;
-		a[7] = ConsignaSentidoVelocidad = 0;
-		a[8] = ConsignaNumPasosFreno = tiempo;
-		a[9] = 255;
+		ConsignaFreno = valor;
+		ConsignaSentidoFreno = 1; //abrir la valvula de desfrenar
+		ComandoVelocidad = 0;
+		ConsignaSentidoVelocidad = 0;
+		ConsignaNumPasosFreno = tiempo;
 
-		Envia(a);
+		Envia();
 
 		ConsignaFreno = 0;
 		ConsignaNumPasosFreno = 0;
@@ -859,11 +784,23 @@ public class ControlCarro implements SerialPortEventListener {
 	}
 
 
-	private void Envia(int a[]) {
+	private void Envia() {
 		
 		logMenEnviados.add(ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno);
+		int a[] = new int[10];
 
-		
+		a[0] = 250;
+		a[1] = 251;
+		a[2] = ConsignaVolante & 255;
+		a[3] = (ConsignaVolante & 65280) >> 8;
+		a[4] = ConsignaFreno;
+		a[5] = ConsignaSentidoFreno;
+		a[6] = ComandoVelocidad;
+		a[7] = ConsignaSentidoVelocidad;
+		a[8] = ConsignaNumPasosFreno;
+		a[9] = 255;
+
+
 		for (int i = 0; i < 10; i++)
 			try {
 				os.write(a[i]);
@@ -879,8 +816,6 @@ public class ControlCarro implements SerialPortEventListener {
 							+ e2.getMessage());
 				}
 			}
-		;
-
 	}
 
 
