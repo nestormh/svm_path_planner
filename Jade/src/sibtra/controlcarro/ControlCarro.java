@@ -197,13 +197,6 @@ public class ControlCarro implements SerialPortEventListener {
 //	private int contadorFreno = 0;
 
 	
-	/** Indica si se están guardando los datos para salvar a fichero. DEPRECADO */
-	private boolean capturando = false;
-	/** Vector donde se guardarán los datos a salver en fichero. DEPRECADO */
-	private Vector captura = null;
-	/** Nombre fichero donde se guardarán los datos. DEPRECADO */
-	private String ficheroCaptura = "";
-
 	/** Registrador del angulo y velocidad medidos al recivir cada paquete */
 	private LoggerArrayDoubles logAngVel;
 
@@ -403,11 +396,6 @@ public class ControlCarro implements SerialPortEventListener {
 		while (newData != -1) {
 			try {
 				newData = is.read();
-				/*
-				 * if(capturando) { captura.add(System.currentTimeMillis() -
-				 * lastTime); captura.add(new Integer(newData)); lastTime =
-				 * System.currentTimeMillis(); }
-				 */
 				TotalBytes++;
 				if (newData == -1) {
 					break;
@@ -1094,41 +1082,6 @@ public class ControlCarro implements SerialPortEventListener {
 		comandoAnt = MINAVANCE;
 		Avanza(0);
 	}
-
-	/**
-	 * Guarda los datos del vehéculo en un fichero
-	 * 
-	 * @param fichero
-	 */
-	public void startCaptura(String fichero) {
-		if (!capturando) {
-			captura = new Vector();
-			ficheroCaptura = fichero;
-			capturando = true;
-		}
-	}
-
-	/**
-	 * Termina de Guardar los datos vuelca al fichero y cierra
-	 */
-	public void stopCaptura() {
-		if (capturando) {
-			capturando = false;
-			try {
-				File fich = new File(ficheroCaptura);
-				ObjectOutputStream oos = new ObjectOutputStream(
-						new FileOutputStream(fich, false));
-				for (int i = 0; i < captura.size(); i++) {
-					oos.write(((Integer) captura.elementAt(i)).intValue());
-				}
-				oos.close();
-			} catch (IOException ioe) {
-				System.err.println("No se pudo abrir el flujo de datos: "
-						+ ioe.getMessage());
-			}
-		}
-	}
-
 
 	/**
 	 * Fija el incremento máximo entre dos comandos de tracción consecutivos
