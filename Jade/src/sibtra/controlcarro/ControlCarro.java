@@ -91,7 +91,7 @@ public class ControlCarro implements SerialPortEventListener {
 	double derivativoAnt = 0;
 	
 	/** Comando calculado por el controlador PID de la velocidad  en {@link #controlVel()}*/
-	int comando = CARRO_CENTRO;
+	double comando = CARRO_CENTRO;
 
 	/** comando anterior calculado por el PID de control de la velocidad  en {@link #controlVel()}*/
 	private double comandoAnt = MINAVANCE;
@@ -178,7 +178,7 @@ public class ControlCarro implements SerialPortEventListener {
 	private boolean controla = false;
 
 	/** Consigna de velocidad a aplicar en cuentas por segundo */
-	private static double consignaVel = 0;
+	private double consignaVel = 0;
 
 	/** Maximo incremento permitido en el comando para evitar aceleraciones bruscas */
 	private int maxInc = 10;
@@ -190,11 +190,11 @@ public class ControlCarro implements SerialPortEventListener {
 	private int NumPaquetes = 0;
 
 	/** Milisegundos al crearse el objeto. Se usa para tener tiempos relativos */
-	private long TiempoInicial = System.currentTimeMillis();
+//	private long TiempoInicial = System.currentTimeMillis();
 
 
 	/** Para llevar la cuenta de la aplicación del freno */
-	private int contadorFreno = 0;
+//	private int contadorFreno = 0;
 
 	
 	/** Indica si se están guardando los datos para salvar a fichero. DEPRECADO */
@@ -207,24 +207,10 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Registrador del angulo y velocidad medidos al recivir cada paquete */
 	private LoggerArrayDoubles logAngVel;
 
+	/**	Registrador de todos los datos del PID de avance*/
+	private LoggerArrayDoubles logControl;
+
 	double FactorFreno=20;
-
-	/** @return devuelve entero SIN SIGNO tomando a como byte para parte alta y b como parte baja */
-	static int byte2entero(int a, int b) {
-		return a * 256 + b;
-	}
-
-	/** @return devuelve entero CON SIGNO tomando a como byte para parte alta y b como parte baja */
-	static int byte2enteroSigno(int a, int b) {
-		if (a > 129) {
-			int atemp = a * 256 + b - 1;
-			atemp = atemp ^ 65535;
-
-			return -1 * atemp;
-		}
-
-		return a * 256 + b;
-	}
 
 	/**
 	 * Crea la conexión serial al carro en el puerto indicado.
@@ -252,6 +238,8 @@ public class ControlCarro implements SerialPortEventListener {
 		logMenRecibidos.setDescripcion("volante,avance,(int)velocidadCS,alarma,incCuentas,incTiempo");
 		logMenEnviados= LoggerFactory.nuevoLoggerArrayInts(this, "mensajesEnviados",(int)(1/T)+1);
 		logMenEnviados.setDescripcion("ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno");
+		logControl=LoggerFactory.nuevoLoggerArrayDoubles(this, "controlPID",(int)(1/T)+1);
+		logControl.setDescripcion("error,derivativo,integral,comandotemp,comando,kPAvance,kIAvance,kDAvance");
 	}
 
 	/**
@@ -454,7 +442,7 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Función que hace el tratamiento de un mensaje válido */
 	private void trataMensaje(int buffer[]) {
 		
-		volante = byte2entero(buffer[1], buffer[2]);
+		volante = UtilCalculos.byte2entero(buffer[1], buffer[2]);
 
 		//si no hay consigna de volante, dejamos el volante como está
 		if (ConsignaVolante == -1) {
@@ -470,6 +458,8 @@ public class ControlCarro implements SerialPortEventListener {
 			avance = avance + (buffer[3] + (255 - avanceant) + 1);
 		avanceant = buffer[3];  //preparamos para siguiente iteración
 
+		
+		// Calculamos la velocidad usando ventana de freqVel mensajes.
 		Cuentas[indiceCuentas] = avance;
 		tiempos[indiceCuentas] = System.currentTimeMillis();
 
@@ -478,7 +468,6 @@ public class ControlCarro implements SerialPortEventListener {
 		long incTiempo=tiempos[indiceCuentas]
 		                       - tiempos[(indiceCuentas + 1) % freqVel];
 		velocidadCS=1000.0 *(double) incCuentas / (double)incTiempo;
-
 		
 		indiceCuentas = (indiceCuentas + 1) % freqVel; //preparamos siguiente iteración
 
@@ -714,16 +703,13 @@ public class ControlCarro implements SerialPortEventListener {
 	/**
 	 * Fija la posicion del volante a n cuentas a partir de la posicion actual
 	 * 
-	 * @param Angulo
+	 * @param deltaAngulo
 	 *            Numero de cuentas a desplazar a partir de la posicion actual
 	 */
-	public void setRVolante(int Angulo) {
+	public void setRVolante(int deltaAngulo) {
 		int a[] = new int[10];
 
-		Angulo = ConsignaVolante + Angulo;
-		Angulo=UtilCalculos.limita(Angulo, 0, 65535);
-
-		ConsignaVolante = Angulo;
+		ConsignaVolante = UtilCalculos.limita(ConsignaVolante + deltaAngulo, 0, 65535);
 
 		a[0] = 250;
 		a[1] = 251;
@@ -919,8 +905,8 @@ public class ControlCarro implements SerialPortEventListener {
 
 
 	/**
-	 * Función para el calculo de la velocidad a partir del encoder incluido en
-	 * el vehiculo.
+	 * Función que implementa PID para el control de la velociad.
+	 * Debe convinar la fuerza de avance con el freno.
 	 */
 	public void controlVel() {
 
@@ -931,54 +917,33 @@ public class ControlCarro implements SerialPortEventListener {
 		if (consignaVel == 0)
 			stopControlVel();
 
-
-		// System.out.println("Control de velocidad activo");
-		// System.out.println("***********************");
-		// System.out.println("Velocidad: " + velocidad);
-		// System.out.println("Diferencia: " + dif);
-		// System.out.println("Velocidad(m/s): " + (velocidad / 78 /
-		// (refresco / 1000)));
-		// System.out.println("Velocidad(Km/h): " + (((velocidad / 78 /
-		// (refresco / 1000)) * 1000) / 3600));
 		double error = consignaVel - velocidadCS;
-		//TODO entender esta acción
-//		double derivativo = kDAvance * (error - errorAnt) + kDAvance* derivativoAnt;
-		double derivativo = kDAvance * (error - errorAnt +  derivativoAnt);
+		//derivativo como y(k)-y(k-2)
+		double derivativo = error - errorAnt +  derivativoAnt;
 
 		if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
-//			integral += kIAvance * errorAnt;
 			integral += errorAnt;
-		// System.out.println("Error: " + error);
 
-		errorAnt = error;
-		derivativoAnt = derivativo;
-
-		double comandotemp = kPAvance * error + derivativo + kIAvance*integral;
+		double comandotemp = kPAvance * error + kDAvance * derivativo + kIAvance * integral;
 		double IncComando = comandotemp - comandoAnt;
-
-		if (Math.abs(IncComando) > maxInc) {
-			if (IncComando >= 0) {
-				comando = (int) (comandoAnt + maxInc);
-				if ((comando > 0) && (comando < ZonaMuerta))
-					comando = ZonaMuerta;
-			} else {
-				comando = (int) (comandoAnt - maxInc);
-				if ((comando > 0) && (comando < ZonaMuerta))
-					comando = 0;
-			}
-		} else
-			comando = (int) (comandoAnt + IncComando);
-
+		
+		//Limitamos el incremento de comando
+		IncComando=UtilCalculos.limita(IncComando,-maxInc,maxInc);
+		comando=comandoAnt+IncComando;
+		//Limitamos el comando maximo a aplicar
 		comando=UtilCalculos.limita(comando, -255, 255);
+		//humbralizamos la zona muerta
+		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 80
+				, -90);  //TODO elegir humbral de freno dinámico según politica de freno a aplicar
 
-//		System.out.println("Avanzando: " + comando + " error " + (consignaVel - velocidadCS));
+
 		if (comando >= 0) {
 			if(comandoAnt<=0) {
 				menosFrena(255, 255);
 //				DesFrena(255);
 				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
 			}
-			Avanza(comando);
+			Avanza((int)comando);
 		}
 		else {
 //			double IncCom=comando-comandoAnt;
@@ -996,10 +961,14 @@ public class ControlCarro implements SerialPortEventListener {
 //				System.err.println("menos frena "+apertura);
 //			}
 		}
+		//guardamos todo para la iteración siguiente
+		errorAnt = error;
+		derivativoAnt = derivativo;
 		comandoAnt = comando;
+		logControl.add(error,derivativo,integral,comandotemp,comando,kPAvance,kIAvance,kDAvance);
 	}
 	
-	public int getComando() {
+	public double getComando() {
 		return comando;
 	}
 

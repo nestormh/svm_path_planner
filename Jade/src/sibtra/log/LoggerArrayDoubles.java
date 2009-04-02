@@ -107,6 +107,27 @@ public class LoggerArrayDoubles extends Logger {
 		double[] nD={d1,d2,d3,d4,d5,d6};
 		datos.add(nD);
 	}
+
+	/** Crea nuevo array con los datos pasados, lo añade y apunta instante de tiempo */
+	public void add(double d1, double d2, double d3,double d4, double d5,double d6,double d7) {
+		super.add();
+		if(!activado)
+			return;
+		//copiamos Datos
+		double[] nD={d1,d2,d3,d4,d5,d6,d7};
+		datos.add(nD);
+	}
+
+	/** Crea nuevo array con los datos pasados, lo añade y apunta instante de tiempo */
+	public void add(double d1, double d2, double d3,double d4, double d5,double d6,double d7,double d8) {
+		super.add();
+		if(!activado)
+			return;
+		//copiamos Datos
+		double[] nD={d1,d2,d3,d4,d5,d6,d7,d8};
+		datos.add(nD);
+	}
+
 	/** Borra los datos almacenados */
 	void clear() {
 		super.clear();
@@ -138,6 +159,7 @@ public class LoggerArrayDoubles extends Logger {
 		super.vuelcaMATv4(smv4);
 		smv4.matrizDoubles(datos, nombre);
 	}
+
 
 
 
