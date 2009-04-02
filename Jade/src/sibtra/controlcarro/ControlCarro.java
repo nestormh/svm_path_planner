@@ -13,14 +13,10 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 import gnu.io.UnsupportedCommOperationException;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.TooManyListenersException;
-import java.util.Vector;
 
 import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerArrayInts;
@@ -28,7 +24,6 @@ import sibtra.log.LoggerFactory;
 import sibtra.util.UtilCalculos;
 
 
-//import com.sun.xml.internal.fastinfoset.util.CharArrayArray;
 
 /**
  * Clase para gestionar la comunicación con el PIC que controla el carro.
@@ -113,8 +108,6 @@ public class ControlCarro implements SerialPortEventListener {
 	private double velocidadCS = 0;
 	/** Ultima velocidad de avance calculada en metros por segundo */
 	private double velocidadMS = 0;
-	/** Ultima velocidad de avance calculada en Kilometros por hora */
-	private double velocidadKH = 0;
 
 	/** Total de bytes recibidos desde el PIC por la serial */
 	private int TotalBytes = 0;
@@ -175,7 +168,7 @@ public class ControlCarro implements SerialPortEventListener {
 	private double kIAvance = 0.1;
 
 	/** Para indicar si se está aplicando control de velocidad */
-	private boolean controla = false;
+	private boolean controlando = false;
 
 	/** Consigna de velocidad a aplicar en cuentas por segundo */
 	private double consignaVel = 0;
@@ -232,7 +225,7 @@ public class ControlCarro implements SerialPortEventListener {
 		logMenEnviados= LoggerFactory.nuevoLoggerArrayInts(this, "mensajesEnviados",(int)(1/T)+1);
 		logMenEnviados.setDescripcion("ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno");
 		logControl=LoggerFactory.nuevoLoggerArrayDoubles(this, "controlPID",(int)(1/T)+1);
-		logControl.setDescripcion("error,derivativo,integral,comandotemp,comando,kPAvance,kIAvance,kDAvance");
+		logControl.setDescripcion("error,derivativo,integral,comandotemp,comando,kPAvance,kIAvance,kDAvance,maxInc");
 	}
 
 	/**
@@ -460,7 +453,6 @@ public class ControlCarro implements SerialPortEventListener {
 		indiceCuentas = (indiceCuentas + 1) % freqVel; //preparamos siguiente iteración
 
 		velocidadMS = velocidadCS / PULSOS_METRO;
-		velocidadKH = velocidadMS * 3600 / 1000;
 
 		//apuntamos angulo volante en radianes y velocidad en m/sg
 		logAngVel.add((volante - CARRO_CENTRO) * RADIANES_POR_CUENTA,velocidadMS);
@@ -899,7 +891,7 @@ public class ControlCarro implements SerialPortEventListener {
 	public void controlVel() {
 
 		
-		if (!controla) 
+		if (!controlando) 
 			return;
 
 		if (consignaVel == 0)
@@ -953,7 +945,7 @@ public class ControlCarro implements SerialPortEventListener {
 		errorAnt = error;
 		derivativoAnt = derivativo;
 		comandoAnt = comando;
-		logControl.add(error,derivativo,integral,comandotemp,comando,kPAvance,kIAvance,kDAvance);
+		logControl.add(error,derivativo,integral,comandotemp,comando,kPAvance,kIAvance,kDAvance,maxInc);
 	}
 	
 	public double getComando() {
@@ -988,7 +980,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 */
 	public void setConsignaAvanceCS(double valor) {
 		consignaVel = valor;
-		controla = true;
+		controlando = true;
 	}
 
 	/** @return la consigna fijada en cuentas por segundo */
@@ -1006,7 +998,7 @@ public class ControlCarro implements SerialPortEventListener {
 	public void setConsignaAvanceMS(double valor) {
 		consignaVel = valor * PULSOS_METRO;
 		System.out.println("Consigna Avance " + consignaVel);
-		controla = true;
+		controlando = true;
 	}
 
 	/** @return la consigna fijada en metros por segundo */
@@ -1023,7 +1015,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 */
 	public void setConsignaAvanceKH(double valor) {
 		consignaVel = valor * PULSOS_METRO * 1000 / 3600;
-		controla = true;
+		controlando = true;
 	}
 
 	/** @return la consigna fijada en Kilometros por hora */
@@ -1054,7 +1046,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 * @return
 	 */
 	public double getVelocidadKH() {
-		return velocidadKH;
+		return velocidadMS * 3600 / 1000;
 	}
 
 
@@ -1078,7 +1070,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 * Detiene el control de la velocidad
 	 */
 	public void stopControlVel() {
-		controla = false;
+		controlando = false;
 		comandoAnt = MINAVANCE;
 		Avanza(0);
 	}
@@ -1087,11 +1079,15 @@ public class ControlCarro implements SerialPortEventListener {
 	 * Fija el incremento máximo entre dos comandos de tracción consecutivos
 	 * para evitar aceleraciones muy bruscas
 	 * 
-	 * @param incremento
-	 *            diferencia máxima entre dos comandos
+	 * @param incremento   diferencia máxima entre dos comandos
 	 */
 	public void setMaxIncremento(int incremento) {
 		maxInc = incremento;
+	}
+
+	/** @return el valor de {@link #maxInc}, máximo incrmento de comando premitido */
+	public int getMaxIncremento() {
+		return maxInc;
 	}
 
 	public int getPaquetes() {
@@ -1152,6 +1148,13 @@ public class ControlCarro implements SerialPortEventListener {
 	 */
 	public void setKPAvance(double avance) {
 		kPAvance = avance;
+	}
+
+	/**
+	 * @return the controlando
+	 */
+	public boolean isControlando() {
+		return controlando;
 	}
 
 

@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -67,6 +68,8 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 
 	private SpinnerNumberModel jspValorFactorFrena;
 
+	private JButton jbParaControl;
+
 	public PanelCarro(ControlCarro cc) {
 		super();
 		contCarro=cc;
@@ -116,7 +119,7 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		//cuenta volante
 		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getVolante","%10d")
 		, "Cuenta Volante");
-		//Avance
+		//Comando
 		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getComando","%10d")
 		, "Comando");
 
@@ -144,6 +147,7 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 			jbAplicaFreno.addActionListener(this);
 		}
 
+		añadeAPanel(new JLabel("VERDINO"), "");
 		//Para menosFrena
 		{// spiner fijar tiempo Frena
 			jspTiempoDesFrena=new SpinnerNumberModel(20,0,255,1);
@@ -161,30 +165,11 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 			jbAplicaDesFreno.addActionListener(this);
 		}
 		{// Boton desfrena total
-			jbDesfrena=new JButton("Desfrena");
+			jbDesfrena=new JButton("TOTAL");
 			añadeAPanel(jbDesfrena, "Desfreno");
 			jbDesfrena.addActionListener(this);
 		}
-//		Hay lazo cerrado no tienen sentido fijar ahora el avance
-//		{// comando avance
-//		jspMAvance=new SpinnerNumberModel(0,0,255,5);
-//		JSpinner jspcv=new JSpinner(jspMAvance);
-//		jspcv.setBorder(BorderFactory.createTitledBorder(
-//		blackline, "Avance"));
-//		jspMAvance.addChangeListener(this);
-//		add(jspcv);
-//		}
 
-		//No es necesario el moando calculado se ve en "Consigna Velocidad"
-//		{ //Consigna de velocidad calculada para cada instante
-//		jlConsigVelCalc=jla=new JLabel("##.##");
-//		jla.setBorder(BorderFactory.createTitledBorder(
-//		blackline, "Vel. m/s"));
-//		jla.setFont(Grande);
-//		jla.setHorizontalAlignment(JLabel.CENTER);
-//		jla.setEnabled(false);
-//		add(jla);
-//		}
 		//Alarma Freno
 		añadeAPanel(new LabelDatoFormato("#",ControlCarro.class,"getFreno","%10d")
 		, "Alarm. Freno");
@@ -194,17 +179,17 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		, "Alar. Desfreno");
 
 		añadeAPanel(new SpinnerDouble(contCarro,"setFactorFreno",0,50,0.1), "Factor Freno");
+		añadeAPanel(new SpinnerInt(contCarro,"setMaxIncremento",0,255*2,1), "MaxIncremento");
 		añadeAPanel(new SpinnerDouble(contCarro,"setKPAvance",0,50,0.1), "KP Avance");
 		añadeAPanel(new SpinnerDouble(contCarro,"setKIAvance",0,50,0.1), "KI Avance");
 		añadeAPanel(new SpinnerDouble(contCarro,"setKDAvance",0,50,0.1), "KD Avance");
 
-//		{// spiner fijar valor FactorFreno
-//			jspValorFactorFrena=new SpinnerNumberModel(contCarro.FactorFreno,0,50,0.1);
-//			JSpinner jspcv=new JSpinner(jspValorFactorFrena);
-//			añadeAPanel(new SpinnerDouble(contCarro,"setFactorFreno",0,50,0.1), "Factor Freno");
-//			jspValorFactorFrena.addChangeListener(this);
-//			jspcv.setEnabled(true);
-//		}
+		{// Boton parar el control
+			jbParaControl=new JButton("PARAR");
+			añadeAPanel(jbParaControl, "Control");
+			jbParaControl.addActionListener(this);
+		}
+
 	}
 	
 	/** atendemos pulsaciones de los botones para aplicar consignas */
@@ -225,7 +210,11 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		}
 		if(ev.getSource()==jbDesfrena) {
 			contCarro.DesFrena(255);
-			}
+		}
+		if(ev.getSource()==jbParaControl) {
+			contCarro.stopControlVel();
+			jbParaControl.setEnabled(false);
+		}
 	}
 
 	public void stateChanged(ChangeEvent ce) {
@@ -243,6 +232,10 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		else
 			actualizaDatos(null);
 		jBarraComVel.setValue(contCarro.getComandoVelocidad());
+		if(contCarro.isControlando())
+			jbParaControl.setEnabled(true);
+		else
+			jbParaControl.setEnabled(false);
 	}
 
 	/**
