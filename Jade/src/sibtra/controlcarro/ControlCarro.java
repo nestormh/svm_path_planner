@@ -865,9 +865,9 @@ public class ControlCarro implements SerialPortEventListener {
 		comando=comandoAnt+IncComando;
 		//Limitamos el comando maximo a aplicar
 		comando=UtilCalculos.limita(comando, -255, 255);
-		//humbralizamos la zona muerta
+		//umbralizamos la zona muerta
 		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 80
-				, -90);  //TODO elegir humbral de freno dinámico según politica de freno a aplicar
+				, 90/FactorFreno+comandoAnt);  //TODO elegir umbral de freno dinámico según politica de freno a aplicar
 
 
 		if (comando >= 0) {
@@ -879,20 +879,18 @@ public class ControlCarro implements SerialPortEventListener {
 			Avanza((int)comando);
 		}
 		else {
-//			double IncCom=comando-comandoAnt;
-//			if(IncCom<=0) {
-//				int apertura=-(int)(IncCom*FactorFreno);
-//				if(apertura>150)
-//					apertura=150;
-//				masFrena( apertura,20); /** Es un comando negativo, por lo que hay que frenar */
-//				System.err.println("Mas frena "+apertura);
-//
-//			} else {
-//				int apertura=(int)(IncCom*FactorFreno);
-//				if(apertura>150) apertura=150;
-//				menosFrena(apertura,20);
-//				System.err.println("menos frena "+apertura);
-//			}
+			double IncCom=comando-comandoAnt;
+			if(IncCom<=0) {
+				int apertura=-(int)(IncCom*FactorFreno);
+				apertura=UtilCalculos.limita(apertura, 90, 150);
+				masFrena( apertura,20); /** Es un comando negativo, por lo que hay que frenar */
+				System.err.println("Mas frena "+apertura);
+			} else {
+				int apertura=(int)(IncCom*FactorFreno);
+				if(apertura>150) apertura=150;
+				menosFrena(apertura,20);
+				System.err.println("menos frena "+apertura);
+			}
 		}
 		//guardamos todo para la iteración siguiente
 		errorAnt = error;
