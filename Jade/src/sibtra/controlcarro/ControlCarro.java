@@ -243,7 +243,7 @@ public class ControlCarro implements SerialPortEventListener {
 		logMenEnviados= LoggerFactory.nuevoLoggerArrayInts(this, "mensajesEnviados",(int)(1/T)+1);
 		logMenEnviados.setDescripcion("ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno");
 		logControl=LoggerFactory.nuevoLoggerArrayDoubles(this, "controlPID",(int)(1/T)+1);
-		logControl.setDescripcion("error,derivativo,integral,comandotemp,comando,kPAvance,kIAvance,kDAvance,maxInc");
+		logControl.setDescripcion("consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,apertura");
 	}
 
 	/**
@@ -847,8 +847,8 @@ public class ControlCarro implements SerialPortEventListener {
 		if (!controlando) 
 			return;
 
-		if (consignaVel == 0)
-			stopControlVel();
+//		if (consignaVel == 0)
+//			stopControlVel();
 
 		double error = consignaVel - velocidadCS;
 		//derivativo como y(k)-y(k-2)
@@ -866,37 +866,39 @@ public class ControlCarro implements SerialPortEventListener {
 		//Limitamos el comando maximo a aplicar
 		comando=UtilCalculos.limita(comando, -255, 255);
 		//umbralizamos la zona muerta
-		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 80
-				, 90/FactorFreno+comandoAnt);  //TODO elegir umbral de freno dinámico según politica de freno a aplicar
+		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 80, -1);
+//				, -90/FactorFreno+comandoAnt);  //TODO da valores positivos
+		
 
-
+		int apertura=0;
 		if (comando >= 0) {
 			if(comandoAnt<=0) {
 				menosFrena(255, 255);
 //				DesFrena(255);
-				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
+//				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
 			}
 			Avanza((int)comando);
 		}
 		else {
 			double IncCom=comando-comandoAnt;
 			if(IncCom<=0) {
-				int apertura=-(int)(IncCom*FactorFreno);
-				apertura=UtilCalculos.limita(apertura, 90, 150);
+				apertura=-(int)(IncCom*FactorFreno);
+				apertura=UtilCalculos.limita(apertura, 20, 150);
 				masFrena( apertura,20); /** Es un comando negativo, por lo que hay que frenar */
 				System.err.println("Mas frena "+apertura);
 			} else {
-				int apertura=(int)(IncCom*FactorFreno);
-				if(apertura>150) apertura=150;
+				apertura=(int)(IncCom*FactorFreno);
+				apertura=UtilCalculos.limita(apertura, 20, 150);
 				menosFrena(apertura,20);
 				System.err.println("menos frena "+apertura);
+				apertura=-apertura;
 			}
 		}
 		//guardamos todo para la iteración siguiente
 		errorAnt = error;
 		derivativoAnt = derivativo;
 		comandoAnt = comando;
-		logControl.add(error,derivativo,integral,comandotemp,comando,kPAvance,kIAvance,kDAvance,maxInc);
+		logControl.add((double)consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,(double)apertura);
 	}
 	
 	public double getComando() {

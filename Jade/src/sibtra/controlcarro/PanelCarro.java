@@ -120,7 +120,7 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getVolante","%10d")
 		, "Cuenta Volante");
 		//Comando
-		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getComando","%10d")
+		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getComando","%10.2f")
 		, "Comando");
 
 		{//barra progreso comando velocidad
