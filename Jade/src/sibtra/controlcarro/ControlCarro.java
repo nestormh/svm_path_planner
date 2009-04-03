@@ -132,8 +132,26 @@ public class ControlCarro implements SerialPortEventListener {
 	/* Comandos enviados hacia el coche para el microcontrolador */
 	/** Uno de los 8 bytes que se envían en mensaje al PIC */
 	private int ConsignaFreno = 0;
-	/** Uno de los 8 bytes que se envían en mensaje al PIC */
-	private int ConsignaSentidoFreno = 0;
+	/** Uno de los 8 bytes que se envían en mensaje al PIC. 
+	 * Indica que acción se va ha hacer con el freno
+	 * <code>
+	 * 0 - Parar el freno, lo que cerraria todas las valvulas y terminaria  
+	 * todos los tiempos, dejando el freno como esta.
+	 * 1 - Abrir valvula de desfrenar
+	 * 2 - Abrir valvula de frenar
+	 * 3 - Desfrenar
+	 * 4 - No hacer nada, dejar el freno en el comportamiento antes fijado,  
+	 * cerrara las valvulas cuando toque.
+	 *  </code>
+	 *  */
+	private int ConsignaSentidoFreno = PARAR_FRENO;
+	
+	static public int PARAR_FRENO=0;
+	static public int ABRIR_DESFRENAR=1;
+	static public int ABRIR_FRENAR=2;
+	static public int DESFRENAR=3;
+	static public int NOCAMBIAR_FRENO=4;
+	
 	/** Uno de los 8 bytes que se envían en mensaje al PIC */
 	private int ComandoVelocidad = 0;
 	/** Uno de los 8 bytes que se envían en mensaje al PIC */
@@ -656,7 +674,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 */
 	public void setVolante(int Angulo) {
 		ConsignaVolante=UtilCalculos.limita(Angulo, 0, 65535);
-		ConsignaSentidoFreno=4;  //No modifica el freno
+		ConsignaSentidoFreno=NOCAMBIAR_FRENO;  //No modifica el freno
 		ConsignaNumPasosFreno = NumPasosFreno; //TODO sobra
 		Envia();
 	}
@@ -669,8 +687,8 @@ public class ControlCarro implements SerialPortEventListener {
 	 */
 	public void setRVolante(int deltaAngulo) {
 		ConsignaVolante = UtilCalculos.limita(ConsignaVolante + deltaAngulo, 0, 65535);
-		ConsignaSentidoFreno=4;
-		ConsignaNumPasosFreno = NumPasosFreno;
+		ConsignaSentidoFreno=NOCAMBIAR_FRENO;
+		ConsignaNumPasosFreno = NumPasosFreno; //TODO sobra
 		Envia();
 	}
 
@@ -686,11 +704,11 @@ public class ControlCarro implements SerialPortEventListener {
 			return;
 		}*/
 
-		ConsignaFreno = 4;  //dejar el freno como está
-		ConsignaSentidoFreno = 0;
 		ComandoVelocidad = Fuerza;
 		ConsignaSentidoVelocidad = 2;  //para alante
-		ConsignaNumPasosFreno = 0;
+//		ConsignaFreno = 4;  //dejar el freno como está
+		ConsignaSentidoFreno = NOCAMBIAR_FRENO;
+		ConsignaNumPasosFreno = 0; //TODO sobra
 		Envia();
 	}
 
@@ -706,10 +724,10 @@ public class ControlCarro implements SerialPortEventListener {
 			return;
 		}
 
-		ConsignaSentidoFreno=4;
+		ConsignaSentidoFreno=NOCAMBIAR_FRENO;
+		ConsignaNumPasosFreno = 0; //TODO sobra
 		ComandoVelocidad = Fuerza;
 		ConsignaSentidoVelocidad = 1;  //para atrás
-		ConsignaNumPasosFreno = 0;
 
 		Envia();
 	}
@@ -723,16 +741,16 @@ public class ControlCarro implements SerialPortEventListener {
 		tiempo = 255 - tiempo;
 
 		ConsignaFreno = 255;
-		ConsignaSentidoFreno = 3;  //abrir las 2 válvulas ??
+		ConsignaSentidoFreno = DESFRENAR;  //abrir las 2 válvulas ??
+		ConsignaNumPasosFreno = tiempo;
 		ComandoVelocidad = 0;
 		ConsignaSentidoVelocidad = 0;
-		ConsignaNumPasosFreno = tiempo;
 
 		Envia();
 
 		ConsignaFreno = 0;
 		ConsignaNumPasosFreno = 0;
-		ConsignaSentidoFreno = 0;
+		ConsignaSentidoFreno = PARAR_FRENO; //TODO mejor NOCAMBIAR_FRENO ¿?
 	}
 
 	/**
@@ -746,17 +764,17 @@ public class ControlCarro implements SerialPortEventListener {
 		
 		tiempo = 255 - tiempo;
 
+		ConsignaSentidoFreno = ABRIR_FRENAR;  //Abrir valvula de frenar
+		ConsignaNumPasosFreno = tiempo;
 		ConsignaFreno = valor;
-		ConsignaSentidoFreno = 2;  //Abrir valvula de frenar
 		ComandoVelocidad = 0;
 		ConsignaSentidoVelocidad = 0;
-		ConsignaNumPasosFreno = tiempo;
 
 		Envia();
 
 		ConsignaFreno = 0;
 		ConsignaNumPasosFreno = 0;
-		ConsignaSentidoFreno = 0;
+		ConsignaSentidoFreno = PARAR_FRENO; //TODO mejor NOCAMBIAR_FRENO ¿?
 	}
 	/**
 	 * Disminuye la presion del frenado
@@ -770,17 +788,17 @@ public class ControlCarro implements SerialPortEventListener {
 		tiempo = 255 - tiempo;
 
 		
+		ConsignaSentidoFreno = ABRIR_DESFRENAR; //abrir la valvula de desfrenar
 		ConsignaFreno = valor;
-		ConsignaSentidoFreno = 1; //abrir la valvula de desfrenar
+		ConsignaNumPasosFreno = tiempo;
 		ComandoVelocidad = 0;
 		ConsignaSentidoVelocidad = 0;
-		ConsignaNumPasosFreno = tiempo;
 
 		Envia();
 
 		ConsignaFreno = 0;
 		ConsignaNumPasosFreno = 0;
-		ConsignaSentidoFreno = 0;
+		ConsignaSentidoFreno = PARAR_FRENO; //TODO mejor NOCAMBIAR_FRENO ¿?
 	}
 
 
