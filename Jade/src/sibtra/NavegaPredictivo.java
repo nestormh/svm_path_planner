@@ -83,9 +83,11 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
     private JCheckBox jcbUsarRF;
     protected double distRF;
     private int numPaquetesGPS;
-	private double gananciaVel = 1;
+	private double gananciaVel = 2;
 	private int puntoFrenado=-1;
 	private GPSData centroToTr;
+	private SpinnerNumberModel spGananciaVel;
+	private JSpinner jsGananciaVel;
 
     /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -162,6 +164,10 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
             spFrenado = new SpinnerNumberModel(value,min,max,step);
             jsDistFrenado = new JSpinner(spFrenado);
             jpSur.add(jsDistFrenado);
+//          Spinner para fijar la ganancia del cálculo d la consigna de Velocidad
+            spGananciaVel = new SpinnerNumberModel(2,0.1,20,0.1);
+            jsGananciaVel = new JSpinner(spGananciaVel);
+            jpSur.add(jsGananciaVel);
             //Checkbox para detectar con RF
             jcbUsarRF = new JCheckBox("Usar RF");
             jcbUsarRF.setSelected(false);
@@ -260,7 +266,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
 
         //Inicializamos modelos predictivos
         modCoche = new Coche();
-        cp = new ControlPredictivo(modCoche, Tr, 13, 3, 1.0, (double) periodoMuestreoMili / 1000);
+        cp = new ControlPredictivo(modCoche, Tr, 13, 4, 2.0, (double) periodoMuestreoMili / 1000);
         JFrame ventanaPredictivo = new JFrame("Panel Muestra Predictivo");
         ventanaPredictivo.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pmp = new PanelMuestraPredictivo(cp,rutaEspacial);
@@ -283,20 +289,26 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
      * En el estado navegando se tiene en cuenta el error en la orientación 
      * @return
      */
-    public double calculaConsignaVel(){
+    public double calculaConsignaVel(double consignaAnt){
         double consigna = 0;
-        double velocidadMax = 3;
+        double velocidadMax = 2.5;
         double refVelocidad;
         double errorOrientacion;       
         int indMin = ControlPredictivo.calculaDistMin(Tr,modCoche.getX(),modCoche.getY());       
-        errorOrientacion = cp.getOrientacionDeseada() - modCoche.getTita();
+//        errorOrientacion = cp.getOrientacionDeseada() - modCoche.getTita();
+        errorOrientacion = Tr[indMin][2] - modCoche.getTita();
+        System.out.println("Error en la orientación "+errorOrientacion);
         if (Tr[indMin][3]>velocidadMax){
             refVelocidad = velocidadMax;
         }else
             refVelocidad = Tr[indMin][3]; 
-        consigna = refVelocidad - errorOrientacion*gananciaVel;
-        if (consigna <= 0)
-            consigna = 0.5;       
+        consigna = refVelocidad - Math.abs(errorOrientacion)*gananciaVel;        
+        if (consigna-consignaAnt >=0.2){
+        	consigna = consignaAnt + 0.2;
+        	System.out.println("Demasiado incremento en la consigna");
+        }
+        if (consigna <= 1)
+            consigna = 1;
         return consigna; 
      }
     /**
@@ -419,11 +431,12 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
         double velocidadActual;        
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         long tSig;
+        double consignaVelAnt = 0;
         while (true) {
             tSig = System.currentTimeMillis() + periodoMuestreoMili;
             if (jcbNavegando.isSelected()) {
 
-                //Calculamos el comando
+                //Calculamos el comando            	
                 GPSData pa = gpsCon.getPuntoActualTemporal();
                 GPSData centroactual = gpsCon.getBufferEspacial().getCentro();
                 if (centroactual.getAltura()!=centroToTr.getAltura()
@@ -452,7 +465,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
                 if (velocidadActual >= umbralMinimaVelocidad)
                 	contCarro.setAnguloVolante(-comandoVolante);
                 if (puntoFrenado==-1){
-                	consignaVelocidad = calculaConsignaVel();                    
+                	consignaVelocidad = calculaConsignaVel(consignaVelAnt);                    
                 }else{
                 	if (velocidadActual >= 1){
                 		double distFrenado = mideDistanciaFrenado(puntoFrenado);
@@ -465,6 +478,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
                 	}                	                	
                 }
                 System.out.println(consignaVelocidad);
+                consignaVelAnt = consignaVelocidad;
                 contCarro.setConsignaAvanceMS(consignaVelocidad);			
                 modCoche.calculaEvolucion(comandoVolante, velocidadActual, periodoMuestreoMili / 1000);
                 pmp.actualiza();
@@ -505,6 +519,9 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
 				// Se acaba de desactivar
 				jsDistFrenado.setEnabled(true);
 				puntoFrenado = -1;
+			}
+			if(e.getSource() == spGananciaVel){
+				gananciaVel = spGananciaVel.getNumber().doubleValue();
 			}
 		}
 	}
