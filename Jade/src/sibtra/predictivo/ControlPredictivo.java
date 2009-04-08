@@ -42,7 +42,7 @@ public class ControlPredictivo {
      * sobrepasamientos
      */    
     double landa;
-    double pesoError;
+    double pesoError = 1;
     Coche carroOriginal;
     /**
      * Objeto que se copiará del carro original más actualizado en cada llamada
@@ -73,6 +73,7 @@ public class ControlPredictivo {
 	private double[] respuestaEscalon;
 	private Coche carroEscalon;
 	private int indMinAnt;
+	private double alpha = 1.05;
 
 	/**
      * 
@@ -218,7 +219,11 @@ public class ControlPredictivo {
 //            System.out.println("Vector x "+vectorDeseadoX+" "+ "Vector y "+vectorDeseadoY+"\n");
 //            System.out.println("Orientacion deseada " + orientacionesDeseadas[i] + " " 
 //                                +"prediccion de orientacion " + predicOrientacion[i]+"\n");
-            vectorError[i] = UtilCalculos.normalizaAngulo(orientacionesDeseadas[i] - predicOrientacion[i]);
+            // coefError pesa los valores del vectorError dependiendo del valor de alpha
+            // si alpha es >1 se pesan más los coeficientes más próximos al instante actual
+            // si alpha está entre 0 y 1 se pesan más los instantes más alejados
+            double coefError = Math.pow(pesoError*alpha,horPrediccion-i);
+            vectorError[i] = coefError*(UtilCalculos.normalizaAngulo(orientacionesDeseadas[i] - predicOrientacion[i]));
             prediccionPosicion[i][0] = carroSim.getX();
             prediccionPosicion[i][1] = carroSim.getY();
         }
