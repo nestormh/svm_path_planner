@@ -89,6 +89,8 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
 	private SpinnerNumberModel spGananciaVel;
 	private JSpinner jsGananciaVel;
 	private double gananciaLateral=1;
+	/** Pendiente de la rampa de frenado para la parada total */
+	private double pendienteFrenado=1.0;
 
     /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -467,20 +469,16 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
                 }
                 double consignaVelocidad;
                 velocidadActual = contCarro.getVelocidadMS();
+                //Cuando está casi parado no tocamos el volante
                 if (velocidadActual >= umbralMinimaVelocidad)
                 	contCarro.setAnguloVolante(-comandoVolante);
-                if (puntoFrenado==-1){
-                	consignaVelocidad = calculaConsignaVel(consignaVelAnt);                    
-                }else{
-//                	if (velocidadActual >= 1){
-                		double distFrenado = mideDistanciaFrenado(puntoFrenado);
-                    	consignaVelocidad = calculaPerfilVelocidad(velocidadActual, distFrenado, periodoMuestreoMili / 1000);
-//                	}else{
-//                		//TODO mejorar esta estrategia. Puede ocurrir que 
-//                		//el coche todavía esté acelerando cuando mandemos a frenar                		
-//                		consignaVelocidad = 0;
-//                		contCarro.masFrena(90,20);
-//                	}                	                	
+                
+            	consignaVelocidad = calculaConsignaVel(consignaVelAnt);                    
+                if (puntoFrenado!=-1){
+            		double distFrenado = mideDistanciaFrenado(puntoFrenado);
+            		double velRampa=distFrenado*pendienteFrenado;
+            		consignaVelocidad=Math.min(consignaVelAnt, velRampa);
+            		System.out.println("Punto frenado a "+distFrenado+" vel. rampa "+ velRampa);
                 }
                 System.out.println(consignaVelocidad);
                 consignaVelAnt = consignaVelocidad;
@@ -513,7 +511,6 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
 
     }
     public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		if (e.getSource() == jcbFrenando){
 			if(jcbFrenando.isSelected()){
 				// Se acaba de seleccionar
