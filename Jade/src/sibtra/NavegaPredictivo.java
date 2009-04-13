@@ -1,4 +1,4 @@
-package sibtra;
+																																																																																																																																																																																																																																																																																																																					package sibtra;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -88,6 +88,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
 	private GPSData centroToTr;
 	private SpinnerNumberModel spGananciaVel;
 	private JSpinner jsGananciaVel;
+	private double gananciaLateral=1;
 
     /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -164,7 +165,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
             spFrenado = new SpinnerNumberModel(value,min,max,step);
             jsDistFrenado = new JSpinner(spFrenado);
             jpSur.add(jsDistFrenado);
-//          Spinner para fijar la ganancia del cálculo d la consigna de Velocidad
+//          Spinner para fijar la ganancia del cálculo d la consigna de Velocidad            
             spGananciaVel = new SpinnerNumberModel(2,0.1,20,0.1);
             jsGananciaVel = new JSpinner(spGananciaVel);
             jpSur.add(jsGananciaVel);
@@ -293,8 +294,12 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
         double consigna = 0;
         double velocidadMax = 2.5;
         double refVelocidad;
-        double errorOrientacion;       
-        int indMin = ControlPredictivo.calculaDistMin(Tr,modCoche.getX(),modCoche.getY());       
+        double errorOrientacion;      
+        double errorLateral;
+        int indMin = ControlPredictivo.calculaDistMin(Tr,modCoche.getX(),modCoche.getY());
+        double dx = Tr[indMin][0]-modCoche.getX();
+        double dy = Tr[indMin][1]-modCoche.getY();
+        errorLateral = Math.sqrt(dx*dx + dy*dy);
 //        errorOrientacion = cp.getOrientacionDeseada() - modCoche.getTita();
         errorOrientacion = Tr[indMin][2] - modCoche.getTita();
         System.out.println("Error en la orientación "+errorOrientacion);
@@ -302,9 +307,9 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
             refVelocidad = velocidadMax;
         }else
             refVelocidad = Tr[indMin][3]; 
-        consigna = refVelocidad - Math.abs(errorOrientacion)*gananciaVel;        
-        if (consigna-consignaAnt >=0.2){
-        	consigna = consignaAnt + 0.2;
+        consigna = refVelocidad - Math.abs(errorOrientacion)*gananciaVel - Math.abs(errorLateral)*gananciaLateral;        
+        if (consigna-consignaAnt >=0.1){
+        	consigna = consignaAnt + 0.1;
         	System.out.println("Demasiado incremento en la consigna");
         }
         if (consigna <= 1)
@@ -467,15 +472,15 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
                 if (puntoFrenado==-1){
                 	consignaVelocidad = calculaConsignaVel(consignaVelAnt);                    
                 }else{
-                	if (velocidadActual >= 1){
+//                	if (velocidadActual >= 1){
                 		double distFrenado = mideDistanciaFrenado(puntoFrenado);
                     	consignaVelocidad = calculaPerfilVelocidad(velocidadActual, distFrenado, periodoMuestreoMili / 1000);
-                	}else{
-                		//TODO mejorar esta estrategia. Puede ocurrir que 
-                		//el coche todavía esté acelerando cuando mandemos a frenar                		
-                		consignaVelocidad = 0;
-                		contCarro.masFrena(90,20);
-                	}                	                	
+//                	}else{
+//                		//TODO mejorar esta estrategia. Puede ocurrir que 
+//                		//el coche todavía esté acelerando cuando mandemos a frenar                		
+//                		consignaVelocidad = 0;
+//                		contCarro.masFrena(90,20);
+//                	}                	                	
                 }
                 System.out.println(consignaVelocidad);
                 consignaVelAnt = consignaVelocidad;
