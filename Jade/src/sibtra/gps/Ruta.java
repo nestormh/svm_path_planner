@@ -578,14 +578,18 @@ public class Ruta implements Serializable {
         	distAux = distEntrePuntos(ptoInicial,ptoAux);
         	int i = getNumPuntos()-1;
         	int indiceAux = getNumPuntos()-1;
-        	while (distAux <= distMin){
+        	while ((distAux <= distMin) && (i>=1)){
         		distMin = distAux;
         		indiceAux = i;
         		i = i - 1;
         		ptoAux = getPunto(i);
         		distAux = distEntrePuntos(ptoInicial,ptoAux);        		
         	}
-        	if (distMin < umbral){
+        	if (indiceAux==1) {
+        		esCerrada = false;
+        		indiceFinal = getNumPuntos()-1;
+        		System.out.println("La ruta está abierta de verdad");        		
+        	} else if (distMin < umbral){
         		esCerrada = true;
         		boolean encontrado = false;
         		indiceFinal = indiceAux;
