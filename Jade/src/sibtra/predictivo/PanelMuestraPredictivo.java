@@ -61,6 +61,8 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     private SpinnerNumberModel jsModHCont;
     private SpinnerNumberModel jsModLanda;
     private SpinnerNumberModel jsModDistMax;
+    private SpinnerNumberModel jsModAlpha;
+    private SpinnerNumberModel jsModPesoError;
     private Ruta rutaAux;
 
     /** Constructor necesita el controlador predictivo */
@@ -117,6 +119,18 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
             jsModDistMax.addChangeListener(this);
             jpPre.add(jsDistMax);
 
+            jpPre.add(new Label("Alpha"));          
+            jsModAlpha = new SpinnerNumberModel(1.05,0.01,2,0.01);
+            JSpinner jsAlpha = new JSpinner(jsModAlpha);
+            jsModAlpha.addChangeListener(this);
+            jpPre.add(jsAlpha);
+            
+            jpPre.add(new Label("Peso Error"));          
+            jsModPesoError = new SpinnerNumberModel(CP.getPesoError(),0.01,10,0.01);
+            JSpinner jsPesoError = new JSpinner(jsModPesoError);
+            jsModPesoError.addChangeListener(this);
+            jpPre.add(jsPesoError);
+            
             jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE, 40));
 //			jpPre.setBorder(BorderFactory.createCompoundBorder(
 //	                   BorderFactory.createLineBorder(Color.red),
@@ -172,6 +186,14 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         if (ce.getSource() == jsModDistMax) {
             double distMax = jsModDistMax.getNumber().doubleValue();
             CP.setRuta(rutaAux.toTr(distMax));
+        }
+        if (ce.getSource() == jsModAlpha){
+        	double alpha = jsModAlpha.getNumber().doubleValue();
+        	CP.setAlpha(alpha);
+        }
+        if (ce.getSource() == jsModPesoError){
+        	double pesoError = jsModPesoError.getNumber().doubleValue();
+        	CP.setPesoError(pesoError);
         }
     }
 
