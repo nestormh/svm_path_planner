@@ -42,7 +42,7 @@ public class ControlPredictivo {
      * sobrepasamientos
      */    
     double landa;
-    double pesoError = 1;
+    double pesoError = 0.8;
     Coche carroOriginal;
     /**
      * Objeto que se copiará del carro original más actualizado en cada llamada
@@ -362,6 +362,20 @@ public class ControlPredictivo {
         }
         return rutaAux;
     }
+    public void setAlpha(double alpha2) {
+    	alpha = alpha2;
+
+    }
+    public void setPesoError(double pesoError2) {
+    	pesoError = pesoError2;
+
+    }
+
+    public double getPesoError() {
+		return pesoError;
+	}
+
+
     public static void main(String[] args){
         Coche carroOri = new Coche();
         double vel = 2;
