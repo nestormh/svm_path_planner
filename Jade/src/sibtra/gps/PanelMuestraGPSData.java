@@ -110,6 +110,15 @@ public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener 
 		//Velocidad m/€s
 		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getVelocidad","%+6.2f")
 		, "Velocidad m/s");
+
+		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getDesvLatitud","%+7.3f")
+		, "Desv. Latitud");
+
+		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getDesvLongitud","%+7.3f")
+		, "Des. Longitud");
+
+		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getDesvAltura","%+7.3f")
+		, "Desv. Altura");
 //		Yaw
 		añadeAPanel(new LabelDato("+????.??") {
 			public void Actualiza(Object oa, boolean hayCambio) {
