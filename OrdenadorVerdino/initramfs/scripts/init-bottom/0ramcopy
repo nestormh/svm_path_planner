@@ -1,0 +1,95 @@
+#!/bin/sh
+
+#Scrip para compiar el root ya montado a disco en memoria RAM y 
+# poner ese como nuevo ROOT
+if [ "$debug" = "y" ]
+then
+	exec >/dev/.initramfs/0ramcopy.debug 2>&1
+	set -x
+fi
+. /scripts/functions
+
+echo "$Id: 0ramcopy,v 1.2 2009/04/17 12:50:33 root Exp root $"
+
+PREREQ=""
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+
+case $1 in
+# get pre-requisites
+prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+for x in $(cat /proc/cmdline); do
+	case ${x} in
+	#Los números indican el tamaño del disco ram 
+	ramcopy=[:digit:][:digit:]*)
+		RAMCOPY="YES"
+		RAMCOPY_SIZE="${x#ramcopy=}"
+		;;
+	#Si no se indica el tamaño se usa 5% más del tamaño ocupado
+	ramcopy*)
+		RAMCOPY="YES"
+		;;
+	esac
+done
+
+if [ -z "${RAMCOPY}" ]
+then
+	exit 0
+fi
+
+# Tamaño del disco Ram
+if [ -n "${RAMCOPY_SIZE}" ]
+then
+	#el indicado
+	size="${RAMCOPY_SIZE}"
+else
+	#5% más de lo que ocupa
+	size=$(du -ks ${rootmnt} | cut -f1)
+	size=$(expr ${size} + ${size} / 20 ) # FIXME: 5% more to be sure
+fi
+
+freespace=$( expr $(awk '/MemFree/{print $2}' /proc/meminfo) + $( awk '/\<Cached/{print $2}' /proc/meminfo ) )
+if [ "${freespace}" -lt "${size}" ]
+then
+	panic "Not enough free memory (${freespace}k free, ${size}k needed) to copy root in RAM."
+	return 1
+fi
+
+newroot="/ramroot"
+mount_options="-o size=${size}k"
+fstype="tmpfs"
+dev="/dev/shm"
+
+
+mkdir "${newroot}"
+
+echo "mount -t ${fstype} ${mount_options} ${dev} ${newroot}"
+mount -t "${fstype}" ${mount_options} "${dev}" "${newroot}"
+
+log_begin_msg "Copiando a RAM"
+cp -a ${rootmnt}/* ${newroot}   # "cp -a" from busybox also copies hidden files
+
+log_end_msg
+#Ponemos root original en nuevo sistema de ficheros
+mkdir "${newroot}"/oldroot
+mount -n -o move "${rootmnt}" "${newroot}"/oldroot
+#movemos disco ram a donde estaba el root anterior
+mount -n -o move "${newroot}" "${rootmnt}"
+
+rmdir "${newroot}"
+
+#Debemos corregir el fstab 
+fstab="${rootmnt}"/etc/fstab 
+mv "${fstab}" "${fstab}.ori"
+grep -v '[[:space:]]/[[:space:]]' "${fstab}.ori" > "${fstab}"
+echo "${dev}	/	${fstype}	${mount_options}	0	0" \
+	>> "${fstab}"
+ 
