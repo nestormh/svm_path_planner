@@ -53,7 +53,13 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
     /** Milisegundos del ciclo */
     private static final long periodoMuestreoMili = 200;
     private static final double COTA_ANGULO = Math.toRadians(30);
+    /** Si la velocidad es más baja que este umbral se deja de mandar comandos al volante*/
 	private static final double umbralMinimaVelocidad = 0.2;
+	/** Distancia a la que el coche empieza a frenar si se encuentra un obstáculo a 
+	 * menos de esa distancia*/
+	private static final double distanciaSeguridad = 10;
+	/** Distancia a la que idealmente se detendrá el coche del obstáculo*/
+	private static final double margenColision = 2;
     private ConexionSerialIMU csi;
     private GPSConnectionTriumph gpsCon;
     private ManejaLMS manLMS;
@@ -81,13 +87,19 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
     private VentanaCoche pmCoche;
     private JLabel jlNumPaquetes;
     private JCheckBox jcbUsarRF;
-    protected double distRF;
+    protected double distRF = 80;
     private int numPaquetesGPS;
+    /** Regula la velocidad que se resta a la consigna principal de velocidad por 
+     * errores en la orientación*/
 	private double gananciaVel = 2;
+	/** Cuando se manda a frenar la función {@link buscaPuntoFrenado} devuelve en esta variable 
+	 * el punto que se encuentra a la distancia de frenado*/
 	private int puntoFrenado=-1;
 	private GPSData centroToTr;
 	private SpinnerNumberModel spGananciaVel;
 	private JSpinner jsGananciaVel;
+	/** Regula la velocidad que se resta a la consigna principal de velocidad por 
+     * errores en la posición lateral*/
 	private double gananciaLateral=1;
 	/** Pendiente de la rampa de frenado para la parada total */
 	private double pendienteFrenado=1.0;
@@ -113,7 +125,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
         try {
             gpsCon = new GPSConnectionTriumph(args[0]);
         } catch (Exception e) {
-            System.err.println("Promblema a crear GPSConnection:" + e.getMessage());
+            System.err.println("Problema a crear GPSConnection:" + e.getMessage());
             System.exit(1);
         }
         if (gpsCon == null) {
@@ -473,12 +485,33 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
                 if (velocidadActual >= umbralMinimaVelocidad)
                 	contCarro.setAnguloVolante(-comandoVolante);
                 
-            	consignaVelocidad = calculaConsignaVel(consignaVelAnt);                    
+            	consignaVelocidad = calculaConsignaVel(consignaVelAnt); 
+            	//Si se pulsa la checkbox de frenar
                 if (puntoFrenado!=-1){
             		double distFrenado = mideDistanciaFrenado(puntoFrenado);
             		double velRampa=distFrenado*pendienteFrenado;
-            		consignaVelocidad=Math.min(consignaVelAnt, velRampa);
+            		//se contempla el caso de que se esté frenando porque se ha pulsado
+            		//la checkbox Frenar y a la vez el RF detecte un obstáculo
+            		if (jcbUsarRF.isSelected() && (distRF <= distanciaSeguridad)){
+            			/* Resto margenColision a distRf para que el coche se detenga a 
+            			 * esa distancia del obstáculo */
+            			double velRampaRF = (distRF-margenColision)*pendienteFrenado; 
+            			velRampa = Math.min(velRampa,velRampaRF);
+            		}
+            		// Nos quedamos con la velocidad menor, la más restrictiva
+            		consignaVelocidad=Math.min(consignaVelocidad, velRampa);
             		System.out.println("Punto frenado a "+distFrenado+" vel. rampa "+ velRampa);
+                }
+                // Si el RF detecta un obstáculo a menos de la dist de seguridad
+                if (jcbUsarRF.isSelected() && (distRF <= distanciaSeguridad)){
+                	double velRampa = (distRF-2)*pendienteFrenado;
+                	if (puntoFrenado!=-1){
+                		double distFrenado = mideDistanciaFrenado(puntoFrenado);
+                		double velRampafrenado = distFrenado*pendienteFrenado;
+                		velRampa = Math.min(velRampa, velRampafrenado);
+                	}
+            		// Nos quedamos con la velocidad menor, la más restrictiva
+                	consignaVelocidad=Math.min(consignaVelocidad, velRampa);
                 }
                 System.out.println(consignaVelocidad);
                 consignaVelAnt = consignaVelocidad;
@@ -524,6 +557,17 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
 			}
 			if(e.getSource() == spGananciaVel){
 				gananciaVel = spGananciaVel.getNumber().doubleValue();
+			}		
+		}
+		if (e.getSource() == jcbNavegando){
+			if (jcbNavegando.isSelected())
+				cp.iniciaNavega();
+		}
+		if (e.getSource() == jcbUsarRF){
+			if(!jcbUsarRF.isSelected()){
+				//Cuando se desactiva la checkbox del rangeFinder la distancia se
+				//se pone al máximo.
+				distRF = 80;
 			}
 		}
 	}
