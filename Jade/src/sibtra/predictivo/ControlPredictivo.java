@@ -13,7 +13,8 @@ import Jama.Matrix;
  * @author Jesus
  */
 public class ControlPredictivo {
-    /**
+    private static final double minAvancePrediccion = 2;
+	/**
      * Variable que indica hasta donde llegará la predicción
      */
     int horPrediccion;
@@ -41,6 +42,7 @@ public class ControlPredictivo {
      * alcanzar un término medio que permita actuar suficientemente rápido pero sin 
      * sobrepasamientos
      */    
+ 
     double landa;
     double pesoError = 0.8;
     Coche carroOriginal;
@@ -72,8 +74,16 @@ public class ControlPredictivo {
 	/** Se usa en calculos internos pero la tenemos como campo para no pedir memoria en cada iteración */
 	private double[] respuestaEscalon;
 	private Coche carroEscalon;
+	/** Inidica el índice del punto de la ruta más cercano al coche de la iteración anterior*/
 	private int indMinAnt;
+	/** Sirve para dar más peso a los componentes más cercanos al instante actual del 
+	 * vector de errores futuros o viceversa.
+	 * si alpha es >1 se pesan más los coeficientes más próximos al instante actual
+     * si alpha está entre 0 y 1 se pesan más los instantes más alejados*/
 	private double alpha = 1.05;
+	/** Hace las veces de ganancia proporcional al error
+	 * 
+	 */
 
 	/**
      * 
@@ -120,7 +130,7 @@ public class ControlPredictivo {
         this.indMinAnt = -1;
         
         
-        // creamos todas las matrices que se usan en las iteracioner para evitar tener que 
+        // creamos todas las matrices que se usan en las iteraciones para evitar tener que 
         //pedir memoria cada vez
         G = new Matrix(horPrediccion,horControl);
         this.landaEye = Matrix.identity(horControl,horControl).times(landa);
@@ -131,7 +141,15 @@ public class ControlPredictivo {
         respuestaEscalon = new double[horPrediccion];
 
     }
-    
+	public double getPesoError() {		
+		return pesoError;
+	}
+	public void setAlpha(double alpha2) {
+		alpha = alpha2;		
+	}
+	public void setPesoError(double pesoError2) {
+		pesoError = pesoError2;		
+	}
     /**
      * 
      * @return Devuelve el primer componente del vector {@link #orientacionesDeseadas}
@@ -177,7 +195,40 @@ public class ControlPredictivo {
             this.ruta = nuevaRuta;
         }
 
-         
+    /** Se encargará de inicializar todas las variables del control predictivo que 
+     * tengan que tener un valor concreto al inicio de una navegación. Tener en cuenta
+     * que se entiende como un inicio de navegación cada vez que el usuario pulse 
+     * en el checkBox navegando. Esto permite conducir manualmente el vehículo hasta
+     * otro punto después de haber realizado una navegación automática y en este nuevo
+     * punto volver a conectar el modo automático
+     * */
+    public void iniciaNavega() {
+    	// Al poner a -1 este índice se le indica al método calculaDistMinOptimizado
+    	// que haga una búsqueda exaustiva por todos los puntos de la ruta
+    	indMinAnt = -1;
+    		
+    }
+    private void calculaHorizonte(){    	
+    	double metrosAvanzados = carroOriginal.getVelocidad()*Ts*horPrediccion;
+    	double velMin = 0.1;
+    	if (metrosAvanzados <= minAvancePrediccion){
+    		//calculo que horizonte de predicción es necesario para que la 
+    		//predicción avance como mínimo minAvancePrediccion metros
+    		if (carroOriginal.getVelocidad() > 0){
+    			horPrediccion = (int)Math.ceil(minAvancePrediccion/(carroOriginal.getVelocidad()*Ts));
+    		}else{    		
+    			if (carroOriginal.getVelocidad() == 0){
+    				//TODO ver que hacemos con el caso de que la 
+    				// velocidad sea negativa o igual a cero
+    				//Evitamos la divisón por cero
+    				//horPrediccion = (int)Math.ceil(minAvancePrediccion/(velMin*Ts));
+    			}
+    			else{
+    				//caso en que la velocidad del coche es negativa
+    			}
+    		}
+    	}
+    }
     /**
      * Calcula la evolución del modelo del vehículo tantos pasos hacia delante como
      * horizonte de predicción se haya definido
@@ -291,7 +342,7 @@ public class ControlPredictivo {
                 }   
         }
         return indMin;
-    }
+    }    
     
     public double calculaComando(){
         //    vector_error = tita_deseado - ftita;
@@ -362,20 +413,6 @@ public class ControlPredictivo {
         }
         return rutaAux;
     }
-    public void setAlpha(double alpha2) {
-    	alpha = alpha2;
-
-    }
-    public void setPesoError(double pesoError2) {
-    	pesoError = pesoError2;
-
-    }
-
-    public double getPesoError() {
-		return pesoError;
-	}
-
-
     public static void main(String[] args){
         Coche carroOri = new Coche();
         double vel = 2;
@@ -392,8 +429,7 @@ public class ControlPredictivo {
 //            System.out.println(rutaPrueba[i][0] + " / " + rutaPrueba[i][1] + 
 //                    "/" + rutaPrueba[i][2]);
 //        }
-        
-        
+                
         ControlPredictivo controlador = new ControlPredictivo(carroOri,rutaPrueba,
                                             horPredic,horCont,paramLanda,paramTs);
         controlador.calculaComando();
@@ -418,5 +454,6 @@ public class ControlPredictivo {
 //        System.out.println("Angulo normalizado " +normalizaAngulo(0));
 //        System.exit(0);
     }
-	
+
+		
 }
