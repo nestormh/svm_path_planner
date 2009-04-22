@@ -22,7 +22,6 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.sun.org.apache.bcel.internal.generic.SIPUSH;
 
 /**
  * {@link JPanel} para examinar el contenido de una ruta.
