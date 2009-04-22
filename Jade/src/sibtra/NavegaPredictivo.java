@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
@@ -16,15 +17,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import sibtra.controlcarro.ControlCarro;
+import sibtra.controlcarro.PanelCarro;
 import sibtra.controlcarro.VentanaCoche;
 import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.GPSData;
 import sibtra.gps.GpsEvent;
 import sibtra.gps.GpsEventListener;
+import sibtra.gps.PanelGPSTriumph;
 import sibtra.gps.PanelMuestraGPSData;
 import sibtra.gps.Ruta;
 import sibtra.imu.AngulosIMU;
@@ -34,12 +35,10 @@ import sibtra.lms.BarridoAngular;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.predictivo.Coche;
-import sibtra.predictivo.CocheModeloAntiguo;
 import sibtra.predictivo.ControlPredictivo;
 import sibtra.predictivo.PanelMuestraPredictivo;
 import sibtra.rfyruta.MiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculo;
-import sibtra.rfyruta.PanelMiraObstaculoSubjetivo;
 import sibtra.util.EligeSerial;
 
 /**
@@ -48,7 +47,7 @@ import sibtra.util.EligeSerial;
  * @author alberto
  *
  */
-public class NavegaPredictivo implements GpsEventListener, ActionListener {
+public class NavegaPredictivo implements ActionListener {
 
     /** Milisegundos del ciclo */
     private static final long periodoMuestreoMili = 200;
@@ -64,7 +63,7 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
     private GPSConnectionTriumph gpsCon;
     private ManejaLMS manLMS;
     private JFrame ventNumeros;
-    private PanelMuestraGPSData PMGPS;
+    private PanelGPSTriumph pgt;
     private PanelMuestraAngulosIMU pmai;
     private JFileChooser fc;
     private Ruta rutaEspacial;
@@ -84,11 +83,10 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
     ControlCarro contCarro;
     private PanelMuestraPredictivo pmp;
     private JLabel jlCalidad;
-    private VentanaCoche pmCoche;
+    private PanelCarro pmCoche;
     private JLabel jlNumPaquetes;
     private JCheckBox jcbUsarRF;
     protected double distRF = 80;
-    private int numPaquetesGPS;
     /** Regula la velocidad que se resta a la consigna principal de velocidad por 
      * errores en la orientación*/
 	private double gananciaVel = 2;
@@ -121,7 +119,6 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
 
         //comunicación con GPS
         System.out.println("Abrimos conexión GPS");
-//		gpsCon=new SimulaGps(args[0]).getGps();
         try {
             gpsCon = new GPSConnectionTriumph(args[0]);
         } catch (Exception e) {
@@ -150,80 +147,96 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
         contCarro = new ControlCarro(args[3]);
 
         if (contCarro.isOpen() == false) {
-            System.err.println("No se obtuvo Conexion al Carro");
-            
+            System.err.println("No se obtuvo Conexion al Carro");            
         }
 
         //Ventana datos numéricos
-        ventNumeros = new JFrame("Datos GPS IMU COCHE");
-        JPanel jpCentral = new JPanel();
-        ventNumeros.add(jpCentral, BorderLayout.CENTER);
-        {   //Parte baja de la ventana
-            JPanel jpSur = new JPanel(new FlowLayout(3));
-            ventNumeros.getContentPane().add(jpSur, BorderLayout.SOUTH);
-
-            //Checkbox para navegar
-            jcbNavegando = new JCheckBox("Navegando");
-            jcbNavegando.setSelected(false);
-            jpSur.add(jcbNavegando);
-            //Checkbox para frenar
-            jcbFrenando = new JCheckBox("Frenar");
-            jcbFrenando.setSelected(false);
-            jcbFrenando.addActionListener(this);
-            jpSur.add(jcbFrenando);
-            //Spinner para fijar la distancia de frenado
-            double value = 5;
-            double min = 1;
-            double max = 50;
-            double step = 0.1;
-            spFrenado = new SpinnerNumberModel(value,min,max,step);
-            jsDistFrenado = new JSpinner(spFrenado);
-            jpSur.add(jsDistFrenado);
-//          Spinner para fijar la ganancia del cálculo d la consigna de Velocidad            
-            spGananciaVel = new SpinnerNumberModel(2,0.1,20,0.1);
-            jsGananciaVel = new JSpinner(spGananciaVel);
-            jpSur.add(jsGananciaVel);
-            //Checkbox para detectar con RF
-            jcbUsarRF = new JCheckBox("Usar RF");
-            jcbUsarRF.setSelected(false);
-            jpSur.add(jcbUsarRF);
-        }
-
-        //paneles uno debajo del otro
-        jpCentral.setLayout(new BoxLayout(jpCentral, BoxLayout.PAGE_AXIS));
-
-        PMGPS = new PanelMuestraGPSData(false);
-        PMGPS.actualizaPunto(new GPSData());
-        jpCentral.add(PMGPS);
-
         {
-        	//TODO Usar panel gpsTriumph
-            JPanel jpGPST = new JPanel();
-            jpCentral.add(jpGPST);
+        	ventNumeros = new JFrame("Datos GPS IMU COCHE");
+        	JPanel jpCentral = new JPanel();
+        	ventNumeros.add(jpCentral, BorderLayout.CENTER);
+        	{   //Parte baja de la ventana
+        		JPanel jpSur = new JPanel(new FlowLayout(3));
+        		ventNumeros.getContentPane().add(jpSur, BorderLayout.SOUTH);
 
-            jlCalidad = new JLabel("Calidad ### %");
-            jpGPST.add(jlCalidad);
-            gpsCon.addGpsEventListener(PMGPS);
-            gpsCon.addGpsEventListener(this);
+        		//Checkbox para navegar
+        		jcbNavegando = new JCheckBox("Navegando");
+        		jcbNavegando.setSelected(false);
+        		jpSur.add(jcbNavegando);
+        		//Checkbox para frenar
+        		jcbFrenando = new JCheckBox("Frenar");
+        		jcbFrenando.setSelected(false);
+        		jcbFrenando.addActionListener(this);
+        		jpSur.add(jcbFrenando);
+        		//Spinner para fijar la distancia de frenado
+        		double value = 5;
+        		double min = 1;
+        		double max = 50;
+        		double step = 0.1;
+        		spFrenado = new SpinnerNumberModel(value,min,max,step);
+        		jsDistFrenado = new JSpinner(spFrenado);
+        		jpSur.add(jsDistFrenado);
+        		// Spinner para fijar la ganancia del cálculo d la consigna de Velocidad
+        		jpSur.add(new JLabel("Ganancia Velocidad"));
+        		spGananciaVel = new SpinnerNumberModel(2,0.1,20,0.1);
+        		jsGananciaVel = new JSpinner(spGananciaVel);
+        		jpSur.add(jsGananciaVel);
 
-            jlNumPaquetes = new JLabel("Mensajes #######");
-            jpGPST.add(jlNumPaquetes);
+        		//Checkbox para detectar con RF
+        		jcbUsarRF = new JCheckBox("Usar RF");
+        		jcbUsarRF.setSelected(false);
+        		jpSur.add(jcbUsarRF);
+        	}
 
+        	//paneles uno debajo del otro
+        	jpCentral.setLayout(new BoxLayout(jpCentral, BoxLayout.PAGE_AXIS));
+
+        	//Panel del GPS
+        	pgt = new PanelGPSTriumph(gpsCon);
+        	pgt.setBorder(BorderFactory.createTitledBorder("GPS"));
+        	pgt.actualizaGPS(new GPSData());
+        	jpCentral.add(pgt);
+
+        	//Panel de la Imu
+        	pmai = new PanelMuestraAngulosIMU();
+        	pmai.setBorder(BorderFactory.createTitledBorder("IMU"));
+        	pmai.actualizaAngulo(new AngulosIMU(0, 0, 0, 0));
+        	jpCentral.add(pmai);
+        	
+        	//Panel del Coche
+        	pmCoche=new PanelCarro(contCarro);
+        	pmCoche.setBorder(BorderFactory.createTitledBorder("COCHE"));
+        	jpCentral.add(pmCoche);
+
+        	ventNumeros.pack();
+        	ventNumeros.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        	ventNumeros.setVisible(true);
+        	
+        	//Tread para refrescar los paneles de la ventana
+            Thread thRefresco = new Thread() {
+            	/** Milisegundos del periodo de actualización */
+            	private long milisPeriodo=500;
+
+                public void run() {
+            		while (true){
+//            			pgt.setEnabled(true);
+            			//GPS
+            			pgt.actualizaGPS(gpsCon.getPuntoActualTemporal());
+            			pgt.repinta();
+            			//IMU
+        				pmai.actualizaAngulo(csi.getAngulo());
+        				pmai.repinta();
+        				//Coche
+        				pmCoche.actualizaCarro();
+        				pmCoche.repinta();
+
+        				try{Thread.sleep(milisPeriodo);} catch (Exception e) {}	
+            		}
+                }
+            };
+            thRefresco.run();
         }
 
-
-        pmai = new PanelMuestraAngulosIMU();
-        pmai.actualizaAngulo(new AngulosIMU(0, 0, 0, 0));
-        jpCentral.add(pmai);
-        //conecto manejador cuando todas las ventanas están creadas
-        csi.addIMUEventListener(pmai);
-
-        VentanaCoche vc=new VentanaCoche(contCarro);
-
-
-        ventNumeros.pack();
-        ventNumeros.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ventNumeros.setVisible(true);
 
         //elegir fichero
         fc = new JFileChooser(new File("./Rutas"));
@@ -289,13 +302,6 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
         ventanaPredictivo.setSize(new Dimension(900, 700));
         ventanaPredictivo.setVisible(true);
 
-    }
-
-    /** Usamos para actulizar la etiqueta de la calidad */
-    public void handleGpsEvent(GpsEvent ev) {
-        jlCalidad.setText(String.format("Calidad Enlace: %4.0f %%", gpsCon.getCalidadLink()));
-        int paquetesAhora = gpsCon.getCuentaPaquetesRecibidos();
-        jlNumPaquetes.setText(String.format("Mensajes %10d", paquetesAhora));
     }
     
     /**
@@ -501,16 +507,9 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
             		// Nos quedamos con la velocidad menor, la más restrictiva
             		consignaVelocidad=Math.min(consignaVelocidad, velRampa);
             		System.out.println("Punto frenado a "+distFrenado+" vel. rampa "+ velRampa);
-                }
-                // Si el RF detecta un obstáculo a menos de la dist de seguridad
-                if (jcbUsarRF.isSelected() && (distRF <= distanciaSeguridad)){
-                	double velRampa = (distRF-2)*pendienteFrenado;
-                	if (puntoFrenado!=-1){
-                		double distFrenado = mideDistanciaFrenado(puntoFrenado);
-                		double velRampafrenado = distFrenado*pendienteFrenado;
-                		velRampa = Math.min(velRampa, velRampafrenado);
-                	}
-            		// Nos quedamos con la velocidad menor, la más restrictiva
+                } else if (jcbUsarRF.isSelected() && (distRF <= distanciaSeguridad)){
+                    // Si el RF detecta un obstáculo a menos de la dist de seguridad
+                	double velRampa = (distRF-margenColision)*pendienteFrenado;
                 	consignaVelocidad=Math.min(consignaVelocidad, velRampa);
                 }
                 System.out.println(consignaVelocidad);
@@ -519,12 +518,6 @@ public class NavegaPredictivo implements GpsEventListener, ActionListener {
                 modCoche.calculaEvolucion(comandoVolante, velocidadActual, periodoMuestreoMili / 1000);
                 pmp.actualiza();
             }
-            //para mostrar si se dejaron de recibir paquetes del GPS
-            int paquetesAhora = gpsCon.getCuentaPaquetesRecibidos();
-            if (numPaquetesGPS == paquetesAhora) {
-                PMGPS.actualizaPunto(null);  //desabilitará todas las labels
-            }
-            numPaquetesGPS = paquetesAhora;
 
             /* no hace falta porque hay un thread que refresca automaticamente
              * pmCoche.actualiza(); 
