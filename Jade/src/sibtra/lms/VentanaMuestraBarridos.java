@@ -9,11 +9,11 @@ import sibtra.util.EligeSerial;
 
 /** Aplicación para mostrar los barridos */
 @SuppressWarnings("serial")
-public class MuestraBarridos extends JFrame {
+public class VentanaMuestraBarridos extends JFrame {
 
 	private ManejaLMS manLMS;
 	private PanelMuestraBarrido pmb;
-	public MuestraBarridos(String ptoRF) {
+	public VentanaMuestraBarridos(String ptoRF) {
 		super("Muestra Barrido");
 		//Conectamos a RF
 		try { 		
@@ -73,7 +73,7 @@ public class MuestraBarridos extends JFrame {
 			}
 		} else puertos=args;
 
-		MuestraBarridos mb=new MuestraBarridos(puertos[0]);
+		VentanaMuestraBarridos mb=new VentanaMuestraBarridos(puertos[0]);
 		
 		while(true) {
 			mb.actulizaBarrido();
