@@ -950,7 +950,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 */
 	public void setConsignaAvanceMS(double valor) {
 		consignaVel = valor * PULSOS_METRO;
-		System.out.println("Consigna Avance " + consignaVel);
+//		System.out.println("Consigna Avance " + consignaVel);
 		controlando = true;
 	}
 

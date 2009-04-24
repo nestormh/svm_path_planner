@@ -20,13 +20,9 @@ import javax.swing.SpinnerNumberModel;
 
 import sibtra.controlcarro.ControlCarro;
 import sibtra.controlcarro.PanelCarro;
-import sibtra.controlcarro.VentanaCoche;
 import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.GPSData;
-import sibtra.gps.GpsEvent;
-import sibtra.gps.GpsEventListener;
 import sibtra.gps.PanelGPSTriumph;
-import sibtra.gps.PanelMuestraGPSData;
 import sibtra.gps.Ruta;
 import sibtra.imu.AngulosIMU;
 import sibtra.imu.ConexionSerialIMU;
@@ -82,9 +78,7 @@ public class NavegaPredictivo implements ActionListener {
     ControlPredictivo cp;
     ControlCarro contCarro;
     private PanelMuestraPredictivo pmp;
-    private JLabel jlCalidad;
     private PanelCarro pmCoche;
-    private JLabel jlNumPaquetes;
     private JCheckBox jcbUsarRF;
     protected double distRF = 80;
     /** Regula la velocidad que se resta a la consigna principal de velocidad por 
@@ -137,6 +131,7 @@ public class NavegaPredictivo implements ActionListener {
         try {
             manLMS = new ManejaLMS(args[2]);
             manLMS.setDistanciaMaxima(80);
+            manLMS.setResolucionAngular((short)100);
             manLMS.CambiaAModo25();
         } catch (LMSException e) {
             System.err.println("No fue posible conectar o configurar RF");
@@ -234,7 +229,7 @@ public class NavegaPredictivo implements ActionListener {
             		}
                 }
             };
-            thRefresco.run();
+            thRefresco.start();
         }
 
 
@@ -289,6 +284,7 @@ public class NavegaPredictivo implements ActionListener {
         ventanaPMO.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pmo = new PanelMiraObstaculo(mi);
         ventanaPMO.getContentPane().add(pmo, BorderLayout.CENTER);
+        ventanaPMO.pack();
         ventanaPMO.setSize(new Dimension(800, 600));
         ventanaPMO.setVisible(true);
 
@@ -322,7 +318,7 @@ public class NavegaPredictivo implements ActionListener {
         errorLateral = Math.sqrt(dx*dx + dy*dy);
 //        errorOrientacion = cp.getOrientacionDeseada() - modCoche.getTita();
         errorOrientacion = Tr[indMin][2] - modCoche.getTita();
-        System.out.println("Error en la orientación "+errorOrientacion);
+//        System.out.println("Error en la orientación "+errorOrientacion);
         if (Tr[indMin][3]>velocidadMax){
             refVelocidad = velocidadMax;
         }else
