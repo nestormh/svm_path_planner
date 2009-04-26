@@ -4,6 +4,7 @@
 package sibtra.rfyruta;
 
 import sibtra.lms.BarridoAngular;
+import sibtra.util.UtilCalculos;
 
 /**
  * Clase para combinar el seguimiento de la ruta con el RF.
@@ -19,7 +20,10 @@ public class MiraObstaculo {
 	
 	/** Trayectoria */
 	double[][] Tr;
-	
+
+	/** Si la trayectoria es cerrada */
+	boolean esCerrada;
+
 	/** Borde Derecho */
 	double[][] Bd;
 	
@@ -79,14 +83,16 @@ public class MiraObstaculo {
 
 	/** indice del barrido donde está el obstáculo más cercano en el camino*/
 	int indBarrSegObs;
-	
+
 	/**
 	 * Constructor necesita conocer la ruta que se va a seguir.
 	 * A partir de ella generará los bordes de la carretera
 	 * @param trayectoria en coordenadas locales.
+	 * @param si la trayectoria es cerrada o no.
 	 * @param debug si queremos activar mensajes de depuracion
 	 */
-	public MiraObstaculo(double[][] trayectoria, boolean debug) {
+	public MiraObstaculo(double[][] trayectoria, boolean esCerrada, boolean debug) {
+		this.esCerrada=esCerrada;
 		this.debug=debug;
 		if(trayectoria==null || trayectoria.length<2 || trayectoria[1].length<2)
 			throw (new IllegalArgumentException("Trayectoria no tienen las dimensiones mínimas"));
@@ -97,9 +103,15 @@ public class MiraObstaculo {
 	}
 
 	/** Constructor sin debug */
-	public MiraObstaculo(double[][] trayectoria) {
-		this(trayectoria,false);
+	public MiraObstaculo(double[][] trayectoria, boolean esCerrada) {
+		this(trayectoria, esCerrada, false);
 	}
+	
+	/** Constructor sin debug y trayectoria supuesta abierta*/
+	public MiraObstaculo(double[][] trayectoria) {
+		this(trayectoria, false, false);
+	}
+
 	/**
 	 * Transcripción de código octave RangeFinder/branches/RFyGPS/ConstruyeCamino.m
 	 * @param tr trayectoria
@@ -109,60 +121,63 @@ public class MiraObstaculo {
 		Bi=new double[tr.length][2];
 		Bd=new double[tr.length][2];
 
+		//Si es cerrada todos los puntos se calculan en el bucle
+		//Si no es cerrada los primeros y últimos puntos se calculan fuera del bucle.
+		//Las variables se inicializan como si NO fuera cerrada.
+		int indIni=1;
+		int indFin=tr.length-1;
+		
 		//Primeros puntos de los bordes a partir del los 2 primeros puntos
 		double[] p1=tr[0];
 		double[] p2=tr[1];
 		double[] v2= {p2[0]-p1[0],p2[1]-p1[1]};
-		double modV2=Math.sqrt(v2[0]*v2[0]+v2[1]*v2[1]);
-		//unitario girado 90º
-		double[] v2u90={-v2[1]/modV2, v2[0]/modV2};
-		
-		Bi[0][0]=p1[0]+v2u90[0]*ancho;  Bi[0][1]=p1[1]+v2u90[1]*ancho;
-		Bd[0][0]=p1[0]-v2u90[0]*ancho;	Bd[0][1]=p1[1]-v2u90[1]*ancho;
-		
-		for(int i=1; i<tr.length-1; i++) {
-			double[] p0=p1;
+		if( !esCerrada) {	
+			//los 2 primeros puntos
+			double modV2=Math.sqrt(v2[0]*v2[0]+v2[1]*v2[1]);
+			//unitario girado 90º
+			double[] v2u90={-v2[1]/modV2, v2[0]/modV2};
+
+			Bi[0][0]=p1[0]+v2u90[0]*ancho;  Bi[0][1]=p1[1]+v2u90[1]*ancho;
+			Bd[0][0]=p1[0]-v2u90[0]*ancho;	Bd[0][1]=p1[1]-v2u90[1]*ancho;
+		} else {
+			//Se cambian las variables para el caso de cerrada
+			indIni=0;
+			indFin=tr.length;
+			p1=tr[tr.length-1];
+			p2=tr[0];
+			v2[0]=p2[0]-p1[0];	v2[1]=p2[1]-p1[1];
+		}
+		for(int i=indIni; i<indFin; i++) {
 			p1=p2;
 			p2=tr[i+1];
 			double[] v1={v2[0],v2[1]};
 			v2[0]=p2[0]-p1[0];	v2[1]=p2[1]-p1[1];
-			double[] v1u90=v2u90;
-			modV2=Math.sqrt(v2[0]*v2[0]+v2[1]*v2[1]);
-			v2u90[0]=-v2[1]/modV2;	v2u90[1]=v2[0]/modV2;
 			
 			double Ti1=Math.atan2(v1[1], v1[0]);
 			//Tita medios
-			double Ti_2=anguloVectores(v1,v2)/2.0;
+			double Ti_2=UtilCalculos.anguloVectores(v1,v2)/2.0;
 			double d=ancho/Math.cos(Ti_2);
 			double angRot=Ti1-Math.PI/2+Ti_2;
 			//vector perpendicular medio a v1 y v2
 			double[] vpc={d*Math.cos(angRot),	d*Math.sin(angRot)};
 			
+			
+			//Añadimos un punto a cada uno de los bordes
 			Bd[i][0]=p1[0]+vpc[0];	Bd[i][1]=p1[1]+vpc[1];
 			Bi[i][0]=p1[0]-vpc[0];	Bi[i][1]=p1[1]-vpc[1];
 			
 		}
-		Bi[tr.length-1][0]=p2[0]+v2u90[0]*ancho;	Bi[tr.length-1][1]=p2[1]+v2u90[1]*ancho;
-		Bd[tr.length-1][0]=p2[0]-v2u90[0]*ancho;	Bd[tr.length-1][1]=p2[1]-v2u90[1]*ancho;
-		
+		if (!esCerrada){
+			//los 2 últimos puntos
+			double modV2=Math.sqrt(v2[0]*v2[0]+v2[1]*v2[1]);
+			//unitario girado 90º
+			double[] v2u90={-v2[1]/modV2, v2[0]/modV2};
+
+			Bi[tr.length-1][0]=p2[0]+v2u90[0]*ancho;	Bi[tr.length-1][1]=p2[1]+v2u90[1]*ancho;
+			Bd[tr.length-1][0]=p2[0]-v2u90[0]*ancho;	Bd[tr.length-1][1]=p2[1]-v2u90[1]*ancho;
+		}		
 	}
 	
-	/**
-	 * @param v1 primer verctor de 2 componentes (x,y)
-	 * @param v2 segundo vector de 2 componenetes (x,y)
-	 * @return angulo formado por los 2 vectores en rango (-PI,PI)
-	 */
-	public static double anguloVectores(double[] v1, double[] v2) {
-		double Ti1=Math.atan2(v1[1],v1[0]);
-		double Ti2=Math.atan2(v2[1],v2[0]);
-		double Ti=Ti2-Ti1;
-		if(Ti<=-Math.PI)
-			Ti=Ti+2*Math.PI;
-		if(Ti>Math.PI)
-			Ti=Ti-2*Math.PI;
-		return Ti;
-	}
-
 	/**
 	 * En un momento dado nos dice a que distancia se encuentra el obstaculo más cercano
 	 * @param posicionLocal Posición en coordenadas locales donde nos encontramos
@@ -220,7 +235,7 @@ public class MiraObstaculo {
 				break; //punto muy lejos para considerarlo
 			}
 			v2[0]=Bd[iptoD][0]-posicionLocal[0];	v2[1]=Bd[iptoD][1]-posicionLocal[1];
-			double angD=anguloVectores(v, v2)+Math.PI/2;
+			double angD=UtilCalculos.anguloVectores(v, v2)+Math.PI/2;
 			if (angD>=AngIniB && angD<=AngFinB) {
 				encontradoIniDer=true;
 				break; //este punto está dentro del barrido
@@ -241,7 +256,7 @@ public class MiraObstaculo {
 				break; 
 			}
 			v2[0]=Bi[iptoI][0]-posicionLocal[0];	v2[1]=Bi[iptoI][1]-posicionLocal[1];
-			double angI=anguloVectores(v, v2)+Math.PI/2;
+			double angI=UtilCalculos.anguloVectores(v, v2)+Math.PI/2;
 			if (angI>=AngIniB && angI<=AngFinB) {
 				encontradoIniIzd=true;
 				break; //este punto está dentro del barrido
@@ -267,7 +282,7 @@ public class MiraObstaculo {
 					double AngDant=AngD;
 					double[] v2D={Bd[iptoD][0]-posicionLocal[0], Bd[iptoD][1]-posicionLocal[1]};
 					double DistD=largoVector(v2D);
-					AngD=anguloVectores(v, v2D)+Math.PI/2; //ya que 0º está 90º a la derecha
+					AngD=UtilCalculos.anguloVectores(v, v2D)+Math.PI/2; //ya que 0º está 90º a la derecha
 					if (AngD<AngDant) {
 						log("El camino gira Decha Dejamos derecha");
 						avanD=false;
@@ -302,7 +317,7 @@ public class MiraObstaculo {
 					double AngIant=AngI;
 					double[] v2I={Bi[iptoI][0]-posicionLocal[0], Bi[iptoI][1]-posicionLocal[1]};
 					double DistI=largoVector(v2I);
-					AngI=anguloVectores(v, v2I)+Math.PI/2; //ya que 0º está 90º a la derecha
+					AngI=UtilCalculos.anguloVectores(v, v2I)+Math.PI/2; //ya que 0º está 90º a la derecha
 					if (AngI>AngIant) {
 						log("El camino gira Izquierda. Dejamos izquierda");
 						avanI=false;
@@ -519,14 +534,14 @@ public class MiraObstaculo {
 		
 
 		//Está en el segmento que une los puntos en i
-		sumAng=anguloVectores(vD, vA);
+		sumAng=UtilCalculos.anguloVectores(vD, vA);
 		if( Math.abs((sumAng-Math.PI))<1e-3 )
 			return true;
 
 		
-		sumAng+=anguloVectores(vA, vB);
-		sumAng+=anguloVectores(vB, vC);
-		sumAng+=anguloVectores(vC, vD);
+		sumAng+=UtilCalculos.anguloVectores(vA, vB);
+		sumAng+=UtilCalculos.anguloVectores(vB, vC);
+		sumAng+=UtilCalculos.anguloVectores(vC, vD);
 		
 		return (Math.abs(Math.abs(sumAng)-(2*Math.PI))<1e-3);
 

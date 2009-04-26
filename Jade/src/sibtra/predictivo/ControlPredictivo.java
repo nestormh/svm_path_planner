@@ -32,7 +32,7 @@ public class ControlPredictivo {
     /**
      * Indica si la ruta está cerrada o no
      */
-    static boolean rutaCerrada;
+    private boolean rutaCerrada;
     /**
      * Dependiendo de su valor se le da más importancia a minimizar el error o 
      * a minimizar el gasto de comando. Si es igual a 0 no tiene en cuenta el gasto de 
@@ -246,7 +246,7 @@ public class ControlPredictivo {
 //        vec_deseado(1,:) = k_dist*(pos_ref(mod(ind_min(k)+cerca,length(pos_ref))+1,:) - [carro.x,carro.y])
 //+ k_ang*[cos(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1)),sin(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1))];
 //        int indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());        
-        indMinAnt = calculaDistMinOptimizado(ruta,carroSim.getX(),carroSim.getY(),indMinAnt);
+        indMinAnt = UtilCalculos.indiceMasCercanoOptimizado(ruta, rutaCerrada, carroSim.getX(),carroSim.getY(),indMinAnt);
         double dx=ruta[indMinAnt][0]-carroSim.getX();
         double dy=ruta[indMinAnt][1]-carroSim.getY();
         distanciaLateral=Math.sqrt(dx*dx+dy*dy);
@@ -261,7 +261,7 @@ public class ControlPredictivo {
         for (int i=1; i<horPrediccion;i++ ){
             carroSim.calculaEvolucion(comando,velocidad,Ts);
             predicOrientacion[i] = carroSim.getTita();
-            indMin = calculaDistMinOptimizado(ruta,carroSim.getX(),carroSim.getY(),indMin);
+            indMin = UtilCalculos.indiceMasCercanoOptimizado(ruta, rutaCerrada, carroSim.getX(),carroSim.getY(),indMin);
 //            indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());
             vectorDeseadoX = ruta[indMin][0] - carroSim.getX() + Math.cos(ruta[indMin][2]);
             vectorDeseadoY = ruta[indMin][1] - carroSim.getY() + Math.sin(ruta[indMin][2]);
@@ -281,68 +281,7 @@ public class ControlPredictivo {
         
         return vectorError;
     }
-    /**
-     * Calcula la distancia mínima entre un punto y una trayectoria
-     * @param ruta Array de doubles bidimensional
-     * @param posX Coordenada x del punto
-     * @param posY Coordenada y del punto
-     * @return Índice de la ruta en el que se encuentra el punto de la 
-     * ruta más cercano al punto (posX,posY)
-     */
-    public static int calculaDistMin(double[][] ruta,double posX,double posY){
-        //Buscar punto más cercano al coche
-            double distMin=Double.POSITIVE_INFINITY;
-            int indMin=0;
-            double dx;
-            double dy;
-            for(int i=0; i<ruta.length; i++) {
-                dx=posX-ruta[i][0];
-                dy=posY-ruta[i][1];
-                double dist=Math.sqrt(dx*dx+dy*dy);
-                if(dist<distMin) {
-                    indMin=i;
-                    distMin=dist;
-                }
-                
-            }
-            return indMin;
-    }
-    /**
-     * Método optimizado de búsqueda del punto más cercano utilizando 
-     * la información del último punto más cercano. Si en el parámetro indMinAnt se pasa
-     * un número negativo realiza una búsqueda exaustiva
-     * @param indMinAnt
-     * @return
-     */
-    public static int calculaDistMinOptimizado(double[][] ruta,double posX,double posY,int indMinAnt){        
-        double dx;
-        double dy;
-        double distMin=Double.POSITIVE_INFINITY;
-        int indMin=0;
-        int indiceInicial = indMinAnt - 10;
-        if(indMinAnt<0){
-        	return calculaDistMin(ruta, posX, posY);
-        }
-        if (rutaCerrada){
-        	indiceInicial = (indMinAnt + ruta.length - 10)%ruta.length;
-        }else{        	
-        	if (indiceInicial <= 0)
-                indiceInicial = 0;
-        }        
-        boolean encontrado=false;
-		for(int i=indiceInicial;encontrado!=true; i=(i+1)%ruta.length) {
-                dx=posX-ruta[i][0];
-                dy=posY-ruta[i][1];
-                double dist=Math.sqrt(dx*dx+dy*dy);                
-                if(dist<=distMin) {
-                    indMin=i;
-                    distMin=dist;                   
-                }else{                    
-                    encontrado=true;
-                }   
-        }
-        return indMin;
-    }    
+    
     
     public double calculaComando(){
         //    vector_error = tita_deseado - ftita;
@@ -443,7 +382,7 @@ public class ControlPredictivo {
             System.out.println("Comando " + comandoVolante);
             carroOri.setConsignaVolante(comandoVolante);
             carroOri.calculaEvolucion(comandoVolante,2,0.2);
-            int indice = ControlPredictivo.calculaDistMin(rutaPrueba,carroOri.getX(),carroOri.getY());
+            int indice = UtilCalculos.indiceMasCercano(rutaPrueba,carroOri.getX(),carroOri.getY());
             double error = rutaPrueba[indice][2] - carroOri.getTita();
             System.out.println("Error " + error);
         }

@@ -36,6 +36,7 @@ import sibtra.predictivo.PanelMuestraPredictivo;
 import sibtra.rfyruta.MiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculo;
 import sibtra.util.EligeSerial;
+import sibtra.util.UtilCalculos;
 
 /**
  * Para realizar la navegación controlando el coche con @link {@link ControlPredictivo}
@@ -312,7 +313,7 @@ public class NavegaPredictivo implements ActionListener {
         double refVelocidad;
         double errorOrientacion;      
         double errorLateral;
-        int indMin = ControlPredictivo.calculaDistMin(Tr,modCoche.getX(),modCoche.getY());
+        int indMin = UtilCalculos.indiceMasCercano(Tr,modCoche.getX(),modCoche.getY());
         double dx = Tr[indMin][0]-modCoche.getX();
         double dy = Tr[indMin][1]-modCoche.getY();
         errorLateral = Math.sqrt(dx*dx + dy*dy);
@@ -339,7 +340,7 @@ public class NavegaPredictivo implements ActionListener {
      * @return Índice del punto que se encuentra a la distancia de frenado
      */
     public int buscaPuntoFrenado(double distFrenado){
-    	int indCercano = ControlPredictivo.calculaDistMin(Tr, modCoche.getX(),modCoche.getY());
+    	int indCercano = UtilCalculos.indiceMasCercano(Tr, modCoche.getX(),modCoche.getY());
     	double dist = 0;
     	int i = 0;    	
     	for (i=indCercano;dist<distFrenado;i++){
@@ -358,7 +359,7 @@ public class NavegaPredictivo implements ActionListener {
      */
     public double mideDistanciaFrenado(int puntoFrenado){
     	double distFrenado=0;
-    	int indCercano = ControlPredictivo.calculaDistMin(Tr, modCoche.getX(),modCoche.getY());    	   	
+    	int indCercano = UtilCalculos.indiceMasCercano(Tr, modCoche.getX(),modCoche.getY());    	   	
     	for (int i=indCercano;i<puntoFrenado;i++){
     		double dx=Tr[i][0]-Tr[(i+1)%Tr.length][0];
             double dy=Tr[i][1]-Tr[(i+1)%Tr.length][1];

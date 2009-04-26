@@ -140,7 +140,7 @@ public class UtilCalculos {
 	}
 
 	/** @return devuelve entero CON SIGNO tomando a como byte para parte alta y b como parte baja */
-	static int byte2enteroSigno(int a, int b) {
+	public static int byte2enteroSigno(int a, int b) {
 		if (a > 129) {
 			int atemp = a * 256 + b - 1;
 			atemp = atemp ^ 65535;
@@ -151,4 +151,110 @@ public class UtilCalculos {
 		return a * 256 + b;
 	}
 
+	/**
+	 * @param v1 primer verctor de 2 componentes (x,y)
+	 * @param v2 segundo vector de 2 componenetes (x,y)
+	 * @return angulo formado por los 2 vectores en rango (-PI,PI)
+	 */
+	public static double anguloVectores(double[] v1, double[] v2) {
+		double Ti1=Math.atan2(v1[1],v1[0]);
+		double Ti2=Math.atan2(v2[1],v2[0]);
+		double Ti=Ti2-Ti1;
+		return normalizaAngulo(Ti);
+	}
+
+	/**
+	 * Indice del punto más cercano de ruta al punto
+	 * @param ruta array con los puntos de la tractoria
+	 * @param posX Coordenada x del punto
+	 * @param posY Coordenada y del punto
+	 * @return Índice de la ruta en el que se encuentra el punto de la 
+	 * ruta más cercano al punto (posX,posY)
+	 */
+	public static int indiceMasCercano(double[][] ruta,double posX,double posY){
+	    //Buscar punto más cercano al coche
+	        double distMin=Double.POSITIVE_INFINITY;
+	        int indMin=0;
+	        double dx;
+	        double dy;
+	        for(int i=0; i<ruta.length; i++) {
+	            dx=posX-ruta[i][0];
+	            dy=posY-ruta[i][1];
+	            double dist=Math.sqrt(dx*dx+dy*dy);
+	            if(dist<distMin) {
+	                indMin=i;
+	                distMin=dist;
+	            }
+	            
+	        }
+	        return indMin;
+	}
+
+	/**
+	 * Indice del punto más cercano de ruta al punto
+	 * @param ruta array con los puntos de la tractoria
+	 * @param pos punto a buscar
+	 * @return Índice de la ruta en el que se encuentra el punto de la 
+	 * ruta más cercano al punto pos
+	 */
+	public static int indiceMasCercano(double[][] ruta,double pos[]){
+		return indiceMasCercano(ruta, pos[0], pos[1]);
+	}
+
+	/**
+	 * Método optimizado de búsqueda del punto más cercano utilizando 
+	 * la información del último punto más cercano. Si en el parámetro indMinAnt se pasa
+	 * un número negativo realiza una búsqueda exaustiva
+	 * @param ruta array con los puntos de la tractoria
+	 * @param esCerrada si la ruta debe considerarse cerrada
+	 * @param posX Coordenada x del punto
+	 * @param posY Coordenada y del punto
+	 * @param indMinAnt indice donde estaba el mínimo en la iteración anterior
+	 * @return Índice de la ruta en el que se encuentra el punto de la 
+	 * ruta más cercano al punto pos
+	 */
+	public static int indiceMasCercanoOptimizado(double[][] ruta, boolean esCerrada,double posX,double posY,int indMinAnt){        
+	    double dx;
+	    double dy;
+	    double distMin=Double.POSITIVE_INFINITY;
+	    int indMin=0;
+	    int indiceInicial = indMinAnt - 10;
+	    if(indMinAnt<0){
+	    	return indiceMasCercano(ruta, posX, posY);
+	    }
+	    if (esCerrada){
+	    	indiceInicial = (indMinAnt + ruta.length - 10)%ruta.length;
+	    }else{        	
+	    	if (indiceInicial <= 0)
+	            indiceInicial = 0;
+	    }        
+	    boolean encontrado=false;
+		for(int i=indiceInicial;encontrado!=true; i=(i+1)%ruta.length) {
+	            dx=posX-ruta[i][0];
+	            dy=posY-ruta[i][1];
+	            double dist=Math.sqrt(dx*dx+dy*dy);                
+	            if(dist<=distMin) {
+	                indMin=i;
+	                distMin=dist;                   
+	            }else{                    
+	                encontrado=true;
+	            }   
+	    }
+	    return indMin;
+	}
+
+	/**
+	 * Método optimizado de búsqueda del punto más cercano utilizando 
+	 * la información del último punto más cercano. Se busca entorno a ese.
+	 * Si en el parámetro indMinAnt se pasa un número negativo realiza una búsqueda exaustiva
+	 * @param ruta array con los puntos de la tractoria
+	 * @param esCerrada si la ruta debe considerarse cerrada
+	 * @param pos punto a buscar
+	 * @param indMinAnt indice donde estaba el mínimo en la iteración anterior. Si es negativo no se tiene en cuenta
+	 * @return Índice de la ruta en el que se encuentra el punto de la 
+	 * ruta más cercano al punto pos
+	 */
+	public static int indiceMasCercanoOptimizado(double[][] ruta, boolean esCerrada,double[] pos,int indMinAnt){
+		return indiceMasCercanoOptimizado(ruta, esCerrada, pos[0], pos[1], indMinAnt);
+	}
 }

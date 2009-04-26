@@ -34,6 +34,7 @@ import sibtra.log.LoggerDouble;
 import sibtra.log.LoggerFactory;
 import sibtra.log.VentanaLoggers;
 import sibtra.util.PanelMuestraTrayectoria;
+import sibtra.util.UtilCalculos;
 
 /**
  * Panel para mostrar la información del control predictivo y poder depurarlo.
@@ -382,7 +383,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                 carroOri.calculaEvolucion(comandoVolante, 2, 0.2);
                 carroViejo.calculaEvolucion(comandoVolante, 2, 0.2);
                 //indice = ControlPredictivo.calculaDistMinOptimizado(rutaPrueba, carroOri.getX(), carroOri.getY(), indice);
-                indice = ControlPredictivo.calculaDistMin(rutaPrueba, carroOri.getX(), carroOri.getY());
+                indice = UtilCalculos.indiceMasCercano(rutaPrueba, carroOri.getX(), carroOri.getY());
 //                System.out.println(indice);
                 double error = rutaPruebaRellena[indice][2] - carroOri.getTita();
                 lgError.add(error);
