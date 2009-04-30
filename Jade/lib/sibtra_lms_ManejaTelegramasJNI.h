@@ -17,6 +17,22 @@ JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_ConectaPuerto
 
 /*
  * Class:     sibtra_lms_ManejaTelegramasJNI
+ * Method:    isInicializado
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_isInicializado
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     sibtra_lms_ManejaTelegramasJNI
+ * Method:    setBaudrate
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_setBaudrate
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     sibtra_lms_ManejaTelegramasJNI
  * Method:    LeeMensaje
  * Signature: ()[B
  */

@@ -9,13 +9,23 @@ package sibtra.lms;
  *
  */
 public class ManejaTelegramasJNI implements ManejaTelegramas {
-
+	
 	/**
 	 * Para abrir y configurar puerto serie
 	 * 
 	 * @param NombrePuerto nombre del puerto serie a utilizar
 	 */
 	public native boolean ConectaPuerto(String NombrePuerto); 
+	
+	/** @return si el pueto ha sido correctamente inicializado por {@link #ConectaPuerto(String)} */
+	public native boolean isInicializado();
+
+	/** 
+	 * Trata de fijar la velocidad de transmisisón del puerto al indicado
+	 * @param baudrate velocidad desead
+	 * @return ture si la velocidad es valida y se consiguió el cambio.
+	 */
+	public native boolean setBaudrate(int baudrate);
 	
 	/**
 	 * Espera la llegada de un telegrama por la serial y extrae el mensaje
@@ -35,7 +45,7 @@ public class ManejaTelegramasJNI implements ManejaTelegramas {
 	 * Cierra el puerto
 	 */
 	public native boolean cierraPuerto();
-    
+
 	static {
 		System.out.println("java.library.path:"
 				+System.getProperty("java.library.path"));
@@ -45,11 +55,13 @@ public class ManejaTelegramasJNI implements ManejaTelegramas {
 	   System.load(libreria);
     }
 	
+	
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String		      defaultPort = "/dev/ttyS0";
+		String		      defaultPort = "/dev/ttyS1";
 		ManejaTelegramasJNI	MT = null;
 		
 		if (args.length > 0) {
@@ -58,10 +70,9 @@ public class ManejaTelegramasJNI implements ManejaTelegramas {
 
 		MT = new ManejaTelegramasJNI();
 		MT.ConectaPuerto(defaultPort);
-		
+
 		byte[] MenBarrido={0x30, 0x01}; 
 		//byte[] MenBarrido={0x37, 0x01, 0x00, (byte)0xc0, 0x00}; 
-		
 		int numbar=1;
 		while(numbar<=5) {
 			System.err.println("Intentamos con barrido "+numbar);

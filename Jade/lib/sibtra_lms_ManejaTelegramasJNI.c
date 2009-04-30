@@ -1,6 +1,8 @@
 
-/* Si queremos mensajes de depuración, descomentar
-#define  DEPURA */
+/* Si queremos mensajes de depuración, descomentar */
+/*#define  INFO */
+/* Si queremos los mensaje de error, descomentar la siguiente */
+/*#define ERR */
 
 #include "sibtra_lms_ManejaTelegramasJNI.h"
 
@@ -19,6 +21,12 @@
 #include <errno.h>
 #include <time.h>
 
+#ifdef ERR
+#define ERROR(men)	{fprintf(stderr,men); fflush(stderr);}	
+#else
+#define ERROR(men)	{}
+#endif
+
 #define BAUDRATE B38400
 #define MODEMDEVICE "/dev/ttyS0"
 
@@ -26,8 +34,9 @@
 
 #define TAMBUF (MAX_LEN+1)
 
-#define TimeOut (10*1000) /*10 sg*/
-/*#define TimeOut (200) /*10 sg*/
+/*10 sg*/
+/*#define TimeOut (10*1000) */ 
+#define TIME_OUT (200) /*200 ms*/
 
 /*Descriptor de archivo de la serial*/
 int fdSer;
@@ -38,6 +47,9 @@ unsigned char Buffer[MAX_LEN];
 
 /*Esta inicializado*/
 int Inicializado=0;
+
+/*Guardarán las configuración del puerto*/
+struct termios oldtio,newtio;
 
 /*
 Funcion para calcular el checksum
@@ -99,7 +111,6 @@ ssize_t LeeTimeOut(int fd, void *buf, size_t nbytes, unsigned long miliTO) {
  */
 JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_ConectaPuerto
 (JNIEnv *env, jobject obj, jstring jsNombrePuerto) {
-   struct termios oldtio,newtio;
 
    Inicializado=JNI_FALSE;
 
@@ -158,6 +169,68 @@ JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_ConectaPuerto
 }
 
 /*
+ * Class:     sibtra_lms_ManejaTelegramasJNI
+ * Method:    setBaudrate
+ * Signature: (I)Z
+ * Tenemos que comprobar que la velocidad es valida y tratar de hacer el cambio.
+ * Debe estar inicializado
+ */
+JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_setBaudrate
+  (JNIEnv *env, jobject obj, jint bautrate) {
+
+  speed_t br;
+  /*Si no esta inicializado, salimos */
+  if(Inicializado!=JNI_TRUE)
+  	return JNI_FALSE;
+  switch (bautrate) {
+    case 0: br=B0; break;
+    case 50: br=B50; break;
+    case 75: br=B75; break;
+    case 110: br=B110; break;
+    case 134: br=B134; break;
+    case 150: br=B150; break;
+    case 200: br=B200; break;
+    case 300: br=B300; break;
+    case 600: br=B600; break;
+    case 1200: br=B1200; break;
+    case 1800: br=B1800; break;
+    case 2400: br=B2400; break;
+    case 4800: br=B4800; break;
+    case 9600: br=B9600; break;
+    case 19200: br=B19200; break;
+    case 38400: br=B38400; break;
+    case 57600: br=B57600; break;
+    case 115200: br=B115200; break;
+    case 230400: br=B230400; break;
+    default: 
+     {      /*No es velocidad válida*/
+        jclass newExcCls = (*env)->FindClass(env, 
+                      "java/lang/IllegalArgumentException");
+        if (newExcCls == NULL) {
+            /* Unable to find the exception class, give up. */
+             return JNI_FALSE;
+         }
+         (*env)->ThrowNew(env, newExcCls, "Baudrate inválido");
+      }
+      return JNI_FALSE;
+  	
+    }
+  cfsetispeed(&newtio,br);
+  cfsetospeed(&newtio,br);
+
+  /* no parce necesario 
+	 tcflush(fdSer, TCIFLUSH);
+  */
+  if(tcsetattr(fdSer,TCSANOW,&newtio)<0) {
+	   perror("Al establecer la nueva velocidad");
+	   fflush(stderr);
+       return JNI_FALSE;
+   }
+  return JNI_TRUE;
+}
+
+
+/*
  * Class:     sibtra_ManejaTelegramasJNI
  * Method:    LeeMensaje
  * Signature: ()[B
@@ -173,88 +246,95 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   if(!Inicializado)
     return 0;
      
-  if(!(res=LeeTimeOut(fdSer,buf,1,TimeOut))) {
-    printf("\nHa habido timeout esperando inicio mensaje");
+  if(!(res=LeeTimeOut(fdSer,buf,1,TIME_OUT))) {
+    ERROR("\nHa habido timeout esperando inicio mensaje\n");
     return 0;
   }
 
   if(buf[0]==0x06) {
-    printf("\nEs reconocimiento");
+    ERROR("\nEs reconocimiento\n");
     return 0;
   }
   if(buf[0]==0x15) {
-    printf("\nNO RECONOCIMIENTO");
+    ERROR("\nNO RECONOCIMIENTO\n");
     return 0;
   }
 
   if(buf[0]!=0x02) {
-    printf("\nNO es comeinzo de telegrama: ALGO RARO");
+    ERROR("\nNO es comienzo de telegrama: ALGO RARO\n");
     return 0;
   }
 
-#ifdef DEPURA
-  printf("\n STX: %02hhX;",buf[0]);
+#ifdef INFO
+  fprintf(stdout,"\n STX: %02hhX;",buf[0]);
+  fflush(stdout);
 #endif
 
   /*Tenemos que conseguir todo el mensaje*/
   /*Primero hasta saber el tamaño*/
   while(res<4) {
     int bl;
-    if(!(bl=LeeTimeOut(fdSer,buf+res,4-res,TimeOut))) {
-      printf("\nHa habido timeout esperando tamaño");
+    if(!(bl=LeeTimeOut(fdSer,buf+res,4-res,TIME_OUT))) {
+      ERROR("\nHa habido timeout esperando tamaño\n");
       return 0;
     }
     res+=bl;
   }         
-#ifdef DEPURA
-  printf(" Addr: %02hhX;",buf[1]);
+#ifdef INFO
+  fprintf(stdout," Addr: %02hhX;",buf[1]);
+  fflush(stdout);
 #endif
 
   len=(unsigned short)(buf[2] | (buf[3]<<8));
 
-#ifdef DEPURA
-  printf(" Len: %02hhX%02hhX (%d)",buf[3],buf[2],len);
+#ifdef INFO
+  fprintf(stdout," Len: %02hhX%02hhX (%d)",buf[3],buf[2],len);
+  fflush(stdout);
 #endif
 
   /*Conseguimos el resto del mensaje*/
   while(res<(len+6)) {
     int bl;
-    if(!(bl=LeeTimeOut(fdSer,buf+res,(len+6)-res,TimeOut))) {
-      printf("\nHa habido timeout esperando resto del mensaje: %d de %d",res, len+6);
+    if(!(bl=LeeTimeOut(fdSer,buf+res,(len+6)-res,TIME_OUT))) {
+#ifdef ERR
+      fprintf(stderr,"\nHa habido timeout esperando resto del mensaje: %d de %d\n",res, len+6);
+      fflush(stderr);
+#endif
       return 0;
     }
     res+=bl;
   }         
 
-#ifdef DEPURA
-   printf("\nTelegrama completo:\n"); 
+#ifdef INFO
+   fprintf(stdout,"\nTelegrama completo:\n"); 
 
    /*Volcamos en hexadecimal como mucho 20 bytes */
    for (i=0; i<res && i<20; i++)
-     printf(" %02hhX",buf[i]);
-/*     printf(" => ");  */
+     fprintf(stdout," %02hhX",buf[i]);
+/*     fprintf(stdout," => ");  */
 
 /*   /\*Volcamos caracter *\/ */
 /*   for (i=0; i<res; i++) */
-/*     printf("%c",buf[i]);  */
+/*     fprintf(stdout,"%c",buf[i]);  */
 
 
-/*   printf("\n Mensaje: "); */
+/*   fprintf(stdout,"\n Mensaje: "); */
 /*   /\*Volcamos en hexadecimal*\/ */
 /*   for (i=4; i<(res-3); i++) */
-/*     printf(" %02hhX",buf[i]); */
+/*     fprintf(stdout," %02hhX",buf[i]); */
 
-/*   printf(" => "); */
+/*   fprintf(stdout," => "); */
 /*   /\*Volcamos caracter*\/ */
 /*   for (i=4; i<(res-3); i++) */
-/*     printf("%c",buf[i]); */
+/*     fprintf(stdout,"%c",buf[i]); */
 
 
-  printf("\n Comando: %02hhX; Status: %02hhX;",buf[4],buf[res-3]);
+  fprintf(stdout,"\n Comando: %02hhX; Status: %02hhX;",buf[4],buf[res-3]);
 
-  printf("\nCHKS: %02hhX%02hhX;",buf[res-1],buf[res-2]);
+  fprintf(stdout,"\nCHKS: %02hhX%02hhX;",buf[res-1],buf[res-2]);
 
-  printf(" Calculado: %04hX",CalculaCRC(buf,res-2));
+  fprintf(stdout," Calculado: %04hX",CalculaCRC(buf,res-2));
+  fflush(stdout);
 #endif
 
 
@@ -304,45 +384,51 @@ JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_EnviaMensaje
   buf[4+TamMen]=CRC%256;
   buf[4+TamMen+1]=CRC/256;
 
-#ifdef DEPURA
-  printf("\nTelegrama Completo:");
+#ifdef INFO
+  fprintf(stdout,"\nTelegrama Completo:");
   /*Volcamos en hexadecimal*/
   for (i=0; i<TamMen+6; i++)
-    printf(" %02hhX",buf[i]);
+    fprintf(stdout," %02hhX",buf[i]);
 
-  printf("\nProcedemos a enviarlo:");
+  fprintf(stdout,"\nProcedemos a enviarlo:");
+  fflush(stdout);
 #endif
 
   /*Antes de enviar purgamos todo lo que hay a la entrada
    para ello aprovechamos el buffer no usado*/
-  while(LeeTimeOut(fdSer,buf+TamMen+7,TAMBUF-TamMen-7,1)>0);
+//  while(LeeTimeOut(fdSer,buf+TamMen+7,TAMBUF-TamMen-7,1)>0);
 
   res=write(fdSer,buf,TamMen+6);
   if(res<TamMen+6) {
-    printf("\nNo se envió todo el mensaje, solo %d caracteres\n",res);
+#ifdef ERR
+    fprintf(stderr,"\nNo se envió todo el mensaje, solo %d caracteres\n",res);
+    fflush(stderr);
+#endif
     return JNI_FALSE;
   } else
 
 #ifdef DEBUG
-    printf("\nEnviado Correctamente");
+    fprintf(stdout,"\nEnviado Correctamente\n");
+    fflush(stdout);
 #endif
 
      
-  if(!(res = LeeTimeOut(fdSer,&conf,1,TimeOut))) {
-    printf("\nHa habido timeout esperando confirmación");
+  if(!(res = LeeTimeOut(fdSer,&conf,1,TIME_OUT))) {
+    ERROR("\nHa habido timeout esperando confirmación\n");
     return JNI_FALSE;
   }
 
   if(conf==0x15) {
-    printf("\nTelgrama NO ENTENDIDO");
+    ERROR("\nTelgrama NO ENTENDIDO");
     return JNI_FALSE;
   } else if(conf==0x06) {
 #ifdef DEBUG
-    printf("\n SI se confirmó el mensaje");
+    fprintf(stdout,"\n SI se confirmó el mensaje");
+    fflush(stdout);
 #endif
     return JNI_TRUE;
   }
-  printf("\nSituación rara");
+  ERROR("\nSituación rara, lo recibido no es ni confirmación ni fallo");
   return JNI_FALSE;
 
 }
@@ -361,4 +447,17 @@ JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_cierraPuerto
   Inicializado=JNI_FALSE;
   return JNI_FALSE;
 }
+
+/*
+ * Class:     sibtra_lms_ManejaTelegramasJNI
+ * Method:    isInicializado
+ * Signature: ()Z
+ * Sencillamente devolvemos Inicializado
+ */
+JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_isInicializado
+  (JNIEnv *env, jobject obj) {
+  	return Inicializado;
+}
+
+
 

@@ -106,6 +106,30 @@ public class ManejaTelegramasIO implements ManejaTelegramas {
 		return true;
 	}
 
+	/** @return si el pueto ha sido correctamente inicializado por {@link #ConectaPuerto(String)} */
+	public boolean isInicializado() {
+		return inicializado;
+	}
+
+	/** 
+	 * Trata de fijar la velocidad de transmisisón del puerto al indicado
+	 * @param baudrate velocidad desead
+	 * @return ture si la velocidad es valida y se consiguió el cambio.
+	 */
+	public boolean setBaudrate(int baudrate) {
+		//Para cambiar velocidad tenemos que fijar todos los parámetros
+		//Si la velocidad no es válida dará una exepción
+		try {
+			puertoSerie.setSerialPortParams(baudrate, SerialPort.DATABITS_8, 
+					SerialPort.STOPBITS_1, 
+					SerialPort.PARITY_NONE);
+		} catch (UnsupportedCommOperationException e) {
+			System.err.println("\n No puedo fijar la nueva velocidad "+baudrate+" la puerto");
+			return false;			
+		}
+		return true;
+	}
+
 	/* (non-Javadoc)
 	 * @see sibtra.lms.ManejaTelegramas#LeeMensaje()
 	 */
@@ -215,6 +239,7 @@ public class ManejaTelegramasIO implements ManejaTelegramas {
 			return null;
 		}
 	}
+
 
 	/* (non-Javadoc)
 	 * @see sibtra.lms.ManejaTelegramas#EnviaMensaje(byte[])

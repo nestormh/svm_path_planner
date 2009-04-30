@@ -16,6 +16,17 @@ public interface ManejaTelegramas {
 	 */
 	public abstract boolean ConectaPuerto(String NombrePuerto);
 
+	/** @return si el pueto ha sido correctamente inicializado por {@link #ConectaPuerto(String)} */
+	public abstract boolean isInicializado();
+
+
+	/** 
+	 * Trata de fijar la velocidad de transmisisón del puerto al indicado
+	 * @param baudrate velocidad desead
+	 * @return ture si la velocidad es valida y se consiguió el cambio.
+	 */
+	public abstract boolean setBaudrate(int baudrate);
+
 	/**
 	 * Espera la llegada de un telegrama por la serial y extrae el mensaje
 	 * @return mensaje contenido en telegrama

@@ -5,6 +5,8 @@ package sibtra.lms;
 
 import java.util.Arrays;
 
+import javax.xml.crypto.KeySelector.Purpose;
+
 /**
  * @author alberto
  *
@@ -28,9 +30,11 @@ public class ManejaLMS {
 	 */
 	protected UtilMensajes	manMen;
 
-	private boolean configuradoCodigo;
+	private boolean lmsVivo=false;
+	
+	private boolean configuradoCodigo=false;
 
-	private boolean configuradoVariante;
+	private boolean configuradoVariante=false;
 	
 	/**
 	 * variable para saber en que estado estamos. Si estamos a la espera de alguna respuesta. 
@@ -47,46 +51,97 @@ public class ManejaLMS {
 	 * @param puertoSerie
 	 */	
 	public ManejaLMS(String puertoSerie){
-		//valores por defecto supuestos
-		manMen=new UtilMensajes((short)50,(short)180,true,(byte)0);
-
-		//conectamos al puerto
-		manTel=new ManejaTelegramasJNI();
-		manTel.ConectaPuerto(puertoSerie);
-
-		pidiendo=PIDIENDO_NADA;
-		
-		configuradoVariante=false;
-		configuradoCodigo=false;
-		
-		try { configura(); } catch (LMSException e) {};
-		
+		this(puertoSerie, new ManejaTelegramasJNI());
 	}
 	
 	/**
 	 * Constructor
 	 * @param puertoSerie
-	 * @param mantel objeto de manajo de telegramas a usar
+	 * @param mantel objeto de manejo de telegramas a usar
 	 */
 	public ManejaLMS(String puertoSerie, ManejaTelegramas mantel) {
 		manTel=mantel;
 		manTel.ConectaPuerto(puertoSerie);
+	
 		
 		//valores por defecto supuestos
 		manMen=new UtilMensajes((short)50,(short)180,true,(byte)0);
 
 		pidiendo=PIDIENDO_NADA;
 		
+		lmsVivo=false;
 		configuradoVariante=false;
 		configuradoCodigo=false;
 		
-		try { configura(); } catch (LMSException e) {};
+		try { configuraInicial(); } catch (LMSException e) {};
 		
 		
 	}
 	
-	private void configura() throws LMSException {
+	/**
+	 * Se encarga de verificar la comunicació con el RF y ponerla 500Kba 
+	 * @return si fue posible fijar y confirmar el paso
+	 */
+	public void configura500K() throws LMSException {
+		configura500K(4);
+	}
+
+	/**
+	 * Se encarga de verificar la comunicació con el RF y ponerla 500Kba
+	 * @param maxIntentos numero de intentos en para cada mensaje enviado 
+	 * @return si fue posible fijar y confirmar el paso
+	 */
+	public void configura500K(int maxIntenos) throws LMSException {
+		lmsVivo=false;
+		if (!manTel.isInicializado())
+			throw new LMSException("Puerto aún no inicializado");
+		byte[] MenEstado={0x31}; 
+		byte[] Men500k={0x20, 0x48};
+		for(int ia=1; ia<=maxIntenos; ia++) {
+			manTel.setBaudrate(38400);
+			boolean rOK=false;
+			for(int i=1; !rOK && i<=maxIntenos; i++) {
+				manTel.EnviaMensaje(MenEstado);
+				rOK=(manTel.LeeMensaje()!=null);
+			}
+			if(rOK) {
+				//RF responde bien a 38400
+				lmsVivo=true;
+				return;
+			}
+//			System.err.println("No se recibió bien el mensaje a 38400. pasamos a 9600");
+			manTel.setBaudrate(9600);
+			rOK=false;
+			for(int i=1; !rOK && i<=maxIntenos; i++) {
+				manTel.EnviaMensaje(MenEstado);
+				rOK=(manTel.LeeMensaje()!=null);
+			}
+			if(!rOK)
+				//RF no responde tampoco a 9600, hacemos otro intento desde el principio
+				continue;
+			//Esta a 9600, trataremos de pasarlo a 500K
+			rOK=false;
+			for(int i=1; !rOK && i<=maxIntenos; i++) {
+				manTel.EnviaMensaje(Men500k);
+				rOK=(manTel.LeeMensaje()!=null);
+			}
+			try { Thread.sleep(2000); } catch (InterruptedException e) {}
+			//haya ido bien o mal volvemos al principio a intentarlo a 38400
+		}
+		throw new LMSException("No fue posible configurar a 500Kba");
+	}
+	
+	/** @return si es se ha conseguido conectar con el LMS */
+	public boolean isVivo() {
+		return lmsVivo;
+	}
+
+	/** Tranta de conectar con LMS a 500Kba y determinar su configuración */ 
+	void configuraInicial() throws LMSException {
 		
+        // Lo pasamos a 500K si no lo está aún
+		if(!lmsVivo)
+			configura500K();
 		if(!configuradoCodigo) {
 				byte[] respConfig;
 				respConfig=ObtieneParte1Configuracion();
@@ -106,6 +161,7 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	public void CambiaAModo25() throws LMSException {
+		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
 		//pasamos al modo 25
@@ -127,6 +183,7 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	protected void CambiaAModoInstalacion() throws LMSException {
+		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		//pasamos al modo 00
 		byte[] menModo00=new byte[LMSPassword.length()+2];
 		menModo00[0]=0x20; menModo00[1]=0;
@@ -152,6 +209,7 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	protected byte[] ObtieneParte1Configuracion() throws LMSException {
+		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
 		byte[] menMiraConfiguracion={0x74};
@@ -172,6 +230,7 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	protected void CambiaParte1Configuracion(byte[] menConfigura) throws LMSException {
+		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
 		if(!manTel.EnviaMensaje(menConfigura)) 
@@ -205,6 +264,7 @@ public class ManejaLMS {
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
 
+		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		final byte[] menVariante={(byte)0x3b, (byte)0xb4, 0, 0x32, 0};  //Mensaje ejemplo
 		UtilMensajes.word2Men(rangoAngular,menVariante,1);  //valores actuales
 		UtilMensajes.word2Men(resAngular, menVariante, 3);
@@ -239,7 +299,7 @@ public class ManejaLMS {
 	 * @throws LMSException si hay problemas en la comunicación.
 	 */
 	public short getRangoAngular() throws LMSException {
-		configura();
+		configuraInicial();
 		if(!configuradoVariante)
 			throw new LMSException("Variante no configurada");
 		return manMen.getRangoAngular();
@@ -260,7 +320,7 @@ public class ManejaLMS {
 	 * @throws LMSException si hay problemas en la comunicación.
 	 */
 	public short getResolucionAngular() throws LMSException {
-		configura();
+		configuraInicial();
 		if(!configuradoVariante)
 			throw new LMSException("Variante no configurada");
 		return manMen.getResAngular();
@@ -273,7 +333,7 @@ public class ManejaLMS {
 	 * @throws LMSException si hay problemas en la comunicación.
 	 */
 	public void setCodigo(boolean enMilimetros, byte codigoRango) throws LMSException{
-		configura();
+		configuraInicial();
 		if(configuradoCodigo && manMen.isEnMilimetros()==enMilimetros && manMen.getCodigoRango()==codigoRango)
 			return; //configuración igual a la pedida
 		
@@ -319,7 +379,7 @@ public class ManejaLMS {
 	 * @throws LMSException si hay problemas en la comunicación.
 	 */
 	public boolean isEnMilimetros() throws LMSException {
-		configura();
+		configuraInicial();
 		if(!configuradoCodigo)
 			throw new LMSException("Codigo no configurado");
 		return manMen.isEnMilimetros();
@@ -340,12 +400,17 @@ public class ManejaLMS {
 	 * @throws LMSException si hay problemas en la comunicación.
 	 */
 	public byte getCodigoRango() throws LMSException {
-		configura();
+		configuraInicial();
 		if(!configuradoCodigo)
 			throw new LMSException("Codigo no configurado");
 		return manMen.getCodigoRango();
 	}
 	
+	/**
+	 * Fija alcance
+	 * @param metros alcance solicitado, debe ser: 8, 16, 32, 80.
+	 * @throws LMSException en caso de cualquier problema
+	 */
 	public void setDistanciaMaxima(int metros) throws LMSException {
 		if (metros==8)
 			setCodigo(true, (byte)2);
@@ -359,6 +424,10 @@ public class ManejaLMS {
 			throw new IllegalArgumentException("Distancia solicitada ("+metros+") no es 8, 16, 32, 80 ");		
 	}
 	
+	/**
+	 * @return el alcance configurado
+	 * @throws LMSException  en caso de cualquier problema
+	 */
 	public int getDistanciaMaxima() throws LMSException {
 		if(getCodigoRango()==2 && isEnMilimetros())
 			return 8;
@@ -374,9 +443,10 @@ public class ManejaLMS {
 	/** Solicita zona al LMS
 	 * @param queZona 0 para A, 1 para B, 2 para C
 	 * @param elConjunto1 true si es conjunto 1, false para conjunto 2
-	 * @throws LMSException
+	 * @throws LMSException  en caso de cualquier problema
 	 */
 	public void pideZona(byte queZona, boolean elConjunto1) throws LMSException {
+		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
 		//A la vista de los parámetros elegimos el mensaje a mandar
@@ -405,6 +475,7 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	public void solicitaDistancia() throws LMSException {
+		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
 		final byte[] men30={0x30,0x02}; //Datos de 1 barrido
@@ -433,9 +504,7 @@ public class ManejaLMS {
 		return distancias;
 	}
 	
-	/**
-	 * 
-	 */
+	/** Cierra la conexión serial. */
 	public void cierraPuerto() {
 		manTel.cierraPuerto();
 	}
@@ -450,7 +519,7 @@ public class ManejaLMS {
 	public void pideBarrido(short anguloInicial, short anguloFinal,
 			short numPromedios) throws LMSException {
 		
-		configura();
+		configuraInicial();
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
 

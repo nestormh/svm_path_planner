@@ -21,7 +21,7 @@ public class VentanaMuestraBarridos extends JFrame {
 			manLMS.setDistanciaMaxima(80);
 			manLMS.CambiaAModo25(); 
 		} catch (LMSException e) {
-			System.err.println("No fue posible conectar o configurar RF");
+			System.err.println("No fue posible conectar o configurar RF: "+e.getMessage());
 			System.exit(1);
 		}
 
@@ -49,8 +49,13 @@ public class VentanaMuestraBarridos extends JFrame {
 
 	private void actulizaBarrido() {
 		try {
+			long t0=System.currentTimeMillis();
 			manLMS.pideBarrido((short)0, (short)180, (short)3);
-			pmb.setBarrido(manLMS.recibeBarrido());
+			long t1=System.currentTimeMillis();
+			BarridoAngular nb=manLMS.recibeBarrido();
+			long t2=System.currentTimeMillis();
+			System.out.println("Deta t="+(t1-t0)+" Delta 2="+(t2-t1));
+			pmb.setBarrido(nb);
 			pmb.actualiza();
 		} catch (LMSException e) {
 			System.err.println("Error al pedir barrido:"+e.getMessage());
