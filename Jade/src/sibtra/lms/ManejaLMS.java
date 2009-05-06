@@ -5,8 +5,6 @@ package sibtra.lms;
 
 import java.util.Arrays;
 
-import javax.xml.crypto.KeySelector.Purpose;
-
 /**
  * @author alberto
  *
@@ -40,11 +38,29 @@ public class ManejaLMS {
 	 * variable para saber en que estado estamos. Si estamos a la espera de alguna respuesta. 
 	 */
 	private int pidiendo;
-	
 	private static final int PIDIENDO_NADA=0;
-	private static final int PIDIENDO_ZONA=0;
-	private static final int PIDIENDO_BARRIDO=0;
-	private static final int PIDIENDO_DISTNCIAS=0;
+//	private static final int PIDIENDO_ZONA=1;
+	private static final int PIDIENDO_BARRIDO=2;
+	private static final int PIDIENDO_DISTANCIAS=3;
+	private static final int PIDIENDO_CONTINUO=4;
+	private static final int PIDIENDO_PARAR=5;
+
+	/** milisegundos a esperar antes de purgar buffer y mandar mensajes.
+	 * Sólo se aplica a mensajes de configuración.
+	 */
+	private static final long milisPreviosEnvio = 500;
+
+	/** Thread encargado de recibir las peticiones continuas */
+	private ThreadContinuo thContinuo;
+	
+	/** Mutex para el acceso a los barridos continuos */
+	private Object mutexBarridos=new Object();
+
+	/** Contendrá el último barrido continuo recibido */
+	private BarridoAngular ultimoBarrido=null;
+	
+	/** numero de reintentos en el envío de un mensaje */
+	private int numReintentos=4; 
 	
 	/**
 	 * Constructor, por defecto usa ManejaTelegramasJNI
@@ -62,7 +78,7 @@ public class ManejaLMS {
 	public ManejaLMS(String puertoSerie, ManejaTelegramas mantel) {
 		manTel=mantel;
 		manTel.ConectaPuerto(puertoSerie);
-	
+		manTel.setDefaultTimeOut(500);
 		
 		//valores por defecto supuestos
 		manMen=new UtilMensajes((short)50,(short)180,true,(byte)0);
@@ -72,8 +88,13 @@ public class ManejaLMS {
 		lmsVivo=false;
 		configuradoVariante=false;
 		configuradoCodigo=false;
+
+		thContinuo=new ThreadContinuo();
 		
-		try { configuraInicial(); } catch (LMSException e) {};
+		try { configuraInicial(); } 
+		catch (LMSException e) {
+			System.err.println("ERROR: "+e.getMessage());
+		};
 		
 		
 	}
@@ -97,36 +118,44 @@ public class ManejaLMS {
 			throw new LMSException("Puerto aún no inicializado");
 		byte[] MenEstado={0x31}; 
 		byte[] Men500k={0x20, 0x48};
+		System.out.println("Tratamos de configurar a 500Kb");
 		for(int ia=1; ia<=maxIntenos; ia++) {
 			manTel.setBaudrate(38400);
 			boolean rOK=false;
 			for(int i=1; !rOK && i<=maxIntenos; i++) {
+				try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+				manTel.purgaBufferEntrada();
 				manTel.EnviaMensaje(MenEstado);
 				rOK=(manTel.LeeMensaje()!=null);
 			}
 			if(rOK) {
-				//RF responde bien a 38400
+				System.out.println("RF responde bien a 38400");
 				lmsVivo=true;
 				return;
 			}
-//			System.err.println("No se recibió bien el mensaje a 38400. pasamos a 9600");
+			System.err.println("No se recibió bien el mensaje a 38400. pasamos a 9600");
 			manTel.setBaudrate(9600);
 			rOK=false;
 			for(int i=1; !rOK && i<=maxIntenos; i++) {
-				manTel.EnviaMensaje(MenEstado);
-				rOK=(manTel.LeeMensaje()!=null);
+				try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+				manTel.purgaBufferEntrada();
+				manTel.EnviaMensaje(MenEstado,1000); //mas timeout ya que es 9600
+				rOK=(manTel.LeeMensaje(2000)!=null); //mas timeout ya que es 9600
 			}
-			if(!rOK)
-				//RF no responde tampoco a 9600, hacemos otro intento desde el principio
+			if(!rOK) {
+				System.err.println("RF no responde tampoco a 9600, hacemos otro intento desde el principio");
 				continue;
-			//Esta a 9600, trataremos de pasarlo a 500K
+			}
+			System.err.println("Esta a 9600, trataremos de pasarlo a 500K");
 			rOK=false;
 			for(int i=1; !rOK && i<=maxIntenos; i++) {
-				manTel.EnviaMensaje(Men500k);
-				rOK=(manTel.LeeMensaje()!=null);
+				try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+				manTel.purgaBufferEntrada();
+				manTel.EnviaMensaje(Men500k,1000); //mas timeout ya que es 9600
+				rOK=(manTel.LeeMensaje(2000)!=null); //mas timeout ya que es 9600
 			}
 			try { Thread.sleep(2000); } catch (InterruptedException e) {}
-			//haya ido bien o mal volvemos al principio a intentarlo a 38400
+			System.err.println("haya ido bien o mal volvemos al principio a intentarlo a 38400");
 		}
 		throw new LMSException("No fue posible configurar a 500Kba");
 	}
@@ -166,17 +195,21 @@ public class ManejaLMS {
 			throw new LMSException("Estamos en medio de una peticion");
 		//pasamos al modo 25
 		byte[] menModo25={0x20, 0x25};
-		if(!manTel.EnviaMensaje(menModo25))
-			throw new LMSException("Telegrama incorrecto en el cambio al modo 25: "
-					+UtilMensajes.hexaString(menModo25));
-		byte[] respModo25;
-		if(( respModo25=manTel.LeeMensaje())==null)
-			throw new LMSException("Respuesta incorrecta al cambio al modo 25");
+		boolean menOK=false;
+		for(int ni=1; !menOK && ni<=numReintentos; ni++) {
+			try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+			manTel.purgaBufferEntrada();
+			manTel.EnviaMensaje(menModo25); 
+			byte[] respModo25;
+			if(( respModo25=manTel.LeeMensaje())==null)
+				continue; //no hay respuesta volvemos a intentarlo
 
-		byte[] respModo25OK={(byte)0xa0, 00, 0x10};
-		if(respModo25==null ||  !Arrays.equals(respModo25,respModo25OK))
-			throw new LMSException("No fue posible el cambio al modo 25: "
-					+UtilMensajes.hexaString(respModo25));
+			byte[] respModo25OK={(byte)0xa0, 00, 0x10};
+			menOK=Arrays.equals(respModo25,respModo25OK);
+		}
+		if(!menOK)
+			throw new LMSException("No fue posible el cambio al modo 25 tras "+numReintentos
+					+" reintentos");
 	}
 	/**
 	 * Manda los mensajes para cambiar a modo 00 (instalación)
@@ -190,17 +223,21 @@ public class ManejaLMS {
 		for(int i=0; i<LMSPassword.length();i++)
 			//la conversión debe funcionar ya que caracteres ASCII sólo usan 7 bits.
 			menModo00[i+2]=(byte)LMSPassword.charAt(i);
-		if(!manTel.EnviaMensaje(menModo00))
-			throw new LMSException("Telegrama incorrecto en el cambio al modo instalacion: "
-					+UtilMensajes.hexaString(menModo00));
-		byte[] respModo00;
-		if(( respModo00=manTel.LeeMensaje())==null)
-			throw new LMSException("Respuesta incorrecta al cambio al modo instacion");
 
-		byte[] respModo00OK={(byte)0xa0, 00, 0x10};
-		if(respModo00==null ||  !Arrays.equals(respModo00,respModo00OK)) 
-			throw new LMSException("No fue posible el cambio al modo instalación: "
-					+UtilMensajes.hexaString(respModo00));
+		//Hacemos bucle de reintentos
+		boolean menOK=false;
+		for(int ni=1; !menOK && ni<=numReintentos; ni++) {
+			try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+			manTel.purgaBufferEntrada();
+			manTel.EnviaMensaje(menModo00);
+			byte[] respModo00;
+			if(( respModo00=manTel.LeeMensaje())==null)
+				continue; //no hay respuesta volvemos a intentarlo
+			byte[] respModo00OK={(byte)0xa0, 00, 0x10};
+			menOK=Arrays.equals(respModo00,respModo00OK);
+		}
+		if(!menOK)
+			throw new LMSException("No fue posible el cambio al modo instalación ");
 	}
 	
 	/**
@@ -213,13 +250,17 @@ public class ManejaLMS {
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
 		byte[] menMiraConfiguracion={0x74};
-		if(!manTel.EnviaMensaje(menMiraConfiguracion))
-			throw new LMSException("Telegrama incorrecto al mirar configuración: "
-					+UtilMensajes.hexaString(menMiraConfiguracion));
-
-		byte[] respConfig;
-		if( (respConfig=manTel.LeeMensaje())==null  
-				|| (respConfig.length!=36) || respConfig[0]!=(byte)0xf4 )
+		byte[] respConfig=null;
+		boolean menOK=false;
+		for(int ni=1; !menOK && ni<=numReintentos; ni++) {
+			try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+			manTel.purgaBufferEntrada();
+			manTel.EnviaMensaje(menMiraConfiguracion);
+			if( (respConfig=manTel.LeeMensaje())==null)
+				continue; //no hay respuesta volvemos a intentarlo
+			menOK= (respConfig.length==36) && (respConfig[0]==(byte)0xf4);
+		}
+		if(!menOK)
 			throw new LMSException("Respuesta incorrecta a la consulta de configuración ");
 		return respConfig;
 	}
@@ -233,13 +274,18 @@ public class ManejaLMS {
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
-		if(!manTel.EnviaMensaje(menConfigura)) 
-			throw new LMSException("Problema al enviar (77) la configuración");
 
-		byte [] respNuevaConfig;
-		if( (respNuevaConfig=manTel.LeeMensaje())==null
-				|| !UtilMensajes.esConfirmacion(respNuevaConfig, menConfigura)
-		) 
+		boolean menOK=false;
+		for(int ni=1; !menOK && ni<=numReintentos; ni++) {
+			try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+			manTel.purgaBufferEntrada();
+			manTel.EnviaMensaje(menConfigura); 
+			byte [] respNuevaConfig;
+			if( (respNuevaConfig=manTel.LeeMensaje())==null)
+				continue; //no hay respuesta volvemos a intentarlo
+			menOK=UtilMensajes.esConfirmacion(respNuevaConfig, menConfigura);
+		}
+		if(!menOK)
 			throw new LMSException("No se aceptó la nueva configuración");
 	}
 
@@ -268,16 +314,19 @@ public class ManejaLMS {
 		final byte[] menVariante={(byte)0x3b, (byte)0xb4, 0, 0x32, 0};  //Mensaje ejemplo
 		UtilMensajes.word2Men(rangoAngular,menVariante,1);  //valores actuales
 		UtilMensajes.word2Men(resAngular, menVariante, 3);
-		if(!manTel.EnviaMensaje(menVariante)) 
-			throw new LMSException("Telegrama incorrecto al enviar cambio de variante: "
-					+UtilMensajes.hexaString(menVariante));
 
-		byte[] respVariante;
-		if((respVariante=manTel.LeeMensaje())==null
-				||  !UtilMensajes.esConfirmacion(respVariante,menVariante)
-		) 
-			throw new LMSException("No fue posible el cambio de variante: "
-					+UtilMensajes.hexaString(respVariante));
+		boolean menOK=false;
+		for(int ni=1; !menOK && ni<=numReintentos; ni++) {
+			try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+			manTel.purgaBufferEntrada();
+			manTel.EnviaMensaje(menVariante); 
+			byte[] respVariante;
+			if((respVariante=manTel.LeeMensaje())==null)
+				continue; //volvemos a intentarlo
+			menOK=UtilMensajes.esConfirmacion(respVariante,menVariante);
+		}
+		if(!menOK) 
+			throw new LMSException("No fue posible el cambio de variante ");
 		//Ponemos rango 180º y 1/2 grado de resolucion
 		manMen.setRangoAngular(rangoAngular);
 		manMen.setResAngular(resAngular); 
@@ -443,30 +492,31 @@ public class ManejaLMS {
 	/** Solicita zona al LMS
 	 * @param queZona 0 para A, 1 para B, 2 para C
 	 * @param elConjunto1 true si es conjunto 1, false para conjunto 2
+	 * @return la zona recibida
 	 * @throws LMSException  en caso de cualquier problema
 	 */
-	public void pideZona(byte queZona, boolean elConjunto1) throws LMSException {
+	public ZonaLMS recibeZona(byte queZona, boolean elConjunto1) throws LMSException {
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
 		//A la vista de los parámetros elegimos el mensaje a mandar
 		byte[] men45= {0x45, (byte)(elConjunto1?1:2), queZona};
-		if(!manTel.EnviaMensaje(men45)) 
-			throw new LMSException("Error al enviar el mensaje "+UtilMensajes.hexaString(men45));
-		pidiendo=PIDIENDO_ZONA;
-	}
-	
-	/** recibe la zona solicitada previamente con {@link #pideZona(byte, boolean)} */
-	public ZonaLMS recibeZona() throws LMSException {
-		if(pidiendo!=PIDIENDO_ZONA)
-			throw new LMSException("No se acaba de pedir zona");
-		//Recibimos respuesta
-		byte[] respMen=manTel.LeeMensaje();
-		if(respMen==null) 
-			throw new LMSException("no se pudo leer mensaje de respuesta.");
-		ZonaLMS zn=ZonaLMS.MensajeC5AZona(respMen);
-		if(zn==null)
-			throw new LMSException("Mensaje no se pudo convertir a zona");
+		ZonaLMS zn=null;
+		boolean menOK=false;
+		for(int ni=1; !menOK && ni<=numReintentos; ni++) {
+			try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+			manTel.purgaBufferEntrada();
+			manTel.EnviaMensaje(men45); 
+			//Recibimos respuesta
+			byte[] respMen=manTel.LeeMensaje(5000); //alargamos TimeOut
+			if(respMen==null) 
+				continue; //volvemos a reintentarlo
+			zn=ZonaLMS.MensajeC5AZona(respMen);
+			menOK=(zn!=null);
+		}
+		if(!menOK)
+			throw new LMSException("No se pudo obtener la zona "+queZona
+					+" del conjunto uno "+elConjunto1);
 		return zn;
 	}
 	
@@ -482,7 +532,7 @@ public class ManejaLMS {
 
 		if(!manTel.EnviaMensaje(men30))
 			throw new LMSException("Error al enviar el mensaje "+UtilMensajes.hexaString(men30));
-		pidiendo=PIDIENDO_DISTNCIAS;
+		pidiendo=PIDIENDO_DISTANCIAS;
 	}
 
 	/**
@@ -491,7 +541,7 @@ public class ManejaLMS {
 	 * @throws LMSException si hay problemas en la comunicación.
 	 */
 	public double[] recibeDistancia() throws LMSException {
-		if(pidiendo!=PIDIENDO_DISTNCIAS)
+		if(pidiendo!=PIDIENDO_DISTANCIAS)
 			throw new LMSException("NO acabamos de pedir distancias");
 		//Recibimos respuesta
 		byte[] respMen=manTel.LeeMensaje();
@@ -521,7 +571,7 @@ public class ManejaLMS {
 		
 		configuraInicial();
 		if(pidiendo!=PIDIENDO_NADA)
-			throw new LMSException("Estamos en medio de una peticion");
+			throw new LMSException("Estamos en medio de una peticion: "+pidiendo);
 
 		final byte[] me3f={0x3f, 100, 0x00, 0x01, 0x69, 0x01};  //Barrido parcial de 0º a 180º de 100 promedios
 		final byte[] me36={0x36, 100}; // 100 promedios
@@ -561,8 +611,7 @@ public class ManejaLMS {
 				mensaje=me30;
 			}
 		}
-		if(!manTel.EnviaMensaje(mensaje))
-			throw new LMSException("Error al enviar el mensaje "+UtilMensajes.hexaString(mensaje));
+		manTel.EnviaMensaje(mensaje,50); //no nos preocupamos por la confirmación
 
 		pidiendo=PIDIENDO_BARRIDO;
 	}
@@ -576,15 +625,135 @@ public class ManejaLMS {
 			throw new LMSException("No acabamos de pedir barrido");
 		//Recibimos respuesta
 		byte[] respMen=manTel.LeeMensaje();
+		pidiendo=PIDIENDO_NADA; //si falla termina la peticion
 		if(respMen==null)
 			throw  new LMSException("no se pudo leer mensaje de respuesta.");
 		
 		BarridoAngular barr=manMen.mensajeABarridoAngular(respMen);
 		if(barr==null) 
 			throw new LMSException("no se pudo interpretar correctamente mensaje.");
-
 		return barr;
 	}
 
+	/**
+	 * Solicita en envío continuo de barridos al LMS con los parámetros indicados
+	 * @param anguloInicial en grados
+	 * @param anguloFinal en grados
+	 * @param numPromedios
+	 * @throws LMSException si se hay algún problema
+	 */
+	public void pideBarridoContinuo(short anguloInicial, short anguloFinal,
+			short numPromedios) throws LMSException {
+		
+		configuraInicial();
+		if(pidiendo!=PIDIENDO_NADA)
+			throw new LMSException("Estamos en medio de una peticion");
 
+		final byte[] me28={0x20, 0x28, 100, 0x00, 0x01, 0x69, 0x01};  //Barrido parcial de 0º a 180º de 100 promedios
+		final byte[] me26={0x20, 0x26, 100}; // 100 promedios
+		final byte[] me27={0x20, 0x27, 0x00, 0x01, 0x69, 0x01};  //Barrido parcial de 0º a 180º
+		final byte[] me24={0x20, 0x24}; //Datos de 1 barrido
+		
+		//A la vista de los parámetros elegimos el mensaje a mandar
+		byte [] mensaje=null;
+		if(numPromedios>1) {
+			if(numPromedios>250)
+				throw new LMSException("Numero de promedios >250");
+			//Se epecifica promedio
+			if (anguloInicial>0 || anguloFinal<180) {
+				//se especifica promedio y águlos => mensaje 28
+				if( anguloInicial>anguloFinal || anguloFinal>180 || anguloInicial>180)
+					throw new LMSException("Los angulos del barrido no están correctamente definidos");
+				mensaje=me28;
+				mensaje[1]=(byte)numPromedios;
+				UtilMensajes.word2Men((short)(anguloInicial*manMen.getResAngularCuartos()+1), mensaje, 2);  //nuevo angulo inicial
+				UtilMensajes.word2Men((short)(anguloFinal*manMen.getResAngularCuartos()+1), mensaje, 4);  //nuevo angulo final				
+			} else {
+				//sólo promedio => mensaje 26
+				mensaje=me26;
+				mensaje[1]=(byte)numPromedios;
+			}
+		} else {
+			//no se especifica promedio
+			if (anguloInicial>0 || anguloFinal<180) {
+				//se especifica algún águlo => mensaje 27
+				if( anguloInicial>anguloFinal || anguloFinal>180 || anguloInicial>180)
+					throw new LMSException("Los angulos del barrido no están correctamente definidos");
+				mensaje=me27;
+				UtilMensajes.word2Men((short)(anguloInicial*manMen.getResAngularCuartos()+1), mensaje, 1);  //nuevo angulo inicial
+				UtilMensajes.word2Men((short)(anguloFinal*manMen.getResAngularCuartos()+1), mensaje, 3);  //nuevo angulo final
+			} else {
+				//no se especifica nada => Mensaje 24 al LSM
+				mensaje=me24;
+			}
+		}
+		if(!manTel.EnviaMensaje(mensaje))
+			throw new LMSException("Error al enviar el mensaje "+UtilMensajes.hexaString(mensaje));
+
+		thContinuo.start();
+		
+		pidiendo=PIDIENDO_CONTINUO;
+	}
+
+	public void pidePararContinuo() throws LMSException {
+		if(pidiendo!=PIDIENDO_CONTINUO && pidiendo!=PIDIENDO_PARAR)
+			throw new LMSException("No estamos en medio de una peticion continua");
+		//pasamos al modo 25
+		byte[] menModo25={0x20, 0x25};
+		if(!manTel.EnviaMensaje(menModo25))
+			throw new LMSException("Error al enviar el mensaje "+UtilMensajes.hexaString(menModo25));
+		//la confirmación la recibirá el thread continuo
+		
+		pidiendo=PIDIENDO_PARAR;
+	}
+	
+	
+	/**
+	 * @return último barrido recibido de forma continua. No se tiene en cuenta
+	 * el estado actual. Se puede pedir el último barrido después de terminado 
+	 * el envío continuo 
+	 */
+	public BarridoAngular ultimoBarrido() {
+		synchronized (mutexBarridos) {
+			return ultimoBarrido;
+		}
+	}
+
+
+	
+	class ThreadContinuo extends Thread {
+		
+		public void run() {
+//			while(pidiendo==PIDIENDO_CONTINUO || pidiendo==PIDIENDO_PARAR) {
+			while(true) { //se saldrá solo cuando se reciba confirmación mensaje parada
+				//Recibimos mensaje
+				byte[] menBarridoC=manTel.LeeMensaje(0);
+				if(menBarridoC==null)
+					//TODO llevar contador de fallos
+					continue;  //no se ha recibido mensaje correctamente :-(
+				
+				//vemos si se trata de mensaje de confirmación de cambio de modo
+				if(pidiendo==PIDIENDO_PARAR 
+						&& menBarridoC[0]==(byte)0xA0 
+						&& menBarridoC[1]==0x00 
+				) {
+					//se confirmo la peticion de parada
+					pidiendo=PIDIENDO_NADA;
+					break;
+				}
+				//TODO optimizar para que se reutilice el barrido
+				BarridoAngular barr=manMen.mensajeABarridoAngular(menBarridoC);
+				if(barr==null) 
+					//TODO llevar contador de fallos
+					continue;  //no se ha podido convertir a barrdio :-(
+				//Tenemos un nuevo barrido valido lo ponemos en el vector
+				synchronized (mutexBarridos) {
+					//por ahora sólo apuntamos el nuevo barrido
+					ultimoBarrido=barr;
+				}
+			}
+		}
+		
+	}
+	
 }

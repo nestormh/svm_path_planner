@@ -31,12 +31,12 @@ public class VentanaMuestraBarridos extends JFrame {
 		
 		//pedimos las zonas para establecerlas en el panel
 		try {
-			manLMS.pideZona((byte)0, true);
-			pmb.setZona(manLMS.recibeZona());
-			manLMS.pideZona((byte)1, true);
-			pmb.setZona(manLMS.recibeZona());
-			manLMS.pideZona((byte)2, true);
-			pmb.setZona(manLMS.recibeZona());
+//			manLMS.pideZona((byte)0, true);
+			pmb.setZona(manLMS.recibeZona((byte)0, true));
+//			manLMS.pideZona((byte)1, true);
+			pmb.setZona(manLMS.recibeZona((byte)1, true));
+//			manLMS.pideZona((byte)2, true);
+			pmb.setZona(manLMS.recibeZona((byte)2, true));
 				
 		} catch (LMSException e){
 			System.err.println("Problema al pedir las zonas:"+e.getMessage());

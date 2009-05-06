@@ -13,7 +13,7 @@ import gnu.io.*;
  * @author alberto
  *
  */
-public class ManejaTelegramasIO implements ManejaTelegramas {
+public class ManejaTelegramasIO extends ManejaTelegramas {
 	private static final int MaxLen = 812;
 	private CommPortIdentifier idPuertoCom;
 	private SerialPort puertoSerie;
@@ -133,7 +133,8 @@ public class ManejaTelegramasIO implements ManejaTelegramas {
 	/* (non-Javadoc)
 	 * @see sibtra.lms.ManejaTelegramas#LeeMensaje()
 	 */
-	public byte[] LeeMensaje() {
+	public byte[] LeeMensaje(int milisTOut) {
+		//TODO ver como se puede fijar TimeOut
 		if(!inicializado)
 			return null;  //lo suyo sería una excepción :-(
 		int res; //cuantos bytes hemos recibido
@@ -240,11 +241,9 @@ public class ManejaTelegramasIO implements ManejaTelegramas {
 		}
 	}
 
+	
+	public boolean EnviaMensajeSinConfirmacion(byte[] mensaje) {
 
-	/* (non-Javadoc)
-	 * @see sibtra.lms.ManejaTelegramas#EnviaMensaje(byte[])
-	 */
-	public boolean EnviaMensaje(byte[] mensaje) {
 		if(!inicializado)
 			return false; //lo suyo sería una excepción :-(
 
@@ -292,7 +291,11 @@ public class ManejaTelegramasIO implements ManejaTelegramas {
 			return false;
 		}	
 //		System.err.printf("\nEnviado Correctamente\n");
-		
+		return true;
+	}
+	
+	public boolean esperaConfirmacion(int milisTOut) {
+		//TODO ver como se puede fijar TimeOut
 		//Esperamos confirmación
 		try {
 			if(flujoEntrada.read(buf, 0, 1)==0) {
@@ -314,6 +317,11 @@ public class ManejaTelegramasIO implements ManejaTelegramas {
 			System.err.println("Error esperando la confirmación");
 			return false;
 		}
+	}
+
+	/** Vacia todo el buffer de entrada de la serial */
+	public void purgaBufferEntrada() {
+		//TODO Pendiente implementación
 	}
 
 	

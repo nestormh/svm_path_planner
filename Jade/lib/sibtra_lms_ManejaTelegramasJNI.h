@@ -34,18 +34,34 @@ JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_setBaudrate
 /*
  * Class:     sibtra_lms_ManejaTelegramasJNI
  * Method:    LeeMensaje
- * Signature: ()[B
+ * Signature: (I)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jint);
 
 /*
  * Class:     sibtra_lms_ManejaTelegramasJNI
- * Method:    EnviaMensaje
+ * Method:    EnviaMensajeSinConfirmacion
  * Signature: ([B)Z
  */
-JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_EnviaMensaje
+JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_EnviaMensajeSinConfirmacion
   (JNIEnv *, jobject, jbyteArray);
+
+/*
+ * Class:     sibtra_lms_ManejaTelegramasJNI
+ * Method:    esperaConfirmacion
+ * Signature: (I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_esperaConfirmacion
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     sibtra_lms_ManejaTelegramasJNI
+ * Method:    purgaBufferEntrada
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_sibtra_lms_ManejaTelegramasJNI_purgaBufferEntrada
+  (JNIEnv *, jobject);
 
 /*
  * Class:     sibtra_lms_ManejaTelegramasJNI

@@ -8,8 +8,8 @@ package sibtra.lms;
  * @author alberto
  *
  */
-public class ManejaTelegramasJNI implements ManejaTelegramas {
-	
+public class ManejaTelegramasJNI extends ManejaTelegramas {
+
 	/**
 	 * Para abrir y configurar puerto serie
 	 * 
@@ -27,19 +27,31 @@ public class ManejaTelegramasJNI implements ManejaTelegramas {
 	 */
 	public native boolean setBaudrate(int baudrate);
 	
+
 	/**
 	 * Espera la llegada de un telegrama por la serial y extrae el mensaje
+	 * @param milisTOut especifica milisegundos para dar <i>time out</i>. 
+	 *   0 significa no time out.
 	 * @return mensaje contenido en telegrama
 	 */
-	public native byte[] LeeMensaje();
+	public native byte[] LeeMensaje(int milisTOut);
 
 	/**
 	 * Construye a telegarama a partir del mensaje pasado y lo envía.
-	 * Espera la confirmación de que ha sido bien recibido.
-	 * 
+	 * NO espera la confirmación de que ha sido bien recibido.
+ 	 * @param mensaje a enviar
+ 	 * @return true si se evió correctamente 
+	 */
+	public native boolean EnviaMensajeSinConfirmacion(byte[] mensaje);
+	
+	/** Espera la confirmación
+	 * @param milisTOut especifica milisegundos para dar <i>time out</i>.
 	 * @return true si se recibe confirmación
 	 */
-	public native boolean EnviaMensaje(byte[] mensaje);
+	public native boolean esperaConfirmacion(int milisTOut);
+
+	/** Vacia todo el buffer de entrada de la serial */
+	public native void purgaBufferEntrada();
 	
 	/**
 	 * Cierra el puerto
