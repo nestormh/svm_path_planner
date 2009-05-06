@@ -2,7 +2,7 @@
 /* Si queremos mensajes de depuración, descomentar */
 /*#define  INFO*/
 /* Si queremos los mensaje de error, descomentar la siguiente */
-#define ERR
+/*#define ERR */
 
 #include "sibtra_lms_ManejaTelegramasJNI.h"
 

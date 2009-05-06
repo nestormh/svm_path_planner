@@ -1,6 +1,8 @@
 package sibtra.lms;
 
 import java.awt.BorderLayout;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 
@@ -9,12 +11,13 @@ import sibtra.util.EligeSerial;
 
 /** Aplicación para mostrar los barridos */
 @SuppressWarnings("serial")
-public class VentanaMuestraBarridos extends JFrame {
+public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 
 	private ManejaLMS manLMS;
 	private PanelMuestraBarrido pmb;
 	/** contendrá el último barrido recibido del LMS */
 	private BarridoAngular barrAct=null;
+	private ThreadActulizacion thActuliza;
 	public VentanaMuestraBarridos(String ptoRF) {
 		super("Muestra Barrido");
 		//Conectamos a RF
@@ -41,20 +44,51 @@ public class VentanaMuestraBarridos extends JFrame {
 			System.err.println("Problema al pedir las zonas:"+e.getMessage());
 		}
 		
+		thActuliza=new ThreadActulizacion();
+		thActuliza.start(); //arranca suspendido
 		
-		try {
-			manLMS.pideBarridoContinuo((short)0, (short)180, (short)1);
-		} catch (LMSException e) {
-			System.err.println("No fue posible inidiciar envío continuo:"+e.getMessage());
-			System.exit(1);
-		}
-		
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addWindowListener(this);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		pack();
 		setVisible(true);
 	}
 
-	private void actulizaBarrido() {
+	class ThreadActulizacion extends Thread {
+		private boolean suspendido=true;
+		
+		public synchronized void activar() {
+			if(suspendido) {
+				suspendido=false;
+				notify();
+			}
+		}
+		
+		public synchronized void suspender() {
+			if(!suspendido) {
+				suspendido=true;
+//				notify();
+			}
+		}
+		
+		public synchronized  boolean isSuspendido() {
+			return suspendido;
+		}
+		
+
+		public void run() {
+			while(true) {
+				actualizaBarrido();
+				try {
+					Thread.sleep(100);
+					synchronized (this) {
+						while (suspendido) wait(); 
+					}
+				} catch (InterruptedException e) {	}
+			}
+		}
+	}
+	
+	public void actualizaBarrido() {
 		long t0=System.currentTimeMillis();
 		BarridoAngular nb=manLMS.ultimoBarrido();
 		if(nb==barrAct) {
@@ -68,7 +102,56 @@ public class VentanaMuestraBarridos extends JFrame {
 		barrAct=nb; //para saber si cambia
 	}
 
-	
+	public void windowActivated(WindowEvent arg0) {
+		System.out.println("windowActivated");
+		windowDeiconified(arg0);
+	}
+
+	public void windowClosed(WindowEvent arg0) {
+		System.out.println("windowClosed");
+		System.exit(0);		
+	}
+
+	public void windowClosing(WindowEvent arg0) {
+		System.out.println("windowClosing");
+		windowIconified(arg0); //lo mismo que al iconificar
+		setVisible(false); //la ocultamos
+		System.exit(0); //no se llega a	windowClosed
+	}
+
+	public void windowDeactivated(WindowEvent arg0) {
+		System.out.println("windowDeactivated");
+		windowIconified(arg0);
+	}
+
+	public void windowDeiconified(WindowEvent arg0) {
+		System.out.println("windowDeiconified");
+		windowOpened(arg0); //lo mismo que si se abriera
+	}
+
+	public void windowIconified(WindowEvent arg0) {
+		System.out.println("windowIconified");
+		//solicitamos la paradad del envio continuo
+		try {
+			manLMS.pidePararContinuo();
+		} catch (LMSException e) {
+			System.err.println("Problema al parar continuo: "+e.getMessage());
+		}
+		thActuliza.suspender();
+	}
+
+	/** Solicitamos envío continuo y arrancamos thread de actualización */
+	public void windowOpened(WindowEvent arg0) {
+		System.out.println("windowOpened");
+		try {
+			manLMS.pideBarridoContinuo((short)0, (short)180, (short)1);
+			thActuliza.activar();
+			System.out.println("Comenzamos th de actualización");
+		} catch (LMSException e) {
+			System.err.println("No fue posible iniciar envío continuo:"+e.getMessage());
+		}
+	}
+
 	/**
 	 * @param args nombre del puerto serie del LMS, si no se pide interactivamente
 	 */
@@ -86,12 +169,7 @@ public class VentanaMuestraBarridos extends JFrame {
 
 		VentanaMuestraBarridos mb=new VentanaMuestraBarridos(puertos[0]);
 		
-		while(true) {
-			mb.actulizaBarrido();
-			try { Thread.sleep(100); } catch (Exception e) {}
-		}
-		
-		
 	}
+
 
 }

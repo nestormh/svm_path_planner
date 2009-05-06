@@ -90,6 +90,7 @@ public class ManejaLMS {
 		configuradoCodigo=false;
 
 		thContinuo=new ThreadContinuo();
+		thContinuo.start(); //comienza suspendido
 		
 		try { configuraInicial(); } 
 		catch (LMSException e) {
@@ -116,7 +117,7 @@ public class ManejaLMS {
 		lmsVivo=false;
 		if (!manTel.isInicializado())
 			throw new LMSException("Puerto aún no inicializado");
-		byte[] MenEstado={0x31}; 
+		byte[] MenPasoA25={0x20, 0x25}; //aprovechamos para ir parando envío continuo
 		byte[] Men500k={0x20, 0x48};
 		System.out.println("Tratamos de configurar a 500Kb");
 		for(int ia=1; ia<=maxIntenos; ia++) {
@@ -125,7 +126,7 @@ public class ManejaLMS {
 			for(int i=1; !rOK && i<=maxIntenos; i++) {
 				try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
 				manTel.purgaBufferEntrada();
-				manTel.EnviaMensaje(MenEstado);
+				manTel.EnviaMensaje(MenPasoA25);
 				rOK=(manTel.LeeMensaje()!=null);
 			}
 			if(rOK) {
@@ -139,7 +140,7 @@ public class ManejaLMS {
 			for(int i=1; !rOK && i<=maxIntenos; i++) {
 				try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
 				manTel.purgaBufferEntrada();
-				manTel.EnviaMensaje(MenEstado,1000); //mas timeout ya que es 9600
+				manTel.EnviaMensaje(MenPasoA25,1000); //mas timeout ya que es 9600
 				rOK=(manTel.LeeMensaje(2000)!=null); //mas timeout ya que es 9600
 			}
 			if(!rOK) {
@@ -664,8 +665,10 @@ public class ManejaLMS {
 			short numPromedios) throws LMSException {
 		
 		configuraInicial();
-		if(pidiendo!=PIDIENDO_NADA)
-			throw new LMSException("Estamos en medio de una peticion");
+		if(pidiendo!=PIDIENDO_NADA && pidiendo!=PIDIENDO_CONTINUO 
+				&& pidiendo!=PIDIENDO_PARAR)
+			throw new LMSException("Estamos en medio de una peticion:" + pidiendo);
+		
 
 		final byte[] me28={0x20, 0x28, 100, 0x00, 0x01, 0x69, 0x01};  //Barrido parcial de 0º a 180º de 100 promedios
 		final byte[] me26={0x20, 0x26, 100}; // 100 promedios
@@ -707,10 +710,24 @@ public class ManejaLMS {
 		}
 
 		System.out.println("Vamos a tratar de pedir envío continuo: "+UtilMensajes.hexaString(mensaje));
-		if(!manTel.EnviaMensaje(mensaje))
-			throw new LMSException("Error al enviar el mensaje "+UtilMensajes.hexaString(mensaje));
+		boolean menOK=false;
+		for(int ni=1; !menOK && ni<=numReintentos; ni++) {
+			try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
+			manTel.purgaBufferEntrada();
+			manTel.EnviaMensaje(mensaje); 
+			byte[] respContinuo;
+			if(( respContinuo=manTel.LeeMensaje())==null)
+				continue; //no hay respuesta volvemos a intentarlo
 
-		thContinuo.start();
+			byte[] respModoContOK={(byte)0xa0, 00, 0x10};
+			//está listo si se recibe confirmación o se empiezan a recibir barridos
+			menOK=Arrays.equals(respContinuo,respModoContOK) ||
+			   (manMen.mensajeABarridoAngular(respContinuo)!=null);
+		}
+		if(!menOK)
+			throw new LMSException("Error al tratar de pasar al modo continuo :"+UtilMensajes.hexaString(mensaje));
+
+		thContinuo.activar(); //ya esta activo, solo tenemos que activarlo
 		
 		pidiendo=PIDIENDO_CONTINUO;
 		System.out.println("Se confirmó el envío continuo");
@@ -719,10 +736,12 @@ public class ManejaLMS {
 	public void pidePararContinuo() throws LMSException {
 		if(pidiendo!=PIDIENDO_CONTINUO && pidiendo!=PIDIENDO_PARAR)
 			throw new LMSException("No estamos en medio de una peticion continua");
-		//pasamos al modo 25
+		System.out.println("Tratamos de parar envío continuo");
 		byte[] menModo25={0x20, 0x25};
-		if(!manTel.EnviaMensaje(menModo25))
-			throw new LMSException("Error al enviar el mensaje "+UtilMensajes.hexaString(menModo25));
+//		if(!
+				manTel.EnviaMensajeSinConfirmacion(menModo25);
+//				)
+//			throw new LMSException("Error al enviar el mensaje "+UtilMensajes.hexaString(menModo25));
 		//la confirmación la recibirá el thread continuo
 		
 		pidiendo=PIDIENDO_PARAR;
@@ -741,13 +760,38 @@ public class ManejaLMS {
 	}
 
 
-	
+	/** Para la recepción de los barridos continuos. 
+	 * Se arranca suspendido. 
+	 * Para que comience a recibir hay que {@link #activar()}.
+	 * Cuando se recibe el mensaje de confirmación de parada se suspende automáticamente.
+	 * @author verdino
+	 *
+	 */
 	class ThreadContinuo extends Thread {
+		
+		private boolean suspendido=true;
+		
+		public synchronized void activar() {
+			if(suspendido) {
+				suspendido=false;
+				notify();
+			}
+		}
+		
+		public synchronized  boolean isSuspendido() {
+			return suspendido;
+		}
 		
 		public void run() {
 //			while(pidiendo==PIDIENDO_CONTINUO || pidiendo==PIDIENDO_PARAR) {
 			while(true) { //se saldrá solo cuando se reciba confirmación mensaje parada
 //				System.out.println("Esperamos mensaje");
+				//miramos a ver si estamos suspendidos
+				try {
+					synchronized (this) {
+						while (suspendido) wait(); 
+						}
+				} catch (InterruptedException e) {	}
 				byte[] menBarridoC=manTel.LeeMensaje(0);
 				if(menBarridoC==null) {
 					System.err.println("no se ha recibido mensaje correctamente"); 
@@ -760,9 +804,9 @@ public class ManejaLMS {
 						&& menBarridoC[0]==(byte)0xA0 
 						&& menBarridoC[1]==0x00 
 				) {
-					//se confirmo la peticion de parada
+					System.out.println("Se confirmo la peticion de parada de barrido continuo. TERMINAMOS");
 					pidiendo=PIDIENDO_NADA;
-					break;
+					suspendido=true;
 				}
 				//TODO optimizar para que se reutilice el barrido
 				BarridoAngular barr=manMen.mensajeABarridoAngular(menBarridoC);
