@@ -526,13 +526,13 @@ public class AgenteLMS extends Agent {
 					elConjunto1=st.nextToken().equals("1");
 			}
 
-			try {
-				manLMS.pideZona(queZona, elConjunto1);
+//			try {
+//				manLMS.pideZona(queZona, elConjunto1);
 			respuesta.setPerformative(ACLMessage.AGREE);
 			respuesta.setContent(request.getContent()); //mismo contenido enviado
-			} catch (LMSException e) {
-				agentLog("Problema :"+e.getMessage());
-			}
+//			} catch (LMSException e) {
+//				agentLog("Problema :"+e.getMessage());
+//			}
 			return respuesta;
 		}
 		
@@ -544,7 +544,7 @@ public class AgenteLMS extends Agent {
 			
 					
 			try {
-				ZonaLMS zn=manLMS.recibeZona();
+				ZonaLMS zn=manLMS.recibeZona(queZona,elConjunto1);
 				respuesta.setContentObject(zn);
 				respuesta.setPerformative(ACLMessage.INFORM);
 			}
