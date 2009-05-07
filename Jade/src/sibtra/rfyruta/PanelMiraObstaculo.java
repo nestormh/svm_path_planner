@@ -27,6 +27,7 @@ import javax.swing.border.Border;
 import sibtra.gps.Ruta;
 import sibtra.lms.BarridoAngular;
 import sibtra.util.PanelMuestraTrayectoria;
+import sibtra.util.UtilCalculos;
 
 /**
  * Clase amiga de {@link MiraObstaculo} que muestar graficamente resultado de sus cálculos.
@@ -108,10 +109,16 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		g.setStroke(new BasicStroke());
 		//pintamos el borde derecho
 		g.setColor(Color.BLUE);
-		g.draw(pathArrayXY(MI.Bd));
+		if(!jcbMostrarPuntos.isSelected()) {
+			GeneralPath gptr=pathArrayXY(MI.Bd);
+			if(gptr!=null) g.draw(gptr);
+		} else puntosArray(g,MI.Bd);
 		//pintamos el borde izquierdo
 		g.setColor(Color.RED);
-		g.draw(pathArrayXY(MI.Bi));
+		if(!jcbMostrarPuntos.isSelected()) {
+			GeneralPath gptr=pathArrayXY(MI.Bi);
+			if(gptr!=null) g.draw(gptr);
+		} else puntosArray(g,MI.Bi);
 		if(hayDatos) {
 			//pixeles del pto actual se usa para trazar varias líneas
 			Point2D pxPtoActual=point2Pixel(MI.posActual);
@@ -152,8 +159,9 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 				g.setStroke(new BasicStroke(2));
 				g.setColor(Color.WHITE);
 				//los de la derecha e izquierda que están libres
-				g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
-				g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
+				GeneralPath gp=null;
+				if((gp=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1))!=null) g.draw(gp);
+				if((gp=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1))!=null) g.draw(gp);
 				if(MI.dist>0) {
 					//marcamos el pto mínimo
 					g.setStroke(new BasicStroke());
@@ -187,8 +195,8 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 					//tenemos los índices
 					g.setStroke(new BasicStroke(3));
 					g.setColor(Color.GREEN);
-					g.draw(pathArrayXY(MI.Tr, MI.indiceCoche
-							, MI.indSegObs+1));
+					if((gp=pathArrayXY(MI.Tr, MI.indiceCoche
+							, MI.indSegObs+1))!=null) g.draw(gp);
 					g.draw(new Line2D.Double(point2Pixel(MI.Bi[MI.indSegObs])
 							,point2Pixel(MI.Bd[MI.indSegObs])));
 					g.draw(new Line2D.Double(point2Pixel(MI.Bi[MI.indiceCoche])
@@ -292,11 +300,13 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	
-		MiraObstaculo mi=new MiraObstaculo(Tr);
+		MiraObstaculo mi=new MiraObstaculo(Tr,rutaEspacial.esRutaCerrada());
 		
 		PanelMiraObstaculo pmo=new PanelMiraObstaculo(mi) {
 			/** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
 			MouseEvent evenPos;
+			Point2D.Double nuevaPos;
+			Point2D.Double posAngulo;
 
 			/**
 		     * Sólo nos interesan pulsaciones del boton 1. 
@@ -334,45 +344,49 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			public void mouseReleased(MouseEvent even) {
 				if(even.getButton()==MouseEvent.BUTTON1 
 						&& (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0
-							&& evenPos!=null) {
-						System.out.println("Soltado con Control Boton "+even.getButton()
-								+" en posición: ("+even.getX()+","+even.getY()+")");
-						//Creamos rectángulo si está suficientemente lejos
-						if(Math.abs(even.getX()-evenPos.getX())>50 
-								|| Math.abs(even.getY()-evenPos.getY())>50) {
-							Point2D.Double nuevaPos=pixel2Point(evenPos.getX(),evenPos.getY());
-							Point2D.Double posAngulo=pixel2Point(even.getX(),even.getY());
-							double[] npos={nuevaPos.getX(),nuevaPos.getY()};
-							{
-								BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
-								double frec=(13.6+2*Math.random());
-								double Amp=(3.0+15*Math.random());
-								double Dpor=(20.0+15*Math.random());
-								for(int i=0;i<barAct.numDatos();i++) {
-//									barAct.datos[i]=(short)((15.0)*100.0);
-									barAct.datos[i]=(short)((Math.sin((double)i/(barAct.numDatos()-1)*Math.PI*frec)
-											*Amp
-											+Dpor)*100.0);
-									//ruido aleatorio
-									if(Math.random()<0.05)
-										barAct.datos[i]=(short)((Math.random()*60+2)*100);
-								}
-								long tini=System.currentTimeMillis();
-								MI.masCercano(npos, Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
-										, barAct);
-								System.out.println("Tarda:"+(System.currentTimeMillis()-tini));
-							}
-							actualiza();
-							System.out.println(MI);
-
-						}
-						return;
+						&& evenPos!=null) {
+					System.out.println("Soltado con Control Boton "+even.getButton()
+							+" en posición: ("+even.getX()+","+even.getY()+")");
+					//Cambiamos la posición si el movimiento es suficientemente grande
+					if(Math.abs(even.getX()-evenPos.getX())>50 
+							|| Math.abs(even.getY()-evenPos.getY())>50) {
+						nuevaPos=pixel2Point(evenPos.getX(),evenPos.getY());
+						posAngulo=pixel2Point(even.getX(),even.getY());
+						MI.nuevaPosicion();
 					}
+					//Aunque no haya nueva posición, hacemos nuevo barrido
+					double[] npos={nuevaPos.getX(),nuevaPos.getY()};
+					BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
+					double frec=(13.6+2*Math.random());
+					double Amp=(3.0+15*Math.random());
+					double Dpor=(20.0+15*Math.random());
+					for(int i=0;i<barAct.numDatos();i++) {
+//						barAct.datos[i]=(short)((15.0)*100.0);
+						barAct.datos[i]=(short)((Math.sin((double)i/(barAct.numDatos()-1)*Math.PI*frec)
+								*Amp
+								+Dpor)*100.0);
+						//ruido aleatorio
+						if(Math.random()<0.05)
+							barAct.datos[i]=(short)((Math.random()*60+2)*100);
+					}
+					long tini=System.currentTimeMillis();
+					MI.masCercano(npos, Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
+							, barAct);
+					actualiza();
+					System.out.println(MI);
+					System.out.println("Tarda:"+(System.currentTimeMillis()-tini));
+					return;
+				} else {
+					//Sacamos indice de pto más cercano
+					Point2D.Double pos = pixel2Point(even.getX(),even.getY());
+					System.out.println("Indice de Tr más cercano:"+UtilCalculos.indiceMasCercano(MI.Tr, pos.getX(), pos.getY()));
+					System.out.println("Indice de Db más cercano:"+UtilCalculos.indiceMasCercano(MI.Bd, pos.getX(), pos.getY()));
+					System.out.println("Indice de Bi más cercano:"+UtilCalculos.indiceMasCercano(MI.Bi, pos.getX(), pos.getY()));
+					
+				}
 				//al final llamamos al del padre
 				super.mouseReleased(even);
 			}
-
-
 		};
 		
 		ventana.add(pmo);

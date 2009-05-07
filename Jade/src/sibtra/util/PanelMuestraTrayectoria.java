@@ -108,20 +108,7 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 					g.draw(gptr);
 				}
 			} else {
-				//pintamos los puntos que están dentro del recuadro
-				for(int i=0; i<Tr.length; i++) {
-					double pa[]=Tr[i];
-					if(pa[0]<=esqSI.getX() && pa[0]>=esqID.getX()
-							&& pa[1]<=esqSI.getY() && pa[1]>=esqID.getY() ) {
-						//esta dentro del recuadro
-						Point2D px=point2Pixel(pa);
-						int x=(int)px.getX(), y=(int)px.getY();
-						g.drawLine(x-tamCruz, y-tamCruz
-								, x+tamCruz, y+tamCruz);
-						g.drawLine(x-tamCruz, y+tamCruz
-								, x+tamCruz, y-tamCruz);
-					}
-				}
+				puntosArray(g,Tr);
 			}
 			//Marcamos puntos si se a asignado vector de índice
 			if(indiceMarcar!=null && indiceMarcar.size()>0) {
@@ -196,6 +183,28 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 				coche.closePath();
 				g.fill(coche);
 				g.draw(coche);
+			}
+		}
+	}
+
+	/**
+	 * Pinta los puntos del array como aspas
+	 * @param g donde pintar
+	 * @param v puntos a pintar (x,y)
+	 */
+	protected void puntosArray(Graphics2D g, double[][] v) {
+		//pintamos los puntos que están dentro del recuadro
+		for(int i=0; i<v.length; i++) {
+			double pa[]=v[i];
+			if(pa[0]<=esqSI.getX() && pa[0]>=esqID.getX()
+					&& pa[1]<=esqSI.getY() && pa[1]>=esqID.getY() ) {
+				//esta dentro del recuadro
+				Point2D px=point2Pixel(pa);
+				int x=(int)px.getX(), y=(int)px.getY();
+				g.drawLine(x-tamCruz, y-tamCruz
+						, x+tamCruz, y+tamCruz);
+				g.drawLine(x-tamCruz, y+tamCruz
+						, x+tamCruz, y-tamCruz);
 			}
 		}
 	}

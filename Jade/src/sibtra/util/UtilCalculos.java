@@ -214,14 +214,14 @@ public class UtilCalculos {
 	 * ruta más cercano al punto pos
 	 */
 	public static int indiceMasCercanoOptimizado(double[][] ruta, boolean esCerrada,double posX,double posY,int indMinAnt){        
+	    if(indMinAnt<0){
+	    	return indiceMasCercano(ruta, posX, posY);
+	    }
 	    double dx;
 	    double dy;
 	    double distMin=Double.POSITIVE_INFINITY;
 	    int indMin=0;
 	    int indiceInicial = indMinAnt - 10;
-	    if(indMinAnt<0){
-	    	return indiceMasCercano(ruta, posX, posY);
-	    }
 	    if (esCerrada){
 	    	indiceInicial = (indMinAnt + ruta.length - 10)%ruta.length;
 	    }else{        	
