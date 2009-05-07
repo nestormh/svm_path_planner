@@ -60,7 +60,8 @@ public class ManejaLMS {
 	private BarridoAngular ultimoBarrido=null;
 	
 	/** numero de reintentos en el envío de un mensaje */
-	private int numReintentos=4; 
+	private int numReintentos=4;
+	private byte[] mensajeArrancaContinuo=null; 
 	
 	/**
 	 * Constructor, por defecto usa ManejaTelegramasJNI
@@ -104,7 +105,7 @@ public class ManejaLMS {
 	 * Se encarga de verificar la comunicació con el RF y ponerla 500Kba 
 	 * @return si fue posible fijar y confirmar el paso
 	 */
-	public void configura500K() throws LMSException {
+	void configura500K() throws LMSException {
 		configura500K(4);
 	}
 
@@ -113,7 +114,7 @@ public class ManejaLMS {
 	 * @param maxIntentos numero de intentos en para cada mensaje enviado 
 	 * @return si fue posible fijar y confirmar el paso
 	 */
-	public void configura500K(int maxIntenos) throws LMSException {
+	void configura500K(int maxIntenos) throws LMSException {
 		lmsVivo=false;
 		if (!manTel.isInicializado())
 			throw new LMSException("Puerto aún no inicializado");
@@ -676,7 +677,7 @@ public class ManejaLMS {
 		final byte[] me24={0x20, 0x24}; //Datos de 1 barrido
 		
 		//A la vista de los parámetros elegimos el mensaje a mandar
-		byte [] mensaje=null;
+		mensajeArrancaContinuo=null;
 		if(numPromedios>1) {
 			if(numPromedios>250)
 				throw new LMSException("Numero de promedios >250");
@@ -685,14 +686,14 @@ public class ManejaLMS {
 				//se especifica promedio y águlos => mensaje 28
 				if( anguloInicial>anguloFinal || anguloFinal>180 || anguloInicial>180)
 					throw new LMSException("Los angulos del barrido no están correctamente definidos");
-				mensaje=me28;
-				mensaje[2]=(byte)numPromedios;
-				UtilMensajes.word2Men((short)(anguloInicial*manMen.getResAngularCuartos()+1), mensaje, 3);  //nuevo angulo inicial
-				UtilMensajes.word2Men((short)(anguloFinal*manMen.getResAngularCuartos()+1), mensaje, 5);  //nuevo angulo final				
+				mensajeArrancaContinuo=me28;
+				mensajeArrancaContinuo[2]=(byte)numPromedios;
+				UtilMensajes.word2Men((short)(anguloInicial*manMen.getResAngularCuartos()+1), mensajeArrancaContinuo, 3);  //nuevo angulo inicial
+				UtilMensajes.word2Men((short)(anguloFinal*manMen.getResAngularCuartos()+1), mensajeArrancaContinuo, 5);  //nuevo angulo final				
 			} else {
 				//sólo promedio => mensaje 26
-				mensaje=me26;
-				mensaje[2]=(byte)numPromedios;
+				mensajeArrancaContinuo=me26;
+				mensajeArrancaContinuo[2]=(byte)numPromedios;
 			}
 		} else {
 			//no se especifica promedio
@@ -700,51 +701,28 @@ public class ManejaLMS {
 				//se especifica algún águlo => mensaje 27
 				if( anguloInicial>anguloFinal || anguloFinal>180 || anguloInicial>180)
 					throw new LMSException("Los angulos del barrido no están correctamente definidos");
-				mensaje=me27;
-				UtilMensajes.word2Men((short)(anguloInicial*manMen.getResAngularCuartos()+1), mensaje, 2);  //nuevo angulo inicial
-				UtilMensajes.word2Men((short)(anguloFinal*manMen.getResAngularCuartos()+1), mensaje, 4);  //nuevo angulo final
+				mensajeArrancaContinuo=me27;
+				UtilMensajes.word2Men((short)(anguloInicial*manMen.getResAngularCuartos()+1), mensajeArrancaContinuo, 2);  //nuevo angulo inicial
+				UtilMensajes.word2Men((short)(anguloFinal*manMen.getResAngularCuartos()+1), mensajeArrancaContinuo, 4);  //nuevo angulo final
 			} else {
 				//no se especifica nada => Mensaje 24 al LSM
-				mensaje=me24;
+				mensajeArrancaContinuo=me24;
 			}
 		}
 
-		System.out.println("Vamos a tratar de pedir envío continuo: "+UtilMensajes.hexaString(mensaje));
-		boolean menOK=false;
-		for(int ni=1; !menOK && ni<=numReintentos; ni++) {
-			try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
-			manTel.purgaBufferEntrada();
-			manTel.EnviaMensaje(mensaje); 
-			byte[] respContinuo;
-			if(( respContinuo=manTel.LeeMensaje())==null)
-				continue; //no hay respuesta volvemos a intentarlo
+		System.out.println("Vamos a tratar de pedir envío continuo: "+UtilMensajes.hexaString(mensajeArrancaContinuo));
 
-			byte[] respModoContOK={(byte)0xa0, 00, 0x10};
-			//está listo si se recibe confirmación o se empiezan a recibir barridos
-			menOK=Arrays.equals(respContinuo,respModoContOK) ||
-			   (manMen.mensajeABarridoAngular(respContinuo)!=null);
-		}
-		if(!menOK)
-			throw new LMSException("Error al tratar de pasar al modo continuo :"+UtilMensajes.hexaString(mensaje));
-
-		thContinuo.activar(); //ya esta activo, solo tenemos que activarlo
+		thContinuo.activar(); //ya esta arrancado, solo tenemos que activarlo
 		
 		pidiendo=PIDIENDO_CONTINUO;
-		System.out.println("Se confirmó el envío continuo");
+//		System.out.println("Se confirmó el envío continuo");
 	}
 
 	public void pidePararContinuo() throws LMSException {
 		if(pidiendo!=PIDIENDO_CONTINUO && pidiendo!=PIDIENDO_PARAR)
 			throw new LMSException("No estamos en medio de una peticion continua");
-		System.out.println("Tratamos de parar envío continuo");
-		byte[] menModo25={0x20, 0x25};
-//		if(!
-				manTel.EnviaMensajeSinConfirmacion(menModo25);
-//				)
-//			throw new LMSException("Error al enviar el mensaje "+UtilMensajes.hexaString(menModo25));
-		//la confirmación la recibirá el thread continuo
-		
-		pidiendo=PIDIENDO_PARAR;
+		System.out.println("Solicitamos parar el envio");
+		pidiendo=PIDIENDO_PARAR;  //de la parada se encarga el thread continuo
 	}
 	
 	
@@ -770,7 +748,10 @@ public class ManejaLMS {
 	class ThreadContinuo extends Thread {
 		
 		private boolean suspendido=true;
-		
+		private boolean yaEmitiendo=false;
+		private byte[] respModoContOK={(byte)0xa0, 00, 0x10};
+		private byte[] menModo25={0x20, 0x25};
+
 		public synchronized void activar() {
 			if(suspendido) {
 				suspendido=false;
@@ -783,8 +764,9 @@ public class ManejaLMS {
 		}
 		
 		public void run() {
-//			while(pidiendo==PIDIENDO_CONTINUO || pidiendo==PIDIENDO_PARAR) {
-			while(true) { //se saldrá solo cuando se reciba confirmación mensaje parada
+			boolean pedimosArrancar, pedimosParar;
+			while(true) { //No se saldrá nunca
+				pedimosArrancar=false; pedimosParar=false;
 //				System.out.println("Esperamos mensaje");
 				//miramos a ver si estamos suspendidos
 				try {
@@ -792,33 +774,52 @@ public class ManejaLMS {
 						while (suspendido) wait(); 
 						}
 				} catch (InterruptedException e) {	}
-				byte[] menBarridoC=manTel.LeeMensaje(0);
-				if(menBarridoC==null) {
-					System.err.println("no se ha recibido mensaje correctamente"); 
-					//TODO llevar contador de fallos
-					continue;  //no se ha recibido mensaje correctamente :-(
+				//Vemos si ya esta emitiendo o tenemos que solicitarlo
+				if(pidiendo==PIDIENDO_CONTINUO && !yaEmitiendo) {
+					manTel.EnviaMensajeSinConfirmacion(mensajeArrancaContinuo);
+					System.out.println("Pedimos arrancar continuo");
+					pedimosArrancar=true;
 				}
-				
-				//vemos si se trata de mensaje de confirmación de cambio de modo
-				if(pidiendo==PIDIENDO_PARAR 
-						&& menBarridoC[0]==(byte)0xA0 
-						&& menBarridoC[1]==0x00 
-				) {
-					System.out.println("Se confirmo la peticion de parada de barrido continuo. TERMINAMOS");
+				if(pidiendo==PIDIENDO_PARAR && yaEmitiendo) {
+					manTel.EnviaMensajeSinConfirmacion(menModo25);
+					System.out.println("Pedimos parar continuo");
+					pedimosParar=true;
+				}
+				//TODO Afinar el time out
+				byte[] menBarridoC=manTel.LeeMensaje(100);
+				if(menBarridoC==null) {
+					System.out.println("ha sido time out (probablemente), no emitiendo");
+					yaEmitiendo=false; //no está emitiendo
+				} else if (Arrays.equals(menBarridoC,respModoContOK)) {
+					//ha sido confirmación de cambio de modo
+					if(pedimosArrancar) {
+						System.out.println("Se confirma la arrancada");
+						yaEmitiendo=true;
+					}
+					if(pedimosParar) {
+						System.out.println("Se confirma la parada");
+						yaEmitiendo=false;
+					}
+				} else {
+					//TODO optimizar para que se reutilice el barrido
+					BarridoAngular barr=manMen.mensajeABarridoAngular(menBarridoC);
+					if(barr==null) {
+						System.err.println("no se ha podido convertir a barrdio :-(");
+						//TODO llevar contador de fallos
+						continue;  //no se ha podido convertir a barrdio :-(
+					}
+					//Tenemos un nuevo barrido valido lo ponemos en el vector
+					synchronized (mutexBarridos) {
+						//por ahora sólo apuntamos el nuevo barrido
+						ultimoBarrido=barr;
+					}
+				}
+					
+				//si se quería parar y ya no se emite nos suspendemos.
+				if(pidiendo==PIDIENDO_PARAR && !yaEmitiendo)  {
+					System.out.println("Se confirmo la peticion de parada de barrido continuo. NOS SUSPENDEMOS");
 					pidiendo=PIDIENDO_NADA;
 					suspendido=true;
-				}
-				//TODO optimizar para que se reutilice el barrido
-				BarridoAngular barr=manMen.mensajeABarridoAngular(menBarridoC);
-				if(barr==null) {
-					System.err.println("no se ha podido convertir a barrdio :-(");
-					//TODO llevar contador de fallos
-					continue;  //no se ha podido convertir a barrdio :-(
-				}
-				//Tenemos un nuevo barrido valido lo ponemos en el vector
-				synchronized (mutexBarridos) {
-					//por ahora sólo apuntamos el nuevo barrido
-					ultimoBarrido=barr;
 				}
 			}
 		}
