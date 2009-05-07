@@ -191,7 +191,7 @@ public class ManejaLMS {
 	 * En este modo el LMS no envía nada sino espera peticiones.
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
-	public void CambiaAModo25() throws LMSException {
+	public synchronized void CambiaAModo25() throws LMSException {
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -252,7 +252,7 @@ public class ManejaLMS {
 	 * @return Mensaje entero de respuesta f4, incuyendo byte de status.
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
-	protected byte[] ObtieneParte1Configuracion() throws LMSException {
+	protected synchronized byte[] ObtieneParte1Configuracion() throws LMSException {
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -281,7 +281,7 @@ public class ManejaLMS {
 	 * @param menConfigura mensaje adecuado (77) para el cambi 
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
-	protected void CambiaParte1Configuracion(byte[] menConfigura) throws LMSException {
+	protected synchronized void CambiaParte1Configuracion(byte[] menConfigura) throws LMSException {
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -311,7 +311,7 @@ public class ManejaLMS {
 	 * @param resAngular resolución angular en decimas de grado 100=1º, 50=0.5º, 25=0.25º
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
-	public void setVariante(short rangoAngular, short resAngular) throws LMSException {
+	public synchronized void setVariante(short rangoAngular, short resAngular) throws LMSException {
 		if(configuradoVariante && manMen.getRangoAngular()==rangoAngular && manMen.getResAngular()==resAngular)
 			return; //estamos en la variante pedida
 
@@ -512,7 +512,7 @@ public class ManejaLMS {
 	 * @return la zona recibida
 	 * @throws LMSException  en caso de cualquier problema
 	 */
-	public ZonaLMS recibeZona(byte queZona, boolean elConjunto1) throws LMSException {
+	public synchronized ZonaLMS recibeZona(byte queZona, boolean elConjunto1) throws LMSException {
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -544,7 +544,7 @@ public class ManejaLMS {
 	 * Manda telegrama 30 solicitando las distancias verticales.
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
-	public void solicitaDistancia() throws LMSException {
+	public synchronized void solicitaDistancia() throws LMSException {
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -560,7 +560,7 @@ public class ManejaLMS {
 	 * @return distancia de cada zona en milímetros
 	 * @throws LMSException si hay problemas en la comunicación.
 	 */
-	public double[] recibeDistancia() throws LMSException {
+	public synchronized double[] recibeDistancia() throws LMSException {
 		if(pidiendo!=PIDIENDO_DISTANCIAS)
 			throw new LMSException("NO acabamos de pedir distancias");
 		//Recibimos respuesta
@@ -586,7 +586,7 @@ public class ManejaLMS {
 	 * @param numPromedios
 	 * @throws LMSException si se hay algún problema
 	 */
-	public void pideBarrido(short anguloInicial, short anguloFinal,
+	public synchronized void pideBarrido(short anguloInicial, short anguloFinal,
 			short numPromedios) throws LMSException {
 		
 		configuraInicial();
@@ -640,7 +640,7 @@ public class ManejaLMS {
 	 * @return Barrido recibido
 	 * @throws LMSException 
 	 */
-	public BarridoAngular recibeBarrido() throws LMSException {
+	public synchronized BarridoAngular recibeBarrido() throws LMSException {
 		if(pidiendo!=PIDIENDO_BARRIDO)
 			throw new LMSException("No acabamos de pedir barrido");
 		//Recibimos respuesta
@@ -662,7 +662,7 @@ public class ManejaLMS {
 	 * @param numPromedios
 	 * @throws LMSException si se hay algún problema
 	 */
-	public void pideBarridoContinuo(short anguloInicial, short anguloFinal,
+	public synchronized void pideBarridoContinuo(short anguloInicial, short anguloFinal,
 			short numPromedios) throws LMSException {
 		
 		configuraInicial();
@@ -677,7 +677,6 @@ public class ManejaLMS {
 		final byte[] me24={0x20, 0x24}; //Datos de 1 barrido
 		
 		//A la vista de los parámetros elegimos el mensaje a mandar
-		mensajeArrancaContinuo=null;
 		if(numPromedios>1) {
 			if(numPromedios>250)
 				throw new LMSException("Numero de promedios >250");
@@ -718,7 +717,7 @@ public class ManejaLMS {
 //		System.out.println("Se confirmó el envío continuo");
 	}
 
-	public void pidePararContinuo() throws LMSException {
+	public synchronized void pidePararContinuo() throws LMSException {
 		if(pidiendo!=PIDIENDO_CONTINUO && pidiendo!=PIDIENDO_PARAR)
 			throw new LMSException("No estamos en medio de una peticion continua");
 		System.out.println("Solicitamos parar el envio");
@@ -765,6 +764,7 @@ public class ManejaLMS {
 		
 		public void run() {
 			boolean pedimosArrancar, pedimosParar;
+			int pidi;
 			while(true) { //No se saldrá nunca
 				pedimosArrancar=false; pedimosParar=false;
 //				System.out.println("Esperamos mensaje");
@@ -775,12 +775,15 @@ public class ManejaLMS {
 						}
 				} catch (InterruptedException e) {	}
 				//Vemos si ya esta emitiendo o tenemos que solicitarlo
-				if(pidiendo==PIDIENDO_CONTINUO && !yaEmitiendo) {
+				synchronized (ManejaLMS.this) {
+					pidi=pidiendo;	//copiamos el valor de pidiendo				
+				}
+				if(pidi==PIDIENDO_CONTINUO && !yaEmitiendo) {
 					manTel.EnviaMensajeSinConfirmacion(mensajeArrancaContinuo);
 					System.out.println("Pedimos arrancar continuo");
 					pedimosArrancar=true;
 				}
-				if(pidiendo==PIDIENDO_PARAR && yaEmitiendo) {
+				if(pidi==PIDIENDO_PARAR && yaEmitiendo) {
 					manTel.EnviaMensajeSinConfirmacion(menModo25);
 					System.out.println("Pedimos parar continuo");
 					pedimosParar=true;
@@ -816,9 +819,11 @@ public class ManejaLMS {
 				}
 					
 				//si se quería parar y ya no se emite nos suspendemos.
-				if(pidiendo==PIDIENDO_PARAR && !yaEmitiendo)  {
+				if(pidi==PIDIENDO_PARAR && !yaEmitiendo)  {
 					System.out.println("Se confirmo la peticion de parada de barrido continuo. NOS SUSPENDEMOS");
-					pidiendo=PIDIENDO_NADA;
+					synchronized (ManejaLMS.this) {
+						pidiendo=PIDIENDO_NADA;						
+					}
 					suspendido=true;
 				}
 			}
