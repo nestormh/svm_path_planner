@@ -5,6 +5,7 @@ package sibtra.rfyruta;
 
 import sibtra.lms.BarridoAngular;
 import sibtra.util.UtilCalculos;
+import sun.awt.SunToolkit.InfiniteLoop;
 
 /**
  * Clase para combinar el seguimiento de la ruta con el RF.
@@ -89,6 +90,9 @@ public class MiraObstaculo {
 
 	/** indice del barrido donde está el obstáculo más cercano en el camino*/
 	int indBarrSegObs;
+
+	/** Si se encontró el segmento donde está el obstáculo */
+	boolean encontradoSegObs;
 
 
 	/**
@@ -219,27 +223,6 @@ public class MiraObstaculo {
 		double AngIniB=barrAct.getAngulo(0);  //angulo inicial del barrido
 		double AngFinB=barrAct.getAngulo(barrAct.numDatos()-1); //angulo final del barrido
 		
-		//¿Puedo saber si estoy dentro del camino??
-		//  Basta que la distancia a alguno de los puntos del camino sea menor que Ancho.
-		//comienzo por el indice de centro anterior
-//		if(distanciaPuntos(posicionLocal,Tr[indiceDentro])<anchoCamino)  {
-//			//el anterior ya esta cerca, busco hacia popa (atrás) hasta salir
-//			while(indiceDentro>=0 
-//					&& distanciaPuntos(posicionLocal,Tr[indiceDentro])<anchoCamino)
-//				indiceDentro--;
-//			indiceDentro++; //nos quedamos con el siguiente (que si está cerca)
-//		} else {
-//			int indIni=indiceDentro;
-//			do {
-//				//avanzamos por Tr ciclando (por si indiceDentro está por delante del coche)
-//				indiceDentro=(indiceDentro+1)%Tr.length;
-//			} while(indiceDentro!=indIni
-//					&& distanciaPuntos(posicionLocal,Tr[indiceDentro])>anchoCamino);
-//			if(indiceDentro==indIni) {
-////				System.out.println("estoy fuera ("+posicionLocal[0]+","+posicionLocal[1]+")");
-//				return dist;
-//			}
-//		}
 		//punto de la trayectoria más cercano a la posición local
 		indiceCoche=UtilCalculos.indiceMasCercanoOptimizado(Tr, esCerrada, posicionLocal, indiceCoche);
 		double distATr=distanciaPuntos(posicionLocal, Tr[indiceCoche]);
@@ -335,46 +318,6 @@ public class MiraObstaculo {
 				iptoIini=(iptoIini+1)%Bi.length; //en válido era justo el anterior
 			}
 		}	
-//			for(iptoD=indiceCoche; iptoD<Bd.length; iptoD++) {
-//				if(distanciaPuntos(posicionLocal, Bd[iptoD])>barrAct.getDistanciaMaxima()) {
-//					System.out.println("Punto Decho muy lejos para considerarlo "+iptoD);
-//					break; //punto muy lejos para considerarlo
-//				}
-//				v2[0]=Bd[iptoD][0]-posicionLocal[0];	v2[1]=Bd[iptoD][1]-posicionLocal[1];
-//				double angD=UtilCalculos.anguloVectores(v, v2)+Math.PI/2;
-//				if (angD>=AngIniB && angD<=AngFinB) {
-//					encontradoIniDer=true;
-//					break; //este punto está dentro del barrido
-//				}
-//			}
-//			if(!encontradoIniDer) {
-//				System.out.println("Ningún punto de la derecha en el barrido");
-//				avanD=false; //no avanzamos por la derecha
-//				iptoD=indiceDentro;
-//			}
-//			iptoDini=iptoD; //apuntamos en indice inicial
-//
-//			//Por la izquierda
-//			boolean encontradoIniIzd=false;
-//			for(iptoI=indiceDentro; iptoI<Bi.length; iptoI++) {
-//				if(distanciaPuntos(posicionLocal, Bi[iptoI])>barrAct.getDistanciaMaxima()) {
-//					System.out.println("Punto Izdo muy lejos para considerarlo "+iptoI);
-//					break; 
-//				}
-//				v2[0]=Bi[iptoI][0]-posicionLocal[0];	v2[1]=Bi[iptoI][1]-posicionLocal[1];
-//				double angI=UtilCalculos.anguloVectores(v, v2)+Math.PI/2;
-//				if (angI>=AngIniB && angI<=AngFinB) {
-//					encontradoIniIzd=true;
-//					break; //este punto está dentro del barrido
-//				}
-//			}
-//			if(!encontradoIniIzd) {
-//				System.out.println("Ningún punto de la izquierda en el barrido");
-//				avanI=false; //no avanzaremos por izquierda
-//				iptoI=indiceDentro;
-//			}
-//			iptoIini=iptoI; //apuntamos en indice inicial
-//		}
 		
 		//procedemos a recorrer los puntos para ver si hay algo dentro
 		boolean avanD=encontradoInicioD; // Si se avanza la derecha
@@ -484,120 +427,70 @@ public class MiraObstaculo {
 					indMin=i;
 			dist=barr.getDistancia(indMin);
 			//Tenemos que buscar pto dentro del camino más cercano
-			indSegObs=Tr.length; //para limitar la búsquda
-			indBarrSegObs=Integer.MAX_VALUE;
-			for(int i=iAD; i<=iAI; i++) {
-				double angI=barr.getAngulo(i);
-				double distI=barr.getDistancia(i);
-				double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
-						,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
-				//Buscamos segmento en que está
-				//TODO usar algo más eficiente que la fuerza bruta
-				int iSA=indiceCoche-1; //empezamos desde el coche
-				while (iSA<indSegObs && !dentroSegmento(ptoI, iSA)) {
-					//no está, vamos avanzando
-					iSA++;
-				} 
-				if(dentroSegmento(ptoI, iSA)) {
-					indSegObs=iSA; //se encontró uno más cercano
-					indBarrSegObs=i;
-				}
-//				indSegObs=(ColDecha?iptoD:iptoI);
-//				if(!dentroSegmento(pto, indSegObs)) {
-//				//si ya está dentro empezamos acercándonos
-//				do {
-//				indSegObs--;
-//				} while (indSegObs>indiceDentro && !dentroSegmento(pto, indSegObs));
-//				if(indSegObs==indiceDentro) indSegObs=Integer.MAX_VALUE;
-//				} 
-//				else {
-//				//no está, vamos avanzando
-//				do { indSegObs++;} while (indSegObs<Tr.length && !dentroSegmento(pto, indSegObs));
-//				if(!dentroSegmento(pto, indSegObs))
-//				indSegObs=Integer.MAX_VALUE; //no se encontró
-//				else
-//				indSegObs--; // nos quedamos con el anterior
-//				}
-			}
-			if(indSegObs==Tr.length) {
-				log("No se encontró segmento ");
+			if(!buscaSegmentoObstaculo(posicionLocal,iAD, iAI))
 				//usamos hasta donde hemos podido explorar
 				indSegObs=(iptoD<iptoI)?iptoI:iptoD;
-				indBarrSegObs=Integer.MAX_VALUE;
-			} //else indSegObs--; //nos quedamos con el anterior
 		} else {
 			log("los rayos se han cruzado y no hay colisión en los 2");
 			if(ColIzda) {
 				//usamos el punto de la trayectoria hasta donde podemos llegar
 				dist=-distanciaPuntos(Tr[iLibre=iptoI],posActual);
 				//Tenemos que buscar pto dentro del camino más cercano
-				//TODO optimizar límites de búsqueda
-				indSegObs=Tr.length; //para limitar la búsquda
-				indBarrSegObs=Integer.MAX_VALUE;
-				for(int i=iAI;i>=0; i--) {
-					double angI=barr.getAngulo(i);
-					double distI=barr.getDistancia(i);
-					double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
-							,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
-					//Buscamos segmento en que está
-					//TODO usar algo más eficiente que la fuerza bruta
-					int iSA=indiceCoche-1; //empezamos desde el coche
-					while (iSA<indSegObs && !dentroSegmento(ptoI, iSA)) {
-						//no está, vamos avanzando
-						iSA++;
-					} 
-					if(dentroSegmento(ptoI, iSA)) {
-						indSegObs=iSA; //se encontró uno más cercano
-						indBarrSegObs=i;
-					}
-				}
-				if(indSegObs==Tr.length) {
-					log("No se encontró segmento a persar colision");
+				if(!buscaSegmentoObstaculo(posicionLocal, 0, iAI))
 					//usamos hasta donde hemos podido explorar
 					indSegObs=iptoI;
-					indBarrSegObs=Integer.MAX_VALUE;
-				} //else indSegObs--; //nos quedamos con el anterior
 			} else  if(ColDecha) {
 				dist=-distanciaPuntos(Tr[iLibre=iptoD],posActual);
 				//Tenemos que buscar pto dentro del camino más cercano
-				//TODO optimizar límites de búsqueda
-				indSegObs=Tr.length; //para limitar la búsquda
-				indBarrSegObs=Integer.MAX_VALUE;
-				for(int i=iAD;  i<barr.numDatos(); i++) {
-					double angI=barr.getAngulo(i);
-					double distI=barr.getDistancia(i);
-					double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
-							,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
-					//Buscamos segmento en que está
-					//TODO usar algo más eficiente que la fuerza bruta
-					int iSA=indiceCoche-1; //empezamos desde el coche
-					while (iSA<indSegObs && !dentroSegmento(ptoI, iSA)) {
-						//no está, vamos avanzando
-						iSA++;
-					} 
-					if(dentroSegmento(ptoI, iSA)) {
-						indSegObs=iSA; //se encontró uno más cercano
-						indBarrSegObs=i;
-					}
-				}
-				if(indSegObs==Tr.length) {
-					log("No se encontró segmento a persar colision");
+				if(!buscaSegmentoObstaculo(posicionLocal, iAD, barr.numDatos()-1))
 					//usamos hasta donde hemos podido explorar
 					indSegObs=iptoD;
-					indBarrSegObs=Integer.MAX_VALUE;
-				} //else indSegObs--; //nos quedamos con el anterior
 			} else {
 				//no ha colisionado ningún lado, cogemos el índice mayor
 				//tambien para el camino
 				iLibre=indSegObs=(iptoD<iptoI)?iptoI:iptoD;
 				indBarrSegObs=Integer.MAX_VALUE;
-				dist=-distanciaPuntos(Tr[iLibre],posActual);				
+				dist=-distanciaPuntos(Tr[iLibre],posActual);
+				encontradoSegObs=false;
 			}
 		}
 		log("Indice del segmento coche "+indiceCoche
-				+" anterior al obstáculo "+indSegObs);
+				+" anterior al obstáculo ("+encontradoSegObs+")"+indSegObs);
 		distCamino=largoTramo(indiceCoche,indSegObs);
 		return distCamino;
+	}
+
+	private boolean buscaSegmentoObstaculo(double[] posicionLocal, int indComBarrido,int indFinBarrido) {
+		int incSegObs; //incremento sobre la posición del coche donde se encuentra el ostaculo 
+		incSegObs=esCerrada?Tr.length-1:Tr.length-indiceCoche; //para limitar la búsquda
+		indBarrSegObs=Integer.MAX_VALUE;
+		encontradoSegObs=false;
+		for(int i=indComBarrido; i<=indFinBarrido; i++) {
+			double angI=barr.getAngulo(i);
+			double distI=barr.getDistancia(i);
+			double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
+					,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
+			//Buscamos segmento en que está
+			//TODO usar algo más eficiente que la fuerza bruta
+			int incSA=0;
+			boolean enseg=false;
+			while (incSA<incSegObs  //no buscamos más allá de segmento ya encontrado
+					&& !(enseg=dentroSegmento(ptoI, ((indiceCoche-1)+incSA)%Tr.length)) 
+					) {
+				incSA++;  //no está, vamos avanzando
+			} 
+			if(enseg) {
+				incSegObs=incSA; //se encontró uno más cercano
+				indBarrSegObs=i;
+			}
+			encontradoSegObs=encontradoSegObs||enseg; //desde que se encuentre algún segmento pasará a true
+		}
+		indSegObs=((indiceCoche-1)+incSegObs)%Tr.length;
+		if(!encontradoSegObs)  {
+			log("No se encontró segmento ");
+			indBarrSegObs=Integer.MAX_VALUE;
+		}
+		return encontradoSegObs;
 	}
 	
 	private void log(String string) {
@@ -623,8 +516,15 @@ public class MiraObstaculo {
 	 * @return si está dentro
 	 */
 	public boolean dentroSegmento(double[] pto,int i){
-		if(i>=(Tr.length-1) || i<0)
-			return false;
+		if(i<0)
+			throw new IllegalArgumentException("Pasado indice negativo");
+		if(i>=Tr.length)
+			throw new IllegalArgumentException("Indice supera largo trayectoria");
+		if(!esCerrada && i==(Tr.length-1))
+			throw new IllegalArgumentException("Es abierta y se a pasado úlitmo indice válido");
+		int psig=i+1;
+		if(esCerrada && i==(Tr.length-1)) 
+			psig=0;
 		
 		//está en alguna de las esquina
 		if(distanciaPuntos(pto, Bi[i])<1e-3)
@@ -635,14 +535,14 @@ public class MiraObstaculo {
 		
 		double sumAng=0;
 		double[] vA={pto[0]-Bi[i][0], pto[1]-Bi[i][1]};
-		double[] vB={pto[0]-Bi[i+1][0], pto[1]-Bi[i+1][1]};
-		double[] vC={pto[0]-Bd[i+1][0], pto[1]-Bd[i+1][1]};
+		double[] vB={pto[0]-Bi[psig][0], pto[1]-Bi[psig][1]};
+		double[] vC={pto[0]-Bd[psig][0], pto[1]-Bd[psig][1]};
 		double[] vD={pto[0]-Bd[i][0], pto[1]-Bd[i][1]};
 		
 		log("esq=["+Bi[i][0]+","+Bi[i][1]+";"
 				+Bi[i][0]+","+Bi[i][1]+";"
-				+Bi[i+1][0]+","+Bi[i+1][1]+";"
-				+Bd[i+1][0]+","+Bd[i+1][1]+";"
+				+Bi[psig][0]+","+Bi[psig][1]+";"
+				+Bd[psig][0]+","+Bd[psig][1]+";"
 				+Bd[i][0]+","+Bd[i][1]+";"
 				+"], pto=["+pto[0]+","+pto[1]+"]"
 				);
@@ -664,11 +564,18 @@ public class MiraObstaculo {
 	
 	
 	public double largoTramo(int iini, int ifin) {
-		if(iini>ifin || ifin>=Tr.length)
+		if(iini<0 || iini>=Tr.length)
+			throw new IllegalArgumentException("Inidice inicial fuera de rango válido "+iini);
+		if(ifin<0 || ifin>=Tr.length)
+			throw new IllegalArgumentException("Inidice final fuera de rango válido "+ifin);
+		if(!esCerrada && iini>ifin)
+			throw new IllegalArgumentException("No es cerrada y indice inicial ("+iini+") > inidice final ("+ifin+")");
+		
+		if(!esCerrada && iini>ifin || ifin>=Tr.length)
 			return Double.POSITIVE_INFINITY;
 		double largo=0;
-		for(int i=iini; i<ifin; i++) {
-			double[] v={Tr[i+1][0]-Tr[i][0], Tr[i+1][1]-Tr[i][1]}; 
+		for(int i=iini; i!=ifin; i=(i+1)%Tr.length) {
+			double[] v={Tr[(i+1)%Tr.length][0]-Tr[i][0], Tr[(i+1)%Tr.length][1]-Tr[i][1]}; 
 			largo+=largoVector(v);
 		}
 		return largo;
@@ -778,7 +685,7 @@ public class MiraObstaculo {
 				+" \n imin ="+indMin
 				+" \n indiceCoche ="+indiceCoche
 				+" indSegObs ="+indSegObs
-				+" indBarrSegObs ="+indBarrSegObs
+				+" indBarrSegObs ("+encontradoSegObs+") ="+indBarrSegObs
 		;
 		return ret;
 	}

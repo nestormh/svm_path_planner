@@ -160,8 +160,8 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 				g.setColor(Color.WHITE);
 				//los de la derecha e izquierda que están libres
 				GeneralPath gp=null;
-				if((gp=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1))!=null) g.draw(gp);
-				if((gp=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1))!=null) g.draw(gp);
+				if((gp=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1,MI.esCerrada))!=null) g.draw(gp);
+				if((gp=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1,MI.esCerrada))!=null) g.draw(gp);
 				if(MI.dist>0) {
 					//marcamos el pto mínimo
 					g.setStroke(new BasicStroke());
@@ -196,7 +196,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 					g.setStroke(new BasicStroke(3));
 					g.setColor(Color.GREEN);
 					if((gp=pathArrayXY(MI.Tr, MI.indiceCoche
-							, MI.indSegObs+1))!=null) g.draw(gp);
+							, MI.indSegObs+1, MI.esCerrada))!=null) g.draw(gp);
 					g.draw(new Line2D.Double(point2Pixel(MI.Bi[MI.indSegObs])
 							,point2Pixel(MI.Bd[MI.indSegObs])));
 					g.draw(new Line2D.Double(point2Pixel(MI.Bi[MI.indiceCoche])

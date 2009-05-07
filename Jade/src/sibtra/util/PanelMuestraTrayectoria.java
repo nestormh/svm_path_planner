@@ -234,32 +234,49 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	 * @param v array de al menos 2 columnas. La primera se considera coordenada X, la segunda la Y
 	 * @param iini indice del primer punto
 	 * @param ifin indice siguiente del último punto
+	 * @param esCerrado si debemos considerrar array circular
 	 * @return {@link GeneralPath} con los puntos considerados
 	 */
-	protected GeneralPath pathArrayXY(double [][] v, int iini, int ifin) {
-		if(v==null || iini<0 || ifin<=iini || v.length<ifin 
-				|| v.length==0 || v[0].length<2)
+	protected GeneralPath pathArrayXY(double [][] v, int iini, int ifin, boolean esCerrado) {
+		if(v==null || v.length==0 || v[0].length<2 || iini<0 || ifin>v.length
+				|| (!esCerrado && ifin<=iini)
+				)
 			return null;
+		int numPuntos=(iini<ifin)?(ifin-iini):(Tr.length-iini+ifin);
 		GeneralPath perimetro = 
-			new GeneralPath(GeneralPath.WIND_EVEN_ODD, ifin-iini);
+			new GeneralPath(GeneralPath.WIND_EVEN_ODD, numPuntos);
 
 		Point2D.Double px=point2Pixel(v[iini][0],v[iini][1]);
 		perimetro.moveTo((float)px.getX(),(float)px.getY());
-		for(int i=iini+1; i<ifin; i++) {
+		int i=iini+1;
+		for(int cont=2; cont<=numPuntos; cont++) {
 			px=point2Pixel(v[i][0],v[i][1]);
 			//Siguientes puntos son lineas
 			perimetro.lineTo((float)px.getX(),(float)px.getY());
+			i=(i+1)%v.length;
 		}
 		return perimetro;
 	}
 
-	/** @return Ídem que {@link #pathArrayXY(double[][], int, int)} usando todo el array.	 */
-	protected GeneralPath pathArrayXY(double[][] v) {
+	/** Ídem {@link #pathArrayXY(double[][], int, int, boolean)} con esCerrado=false */
+	protected GeneralPath pathArrayXY(double [][] v, int iini, int ifin) {
+		return pathArrayXY(v, iini, ifin, false);
+	}
+
+	
+	/** @return Ídem que {@link #pathArrayXY(double[][], int, int, boolean)} usando todo el array.	 */
+	protected GeneralPath pathArrayXY(double[][] v, boolean esCerrada) {
 		if(v==null)
 			return null;
-		return pathArrayXY(v, 0, v.length);
+		return pathArrayXY(v, 0, v.length,esCerrada);
 		
 	}
+	
+	/** Ídem que {@link #pathArrayXY(double[][], boolean)} con cerrada =false */
+	protected GeneralPath pathArrayXY(double[][] v) {
+		return pathArrayXY(v, false);
+	}
+	
 	
 	/** Establece la trayectoria a representar, pero no actualiza el panel
 	 * 
