@@ -248,7 +248,7 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 
 		Point2D.Double px=point2Pixel(v[iini][0],v[iini][1]);
 		perimetro.moveTo((float)px.getX(),(float)px.getY());
-		int i=iini+1;
+		int i=(iini+1)%v.length;
 		for(int cont=2; cont<=numPuntos; cont++) {
 			px=point2Pixel(v[i][0],v[i][1]);
 			//Siguientes puntos son lineas

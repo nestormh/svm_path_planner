@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 
 import sibtra.gps.Ruta;
 import sibtra.lms.BarridoAngular;
@@ -256,6 +257,24 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		super.actualiza();
 	}
 	
+
+public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
+	Ruta rutaEspacial;
+	try {
+		File file = new File(fichRuta);
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+		rutaEspacial=(Ruta)ois.readObject();
+		ois.close();
+	} catch (IOException ioe) {
+		System.err.println("Error al abrir el fichero " + fichRuta);
+		System.err.println(ioe.getMessage());
+		rutaEspacial=null;
+	} catch (ClassNotFoundException cnfe) {
+		System.err.println("Objeto leído inválido: " + cnfe.getMessage());
+		rutaEspacial=null;
+	}     
+	return rutaEspacial;
+}
 	
 	
 	/**
@@ -265,137 +284,135 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 	public static void main(String[] args) {
 
 		//necestamos leer archivo con la ruta
+		boolean esInteractivo=true;
+		int numIteras=1000; //para el caso de que no sea interactivo
 		Ruta rutaEspacial=null;
-		//elegir fichero
-		JFileChooser fc=new JFileChooser(new File("./Rutas"));
-		do {
-			int devuelto=fc.showOpenDialog(null);
-			if (devuelto!=JFileChooser.APPROVE_OPTION) 
-				JOptionPane.showMessageDialog(null,
-						"Necesario cargar fichero de ruta",
-						"Error",
-						JOptionPane.ERROR_MESSAGE);
-			else  {
-				String fichRuta=fc.getSelectedFile().getAbsolutePath();
-	    		try {
-	    			File file = new File(fichRuta);
-	    			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-	    			rutaEspacial=(Ruta)ois.readObject();
-	    			ois.close();
-	    		} catch (IOException ioe) {
-	    			System.err.println("Error al abrir el fichero " + fichRuta);
-	    			System.err.println(ioe.getMessage());
-	    			rutaEspacial=null;
-	    		} catch (ClassNotFoundException cnfe) {
-	    			System.err.println("Objeto leído inválido: " + cnfe.getMessage());
-	    			rutaEspacial=null;
-	    		}     
+		if(args.length<1) {
+			//elegir fichero
+			JFileChooser fc=new JFileChooser(new File("./Rutas"));
+			do {
+				int devuelto=fc.showOpenDialog(null);
+				if (devuelto!=JFileChooser.APPROVE_OPTION) 
+					JOptionPane.showMessageDialog(null,
+							"Necesario cargar fichero de ruta",
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+				else  {
+					rutaEspacial=leeRutaEspacialDeFichero(fc.getSelectedFile().getAbsolutePath());
+				}
+			} while(rutaEspacial==null);
+		} else {
+			//nombre de fichero se pasa en linea de comandos
+			if((rutaEspacial=leeRutaEspacialDeFichero(args[0]))==null) {
+				System.exit(1);
 			}
-		} while(rutaEspacial==null);
+			esInteractivo=false;
+			//TODO numero de interaciones como segundo argumento.
+//			if(args.length>1 && )
+		}
 
 		double [][] Tr=rutaEspacial.toTr();
 		System.out.println("Longitud de la trayectoria="+Tr.length);
 
-		JFrame ventana=new JFrame("Panel Mira Obstáculo");
-		
-		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	
 		MiraObstaculo mi=new MiraObstaculo(Tr,rutaEspacial.esRutaCerrada());
-		
-		PanelMiraObstaculo pmo=new PanelMiraObstaculo(mi) {
-			/** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
-			MouseEvent evenPos;
-			Point2D.Double nuevaPos;
-			Point2D.Double posAngulo;
+		PanelMiraObstaculo pmo=null;
+		if(esInteractivo) {
+			JFrame ventana=new JFrame("Panel Mira Obstáculo");
+			ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			pmo=new PanelMiraObstaculo(mi) {
+				/** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
+				MouseEvent evenPos;
+				Point2D.Double nuevaPos;
+				Point2D.Double posAngulo;
 
-			/**
-		     * Sólo nos interesan pulsaciones del boton 1. 
-		     * Con CONTROL para determinar posición y orientación. Sin nada para hacer zoom.
-		     * @see #mouseReleased(MouseEvent)
-		     */
-			public void mousePressed(MouseEvent even) {
-				evenPos=null;
-				if(even.getButton()==MouseEvent.BUTTON1 && (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0) {
-					//Punto del coche
-					Point2D.Double nuevaPos=pixel2Point(even.getX(),even.getY());
-					System.out.println("Pulsado Boton 1 con CONTROL "+even.getButton()
-							+" en posición: ("+even.getX()+","+even.getY()+")"
-							+"  ("+nuevaPos.getX()+","+nuevaPos.getY()+")  "
-					);
-					evenPos=even;
-					return;
-				}
-				if(even.getButton()==MouseEvent.BUTTON3) {
-					System.out.println("Pulsado Boton "+even.getButton()+" pedimos los cálculos");
-					MI.masCercano(MI.posActual, MI.Yaw, MI.barr);
-
-					actualiza();
-					System.out.println(MI);
-					return;
-				}
-				//al del padre lo llamamos al final
-				super.mousePressed(even);
-			}
-
-			/**
-		     * Las pulsaciones del boton 1 con CONTROL para determinar posición y orientación.
-		     * Termina el trabajo empezado en {@link #mousePressed(MouseEvent)}
-		     */
-			public void mouseReleased(MouseEvent even) {
-				if(even.getButton()==MouseEvent.BUTTON1 
-						&& (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0
-						&& evenPos!=null) {
-					System.out.println("Soltado con Control Boton "+even.getButton()
-							+" en posición: ("+even.getX()+","+even.getY()+")");
-					//Cambiamos la posición si el movimiento es suficientemente grande
-					if(Math.abs(even.getX()-evenPos.getX())>50 
-							|| Math.abs(even.getY()-evenPos.getY())>50) {
-						nuevaPos=pixel2Point(evenPos.getX(),evenPos.getY());
-						posAngulo=pixel2Point(even.getX(),even.getY());
-						MI.nuevaPosicion();
+				/**
+				 * Sólo nos interesan pulsaciones del boton 1. 
+				 * Con CONTROL para determinar posición y orientación. Sin nada para hacer zoom.
+				 * @see #mouseReleased(MouseEvent)
+				 */
+				public void mousePressed(MouseEvent even) {
+					evenPos=null;
+					if(even.getButton()==MouseEvent.BUTTON1 && (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0) {
+						//Punto del coche
+						Point2D.Double nuevaPos=pixel2Point(even.getX(),even.getY());
+						System.out.println("Pulsado Boton 1 con CONTROL "+even.getButton()
+								+" en posición: ("+even.getX()+","+even.getY()+")"
+								+"  ("+nuevaPos.getX()+","+nuevaPos.getY()+")  "
+						);
+						evenPos=even;
+						return;
 					}
-					//Aunque no haya nueva posición, hacemos nuevo barrido
-					double[] npos={nuevaPos.getX(),nuevaPos.getY()};
-					BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
-					double frec=(13.6+2*Math.random());
-					double Amp=(3.0+15*Math.random());
-					double Dpor=(20.0+15*Math.random());
-					for(int i=0;i<barAct.numDatos();i++) {
-//						barAct.datos[i]=(short)((15.0)*100.0);
-						barAct.datos[i]=(short)((Math.sin((double)i/(barAct.numDatos()-1)*Math.PI*frec)
-								*Amp
-								+Dpor)*100.0);
-						//ruido aleatorio
-						if(Math.random()<0.05)
-							barAct.datos[i]=(short)((Math.random()*60+2)*100);
+					if(even.getButton()==MouseEvent.BUTTON3) {
+						System.out.println("Pulsado Boton "+even.getButton()+" pedimos los cálculos");
+						MI.masCercano(MI.posActual, MI.Yaw, MI.barr);
+
+						actualiza();
+						System.out.println(MI);
+						return;
 					}
-					long tini=System.currentTimeMillis();
-					MI.masCercano(npos, Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
-							, barAct);
-					actualiza();
-					System.out.println(MI);
-					System.out.println("Tarda:"+(System.currentTimeMillis()-tini));
-					return;
-				} else {
-					//Sacamos indice de pto más cercano
-					Point2D.Double pos = pixel2Point(even.getX(),even.getY());
-					System.out.println("Indice de Tr más cercano:"+UtilCalculos.indiceMasCercano(MI.Tr, pos.getX(), pos.getY()));
-					System.out.println("Indice de Db más cercano:"+UtilCalculos.indiceMasCercano(MI.Bd, pos.getX(), pos.getY()));
-					System.out.println("Indice de Bi más cercano:"+UtilCalculos.indiceMasCercano(MI.Bi, pos.getX(), pos.getY()));
-					
+					//al del padre lo llamamos al final
+					super.mousePressed(even);
 				}
-				//al final llamamos al del padre
-				super.mouseReleased(even);
-			}
-		};
-		
-		ventana.add(pmo);
-		
-		
-		//ventana.pack();
-		ventana.setSize(new Dimension(800,600));
-		ventana.setVisible(true);
-		
+
+				/**
+				 * Las pulsaciones del boton 1 con CONTROL para determinar posición y orientación.
+				 * Termina el trabajo empezado en {@link #mousePressed(MouseEvent)}
+				 */
+				public void mouseReleased(MouseEvent even) {
+					if(even.getButton()==MouseEvent.BUTTON1 
+							&& (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0
+							&& evenPos!=null) {
+						System.out.println("Soltado con Control Boton "+even.getButton()
+								+" en posición: ("+even.getX()+","+even.getY()+")");
+						//Cambiamos la posición si el movimiento es suficientemente grande
+						if(Math.abs(even.getX()-evenPos.getX())>50 
+								|| Math.abs(even.getY()-evenPos.getY())>50) {
+							nuevaPos=pixel2Point(evenPos.getX(),evenPos.getY());
+							posAngulo=pixel2Point(even.getX(),even.getY());
+							MI.nuevaPosicion();
+						}
+						//Aunque no haya nueva posición, hacemos nuevo barrido
+						double[] npos={nuevaPos.getX(),nuevaPos.getY()};
+						BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
+						double frec=(13.6+2*Math.random());
+						double Amp=(3.0+15*Math.random());
+						double Dpor=(20.0+15*Math.random());
+						for(int i=0;i<barAct.numDatos();i++) {
+//							barAct.datos[i]=(short)((15.0)*100.0);
+							barAct.datos[i]=(short)((Math.sin((double)i/(barAct.numDatos()-1)*Math.PI*frec)
+									*Amp
+									+Dpor)*100.0);
+							//ruido aleatorio
+							if(Math.random()<0.05)
+								barAct.datos[i]=(short)((Math.random()*60+2)*100);
+						}
+						long tini=System.currentTimeMillis();
+						MI.masCercano(npos, Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
+								, barAct);
+						actualiza();
+						System.out.println(MI);
+						System.out.println("Tarda:"+(System.currentTimeMillis()-tini));
+						return;
+					} else {
+						//Sacamos indice de pto más cercano
+						Point2D.Double pos = pixel2Point(even.getX(),even.getY());
+						System.out.println("Indice de Tr más cercano:"+UtilCalculos.indiceMasCercano(MI.Tr, pos.getX(), pos.getY()));
+						System.out.println("Indice de Db más cercano:"+UtilCalculos.indiceMasCercano(MI.Bd, pos.getX(), pos.getY()));
+						System.out.println("Indice de Bi más cercano:"+UtilCalculos.indiceMasCercano(MI.Bi, pos.getX(), pos.getY()));
+
+					}
+					//al final llamamos al del padre
+					super.mouseReleased(even);
+				}
+			};
+
+			ventana.add(pmo);
+
+
+			//ventana.pack();
+			ventana.setSize(new Dimension(800,600));
+			ventana.setVisible(true);
+		}
 
 		//Damos pto, orientación y barrido
 		BarridoAngular ba=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
@@ -405,13 +422,15 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		}
 		double[] ptoAct={-26, 10};
 		double dist=mi.masCercano(ptoAct, Math.toRadians(90), ba);
-		pmo.actualiza();
+		if(esInteractivo) pmo.actualiza();
 		System.out.println(mi);
-		boolean Caminar=false;
+		boolean Caminar=true;
 		if(Caminar) {
 			//vamos recorriendo la trayectoria con barridos aleatorios
 			int inTr=10, inTrAnt=8;
-			while(true) {
+			int iteracion=0;
+			while(esInteractivo || iteracion<numIteras) { //si no es interactivo repetimos sólo 1000 veces
+				iteracion++;
 				BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
 				double frec=(13.6+2*Math.random());
 				double Amp=(3.0+15*Math.random());
@@ -421,15 +440,20 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 					barAct.datos[i]=(short)((Math.sin((double)i/(barAct.numDatos()-1)*Math.PI*frec)
 							*Amp
 							+Dpor)*100.0);
+					//ruido aleatorio
+					if(Math.random()<0.05)
+						barAct.datos[i]=(short)((Math.random()*60+2)*100);
 				}
 
 				double diAct=mi.masCercano(Tr[inTr]
 				                               , Math.atan2(Tr[inTr][1]-Tr[inTrAnt][1],Tr[inTr][0]-Tr[inTrAnt][0]), barAct);
-				System.out.println("Indice "+inTr+" distancia "+diAct);
-				pmo.actualiza();
-				try {
-					Thread.sleep(200);
-				} catch (Exception e) { }
+				System.out.println(iteracion+"- Indice "+inTr+" distancia "+diAct);
+				if(esInteractivo) {
+					pmo.actualiza();
+					try {
+						Thread.sleep(200);
+					} catch (Exception e) { }
+				}
 				inTrAnt=inTr;
 				inTr=(inTr+3)%Tr.length;
 			}

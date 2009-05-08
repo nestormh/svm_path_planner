@@ -403,16 +403,21 @@ public class MiraObstaculo {
 		}
 			
 		//Buscamos segmento del coche
-//		indiceCoche=indiceDentro;
-		indiceCoche--;
-		while(!dentroSegmento(posicionLocal, indiceCoche) && indiceCoche<Tr.length) { indiceCoche++; }
-		if(indiceCoche==Tr.length) {
-			System.err.println("No se ha encontrado el segmento del coche");
-			return Double.NaN;
-		}
-			
-		indiceCoche++; //nos quedamos con el siguiente
+		{
+			indiceCoche--;
+			if(indiceCoche==-1) indiceCoche=(esCerrada)?(Tr.length-1):0;
+			int maxInc=esCerrada?Tr.length-1:Tr.length-indiceCoche-1;
+			boolean encontrado=false;
+			for(int incAct=0; !encontrado && incAct<=maxInc; incAct++)
+				encontrado=dentroSegmento(posicionLocal, (indiceCoche+incAct)%Tr.length);
+			if(!encontrado) {
+				System.err.println("No se ha encontrado el segmento del coche");
+				return Double.NaN;
+			}
 
+			indiceCoche++; //nos quedamos con el siguiente
+			if(indiceCoche==Tr.length) indiceCoche=(esCerrada)?0:Tr.length-1;
+		}
 		indSegObs=Integer.MAX_VALUE;
 		indBarrSegObs=Integer.MAX_VALUE;
 		if(iAD<iAI || (ColDecha && ColIzda)) {
@@ -462,7 +467,7 @@ public class MiraObstaculo {
 
 	private boolean buscaSegmentoObstaculo(double[] posicionLocal, int indComBarrido,int indFinBarrido) {
 		int incSegObs; //incremento sobre la posición del coche donde se encuentra el ostaculo 
-		incSegObs=esCerrada?Tr.length-1:Tr.length-indiceCoche; //para limitar la búsquda
+		incSegObs=esCerrada?Tr.length-1:Tr.length-indiceCoche-1; //para limitar la búsquda
 		indBarrSegObs=Integer.MAX_VALUE;
 		encontradoSegObs=false;
 		for(int i=indComBarrido; i<=indFinBarrido; i++) {
@@ -475,7 +480,7 @@ public class MiraObstaculo {
 			int incSA=0;
 			boolean enseg=false;
 			while (incSA<incSegObs  //no buscamos más allá de segmento ya encontrado
-					&& !(enseg=dentroSegmento(ptoI, ((indiceCoche-1)+incSA)%Tr.length)) 
+					&& !(enseg=dentroSegmento(ptoI, (indiceCoche+incSA)%Tr.length)) 
 					) {
 				incSA++;  //no está, vamos avanzando
 			} 

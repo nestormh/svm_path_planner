@@ -131,9 +131,9 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 			}
 			{// trayectoria
 				GeneralPath gpTr=new GeneralPath();
-				pxB=pointReal2pixel(MI.Tr[MI.indiceDentro]);
+				pxB=pointReal2pixel(MI.Tr[MI.indiceCoche]);
 				gpTr.moveTo((float)pxB.getX(), (float)pxB.getY());
-				for(int i=MI.indiceDentro+1; i<MI.Tr.length 
+				for(int i=MI.indiceCoche+1; i<MI.Tr.length 
 				&& MiraObstaculo.distanciaPuntos(MI.Tr[i],MI.posActual)<distanciaVista; i++) {
 					pxB=pointReal2pixel(MI.Tr[i]);
 					gpTr.lineTo((float)pxB.getX(), (float)pxB.getY());
