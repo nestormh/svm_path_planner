@@ -548,7 +548,7 @@ public class MiraObstaculo {
 	 * @param i cuadrilátero i-ésimo del camino
 	 * @return si está dentro
 	 */
-	public boolean dentroSegmento(double[] pto,int i){
+	public boolean dentroSegmento2(double[] pto,int i){
 		if(i<0)
 			throw new IllegalArgumentException("Pasado indice negativo");
 		if(i>=Tr.length)
@@ -594,7 +594,7 @@ public class MiraObstaculo {
 		boolean dentro1= (Math.abs(Math.abs(sumAng)-(2*Math.PI))<1e-3);
 		boolean dentro2=dentroSegmento2(pto, i);
 		if(dentro1!=dentro2)
-			System.err.println("Dan distinto: "+dentro1+"!="+dentro2+" \n"+"esq=["+
+			System.err.println("Dan distinto 2: "+dentro1+"!="+dentro2+" \n"+"esq=["+
 				+Bi[i][0]+","+Bi[i][1]+";"
 				+Bi[psig][0]+","+Bi[psig][1]+";"
 				+Bd[psig][0]+","+Bd[psig][1]+";"
@@ -606,33 +606,6 @@ public class MiraObstaculo {
 	}
 	
 	/**
-	 * Usamos algoritmo sacado de http://2000clicks.com/MathHelp/GeometryPointAndTriangle2.htm
-	 * <code>
-	 	if fAB()*fBC()>0 & fBC()*fCA()>0 then say "Inside"
-		else say "Not Inside"
-		exit
-
-		fAB: return (y-y1)*(x2-x1) - (x-x1)*(y2-y1)
-		fCA: return (y-y3)*(x1-x3) - (x-x3)*(y1-y3)
-		fBC: return (y-y2)*(x3-x2) - (x-x2)*(y3-y2) 
-
-	  </code>
-	 * 
-	 * @param A primer vertice del triangulo
-	 * @param B segundo vertice del triangulo
-	 * @param C tercer vertice del triangulo
-	 * @param P punto sobre el que se pregunta
-	 * @return true si P dentro del triangulo (A,B,C)
-	 */
-	public boolean puntoEnTriangulo(double[] A, double[] B, double[] C, double[] P) {
-		double fAB = (P[1]-A[1])*(B[0]-A[0])-(P[0]-A[0])*(B[1]-A[1]);
-		double fBC = (P[1]-B[1])*(C[0]-B[0])-(P[0]-B[0])*(C[1]-B[1]);
-		double fCA = (P[1]-C[1])*(A[0]-C[0])-(P[0]-C[0])*(A[1]-C[1]);
-	    return fAB*fBC>0 && fBC*fCA>0;
-
-	}
-
-	/**
 	 * Dice si pto pasado esta en cuadrilátero de la trayectoria.
 	 * Lo hacemos dividiendo cuadrilátero en dos triangulos y determiando si punto pertenece a alguno de los triangulos.
 	 * Sacado de  http://gmc.yoyogames.com/index.php?showtopic=409110
@@ -641,7 +614,7 @@ public class MiraObstaculo {
 	 * @param i cuadrilátero i-ésimo del camino
 	 * @return si está dentro
 	 */
-	public boolean dentroSegmento2(double[] pto,int i) {
+	public boolean dentroSegmento(double[] pto,int i) {
 		if(i<0)
 			throw new IllegalArgumentException("Pasado indice negativo");
 		if(i>=Tr.length)
@@ -652,8 +625,25 @@ public class MiraObstaculo {
 		if(esCerrada && i==(Tr.length-1)) 
 			psig=0;
 		
-		return puntoEnTriangulo(Bi[i], Bd[psig], Bi[psig], pto) ||
-		puntoEnTriangulo(Bi[i], Bd[psig], Bd[i], pto);
+		//usamos directamente el área con sentido en todo el cuadrilátero.
+		/*Cuadrilatero 
+		 *  D=Bi[i+1] * --------------------------------* C=Bd[i+1] 
+		 *            |                                 |
+		 *            |                                 |
+		 *            |                                 |
+		 *  A=Bi[i]   * --------------------------------* B=Bd[i] 
+		 *  
+		 */
+		double fAB = (pto[1]-Bi[i][1])*(Bd[i][0]-Bi[i][0])-(pto[0]-Bi[i][0])*(Bd[i][1]-Bi[i][1]);
+		double fBC = (pto[1]-Bd[i][1])*(Bd[psig][0]-Bd[i][0])-(pto[0]-Bd[i][0])*(Bd[psig][1]-Bd[i][1]);
+		double fCD = (pto[1]-Bd[psig][1])*(Bi[psig][0]-Bd[psig][0])-(pto[0]-Bd[psig][0])*(Bi[psig][1]-Bd[psig][1]);
+		double fDA = (pto[1]-Bi[psig][1])*(Bi[i][0]-Bi[psig][0])-(pto[0]-Bi[psig][0])*(Bi[i][1]-Bi[psig][1]);
+		
+		//Cada una de éstas fórmulas da >0 si el punto está a la izquierda del vector, <0 si está a la derecha,
+		// 0 si está sobre el vector
+		return fAB>=0 && fBC>=0 
+			&& fCD>0 //si está sobre el segmento BD, no lo consideramos (será considerado por el siguiente)
+			&& fDA>=0;
 	}
 	
 //	/**
