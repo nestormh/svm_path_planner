@@ -23,7 +23,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 
 import sibtra.gps.Ruta;
 import sibtra.lms.BarridoAngular;
@@ -138,6 +137,26 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 					perimetro.lineTo((float)px.getX(),(float)px.getY());
 				}
 				g.draw(perimetro);
+				//Si esta seleccionado puntos, admeás ponemo una cruz en cada punto del barrido.
+				if(jcbMostrarPuntos.isSelected()) {
+					// Sacado de puntosArray(g,MI.Bi);
+					//pintamos los puntos que están dentro del recuadro
+					for(int i=1; i<MI.barr.numDatos(); i++ ) {
+						Point2D pa=ptoRF2Point(i);
+						if(pa.getX()<=esqSI.getX() && pa.getX()>=esqID.getX()
+								&& pa.getY()<=esqSI.getY() && pa.getY()>=esqID.getY() ) {
+							//esta dentro del recuadro
+							Point2D pto=point2Pixel(pa);
+							int x=(int)pto.getX(), y=(int)pto.getY();
+							g.drawLine(x-tamCruz, y-tamCruz
+									, x+tamCruz, y+tamCruz);
+							g.drawLine(x-tamCruz, y+tamCruz
+									, x+tamCruz, y-tamCruz);
+						}
+					}
+
+				}
+
 
 			}
 
@@ -278,16 +297,31 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 	
 	
 	/**
-	 * Programa para probar 
+	 * Programa para probar.
+	 * Sin argumentos es interactivo y no comanina. El vehiculo se posiciona con el ratón.
+	 * Primer argumento número de iteraciones, el vehiculo camina el número de iteraciones indicadas. Si es <=0 no camina.
+	 * Segundo argumento fichero de ruta, ya no es interactivo.
 	 * @param args
 	 */
 	public static void main(String[] args) {
 
 		//necestamos leer archivo con la ruta
 		boolean esInteractivo=true;
+		boolean Caminar=false;
+
 		int numIteras=1000; //para el caso de que no sea interactivo
+		//primer argumento, número de iteracines
+		if(args.length>=1) {
+			try {
+				numIteras=Integer.parseInt(args[0]);
+			} catch (NumberFormatException e) {
+				System.err.println("Primer argumneto no se entiende como entero (número de iteraciones)");
+				System.exit(1);
+			}
+			Caminar=numIteras>0;
+		}
 		Ruta rutaEspacial=null;
-		if(args.length<1) {
+		if(args.length<2) { //no se ha pasado 2º argumento
 			//elegir fichero
 			JFileChooser fc=new JFileChooser(new File("./Rutas"));
 			do {
@@ -303,14 +337,13 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 			} while(rutaEspacial==null);
 		} else {
 			//nombre de fichero se pasa en linea de comandos
-			if((rutaEspacial=leeRutaEspacialDeFichero(args[0]))==null) {
+			if((rutaEspacial=leeRutaEspacialDeFichero(args[1]))==null) {
+				System.err.println("No se ha podido leer fichero de ruta :"+args[1]);
 				System.exit(1);
 			}
-			esInteractivo=false;
-			//TODO numero de interaciones como segundo argumento.
-//			if(args.length>1 && )
+			esInteractivo=!Caminar; //Si no camina, será interactivo
 		}
-
+		
 		double [][] Tr=rutaEspacial.toTr();
 		System.out.println("Longitud de la trayectoria="+Tr.length);
 
@@ -424,12 +457,11 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 		double dist=mi.masCercano(ptoAct, Math.toRadians(90), ba);
 		if(esInteractivo) pmo.actualiza();
 		System.out.println(mi);
-		boolean Caminar=true;
 		if(Caminar) {
 			//vamos recorriendo la trayectoria con barridos aleatorios
 			int inTr=10, inTrAnt=8;
 			int iteracion=0;
-			while(esInteractivo || iteracion<numIteras) { //si no es interactivo repetimos sólo 1000 veces
+			while(iteracion<numIteras) { //si no es interactivo repetimos sólo 1000 veces
 				iteracion++;
 				BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
 				double frec=(13.6+2*Math.random());
@@ -451,7 +483,7 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 				if(esInteractivo) {
 					pmo.actualiza();
 					try {
-						Thread.sleep(200);
+						Thread.sleep(2000);
 					} catch (Exception e) { }
 				}
 				inTrAnt=inTr;

@@ -20,7 +20,7 @@ import javax.swing.JCheckBox;
 public class PanelMuestraTrayectoria extends PanelMapa {
 	
 	/** Tamaño en pixeles del aspa que marca cada punto */ 
-	private static final int tamCruz = 2;
+	protected static final int tamCruz = 2;
 	
 	/** Longitud del vector que marca el rumbo en cada punto */
 	private static final double tamRumbo = 50;
