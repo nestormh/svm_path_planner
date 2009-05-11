@@ -5,7 +5,6 @@ package sibtra.rfyruta;
 
 import sibtra.lms.BarridoAngular;
 import sibtra.util.UtilCalculos;
-import sun.awt.SunToolkit.InfiniteLoop;
 
 /**
  * Clase para combinar el seguimiento de la ruta con el RF.
@@ -408,14 +407,15 @@ public class MiraObstaculo {
 			if(indiceCoche==-1) indiceCoche=(esCerrada)?(Tr.length-1):0;
 			int maxInc=esCerrada?Tr.length-1:Tr.length-indiceCoche-1;
 			boolean encontrado=false;
-			for(int incAct=0; !encontrado && incAct<=maxInc; incAct++)
+			int incAct;
+			for(incAct=0; !encontrado && incAct<=maxInc; incAct++)
 				encontrado=dentroSegmento(posicionLocal, (indiceCoche+incAct)%Tr.length);
 			if(!encontrado) {
 				System.err.println("No se ha encontrado el segmento del coche");
 				return Double.NaN;
 			}
-
-			indiceCoche++; //nos quedamos con el siguiente
+			//incAct sale con ya con uno más
+			indiceCoche=(indiceCoche+incAct)%Tr.length; //nos quedamos con el siguiente
 			if(indiceCoche==Tr.length) indiceCoche=(esCerrada)?0:Tr.length-1;
 		}
 		indSegObs=Integer.MAX_VALUE;
@@ -432,7 +432,7 @@ public class MiraObstaculo {
 					indMin=i;
 			dist=barr.getDistancia(indMin);
 			//Tenemos que buscar pto dentro del camino más cercano
-			if(!buscaSegmentoObstaculo(posicionLocal,iAD, iAI))
+			if(!buscaSegmentoObstaculo(posicionLocal,iAD, iAI,indMin))
 				//usamos hasta donde hemos podido explorar
 				indSegObs=(iptoD<iptoI)?iptoI:iptoD;
 		} else {
@@ -465,38 +465,66 @@ public class MiraObstaculo {
 		return distCamino;
 	}
 
-	private boolean buscaSegmentoObstaculo(double[] posicionLocal, int indComBarrido,int indFinBarrido) {
+	
+	private int segmentoObstaculoParaIndice (double[] posicionLocal, int indiceBarrido,int incSegObs) {
+		double angI=barr.getAngulo(indiceBarrido);
+		double distI=barr.getDistancia(indiceBarrido);
+		double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
+				,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
+		//Buscamos segmento en que está
+		//TODO usar algo más eficiente que la fuerza bruta
+		int incSA=0;
+		boolean enseg=false;
+		while (incSA<incSegObs  //no buscamos más allá de segmento ya encontrado
+				&& !(enseg=dentroSegmento(ptoI, (indiceCoche+incSA)%Tr.length)) 
+				) {
+			incSA++;  //no está, vamos avanzando
+		} 
+		if(enseg) {
+			incSegObs=incSA; //se encontró uno más cercano
+			indBarrSegObs=indiceBarrido;
+		}
+		return incSegObs;
+	}
+	
+	/** Para la posición local actual, busca un rango de barridos del RF, para determinar el segmento de la trayectoria 
+	 * más cercano en que se da una colisión.
+	 * @param posicionLocal
+	 * @param indComBarrido 
+	 * @param indFinBarrido
+	 * @param indiceMasCercano pista de en que índice del barrido puede estar el más cercano, para reducir la búsqueda
+	 * @return si alguno de los puntos dio colisión dentro del camino.
+	 */
+	private boolean buscaSegmentoObstaculo(double[] posicionLocal, int indComBarrido,int indFinBarrido, int indiceMasCercano) {
 		int incSegObs; //incremento sobre la posición del coche donde se encuentra el ostaculo 
 		incSegObs=esCerrada?Tr.length-1:Tr.length-indiceCoche-1; //para limitar la búsquda
 		indBarrSegObs=Integer.MAX_VALUE;
 		encontradoSegObs=false;
-		for(int i=indComBarrido; i<=indFinBarrido; i++) {
-			double angI=barr.getAngulo(i);
-			double distI=barr.getDistancia(i);
-			double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
-					,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
-			//Buscamos segmento en que está
-			//TODO usar algo más eficiente que la fuerza bruta
-			int incSA=0;
-			boolean enseg=false;
-			while (incSA<incSegObs  //no buscamos más allá de segmento ya encontrado
-					&& !(enseg=dentroSegmento(ptoI, (indiceCoche+incSA)%Tr.length)) 
-					) {
-				incSA++;  //no está, vamos avanzando
-			} 
-			if(enseg) {
-				incSegObs=incSA; //se encontró uno más cercano
-				indBarrSegObs=i;
-			}
-			encontradoSegObs=encontradoSegObs||enseg; //desde que se encuentre algún segmento pasará a true
+		int nuevoIncSegObst;
+		//si es válido indiceMasCercano probamos primero con ese índice (tendremos el mínimo más rápido)
+		if(indiceMasCercano>=indComBarrido && indiceMasCercano<=indFinBarrido) {
+			nuevoIncSegObst=segmentoObstaculoParaIndice(posicionLocal, indiceMasCercano, incSegObs);
+			encontradoSegObs=encontradoSegObs||(nuevoIncSegObst!=incSegObs); //desde que se encuentre algún segmento pasará a true
+			incSegObs=nuevoIncSegObst;
 		}
-		indSegObs=((indiceCoche-1)+incSegObs)%Tr.length;
+		for(int i=indComBarrido; i<=indFinBarrido; i++) {
+			nuevoIncSegObst=segmentoObstaculoParaIndice(posicionLocal, i, incSegObs);
+			encontradoSegObs=encontradoSegObs||(nuevoIncSegObst!=incSegObs); //desde que se encuentre algún segmento pasará a true
+			incSegObs=nuevoIncSegObst;
+		}
+		indSegObs=((indiceCoche)+incSegObs)%Tr.length;
 		if(!encontradoSegObs)  {
 			log("No se encontró segmento ");
 			indBarrSegObs=Integer.MAX_VALUE;
 		}
 		return encontradoSegObs;
 	}
+	
+	/** Ídem {@link #buscaSegmentoObstaculo(double[], int, int, int)} pero sin pista sobre el más cercano */
+	private boolean buscaSegmentoObstaculo(double[] posicionLocal, int indComBarrido,int indFinBarrido) {
+		return buscaSegmentoObstaculo(posicionLocal, indComBarrido, indFinBarrido, -1);
+	}
+	
 	
 	private void log(String string) {
 		if(debug)
