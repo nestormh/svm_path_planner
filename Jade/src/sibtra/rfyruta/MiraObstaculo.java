@@ -591,9 +591,97 @@ public class MiraObstaculo {
 		sumAng+=UtilCalculos.anguloVectores(vB, vC);
 		sumAng+=UtilCalculos.anguloVectores(vC, vD);
 		
-		return (Math.abs(Math.abs(sumAng)-(2*Math.PI))<1e-3);
+		boolean dentro1= (Math.abs(Math.abs(sumAng)-(2*Math.PI))<1e-3);
+		boolean dentro2=dentroSegmento2(pto, i);
+		if(dentro1!=dentro2)
+			System.err.println("Dan distinto: "+dentro1+"!="+dentro2+" \n"+"esq=["+
+				+Bi[i][0]+","+Bi[i][1]+";"
+				+Bi[psig][0]+","+Bi[psig][1]+";"
+				+Bd[psig][0]+","+Bd[psig][1]+";"
+				+Bd[i][0]+","+Bd[i][1]+";"
+				+"], pto=["+pto[0]+","+pto[1]+"]"
+				);
+		return dentro1;
 
 	}
+	
+	/**
+	 * Usamos algoritmo sacado de http://2000clicks.com/MathHelp/GeometryPointAndTriangle2.htm
+	 * <code>
+	 	if fAB()*fBC()>0 & fBC()*fCA()>0 then say "Inside"
+		else say "Not Inside"
+		exit
+
+		fAB: return (y-y1)*(x2-x1) - (x-x1)*(y2-y1)
+		fCA: return (y-y3)*(x1-x3) - (x-x3)*(y1-y3)
+		fBC: return (y-y2)*(x3-x2) - (x-x2)*(y3-y2) 
+
+	  </code>
+	 * 
+	 * @param A primer vertice del triangulo
+	 * @param B segundo vertice del triangulo
+	 * @param C tercer vertice del triangulo
+	 * @param P punto sobre el que se pregunta
+	 * @return true si P dentro del triangulo (A,B,C)
+	 */
+	public boolean puntoEnTriangulo(double[] A, double[] B, double[] C, double[] P) {
+		double fAB = (P[1]-A[1])*(B[0]-A[0])-(P[0]-A[0])*(B[1]-A[1]);
+		double fBC = (P[1]-B[1])*(C[0]-B[0])-(P[0]-B[0])*(C[1]-B[1]);
+		double fCA = (P[1]-C[1])*(A[0]-C[0])-(P[0]-C[0])*(A[1]-C[1]);
+	    return fAB*fBC>0 && fBC*fCA>0;
+
+	}
+
+	/**
+	 * Dice si pto pasado esta en cuadrilátero de la trayectoria.
+	 * Lo hacemos dividiendo cuadrilátero en dos triangulos y determiando si punto pertenece a alguno de los triangulos.
+	 * Sacado de  http://gmc.yoyogames.com/index.php?showtopic=409110
+	 * La explicación de la pertenencia a triangulo, sacada de http://2000clicks.com/MathHelp/GeometryPointAndTriangle2.htm
+	 * @param pto por el que se pregunta
+	 * @param i cuadrilátero i-ésimo del camino
+	 * @return si está dentro
+	 */
+	public boolean dentroSegmento2(double[] pto,int i) {
+		if(i<0)
+			throw new IllegalArgumentException("Pasado indice negativo");
+		if(i>=Tr.length)
+			throw new IllegalArgumentException("Indice supera largo trayectoria");
+		if(!esCerrada && i==(Tr.length-1))
+			throw new IllegalArgumentException("Es abierta y se a pasado úlitmo indice válido");
+		int psig=i+1;
+		if(esCerrada && i==(Tr.length-1)) 
+			psig=0;
+		
+		return puntoEnTriangulo(Bi[i], Bd[psig], Bi[psig], pto) ||
+		puntoEnTriangulo(Bi[i], Bd[psig], Bd[i], pto);
+	}
+	
+//	/**
+//	 * Dice si pto pasado esta en cuadrilátero de la trayectoria
+//	 * @param pto por el que se pregunt
+//	 * @param i cuadrilátero i-ésimo del camino
+//	 * @return si está dentro
+//	 */
+//	public boolean dentroSegmentoAproximado(double[] pto,int i){
+//		if(i<0)
+//			throw new IllegalArgumentException("Pasado indice negativo");
+//		if(i>=Tr.length)
+//			throw new IllegalArgumentException("Indice supera largo trayectoria");
+//		if(!esCerrada && i==(Tr.length-1))
+//			throw new IllegalArgumentException("Es abierta y se a pasado úlitmo indice válido");
+//		int psig=i+1;
+//		if(esCerrada && i==(Tr.length-1)) psig=0;
+//		int pant=i-1;
+//		if(esCerrada && i==0) pant=Tr.length-1;
+//		
+//		double distI=distanciaPuntos(pto, Tr[i]);
+//		double distI1=distanciaPuntos(pto, Tr[psig]);
+//		
+//		if(distI<=anchoCamino && distI1<=anchoCamino)
+//			return true;
+//		
+//		return false;	
+//	}	
 	
 	
 	public double largoTramo(int iini, int ifin) {
