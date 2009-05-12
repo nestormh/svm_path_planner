@@ -476,10 +476,12 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 					if(Math.random()<0.05)
 						barAct.datos[i]=(short)((Math.random()*60+2)*100);
 				}
-
+				long tini=System.currentTimeMillis();
 				double diAct=mi.masCercano(Tr[inTr]
 				                               , Math.atan2(Tr[inTr][1]-Tr[inTrAnt][1],Tr[inTr][0]-Tr[inTrAnt][0]), barAct);
-				System.out.println(iteracion+"- Indice "+inTr+" distancia "+diAct);
+				long tfin=System.currentTimeMillis();
+				System.out.println(iteracion+"- Indice "+inTr+" distancia "+diAct
+						+"  Tarda:"+(tfin-tini));
 				if(esInteractivo) {
 					pmo.actualiza();
 					try {
