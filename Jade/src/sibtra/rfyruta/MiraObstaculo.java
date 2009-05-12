@@ -12,6 +12,8 @@ import sibtra.util.UtilCalculos;
  * @author alberto
  */
 public class MiraObstaculo {
+
+	public static final double PI_2=Math.PI/2;
 	
 	private boolean debug = true;
 
@@ -168,7 +170,7 @@ public class MiraObstaculo {
 			//Tita medios
 			double Ti_2=UtilCalculos.anguloVectores(v1,v2)/2.0;
 			double d=ancho/Math.cos(Ti_2);
-			double angRot=Ti1-Math.PI/2+Ti_2;
+			double angRot=Ti1-PI_2+Ti_2;
 			//vector perpendicular medio a v1 y v2
 			double[] vpc={d*Math.cos(angRot),	d*Math.sin(angRot)};
 			
@@ -245,7 +247,7 @@ public class MiraObstaculo {
 				System.out.println("Estamos yendo hacia atrás");
 				return dist; //salimos 
 			}
-			angD+=+Math.PI/2;
+			angD+=+PI_2;
 			if(angD<=AngIniB) {
 				//punto por detrás del barrido, tenemos que avanzar para encontrarlo
 				boolean alcanzable=true;
@@ -258,7 +260,7 @@ public class MiraObstaculo {
 				) {
 					iptoDini=(iptoDini+1)%Bd.length; //incrementamos ciclando por si es cerrada
 					v2[0]=Bd[iptoDini][0]-posicionLocal[0];	v2[1]=Bd[iptoDini][1]-posicionLocal[1];
-					angD=UtilCalculos.anguloVectores(v, v2)+Math.PI/2;
+					angD=UtilCalculos.anguloVectores(v, v2)+PI_2;
 				}
 				encontradoInicioD=alcanzable && (angD>=AngIniB);
 			} else {
@@ -273,7 +275,7 @@ public class MiraObstaculo {
 				) {
 					iptoDini=(iptoDini+Bd.length-1)%Bd.length; //decrementamos ciclando por si es cerrada
 					v2[0]=Bd[iptoDini][0]-posicionLocal[0];	v2[1]=Bd[iptoDini][1]-posicionLocal[1];
-					angD=UtilCalculos.anguloVectores(v, v2)+Math.PI/2;
+					angD=UtilCalculos.anguloVectores(v, v2)+PI_2;
 				}
 				encontradoInicioD=alcanzable && (esCerrada || iptoDini>0);
 				iptoDini=(iptoDini+1)%Bd.length; //en válido era justo el anterior
@@ -283,7 +285,7 @@ public class MiraObstaculo {
 			double[] v2=new double[2];
 			iptoIini=indiceCoche; //comenzamos a probar con en pto donde está el coche
 			v2[0]=Bi[iptoIini][0]-posicionLocal[0];	v2[1]=Bi[iptoIini][1]-posicionLocal[1];
-			double angI=UtilCalculos.anguloVectores(v, v2)+Math.PI/2;
+			double angI=UtilCalculos.anguloVectores(v, v2)+PI_2;
 			if(angI>AngFinB) {
 				//punto por detrás del barrido, tenemos que avanzar para encontrarlo
 				boolean alcanzable=true;
@@ -296,7 +298,7 @@ public class MiraObstaculo {
 				) {
 					iptoIini=(iptoIini+1)%Bi.length; //incrementamos ciclando por si es cerrada
 					v2[0]=Bi[iptoIini][0]-posicionLocal[0];	v2[1]=Bi[iptoIini][1]-posicionLocal[1];
-					angI=UtilCalculos.anguloVectores(v, v2)+Math.PI/2;
+					angI=UtilCalculos.anguloVectores(v, v2)+PI_2;
 				}
 				encontradoInicioIzda=alcanzable && (angI<=AngFinB);
 			} else {
@@ -311,7 +313,7 @@ public class MiraObstaculo {
 				) {
 					iptoIini=(iptoIini+Bi.length-1)%Bi.length; //decrementamos ciclando por si es cerrada
 					v2[0]=Bi[iptoIini][0]-posicionLocal[0];	v2[1]=Bi[iptoIini][1]-posicionLocal[1];
-					angI=UtilCalculos.anguloVectores(v, v2)+Math.PI/2;
+					angI=UtilCalculos.anguloVectores(v, v2)+PI_2;
 				}
 				encontradoInicioIzda=alcanzable && (esCerrada || iptoIini>0);
 				iptoIini=(iptoIini+1)%Bi.length; //en válido era justo el anterior
@@ -334,7 +336,7 @@ public class MiraObstaculo {
 				double AngDant=AngD;
 				double[] v2D={Bd[iptoD][0]-posicionLocal[0], Bd[iptoD][1]-posicionLocal[1]};
 				double DistD=largoVector(v2D);
-				AngD=UtilCalculos.anguloVectores(v, v2D)+Math.PI/2; //ya que 0º está 90º a la derecha
+				AngD=UtilCalculos.anguloVectores(v, v2D)+PI_2; //ya que 0º está 90º a la derecha
 				if (AngD<AngDant) {
 					log("El camino gira Decha Dejamos derecha");
 					avanD=false;
@@ -372,7 +374,7 @@ public class MiraObstaculo {
 				double AngIant=AngI;
 				double[] v2I={Bi[iptoI][0]-posicionLocal[0], Bi[iptoI][1]-posicionLocal[1]};
 				double DistI=largoVector(v2I);
-				AngI=UtilCalculos.anguloVectores(v, v2I)+Math.PI/2; //ya que 0º está 90º a la derecha
+				AngI=UtilCalculos.anguloVectores(v, v2I)+PI_2; //ya que 0º está 90º a la derecha
 				if (AngI>AngIant) {
 					log("El camino gira Izquierda. Dejamos izquierda");
 					avanI=false;
@@ -469,8 +471,8 @@ public class MiraObstaculo {
 	private int segmentoObstaculoParaIndice (double[] posicionLocal, int indiceBarrido,int incSegObs) {
 		double angI=barr.getAngulo(indiceBarrido);
 		double distI=barr.getDistancia(indiceBarrido);
-		double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-Math.PI/2)
-				,posicionLocal[1]+distI*Math.sin(Yaw+angI-Math.PI/2)};
+		double[] ptoI={posicionLocal[0]+distI*Math.cos(Yaw+angI-PI_2)
+				,posicionLocal[1]+distI*Math.sin(Yaw+angI-PI_2)};
 		//Buscamos segmento en que está
 		//TODO usar algo más eficiente que la fuerza bruta
 		int incSA=0;
@@ -581,30 +583,18 @@ public class MiraObstaculo {
 //				);
 		
 
-		double fAB = (pto[1]-Bi[i][1])*(Bd[i][0]-Bi[i][0])-(pto[0]-Bi[i][0])*(Bd[i][1]-Bi[i][1]);
-		double fBC = (pto[1]-Bd[i][1])*(Bd[psig][0]-Bd[i][0])-(pto[0]-Bd[i][0])*(Bd[psig][1]-Bd[i][1]);
-		double fCD = (pto[1]-Bd[psig][1])*(Bi[psig][0]-Bd[psig][0])-(pto[0]-Bd[psig][0])*(Bi[psig][1]-Bd[psig][1]);
-		double fDA = (pto[1]-Bi[psig][1])*(Bi[i][0]-Bi[psig][0])-(pto[0]-Bi[psig][0])*(Bi[i][1]-Bi[psig][1]);
-		
-		//Cada una de éstas fórmulas da >0 si el punto está a la izquierda del vector, <0 si está a la derecha,
-		// 0 si está sobre el vector
-		
-		return fAB>=-1e-10 
-		&& fBC>=-1e-10 
-		&& fCD>0 //si está sobre el segmento BD, no lo consideramos (será considerado por el siguiente)
-		&& fDA>=-1e-10;
-
 		//Las ordenamos para intentar que se dispare primero la más probable y evitar más cálculos
 		//Suponemos que lo más probable es que esté delante (falla fCD), detrás (fall fAB) y luego los lados
-//		return 
-//		((pto[1]-Bd[psig][1])*(Bi[psig][0]-Bd[psig][0])-(pto[0]-Bd[psig][0])*(Bi[psig][1]-Bd[psig][1]))>0 //fCD si está sobre el segmento BD, no lo consideramos (será considerado por el siguiente)
-//		&& 
-//		((pto[1]-Bi[i][1])*(Bd[i][0]-Bi[i][0])-(pto[0]-Bi[i][0])*(Bd[i][1]-Bi[i][1]))>=-1e-10 //fAB 
-//		&& 
-//		((pto[1]-Bd[i][1])*(Bd[psig][0]-Bd[i][0])-(pto[0]-Bd[i][0])*(Bd[psig][1]-Bd[i][1]))>=-1e-10 //fBC 
-//		&& 
-//		((pto[1]-Bi[psig][1])*(Bi[i][0]-Bi[psig][0])-(pto[0]-Bi[psig][0])*(Bi[i][1]-Bi[psig][1]))>=-1e-10 //fDA
-//		;
+		//(no supone una gran mejora).
+		return 
+		((pto[1]-Bd[psig][1])*(Bi[psig][0]-Bd[psig][0])-(pto[0]-Bd[psig][0])*(Bi[psig][1]-Bd[psig][1]))>0 //fCD si está sobre el segmento BD, no lo consideramos (será considerado por el siguiente)
+		&& 
+		((pto[1]-Bi[i][1])*(Bd[i][0]-Bi[i][0])-(pto[0]-Bi[i][0])*(Bd[i][1]-Bi[i][1]))>=-1e-10 //fAB 
+		&& 
+		((pto[1]-Bd[i][1])*(Bd[psig][0]-Bd[i][0])-(pto[0]-Bd[i][0])*(Bd[psig][1]-Bd[i][1]))>=-1e-10 //fBC 
+		&& 
+		((pto[1]-Bi[psig][1])*(Bi[i][0]-Bi[psig][0])-(pto[0]-Bi[psig][0])*(Bi[i][1]-Bi[psig][1]))>=-1e-10 //fDA
+		;
 	}
 	
 //	/**
