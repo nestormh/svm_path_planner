@@ -79,7 +79,7 @@ public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 			while(true) {
 				actualizaBarrido();
 				try {
-					Thread.sleep(100);
+//					Thread.sleep(100); ya no esperamos ya que actualiza barrido espera.
 					synchronized (this) {
 						while (suspendido) wait(); 
 					}
@@ -90,13 +90,13 @@ public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 	
 	public void actualizaBarrido() {
 		long t0=System.currentTimeMillis();
-		BarridoAngular nb=manLMS.ultimoBarrido();
+		BarridoAngular nb=manLMS.esperaNuevoBarrido(barrAct);
 		if(nb==barrAct) {
-//			System.out.println("Es el mismo");
+			System.out.println("Es el mismo");
 			return; 
 		}
 		long t1=System.currentTimeMillis();
-//		System.out.println("Deta t="+(t1-t0));
+		System.out.println("Deta t="+(t1-t0));
 		pmb.setBarrido(nb);
 		pmb.actualiza();
 		barrAct=nb; //para saber si cambia

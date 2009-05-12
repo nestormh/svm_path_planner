@@ -736,6 +736,23 @@ public class ManejaLMS {
 		}
 	}
 
+	/**
+	 * Bloquea el thread llamante hasta que se tenga un barrido distinto del actual.
+	 * Si no estamos en barrido continuo se bloqueará hasta que vuelva a comenzar
+	 * @return último barrido recibido de forma continua.
+	 */
+	public BarridoAngular esperaNuevoBarrido(BarridoAngular actual) {
+		synchronized (mutexBarridos) {
+			while(actual==ultimoBarrido)
+				try {
+				mutexBarridos.wait(); //nos quedamos bloqueado en mutexBarridos
+				} catch (InterruptedException e) {
+					//No hacemos nada si somos interrumpidos
+				}
+			return ultimoBarrido;
+		}
+	}
+
 
 	/** Para la recepción de los barridos continuos. 
 	 * Se arranca suspendido. 
@@ -815,6 +832,8 @@ public class ManejaLMS {
 					synchronized (mutexBarridos) {
 						//por ahora sólo apuntamos el nuevo barrido
 						ultimoBarrido=barr;
+						//avisamos a todos los que estén esperando por el nuevo barrido
+						mutexBarridos.notifyAll();
 					}
 				}
 					
