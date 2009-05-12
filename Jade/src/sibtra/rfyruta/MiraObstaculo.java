@@ -405,7 +405,7 @@ public class MiraObstaculo {
 		{
 			indiceCoche--;
 			if(indiceCoche==-1) indiceCoche=(esCerrada)?(Tr.length-1):0;
-			int maxInc=esCerrada?Tr.length-1:Tr.length-indiceCoche-1;
+			int maxInc=esCerrada?Tr.length-1:Tr.length-indiceCoche-2;
 			boolean encontrado=false;
 			int incAct;
 			for(incAct=0; !encontrado && incAct<=maxInc; incAct++)
@@ -542,68 +542,6 @@ public class MiraObstaculo {
 		return largoVector(d);
 	}
 
-	/**
-	 * Dice si pto pasado esta en cuadrilátero de la trayectoria
-	 * @param pto por el que se pregunt
-	 * @param i cuadrilátero i-ésimo del camino
-	 * @return si está dentro
-	 */
-	public boolean dentroSegmento2(double[] pto,int i){
-		if(i<0)
-			throw new IllegalArgumentException("Pasado indice negativo");
-		if(i>=Tr.length)
-			throw new IllegalArgumentException("Indice supera largo trayectoria");
-		if(!esCerrada && i==(Tr.length-1))
-			throw new IllegalArgumentException("Es abierta y se a pasado úlitmo indice válido");
-		int psig=i+1;
-		if(esCerrada && i==(Tr.length-1)) 
-			psig=0;
-		
-		//está en alguna de las esquina
-		if(distanciaPuntos(pto, Bi[i])<1e-3)
-			return true;
-		if(distanciaPuntos(pto, Bd[i])<1e-3)
-			return true;
-			
-		
-		double sumAng=0;
-		double[] vA={pto[0]-Bi[i][0], pto[1]-Bi[i][1]};
-		double[] vB={pto[0]-Bi[psig][0], pto[1]-Bi[psig][1]};
-		double[] vC={pto[0]-Bd[psig][0], pto[1]-Bd[psig][1]};
-		double[] vD={pto[0]-Bd[i][0], pto[1]-Bd[i][1]};
-		
-		log("esq=["+Bi[i][0]+","+Bi[i][1]+";"
-				+Bi[i][0]+","+Bi[i][1]+";"
-				+Bi[psig][0]+","+Bi[psig][1]+";"
-				+Bd[psig][0]+","+Bd[psig][1]+";"
-				+Bd[i][0]+","+Bd[i][1]+";"
-				+"], pto=["+pto[0]+","+pto[1]+"]"
-				);
-		
-
-		//Está en el segmento que une los puntos en i
-		sumAng=UtilCalculos.anguloVectores(vD, vA);
-		if( Math.abs((sumAng-Math.PI))<1e-3 )
-			return true;
-
-		
-		sumAng+=UtilCalculos.anguloVectores(vA, vB);
-		sumAng+=UtilCalculos.anguloVectores(vB, vC);
-		sumAng+=UtilCalculos.anguloVectores(vC, vD);
-		
-		boolean dentro1= (Math.abs(Math.abs(sumAng)-(2*Math.PI))<1e-3);
-		boolean dentro2=dentroSegmento2(pto, i);
-		if(dentro1!=dentro2)
-			System.err.println("Dan distinto 2: "+dentro1+"!="+dentro2+" \n"+"esq=["+
-				+Bi[i][0]+","+Bi[i][1]+";"
-				+Bi[psig][0]+","+Bi[psig][1]+";"
-				+Bd[psig][0]+","+Bd[psig][1]+";"
-				+Bd[i][0]+","+Bd[i][1]+";"
-				+"], pto=["+pto[0]+","+pto[1]+"]"
-				);
-		return dentro1;
-
-	}
 	
 	/**
 	 * Dice si pto pasado esta en cuadrilátero de la trayectoria.
@@ -634,6 +572,15 @@ public class MiraObstaculo {
 		 *  A=Bi[i]   * --------------------------------* B=Bd[i] 
 		 *  
 		 */
+//		log("esq=["
+//				+Bi[i][0]+","+Bi[i][1]+";"
+//				+Bi[psig][0]+","+Bi[psig][1]+";"
+//				+Bd[psig][0]+","+Bd[psig][1]+";"
+//				+Bd[i][0]+","+Bd[i][1]+";"
+//				+"], pto=["+pto[0]+","+pto[1]+"]"
+//				);
+		
+
 		double fAB = (pto[1]-Bi[i][1])*(Bd[i][0]-Bi[i][0])-(pto[0]-Bi[i][0])*(Bd[i][1]-Bi[i][1]);
 		double fBC = (pto[1]-Bd[i][1])*(Bd[psig][0]-Bd[i][0])-(pto[0]-Bd[i][0])*(Bd[psig][1]-Bd[i][1]);
 		double fCD = (pto[1]-Bd[psig][1])*(Bi[psig][0]-Bd[psig][0])-(pto[0]-Bd[psig][0])*(Bi[psig][1]-Bd[psig][1]);
@@ -641,9 +588,23 @@ public class MiraObstaculo {
 		
 		//Cada una de éstas fórmulas da >0 si el punto está a la izquierda del vector, <0 si está a la derecha,
 		// 0 si está sobre el vector
-		return fAB>=0 && fBC>=0 
-			&& fCD>0 //si está sobre el segmento BD, no lo consideramos (será considerado por el siguiente)
-			&& fDA>=0;
+		
+		return fAB>=-1e-10 
+		&& fBC>=-1e-10 
+		&& fCD>0 //si está sobre el segmento BD, no lo consideramos (será considerado por el siguiente)
+		&& fDA>=-1e-10;
+
+		//Las ordenamos para intentar que se dispare primero la más probable y evitar más cálculos
+		//Suponemos que lo más probable es que esté delante (falla fCD), detrás (fall fAB) y luego los lados
+//		return 
+//		((pto[1]-Bd[psig][1])*(Bi[psig][0]-Bd[psig][0])-(pto[0]-Bd[psig][0])*(Bi[psig][1]-Bd[psig][1]))>0 //fCD si está sobre el segmento BD, no lo consideramos (será considerado por el siguiente)
+//		&& 
+//		((pto[1]-Bi[i][1])*(Bd[i][0]-Bi[i][0])-(pto[0]-Bi[i][0])*(Bd[i][1]-Bi[i][1]))>=-1e-10 //fAB 
+//		&& 
+//		((pto[1]-Bd[i][1])*(Bd[psig][0]-Bd[i][0])-(pto[0]-Bd[i][0])*(Bd[psig][1]-Bd[i][1]))>=-1e-10 //fBC 
+//		&& 
+//		((pto[1]-Bi[psig][1])*(Bi[i][0]-Bi[psig][0])-(pto[0]-Bi[psig][0])*(Bi[i][1]-Bi[psig][1]))>=-1e-10 //fDA
+//		;
 	}
 	
 //	/**
