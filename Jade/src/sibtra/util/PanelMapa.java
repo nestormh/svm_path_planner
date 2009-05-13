@@ -421,11 +421,15 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 				//soltado boton 1 sin Shift, queremos desplazar el centro
 				System.out.println("Soltado Boton "+even.getButton()
 						+" SIN Shift en posición: ("+even.getX()+","+even.getY()+")");
-				Point2D.Double ptoPulsado=pixel2Point( new Point2D.Double(evenPulsa.getX(),evenPulsa.getY()) );
-				Point2D.Double ptoSoltado=pixel2Point( new Point2D.Double(even.getX(),even.getY()) );
-				//desplazamos el centro en lo que se ha desplazado el cursor
-				centro[0]+=-ptoSoltado.getX()+ptoPulsado.getX();
-				centro[1]+=-ptoSoltado.getY()+ptoPulsado.getY();
+				if(evenPulsa!=null) {
+					Point2D.Double ptoPulsado=pixel2Point( new Point2D.Double(evenPulsa.getX(),evenPulsa.getY()) );
+					Point2D.Double ptoSoltado=pixel2Point( new Point2D.Double(even.getX(),even.getY()) );
+					//desplazamos el centro en lo que se ha desplazado el cursor
+					centro[0]+=-ptoSoltado.getX()+ptoPulsado.getX();
+					centro[1]+=-ptoSoltado.getY()+ptoPulsado.getY();
+				} else {
+					System.out.println("Se pulsó con algún modificador, evenPulsa==null ");
+				}
 				restaurar=true;
 				JPanelGrafico.repaint();
 			}
