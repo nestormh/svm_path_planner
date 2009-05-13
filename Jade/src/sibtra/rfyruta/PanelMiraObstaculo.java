@@ -138,7 +138,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 				}
 				g.draw(perimetro);
 				//Si esta seleccionado puntos, admeás ponemo una cruz en cada punto del barrido.
-				if(jcbMostrarPuntos.isSelected()) {
+				if(jcbMostrarPuntos.isSelected())
 					// Sacado de puntosArray(g,MI.Bi);
 					//pintamos los puntos que están dentro del recuadro
 					for(int i=1; i<MI.barr.numDatos(); i++ ) {
@@ -153,11 +153,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 							g.drawLine(x-tamCruz, y+tamCruz
 									, x+tamCruz, y-tamCruz);
 						}
-					}
-
 				}
-
-
 			}
 
 			//vemos si hay información de colisión
@@ -166,22 +162,26 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 				//Lineas indicando de donde empezó el barrido
 				g.setStroke(new BasicStroke());
 				g.setColor(Color.GRAY);
+				if(MI.encontradoInicioD) {
 				g.draw(new Line2D.Double(pxPtoActual
 						,point2Pixel(MI.Bd[MI.iptoDini])));
 				g.draw(new Line2D.Double(pxPtoActual
 						,point2Pixel(MI.Bd[MI.iptoD])));
+				}
+				if(MI.encontradoInicioI) {
 				g.draw(new Line2D.Double(pxPtoActual
 						,point2Pixel(MI.Bi[MI.iptoIini])));
 				g.draw(new Line2D.Double(pxPtoActual
 						,point2Pixel(MI.Bi[MI.iptoI])));
+				}
 
 
 				g.setStroke(new BasicStroke(2));
 				g.setColor(Color.WHITE);
 				//los de la derecha e izquierda que están libres
 				GeneralPath gp=null;
-				if((gp=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1,MI.esCerrada))!=null) g.draw(gp);
-				if((gp=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1,MI.esCerrada))!=null) g.draw(gp);
+				if(MI.encontradoInicioD && (gp=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1,MI.esCerrada))!=null) g.draw(gp);
+				if(MI.encontradoInicioI && (gp=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1,MI.esCerrada))!=null) g.draw(gp);
 				if(MI.dist>0) {
 					//marcamos el pto mínimo
 					g.setStroke(new BasicStroke());
@@ -406,18 +406,18 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 						}
 						//Aunque no haya nueva posición, hacemos nuevo barrido
 						double[] npos={nuevaPos.getX(),nuevaPos.getY()};
-						BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
+						BarridoAngular barAct=new BarridoAngular(181,0,4,(byte)2,false,(short)2); //con true mm, false cm
 						double frec=(13.6+2*Math.random());
 						double Amp=(3.0+15*Math.random());
-						double Dpor=(20.0+15*Math.random());
+						double Dpor=(15.0+15*Math.random());
 						for(int i=0;i<barAct.numDatos();i++) {
-//							barAct.datos[i]=(short)((15.0)*100.0);
+//							barAct.datos[i]=(short)((15.0)*1000.0);
 							barAct.datos[i]=(short)((Math.sin((double)i/(barAct.numDatos()-1)*Math.PI*frec)
 									*Amp
 									+Dpor)*100.0);
 							//ruido aleatorio
 							if(Math.random()<0.05)
-								barAct.datos[i]=(short)((Math.random()*60+2)*100);
+								barAct.datos[i]=(short)((Math.random()*60+2)*100.0);
 						}
 						long tini=System.currentTimeMillis();
 						MI.masCercano(npos, Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
