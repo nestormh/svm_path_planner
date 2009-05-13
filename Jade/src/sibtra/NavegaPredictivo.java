@@ -302,14 +302,15 @@ public class NavegaPredictivo implements ActionListener {
     }
     
     /**
-     * Método para decidir la consigna de velocidad para cada instante. Se programan tres estados:
-     * Arrancando,navegando y frenando.
-     * En el estado navegando se tiene en cuenta el error en la orientación 
+     * Método para decidir la consigna de velocidad para cada instante.
+     * Se tiene en cuenta el error en la orientación y el error lateral para reducir la 
+     * consigna de velocidad. 
      * @return
      */
     public double calculaConsignaVel(double consignaAnt){
         double consigna = 0;
         double velocidadMax = 2.5;
+        double VelocidadMinima = 1;
         double refVelocidad;
         double errorOrientacion;      
         double errorLateral;
@@ -329,8 +330,18 @@ public class NavegaPredictivo implements ActionListener {
         	consigna = consignaAnt + 0.1;
         	System.out.println("Demasiado incremento en la consigna");
         }
-        if (consigna <= 1)
-            consigna = 1;
+/*      Solo con esta condición el coche no se detiene nunca,aunque la referencia de la 
+ * 		ruta sea cero*/
+//        if (consigna <= 1){
+//            consigna = 1;
+        if (consigna <= VelocidadMinima && refVelocidad >= VelocidadMinima){
+        /*Con esta condición se contempla el caso de que la consigna sea < 0*/
+            consigna = VelocidadMinima;
+        }else if (consigna <= VelocidadMinima && refVelocidad <= VelocidadMinima)
+        /* De esta manera si la velocidad de la ruta disminuye hasta cero el coche se 
+        detiene, en vez de seguir a velocidad mínima como ocurría antes. En este caso también
+        está contemplado el caso de que la consigna sea < 0*/
+        	consigna = refVelocidad;
         return consigna; 
      }
     /**
