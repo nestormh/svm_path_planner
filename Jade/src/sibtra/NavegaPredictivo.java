@@ -134,6 +134,8 @@ public class NavegaPredictivo implements ActionListener {
             manLMS.setDistanciaMaxima(80);
             manLMS.setResolucionAngular((short)100);
             manLMS.CambiaAModo25();
+			manLMS.pideBarridoContinuo((short)0, (short)180, (short)1);
+
         } catch (LMSException e) {
             System.err.println("No fue posible conectar o configurar RF");
         }
@@ -411,19 +413,11 @@ public class NavegaPredictivo implements ActionListener {
     public void camina() {
         Thread thRF = new Thread() {
 
-            private long periodoMuestreoMiliRF = 500;
-			
-
             public void run() {
-                long tSig;
-                boolean solicitado = false;
+                BarridoAngular ba=null;
                 while (true) {
-                    tSig = System.currentTimeMillis() + periodoMuestreoMiliRF;
-                    try {
                         if (jcbUsarRF.isSelected()) {
-                            manLMS.pideBarrido((short) 0, (short) 180, (short) 1);
-                            BarridoAngular ba = manLMS.recibeBarrido();
-
+                        	ba=manLMS.esperaNuevoBarrido(ba);
                             //Calculamos el comando
                             GPSData pa = gpsCon.getPuntoActualTemporal();                            
                             double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
@@ -441,23 +435,8 @@ public class NavegaPredictivo implements ActionListener {
 //								System.out.println("Distancia="+dist);
 
                         }
-                    } catch (LMSException e) {
-                        System.err.println("Problemas al obtener barrido en punto " + " :" + e.getMessage());
-                    }
-                    //TODO poner RF a todo lo que da
-                    long msSobra = tSig - System.currentTimeMillis();
-                    if (msSobra < 0) {
-                        System.out.println("Sobra RF =" + msSobra);
-                    }
-                    while (System.currentTimeMillis() < tSig) {
-                        try {
-                            Thread.sleep(tSig - System.currentTimeMillis());
-                        } catch (Exception e) {
-                        }
                     }
                 }
-
-            }
         };
 
         thRF.start();
