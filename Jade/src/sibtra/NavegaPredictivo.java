@@ -348,6 +348,28 @@ public class NavegaPredictivo implements ActionListener {
       
         ventanaPrincipal.setBounds(0, 384, 1024, 742);
         splitPanel.setDividerLocation(0.50); //La mitad para cada uno
+        
+        //La ventana Secundaria
+        ventadaPeque=new JFrame("VERDINO");
+        {
+        	JPanel central=new JPanel();
+        	central.setLayout(new BoxLayout(central,BoxLayout.PAGE_AXIS));
+        	//Checkbox para navegar
+        	JCheckBox jcbNavegandoP = new JCheckBox("Navegando");
+        	jcbNavegandoP.setFont(jcbNavegandoP.getFont().deriveFont(80.0f));
+        	jcbNavegandoP.setSelected(true);
+        	central.add(jcbNavegandoP);
+        	//Checkbox para frenar
+        	JCheckBox jcbFrenandoP = new JCheckBox("Frenar");
+        	jcbFrenandoP.setFont(jcbNavegandoP.getFont().deriveFont(80.0f));
+        	jcbFrenandoP.setSelected(true);
+//      	jcbFrenandoP.addActionListener(this);
+        	central.add(jcbFrenandoP);
+        	ventadaPeque.add(central);
+        }
+        ventadaPeque.pack();
+        ventadaPeque.setVisible(true);
+        ventadaPeque.setBounds(0, 0, 640, 384);
     }
     
     /**
