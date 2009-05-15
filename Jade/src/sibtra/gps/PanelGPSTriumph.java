@@ -15,43 +15,41 @@ import sibtra.util.PanelDatos;
  * @author alberto
  *
  */
-public class PanelGPSTriumph extends JPanel {
-	
-	PanelMuestraGPSData pmGdata;
+public class PanelGPSTriumph extends PanelMuestraGPSData {
 	
 	GPSConnectionTriumph gpsCT;
 
 	private int cuentaEnlaceUltimo;
 
-	private PanelDatos jpEnlace;
-	
+	private LabelDatoFormato ldCal;
+
+	private LabelDatoFormato ldOK;
+
 	public PanelGPSTriumph(GPSConnectionTriumph gct) {
+		super(true); //solo espaciales
 		if(gct==null)
 			throw new IllegalArgumentException("Conexion a GPS no puede ser null");
 		gpsCT=gct;
-		setLayout(new BoxLayout(this,BoxLayout.PAGE_AXIS));
-		
-		pmGdata=new PanelMuestraGPSData();
-		add(pmGdata);
-		{ //linea con datos de calidad del enlace
-			jpEnlace=new PanelDatos(new FlowLayout(FlowLayout.CENTER));
-			LabelDato lda=new LabelDatoFormato("  ### %  ",GPSConnectionTriumph.class,"getCalidadLink","%4.0f %%");
-//			lda.setPreferredSize(new Dimension(100,50));
-			jpEnlace.añadeAPanel(lda, "Cali Enlace",jpEnlace);
-			lda=new LabelDatoFormato("   ####   ",GPSConnectionTriumph.class,"getNumOKLink"," %10d");
-//			lda.setPreferredSize(new Dimension(100,50));
-			jpEnlace.añadeAPanel(lda, "Paq OK Enlace",jpEnlace);
-			add(jpEnlace);
-		}
+		//linea con datos de calidad del enlace
+		ldCal=new LabelDatoFormato("  ### %  ",GPSConnectionTriumph.class,"getCalidadLink","%4.0f %%");
+//		lda.setPreferredSize(new Dimension(100,50));
+		añadeAPanel(ldCal, "Cali Enlace");
+		ldOK=new LabelDatoFormato("   ####   ",GPSConnectionTriumph.class,"getNumOKLink"," %10d");
+//		lda.setPreferredSize(new Dimension(100,50));
+		añadeAPanel(ldOK, "Paq OK Enlace");
 	}
 
 	public void actualizaGPS(GPSData ngpsdt) {
-		pmGdata.actualizaPunto(ngpsdt);
+		actualizaPunto(ngpsdt);
 		if(cuentaEnlaceUltimo!=gpsCT.getNumOKLink()) {
-			jpEnlace.actualizaDatos(gpsCT);
+			//TODO pueden no ser necesarios
+			ldCal.setEnabled(true);
+			ldOK.setEnabled(true);
 			cuentaEnlaceUltimo=gpsCT.getNumOKLink();
-		} else
-			jpEnlace.actualizaDatos(null);
+		} else {
+			ldCal.setEnabled(false);
+			ldOK.setEnabled(false);
+		}
 	}
 
 	/**

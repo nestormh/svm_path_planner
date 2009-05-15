@@ -82,7 +82,7 @@ public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener 
 		añadeAPanel(new LabelDatoFormato("+??? ??.?????",GPSData.class,"getLongitudText","%s")
 		,"Longitud");
 		//RMS
-		añadeAPanel(new LabelDatoFormato("?.?",GPSData.class,"getRms","%2.3f")
+		añadeAPanel(new LabelDatoFormato("?.???",GPSData.class,"getRms","%2.3f")
 		,"RMS");
 		//Número satélites
 		añadeAPanel(new LabelDatoFormato("?",GPSData.class,"getSatelites","%1d")
@@ -90,20 +90,43 @@ public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener 
 		//Edad correción diferencial
 		añadeAPanel(new LabelDatoFormato("??? sg",GPSData.class,"getAge","%3.0f sg")
 		, "Edad Correccion");
-		//Coordenadas locales
-		añadeAPanel(new LabelDato("(???.??, ???.??, ???.??)") {
+		//Coordenadas locales por separado
+		añadeAPanel(new LabelDato("+???.??") {
 			public void Actualiza(Object oa,boolean hayCambio) {
 				setEnabled(hayCambio);
 				if(!hayCambio) return;
 				Matrix cl=((GPSData)oa).getCoordLocal();
 				if(cl!=null && cl.get(0, 0)<Double.MAX_VALUE) {
-					setText(String.format("(%3.3f %3.3f %3.3f)"
-							, cl.get(0,0), cl.get(1,0), cl.get(2,0)));
+					setText(String.format("%3.3f", cl.get(0,0)));
 				} else 
 					setEnabled(false);
 			}
 		}
-		,"Locales");
+		,"X Local");
+		añadeAPanel(new LabelDato("+???.??") {
+			public void Actualiza(Object oa,boolean hayCambio) {
+				setEnabled(hayCambio);
+				if(!hayCambio) return;
+				Matrix cl=((GPSData)oa).getCoordLocal();
+				if(cl!=null && cl.get(0, 0)<Double.MAX_VALUE) {
+					setText(String.format("%3.3f", cl.get(1,0)));
+				} else 
+					setEnabled(false);
+			}
+		}
+		,"Y Local");
+		añadeAPanel(new LabelDato("+???.??") {
+			public void Actualiza(Object oa,boolean hayCambio) {
+				setEnabled(hayCambio);
+				if(!hayCambio) return;
+				Matrix cl=((GPSData)oa).getCoordLocal();
+				if(cl!=null && cl.get(0, 0)<Double.MAX_VALUE) {
+					setText(String.format("%3.3f", cl.get(2,0)));
+				} else 
+					setEnabled(false);
+			}
+		}
+		,"Z Local");
 		//altura
 		añadeAPanel(new LabelDatoFormato("+????.??",GPSData.class,"getAltura","%+8.2f"), "Altura");
 

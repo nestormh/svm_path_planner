@@ -5,12 +5,14 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.util.Vector;
 
+import javax.rmi.CORBA.Tie;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 /**
  * Es {@link JPanel} que gestiona LabelDatos permitiendo añadirlos y
@@ -21,7 +23,9 @@ import javax.swing.border.Border;
  */
 public class PanelDatos extends JPanel {
 	/** Fuente a usar en las LabelDatos */
-	private Font Grande;
+	protected Font fuenteLabel;
+	/** Fuente a usar en el titulo del borde */
+	protected Font fuenteTitulo;
 	/** Borde que rodea las etiquetas*/
 	private Border blackline = BorderFactory.createLineBorder(Color.black);
 	/** Panel por defecto donde se añadirán las etiquetas */
@@ -32,7 +36,8 @@ public class PanelDatos extends JPanel {
 	
 	/** Constructor sin definir panel por defecto */
 	public PanelDatos() {
-		Grande = getFont().deriveFont(20.0f);
+		fuenteLabel = getFont().deriveFont(18.0f);
+		fuenteTitulo = getFont().deriveFont(12.0f);
 		jpPorDefecto=this; //panel por defecto es él mismo
 	}
 
@@ -72,7 +77,7 @@ public class PanelDatos extends JPanel {
 	public void añadeAPanel(LabelDato lda,String Titulo, JPanel panAñadir) {
 		añadeLabel(lda);
 		lda.setHorizontalAlignment(JLabel.CENTER);
-		lda.setFont(Grande);
+		lda.setFont(fuenteLabel);
 		añadeAPanel((JComponent)lda, Titulo, false, panAñadir);		
 	}
 	
@@ -102,7 +107,7 @@ public class PanelDatos extends JPanel {
 	/** Añade componente (no gestionado) a panel indicado con borde y título, indicando si está habilitado */
 	public void añadeAPanel(JComponent jcmp, String Titulo, boolean enabled, JPanel panAñadir) {
 		jcmp.setBorder(BorderFactory.createTitledBorder(
-				blackline, Titulo));
+				blackline, Titulo,TitledBorder.LEFT,TitledBorder.TOP,fuenteTitulo));
 		jcmp.setEnabled(enabled);
 		panAñadir.add(jcmp);
 	}

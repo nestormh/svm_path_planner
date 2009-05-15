@@ -74,25 +74,25 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		super();
 		contCarro=cc;
 
-		setLayout(new GridLayout(0,4)); //empezamos con 4 columnas
+		setLayout(new GridLayout(0,3)); //empezamos con 4 columnas
 
 		//angulo volante
 		añadeAPanel(new LabelDatoFormato("##.##º",ControlCarro.class,"getAnguloVolanteGrados","%5.2f º")
 		, "Ángulo Volante");		
 		//Consigna Volante en grados
 		añadeAPanel(new LabelDatoFormato("##.## º",ControlCarro.class,"getConsignaAnguloVolanteGrados","%5.2f º")
-		, "Consg Volante º");
+		, "Csg Volante º");
 //		//consigna volante en cuentas 	
 //		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getConsignaVolante","%10d")
-//		, "Consg Volante");
+//		, "Csg Volante");
 		{// spiner fijar consigna volante en grados
 			jspMConsignaVolante=new SpinnerNumberModel(0.0,-45.0,45.0,0.5);
 			JSpinner jspcv=new JSpinner(jspMConsignaVolante);
-			añadeAPanel(jspcv, "Consg Volant º");
+			añadeAPanel(jspcv, "Csg Volant º");
 		}
 		{// Boton aplicar consigna volante en grados
-			jbAplicaConsignaVolante=new JButton("Aplicar Consg Volant");
-			añadeAPanel(jbAplicaConsignaVolante, "Consg Volant");
+			jbAplicaConsignaVolante=new JButton("Aplicar");
+			añadeAPanel(jbAplicaConsignaVolante, "Csg Volant");
 			jbAplicaConsignaVolante.addActionListener(this);
 		}
 
@@ -101,15 +101,15 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		, "Vel. m/s");
 		//Consigna Velocidad
 		añadeAPanel(new LabelDatoFormato("####",ControlCarro.class,"getConsignaAvanceMS","%5.2f")
-		, "Consg Velo");
+		, "Csg Velo");
 		{// spiner consigna velocidad en m/s
 			jspMConsignaVelocidad=new SpinnerNumberModel(1.0,0.0,6.0,0.1);
 			JSpinner jspcv=new JSpinner(jspMConsignaVelocidad);
-			añadeAPanel(jspcv, "Consg Veloc m/s");
+			añadeAPanel(jspcv, "Csg Veloc m/s");
 		}
 		{// Boton aplicar
-			jbAplicaConsignaVelocidad=new JButton("Aplicar Consigna");
-			añadeAPanel(jbAplicaConsignaVelocidad, "Consg Velocidad");
+			jbAplicaConsignaVelocidad=new JButton("Aplicar");
+			añadeAPanel(jbAplicaConsignaVelocidad, "Csg Velocidad");
 			jbAplicaConsignaVelocidad.addActionListener(this);
 		}
 
@@ -125,7 +125,7 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 
 		{//barra progreso comando velocidad
 			jBarraComVel=new JProgressBar(0,maxComVelocidad);
-			añadeAPanel(jBarraComVel, "Comando Velocidad");
+			añadeAPanel(jBarraComVel, "Cmd Velocidad");
 			jBarraComVel.setOrientation(JProgressBar.HORIZONTAL);
 			jBarraComVel.setValue(0);
 		}
@@ -134,7 +134,7 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		{// spiner fijar tiempo Frena
 			jspTiempoFrena=new SpinnerNumberModel(20,0,255,1);
 			JSpinner jspcv=new JSpinner(jspTiempoFrena);
-			añadeAPanel(jspcv, "Tiempo Frena");
+			añadeAPanel(jspcv, "Timp Frena");
 		}
 		{// spiner fijar valor frena
 			jspValorFrena=new SpinnerNumberModel(90,0,255,1);
@@ -142,25 +142,25 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 			añadeAPanel(jspcv, "Valor Frena");
 		}
 		{// Boton aplicar consigna volante en grados
-			jbAplicaFreno=new JButton("Aplicar Freno");
+			jbAplicaFreno=new JButton("Aplicar");
 			añadeAPanel(jbAplicaFreno, "Freno");
 			jbAplicaFreno.addActionListener(this);
 		}
 
-		añadeAPanel(new JLabel("VERDINO"), "");
+//		añadeAPanel(new JLabel("VERDINO"), "");
 		//Para menosFrena
 		{// spiner fijar tiempo Frena
 			jspTiempoDesFrena=new SpinnerNumberModel(20,0,255,1);
 			JSpinner jspcv=new JSpinner(jspTiempoDesFrena);
-			añadeAPanel(jspcv, "Tiempo Desfrena");
+			añadeAPanel(jspcv, "Timp Desfr");
 		}
 		{// spiner fijar valor frena
 			jspValorDesFrena=new SpinnerNumberModel(90,0,255,1);
 			JSpinner jspcv=new JSpinner(jspValorDesFrena);
-			añadeAPanel(jspcv, "Valor Desfrena");
+			añadeAPanel(jspcv, "Valor Desfr");
 		}
 		{// Boton aplicar desfreno
-			jbAplicaDesFreno=new JButton("Aplicar Desfreno");
+			jbAplicaDesFreno=new JButton("Aplicar");
 			añadeAPanel(jbAplicaDesFreno, "Desfreno");
 			jbAplicaDesFreno.addActionListener(this);
 		}
@@ -178,8 +178,8 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		añadeAPanel(new LabelDatoFormato("#",ControlCarro.class,"getDesfreno","%10d")
 		, "Alar. Desfreno");
 
-		añadeAPanel(new SpinnerDouble(contCarro,"setFactorFreno",0,50,0.1), "Factor Freno");
-		añadeAPanel(new SpinnerInt(contCarro,"setMaxIncremento",0,255*2,1), "MaxIncremento");
+		añadeAPanel(new SpinnerDouble(contCarro,"setFactorFreno",0,50,0.1), "Fact Freno");
+		añadeAPanel(new SpinnerInt(contCarro,"setMaxIncremento",0,255*2,1), "Max Inc");
 		añadeAPanel(new SpinnerDouble(contCarro,"setKPAvance",0,50,0.1), "KP Avance");
 		añadeAPanel(new SpinnerDouble(contCarro,"setKIAvance",0,50,0.1), "KI Avance");
 		añadeAPanel(new SpinnerDouble(contCarro,"setKDAvance",0,50,0.1), "KD Avance");

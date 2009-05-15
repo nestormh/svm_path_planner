@@ -294,11 +294,11 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 		JPanelGrafico.addMouseListener(this);
 		JPanelGrafico.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		
-		add(JPanelGrafico,BorderLayout.CENTER);
-//		add(JPanelGrafico);
+//		add(JPanelGrafico,BorderLayout.CENTER);
+		add(JPanelGrafico);
 		
-		JPanelGrafico.setPreferredSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
-		JPanelGrafico.setMaximumSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
+//		JPanelGrafico.setPreferredSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
+//		JPanelGrafico.setMaximumSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
 
 		
 		{
