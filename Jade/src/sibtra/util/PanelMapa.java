@@ -287,7 +287,7 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 			}
 		};
 		setLayout(new BoxLayout(this,BoxLayout.PAGE_AXIS));
-		JPanelGrafico.setMinimumSize(new Dimension(400,400));
+		JPanelGrafico.setMinimumSize(new Dimension(50,50));
 		//JPanelGrafico.setSize(new Dimension(400,400));
 		//para que se expanda todo lo que pueda en el boxLayout
 		JPanelGrafico.setPreferredSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));

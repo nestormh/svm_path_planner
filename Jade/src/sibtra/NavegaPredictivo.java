@@ -332,7 +332,8 @@ public class NavegaPredictivo implements ActionListener {
 
     	//split panel en el centro de la ventana principal
         JSplitPane splitPanel=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT
-        		,true
+//        		,false  //si al mover la barra componentes se refrescan continuamente
+        		,true  //si al mover la barra componentes se refrescan continuamente
         		,jspNumeros
         		,tbPanel
         );
@@ -343,13 +344,14 @@ public class NavegaPredictivo implements ActionListener {
 //      ventanaPrincipal.setLocation(0,384); //en la esquina de la pantalla grande
 //      ventanaPrincipal.setMinimumSize(new Dimension(1024, 700)); //Cogemos toda la pantalla grande
 //      ventanaPrincipal.setMaximumSize(new Dimension(1024, 700)); //Cogemos toda la pantalla grande
-      ventanaPrincipal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      ventanaPrincipal.pack();
-      ventanaPrincipal.setVisible(true);
-      
+        ventanaPrincipal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ventanaPrincipal.pack();
+        ventanaPrincipal.setVisible(true);
+
         ventanaPrincipal.setBounds(0, 384, 1024, 742);
-        splitPanel.setDividerLocation(0.50); //La mitad para cada uno
-        
+//        splitPanel.setDividerLocation(0.50); //La mitad para cada uno
+        splitPanel.setDividerLocation(500); //Ajustamos para que no aparezca la barra a la dercha
+
         //La ventana Secundaria
         ventadaPeque=new JFrame("VERDINO");
         {
