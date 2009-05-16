@@ -26,6 +26,7 @@ import javax.swing.border.Border;
 
 import sibtra.gps.Ruta;
 import sibtra.lms.BarridoAngular;
+import sibtra.util.PanelFlow;
 import sibtra.util.PanelMuestraTrayectoria;
 import sibtra.util.UtilCalculos;
 
@@ -67,7 +68,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		JLabel jla=null;
 		Border blackline = BorderFactory.createLineBorder(Color.black);
 		{//nuevo panel para añadir debajo
-			JPanel jpPre=new JPanel(new FlowLayout(FlowLayout.LEADING));
+			JPanel jpPre=new PanelFlow();
 			
 			jla=jlDistLin=new JLabel("   ??.???");
 		    Font Grande = jla.getFont().deriveFont(20.0f);
@@ -76,7 +77,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			jla.setMinimumSize(new Dimension(300, 20));
+//			jla.setMinimumSize(new Dimension(300, 20));
 			jla.setPreferredSize(new Dimension(130, 45));
 			jpPre.add(jla);
 			
@@ -86,7 +87,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		    jla.setFont(Grande);
 			jla.setHorizontalAlignment(JLabel.CENTER);
 			jla.setEnabled(false);
-			jla.setMinimumSize(new Dimension(300, 20));
+//			jla.setMinimumSize(new Dimension(300, 20));
 			jla.setPreferredSize(new Dimension(130, 45));
 			jpPre.add(jla);
 
@@ -97,7 +98,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			jla.setEnabled(false);
 			jpPre.add(jla);
 
-			jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE,60));
+//			jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE,60));
 			add(jpPre);
 
 		}

@@ -17,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,6 +34,7 @@ import sibtra.log.Logger;
 import sibtra.log.LoggerDouble;
 import sibtra.log.LoggerFactory;
 import sibtra.log.VentanaLoggers;
+import sibtra.util.PanelFlow;
 import sibtra.util.PanelMuestraTrayectoria;
 import sibtra.util.UtilCalculos;
 
@@ -74,7 +76,8 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         CP = contPredic;
         setTr(CP.ruta);
         {//nuevo panel para añadir debajo
-            JPanel jpPre = new JPanel(new FlowLayout(FlowLayout.LEADING));
+//            JPanel jpPre = new JPanel(new FlowLayout(FlowLayout.LEADING));
+            JPanel jpPre = new PanelFlow();
             //barra de progreso para el comando
             jpbComandoI = new JProgressBar(-pbMax, 0);
             jpPre.add(jpbComandoI);
@@ -132,9 +135,9 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
             jsModPesoError.addChangeListener(this);
             jpPre.add(jsPesoError);
             
-            jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE, 40));
+//            jpPre.setMinimumSize(new Dimension(Short.MAX_VALUE, 40));
 //			jpPre.setBorder(BorderFactory.createCompoundBorder(
-//	                   BorderFactory.createLineBorder(Color.red),
+//	                   BorderFactory.createLineBorder(Color.blue),
 //	                   jpPre.getBorder()));
 
             add(jpPre);

@@ -1,16 +1,18 @@
 																																																																																																																																																																																																																																																																																																																					package sibtra;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,7 +35,6 @@ import sibtra.imu.AngulosIMU;
 import sibtra.imu.ConexionSerialIMU;
 import sibtra.imu.PanelMuestraAngulosIMU;
 import sibtra.lms.BarridoAngular;
-import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.predictivo.Coche;
 import sibtra.predictivo.ControlPredictivo;
@@ -365,11 +366,45 @@ public class NavegaPredictivo implements ActionListener {
         	jcbFrenandoP.setSelected(true);
 //      	jcbFrenandoP.addActionListener(this);
         	central.add(jcbFrenandoP);
+        	
+        	JButton jbSaca=new JButton("Dimesiones");
+        	jbSaca.addActionListener(this);
+        	central.add(jbSaca);
+        	
         	ventadaPeque.add(central);
         }
+        ventadaPeque.setUndecorated(true); //para que no aparezcan el marco
         ventadaPeque.pack();
         ventadaPeque.setVisible(true);
         ventadaPeque.setBounds(0, 0, 640, 384);
+        
+    }
+
+    public void SacaDimensiones() {
+    	//vemos tamaños de panel predictivo
+    	System.out.println("Predictivo:");
+    	for(int i=0; i<pmp.getComponentCount(); i++) {
+    		Component ca=pmp.getComponent(i);
+    		System.out.println("Componente "+i
+    				+ "  Clase :"+ca.getClass().getName()
+    				+ " Size="+ca.getSize()
+    				+ "  Minimo="+ca.getMinimumSize()
+    				+ "  Maximo="+ca.getMaximumSize()
+    				+ "  Preferido="+ca.getPreferredSize()
+    		);
+    	}
+    	//vemos tamaños de panel
+    	System.out.println("Obstaculos:");
+    	for(int i=0; i<pmo.getComponentCount(); i++) {
+    		Component ca=pmo.getComponent(i);
+    		System.out.println("Componente "+i
+    				+ "  Clase :"+ca.getClass().getName()
+    				+ " Size="+ca.getSize()
+    				+ "  Minimo="+ca.getMinimumSize()
+    				+ "  Maximo="+ca.getMaximumSize()
+    				+ "  Preferido="+ca.getPreferredSize()
+    		);
+    	}
     }
     
     /**
@@ -619,6 +654,7 @@ public class NavegaPredictivo implements ActionListener {
 				distRF = 80;
 			}
 		}
+		SacaDimensiones();
 	}
     /**
      * @param args Seriales para IMU, GPS, RF y Carro. Si no se pasan de piden interactivamente.
