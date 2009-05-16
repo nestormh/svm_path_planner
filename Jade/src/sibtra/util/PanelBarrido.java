@@ -127,10 +127,8 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 		if(distanciaMaxima>0 && distanciaMaxima<=80)
 			distMax=distanciaMaxima;
 		
-		//setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));	
-		
-		setLayout(new BorderLayout(3,3));
-		
+		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));	
+
 		esqID=new Point2D.Double();
 		esqSI=new Point2D.Double();
 		restaurar=true;	//se actualizan las esquinas la primera vez
@@ -233,11 +231,12 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 				cosasAPintar(g0);
 			}
 		};
-		JPanelGrafico.setMinimumSize(new Dimension(400,400));
-		JPanelGrafico.setSize(new Dimension(400,400));
+		JPanelGrafico.setMinimumSize(new Dimension(50,50));
+		//Se para expandir todo lo que pueda
+		JPanelGrafico.setMaximumSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
+		JPanelGrafico.setPreferredSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
 		JPanelGrafico.setBackground(Color.BLACK);
 		JPanelGrafico.addMouseListener(this);
-		add(JPanelGrafico,BorderLayout.CENTER);
 		
 		//después (a la dercha) el slider
 		JSliderZoom=new JSlider(SwingConstants.VERTICAL,0,distMax,distMax);
@@ -246,12 +245,17 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 		JSliderZoom.setPaintLabels(true);
 		JSliderZoom.setPaintTicks(true);
 		JSliderZoom.addChangeListener(this);
-		add(JSliderZoom,BorderLayout.LINE_END);
+
+		//Panel que contedrá grafica y slider de zoom
+		JPanel jpGS=new JPanel();
+		jpGS.setLayout(new BoxLayout(jpGS,BoxLayout.LINE_AXIS));
+		jpGS.add(JPanelGrafico);
+		jpGS.add(JSliderZoom);
+		add(jpGS); //añadimos como primera caja del panel
 		
 		{
-			//Abajo los checks para mostrar o no las zonas y el barrido
-			jpChecks=new JPanel();
-			jpChecks.setLayout(new BoxLayout(jpChecks,BoxLayout.LINE_AXIS));
+			//Abajo los checks para mostrar Rejillas y reglas
+			jpChecks=new PanelFlow();
 			jpChecks.setBorder(
 					BorderFactory.createCompoundBorder(
 							BorderFactory.createEmptyBorder(5, 5, 5, 5)
@@ -277,7 +281,7 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 			jcbRejillaRecta.addChangeListener(this);
 			jpChecks.add(jcbRejillaRecta);
 
-			add(jpChecks,BorderLayout.PAGE_END);
+			add(jpChecks); //siguiente caja del panel
 		}
 		
 	}

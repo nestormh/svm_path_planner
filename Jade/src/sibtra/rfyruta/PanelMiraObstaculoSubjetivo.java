@@ -80,7 +80,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		super(distanciaMaxima);
 		MI=miObs;
 
-		jlDistLin=new JLabel("Dist ??.???");
+		jlDistLin=new JLabel("Lineal ??.???");
 		Font Grande = jlDistLin.getFont().deriveFont(20.0f);
 		jlDistLin.setFont(Grande);
 		jlDistLin.setHorizontalAlignment(JLabel.CENTER);

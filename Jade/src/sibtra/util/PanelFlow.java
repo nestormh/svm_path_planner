@@ -2,6 +2,7 @@ package sibtra.util;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 
 import javax.swing.JPanel;
 
@@ -28,28 +29,32 @@ public class PanelFlow extends JPanel {
 	    //si no tenemos hijos, 0,0 está bien
 	    if(getComponentCount()==0) return min;
 	    int vg=fL.getVgap(), hg=fL.getHgap();
+		//añadimos los insets por si hay bordes definidos
+		Insets ia=getInsets();
 //	    Dimension minFL=fL.minimumLayoutSize(this); No produce nada válido
-	    int xa=min.width+2*hg; //puntero dentro de la fila actual
-	    int ya=min.height+2*vg;
-	    for(int i=0; i<getComponentCount();i++) {
-	    	Dimension da=getComponent(i).getPreferredSize();
+    	Dimension da=getComponent(0).getPreferredSize();
+    	//Apuntamos lo de el primer componente
+	    int xa=da.width+hg+ia.left+ia.right; //apuntamos desde el principio espacio ocupado por insets
+	    int ya=da.height;
+	    for(int i=1; i<getComponentCount();i++) {
+	    	da=getComponent(i).getPreferredSize();
 	    	if((xa+da.width)>sizeAct.width) {
 	    		//no cabe en la línea actual, hay que saltar de linea
-	    		// actulizamos min con los datos de la línea que acaba de terminar
+	    		// actualizamos min con los datos de la línea que acaba de terminar
 	    		if(xa>min.width) min.width=xa; 
-	    		min.height+=ya;
+	    		min.height+=ya+vg;
 	    		//iniciamos datos de la nueva línea
-	    		xa=da.width+hg;
-	    		ya=da.height+vg;
+	    		xa=da.width+hg+ia.left+ia.right;
+	    		ya=da.height;
 	    	} else {
 	    		//cabe en la linea
 	    		xa+=da.width+hg;
-	    		if((da.height+vg)>ya) ya=da.height+vg; //máxima altura
+	    		if((da.height)>ya) ya=da.height; //máxima altura
 	    	}
 	    }
 		// actulizamos min con los datos de la última línea
 		if(xa>min.width) min.width=xa; 
-		min.height+=ya;
+		min.height+=ya+vg+ia.top+ia.bottom; //añadimos espacion necesario para insets
 	    return min;
 	}
 

@@ -298,6 +298,7 @@ public class NavegaPredictivo implements ActionListener {
         JTabbedPane tbPanel=new JTabbedPane();
 
 
+        //añadimos los paneles a las solapas
         pmp = new PanelMuestraPredictivo(cp,rutaEspacial);
         tbPanel.add("Predictivo",pmp);
         pmo = new PanelMiraObstaculo(mi);
@@ -311,7 +312,6 @@ public class NavegaPredictivo implements ActionListener {
 //        	}
         	pmoS=new PanelMiraObstaculoSubjetivo(mi,distMaxRF);
         }
-        //añadimos los paneles a las solapas
         tbPanel.add("Subjetivo",pmoS);
 
         //Tamaños se los dos lados
@@ -399,6 +399,18 @@ public class NavegaPredictivo implements ActionListener {
     	System.out.println("Obstaculos:");
     	for(int i=0; i<pmo.getComponentCount(); i++) {
     		Component ca=pmo.getComponent(i);
+    		System.out.println("Componente "+i
+    				+ "  Clase :"+ca.getClass().getName()
+    				+ " Size="+ca.getSize()
+    				+ "  Minimo="+ca.getMinimumSize()
+    				+ "  Maximo="+ca.getMaximumSize()
+    				+ "  Preferido="+ca.getPreferredSize()
+    		);
+    	}
+    	//vemos tamaños de panel
+    	System.out.println("Subjetivo:");
+    	for(int i=0; i<pmoS.getComponentCount(); i++) {
+    		Component ca=pmoS.getComponent(i);
     		System.out.println("Componente "+i
     				+ "  Clase :"+ca.getClass().getName()
     				+ " Size="+ca.getSize()
