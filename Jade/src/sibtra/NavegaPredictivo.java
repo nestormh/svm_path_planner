@@ -12,7 +12,6 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,6 +35,7 @@ import sibtra.imu.ConexionSerialIMU;
 import sibtra.imu.PanelMuestraAngulosIMU;
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.ManejaLMS;
+import sibtra.log.PanelLoggers;
 import sibtra.predictivo.Coche;
 import sibtra.predictivo.ControlPredictivo;
 import sibtra.predictivo.PanelMuestraPredictivo;
@@ -104,8 +104,8 @@ public class NavegaPredictivo implements ActionListener {
     private PanelMuestraAngulosIMU pmai;
     private PanelMiraObstaculo pmo;
 	private PanelMiraObstaculoSubjetivo pmoS;
+	private PanelLoggers pmLog;
     private JFileChooser fc;
-    private JFrame ventanaPMO;
 
     JCheckBox jcbNavegando;
     JCheckBox jcbFrenando;
@@ -268,29 +268,6 @@ public class NavegaPredictivo implements ActionListener {
         	pmai.actualizaAngulo(new AngulosIMU(0, 0, 0, 0));
         	panelNumeros.add(pmai);
         	
-        	//Tread para refrescar los paneles de la ventana
-            Thread thRefresco = new Thread() {
-            	/** Milisegundos del periodo de actualización */
-            	private long milisPeriodo=500;
-
-                public void run() {
-            		while (true){
-//            			pgt.setEnabled(true);
-            			//GPS
-            			pgt.actualizaGPS(conGPS.getPuntoActualTemporal());
-            			pgt.repinta();
-            			//IMU
-        				pmai.actualizaAngulo(conIMU.getAngulo());
-        				pmai.repinta();
-        				//Coche
-        				pmCoche.actualizaCarro();
-        				pmCoche.repinta();
-
-        				try{Thread.sleep(milisPeriodo);} catch (Exception e) {}	
-            		}
-                }
-            };
-            thRefresco.start();
         }
 
         //Panel con solapas para la parte derecha de la ventana principal
@@ -313,6 +290,9 @@ public class NavegaPredictivo implements ActionListener {
         	pmoS=new PanelMiraObstaculoSubjetivo(mi,distMaxRF);
         }
         tbPanel.add("Subjetivo",pmoS);
+        //Loggers en solapa con scroll panel
+        pmLog=new PanelLoggers();
+        tbPanel.add("Loggers",new JScrollPane(pmLog));
 
         //Tamaños se los dos lados
         JScrollPane jspNumeros=new JScrollPane(panelNumeros
@@ -345,6 +325,7 @@ public class NavegaPredictivo implements ActionListener {
 //      ventanaPrincipal.setMinimumSize(new Dimension(1024, 700)); //Cogemos toda la pantalla grande
 //      ventanaPrincipal.setMaximumSize(new Dimension(1024, 700)); //Cogemos toda la pantalla grande
         ventanaPrincipal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ventanaPrincipal.setUndecorated(true);
         ventanaPrincipal.pack();
         ventanaPrincipal.setVisible(true);
 
@@ -380,6 +361,32 @@ public class NavegaPredictivo implements ActionListener {
         ventadaPeque.setVisible(true);
         ventadaPeque.setBounds(0, 0, 640, 384);
         
+    	//Tread para refrescar los paneles de la ventana
+        Thread thRefresco = new Thread() {
+        	/** Milisegundos del periodo de actualización */
+        	private long milisPeriodo=500;
+
+            public void run() {
+        		while (true){
+//        			pgt.setEnabled(true);
+        			//GPS
+        			pgt.actualizaGPS(conGPS.getPuntoActualTemporal());
+        			pgt.repinta();
+        			//IMU
+    				pmai.actualizaAngulo(conIMU.getAngulo());
+    				pmai.repinta();
+    				//Coche
+    				pmCoche.actualizaCarro();
+    				pmCoche.repinta();
+    				
+    				//Loggers
+    				pmLog.repinta();
+
+    				try{Thread.sleep(milisPeriodo);} catch (Exception e) {}	
+        		}
+            }
+        };
+        thRefresco.start();
     }
 
     public void SacaDimensiones() {
