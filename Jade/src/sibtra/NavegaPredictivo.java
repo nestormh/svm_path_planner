@@ -301,14 +301,14 @@ public class NavegaPredictivo implements ActionListener {
         
         //(panelNumeros.setPreferredSize(new Dimension(500,600));
         
-        System.err.println("Panel Numeros Prefferred size :"+panelNumeros.getPreferredSize());
-        System.err.println("Panel Numeros minimun size :"+panelNumeros.getMinimumSize());
-        System.err.println("Panel scroll Prefferred size :"+jspNumeros.getPreferredSize());
-        System.err.println("Panel scroll  minimun size :"+jspNumeros.getMinimumSize());
+//        System.err.println("Panel Numeros Prefferred size :"+panelNumeros.getPreferredSize());
+//        System.err.println("Panel Numeros minimun size :"+panelNumeros.getMinimumSize());
+//        System.err.println("Panel scroll Prefferred size :"+jspNumeros.getPreferredSize());
+//        System.err.println("Panel scroll  minimun size :"+jspNumeros.getMinimumSize());
         tbPanel.setPreferredSize(new Dimension(500,600));
         tbPanel.setMinimumSize(new Dimension(100,600));
-        System.err.println("Panel Tabbed Prefferred size :"+tbPanel.getPreferredSize());
-        System.err.println("Panel Tabbed minimun size :"+tbPanel.getMinimumSize());
+//        System.err.println("Panel Tabbed Prefferred size :"+tbPanel.getPreferredSize());
+//        System.err.println("Panel Tabbed minimun size :"+tbPanel.getMinimumSize());
 
     	//split panel en el centro de la ventana principal
         JSplitPane splitPanel=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT
@@ -321,14 +321,12 @@ public class NavegaPredictivo implements ActionListener {
         ventanaPrincipal.getContentPane().add(splitPanel, BorderLayout.CENTER);
 
         //Mostramos la ventana principal con el tamaño y la posición deseada
-//      ventanaPrincipal.setLocation(0,384); //en la esquina de la pantalla grande
-//      ventanaPrincipal.setMinimumSize(new Dimension(1024, 700)); //Cogemos toda la pantalla grande
-//      ventanaPrincipal.setMaximumSize(new Dimension(1024, 700)); //Cogemos toda la pantalla grande
         ventanaPrincipal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ventanaPrincipal.setUndecorated(true);
         ventanaPrincipal.pack();
         ventanaPrincipal.setVisible(true);
 
+        //Fijamos su tamaño y posición
         ventanaPrincipal.setBounds(0, 384, 1024, 742);
 //        splitPanel.setDividerLocation(0.50); //La mitad para cada uno
         splitPanel.setDividerLocation(500); //Ajustamos para que no aparezca la barra a la dercha
@@ -359,6 +357,7 @@ public class NavegaPredictivo implements ActionListener {
         ventadaPeque.setUndecorated(true); //para que no aparezcan el marco
         ventadaPeque.pack();
         ventadaPeque.setVisible(true);
+        //fijamos su tamaño y posición
         ventadaPeque.setBounds(0, 0, 640, 384);
         
     	//Tread para refrescar los paneles de la ventana
@@ -549,7 +548,7 @@ public class NavegaPredictivo implements ActionListener {
                             double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
                             distRF = mi.masCercano(ptoAct, angAct, ba);
                             pmo.actualiza();
-//							PMOS.actualiza();
+							pmoS.actualiza();
 
 
 //							if(Double.isNaN(dist))
