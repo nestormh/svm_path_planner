@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.MenuBar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -15,6 +16,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -66,6 +70,10 @@ public class NavegaPredictivo implements ActionListener {
 	/** Distancia a la que idealmente se detendrá el coche del obstáculo*/
 	private static final double margenColision = 2;
 	
+	/** distancia maxima entre puntos sucesivos de Tr */
+    private double distMaxTr = 0.1;        
+
+	
 	//Campos de interacción con los dispositivos ******************************************************
     private ConexionSerialIMU conIMU=null;
     private GPSConnectionTriumph conGPS=null;
@@ -73,8 +81,12 @@ public class NavegaPredictivo implements ActionListener {
     private ControlCarro contCarro=null;
 
 	//Campos relacionados con los cálculos ************************************************************
-    private Ruta rutaEspacial;
-    double[][] Tr = null;
+    /** Ruta con la que se está trabajando. Mientras sea ==null significa que no se ha cargado ruta*/
+    private Ruta rutaEspacial=null;
+	/** Variable que indicará cuando se quiere navegar */
+	private boolean navegando=false;
+
+	double[][] Tr = null;
     private MiraObstaculo mi;
     private double desMag;
     Coche modCoche;
@@ -116,13 +128,18 @@ public class NavegaPredictivo implements ActionListener {
     private JCheckBox jcbUsarRF;
 	private SpinnerNumberModel spGananciaVel;
 	private JSpinner jsGananciaVel;
+	//Items del menu
+	private JMenuItem miCargar;
+	private JMenuItem miSalir;
 
-    /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
+	/** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
         if (args == null || args.length < 4) {
             System.err.println("Son necesarios 4 argumentos con los puertos seriales");
             System.exit(1);
         }
+        //inicializamos modelo del coche
+        modCoche = new Coche();
 
         //conexión de la IMU
         System.out.println("Abrimos conexión IMU");
@@ -172,40 +189,6 @@ public class NavegaPredictivo implements ActionListener {
         //elegir fichero
         fc = new JFileChooser(new File("./Rutas"));
 
-        //necestamos leer archivo con la ruta
-        do {
-            int devuelto = fc.showOpenDialog(ventanaPrincipal);
-            if (devuelto != JFileChooser.APPROVE_OPTION) {
-                JOptionPane.showMessageDialog(ventanaPrincipal,
-                        "Necesario cargar fichero de ruta",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
-            } else {
-                conGPS.loadRuta(fc.getSelectedFile().getAbsolutePath());
-            }
-        } while (conGPS.getRutaEspacial() == null);
-        //nuestra ruta espacial será la que se cargó
-        rutaEspacial = conGPS.getRutaEspacial();
-        desMag = rutaEspacial.getDesviacionM();
-        System.out.println("Usando desviación magnética " + Math.toDegrees(desMag));
-
-        //Rellenamos la trayectoria con la nueva versión de toTr,que 
-        //introduce puntos en la trayectoria de manera que la separación
-        //entre dos puntos nunca sea mayor de la distMax
-        double distMax = 0.1;        
-        // MOstrar coodenadas del centro del sistema local
-        centroToTr = rutaEspacial.getCentro();
-        System.out.println("centro de la Ruta Espacial " + centroToTr);
-        Tr = rutaEspacial.toTr(distMax);
-
-
-        System.out.println("Longitud de la trayectoria=" + Tr.length);
-
-        mi = new MiraObstaculo(Tr);
-
-        //Inicializamos modelos predictivos
-        modCoche = new Coche();
-        cp = new ControlPredictivo(modCoche, Tr, 13, 4, 2.0, (double) periodoMuestreoMili / 1000);
 
         //Definición de los elementos gráficos
         ventanaPrincipal=new JFrame("Navega Predictivo");
@@ -217,6 +200,8 @@ public class NavegaPredictivo implements ActionListener {
     		//Checkbox para navegar
     		jcbNavegando = new JCheckBox("Navegando");
     		jcbNavegando.setSelected(false);
+    		if(rutaEspacial==null) jcbNavegando.setEnabled(false);
+    		jcbNavegando.addActionListener(this);
     		jpSur.add(jcbNavegando);
     		//Checkbox para frenar
     		jcbFrenando = new JCheckBox("Frenar");
@@ -276,9 +261,9 @@ public class NavegaPredictivo implements ActionListener {
 
 
         //añadimos los paneles a las solapas
-        pmp = new PanelMuestraPredictivo(cp,rutaEspacial);
+        pmp = new PanelMuestraPredictivo(null,null);
         tbPanel.add("Predictivo",pmp);
-        pmo = new PanelMiraObstaculo(mi);
+        pmo = new PanelMiraObstaculo(null);
         tbPanel.add("Obstaculo", pmo);
         {
         	short distMaxRF=80; //valor por defecto
@@ -320,6 +305,24 @@ public class NavegaPredictivo implements ActionListener {
 
         ventanaPrincipal.getContentPane().add(splitPanel, BorderLayout.CENTER);
 
+        {	//barra de menu
+        	JMenuBar barra=new JMenuBar();
+        	//menu de archivo
+        	JMenu menuArchivo=new JMenu("Fichero");
+        	barra.add(menuArchivo);
+        	
+        	miCargar=new JMenuItem("Cargar Ruta");
+        	miCargar.addActionListener(this);
+        	menuArchivo.add(miCargar);
+        	
+        	menuArchivo.addSeparator(); //separador =============================
+        	miSalir=new JMenuItem("Salir");
+        	miSalir.addActionListener(this);
+        	menuArchivo.add(miSalir);
+        	
+        	ventanaPrincipal.setJMenuBar(barra); //ponemos barra en la ventana
+        }
+        
         //Mostramos la ventana principal con el tamaño y la posición deseada
         ventanaPrincipal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ventanaPrincipal.setUndecorated(true);
@@ -532,56 +535,152 @@ public class NavegaPredictivo implements ActionListener {
     	return consignaVelocidad;
     }
     
-	/** Método que ejecuta cada {@link #periodoMuestreoMili} bucle de control del coche mirando los obstáculos con el RF 
+    
+    /** Metodo para cargar una ruta de fichero */
+    protected void CargarRuta() {
+    	//necestamos leer archivo con la ruta
+    	int devuelto = fc.showOpenDialog(ventanaPrincipal);
+    	if (devuelto != JFileChooser.APPROVE_OPTION) {
+    		//no se quiso seleccionar ruta
+    		rutaEspacial=null;
+    		pmp.setControlPyRuta(null, null);
+            pmo.setMiraObstaculo(null);
+            pmoS.setMiraObstaculo(null);
+
+    		return;
+    	}
+
+    	conGPS.loadRuta(fc.getSelectedFile().getAbsolutePath());
+    	if((rutaEspacial=conGPS.getRutaEspacial())==null) {
+    		JOptionPane.showMessageDialog(ventanaPrincipal,
+    				"No se cargó ruta adecuadamente de ese fichero",
+    				"Error",
+    				JOptionPane.ERROR_MESSAGE);
+    		return;
+    	}
+    	//tenemos ruta != null
+        desMag = rutaEspacial.getDesviacionM();
+        System.out.println("Usando desviación magnética " + Math.toDegrees(desMag));
+
+        // MOstrar coodenadas del centro del sistema local
+        centroToTr = rutaEspacial.getCentro();
+        System.out.println("centro de la Ruta Espacial " + centroToTr);
+        //Rellenamos la trayectoria con la nueva versión de toTr,que 
+        //introduce puntos en la trayectoria de manera que la separación
+        //entre dos puntos nunca sea mayor de la distMax
+        Tr = rutaEspacial.toTr(distMaxTr);
+
+
+        System.out.println("Longitud de la trayectoria=" + Tr.length);
+
+        mi = new MiraObstaculo(Tr);
+
+        pmo.setMiraObstaculo(mi);
+        pmoS.setMiraObstaculo(mi);
+        //Inicializamos modelos predictivos
+        cp = new ControlPredictivo(modCoche, Tr, 13, 4, 2.0, (double) periodoMuestreoMili / 1000);
+        pmp.setControlPyRuta(cp, rutaEspacial); //nuevos valore en panel predictivo
+    }
+    
+    /** Metodo para terminar la ejecución */
+    protected void Terminar() {
+    	//TODO dejar todo en estado adecuado, desfrenar, etc. Apagar RF
+		System.exit(0);
+	}
+
+    public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == jcbFrenando){
+			if(jcbFrenando.isSelected()){
+				// Se acaba de seleccionar
+				double distFrenado = spFrenado.getNumber().doubleValue();
+				puntoFrenado = buscaPuntoFrenado(distFrenado);
+				jsDistFrenado.setEnabled(false);
+			}else{
+				// Se acaba de desactivar
+				jsDistFrenado.setEnabled(true);
+				puntoFrenado = -1;
+			}
+			if(e.getSource() == spGananciaVel){
+				gananciaVel = spGananciaVel.getNumber().doubleValue();
+			}		
+		}
+		if (e.getSource() == jcbNavegando){
+			if (rutaEspacial==null) { //por si las moscas
+				jcbNavegando.setSelected(false);
+				jcbNavegando.setEnabled(false);
+			} else if (jcbNavegando.isSelected()) {
+				navegando=true;
+				cp.iniciaNavega();
+			} else {
+				//se desactivo Navegando
+				navegando=false;
+			}
+		}
+		if (e.getSource() == jcbUsarRF){
+			if(!jcbUsarRF.isSelected()){
+				//Cuando se desactiva la checkbox del rangeFinder la distancia se
+				//se pone al máximo.
+				distRF = 80;
+			}
+		}
+		if(e.getSource()==miSalir) {
+			Terminar();
+		}
+		if(e.getSource()==miCargar) {
+			CargarRuta();
+		}
+		SacaDimensiones();
+	}
+
+    /** Método que ejecuta cada {@link #periodoMuestreoMili} bucle de control del coche mirando los obstáculos con el RF 
      */
     public void camina() {
-        Thread thRF = new Thread() {
+    	//TODO poner este thread para que se arranque en el constructor
+    	Thread thRF = new Thread() {
 
-            public void run() {
-                BarridoAngular ba=null;
-                while (true) {
-                        if (jcbUsarRF.isSelected()) {
-                        	ba=manLMS.esperaNuevoBarrido(ba);
-                            //Calculamos el comando
-                            GPSData pa = conGPS.getPuntoActualTemporal();                            
-                            double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
-                            double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
-                            distRF = mi.masCercano(ptoAct, angAct, ba);
-                            pmo.actualiza();
-							pmoS.actualiza();
-
-
-//							if(Double.isNaN(dist))
-//								System.out.println("Estamos fuera del camino");
-//							else if(Double.isInfinite(dist))
-//								System.out.println("No hay obstáculo");
-//							else
-//								System.out.println("Distancia="+dist);
-
-                        }
-                    }
-                }
-        };
-
-        thRF.start();
+    		public void run() {
+    			BarridoAngular ba=null;
+    			while (true) {
+    				ba=manLMS.esperaNuevoBarrido(ba);
+    				GPSData pa = conGPS.getPuntoActualTemporal();                            
+    				double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
+    				double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
+    				if (jcbUsarRF.isSelected() &&
+    						// esto es redundante, ya que no debería activarse jcbUsarRF si ruta es null
+    						rutaEspacial!=null ) {
+    					//calculamos distancia a obstáculo más cercano
+    					distRF = mi.masCercano(ptoAct, angAct, ba);
+    				} else {
+    					//ponemos posición y barrido
+    					pmo.setPosicionYawBarrido(ptoAct, angAct, ba);
+    					pmoS.setBarrido(ba);
+    				}
+    				//actualizamos paneles aunque no haya mi
+    				pmo.actualiza();
+    				pmoS.actualiza();
+    			}
+    		}
+    	};
+//        thRF.start();
+        
         double velocidadActual;        
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         long tSig;
         double consignaVelAnt = 0;
         while (true) {
             tSig = System.currentTimeMillis() + periodoMuestreoMili;
-            if (jcbNavegando.isSelected()) {
+            //Calculamos el comando            	
+            GPSData pa = conGPS.getPuntoActualTemporal();
+            double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
+            double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
+            if (navegando) { //sólo se debe activar si hay ruta 
 
-                //Calculamos el comando            	
-                GPSData pa = conGPS.getPuntoActualTemporal();
-                GPSData centroactual = conGPS.getBufferEspacial().getCentro();
-                if (centroactual.getAltura()!=centroToTr.getAltura()
-                		|| centroactual.getLatitud()!=centroToTr.getLatitud()
-                		|| centroactual.getLongitud()!=centroToTr.getLongitud())
-                	System.err.println("El centro es diferente!!! " + centroToTr 
-                			+"!= "+  conGPS.getBufferEspacial().getCentro());
-                double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
-                double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
+//                GPSData centroactual = conGPS.getBufferEspacial().getCentro();
+//                if (centroactual.getAltura()!=centroToTr.getAltura()
+//                		|| centroactual.getLatitud()!=centroToTr.getLatitud()
+//                		|| centroactual.getLongitud()!=centroToTr.getLongitud())
+//                	System.err.println("El centro es diferente!!! " + centroToTr 
+//                			+"!= "+  conGPS.getBufferEspacial().getCentro());
                 double volante = contCarro.getAnguloVolante();
                 // Con esta linea realimentamos la información de los sensores al modelo
                 // se puede incluir tambien la posicion del volante añadiendo el parámetro
@@ -627,12 +726,12 @@ public class NavegaPredictivo implements ActionListener {
                 consignaVelAnt = consignaVelocidad;
                 contCarro.setConsignaAvanceMS(consignaVelocidad);			
                 modCoche.calculaEvolucion(comandoVolante, velocidadActual, periodoMuestreoMili / 1000);
-                pmp.actualiza();
+            } else {
+            	//Le decimos almenos donde está el coche
+            	pmp.situaCoche(ptoAct[0], ptoAct[1], angAct);
             }
+            pmp.actualiza();
 
-            /* no hace falta porque hay un thread que refresca automaticamente
-             * pmCoche.actualiza(); 
-            pmCoche.repinta(); */
             //esperamos hasta que hayan pasado miliSeg de ciclo.
             long msSobra = tSig - System.currentTimeMillis();
             if (msSobra < 0) {
@@ -647,35 +746,7 @@ public class NavegaPredictivo implements ActionListener {
         }
 
     }
-    public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == jcbFrenando){
-			if(jcbFrenando.isSelected()){
-				// Se acaba de seleccionar
-				double distFrenado = spFrenado.getNumber().doubleValue();
-				puntoFrenado = buscaPuntoFrenado(distFrenado);
-				jsDistFrenado.setEnabled(false);
-			}else{
-				// Se acaba de desactivar
-				jsDistFrenado.setEnabled(true);
-				puntoFrenado = -1;
-			}
-			if(e.getSource() == spGananciaVel){
-				gananciaVel = spGananciaVel.getNumber().doubleValue();
-			}		
-		}
-		if (e.getSource() == jcbNavegando){
-			if (jcbNavegando.isSelected())
-				cp.iniciaNavega();
-		}
-		if (e.getSource() == jcbUsarRF){
-			if(!jcbUsarRF.isSelected()){
-				//Cuando se desactiva la checkbox del rangeFinder la distancia se
-				//se pone al máximo.
-				distRF = 80;
-			}
-		}
-		SacaDimensiones();
-	}
+
     /**
      * @param args Seriales para IMU, GPS, RF y Carro. Si no se pasan de piden interactivamente.
      */
@@ -693,7 +764,7 @@ public class NavegaPredictivo implements ActionListener {
             puertos = args;
         }
         NavegaPredictivo na = new NavegaPredictivo(puertos);
-        na.camina();
+//        na.camina();
     }
 
 

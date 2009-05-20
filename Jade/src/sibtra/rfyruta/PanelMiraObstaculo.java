@@ -41,11 +41,9 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 	/** Objeto {@link MiraObstaculo} del cual se obtiene toda la información a representar*/
 	protected MiraObstaculo MI;
 	
-
-
-	/** Si ya hay datos que representar (posición y barrido) */
-	protected boolean hayDatos;
-
+	/** Barrido angular de {@link #MI} o fijado expresamente */
+	protected BarridoAngular barrAng=null;
+	
 	/** etiqueta que muestar la distancia al obstaculo */
 	protected JLabel jlDistLin;
 	/** etiqueta que muestar la distancia al obstaculo */
@@ -60,10 +58,6 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
      */
 	public PanelMiraObstaculo(MiraObstaculo miObs) {
 		super();
-		this.MI=miObs;
-		setTr(MI.Tr);
-		hayDatos=false;
-
 		
 		JLabel jla=null;
 		Border blackline = BorderFactory.createLineBorder(Color.black);
@@ -102,11 +96,50 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			add(jpPre);
 
 		}
+		setMiraObstaculo(miObs);
+	}
+	
+	public void setMiraObstaculo(MiraObstaculo mi) {
+		MI=mi;
+		actualiza();
 	}
 
 	protected void cosasAPintar(Graphics g0) {
 		super.cosasAPintar(g0);
 		Graphics2D g=(Graphics2D)g0;
+		if (posXCoche!=Double.NaN && barrAng!=null) { //pintamos el barrido si existe y estamos situados
+			g.setStroke(new BasicStroke());
+			g.setColor(Color.WHITE);
+			//pintamos rango de puntos en camino
+			GeneralPath perimetro = 
+				new GeneralPath(GeneralPath.WIND_EVEN_ODD, barrAng.numDatos());
+
+			Point2D.Double px=point2Pixel(ptoRF2Point(0));
+			perimetro.moveTo((float)px.getX(),(float)px.getY());
+			for(int i=1; i<barrAng.numDatos(); i++ ) {
+				px=point2Pixel(ptoRF2Point(i));
+				perimetro.lineTo((float)px.getX(),(float)px.getY());
+			}
+			g.draw(perimetro);
+			//Si esta seleccionado puntos, admeás ponemo una cruz en cada punto del barrido.
+			if(jcbMostrarPuntos.isSelected())
+				// Sacado de puntosArray(g,MI.Bi);
+				//pintamos los puntos que están dentro del recuadro
+				for(int i=1; i<barrAng.numDatos(); i++ ) {
+					Point2D pa=ptoRF2Point(i);
+					if(pa.getX()<=esqSI.getX() && pa.getX()>=esqID.getX()
+							&& pa.getY()<=esqSI.getY() && pa.getY()>=esqID.getY() ) {
+						//esta dentro del recuadro
+						Point2D pto=point2Pixel(pa);
+						int x=(int)pto.getX(), y=(int)pto.getY();
+						g.drawLine(x-tamCruz, y-tamCruz
+								, x+tamCruz, y+tamCruz);
+						g.drawLine(x-tamCruz, y+tamCruz
+								, x+tamCruz, y-tamCruz);
+					}
+			}
+		}
+		if(MI==null) return; //si no hay MI, no hacemos nada más 
 		g.setStroke(new BasicStroke());
 		//pintamos el borde derecho
 		g.setColor(Color.BLUE);
@@ -120,42 +153,9 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			GeneralPath gptr=pathArrayXY(MI.Bi);
 			if(gptr!=null) g.draw(gptr);
 		} else puntosArray(g,MI.Bi);
-		if(hayDatos) {
+		if(MI.hayDatos) {
 			//pixeles del pto actual se usa para trazar varias líneas
 			Point2D pxPtoActual=point2Pixel(MI.posActual);
-
-			{ //pintamos el barrido
-				g.setStroke(new BasicStroke());
-				g.setColor(Color.WHITE);
-				//pintamos rango de puntos en camino
-				GeneralPath perimetro = 
-					new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.barr.numDatos());
-
-				Point2D.Double px=point2Pixel(ptoRF2Point(0));
-				perimetro.moveTo((float)px.getX(),(float)px.getY());
-				for(int i=1; i<MI.barr.numDatos(); i++ ) {
-					px=point2Pixel(ptoRF2Point(i));
-					perimetro.lineTo((float)px.getX(),(float)px.getY());
-				}
-				g.draw(perimetro);
-				//Si esta seleccionado puntos, admeás ponemo una cruz en cada punto del barrido.
-				if(jcbMostrarPuntos.isSelected())
-					// Sacado de puntosArray(g,MI.Bi);
-					//pintamos los puntos que están dentro del recuadro
-					for(int i=1; i<MI.barr.numDatos(); i++ ) {
-						Point2D pa=ptoRF2Point(i);
-						if(pa.getX()<=esqSI.getX() && pa.getX()>=esqID.getX()
-								&& pa.getY()<=esqSI.getY() && pa.getY()>=esqID.getY() ) {
-							//esta dentro del recuadro
-							Point2D pto=point2Pixel(pa);
-							int x=(int)pto.getX(), y=(int)pto.getY();
-							g.drawLine(x-tamCruz, y-tamCruz
-									, x+tamCruz, y+tamCruz);
-							g.drawLine(x-tamCruz, y+tamCruz
-									, x+tamCruz, y-tamCruz);
-						}
-				}
-			}
 
 			//vemos si hay información de colisión
 			if(!Double.isNaN(MI.dist)) {
@@ -237,14 +237,22 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 	/**
 	 * Obtiene posición real de una medida del RF
 	 * @param i indice del barrido a considerar
-	 * @return posición real obtenidad a partir de posición actual y rumbo en {@link #MI}
+	 * @return posición real obtenidad a partir de posición actual y rumbo
 	 */
 	protected Point2D ptoRF2Point(int i) {
-		double ang=MI.Yaw+MI.barr.getAngulo(i)-Math.PI/2;
-		double dist=MI.barr.getDistancia(i);
-		return new Point2D.Double(MI.posActual[0]+dist*Math.cos(ang),MI.posActual[1]+dist*Math.sin(ang));
+		double ang=orientacionCoche+barrAng.getAngulo(i)-Math.PI/2;
+		double dist=barrAng.getDistancia(i);
+		return new Point2D.Double(posXCoche+dist*Math.cos(ang),posYCoche+dist*Math.sin(ang));
 	}
 
+	/** Fija posición, orientación y barrido y actualiza. Cualquiera de ellos puede ser null */
+	public void setPosicionYawBarrido(double[] pos, double yaw, BarridoAngular barr) {
+		if(pos!=null && pos.length<2 )
+			throw new IllegalArgumentException("La posición del coche debe ser array de, al menos, 2 valores");
+		situaCoche(pos[0], pos[1], yaw);
+		barrAng=barr;
+		actualiza();
+	}
 	
 
 	/**
@@ -252,9 +260,10 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 	 * Se debe invocar cuando {@link #MI} realiza un nuevo cálculo. 
 	 */
 	public void actualiza() {
-		hayDatos=true;
-		situaCoche(MI.posActual[0], MI.posActual[1], MI.Yaw);
-		if(Double.isNaN(MI.dist)) {
+		if(MI!=null && MI.hayDatos) {
+			situaCoche(MI.posActual[0], MI.posActual[1], MI.Yaw);
+		}
+		if(MI==null || Double.isNaN(MI.dist)) {
 			jlDistLin.setEnabled(false);
 			jlDistCam.setEnabled(false);
 			jlFuera.setEnabled(true);

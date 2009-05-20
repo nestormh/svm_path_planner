@@ -92,6 +92,8 @@ public class MiraObstaculo {
 	/** Si se encontró el segmento donde está el obstáculo */
 	boolean encontradoSegObs;
 
+	/** Si se ha invocado a mas cercano con datos válidos */
+	boolean hayDatos=false;
 
 	/**
 	 * Constructor necesita conocer la ruta que se va a seguir.
@@ -225,6 +227,7 @@ public class MiraObstaculo {
 		ColIzda=false; //colisión por la izda.
 		ColDecha=false; //colisión por la derecha
 		iAI=barrAct.numDatos()-1; iAD=0;
+		hayDatos=true;
 		double AngD=barrAct.getAngulo(iAD);
 		double AngI=barrAct.getAngulo(iAI);
 		double resAng=Math.toRadians(barr.incAngular*0.25);

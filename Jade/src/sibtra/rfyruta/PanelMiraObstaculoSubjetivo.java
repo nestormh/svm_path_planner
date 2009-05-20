@@ -35,7 +35,11 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 
 	private JLabel jlDistCamino;
 
-    /**
+	
+	/** Barrido angular de {@link #MI} o fijado expresamente */
+	protected BarridoAngular barrAng=null;
+
+	/**
      * Dado punto del mundo real lo pasa pixeles el coordenadas del RF.
      * @param ds
      * @return 
@@ -100,120 +104,119 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 
 	protected void cosasAPintar(Graphics g0) {
 		super.cosasAPintar(g0);
+		if(MI==null || MI.posActual==null)
+			return; //no hacemos nada
 		Graphics2D g=(Graphics2D)g0;
 		Point2D.Double pxCentro=point2Pixel(0.0,0.0);
-		if(MI!=null && MI.posActual!=null) {
-			//pintamos los bordes del camino
-			Point2D.Double pxB=null;
-			{//lado derecho
-				GeneralPath gpBd=new GeneralPath();
-				pxB=pointReal2pixel(MI.Bd[MI.iptoDini]);
-				gpBd.moveTo((float)pxB.getX(), (float)pxB.getY());
-				for(int i=MI.iptoDini+1; i<MI.Bd.length 
-				&& MiraObstaculo.distanciaPuntos(MI.Bd[i],MI.posActual)<distanciaVista; i++) {
-					pxB=pointReal2pixel(MI.Bd[i]);
-					gpBd.lineTo((float)pxB.getX(), (float)pxB.getY());
-				}
-				g.setColor(Color.BLUE);
-				g.draw(gpBd);
+		//pintamos los bordes del camino
+		Point2D.Double pxB=null;
+		{//lado derecho
+			GeneralPath gpBd=new GeneralPath();
+			pxB=pointReal2pixel(MI.Bd[MI.iptoDini]);
+			gpBd.moveTo((float)pxB.getX(), (float)pxB.getY());
+			for(int i=MI.iptoDini+1; i<MI.Bd.length 
+			&& MiraObstaculo.distanciaPuntos(MI.Bd[i],MI.posActual)<distanciaVista; i++) {
+				pxB=pointReal2pixel(MI.Bd[i]);
+				gpBd.lineTo((float)pxB.getX(), (float)pxB.getY());
 			}
-			{//lado izquierdo
-				GeneralPath gpBi=new GeneralPath();
-				pxB=pointReal2pixel(MI.Bi[MI.iptoIini]);
-				gpBi.moveTo((float)pxB.getX(), (float)pxB.getY());
-				for(int i=MI.iptoIini+1; i<MI.Bi.length 
-				&& MiraObstaculo.distanciaPuntos(MI.Bi[i],MI.posActual)<distanciaVista; i++) {
-					pxB=pointReal2pixel(MI.Bi[i]);
-					gpBi.lineTo((float)pxB.getX(), (float)pxB.getY());
-				}
-				g.setColor(Color.RED);
-				g.draw(gpBi);
-			}
-			{// trayectoria
-				GeneralPath gpTr=new GeneralPath();
-				pxB=pointReal2pixel(MI.Tr[MI.indiceCoche]);
-				gpTr.moveTo((float)pxB.getX(), (float)pxB.getY());
-				for(int i=MI.indiceCoche+1; i<MI.Tr.length 
-				&& MiraObstaculo.distanciaPuntos(MI.Tr[i],MI.posActual)<distanciaVista; i++) {
-					pxB=pointReal2pixel(MI.Tr[i]);
-					gpTr.lineTo((float)pxB.getX(), (float)pxB.getY());
-				}
-				g.setColor(Color.YELLOW);
-				g.draw(gpTr);
-			}
-			//pintamos la distancia mínima etc.
-			if(!java.lang.Double.isNaN(MI.dist))  {
-				g.setStroke(new BasicStroke(2));
-				g.setColor(Color.WHITE);
-				//los de la derecha e izquierda que están libres
-				g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
-				g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
-
-				if(MI.dist>0) {
-					//marcamos el pto mínimo
-					g.setStroke(new BasicStroke());
-					g.setColor(Color.RED);
-					g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
-							,point2Pixel(ptoRF2Point(MI.indMin))));
-
-					if(MI.iAD<MI.iAI) {
-						g.setStroke(new BasicStroke(3));
-						g.setColor(Color.RED);
-						//pintamos rango de puntos en camino
-						GeneralPath perimetro = 
-							new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
-
-						Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
-						perimetro.moveTo((float)px.getX(),(float)px.getY());
-						for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
-							px=point2Pixel(ptoRF2Point(i));
-							perimetro.lineTo((float)px.getX(),(float)px.getY());
-						}
-						g.draw(perimetro);
-					}
-				} else {
-					//tenemos libre marcamos punto libre
-					g.setStroke(new BasicStroke());
-					g.setColor(Color.GREEN);
-					g.draw(new Line2D.Double(pxCentro
-							,pointReal2pixel(MI.Tr[MI.iLibre])));
-				}
-				g.setStroke(new BasicStroke());
-				g.setColor(Color.GRAY);
-				
-				g.draw(new Line2D.Double(pxCentro
-						,pointReal2pixel(MI.Bd[MI.iptoDini])));
-				g.draw(new Line2D.Double(pxCentro
-						,pointReal2pixel(MI.Bd[MI.iptoD])));
-				g.draw(new Line2D.Double(pxCentro
-						,pointReal2pixel(MI.Bi[MI.iptoIini])));
-				g.draw(new Line2D.Double(pxCentro
-						,pointReal2pixel(MI.Bi[MI.iptoI])));
-
-				//Pintamos en verde la distancia sobre el camino
-				if(!Double.isInfinite(MI.distCamino) && MI.indSegObs<MI.Tr.length) {
-					//tenemos los índices
-					g.setStroke(new BasicStroke(3));
-					g.setColor(Color.GREEN);
-					GeneralPath gp=pathArrayXY(MI.Tr, MI.indiceCoche
-							, MI.indSegObs+1);
-					if(gp!=null)
-						g.draw(gp);
-					g.draw(new Line2D.Double(pointReal2pixel(MI.Bi[MI.indSegObs])
-							,pointReal2pixel(MI.Bd[MI.indSegObs])));
-					g.draw(new Line2D.Double(pointReal2pixel(MI.Bi[MI.indiceCoche])
-							,pointReal2pixel(MI.Bd[MI.indiceCoche])));
-					if(MI.indBarrSegObs!=Integer.MAX_VALUE) {
-						//marcamos pto barrido dió obstáculo camino más cercano
-						g.setStroke(new BasicStroke());
-						g.draw(new Line2D.Double(pxCentro
-								,point2Pixel(ptoRF2Point(MI.indBarrSegObs))));
-					}
-				}
-
-			}
+			g.setColor(Color.BLUE);
+			g.draw(gpBd);
 		}
+		{//lado izquierdo
+			GeneralPath gpBi=new GeneralPath();
+			pxB=pointReal2pixel(MI.Bi[MI.iptoIini]);
+			gpBi.moveTo((float)pxB.getX(), (float)pxB.getY());
+			for(int i=MI.iptoIini+1; i<MI.Bi.length 
+			&& MiraObstaculo.distanciaPuntos(MI.Bi[i],MI.posActual)<distanciaVista; i++) {
+				pxB=pointReal2pixel(MI.Bi[i]);
+				gpBi.lineTo((float)pxB.getX(), (float)pxB.getY());
+			}
+			g.setColor(Color.RED);
+			g.draw(gpBi);
+		}
+		{// trayectoria
+			GeneralPath gpTr=new GeneralPath();
+			pxB=pointReal2pixel(MI.Tr[MI.indiceCoche]);
+			gpTr.moveTo((float)pxB.getX(), (float)pxB.getY());
+			for(int i=MI.indiceCoche+1; i<MI.Tr.length 
+			&& MiraObstaculo.distanciaPuntos(MI.Tr[i],MI.posActual)<distanciaVista; i++) {
+				pxB=pointReal2pixel(MI.Tr[i]);
+				gpTr.lineTo((float)pxB.getX(), (float)pxB.getY());
+			}
+			g.setColor(Color.YELLOW);
+			g.draw(gpTr);
+		}
+		//pintamos la distancia mínima etc.
+		if(MI.hayDatos && !java.lang.Double.isNaN(MI.dist))  {
+			g.setStroke(new BasicStroke(2));
+			g.setColor(Color.WHITE);
+			//los de la derecha e izquierda que están libres
+			g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
+			g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
 
+			if(MI.dist>0) {
+				//marcamos el pto mínimo
+				g.setStroke(new BasicStroke());
+				g.setColor(Color.RED);
+				g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
+						,point2Pixel(ptoRF2Point(MI.indMin))));
+
+				if(MI.iAD<MI.iAI) {
+					g.setStroke(new BasicStroke(3));
+					g.setColor(Color.RED);
+					//pintamos rango de puntos en camino
+					GeneralPath perimetro = 
+						new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
+
+					Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
+					perimetro.moveTo((float)px.getX(),(float)px.getY());
+					for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
+						px=point2Pixel(ptoRF2Point(i));
+						perimetro.lineTo((float)px.getX(),(float)px.getY());
+					}
+					g.draw(perimetro);
+				}
+			} else {
+				//tenemos libre marcamos punto libre
+				g.setStroke(new BasicStroke());
+				g.setColor(Color.GREEN);
+				g.draw(new Line2D.Double(pxCentro
+						,pointReal2pixel(MI.Tr[MI.iLibre])));
+			}
+			g.setStroke(new BasicStroke());
+			g.setColor(Color.GRAY);
+
+			g.draw(new Line2D.Double(pxCentro
+					,pointReal2pixel(MI.Bd[MI.iptoDini])));
+			g.draw(new Line2D.Double(pxCentro
+					,pointReal2pixel(MI.Bd[MI.iptoD])));
+			g.draw(new Line2D.Double(pxCentro
+					,pointReal2pixel(MI.Bi[MI.iptoIini])));
+			g.draw(new Line2D.Double(pxCentro
+					,pointReal2pixel(MI.Bi[MI.iptoI])));
+
+			//Pintamos en verde la distancia sobre el camino
+			if(!Double.isInfinite(MI.distCamino) && MI.indSegObs<MI.Tr.length) {
+				//tenemos los índices
+				g.setStroke(new BasicStroke(3));
+				g.setColor(Color.GREEN);
+				GeneralPath gp=pathArrayXY(MI.Tr, MI.indiceCoche
+						, MI.indSegObs+1);
+				if(gp!=null)
+					g.draw(gp);
+				g.draw(new Line2D.Double(pointReal2pixel(MI.Bi[MI.indSegObs])
+						,pointReal2pixel(MI.Bd[MI.indSegObs])));
+				g.draw(new Line2D.Double(pointReal2pixel(MI.Bi[MI.indiceCoche])
+						,pointReal2pixel(MI.Bd[MI.indiceCoche])));
+				if(MI.indBarrSegObs!=Integer.MAX_VALUE) {
+					//marcamos pto barrido dió obstáculo camino más cercano
+					g.setStroke(new BasicStroke());
+					g.draw(new Line2D.Double(pxCentro
+							,point2Pixel(ptoRF2Point(MI.indBarrSegObs))));
+				}
+			}
+
+		}
 	}
 
 
@@ -240,18 +243,22 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		return perimetro;
 	}
 
-	
+	/** Fija el nuevo objeto {@link #MI} y actualiza el panel */
+	public void setMiraObstaculo(MiraObstaculo mi) {
+		MI=mi;
+		actualiza();
+	}
+		
 	/**
 	 * Para cambiar el barrido que se está mostrando.
 	 * y actualiza la presentación
 	 */
 	public void actualiza() {
-		if(MI==null)
-			return;
-		if(java.lang.Double.isNaN(MI.dist)) {
+		if(MI!=null) barrAng=MI.barr;
+		if(MI==null || java.lang.Double.isNaN(MI.dist)) {
 			jlDistLin.setText("Fuera");
 			jlDistLin.setForeground(Color.RED);
-		} else 
+		} else  {
 			if (MI.dist>0) {
 				jlDistLin.setText(String.format("Lineal %6.3f m", MI.dist));
 				jlDistLin.setForeground(Color.RED);
@@ -259,14 +266,14 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 				jlDistLin.setText(String.format("Lineal %6.3f m", -MI.dist));
 				jlDistLin.setForeground(Color.GREEN);
 			}
+			if(!Double.isInfinite(MI.distCamino)) {
+				jlDistCamino.setText(String.format("Camino %6.3f m", MI.distCamino));
+				jlDistCamino.setEnabled(true);
+			}
+		}
 		jlDistLin.setEnabled(true);
 
-		if(!Double.isInfinite(MI.distCamino)) {
-			jlDistCamino.setText(String.format("Camino %6.3f m", MI.distCamino));
-			jlDistCamino.setEnabled(true);
-		}
-		
-		setBarrido(MI.barr);
+		super.setBarrido(MI.barr);
 		repaint();
 	}
 
