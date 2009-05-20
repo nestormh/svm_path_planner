@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,7 +24,6 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 
 import sibtra.util.SalvaMATv4;
 
@@ -78,7 +78,23 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 			
 			//Donde seleccionar los loggers
 			modeloTL=new ModeloTablaLoggers();
-			tablaLoggers=new JTable(modeloTL);	
+			tablaLoggers=new JTable(modeloTL) {
+				/** Saca descripcion en columna del nombre */
+		        public String getToolTipText(MouseEvent e) {
+		            String tip = null;
+		            java.awt.Point p = e.getPoint();
+		            int rowIndex = rowAtPoint(p);
+		            int colIndex = columnAtPoint(p);
+		            int realColumnIndex = convertColumnIndexToModel(colIndex);
+
+		            if (realColumnIndex == COL_NOM) { //Columna del nombre
+		                tip = modeloTL.getDescripcion(rowIndex);
+		            } else { //another column
+		                tip = super.getToolTipText(e);
+		            }
+		            return tip;
+		        }				
+			};
 	        tablaLoggers.setPreferredScrollableViewportSize(new Dimension(500, 70));
 //	        table.setAutoCreateRowSorter(true);
 	        //fijamos tamaños preferidos
@@ -157,7 +173,7 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
     		}
     	}
     	
-        public String getColumnName(int col) {
+		public String getColumnName(int col) {
             return nombColumnas[col].toString();
         }
         public int getRowCount() { return LoggerFactory.vecLoggers.size(); }
@@ -269,6 +285,10 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
     		
     		return largo*10;
     	}
+
+        public String getDescripcion(int row) {
+			return vecLA.get(row).la.descripcion;
+		}
 
     }
 	public void actionPerformed(ActionEvent ae) {

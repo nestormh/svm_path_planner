@@ -286,23 +286,20 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 				cosasAPintar(g0);
 			}
 		};
-//		setLayout(new BorderLayout(3,3));
 		setLayout(new BoxLayout(this,BoxLayout.PAGE_AXIS));
-//		JPanelGrafico.setMinimumSize(new Dimension(400,400));
+		JPanelGrafico.setMinimumSize(new Dimension(50,50));
 		//JPanelGrafico.setSize(new Dimension(400,400));
+		//para que se expanda todo lo que pueda en el boxLayout
+		JPanelGrafico.setPreferredSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
+//		JPanelGrafico.setMaximumSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
 		JPanelGrafico.setBackground(Color.BLACK);
 		JPanelGrafico.addMouseListener(this);
 		JPanelGrafico.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		
-		add(JPanelGrafico,BorderLayout.CENTER);
-//		add(JPanelGrafico);
-		
-		JPanelGrafico.setPreferredSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
-		JPanelGrafico.setMaximumSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
-
+		add(JPanelGrafico);
 		
 		{
-			jpSur=new JPanel();
+			jpSur=new PanelFlow();
 			jpSur.setLayout(new FlowLayout(FlowLayout.LEFT,3,3));
 			
 			jpSur.add(new JLabel("Escala"));
@@ -319,13 +316,11 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 			jcbRejilla.addActionListener(this);  //solo para que se repinte si cambia
 			jpSur.add(jcbRejilla);
 			
+			//Para depurar los tamaños
 //			jpSur.setBorder(BorderFactory.createCompoundBorder(
 //	                   BorderFactory.createLineBorder(Color.red),
 //	                   jpSur.getBorder()));
 
-			jpSur.setMinimumSize(new Dimension(Short.MAX_VALUE,35));
-
-			//			add(jpSur,BorderLayout.SOUTH);
 			add(jpSur);
 		}
 		

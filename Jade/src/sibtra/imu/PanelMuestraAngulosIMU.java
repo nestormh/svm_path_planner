@@ -23,7 +23,7 @@ public class PanelMuestraAngulosIMU extends PanelDatos implements IMUEventListen
 
 	public PanelMuestraAngulosIMU() {
 		super();
-		setLayout(new GridLayout(0,3)); //empezamos con 3 columnas
+		setLayout(new GridLayout(0,2)); //empezamos con 3 columnas
 		//roll
 		LabelDato lda=new LabelDatoFormato("??:??:??.??",AngulosIMU.class,"getRoll","%+10.4f");
 		añadeAPanel(lda,"Roll");
