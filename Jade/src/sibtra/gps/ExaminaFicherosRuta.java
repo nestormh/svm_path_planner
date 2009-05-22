@@ -74,6 +74,7 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
 		setVisible(true);
+		setBounds(0, 384, 1024, 742);
 	}
         public Ruta getRutaTemporal(){
             return rutaTemporal;

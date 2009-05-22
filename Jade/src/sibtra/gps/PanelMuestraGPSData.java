@@ -142,6 +142,9 @@ public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener 
 
 		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getDesvAltura","%+7.3f")
 		, "Desv. Altura");
+
+		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getVelocidad","%+7.3f")
+		, "Velocidad");
 //		Yaw
 		añadeAPanel(new LabelDato("+????.??") {
 			public void Actualiza(Object oa, boolean hayCambio) {

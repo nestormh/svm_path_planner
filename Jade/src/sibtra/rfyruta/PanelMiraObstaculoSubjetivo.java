@@ -273,7 +273,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		}
 		jlDistLin.setEnabled(true);
 
-		super.setBarrido(MI.barr);
+		super.setBarrido(barrAng);
 		repaint();
 	}
 

@@ -51,6 +51,8 @@ public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		pack();
 		setVisible(true);
+        setBounds(0, 384, 1024, 742);
+
 	}
 
 	class ThreadActulizacion extends Thread {

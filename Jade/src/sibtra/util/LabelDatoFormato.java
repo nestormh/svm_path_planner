@@ -57,8 +57,10 @@ public class LabelDatoFormato extends LabelDato {
 		if(hayCambio) {
 			try {
 				if (objeto.getClass()!=clase) {
-					throw new IllegalArgumentException("El objeto pasado no es de la clase "
-							+clase.getCanonicalName());
+					//TODO problemas en panel GPS Triump
+//					throw new IllegalArgumentException("El objeto pasado no es de la clase "
+//							+clase.getCanonicalName());
+					return;
 				}
 				setText(String.format(formato, metodo.invoke(objeto, (Object[])null)));
 			} catch (IllegalArgumentException e) {

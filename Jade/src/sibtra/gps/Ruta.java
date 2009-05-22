@@ -428,13 +428,13 @@ public class Ruta implements Serializable {
 	public double[][] toTr(double distMax) {
 		esRutaCerrada();
 		int ptosAñadidos = calculaPuntosAAñadir(distMax);
-		System.out.println("Puntos añadidos " + ptosAñadidos);
-		System.out.println("Indice final " + indiceFinal);
-		System.out.println("numero de puntos en el vector original " + getNumPuntos());
+//		System.out.println("Puntos añadidos " + ptosAñadidos);
+//		System.out.println("Indice final " + indiceFinal);
+//		System.out.println("numero de puntos en el vector original " + getNumPuntos());
 		double desvMagnética = getDesviacionM();
 		int L = indiceFinal+1;
 		int ptosTotales = L+ptosAñadidos;
-		System.out.println("Puntos Totales " + ptosTotales);
+//		System.out.println("Puntos Totales " + ptosTotales);
 		double[][] rutaRellena = new double[ptosTotales][4];
 		GPSData ptoC;
 		int i = 0;       
@@ -481,7 +481,7 @@ public class Ruta implements Serializable {
 
 			//hay que rellenar con puntos intermedios (o no si sale 0)
 			int numPuntosIntermedios=(int) Math.ceil(separacion / distMax)-1;
-			System.out.print(numPuntosIntermedios+" ");
+//			System.out.print(numPuntosIntermedios+" ");
 
 
 			double dtita = UtilCalculos.normalizaAngulo(titaB - titaA);  //variación en angulo  en el tramo
@@ -503,29 +503,31 @@ public class Ruta implements Serializable {
 		}
 		if (!esCerrada) {
 			//tenemos que añadir el último punto.
-			System.out.println("La ruta está abierta");
+//			System.out.println("La ruta está abierta");
 			//apuntamos el punto actual.
 			rutaRellena[indice][0] = ptoA.getXLocal();
 			rutaRellena[indice][1] = ptoA.getYLocal();                
 			rutaRellena[indice][2] = titaA + desvMagnética;
 			rutaRellena[indice][3] = velA;
 
-			//se hace un fade out de la velocidad
-			double dist = 0;
-			int j;
-			for(j = ptosTotales-2;dist < distFrenado;j--){            		            	
-				double dx = rutaRellena[j][0] - rutaRellena[j+1][0];
-				double dy = rutaRellena[j][1] - rutaRellena[j+1][1];
-				dist += Math.sqrt(dx*dx + dy*dy);
-				System.out.println("La distancia medida es "+dist);            		
+			//se hace un fade out de la velocidad si hay mas de 4 puntos ??
+			if (ptosTotales> 4) {
+				double dist = 0;
+				int j;
+				for(j = ptosTotales-2;dist < distFrenado && j>0;j--){            		            	
+					double dx = rutaRellena[j][0] - rutaRellena[j+1][0];
+					double dy = rutaRellena[j][1] - rutaRellena[j+1][1];
+					dist += Math.sqrt(dx*dx + dy*dy);
+//					System.out.println("La distancia medida es "+dist);            		
+				}
+				double incremento  = rutaRellena[j][3]/(ptosTotales-j-1);            	            
+				double velPunto=0;
+				for (int k=ptosTotales-1;k>j;k--){
+					rutaRellena[k][3] = velPunto;
+					velPunto += incremento;
+//					System.out.println("La velocidad del punto " + k+ " es "+ rutaRellena[k][3]);
+				}
 			}
-			double incremento  = rutaRellena[j][3]/(ptosTotales-j-1);            	            
-			double velPunto=0;
-			for (int k=ptosTotales-1;k>j;k--){
-				rutaRellena[k][3] = velPunto;
-				velPunto += incremento;
-				System.out.println("La velocidad del punto " + k+ " es "+ rutaRellena[k][3]);
-			}            	
 		}            
 		return rutaRellena;
 	}
@@ -574,7 +576,7 @@ public class Ruta implements Serializable {
 			GPSData ptoB = getPunto(i);
 			separacion = distEntrePuntos(ptoA, ptoB);                    
 			numPuntosIntermedios = (int)Math.ceil(separacion/distMax)-1;
-			System.out.print(numPuntosIntermedios+" ");
+//			System.out.print(numPuntosIntermedios+" ");
 			puntosAAñadir +=  numPuntosIntermedios;                   
 		}
 		if (esCerrada){
@@ -582,10 +584,10 @@ public class Ruta implements Serializable {
 			GPSData ptoB = getPunto(0);                                
 			separacion = distEntrePuntos(ptoA, ptoB);          
 			numPuntosIntermedios = (int)Math.ceil(separacion/distMax)-1;
-			System.out.print(numPuntosIntermedios+" ");
+//			System.out.print(numPuntosIntermedios+" ");
 			puntosAAñadir +=  numPuntosIntermedios;
 		}
-		System.out.println(" ");
+//		System.out.println(" ");
 		return puntosAAñadir;
 	}
 	
@@ -620,12 +622,12 @@ public class Ruta implements Serializable {
 		if (indiceAux==1) {
 			esCerrada = false;
 			indiceFinal = getNumPuntos()-1;
-			System.out.println("La ruta está abierta de verdad");        		
+//			System.out.println("La ruta está abierta de verdad");        		
 		} else if (distMin < umbral){
 			esCerrada = true;
 			boolean encontrado = false;
 			indiceFinal = indiceAux;
-			System.out.println("La ruta está cerrada");        		
+//			System.out.println("La ruta está cerrada");        		
 			if (esCerrada){
 				for (int j=indiceFinal;encontrado!=true;j--){
 					GPSData ptoInicio = getPunto(0);
@@ -643,7 +645,7 @@ public class Ruta implements Serializable {
 		else {
 			esCerrada = false;
 			indiceFinal = getNumPuntos()-1;
-			System.out.println("La ruta está abierta");
+//			System.out.println("La ruta está abierta");
 		}
 		return esCerrada;        
 	}
@@ -664,11 +666,11 @@ public class Ruta implements Serializable {
 	 * */
 	public double distEntrePuntos(int ind1, int ind2){
 		double dist=Double.POSITIVE_INFINITY;
-		System.out.println(ind1 + " >? " + getNumPuntos());
+//		System.out.println(ind1 + " >? " + getNumPuntos());
 		GPSData ptoA = getPunto(ind1);
 		GPSData ptoB = getPunto(ind2);
-		System.out.println(ptoA.getXLocal());
-		System.out.println(ptoB.getXLocal());
+//		System.out.println(ptoA.getXLocal());
+//		System.out.println(ptoB.getXLocal());
 		double dx = ptoB.getXLocal()-ptoA.getXLocal();
 		double dy = ptoB.getYLocal()-ptoA.getYLocal();                    
 		dist = Math.sqrt(dx*dx + dy*dy);

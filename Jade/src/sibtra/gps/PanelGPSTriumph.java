@@ -40,15 +40,15 @@ public class PanelGPSTriumph extends PanelMuestraGPSData {
 	}
 
 	public void actualizaGPS(GPSData ngpsdt) {
+		//TODO actualizacion ldCAL etc.
 		actualizaPunto(ngpsdt);
 		if(cuentaEnlaceUltimo!=gpsCT.getNumOKLink()) {
-			//TODO pueden no ser necesarios
-			ldCal.setEnabled(true);
-			ldOK.setEnabled(true);
+			ldCal.Actualiza(gpsCT,true);
+			ldOK.Actualiza(gpsCT,true);
 			cuentaEnlaceUltimo=gpsCT.getNumOKLink();
 		} else {
-			ldCal.setEnabled(false);
-			ldOK.setEnabled(false);
+			ldCal.Actualiza(gpsCT,false);
+			ldOK.Actualiza(gpsCT,false);
 		}
 	}
 

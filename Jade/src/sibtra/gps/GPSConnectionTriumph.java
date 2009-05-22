@@ -232,7 +232,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 			} catch (IOException ioe) {
 				log(ERR,"\nError al recibir los datos");
 			} catch (Exception ex) {
-				log(ERR,"\nGPSConnection Error al procesar >"+buff+"< : " + ex.getMessage());
+				log(ERR,"\nGPSConnectionTriump Error al procesar >"+buff+"< : " + ex.getMessage());
 				ex.printStackTrace();
 				indIni=-1;
 			}
