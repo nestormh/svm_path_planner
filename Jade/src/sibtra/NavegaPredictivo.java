@@ -38,6 +38,7 @@ import sibtra.imu.AngulosIMU;
 import sibtra.imu.ConexionSerialIMU;
 import sibtra.imu.PanelMuestraAngulosIMU;
 import sibtra.lms.BarridoAngular;
+import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.log.PanelLoggers;
 import sibtra.predictivo.Coche;
@@ -142,49 +143,48 @@ public class NavegaPredictivo implements ActionListener {
         modCoche = new Coche();
 
         //conexión de la IMU
-        System.out.println("Abrimos conexión IMU");
+        System.out.println("Abrimos conexión IMU en "+args[1]);
         conIMU = new ConexionSerialIMU();
-//        if (!conIMU.ConectaPuerto(args[1], 5)) {
-//            System.err.println("Problema en conexión serial con la IMU");
-//            System.exit(1);
-//        }
+        if (!conIMU.ConectaPuerto(args[1], 5)) {
+            System.err.println("Problema en conexión serial con la IMU");
+            System.exit(1);
+        }
 
         //comunicación con GPS
-        System.out.println("Abrimos conexión GPS");
+        System.out.println("Abrimos conexión GPS en "+args[0]);
         try {
-//            conGPS = new GPSConnectionTriumph(args[0]);
+            conGPS = new GPSConnectionTriumph(args[0]);
         	conGPS = new GPSConnectionTriumph();
         } catch (Exception e) {
             System.err.println("Problema a crear GPSConnection:" + e.getMessage());
-//            System.exit(1);
+            System.exit(1);
         }
-//        if (conGPS == null) {
-//            System.err.println("No se obtuvo GPSConnection");
-//            System.exit(1);
-//        }
-//        conGPS.setCsIMU(conIMU);
+        if (conGPS == null) {
+            System.err.println("No se obtuvo GPSConnection");
+            System.exit(1);
+        }
+        conGPS.setCsIMU(conIMU);
 
 
         //Conectamos a RF
-//        System.out.println("Abrimos conexión LMS");
-//        try {
-//            manLMS = new ManejaLMS(args[2]);
-//            manLMS.setDistanciaMaxima(80);
-//            manLMS.setResolucionAngular((short)100);
-//            manLMS.CambiaAModo25();
-//			manLMS.pideBarridoContinuo((short)0, (short)180, (short)1);
-//
-//        } catch (LMSException e) {
-//            System.err.println("No fue posible conectar o configurar RF");
-//        }
+        System.out.println("Abrimos conexión LMS en "+args[2]);
+        try {
+            manLMS = new ManejaLMS(args[2]);
+            manLMS.setDistanciaMaxima(80);
+            manLMS.setResolucionAngular((short)100);
+            manLMS.CambiaAModo25();
+
+        } catch (LMSException e) {
+            System.err.println("No fue posible conectar o configurar RF");
+        }
 
         //Conectamos Carro
-        System.out.println("Abrimos conexión al Carro");
+        System.out.println("Abrimos conexión al Carro en "+args[3]);
         contCarro = new ControlCarro(args[3]);
 
-//        if (contCarro.isOpen() == false) {
-//            System.err.println("No se obtuvo Conexion al Carro");            
-//        }
+        if (contCarro.isOpen() == false) {
+            System.err.println("No se obtuvo Conexion al Carro");            
+        }
 
         //elegir fichero
         fc = new JFileChooser(new File("./Rutas"));
@@ -267,11 +267,11 @@ public class NavegaPredictivo implements ActionListener {
         tbPanel.add("Obstaculo", pmo);
         {
         	short distMaxRF=80; //valor por defecto
-//        	try {
-//        		distMaxRF=(short)manLMS.getDistanciaMaxima();
-//        	} catch (LMSException e) {
-//        		System.err.println("Problema al obtener distancia maxima configurada en RF");
-//        	}
+        	try {
+        		distMaxRF=(short)manLMS.getDistanciaMaxima();
+        	} catch (LMSException e) {
+        		System.err.println("Problema al obtener distancia maxima configurada en RF");
+        	}
         	pmoS=new PanelMiraObstaculoSubjetivo(mi,distMaxRF);
         }
         tbPanel.add("Subjetivo",pmoS);
@@ -389,6 +389,43 @@ public class NavegaPredictivo implements ActionListener {
             }
         };
         thRefresco.start();
+        
+        //thread para refrescar ventana del RF y calcular distancia al obstaculo
+        Thread thRF = new Thread() {
+    		public void run() {
+    			BarridoAngular ba=null;
+    			while (true) {
+    				ba=manLMS.esperaNuevoBarrido(ba);
+    				GPSData pa = conGPS.getPuntoActualTemporal();                            
+    	            double[] ptoAct=null;
+    	            double angAct=Double.NaN;
+    	            if(pa!=null) {
+    	             ptoAct= new double[2];
+    	             ptoAct[0]=pa.getXLocal(); ptoAct[1]=pa.getYLocal();
+    	             angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
+    	            }
+    				if (jcbUsarRF.isSelected() &&
+    						// esto es redundante, ya que no debería activarse jcbUsarRF si ruta es null
+    						rutaEspacial!=null ) {
+    					//calculamos distancia a obstáculo más cercano
+    					distRF = mi.masCercano(ptoAct, angAct, ba);
+    				} else {
+    					//ponemos posición y barrido
+    					if(ptoAct!=null) pmo.setPosicionYawBarrido(ptoAct, angAct, ba);
+    					pmoS.setBarrido(ba);
+    				}
+    				//actualizamos paneles aunque no haya mi
+    				pmo.actualiza();
+    				pmoS.actualiza();
+    			}
+    		}
+    	};
+    	try {
+		manLMS.pideBarridoContinuo((short)0, (short)180, (short)1);
+    	} catch (LMSException e) {
+            System.err.println("No fue posible Arrancar barrido continuo RF");
+		}
+        thRF.start();
     }
 
     public void SacaDimensiones() {
@@ -635,34 +672,6 @@ public class NavegaPredictivo implements ActionListener {
     /** Método que ejecuta cada {@link #periodoMuestreoMili} bucle de control del coche mirando los obstáculos con el RF 
      */
     public void camina() {
-    	//TODO poner este thread para que se arranque en el constructor
-    	Thread thRF = new Thread() {
-
-    		public void run() {
-    			BarridoAngular ba=null;
-    			while (true) {
-    				ba=manLMS.esperaNuevoBarrido(ba);
-    				GPSData pa = conGPS.getPuntoActualTemporal();                            
-    				double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
-    				double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
-    				if (jcbUsarRF.isSelected() &&
-    						// esto es redundante, ya que no debería activarse jcbUsarRF si ruta es null
-    						rutaEspacial!=null ) {
-    					//calculamos distancia a obstáculo más cercano
-    					distRF = mi.masCercano(ptoAct, angAct, ba);
-    				} else {
-    					//ponemos posición y barrido
-    					pmo.setPosicionYawBarrido(ptoAct, angAct, ba);
-    					pmoS.setBarrido(ba);
-    				}
-    				//actualizamos paneles aunque no haya mi
-    				pmo.actualiza();
-    				pmoS.actualiza();
-    			}
-    		}
-    	};
-//        thRF.start();
-        
         double velocidadActual;        
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         long tSig;
@@ -671,16 +680,15 @@ public class NavegaPredictivo implements ActionListener {
             tSig = System.currentTimeMillis() + periodoMuestreoMili;
             //Calculamos el comando            	
             GPSData pa = conGPS.getPuntoActualTemporal();
-            double[] ptoAct = {pa.getXLocal(), pa.getYLocal()};
-            double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
+            double[] ptoAct=null;
+            double angAct=Double.NaN;
+            if(pa!=null) {
+             ptoAct= new double[2];
+             ptoAct[0]=pa.getXLocal(); ptoAct[1]=pa.getYLocal();
+             angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
+            }
             if (navegando) { //sólo se debe activar si hay ruta 
 
-//                GPSData centroactual = conGPS.getBufferEspacial().getCentro();
-//                if (centroactual.getAltura()!=centroToTr.getAltura()
-//                		|| centroactual.getLatitud()!=centroToTr.getLatitud()
-//                		|| centroactual.getLongitud()!=centroToTr.getLongitud())
-//                	System.err.println("El centro es diferente!!! " + centroToTr 
-//                			+"!= "+  conGPS.getBufferEspacial().getCentro());
                 double volante = contCarro.getAnguloVolante();
                 // Con esta linea realimentamos la información de los sensores al modelo
                 // se puede incluir tambien la posicion del volante añadiendo el parámetro
@@ -728,7 +736,7 @@ public class NavegaPredictivo implements ActionListener {
                 modCoche.calculaEvolucion(comandoVolante, velocidadActual, periodoMuestreoMili / 1000);
             } else {
             	//Le decimos almenos donde está el coche
-            	pmp.situaCoche(ptoAct[0], ptoAct[1], angAct);
+            	if(ptoAct!=null) pmp.situaCoche(ptoAct[0], ptoAct[1], angAct);
             }
             pmp.actualiza();
 
@@ -764,7 +772,7 @@ public class NavegaPredictivo implements ActionListener {
             puertos = args;
         }
         NavegaPredictivo na = new NavegaPredictivo(puertos);
-//        na.camina();
+        na.camina();
     }
 
 
