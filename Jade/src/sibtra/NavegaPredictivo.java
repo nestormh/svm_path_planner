@@ -278,13 +278,10 @@ public class NavegaPredictivo implements ActionListener {
         	short distMaxRF=80; //valor por defecto
         	try {
         		distMaxRF=(short)manLMS.getDistanciaMaxima();
-
-        		pmoS=new PanelMiraObstaculoSubjetivo(mi,distMaxRF);
-
-        		pmoS.setZona(manLMS.recibeZona((byte)0, true));
+            	pmoS=new PanelMiraObstaculoSubjetivo(mi,distMaxRF);
+    			pmoS.setZona(manLMS.recibeZona((byte)0, true));
     			pmoS.setZona(manLMS.recibeZona((byte)1, true));
     			pmoS.setZona(manLMS.recibeZona((byte)2, true));
-
         	} catch (LMSException e) {
         		System.err.println("Problema al obtener distancia maxima o zonas en RF");
         	}
@@ -441,10 +438,14 @@ public class NavegaPredictivo implements ActionListener {
     		}
     	};
     	try {
-		manLMS.pideBarridoContinuo((short)0, (short)180, (short)1);
+    		manLMS.pideBarridoContinuo((short)0, (short)180, (short)1);
+    		while(!manLMS.yaRecibiendoBarridoContinuo())
+    			try {Thread.sleep(1000);} catch (Exception e) {}
     	} catch (LMSException e) {
             System.err.println("No fue posible Arrancar barrido continuo RF");
+            System.exit(1);
 		}
+    	System.out.println("Comenzó recepción barrido continuo. Lanzamos en thread para el RF");
         thRF.start();
     }
 
