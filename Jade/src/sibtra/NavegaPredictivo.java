@@ -401,7 +401,12 @@ public class NavegaPredictivo implements ActionListener {
     		public void run() {
     			BarridoAngular ba=null;
     			while (true) {
+    				long t0=System.currentTimeMillis();
     				ba=manLMS.esperaNuevoBarrido(ba);
+    				long dt=System.currentTimeMillis()-t0;
+    				if(dt>32) {
+    					System.err.println("\nNuevo barrido tardó "+dt);
+    				}
     				GPSData pa = conGPS.getPuntoActualTemporal();                            
     	            double[] ptoAct=null;
     	            double angAct=Double.NaN;

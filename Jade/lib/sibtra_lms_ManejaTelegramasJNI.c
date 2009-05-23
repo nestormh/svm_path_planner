@@ -2,7 +2,7 @@
 /* Si queremos mensajes de depuración, descomentar */
 /*#define  INFO*/
 /* Si queremos los mensaje de error, descomentar la siguiente */
-/*#define ERR */
+/*#define ERR*/ 
 
 #include "sibtra_lms_ManejaTelegramasJNI.h"
 
@@ -242,16 +242,18 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   unsigned char *buf;
   int res;
   int len;  /*valor campo longitud*/
+  unsigned short crcCal; //CRC calculado para el mensaje
   jbyteArray jarray;
 
   if(!Inicializado)
     return JNI_FALSE;
 
+  while(1) { //nos quedaremos mientras se consiga mensaje válido o haya timeout
   	buf=Buffer;
 	buf[0]=0x06;
 
-	//Buffer para quitar los posibles confirmaciones iniciales
-  while((buf[0]==0x15) || (buf[0]==0x06) ) {
+	//Esperamos a lo que pueda ser comienzo de mensaje
+  while(buf[0]!=0x02)  {
 		res=LeeTimeOut(fdSer,buf,1,milisTOut);   
 	  	if(res!=1) {
 #ifdef ERR
@@ -270,10 +272,12 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
 	    continue;
 	  }
   }
+/*
   if(buf[0]!=0x02) {
     ERROR("\n\t\t\tJNI: NO es comienzo de telegrama: ALGO RARO");
     return JNI_FALSE;
   }
+  */
 #ifdef INFO
   fprintf(stdout,"\n\t\t\tJNI:  STX: %02hhX;",buf[0]);
   fflush(stdout);
@@ -303,6 +307,11 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   fprintf(stdout,"\t\t\tJNI:  Len: %02hhX%02hhX (%d)",buf[3],buf[2],len);
   fflush(stdout);
 #endif
+
+	if((len+6)>TAMBUF) {
+		ERROR("\n\t\t\tJNI: Longitud calculada es muy grande");
+		continue;  //volvemos a intentarlo desde el principio
+	}
 
   /*Conseguimos el resto del mensaje*/
   while(res<(len+6)) {
@@ -352,13 +361,24 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   }
 #endif
 
+  //comprobamos el CheckSum
+  crcCal=CalculaCRC(buf,res-2);
+  if(crcCal!=(unsigned short)((buf[res-1]<<8)|buf[res-2])) {
+#ifdef ERR
+	    fprintf(stderr,"\n\t\t\tJNI: CRC resultó erroneo %02hhX%02hhX != %04hX"
+	      ,buf[res-1],buf[res-2],crcCal);
+	    fflush(stderr);
+#endif
+	continue; //mensaje erroneo, volvemos al principio
+  }
+
 
   /* Creamos el byte[] para depositar mensaje */
   jarray = (*env)->NewByteArray(env,len);
   (*env)->SetByteArrayRegion(env,jarray, 0, len, buf+4);
 
   return jarray;
-
+  } //cerramos while(1);
 
 }
 
