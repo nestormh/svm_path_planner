@@ -35,9 +35,6 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 
 	private JLabel jlDistCamino;
 
-	
-	/** Barrido angular de {@link #MI} o fijado expresamente */
-	protected BarridoAngular barrAng=null;
 
 	/**
      * Dado punto del mundo real lo pasa pixeles el coordenadas del RF.
@@ -254,7 +251,8 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 	 * y actualiza la presentación
 	 */
 	public void actualiza() {
-		if(MI!=null) barrAng=MI.barr;
+		if(MI!=null) 		
+			super.setBarrido(MI.barr);
 		if(MI==null || java.lang.Double.isNaN(MI.dist)) {
 			jlDistLin.setText("Fuera");
 			jlDistLin.setForeground(Color.RED);
@@ -273,7 +271,6 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		}
 		jlDistLin.setEnabled(true);
 
-		super.setBarrido(barrAng);
 		repaint();
 	}
 

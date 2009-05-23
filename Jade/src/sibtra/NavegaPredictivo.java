@@ -269,10 +269,16 @@ public class NavegaPredictivo implements ActionListener {
         	short distMaxRF=80; //valor por defecto
         	try {
         		distMaxRF=(short)manLMS.getDistanciaMaxima();
+
+        		pmoS=new PanelMiraObstaculoSubjetivo(mi,distMaxRF);
+
+        		pmoS.setZona(manLMS.recibeZona((byte)0, true));
+    			pmoS.setZona(manLMS.recibeZona((byte)1, true));
+    			pmoS.setZona(manLMS.recibeZona((byte)2, true));
+
         	} catch (LMSException e) {
-        		System.err.println("Problema al obtener distancia maxima configurada en RF");
+        		System.err.println("Problema al obtener distancia maxima o zonas en RF");
         	}
-        	pmoS=new PanelMiraObstaculoSubjetivo(mi,distMaxRF);
         }
         tbPanel.add("Subjetivo",pmoS);
         //Loggers en solapa con scroll panel
@@ -412,6 +418,7 @@ public class NavegaPredictivo implements ActionListener {
     				} else {
     					//ponemos posición y barrido
     					if(ptoAct!=null) pmo.setPosicionYawBarrido(ptoAct, angAct, ba);
+//    					System.out.println("Barrido:"+ba);
     					pmoS.setBarrido(ba);
     				}
     				//actualizamos paneles aunque no haya mi
