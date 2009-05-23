@@ -21,6 +21,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
@@ -132,6 +133,7 @@ public class NavegaPredictivo implements ActionListener {
 	//Items del menu
 	private JMenuItem miCargar;
 	private JMenuItem miSalir;
+	private JProgressBar jpbTRF;
 
 	/** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -154,7 +156,6 @@ public class NavegaPredictivo implements ActionListener {
         System.out.println("Abrimos conexión GPS en "+args[0]);
         try {
             conGPS = new GPSConnectionTriumph(args[0]);
-        	conGPS = new GPSConnectionTriumph();
         } catch (Exception e) {
             System.err.println("Problema a crear GPSConnection:" + e.getMessage());
             System.exit(1);
@@ -225,7 +226,15 @@ public class NavegaPredictivo implements ActionListener {
     		//Checkbox para detectar con RF
     		jcbUsarRF = new JCheckBox("Usar RF");
     		jcbUsarRF.setSelected(false);
+    		if(rutaEspacial==null) jcbUsarRF.setEnabled(false);
     		jpSur.add(jcbUsarRF);
+    		
+    		//barra de progreso para tiempo RF
+    		jpbTRF=new JProgressBar(0,100);
+    		jpbTRF.setOrientation(JProgressBar.HORIZONTAL);
+    		jpbTRF.setValue(0);
+    		jpSur.add(new JLabel("Tiempo RF"));
+    		jpSur.add(jpbTRF);
     	}
     	
 
@@ -404,9 +413,10 @@ public class NavegaPredictivo implements ActionListener {
     				long t0=System.currentTimeMillis();
     				ba=manLMS.esperaNuevoBarrido(ba);
     				long dt=System.currentTimeMillis()-t0;
-    				if(dt>32) {
-    					System.err.println("\nNuevo barrido tardó "+dt);
-    				}
+    				jpbTRF.setValue((int)dt);
+//    				if(dt>32) {
+//    					System.err.println("\nNuevo barrido tardó "+dt);
+//    				}
     				GPSData pa = conGPS.getPuntoActualTemporal();                            
     	            double[] ptoAct=null;
     	            double angAct=Double.NaN;
@@ -415,13 +425,11 @@ public class NavegaPredictivo implements ActionListener {
     	             ptoAct[0]=pa.getXLocal(); ptoAct[1]=pa.getYLocal();
     	             angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
     	            }
-    				if (jcbUsarRF.isSelected() &&
-    						// esto es redundante, ya que no debería activarse jcbUsarRF si ruta es null
-    						rutaEspacial!=null ) {
+    				if (jcbUsarRF.isSelected() ) {
     					//calculamos distancia a obstáculo más cercano
     					distRF = mi.masCercano(ptoAct, angAct, ba);
     				} else {
-    					//ponemos posición y barrido
+    					//ponemos posición y barrido ya que no se puede tomar de otro sitio
     					if(ptoAct!=null) pmo.setPosicionYawBarrido(ptoAct, angAct, ba);
 //    					System.out.println("Barrido:"+ba);
     					pmoS.setBarrido(ba);
@@ -595,6 +603,8 @@ public class NavegaPredictivo implements ActionListener {
     		pmp.setControlPyRuta(null, null);
             pmo.setMiraObstaculo(null);
             pmoS.setMiraObstaculo(null);
+            jcbNavegando.setEnabled(false);
+            jcbUsarRF.setEnabled(false);
 
     		return;
     	}
@@ -628,7 +638,9 @@ public class NavegaPredictivo implements ActionListener {
         pmoS.setMiraObstaculo(mi);
         //Inicializamos modelos predictivos
         cp = new ControlPredictivo(modCoche, Tr, 13, 4, 2.0, (double) periodoMuestreoMili / 1000);
-        pmp.setControlPyRuta(cp, rutaEspacial); //nuevos valore en panel predictivo
+        pmp.setControlPyRuta(cp, rutaEspacial); //nuevos valores en panel predictivo
+        jcbNavegando.setEnabled(true);
+        jcbUsarRF.setEnabled(true);
     }
     
     /** Metodo para terminar la ejecución */
@@ -678,7 +690,8 @@ public class NavegaPredictivo implements ActionListener {
 		if(e.getSource()==miCargar) {
 			CargarRuta();
 		}
-		SacaDimensiones();
+//		SacaDimensiones()
+		;
 	}
 
     /** Método que ejecuta cada {@link #periodoMuestreoMili} bucle de control del coche mirando los obstáculos con el RF 

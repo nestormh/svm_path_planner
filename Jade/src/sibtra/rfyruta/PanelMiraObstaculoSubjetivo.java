@@ -201,6 +201,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 						, MI.indSegObs+1);
 				if(gp!=null)
 					g.draw(gp);
+				//TODO controlar para que no de problemas de desbordamiento
 				g.draw(new Line2D.Double(pointReal2pixel(MI.Bi[MI.indSegObs])
 						,pointReal2pixel(MI.Bd[MI.indSegObs])));
 				g.draw(new Line2D.Double(pointReal2pixel(MI.Bi[MI.indiceCoche])

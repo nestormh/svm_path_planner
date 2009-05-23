@@ -101,6 +101,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 	
 	public void setMiraObstaculo(MiraObstaculo mi) {
 		MI=mi;
+		if(MI!=null) setTr(MI.Tr);
 		actualiza();
 	}
 
