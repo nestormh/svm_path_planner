@@ -4,11 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.MenuBar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -34,6 +34,8 @@ import sibtra.controlcarro.PanelCarro;
 import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.GPSData;
 import sibtra.gps.PanelGPSTriumph;
+import sibtra.gps.PanelGrabarRuta;
+import sibtra.gps.PanelMuestraRuta;
 import sibtra.gps.Ruta;
 import sibtra.imu.AngulosIMU;
 import sibtra.imu.ConexionSerialIMU;
@@ -118,9 +120,14 @@ public class NavegaPredictivo implements ActionListener {
     private PanelMuestraAngulosIMU pmai;
     private PanelMiraObstaculo pmo;
 	private PanelMiraObstaculoSubjetivo pmoS;
+	private PanelMuestraRuta pmr;
 	private PanelLoggers pmLog;
+	private PanelGrabarRuta panGrabar;
     private JFileChooser fc;
 
+    //TODO poner acciones para todo
+	private AbstractAction actGrabarRuta;
+    
     JCheckBox jcbNavegando;
     JCheckBox jcbFrenando;
     SpinnerNumberModel spFrenado;
@@ -134,6 +141,8 @@ public class NavegaPredictivo implements ActionListener {
 	private JMenuItem miCargar;
 	private JMenuItem miSalir;
 	private JProgressBar jpbTRF;
+	private JTabbedPane tbPanelDecho;
+	private JTabbedPane tbPanelIzdo;
 
 	/** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -191,7 +200,12 @@ public class NavegaPredictivo implements ActionListener {
         fc = new JFileChooser(new File("./Rutas"));
 
 
-        //Definición de los elementos gráficos
+        //Definición de los elementos gráficos =============================================
+        actGrabarRuta=new AbstractAction("Grabar Ruta") {
+            public void actionPerformed(ActionEvent e) {
+            	pmr.setRuta(conGPS.getBufferRutaEspacial());
+            }
+        };
         ventanaPrincipal=new JFrame("Navega Predictivo");
         
     	{   //Parte baja de la ventana principal
@@ -237,6 +251,8 @@ public class NavegaPredictivo implements ActionListener {
     		jpSur.add(jpbTRF);
     	}
     	
+    	//Solapas del lado izquierdo ===============================================
+        tbPanelIzdo=new JTabbedPane();
 
     	//Panel datos numéricos se colacará a la izda del split panel
     	JPanel panelNumeros = new JPanel();
@@ -263,17 +279,28 @@ public class NavegaPredictivo implements ActionListener {
         	panelNumeros.add(pmai);
         	
         }
+        JScrollPane jspNumeros=new JScrollPane(panelNumeros
+				,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
+				,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        
+        tbPanelIzdo.add(jspNumeros);
+        
+        panGrabar=new PanelGrabarRuta(conGPS,actGrabarRuta,null);
+        panGrabar.setEnabled(true);
+        tbPanelIzdo.add(panGrabar);
 
-        //Panel con solapas para la parte derecha de la ventana principal
+        //Panel con solapas para la parte derecha de la ventana principal =========================
         //  contendrá las gráficas.
-        JTabbedPane tbPanel=new JTabbedPane();
+        tbPanelDecho=new JTabbedPane();
 
 
-        //añadimos los paneles a las solapas
+        //añadimos los paneles a las solapasprotected
+        pmr = new PanelMuestraRuta(conGPS.getBufferEspacial());
+        tbPanelDecho.add("Ruta",pmr);
         pmp = new PanelMuestraPredictivo(null,null);
-        tbPanel.add("Predictivo",pmp);
+        tbPanelDecho.add("Predictivo",pmp);
         pmo = new PanelMiraObstaculo(null);
-        tbPanel.add("Obstaculo", pmo);
+        tbPanelDecho.add("Obstaculo", pmo);
         {
         	short distMaxRF=80; //valor por defecto
         	try {
@@ -286,15 +313,11 @@ public class NavegaPredictivo implements ActionListener {
         		System.err.println("Problema al obtener distancia maxima o zonas en RF");
         	}
         }
-        tbPanel.add("Subjetivo",pmoS);
+        tbPanelDecho.add("Subjetivo",pmoS);
         //Loggers en solapa con scroll panel
         pmLog=new PanelLoggers();
-        tbPanel.add("Loggers",new JScrollPane(pmLog));
+        tbPanelDecho.add("Loggers",new JScrollPane(pmLog));
 
-        //Tamaños se los dos lados
-        JScrollPane jspNumeros=new JScrollPane(panelNumeros
-				,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
-				,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         
         //(panelNumeros.setPreferredSize(new Dimension(500,600));
         
@@ -302,8 +325,8 @@ public class NavegaPredictivo implements ActionListener {
 //        System.err.println("Panel Numeros minimun size :"+panelNumeros.getMinimumSize());
 //        System.err.println("Panel scroll Prefferred size :"+jspNumeros.getPreferredSize());
 //        System.err.println("Panel scroll  minimun size :"+jspNumeros.getMinimumSize());
-        tbPanel.setPreferredSize(new Dimension(500,600));
-        tbPanel.setMinimumSize(new Dimension(100,600));
+        tbPanelDecho.setPreferredSize(new Dimension(500,600));
+        tbPanelDecho.setMinimumSize(new Dimension(100,600));
 //        System.err.println("Panel Tabbed Prefferred size :"+tbPanel.getPreferredSize());
 //        System.err.println("Panel Tabbed minimun size :"+tbPanel.getMinimumSize());
 
@@ -311,8 +334,8 @@ public class NavegaPredictivo implements ActionListener {
         JSplitPane splitPanel=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT
 //        		,false  //si al mover la barra componentes se refrescan continuamente
         		,true  //si al mover la barra componentes se refrescan continuamente
-        		,jspNumeros
-        		,tbPanel
+        		,tbPanelIzdo
+        		,tbPanelDecho
         );
 
         ventanaPrincipal.getContentPane().add(splitPanel, BorderLayout.CENTER);
@@ -674,10 +697,12 @@ public class NavegaPredictivo implements ActionListener {
 				jcbNavegando.setEnabled(false);
 			} else if (jcbNavegando.isSelected()) {
 				navegando=true;
+				actGrabarRuta.setEnabled(false); //no se puede grabar si estamos navegando
 				cp.iniciaNavega();
 			} else {
 				//se desactivo Navegando
 				navegando=false;
+				actGrabarRuta.setEnabled(true); //ahora podemos grabar
 			}
 		}
 //		if (e.getSource() == jcbUsarRF){

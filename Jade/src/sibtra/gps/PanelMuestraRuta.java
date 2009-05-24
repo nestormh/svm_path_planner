@@ -1,14 +1,7 @@
 package sibtra.gps;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
 
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 
 import sibtra.util.PanelMapa;
