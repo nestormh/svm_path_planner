@@ -51,6 +51,9 @@ int Inicializado=0;
 /*Guardarán las configuración del puerto*/
 struct termios oldtio,newtio;
 
+/* Para llevar la cuenta de los caracteres descartados por errores */
+int Descartados=0;
+
 /*
 Funcion para calcular el checksum
 
@@ -238,22 +241,22 @@ JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_setBaudrate
  */
 JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   (JNIEnv *env, jobject obj, jint milisTOut) {
-
   unsigned char *buf;
   int res;
   int len;  /*valor campo longitud*/
   unsigned short crcCal; //CRC calculado para el mensaje
   jbyteArray jarray;
-
+  Descartados=0;
   if(!Inicializado)
     return JNI_FALSE;
 
   while(1) { //nos quedaremos mientras se consiga mensaje válido o haya timeout
   	buf=Buffer;
 	buf[0]=0x06;
-
+	Descartados--; 
 	//Esperamos a lo que pueda ser comienzo de mensaje
   while(buf[0]!=0x02)  {
+  		Descartados++;
 		res=LeeTimeOut(fdSer,buf,1,milisTOut);   
 	  	if(res!=1) {
 #ifdef ERR
@@ -310,6 +313,7 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
 
 	if((len+6)>TAMBUF) {
 		ERROR("\n\t\t\tJNI: Longitud calculada es muy grande");
+		Descartados+=res;
 		continue;  //volvemos a intentarlo desde el principio
 	}
 
@@ -369,6 +373,7 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
 	      ,buf[res-1],buf[res-2],crcCal);
 	    fflush(stderr);
 #endif
+    Descartados+=res;
 	continue; //mensaje erroneo, volvemos al principio
   }
 
@@ -377,6 +382,10 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   jarray = (*env)->NewByteArray(env,len);
   (*env)->SetByteArrayRegion(env,jarray, 0, len, buf+4);
 
+  if(Descartados>0) {
+	    fprintf(stderr,"\n\t\t\tJNI: Descartados %d",Descartados);
+	    fflush(stderr);
+  }
   return jarray;
   } //cerramos while(1);
 
