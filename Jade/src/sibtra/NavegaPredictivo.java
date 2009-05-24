@@ -381,6 +381,7 @@ public class NavegaPredictivo implements ActionListener {
         	private long milisPeriodo=500;
 
             public void run() {
+    			setName("Refresco Numeros");
         		while (true){
 //        			pgt.setEnabled(true);
         			//GPS
@@ -405,6 +406,7 @@ public class NavegaPredictivo implements ActionListener {
         //thread para refrescar ventana del RF y calcular distancia al obstaculo
         Thread thRF = new Thread() {
     		public void run() {
+    			setName("Recibe RF");
     			BarridoAngular ba=null;
     			while (true) {
     				long t0=System.currentTimeMillis();
@@ -422,7 +424,7 @@ public class NavegaPredictivo implements ActionListener {
     	             ptoAct[0]=pa.getXLocal(); ptoAct[1]=pa.getYLocal();
     	             angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
     	            }
-    				if (jcbUsarRF.isSelected() ) {
+    				if (rutaEspacial != null ) {
     					//calculamos distancia a obstáculo más cercano
     					distRF = mi.masCercano(ptoAct, angAct, ba);
     				} else {
@@ -678,21 +680,20 @@ public class NavegaPredictivo implements ActionListener {
 				navegando=false;
 			}
 		}
-		if (e.getSource() == jcbUsarRF){
-			if(!jcbUsarRF.isSelected()){
-				//Cuando se desactiva la checkbox del rangeFinder la distancia se
-				//se pone al máximo.
-				distRF = 80;
-			}
-		}
+//		if (e.getSource() == jcbUsarRF){
+//			if(!jcbUsarRF.isSelected()){
+//				//Cuando se desactiva la checkbox del rangeFinder la distancia se
+//				//se pone al máximo.
+//				distRF = 80;
+//			}
+//		}
 		if(e.getSource()==miSalir) {
 			Terminar();
 		}
 		if(e.getSource()==miCargar) {
 			CargarRuta();
 		}
-//		SacaDimensiones()
-		;
+//		SacaDimensiones();
 	}
 
     /** Método que ejecuta cada {@link #periodoMuestreoMili} bucle de control del coche mirando los obstáculos con el RF 
@@ -740,19 +741,12 @@ public class NavegaPredictivo implements ActionListener {
                 if (puntoFrenado!=-1){
             		double distFrenado = mideDistanciaFrenado(puntoFrenado);
             		double velRampa=distFrenado*pendienteFrenado;
-            		//se contempla el caso de que se esté frenando porque se ha pulsado
-            		//la checkbox Frenar y a la vez el RF detecte un obstáculo
-            		if (jcbUsarRF.isSelected() && (distRF <= distanciaSeguridad)){
-            			/* Resto margenColision a distRf para que el coche se detenga a 
-            			 * esa distancia del obstáculo */
-            			double velRampaRF = (distRF-margenColision)*pendienteFrenado; 
-            			velRampa = Math.min(velRampa,velRampaRF);
-            		}
             		// Nos quedamos con la velocidad menor, la más restrictiva
             		consignaVelocidad=Math.min(consignaVelocidad, velRampa);
             		System.out.println("Punto frenado a "+distFrenado+" vel. rampa "+ velRampa);
-                } else if (jcbUsarRF.isSelected() && (distRF <= distanciaSeguridad)){
-                    // Si el RF detecta un obstáculo a menos de la dist de seguridad
+                } 
+                if (jcbUsarRF.isSelected() && (distRF <= distanciaSeguridad)){
+                	// Si el RF detecta un obstáculo a menos de la dist de seguridad
                 	double velRampa = (distRF-margenColision)*pendienteFrenado;
                 	consignaVelocidad=Math.min(consignaVelocidad, velRampa);
                 }
