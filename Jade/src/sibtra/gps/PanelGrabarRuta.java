@@ -34,6 +34,7 @@ public class PanelGrabarRuta extends JPanel implements GpsEventListener,
     	super();
     	if(gpsc==null)
     		throw new IllegalArgumentException("conexión a GPS no puede ser null");
+    	gpsCon=gpsc;
     	JComponent ja;
 
     	jbGrabar = new JButton("Grabar");

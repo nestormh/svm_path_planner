@@ -303,7 +303,7 @@ public class Ruta implements Serializable {
 	 * @return
 	 */
 	public GPSData getPunto(int i) {
-		if(i>=puntos.size())
+		if(i>=puntos.size() || i<0)
 			return null;
 		else
 			return puntos.elementAt(i);
@@ -426,6 +426,8 @@ public class Ruta implements Serializable {
 	 */
 
 	public double[][] toTr(double distMax) {
+		if(getNumPuntos()==0)
+			return null;
 		esRutaCerrada();
 		int ptosAñadidos = calculaPuntosAAñadir(distMax);
 //		System.out.println("Puntos añadidos " + ptosAñadidos);
@@ -604,6 +606,9 @@ public class Ruta implements Serializable {
 	 */
 	public boolean esRutaCerrada(){
 		esCerrada=false;
+		//necesitamos al menos 2 puntos
+		if(getNumPuntos()<2)
+			return esCerrada;
 		double umbral = 3;
 		double distAux;
 		double distMin = Double.POSITIVE_INFINITY;

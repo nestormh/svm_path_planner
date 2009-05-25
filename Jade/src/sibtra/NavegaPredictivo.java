@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -72,7 +73,7 @@ public class NavegaPredictivo implements ActionListener {
 	 * menos de esa distancia*/
 	private static final double distanciaSeguridad = 10;
 	/** Distancia a la que idealmente se detendrá el coche del obstáculo*/
-	private static final double margenColision = 2;
+	private static final double margenColision = 3;
 	
 	/** distancia maxima entre puntos sucesivos de Tr */
     private double distMaxTr = 0.1;        
@@ -126,7 +127,8 @@ public class NavegaPredictivo implements ActionListener {
     private JFileChooser fc;
 
     //TODO poner acciones para todo
-	private AbstractAction actGrabarRuta;
+	private Action actGrabarRuta;
+	private Action actPararGrabarRuta;
     
     JCheckBox jcbNavegando;
     JCheckBox jcbFrenando;
@@ -204,6 +206,16 @@ public class NavegaPredictivo implements ActionListener {
         actGrabarRuta=new AbstractAction("Grabar Ruta") {
             public void actionPerformed(ActionEvent e) {
             	pmr.setRuta(conGPS.getBufferRutaEspacial());
+            	actGrabarRuta.setEnabled(false);
+            	actPararGrabarRuta.setEnabled(true);
+            }
+        };
+        actPararGrabarRuta=new AbstractAction("Parar Grabar Ruta") {
+            public void actionPerformed(ActionEvent e) {
+            	pmr.setRuta(conGPS.getBufferEspacial()); 
+            	actGrabarRuta.setEnabled(true);
+            	actPararGrabarRuta.setEnabled(false);
+            	
             }
         };
         ventanaPrincipal=new JFrame("Navega Predictivo");
@@ -283,11 +295,11 @@ public class NavegaPredictivo implements ActionListener {
 				,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
 				,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         
-        tbPanelIzdo.add(jspNumeros);
+        tbPanelIzdo.add("Numeros",jspNumeros);
         
-        panGrabar=new PanelGrabarRuta(conGPS,actGrabarRuta,null);
+        panGrabar=new PanelGrabarRuta(conGPS,actGrabarRuta,actPararGrabarRuta);
         panGrabar.setEnabled(true);
-        tbPanelIzdo.add(panGrabar);
+        tbPanelIzdo.add("Grabar",panGrabar);
 
         //Panel con solapas para la parte derecha de la ventana principal =========================
         //  contendrá las gráficas.
@@ -296,6 +308,7 @@ public class NavegaPredictivo implements ActionListener {
 
         //añadimos los paneles a las solapasprotected
         pmr = new PanelMuestraRuta(conGPS.getBufferEspacial());
+        conGPS.addGpsEventListener(pmr);
         tbPanelDecho.add("Ruta",pmr);
         pmp = new PanelMuestraPredictivo(null,null);
         tbPanelDecho.add("Predictivo",pmp);
@@ -538,10 +551,6 @@ public class NavegaPredictivo implements ActionListener {
         }else
             refVelocidad = Tr[indMin][3]; 
         consigna = refVelocidad - Math.abs(errorOrientacion)*gananciaVel - Math.abs(errorLateral)*gananciaLateral;        
-        if (consigna-consignaAnt >=0.1){
-        	consigna = consignaAnt + 0.1;
-        	System.out.println("Demasiado incremento en la consigna");
-        }
 /*      Solo con esta condición el coche no se detiene nunca,aunque la referencia de la 
  * 		ruta sea cero*/
 //        if (consigna <= 1){
@@ -659,7 +668,7 @@ public class NavegaPredictivo implements ActionListener {
         System.out.println("Longitud de la trayectoria=" + Tr.length);
 
         mi = new MiraObstaculo(Tr);
-
+//        mi.nuevaPosicion(); 
         pmo.setMiraObstaculo(mi);
         pmoS.setMiraObstaculo(mi);
         //Inicializamos modelos predictivos
@@ -774,6 +783,10 @@ public class NavegaPredictivo implements ActionListener {
                 	// Si el RF detecta un obstáculo a menos de la dist de seguridad
                 	double velRampa = (distRF-margenColision)*pendienteFrenado;
                 	consignaVelocidad=Math.min(consignaVelocidad, velRampa);
+                }
+                if (consignaVelocidad-consignaVelAnt >=0.1){
+                	consignaVelocidad = consignaVelAnt + 0.1;
+                	System.out.println("Demasiado incremento en la consigna");
                 }
                 System.out.println(consignaVelocidad);
                 consignaVelAnt = consignaVelocidad;

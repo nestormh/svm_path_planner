@@ -94,6 +94,9 @@ public class MiraObstaculo {
 
 	/** Si se ha invocado a mas cercano con datos válidos */
 	boolean hayDatos=false;
+	
+	/** Se activa cuando esta fuera del camino */
+	boolean estaFuera=true;
 
 	/**
 	 * Constructor necesita conocer la ruta que se va a seguir.
@@ -234,6 +237,9 @@ public class MiraObstaculo {
 		double AngIniB=barrAct.getAngulo(0);  //angulo inicial del barrido
 		double AngFinB=barrAct.getAngulo(barrAct.numDatos()-1); //angulo final del barrido
 		
+		//Si en la iteración anterior estabamos fuera buscamos desde el principio
+		//TODO no funciona bie, corregir
+//		if(estaFuera) indiceCoche=-1;
 		//punto de la trayectoria más cercano a la posición local
 		indiceCoche=UtilCalculos.indiceMasCercanoOptimizado(Tr, esCerrada, posicionLocal, indiceCoche);
 		
@@ -253,10 +259,11 @@ public class MiraObstaculo {
 					if(distATr<=anchoCamino)
 						System.err.println("No está tampoco en segmento anterior a pesar de distacia < camino");
 					//esta fuera del camino
+					estaFuera=true;
 					return dist; //NaN					
 				}
 			}
-		
+		estaFuera=false;
 		indiceCoche++;
 		//inidiceCoche tiene en ídice del siguiente al segmento, por lo que el coche estará un poquito más atras		
 		

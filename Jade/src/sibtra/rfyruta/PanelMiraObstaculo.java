@@ -263,6 +263,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 	public void actualiza() {
 		if(MI!=null && MI.hayDatos) {
 			situaCoche(MI.posActual[0], MI.posActual[1], MI.Yaw);
+			barrAng=MI.barr;
 		}
 		if(MI==null || Double.isNaN(MI.dist)) {
 			jlDistLin.setEnabled(false);
