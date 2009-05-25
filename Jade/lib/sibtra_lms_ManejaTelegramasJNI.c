@@ -250,37 +250,42 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   if(!Inicializado)
     return JNI_FALSE;
 
+  buf=Buffer;
+  res=0;
   while(1) { //nos quedaremos mientras se consiga mensaje válido o haya timeout
-  	buf=Buffer;
-	buf[0]=0x06;
-	Descartados--; 
-	//Esperamos a lo que pueda ser comienzo de mensaje
-  while(buf[0]!=0x02)  {
-  		Descartados++;
-		res=LeeTimeOut(fdSer,buf,1,milisTOut);   
-	  	if(res!=1) {
+  	//bucle hasta encontrar el 0x02
+  	while(1) {  //nos quedaremos mientras no encontremos comienzo (o time out)
+  		if(res==0) { //No queda nada en buffer tenemos que leer
+			res=LeeTimeOut(fdSer,buf,1,milisTOut);   
+	  		if(res!=1) {
 #ifdef ERR
-	    fprintf(stderr,"\n\t\t\tJNI: Ha habido timeout (%d) esperando inicio mensaje: %d",milisTOut,res);
-	    fflush(stderr);
+	    	fprintf(stderr,"\n\t\t\tJNI: Ha habido timeout (%d) esperando inicio mensaje: %d",milisTOut,res);
+	    	fflush(stderr);
 #endif
-	    return JNI_FALSE;
-	  }
-	
-	  if(buf[0]==0x15) {
-	    ERROR("\n\t\t\tJNI: Es NO RECONOCIMIENTO (0x15)");
-	    continue;
-	  }
-	  if(buf[0]==0x06) {
-	    ERROR("\n\t\t\tJNI: Es reconocimiento (0x06)");
-	    continue;
-	  }
-  }
-/*
-  if(buf[0]!=0x02) {
-    ERROR("\n\t\t\tJNI: NO es comienzo de telegrama: ALGO RARO");
-    return JNI_FALSE;
-  }
-  */
+	    	return 0;
+	    }
+		if(buf[0]==0x02) {
+	    	//ya tenemos el (posible) comienzo
+	    	if(buf!=Buffer) {
+	    		//no estamos al comienzo, rodamos todo lo que tenemos
+	    		memmove(Buffer,buf,res);
+	    		buf=Buffer;
+	    	}
+	    	break; //salimos bucle búsqueda 0x02 
+	    }
+	    if(buf[0]==0x15) {
+			ERROR("\n\t\t\tJNI: Es NO RECONOCIMIENTO (0x15)");
+		}
+		if(buf[0]==0x06) {
+			ERROR("\n\t\t\tJNI: Es reconocimiento (0x06)");
+		}
+	    if(res>0) {
+	    	buf++; //avanzamos por el buffer
+	    	res--;
+	    }
+		Descartados++;
+  	}
+
 #ifdef INFO
   fprintf(stdout,"\n\t\t\tJNI:  STX: %02hhX;",buf[0]);
   fflush(stdout);
@@ -313,8 +318,11 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
 
 	if((len+6)>TAMBUF) {
 		ERROR("\n\t\t\tJNI: Longitud calculada es muy grande");
-		Descartados+=res;
-		continue;  //volvemos a intentarlo desde el principio
+		//saltamos el 0x02 y volvemos a intentar
+		buf++;
+		res--;
+		Descartados++;
+		continue;
 	}
 
   /*Conseguimos el resto del mensaje*/
@@ -365,16 +373,19 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   }
 #endif
 
-  //comprobamos el CheckSum
-  crcCal=CalculaCRC(buf,res-2);
-  if(crcCal!=(unsigned short)((buf[res-1]<<8)|buf[res-2])) {
+	//comprobamos el CheckSum
+	crcCal=CalculaCRC(buf,res-2);
+	if(crcCal!=(unsigned short)((buf[res-1]<<8)|buf[res-2])) {
 #ifdef ERR
-	    fprintf(stderr,"\n\t\t\tJNI: CRC resultó erroneo %02hhX%02hhX != %04hX"
-	      ,buf[res-1],buf[res-2],crcCal);
-	    fflush(stderr);
+		fprintf(stderr,"\n\t\t\tJNI: CRC resultó erroneo %02hhX%02hhX != %04hX"
+			,buf[res-1],buf[res-2],crcCal);
+		fflush(stderr);
 #endif
-    Descartados+=res;
-	continue; //mensaje erroneo, volvemos al principio
+		//saltamos el 0x02 y volvemos a intentar
+		buf++;
+		res--;
+		Descartados++;
+		continue;
   }
 
 
