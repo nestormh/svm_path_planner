@@ -393,10 +393,12 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   jarray = (*env)->NewByteArray(env,len);
   (*env)->SetByteArrayRegion(env,jarray, 0, len, buf+4);
 
+#ifdef ERR
   if(Descartados>0) {
 	    fprintf(stderr,"\n\t\t\tJNI: Descartados %d",Descartados);
 	    fflush(stderr);
   }
+#endif
   return jarray;
   } //cerramos while(1);
 
