@@ -400,11 +400,11 @@ public class Ruta implements Serializable {
 
 		desEstDM=dif2/(indiceConsideradosDM.size());
 
-		System.out.println(" Con umbral="+Math.toDegrees(umbralAngulo)+" grados"
-				+" Considerados "+indiceConsideradosDM.size()+" de "+(puntos.size()-3)+" posibles"
-				+" Desviación media="+Math.toDegrees(desviacionM)
-				+" Desviación estandar="+Math.toDegrees(desEstDM)
-				+" Desviación máxima="+Math.toDegrees(dmMax));
+//		System.out.println(" Con umbral="+Math.toDegrees(umbralAngulo)+" grados"
+//				+" Considerados "+indiceConsideradosDM.size()+" de "+(puntos.size()-3)+" posibles"
+//				+" Desviación media="+Math.toDegrees(desviacionM)
+//				+" Desviación estandar="+Math.toDegrees(desEstDM)
+//				+" Desviación máxima="+Math.toDegrees(dmMax));
 
 	}
 

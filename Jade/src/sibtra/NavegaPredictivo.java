@@ -1,4 +1,6 @@
-																																																																																																																																																																																																																																																																																																																					package sibtra;
+/* */
+
+package sibtra;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -460,7 +462,7 @@ public class NavegaPredictivo implements ActionListener {
     	             ptoAct[0]=pa.getXLocal(); ptoAct[1]=pa.getYLocal();
     	             angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
     	            }
-    				if (rutaEspacial != null ) {
+    				if (mi != null ) {
     					//calculamos distancia a obstáculo más cercano
     					distRF = mi.masCercano(ptoAct, angAct, ba);
     				} else {
@@ -532,7 +534,7 @@ public class NavegaPredictivo implements ActionListener {
      * consigna de velocidad. 
      * @return
      */
-    public double calculaConsignaVel(double consignaAnt){
+    public double calculaConsignaVel(){
         double consigna = 0;
         double velocidadMax = 2.5;
         double VelocidadMinima = 1;
@@ -770,7 +772,8 @@ public class NavegaPredictivo implements ActionListener {
                 if (velocidadActual >= umbralMinimaVelocidad)
                 	contCarro.setAnguloVolante(-comandoVolante);
                 
-            	consignaVelocidad = calculaConsignaVel(consignaVelAnt); 
+            	consignaVelocidad = calculaConsignaVel(); 
+		System.out.println("Consigna de calcula: "+consignaVelocidad);
             	//Si se pulsa la checkbox de frenar
                 if (puntoFrenado!=-1){
             		double distFrenado = mideDistanciaFrenado(puntoFrenado);
@@ -779,7 +782,8 @@ public class NavegaPredictivo implements ActionListener {
             		consignaVelocidad=Math.min(consignaVelocidad, velRampa);
             		System.out.println("Punto frenado a "+distFrenado+" vel. rampa "+ velRampa);
                 } 
-                if (jcbUsarRF.isSelected() && (distRF <= distanciaSeguridad)){
+                if (jcbUsarRF.isSelected() && !Double.isNaN(distRF) 
+			&&(distRF <= distanciaSeguridad)){
                 	// Si el RF detecta un obstáculo a menos de la dist de seguridad
                 	double velRampa = (distRF-margenColision)*pendienteFrenado;
                 	consignaVelocidad=Math.min(consignaVelocidad, velRampa);
