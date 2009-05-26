@@ -263,6 +263,7 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
 	    	fflush(stderr);
 #endif
 	    	return 0;
+			}
 	    }
 		if(buf[0]==0x02) {
 	    	//ya tenemos el (posible) comienzo
