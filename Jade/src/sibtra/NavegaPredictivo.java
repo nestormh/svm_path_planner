@@ -199,6 +199,7 @@ public class NavegaPredictivo implements ActionListener {
         if (contCarro.isOpen() == false) {
             System.err.println("No se obtuvo Conexion al Carro");            
         }
+        conGPS.setCsCARRO(contCarro);
 
         //elegir fichero
         fc = new JFileChooser(new File("./Rutas"));
