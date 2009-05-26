@@ -238,8 +238,7 @@ public class MiraObstaculo {
 		double AngFinB=barrAct.getAngulo(barrAct.numDatos()-1); //angulo final del barrido
 		
 		//Si en la iteración anterior estabamos fuera buscamos desde el principio
-		//TODO no funciona bie, corregir
-//		if(estaFuera) indiceCoche=-1;
+		if(estaFuera) indiceCoche=-1;
 		//punto de la trayectoria más cercano a la posición local
 		indiceCoche=UtilCalculos.indiceMasCercanoOptimizado(Tr, esCerrada, posicionLocal, indiceCoche);
 		
@@ -756,7 +755,8 @@ public class MiraObstaculo {
 	
 	public String toString() {
 		String ret="Lineal="+dist+" camino="+distCamino;
-		ret+=" \n indiceCoche ="+indiceCoche
+		ret+=" \n indiceCoche ="+indiceCoche 
+		    + " estaFuera "+ estaFuera
 			+" encontradoInicioD:"+encontradoInicioD +"  iptoDini ="+iptoDini
 			+" encontradoInicioI:"+encontradoInicioI +"  iptoIini ="+ iptoIini
 			+"\n iAD="+iAD
