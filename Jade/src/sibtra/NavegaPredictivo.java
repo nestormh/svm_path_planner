@@ -8,6 +8,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 
 import javax.swing.AbstractAction;
@@ -25,6 +27,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -426,8 +429,6 @@ public class NavegaPredictivo implements ActionListener {
         ventanaPrincipal.pack();
         ventanaPrincipal.setVisible(true);
 
-        //Fijamos su tamaño y posición
-        ventanaPrincipal.setBounds(0, 384, 1024, 742);
 //        splitPanel.setDividerLocation(0.50); //La mitad para cada uno
         splitPanel.setDividerLocation(500); //Ajustamos para que no aparezca la barra a la dercha
 
@@ -457,8 +458,6 @@ public class NavegaPredictivo implements ActionListener {
         ventadaPeque.setUndecorated(true); //para que no aparezcan el marco
         ventadaPeque.pack();
         ventadaPeque.setVisible(true);
-        //fijamos su tamaño y posición
-        ventadaPeque.setBounds(0, 0, 640, 384);
         
     	//Tread para refrescar los paneles de la ventana
         Thread thRefresco = new Thread() {
@@ -531,10 +530,71 @@ public class NavegaPredictivo implements ActionListener {
     	} catch (LMSException e) {
             System.err.println("No fue posible Arrancar barrido continuo RF");
             System.exit(1);
-		}
+    	}
     	System.out.println("Comenzó recepción barrido continuo. Lanzamos en thread para el RF");
-        thRF.start();
+    	thRF.start();
+
+    	// ponemos popups en las tabs
+    	tbPanelDecho.addMouseListener(new MouseAdapter() {
+    		public void mousePressed(MouseEvent me)
+    		{
+    			maybeShowPopup(me);
+    		}
+
+    		public void mouseReleased(MouseEvent me)
+    		{
+    			maybeShowPopup(me);
+    		}
+    	});
+    	tbPanelIzdo.addMouseListener(new MouseAdapter() {
+    		public void mousePressed(MouseEvent me)
+    		{
+    			maybeShowPopup(me);
+    		}
+
+    		public void mouseReleased(MouseEvent me)
+    		{
+    			maybeShowPopup(me);
+    		}
+    	});
+
+        //Fijamos su tamaño y posición
+        ventanaPrincipal.setBounds(0, 384, 1024, 742);
+        //fijamos su tamaño y posición
+        ventadaPeque.setBounds(0, 0, 640, 384);
+
     }
+
+    // Sacado de http://forums.sun.com/thread.jspa?forumID=257&threadID=372811
+    private void maybeShowPopup(final MouseEvent me)
+    {
+    	JTabbedPane pest;
+    	if (me.isPopupTrigger() 
+    			&& (pest=(JTabbedPane)me.getSource()).getTabCount()>0
+    			&& (pest.getSelectedIndex()<pest.getTabCount())
+    	) {
+    		JPopupMenu popup = new JPopupMenu();
+    		JMenuItem item = new JMenuItem("Cambia de pestaÃ±a de lado");
+    		popup.add(item);
+    		item.addActionListener(new ActionListener() {
+    			public void actionPerformed(ActionEvent e)
+    			{
+    				JTabbedPane tabbed = (JTabbedPane)me.getSource();
+    				int i = tabbed.getSelectedIndex();
+    				if(i>=tabbed.getTabCount()) return;
+    				if(tabbed==tbPanelDecho) {
+    					tbPanelIzdo.add(tabbed.getTitleAt(i),tabbed.getComponent(i));
+    				} else {
+    					tbPanelDecho.add(tabbed.getTitleAt(i),tabbed.getComponent(i));
+    				}
+    				//NO hace falta borrarla ??
+    				//						tabbed.remove(i);
+    			}
+    		});
+    		popup.show(me.getComponent(), me.getX(), me.getY());
+    	}
+    }    
+
 
     public void SacaDimensiones() {
     	//vemos tamaños de panel predictivo
