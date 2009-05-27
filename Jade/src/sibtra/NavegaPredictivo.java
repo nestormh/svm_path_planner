@@ -424,7 +424,7 @@ public class NavegaPredictivo implements ActionListener {
 
     		public void mouseReleased(MouseEvent me)
     		{
-//    			maybeShowPopup(me);
+    			maybeShowPopup(me);
     		}
     	});
     }
@@ -432,8 +432,11 @@ public class NavegaPredictivo implements ActionListener {
     // Sacado de http://forums.sun.com/thread.jspa?forumID=257&threadID=372811
     private void maybeShowPopup(final MouseEvent me)
 	{
+    	JTabbedPane pest;
 		if (me.isPopupTrigger() 
-				&& ((JTabbedPane)me.getSource()).getTabCount()>0) {
+				&& (pest=(JTabbedPane)me.getSource()).getTabCount()>0
+				&& (pest.getSelectedIndex()<pest.getTabCount())
+		) {
 			JPopupMenu popup = new JPopupMenu();
 			JMenuItem item = new JMenuItem("Cambia de pestaña de lado");
 			popup.add(item);
@@ -442,11 +445,14 @@ public class NavegaPredictivo implements ActionListener {
 					{
 						JTabbedPane tabbed = (JTabbedPane)me.getSource();
 						int i = tabbed.getSelectedIndex();
+						if(i>=tabbed.getTabCount()) return;
 						if(tabbed==tbPanelDecho) {
 							tbPanelIzdo.add(tabbed.getTitleAt(i),tabbed.getComponent(i));
-						} else 
+						} else {
 							tbPanelDecho.add(tabbed.getTitleAt(i),tabbed.getComponent(i));
-						tabbed.remove(i);
+						}
+						//NO hace falta borrarla ??
+//						tabbed.remove(i);
 					}
 				});
 			popup.show(me.getComponent(), me.getX(), me.getY());
