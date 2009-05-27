@@ -16,6 +16,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -131,9 +132,10 @@ public class NavegaPredictivo implements ActionListener {
     //TODO poner acciones para todo
 	private Action actGrabarRuta;
 	private Action actPararGrabarRuta;
+	private Action actNavegar;
+	private Action actFrenar;
     
-    JCheckBox jcbNavegando;
-    JCheckBox jcbFrenando;
+//    JCheckBox jcbNavegando;
     SpinnerNumberModel spFrenado;
     JSpinner jsDistFrenado;
     private PanelMuestraPredictivo pmp;
@@ -213,6 +215,7 @@ public class NavegaPredictivo implements ActionListener {
             	actPararGrabarRuta.setEnabled(true);
             }
         };
+        actGrabarRuta.setEnabled(true); //inicialmente activada
         actPararGrabarRuta=new AbstractAction("Parar Grabar Ruta") {
             public void actionPerformed(ActionEvent e) {
             	pmr.setRuta(conGPS.getBufferEspacial()); 
@@ -221,6 +224,45 @@ public class NavegaPredictivo implements ActionListener {
             	
             }
         };
+        actNavegar=new AbstractAction("Navegar") {
+        	public void actionPerformed(ActionEvent e) {
+        		if (rutaEspacial==null) { //por si las moscas
+        			putValue(SELECTED_KEY, false);
+        			setEnabled(false);
+        		} else if ((Boolean)getValue(SELECTED_KEY)) {
+        			navegando=true;
+        			actGrabarRuta.setEnabled(false); //no se puede grabar si estamos navegando
+        			actFrenar.setEnabled(true); //se puede frenar cuando se está navegando
+        			cp.iniciaNavega();
+        		} else {
+        			//se desactivo Navegando
+        			navegando=false;
+        			actGrabarRuta.setEnabled(true); //ahora podemos grabar
+        			actFrenar.setEnabled(false); //no se puede frenar cuando se está navegando
+        		}
+        	}
+        };
+		actNavegar.putValue(Action.SELECTED_KEY, false);
+		if(rutaEspacial==null) actNavegar.setEnabled(false);
+
+        
+        actFrenar=new AbstractAction("Frenar") {
+        	public void actionPerformed(ActionEvent e) {
+        		if((Boolean)getValue(SELECTED_KEY)){
+        			// Se acaba de seleccionar
+        			double distFrenado = spFrenado.getNumber().doubleValue();
+        			puntoFrenado = buscaPuntoFrenado(distFrenado);
+        			jsDistFrenado.setEnabled(false);
+        		}else{
+        			// Se acaba de desactivar
+        			jsDistFrenado.setEnabled(true);
+        			puntoFrenado = -1;
+        		}
+        	}
+        };
+		actFrenar.putValue(Action.SELECTED_KEY, false);
+		actFrenar.setEnabled(false); //se activa cuando se está navegando
+
         ventanaPrincipal=new JFrame("Navega Predictivo");
         
     	{   //Parte baja de la ventana principal
@@ -228,15 +270,10 @@ public class NavegaPredictivo implements ActionListener {
     		ventanaPrincipal.getContentPane().add(jpSur, BorderLayout.SOUTH);
 
     		//Checkbox para navegar
-    		jcbNavegando = new JCheckBox("Navegando");
-    		jcbNavegando.setSelected(false);
-    		if(rutaEspacial==null) jcbNavegando.setEnabled(false);
-    		jcbNavegando.addActionListener(this);
+    		JCheckBox jcbNavegando = new JCheckBox(actNavegar);
     		jpSur.add(jcbNavegando);
     		//Checkbox para frenar
-    		jcbFrenando = new JCheckBox("Frenar");
-    		jcbFrenando.setSelected(false);
-    		jcbFrenando.addActionListener(this);
+    		JCheckBox jcbFrenando = new JCheckBox("Frenar");
     		jpSur.add(jcbFrenando);
     		//Spinner para fijar la distancia de frenado
     		double value = 5;
@@ -371,6 +408,15 @@ public class NavegaPredictivo implements ActionListener {
         	miSalir.addActionListener(this);
         	menuArchivo.add(miSalir);
         	
+        	//menu de Acciones
+        	JMenu menuAcciones=new JMenu("Acciones");
+        	menuAcciones.add(new JCheckBoxMenuItem(actNavegar));
+        	menuAcciones.add(new JCheckBoxMenuItem(actFrenar));
+        	menuAcciones.addSeparator();
+        	menuAcciones.add(new JMenuItem(actGrabarRuta));
+        	menuAcciones.add(new JMenuItem(actPararGrabarRuta));
+        	barra.add(menuArchivo);
+        	
         	ventanaPrincipal.setJMenuBar(barra); //ponemos barra en la ventana
         }
         
@@ -391,7 +437,7 @@ public class NavegaPredictivo implements ActionListener {
         	JPanel central=new JPanel();
         	central.setLayout(new BoxLayout(central,BoxLayout.PAGE_AXIS));
         	//Checkbox para navegar
-        	JCheckBox jcbNavegandoP = new JCheckBox("Navegando");
+        	JCheckBox jcbNavegandoP = new JCheckBox(actNavegar);
         	jcbNavegandoP.setFont(jcbNavegandoP.getFont().deriveFont(80.0f));
         	jcbNavegandoP.setSelected(true);
         	central.add(jcbNavegandoP);
@@ -641,7 +687,7 @@ public class NavegaPredictivo implements ActionListener {
     		pmp.setControlPyRuta(null, null);
             pmo.setMiraObstaculo(null);
             pmoS.setMiraObstaculo(null);
-            jcbNavegando.setEnabled(false);
+            actNavegar.setEnabled(false);
             jcbUsarRF.setEnabled(false);
 
     		return;
@@ -677,7 +723,7 @@ public class NavegaPredictivo implements ActionListener {
         //Inicializamos modelos predictivos
         cp = new ControlPredictivo(modCoche, Tr, 13, 4, 2.0, (double) periodoMuestreoMili / 1000);
         pmp.setControlPyRuta(cp, rutaEspacial); //nuevos valores en panel predictivo
-        jcbNavegando.setEnabled(true);
+        actNavegar.setEnabled(true);
         jcbUsarRF.setEnabled(true);
     }
     
@@ -688,35 +734,9 @@ public class NavegaPredictivo implements ActionListener {
 	}
 
     public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == jcbFrenando){
-			if(jcbFrenando.isSelected()){
-				// Se acaba de seleccionar
-				double distFrenado = spFrenado.getNumber().doubleValue();
-				puntoFrenado = buscaPuntoFrenado(distFrenado);
-				jsDistFrenado.setEnabled(false);
-			}else{
-				// Se acaba de desactivar
-				jsDistFrenado.setEnabled(true);
-				puntoFrenado = -1;
-			}
-			if(e.getSource() == spGananciaVel){
-				gananciaVel = spGananciaVel.getNumber().doubleValue();
-			}		
-		}
-		if (e.getSource() == jcbNavegando){
-			if (rutaEspacial==null) { //por si las moscas
-				jcbNavegando.setSelected(false);
-				jcbNavegando.setEnabled(false);
-			} else if (jcbNavegando.isSelected()) {
-				navegando=true;
-				actGrabarRuta.setEnabled(false); //no se puede grabar si estamos navegando
-				cp.iniciaNavega();
-			} else {
-				//se desactivo Navegando
-				navegando=false;
-				actGrabarRuta.setEnabled(true); //ahora podemos grabar
-			}
-		}
+		if(e.getSource() == spGananciaVel){
+			gananciaVel = spGananciaVel.getNumber().doubleValue();
+		}		
 //		if (e.getSource() == jcbUsarRF){
 //			if(!jcbUsarRF.isSelected()){
 //				//Cuando se desactiva la checkbox del rangeFinder la distancia se
