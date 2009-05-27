@@ -6,6 +6,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
@@ -15,8 +18,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
@@ -116,6 +121,9 @@ public class NavegaPredictivo implements ActionListener {
     private JCheckBox jcbUsarRF;
 	private SpinnerNumberModel spGananciaVel;
 	private JSpinner jsGananciaVel;
+	private JTabbedPane tbPanelDecho;
+	private JTabbedPane tbPanelIzdo;
+	private JPopupMenu popup;
 
     /** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
     public NavegaPredictivo(String[] args) {
@@ -207,8 +215,15 @@ public class NavegaPredictivo implements ActionListener {
         modCoche = new Coche();
         cp = new ControlPredictivo(modCoche, Tr, 13, 4, 2.0, (double) periodoMuestreoMili / 1000);
 
-        //Definición de los elementos gráficos
+        //Definición de los elementos gráficos ======================================================
         ventanaPrincipal=new JFrame("Navega Predictivo");
+        
+        //Create the popup menu.
+//        popup = new JPopupMenu();
+//        JMenuItem menuItem = new JMenuItem("Cambiar de pestaña de lado");
+//        menuItem.addActionListener(this);
+//        popup.add(menuItem);
+
         
     	{   //Parte baja de la ventana principal
     		JPanel jpSur = new JPanel(new FlowLayout(3));
@@ -272,14 +287,14 @@ public class NavegaPredictivo implements ActionListener {
 
         //Panel con solapas para la parte derecha de la ventana principal
         //  contendrá las gráficas.
-        JTabbedPane tbPanel=new JTabbedPane();
+        tbPanelDecho=new JTabbedPane();
 
 
         //añadimos los paneles a las solapas
         pmp = new PanelMuestraPredictivo(cp,rutaEspacial);
-        tbPanel.add("Predictivo",pmp);
+        tbPanelDecho.add("Predictivo",pmp);
         pmo = new PanelMiraObstaculo(mi);
-        tbPanel.add("Obstaculo", pmo);
+        tbPanelDecho.add("Obstaculo", pmo);
         {
         	short distMaxRF=80; //valor por defecto
 //        	try {
@@ -289,15 +304,17 @@ public class NavegaPredictivo implements ActionListener {
 //        	}
         	pmoS=new PanelMiraObstaculoSubjetivo(mi,distMaxRF);
         }
-        tbPanel.add("Subjetivo",pmoS);
+        tbPanelDecho.add("Subjetivo",pmoS);
         //Loggers en solapa con scroll panel
         pmLog=new PanelLoggers();
-        tbPanel.add("Loggers",new JScrollPane(pmLog));
+        tbPanelDecho.add("Loggers",new JScrollPane(pmLog));
 
         //Tamaños se los dos lados
         JScrollPane jspNumeros=new JScrollPane(panelNumeros
 				,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
 				,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        tbPanelIzdo=new JTabbedPane();
+        tbPanelIzdo.add("Numeros",jspNumeros);
         
         //(panelNumeros.setPreferredSize(new Dimension(500,600));
         
@@ -305,8 +322,8 @@ public class NavegaPredictivo implements ActionListener {
 //        System.err.println("Panel Numeros minimun size :"+panelNumeros.getMinimumSize());
 //        System.err.println("Panel scroll Prefferred size :"+jspNumeros.getPreferredSize());
 //        System.err.println("Panel scroll  minimun size :"+jspNumeros.getMinimumSize());
-        tbPanel.setPreferredSize(new Dimension(500,600));
-        tbPanel.setMinimumSize(new Dimension(100,600));
+        tbPanelDecho.setPreferredSize(new Dimension(500,600));
+        tbPanelDecho.setMinimumSize(new Dimension(100,600));
 //        System.err.println("Panel Tabbed Prefferred size :"+tbPanel.getPreferredSize());
 //        System.err.println("Panel Tabbed minimun size :"+tbPanel.getMinimumSize());
 
@@ -314,8 +331,8 @@ public class NavegaPredictivo implements ActionListener {
         JSplitPane splitPanel=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT
 //        		,false  //si al mover la barra componentes se refrescan continuamente
         		,true  //si al mover la barra componentes se refrescan continuamente
-        		,jspNumeros
-        		,tbPanel
+        		,tbPanelIzdo
+        		,tbPanelDecho
         );
 
         ventanaPrincipal.getContentPane().add(splitPanel, BorderLayout.CENTER);
@@ -386,9 +403,57 @@ public class NavegaPredictivo implements ActionListener {
             }
         };
         thRefresco.start();
+        
+        // ponemos popups en las tabs
+        tbPanelDecho.addMouseListener(new MouseAdapter() {
+    		public void mousePressed(MouseEvent me)
+    		{
+    			maybeShowPopup(me);
+    		}
+
+    		public void mouseReleased(MouseEvent me)
+    		{
+    			maybeShowPopup(me);
+    		}
+    	});
+        tbPanelIzdo.addMouseListener(new MouseAdapter() {
+    		public void mousePressed(MouseEvent me)
+    		{
+    			maybeShowPopup(me);
+    		}
+
+    		public void mouseReleased(MouseEvent me)
+    		{
+//    			maybeShowPopup(me);
+    		}
+    	});
     }
 
-    public void SacaDimensiones() {
+    // Sacado de http://forums.sun.com/thread.jspa?forumID=257&threadID=372811
+    private void maybeShowPopup(final MouseEvent me)
+	{
+		if (me.isPopupTrigger() 
+				&& ((JTabbedPane)me.getSource()).getTabCount()>0) {
+			JPopupMenu popup = new JPopupMenu();
+			JMenuItem item = new JMenuItem("Cambia de pestaña de lado");
+			popup.add(item);
+			item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e)
+					{
+						JTabbedPane tabbed = (JTabbedPane)me.getSource();
+						int i = tabbed.getSelectedIndex();
+						if(tabbed==tbPanelDecho) {
+							tbPanelIzdo.add(tabbed.getTitleAt(i),tabbed.getComponent(i));
+						} else 
+							tbPanelDecho.add(tabbed.getTitleAt(i),tabbed.getComponent(i));
+						tabbed.remove(i);
+					}
+				});
+			popup.show(me.getComponent(), me.getX(), me.getY());
+		}
+	}    
+
+	public void SacaDimensiones() {
     	//vemos tamaños de panel predictivo
     	System.out.println("Predictivo:");
     	for(int i=0; i<pmp.getComponentCount(); i++) {
@@ -693,7 +758,7 @@ public class NavegaPredictivo implements ActionListener {
             puertos = args;
         }
         NavegaPredictivo na = new NavegaPredictivo(puertos);
-        na.camina();
+//        na.camina();
     }
 
 
