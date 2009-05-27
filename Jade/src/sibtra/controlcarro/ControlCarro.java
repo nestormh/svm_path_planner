@@ -52,8 +52,8 @@ public class ControlCarro implements SerialPortEventListener {
 	private boolean open;
 
 	/** Punto central del volante del vehiculo */
-	public final static int CARRO_CENTRO = 5280;
-
+//	public final static int CARRO_CENTRO = 5280;
+	public final static int CARRO_CENTRO = 2640;
 	/** Maximo comando en el avance */
 	public final static int MINAVANCE = 100;
 	/** Minimo comando en el avance */

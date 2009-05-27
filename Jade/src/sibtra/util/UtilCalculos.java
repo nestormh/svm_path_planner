@@ -255,6 +255,8 @@ public class UtilCalculos {
 	 * ruta más cercano al punto pos
 	 */
 	public static int indiceMasCercanoOptimizado(double[][] ruta, boolean esCerrada,double[] pos,int indMinAnt){
+		if(pos==null)
+			throw new IllegalArgumentException("Vector de posición pasado es NULL");
 		return indiceMasCercanoOptimizado(ruta, esCerrada, pos[0], pos[1], indMinAnt);
 	}
 }

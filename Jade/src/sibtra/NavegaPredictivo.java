@@ -4,7 +4,6 @@ package sibtra;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +13,6 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -33,7 +31,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 
 import sibtra.controlcarro.ControlCarro;
@@ -276,7 +273,7 @@ public class NavegaPredictivo implements ActionListener {
     		JCheckBox jcbNavegando = new JCheckBox(actNavegar);
     		jpSur.add(jcbNavegando);
     		//Checkbox para frenar
-    		JCheckBox jcbFrenando = new JCheckBox("Frenar");
+    		JCheckBox jcbFrenando = new JCheckBox(actFrenar);
     		jpSur.add(jcbFrenando);
     		//Spinner para fijar la distancia de frenado
     		double value = 5;
@@ -308,37 +305,21 @@ public class NavegaPredictivo implements ActionListener {
     	
     	//Solapas del lado izquierdo ===============================================
         tbPanelIzdo=new JTabbedPane();
-
     	//Panel datos numéricos se colacará a la izda del split panel
-    	JPanel panelNumeros = new JPanel();
-        {
 
-        	//paneles uno debajo del otro
-        	panelNumeros.setLayout(new BoxLayout(panelNumeros, BoxLayout.PAGE_AXIS));
+        //Panel del GPS
+        pgt = new PanelGPSTriumph(conGPS);
+        pgt.actualizaGPS(new GPSData());
+        tbPanelIzdo.add("GPS",new JScrollPane(pgt));
 
-        	//Panel del GPS
-        	pgt = new PanelGPSTriumph(conGPS);
-        	pgt.setBorder(BorderFactory.createTitledBorder("GPS"));
-        	pgt.actualizaGPS(new GPSData());
-        	panelNumeros.add(pgt);
+        //Panel del Coche
+        pmCoche=new PanelCarro(contCarro);
+        tbPanelIzdo.add("Coche",new JScrollPane(pmCoche));
 
-        	//Panel del Coche
-        	pmCoche=new PanelCarro(contCarro);
-        	pmCoche.setBorder(BorderFactory.createTitledBorder("COCHE"));
-        	panelNumeros.add(pmCoche);
-        	
-        	//Panel de la Imu
-        	pmai = new PanelMuestraAngulosIMU();
-        	pmai.setBorder(BorderFactory.createTitledBorder("IMU"));
-        	pmai.actualizaAngulo(new AngulosIMU(0, 0, 0, 0));
-        	panelNumeros.add(pmai);
-        	
-        }
-        JScrollPane jspNumeros=new JScrollPane(panelNumeros
-				,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED
-				,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        
-        tbPanelIzdo.add("Numeros",jspNumeros);
+        //Panel de la Imu
+        pmai = new PanelMuestraAngulosIMU();
+        pmai.actualizaAngulo(new AngulosIMU(0, 0, 0, 0));
+        tbPanelIzdo.add("IMU",new JScrollPane(pmai));
         
         panGrabar=new PanelGrabarRuta(conGPS,actGrabarRuta,actPararGrabarRuta);
         panGrabar.setEnabled(true);
@@ -375,16 +356,9 @@ public class NavegaPredictivo implements ActionListener {
         tbPanelDecho.add("Loggers",new JScrollPane(pmLog));
 
         
-        //(panelNumeros.setPreferredSize(new Dimension(500,600));
         
-//        System.err.println("Panel Numeros Prefferred size :"+panelNumeros.getPreferredSize());
-//        System.err.println("Panel Numeros minimun size :"+panelNumeros.getMinimumSize());
-//        System.err.println("Panel scroll Prefferred size :"+jspNumeros.getPreferredSize());
-//        System.err.println("Panel scroll  minimun size :"+jspNumeros.getMinimumSize());
-        tbPanelDecho.setPreferredSize(new Dimension(500,600));
-        tbPanelDecho.setMinimumSize(new Dimension(100,600));
-//        System.err.println("Panel Tabbed Prefferred size :"+tbPanel.getPreferredSize());
-//        System.err.println("Panel Tabbed minimun size :"+tbPanel.getMinimumSize());
+//        tbPanelDecho.setPreferredSize(new Dimension(500,600));
+//        tbPanelDecho.setMinimumSize(new Dimension(100,600));
 
     	//split panel en el centro de la ventana principal
         JSplitPane splitPanel=new JSplitPane(JSplitPane.HORIZONTAL_SPLIT
@@ -418,7 +392,7 @@ public class NavegaPredictivo implements ActionListener {
         	menuAcciones.addSeparator();
         	menuAcciones.add(new JMenuItem(actGrabarRuta));
         	menuAcciones.add(new JMenuItem(actPararGrabarRuta));
-        	barra.add(menuArchivo);
+        	barra.add(menuAcciones);
         	
         	ventanaPrincipal.setJMenuBar(barra); //ponemos barra en la ventana
         }
@@ -440,13 +414,10 @@ public class NavegaPredictivo implements ActionListener {
         	//Checkbox para navegar
         	JCheckBox jcbNavegandoP = new JCheckBox(actNavegar);
         	jcbNavegandoP.setFont(jcbNavegandoP.getFont().deriveFont(80.0f));
-        	jcbNavegandoP.setSelected(true);
         	central.add(jcbNavegandoP);
         	//Checkbox para frenar
-        	JCheckBox jcbFrenandoP = new JCheckBox("Frenar");
+        	JCheckBox jcbFrenandoP = new JCheckBox(actFrenar);
         	jcbFrenandoP.setFont(jcbNavegandoP.getFont().deriveFont(80.0f));
-        	jcbFrenandoP.setSelected(true);
-//      	jcbFrenandoP.addActionListener(this);
         	central.add(jcbFrenandoP);
         	
         	JButton jbSaca=new JButton("Dimesiones");
@@ -508,7 +479,7 @@ public class NavegaPredictivo implements ActionListener {
     	             ptoAct[0]=pa.getXLocal(); ptoAct[1]=pa.getYLocal();
     	             angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
     	            }
-    				if (mi != null ) {
+    				if (mi != null && ptoAct!=null) {
     					//calculamos distancia a obstáculo más cercano
     					distRF = mi.masCercano(ptoAct, angAct, ba);
     				} else {
@@ -574,7 +545,7 @@ public class NavegaPredictivo implements ActionListener {
     			&& (pest.getSelectedIndex()<pest.getTabCount())
     	) {
     		JPopupMenu popup = new JPopupMenu();
-    		JMenuItem item = new JMenuItem("Cambia de pestaÃ±a de lado");
+    		JMenuItem item = new JMenuItem("Cambia de pestaña de lado");
     		popup.add(item);
     		item.addActionListener(new ActionListener() {
     			public void actionPerformed(ActionEvent e)
@@ -831,7 +802,7 @@ public class NavegaPredictivo implements ActionListener {
              ptoAct[0]=pa.getXLocal(); ptoAct[1]=pa.getYLocal();
              angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + desMag;
             }
-            if (navegando) { //sólo se debe activar si hay ruta 
+            if (navegando && ptoAct!=null) { //sólo se debe activar si hay ruta 
 
                 double volante = contCarro.getAnguloVolante();
                 // Con esta linea realimentamos la información de los sensores al modelo
