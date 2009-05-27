@@ -239,6 +239,7 @@ public class NavegaPredictivo implements ActionListener {
         			navegando=false;
         			actGrabarRuta.setEnabled(true); //ahora podemos grabar
         			actFrenar.setEnabled(false); //no se puede frenar cuando se está navegando
+        			contCarro.stopControlVel(); //Paramos el control del carro
         		}
         	}
         };
@@ -747,7 +748,7 @@ public class NavegaPredictivo implements ActionListener {
 
         System.out.println("Longitud de la trayectoria=" + Tr.length);
 
-        mi = new MiraObstaculo(Tr);
+        mi = new MiraObstaculo(Tr,rutaEspacial.esRutaCerrada());
 //        mi.nuevaPosicion(); 
         pmo.setMiraObstaculo(mi);
         pmoS.setMiraObstaculo(mi);
