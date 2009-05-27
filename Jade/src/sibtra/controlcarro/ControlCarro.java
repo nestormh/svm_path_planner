@@ -48,12 +48,10 @@ public class ControlCarro implements SerialPortEventListener {
 	 * funcione correctamente /
 	 */
 
+
 	/** Para saber si el puerto serial está abierto */
 	private boolean open;
 
-	/** Punto central del volante del vehiculo */
-//	public final static int CARRO_CENTRO = 5280;
-	public final static int CARRO_CENTRO = 2640;
 	/** Maximo comando en el avance */
 	public final static int MINAVANCE = 100;
 	/** Minimo comando en el avance */
@@ -64,8 +62,15 @@ public class ControlCarro implements SerialPortEventListener {
 
 	// public static final double RADIANES_POR_CUENTA =
 	// 2*Math.PI/MAX_CUENTA_VOLANTE;
+	/** Punto central del volante del vehiculo */
+//	public final static int CARRO_CENTRO = 5280;
+	// 2927, 3188, 3897
+	public final static int CARRO_CENTRO = 3720;
 	/** Radianes que suponen cada cuenta del sensor del volante */
-	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374 / (5280 - 3300);
+//	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374 / (CARRO_CENTRO - 3300);
+	private static int CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO=2156;
+	public static final double RADIANES_POR_CUENTA 
+		= Math.toRadians(15) / (CARRO_CENTRO - CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO);
 
 	/** Periodo de envío de mensajes por parte del PIC ¿? */
 	static double T = 0.096; // Version anterior 0.087
