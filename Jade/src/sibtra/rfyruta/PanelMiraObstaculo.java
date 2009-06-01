@@ -357,7 +357,8 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 		}
 		
 		double [][] Tr=rutaEspacial.toTr();
-		System.out.println("Longitud de la trayectoria="+Tr.length);
+		System.out.println("Longitud de la trayectoria="+Tr.length
+				+" es cerrad="+rutaEspacial.esRutaCerrada());
 
 		MiraObstaculo mi=new MiraObstaculo(Tr,rutaEspacial.esRutaCerrada());
 		PanelMiraObstaculo pmo=null;

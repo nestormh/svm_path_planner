@@ -65,12 +65,14 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Punto central del volante del vehiculo */
 //	public final static int CARRO_CENTRO = 5280;
 	// 2927, 3188, 3897
-	public final static int CARRO_CENTRO = 3720;
+	public final static int CARRO_CENTRO = 3800;
 	/** Radianes que suponen cada cuenta del sensor del volante */
 //	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374 / (CARRO_CENTRO - 3300);
 	private static int CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO=2156;
+//	public static final double RADIANES_POR_CUENTA 
+//		= Math.toRadians(15) / (CARRO_CENTRO - CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO);
 	public static final double RADIANES_POR_CUENTA 
-		= Math.toRadians(15) / (CARRO_CENTRO - CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO);
+	= Math.toRadians(45) / CARRO_CENTRO ;
 
 	/** Periodo de envío de mensajes por parte del PIC ¿? */
 	static double T = 0.096; // Version anterior 0.087

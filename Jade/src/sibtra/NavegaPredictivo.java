@@ -187,7 +187,7 @@ public class NavegaPredictivo implements ActionListener {
         try {
             manLMS = new ManejaLMS(args[2]);
             manLMS.setDistanciaMaxima(80);
-            manLMS.setResolucionAngular((short)100);
+//            manLMS.setResolucionAngular((short)100);
             manLMS.CambiaAModo25();
 
         } catch (LMSException e) {
@@ -496,7 +496,8 @@ public class NavegaPredictivo implements ActionListener {
     		}
     	};
     	try {
-    		manLMS.pideBarridoContinuo((short)0, (short)180, (short)1);
+    		//TODO Para acortar barrido
+    		manLMS.pideBarridoContinuo((short)10, (short)170, (short)1);
     		while(!manLMS.yaRecibiendoBarridoContinuo())
     			try {Thread.sleep(1000);} catch (Exception e) {}
     	} catch (LMSException e) {
