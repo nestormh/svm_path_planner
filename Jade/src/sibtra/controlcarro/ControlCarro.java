@@ -854,7 +854,8 @@ public class ControlCarro implements SerialPortEventListener {
 		//derivativo como y(k)-y(k-2)
 		double derivativo = error - errorAnt +  derivativoAnt;
 
-		if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
+		//No acumularmos error cuando comando saturado en uno u otro sentido
+		if ((comandoAnt > -255 )&& (comandoAnt < 254 ))
 			integral += errorAnt;
 
 		double comandotemp = kPAvance * error + kDAvance * derivativo + kIAvance * integral;
@@ -865,8 +866,8 @@ public class ControlCarro implements SerialPortEventListener {
 		comando=comandoAnt+IncComando;
 		//Limitamos el comando maximo a aplicar
 		comando=UtilCalculos.limita(comando, -255, 255);
-		//umbralizamos la zona muerta
-		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 80, -1);
+		//umbralizamos la zona muerta, Vemos que a 60 ya camina algo
+		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 60, -1);
 //				, -90/FactorFreno+comandoAnt);  //TODO da valores positivos
 		
 
