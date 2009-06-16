@@ -31,6 +31,7 @@ import javax.swing.event.ChangeListener;
 
 import sibtra.gps.Ruta;
 import sibtra.log.Logger;
+import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerDouble;
 import sibtra.log.LoggerFactory;
 import sibtra.log.VentanaLoggers;
@@ -388,9 +389,13 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 //		for (int i = 0; i < rutaPrueba.length; i++) {
         pmp.actualiza();
         LoggerDouble lgCV=LoggerFactory.nuevoLoggerDouble(controlador, "comandoVolante", 1000/250);
-        LoggerDouble lgError=LoggerFactory.nuevoLoggerDouble(controlador, "error", 1000/250);
+        LoggerArrayDoubles lgError=LoggerFactory.nuevoLoggerArrayDoubles(controlador, "error", 1000/250);
+        lgError.setDescripcion("[error angular,error laterar]");
         Logger lgInstantes=LoggerFactory.nuevoLoggerTiempo(controlador, "Ciclo");
-        Logger lgNoUsado=LoggerFactory.nuevoLoggerDouble(controlador,"NoUsado");
+        LoggerArrayDoubles lgTrayectoria=LoggerFactory.nuevoLoggerArrayDoubles(controlador,"Posicion");
+        lgTrayectoria.setDescripcion("[pos X, Pos y]");
+        LoggerArrayDoubles lgDeseada=LoggerFactory.nuevoLoggerArrayDoubles(controlador, "Deseada");
+        lgDeseada.setDescripcion("Punto más cercano [X,Y]");
         Logger lgParadas=null;
         
         //Una ves definidos todos, abrimos ventana de Loggers
@@ -416,13 +421,16 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                 carroOri.setConsignaVolante(comandoVolante);
                 carroViejo.setConsignaVolante(comandoVolante);   
                 carroOri.setPostura(carroOri.getX(),carroOri.getY(),carroOri.getTita(),carroOri.getVolante());
+                lgTrayectoria.add(carroOri.getX(),carroOri.getY());
                 carroOri.calculaEvolucion(comandoVolante, 2, 0.2);
                 carroViejo.calculaEvolucion(comandoVolante, 2, 0.2);
                 //indice = ControlPredictivo.calculaDistMinOptimizado(rutaPrueba, carroOri.getX(), carroOri.getY(), indice);
                 indice = UtilCalculos.indiceMasCercano(rutaPrueba, carroOri.getX(), carroOri.getY());
+                indice=controlador.indMinAnt;
 //                System.out.println(indice);
-                double error = rutaPruebaRellena[indice][2] - carroOri.getTita();
-                lgError.add(error);
+                double errorAngular = rutaPruebaRellena[indice][2] - carroOri.getTita();
+                lgError.add(errorAngular, controlador.distanciaLateral);
+                lgDeseada.add(rutaPruebaRellena[indice][0],rutaPruebaRellena[indice][1]);
                 //System.out.println("Error " + error);
                 pmp.actualiza();
             } else {
