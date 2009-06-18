@@ -6,7 +6,6 @@
 package sibtra.util;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -220,14 +219,20 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 					}
 				}
 				
-				//cemicírculo central
+				//cemicírculo central del ancho del coche
+				Point2D.Double pxAncho=point2Pixel(-Parametros.medioAnchoCarro,Parametros.medioAnchoCarro);
 				g.setStroke(new BasicStroke());
 				g.setColor(Color.WHITE);
-				g.draw(new Arc2D.Double(pxCentro.getX()-TamMarca/2, pxCentro.getY()-TamMarca/2 //esquina rectángulo
-						, TamMarca, TamMarca //Tamaño rectángulo
-						, 0, 180 //rango de ángulos
-						,Arc2D.CHORD //ralla entre los extremos
-				));
+				g.draw(new Arc2D.Double(pxAncho.x,pxAncho.y
+						,(pxCentro.x-pxAncho.x)*2,(pxCentro.y-pxAncho.y)*2
+						,0,180
+						,Arc2D.CHORD
+						));
+//				g.draw(new Arc2D.Double(pxCentro.getX()-TamMarca/2, pxCentro.getY()-TamMarca/2 //esquina rectángulo
+//						, TamMarca, TamMarca //Tamaño rectángulo
+//						, 0, 180 //rango de ángulos
+//						,Arc2D.CHORD //ralla entre los extremos
+//				));
 				cosasAPintar(g0);
 			}
 		};

@@ -242,7 +242,7 @@ public class MiraObstaculo {
 		//punto de la trayectoria más cercano a la posición local
 		indiceCoche=UtilCalculos.indiceMasCercanoOptimizado(Tr, esCerrada, posicionLocal, indiceCoche);
 		
-		double distATr=distanciaPuntos(posicionLocal, Tr[indiceCoche]);
+		double distATr=UtilCalculos.distanciaPuntos(posicionLocal, Tr[indiceCoche]);
 		//El coche solo puede estar en el segmento del más cercano o en el anterior
 		if ((indiceCoche==(Tr.length-1) && !esCerrada) 
 				|| !dentroSegmento(posicionLocal, indiceCoche))
@@ -299,7 +299,7 @@ public class MiraObstaculo {
 					angI=UtilCalculos.anguloVectores(v, vI);
 					seFueCamino=Math.abs(angI)>PI_2 ||  (angI+PI_2)<AngIniB;
 				} while(
-						(alcanzable=(largoVector(vD)<=barrAct.getDistanciaMaxima())) //se alcance
+						(alcanzable=(UtilCalculos.largoVector(vD)<=barrAct.getDistanciaMaxima())) //se alcance
 						&& !enRango //no hayamos entrado en rango
 						&& !seFueCamino //no se haya ido todo el camino del rango del RF
 						&& (esCerrada || iptoDini<(Bd.length-1)) //no se haya acabado la trayectoria
@@ -334,7 +334,7 @@ public class MiraObstaculo {
 					angD=UtilCalculos.anguloVectores(v, vD);
 					seFueCamino=Math.abs(angD)>PI_2 ||  (angD+PI_2)>AngFinB;
 				} while(
-						(alcanzable=(largoVector(v2)<=barrAct.getDistanciaMaxima()))
+						(alcanzable=(UtilCalculos.largoVector(v2)<=barrAct.getDistanciaMaxima()))
 						&& !enRango
 						&& !seFueCamino //no se haya ido todo el camino del rango del RF						
 						&& (esCerrada || iptoIini<(Bi.length-1))
@@ -368,7 +368,7 @@ public class MiraObstaculo {
 				iptoD=(iptoD+1)%Bd.length; //incrementamos ciclando por si es cerrada
 				double AngDant=AngD;
 				double[] v2D={Bd[iptoD][0]-posicionLocal[0], Bd[iptoD][1]-posicionLocal[1]};
-				double DistD=largoVector(v2D);
+				double DistD=UtilCalculos.largoVector(v2D);
 				AngD=UtilCalculos.anguloVectores(v, v2D)+PI_2; //ya que 0º está 90º a la derecha
 				if (AngD<AngDant) {
 					log("El camino gira Decha Dejamos derecha");
@@ -406,7 +406,7 @@ public class MiraObstaculo {
 				iptoI=(iptoI+1)%Bi.length; //incrementamos ciclando por si es cerrada
 				double AngIant=AngI;
 				double[] v2I={Bi[iptoI][0]-posicionLocal[0], Bi[iptoI][1]-posicionLocal[1]};
-				double DistI=largoVector(v2I);
+				double DistI=UtilCalculos.largoVector(v2I);
 				AngI=UtilCalculos.anguloVectores(v, v2I)+PI_2; //ya que 0º está 90º a la derecha
 				if (AngI>AngIant) {
 					log("El camino gira Izquierda. Dejamos izquierda");
@@ -458,13 +458,13 @@ public class MiraObstaculo {
 			log("los rayos se han cruzado y no hay colisión en los 2 o alguno no se a iniciado");
 			if(ColIzda) {
 				//usamos el punto de la trayectoria hasta donde podemos llegar
-				dist=-distanciaPuntos(Tr[iLibre=iptoI],posActual);
+				dist=-UtilCalculos.distanciaPuntos(Tr[iLibre=iptoI],posActual);
 				//Tenemos que buscar pto dentro del camino más cercano
 				if(!buscaSegmentoObstaculo(posicionLocal, 0, iAI))
 					//usamos hasta donde hemos podido explorar
 					indSegObs=iptoI;
 			} else  if(ColDecha) {
-				dist=-distanciaPuntos(Tr[iLibre=iptoD],posActual);
+				dist=-UtilCalculos.distanciaPuntos(Tr[iLibre=iptoD],posActual);
 				//Tenemos que buscar pto dentro del camino más cercano
 				if(!buscaSegmentoObstaculo(posicionLocal, iAD, barr.numDatos()-1))
 					//usamos hasta donde hemos podido explorar
@@ -475,7 +475,7 @@ public class MiraObstaculo {
 				//Si alguno no iniciado su índice será negativo
 				iLibre=indSegObs=(iptoD<iptoI)?iptoI:iptoD;
 				indBarrSegObs=Integer.MAX_VALUE;
-				dist=-distanciaPuntos(Tr[iLibre],posActual);
+				dist=-UtilCalculos.distanciaPuntos(Tr[iLibre],posActual);
 				encontradoSegObs=false;
 			}
 		}
@@ -552,18 +552,6 @@ public class MiraObstaculo {
 			System.out.println(string);		
 	}
 
-	/** @return largo euclídeo del vector */
-	public static double largoVector(double[] d) {
-		return Math.sqrt(d[0]*d[0]+d[1]*d[1]);
-	}
-
-	/** @return distancia ecuclídea entre p1 y p2	 */
-	public static double distanciaPuntos(double[] p1, double[] p2) {
-		double[] d={p1[0]-p2[0], p1[1]-p2[1]};
-		return largoVector(d);
-	}
-
-	
 	/**
 	 * Dice si pto pasado esta en cuadrilátero de la trayectoria.
 	 * Lo hacemos dividiendo cuadrilátero en dos triangulos y determiando si punto pertenece a alguno de los triangulos.
@@ -657,7 +645,7 @@ public class MiraObstaculo {
 		double largo=0;
 		for(int i=iini; i!=ifin; i=(i+1)%Tr.length) {
 			double[] v={Tr[(i+1)%Tr.length][0]-Tr[i][0], Tr[(i+1)%Tr.length][1]-Tr[i][1]}; 
-			largo+=largoVector(v);
+			largo+=UtilCalculos.largoVector(v);
 		}
 		return largo;
 	}

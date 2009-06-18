@@ -25,6 +25,7 @@ import sibtra.lms.ZonaLMS;
 import sibtra.lms.ZonaRadialLMS;
 import sibtra.lms.ZonaRectangularLMS;
 import sibtra.lms.ZonaSegmentadaLMS;
+import sibtra.util.UtilCalculos;
 
 @SuppressWarnings("serial")
 public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
@@ -112,7 +113,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 			pxB=pointReal2pixel(MI.Bd[MI.iptoDini]);
 			gpBd.moveTo((float)pxB.getX(), (float)pxB.getY());
 			for(int i=MI.iptoDini+1; i<MI.Bd.length 
-			&& MiraObstaculo.distanciaPuntos(MI.Bd[i],MI.posActual)<distanciaVista; i++) {
+			&& UtilCalculos.distanciaPuntos(MI.Bd[i],MI.posActual)<distanciaVista; i++) {
 				pxB=pointReal2pixel(MI.Bd[i]);
 				gpBd.lineTo((float)pxB.getX(), (float)pxB.getY());
 			}
@@ -124,7 +125,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 			pxB=pointReal2pixel(MI.Bi[MI.iptoIini]);
 			gpBi.moveTo((float)pxB.getX(), (float)pxB.getY());
 			for(int i=MI.iptoIini+1; i<MI.Bi.length 
-			&& MiraObstaculo.distanciaPuntos(MI.Bi[i],MI.posActual)<distanciaVista; i++) {
+			&& UtilCalculos.distanciaPuntos(MI.Bi[i],MI.posActual)<distanciaVista; i++) {
 				pxB=pointReal2pixel(MI.Bi[i]);
 				gpBi.lineTo((float)pxB.getX(), (float)pxB.getY());
 			}
@@ -136,7 +137,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 			pxB=pointReal2pixel(MI.Tr[MI.indiceCoche]);
 			gpTr.moveTo((float)pxB.getX(), (float)pxB.getY());
 			for(int i=MI.indiceCoche+1; i<MI.Tr.length 
-			&& MiraObstaculo.distanciaPuntos(MI.Tr[i],MI.posActual)<distanciaVista; i++) {
+			&& UtilCalculos.distanciaPuntos(MI.Tr[i],MI.posActual)<distanciaVista; i++) {
 				pxB=pointReal2pixel(MI.Tr[i]);
 				gpTr.lineTo((float)pxB.getX(), (float)pxB.getY());
 			}
