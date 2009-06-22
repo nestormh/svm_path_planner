@@ -37,6 +37,7 @@ public class FuturoObstaculo {
 	int indMin;
 	/** Barrido que se usó en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
 	BarridoAngular bAct;
+	double distanciaObs;
 
 	public FuturoObstaculo() {
 		
@@ -49,16 +50,14 @@ public class FuturoObstaculo {
 	 * @param barr barrido obtenido del RF
 	 * @return los segundos hasta siguiente obstáculo. Será infinito si no se encuentra 
 	 */
-	public double tiempoAObstaculo(double alfa, double velMS, BarridoAngular barr) {
+	public double distanciaAObstaculo(double alfa, BarridoAngular barr) {
 		//copiamos los valores pasados
 		bAct=barr;
 		alfaAct=alfa;
-		velMSAct=velMS;
 		if(Math.abs(alfa)>Math.toRadians(0.1)) {
 			//la orientación no es 0: Caso general
 			signoAlfa=Math.signum(alfa);
 			radioCur=Parametros.batalla*signoAlfa/Math.tan(alfa);
-			velAngular=velMS/radioCur;
 			
 			radioInterior=radioCur-Parametros.medioAnchoCarro;
 			double esquinaExterior[]={Parametros.distRFEje , -(radioCur+Parametros.medioAnchoCarro)*signoAlfa};
@@ -85,15 +84,16 @@ public class FuturoObstaculo {
 			}
 			if(indMin<0) {
 				//no hay ningún punto en zona peligrosa
-				return Double.POSITIVE_INFINITY;
+				//damos la distancia de lo que vemos
+				angMin=-anguloInterior;
+//				return Double.POSITIVE_INFINITY;
 			}
 			//Tenemos un punto, calculamos tiempo al mismo
 			double angAvance=angMin-anguloInterior;
-			return angAvance/velAngular;
+			return distanciaObs=(angAvance*radioCur);
 		} else { 
 			//la orientación en practicamente 0
 			radioCur=Double.POSITIVE_INFINITY;
-			velAngular=velMS;
 			double distMin=Double.POSITIVE_INFINITY;
 			indMin=-1;
 			for(int iPtoA=0; iPtoA<barr.numDatos();iPtoA++) {
@@ -108,9 +108,9 @@ public class FuturoObstaculo {
 			}
 			if(indMin<0) {
 				System.err.println("ABSURDO: No hay minimo con alfa=0");
-				return Double.POSITIVE_INFINITY;
+				return distanciaObs=Double.NaN;
 			}
-			return distMin/velMS;
+			return distanciaObs=distMin;
 		}
 	}
 
@@ -122,4 +122,11 @@ public class FuturoObstaculo {
 				, -distancia*Math.cos(angulo)-radioCur*signoAlfa};
 		return pos;
 	}
+	
+	public double tiempoAObstaculo(double velMS) {
+		velAngular=velMS/radioCur;
+		return distanciaObs/velMS;
+	}
+
+
 }

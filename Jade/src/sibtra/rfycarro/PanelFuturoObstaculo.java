@@ -3,22 +3,27 @@ package sibtra.rfycarro;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.PanelMuestraBarrido;
+import sibtra.util.PanelFlow;
 import sibtra.util.Parametros;
 
 /**
@@ -32,10 +37,37 @@ public class PanelFuturoObstaculo extends PanelMuestraBarrido {
 	FuturoObstaculo futObs;
 	/** Tamaño de la marca del punto más cercano */
 	double TamCruz=10;
+	private JLabel jlDistLin;
+	private JProgressBar jpbDistancia;
 	
 	public PanelFuturoObstaculo(FuturoObstaculo fo) {
 		super((short) 80);
 		futObs=fo;
+
+		JLabel jla=null;
+		Border blackline = BorderFactory.createLineBorder(Color.black);
+		{//nuevo panel para añadir debajo
+			JPanel jpPre=new PanelFlow();
+			
+			jla=jlDistLin=new JLabel("   ??.???");
+		    Font Grande = jla.getFont().deriveFont(20.0f);
+			jla.setBorder(BorderFactory.createTitledBorder(
+				       blackline, "Dist Libre"));
+		    jla.setFont(Grande);
+			jla.setHorizontalAlignment(JLabel.CENTER);
+			jla.setEnabled(false);
+//			jla.setMinimumSize(new Dimension(300, 20));
+			jla.setPreferredSize(new Dimension(130, 45));
+			jpPre.add(jla);
+			
+			jpbDistancia=new JProgressBar(JProgressBar.HORIZONTAL,0,80);
+			//TODO que el largo se ajuste a todo lo que quede de espacio
+			jpbDistancia.setPreferredSize(new Dimension(800,20));
+			jpPre.add(jpbDistancia);
+			
+			add(jpPre);
+		}
+			
 		
 	}
 
@@ -90,6 +122,24 @@ public class PanelFuturoObstaculo extends PanelMuestraBarrido {
 	}
 	
 	/**
+	 * Acatualiza la presentación con los datos en {@link #MI}.
+	 * Se debe invocar cuando {@link #MI} realiza un nuevo cálculo. 
+	 */
+	public void actualiza() {
+		if(futObs!=null) {
+			jlDistLin.setText(String.format("%5.2f", futObs.distanciaObs));
+			jlDistLin.setEnabled(true);
+			jpbDistancia.setValue((int)futObs.distanciaObs);
+			jpbDistancia.setEnabled(false);
+		} else {
+			jlDistLin.setEnabled(false);
+			jpbDistancia.setEnabled(false);
+		}
+		
+		super.actualiza();
+	}
+	
+	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -98,7 +148,7 @@ public class PanelFuturoObstaculo extends PanelMuestraBarrido {
 		final SpinnerNumberModel spnAlfa;
 		final SpinnerNumberModel spnVel;
 		final BarridoAngular ba;
-		//Damos pto, orientación y barrido
+
 		ba=new BarridoAngular(181,0,4,(byte)2,false,(short)2);
 		for(int i=0;i<ba.numDatos();i++) {
 //			ba.datos[i]=(short)((15.0)*100.0);
@@ -117,19 +167,27 @@ public class PanelFuturoObstaculo extends PanelMuestraBarrido {
 			JSpinner jsAlfa=new JSpinner(spnAlfa);
 			jpSur.add(jsAlfa);
 			
-			spnVel=new SpinnerNumberModel(1,0,6,0.5);
+			spnVel=new SpinnerNumberModel(1.0,0.0,6.0,0.5);
 			JSpinner jsVel=new JSpinner(spnVel);
 			jpSur.add(jsVel);
-			final JLabel jlTiempo;
-			jlTiempo=new JLabel("Tiempo= ###.## sg");
-			jpSur.add(jlTiempo);
+			final JLabel jlDistancia;
+			jlDistancia=new JLabel("Distancia= ###.## m Tiempo=###.## sg");
+			jpSur.add(jlDistancia);
 			
 			ChangeListener chL=new ChangeListener() {
 				public void stateChanged(ChangeEvent arg0) {
 					double alfa=Math.toRadians(spnAlfa.getNumber().doubleValue());
 					double velMS=spnVel.getNumber().doubleValue();
-					double tiempo=fo.tiempoAObstaculo(alfa, velMS, ba);
-					jlTiempo.setText(String.format("Tiempo= %5.2f sg", tiempo));
+					double largo=60.0*Math.random();
+					for(int i=0;i<ba.numDatos();i++) {
+//						ba.datos[i]=(short)((15.0)*100.0);
+//						ba.datos[i]=(short)((Math.sin((double)i/(ba.numDatos()-1)*Math.PI*13.6)*3.0+10.0)*100.0);
+						ba.datos[i]=(short)((Math.sin((double)i/(ba.numDatos()-1)*Math.PI*13.6)*3.0
+								+largo)*100.0);
+					}					
+					double distancia=fo.distanciaAObstaculo(alfa, ba);
+					jlDistancia.setText(String.format("Distancia= %5.2f m Tiempo=%5.2f sg"
+							, distancia,fo.tiempoAObstaculo(velMS)));
 					pfo.actualiza();
 				}
 			};
@@ -138,14 +196,13 @@ public class PanelFuturoObstaculo extends PanelMuestraBarrido {
 			spnVel.addChangeListener(chL);
 			
 			ventana.getContentPane().add(jpSur, BorderLayout.SOUTH);
-			
 		}
 			
 		
 		ventana.setSize(new Dimension(800,600));
 		ventana.setVisible(true);
-		
-		double tiempo=fo.tiempoAObstaculo(Math.toRadians(10), 1, ba);
+
+		fo.distanciaAObstaculo(Math.toRadians(10), ba);
 		pfo.setBarrido(ba);
 		pfo.actualiza();
 
