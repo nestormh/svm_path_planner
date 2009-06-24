@@ -70,6 +70,10 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 
 	private JButton jbParaControl;
 
+	private SpinnerNumberModel jspMAvance;
+
+	private JButton jbAplicaAvance;
+
 	public PanelCarro(ControlCarro cc) {
 		super();
 		contCarro=cc;
@@ -130,6 +134,17 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 			jBarraComVel.setValue(0);
 		}
 		
+		{// spiner consigna velocidad en m/s
+			jspMAvance=new SpinnerNumberModel(0,0,255,1);
+			JSpinner jspav=new JSpinner(jspMAvance);
+			añadeAPanel(jspav, "Avance");
+		}
+		{// Boton aplicar
+			jbAplicaAvance=new JButton("Aplicar");
+			añadeAPanel(jbAplicaAvance, "Avance");
+			jbAplicaAvance.addActionListener(this);
+		}
+
 		//Para masFrena
 		{// spiner fijar tiempo Frena
 			jspTiempoFrena=new SpinnerNumberModel(20,0,255,1);
@@ -214,6 +229,11 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		if(ev.getSource()==jbParaControl) {
 			contCarro.stopControlVel();
 			jbParaControl.setEnabled(false);
+		}
+		if(ev.getSource()==jbAplicaAvance) {
+			int fuerza=jspMAvance.getNumber().intValue();
+			contCarro.Avanza(fuerza);
+			System.out.println("Aplicado avance "+fuerza);
 		}
 	}
 

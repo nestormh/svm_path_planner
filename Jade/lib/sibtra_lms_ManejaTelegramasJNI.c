@@ -2,7 +2,7 @@
 /* Si queremos mensajes de depuración, descomentar */
 /*#define  INFO*/
 /* Si queremos los mensaje de error, descomentar la siguiente */
-/*#define ERR */
+/*#define ERR*/ 
 
 #include "sibtra_lms_ManejaTelegramasJNI.h"
 
@@ -50,6 +50,9 @@ int Inicializado=0;
 
 /*Guardarán las configuración del puerto*/
 struct termios oldtio,newtio;
+
+/* Para llevar la cuenta de los caracteres descartados por errores */
+int Descartados=0;
 
 /*
 Funcion para calcular el checksum
@@ -238,42 +241,52 @@ JNIEXPORT jboolean JNICALL Java_sibtra_lms_ManejaTelegramasJNI_setBaudrate
  */
 JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   (JNIEnv *env, jobject obj, jint milisTOut) {
-
   unsigned char *buf;
   int res;
   int len;  /*valor campo longitud*/
+  unsigned short crcCal; //CRC calculado para el mensaje
   jbyteArray jarray;
-
+  Descartados=0;
   if(!Inicializado)
     return JNI_FALSE;
 
-  	buf=Buffer;
-	buf[0]=0x06;
-
-	//Buffer para quitar los posibles confirmaciones iniciales
-  while((buf[0]==0x15) || (buf[0]==0x06) ) {
-		res=LeeTimeOut(fdSer,buf,1,milisTOut);   
-	  	if(res!=1) {
+  buf=Buffer;
+  res=0;
+  while(1) { //nos quedaremos mientras se consiga mensaje válido o haya timeout
+  	//bucle hasta encontrar el 0x02
+  	while(1) {  //nos quedaremos mientras no encontremos comienzo (o time out)
+  		if(res==0) { //No queda nada en buffer tenemos que leer
+			res=LeeTimeOut(fdSer,buf,1,milisTOut);   
+	  		if(res!=1) {
 #ifdef ERR
-	    fprintf(stderr,"\n\t\t\tJNI: Ha habido timeout (%d) esperando inicio mensaje: %d",milisTOut,res);
-	    fflush(stderr);
+	    	fprintf(stderr,"\n\t\t\tJNI: Ha habido timeout (%d) esperando inicio mensaje: %d",milisTOut,res);
+	    	fflush(stderr);
 #endif
-	    return JNI_FALSE;
-	  }
-	
-	  if(buf[0]==0x15) {
-	    ERROR("\n\t\t\tJNI: Es NO RECONOCIMIENTO (0x15)");
-	    continue;
-	  }
-	  if(buf[0]==0x06) {
-	    ERROR("\n\t\t\tJNI: Es reconocimiento (0x06)");
-	    continue;
-	  }
-  }
-  if(buf[0]!=0x02) {
-    ERROR("\n\t\t\tJNI: NO es comienzo de telegrama: ALGO RARO");
-    return JNI_FALSE;
-  }
+	    	return 0;
+			}
+	    }
+		if(buf[0]==0x02) {
+	    	//ya tenemos el (posible) comienzo
+	    	if(buf!=Buffer) {
+	    		//no estamos al comienzo, rodamos todo lo que tenemos
+	    		memmove(Buffer,buf,res);
+	    		buf=Buffer;
+	    	}
+	    	break; //salimos bucle búsqueda 0x02 
+	    }
+	    if(buf[0]==0x15) {
+			ERROR("\n\t\t\tJNI: Es NO RECONOCIMIENTO (0x15)");
+		}
+		if(buf[0]==0x06) {
+			ERROR("\n\t\t\tJNI: Es reconocimiento (0x06)");
+		}
+	    if(res>0) {
+	    	buf++; //avanzamos por el buffer
+	    	res--;
+	    }
+		Descartados++;
+  	}
+
 #ifdef INFO
   fprintf(stdout,"\n\t\t\tJNI:  STX: %02hhX;",buf[0]);
   fflush(stdout);
@@ -303,6 +316,15 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   fprintf(stdout,"\t\t\tJNI:  Len: %02hhX%02hhX (%d)",buf[3],buf[2],len);
   fflush(stdout);
 #endif
+
+	if((len+6)>TAMBUF) {
+		ERROR("\n\t\t\tJNI: Longitud calculada es muy grande");
+		//saltamos el 0x02 y volvemos a intentar
+		buf++;
+		res--;
+		Descartados++;
+		continue;
+	}
 
   /*Conseguimos el resto del mensaje*/
   while(res<(len+6)) {
@@ -352,13 +374,34 @@ JNIEXPORT jbyteArray JNICALL Java_sibtra_lms_ManejaTelegramasJNI_LeeMensaje
   }
 #endif
 
+	//comprobamos el CheckSum
+	crcCal=CalculaCRC(buf,res-2);
+	if(crcCal!=(unsigned short)((buf[res-1]<<8)|buf[res-2])) {
+#ifdef ERR
+		fprintf(stderr,"\n\t\t\tJNI: CRC resultó erroneo %02hhX%02hhX != %04hX"
+			,buf[res-1],buf[res-2],crcCal);
+		fflush(stderr);
+#endif
+		//saltamos el 0x02 y volvemos a intentar
+		buf++;
+		res--;
+		Descartados++;
+		continue;
+  }
+
 
   /* Creamos el byte[] para depositar mensaje */
   jarray = (*env)->NewByteArray(env,len);
   (*env)->SetByteArrayRegion(env,jarray, 0, len, buf+4);
 
+#ifdef ERR
+  if(Descartados>0) {
+	    fprintf(stderr,"\n\t\t\tJNI: Descartados %d",Descartados);
+	    fflush(stderr);
+  }
+#endif
   return jarray;
-
+  } //cerramos while(1);
 
 }
 

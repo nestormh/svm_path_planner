@@ -753,6 +753,10 @@ public class ManejaLMS {
 		}
 	}
 
+	/** Devuelve si ya ase esta recibiendo barrido continuo */
+	public boolean yaRecibiendoBarridoContinuo() {
+		return thContinuo.isEmitiendo();
+	}
 
 	/** Para la recepción de los barridos continuos. 
 	 * Se arranca suspendido. 
@@ -761,7 +765,7 @@ public class ManejaLMS {
 	 * @author verdino
 	 *
 	 */
-	class ThreadContinuo extends Thread {
+	private class ThreadContinuo extends Thread {
 		
 		private boolean suspendido=true;
 		private boolean yaEmitiendo=false;
@@ -777,6 +781,11 @@ public class ManejaLMS {
 		
 		public synchronized  boolean isSuspendido() {
 			return suspendido;
+		}
+		
+		/** Dice si ya está emitiendo */
+		public synchronized boolean isEmitiendo() {
+			return yaEmitiendo;			
 		}
 		
 		public void run() {

@@ -1,5 +1,6 @@
 package sibtra.util;
 
+
 public class UtilCalculos {
 
 	/**
@@ -255,6 +256,19 @@ public class UtilCalculos {
 	 * ruta más cercano al punto pos
 	 */
 	public static int indiceMasCercanoOptimizado(double[][] ruta, boolean esCerrada,double[] pos,int indMinAnt){
+		if(pos==null)
+			throw new IllegalArgumentException("Vector de posición pasado es NULL");
 		return indiceMasCercanoOptimizado(ruta, esCerrada, pos[0], pos[1], indMinAnt);
+	}
+
+	/** @return distancia ecuclídea entre p1 y p2	 */
+	public static double distanciaPuntos(double[] p1, double[] p2) {
+		double[] d={p1[0]-p2[0], p1[1]-p2[1]};
+		return largoVector(d);
+	}
+
+	/** @return largo euclídeo del vector */
+	public static double largoVector(double[] d) {
+		return Math.sqrt(d[0]*d[0]+d[1]*d[1]);
 	}
 }

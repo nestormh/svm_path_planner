@@ -75,7 +75,7 @@ public class ControlPredictivo {
 	private double[] respuestaEscalon;
 	private Coche carroEscalon;
 	/** Inidica el índice del punto de la ruta más cercano al coche de la iteración anterior*/
-	private int indMinAnt;
+	int indMinAnt;
 	/** Sirve para dar más peso a los componentes más cercanos al instante actual del 
 	 * vector de errores futuros o viceversa.
 	 * si alpha es >1 se pesan más los coeficientes más próximos al instante actual

@@ -48,11 +48,9 @@ public class ControlCarro implements SerialPortEventListener {
 	 * funcione correctamente /
 	 */
 
+
 	/** Para saber si el puerto serial está abierto */
 	private boolean open;
-
-	/** Punto central del volante del vehiculo */
-	public final static int CARRO_CENTRO = 5280;
 
 	/** Maximo comando en el avance */
 	public final static int MINAVANCE = 100;
@@ -64,8 +62,17 @@ public class ControlCarro implements SerialPortEventListener {
 
 	// public static final double RADIANES_POR_CUENTA =
 	// 2*Math.PI/MAX_CUENTA_VOLANTE;
+	/** Punto central del volante del vehiculo */
+//	public final static int CARRO_CENTRO = 5280;
+	// 2927, 3188, 3897
+	public final static int CARRO_CENTRO = 3800;
 	/** Radianes que suponen cada cuenta del sensor del volante */
-	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374 / (5280 - 3300);
+//	public static final double RADIANES_POR_CUENTA = 0.25904573048913979374 / (CARRO_CENTRO - 3300);
+	private static int CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO=2156;
+//	public static final double RADIANES_POR_CUENTA 
+//		= Math.toRadians(15) / (CARRO_CENTRO - CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO);
+	public static final double RADIANES_POR_CUENTA 
+	= Math.toRadians(45) / CARRO_CENTRO ;
 
 	/** Periodo de envío de mensajes por parte del PIC ¿? */
 	static double T = 0.096; // Version anterior 0.087
@@ -854,8 +861,7 @@ public class ControlCarro implements SerialPortEventListener {
 		//derivativo como y(k)-y(k-2)
 		double derivativo = error - errorAnt +  derivativoAnt;
 
-		//No acumularmos error cuando comando saturado en uno u otro sentido
-		if ((comandoAnt > -255 )&& (comandoAnt < 254 ))
+		if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
 			integral += errorAnt;
 
 		double comandotemp = kPAvance * error + kDAvance * derivativo + kIAvance * integral;
@@ -866,8 +872,8 @@ public class ControlCarro implements SerialPortEventListener {
 		comando=comandoAnt+IncComando;
 		//Limitamos el comando maximo a aplicar
 		comando=UtilCalculos.limita(comando, -255, 255);
-		//umbralizamos la zona muerta, Vemos que a 60 ya camina algo
-		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 60, -1);
+		//umbralizamos la zona muerta
+		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 80, -1);
 //				, -90/FactorFreno+comandoAnt);  //TODO da valores positivos
 		
 

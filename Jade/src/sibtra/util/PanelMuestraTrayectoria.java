@@ -36,10 +36,10 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	Vector<Integer> indiceMarcar=null;
 
 	/** coordenadas de la posición del coche. Si es NaN el coche no se pinta */
-	double posXCoche=Double.NaN;
-	double posYCoche;
+	protected double posXCoche=Double.NaN;
+	protected double posYCoche;
 	/** orientación del coche */
-	double orientacionCoche;
+	protected double orientacionCoche;
 	
 	
 	

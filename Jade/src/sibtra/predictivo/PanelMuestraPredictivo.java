@@ -31,6 +31,7 @@ import javax.swing.event.ChangeListener;
 
 import sibtra.gps.Ruta;
 import sibtra.log.Logger;
+import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerDouble;
 import sibtra.log.LoggerFactory;
 import sibtra.log.VentanaLoggers;
@@ -53,6 +54,10 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     private static final double COTA_ANGULO = Math.toRadians(30);
     /** Puntero al controlador predicctivo a mostrar */
     ControlPredictivo CP = null;
+
+    /** Ruta para poder cambiar la distancia maxima entre puntos */
+    Ruta rutaAux=null;
+    
     /** Barra progreso para comando a la izquierda */
     private JProgressBar jpbComandoI;
     /** Label que presentará el comando calculado */
@@ -66,15 +71,16 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     private SpinnerNumberModel jsModDistMax;
     private SpinnerNumberModel jsModAlpha;
     private SpinnerNumberModel jsModPesoError;
-    private Ruta rutaAux;
+	private JSpinner jsDistMax;
+	private JSpinner jsHorPred;
+	private JSpinner jsHorCont;
+	private JSpinner jsLanda;
+	private JSpinner jsAlpha;
+	private JSpinner jsPesoError;
 
     /** Constructor necesita el controlador predictivo */
     public PanelMuestraPredictivo(ControlPredictivo contPredic, Ruta rutaIn) {
         super();
-        rutaAux = new Ruta();
-        rutaAux = rutaIn;
-        CP = contPredic;
-        setTr(CP.ruta);
         {//nuevo panel para añadir debajo
 //            JPanel jpPre = new JPanel(new FlowLayout(FlowLayout.LEADING));
             JPanel jpPre = new PanelFlow();
@@ -101,37 +107,37 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
             jpPre.add(new Label("H Pred"));
             jsModHPred = new SpinnerNumberModel(1, 1, 25, 1);
-            JSpinner jsHorPred = new JSpinner(jsModHPred);
+            jsHorPred = new JSpinner(jsModHPred);
             jsModHPred.addChangeListener(this);
             jpPre.add(jsHorPred);
 
             jpPre.add(new Label("H Cont"));
             jsModHCont = new SpinnerNumberModel(1, 1, 25, 1);
-            JSpinner jsHorCont = new JSpinner(jsModHCont);
+            jsHorCont = new JSpinner(jsModHCont);
             jsModHCont.addChangeListener(this);
             jpPre.add(jsHorCont);
 
             jpPre.add(new Label("Landa"));
             jsModLanda = new SpinnerNumberModel(0, 0, 100, 0.1);
-            JSpinner jsLanda = new JSpinner(jsModLanda);
+            jsLanda = new JSpinner(jsModLanda);
             jsModLanda.addChangeListener(this);
             jpPre.add(jsLanda);
 
             jpPre.add(new Label("Dist Max"));
             jsModDistMax = new SpinnerNumberModel(0.7, 0.05, 1, 0.05);
-            JSpinner jsDistMax = new JSpinner(jsModDistMax);
+            jsDistMax = new JSpinner(jsModDistMax);
             jsModDistMax.addChangeListener(this);
             jpPre.add(jsDistMax);
 
             jpPre.add(new Label("Alpha"));          
             jsModAlpha = new SpinnerNumberModel(1.05,0.01,2,0.01);
-            JSpinner jsAlpha = new JSpinner(jsModAlpha);
+            jsAlpha = new JSpinner(jsModAlpha);
             jsModAlpha.addChangeListener(this);
             jpPre.add(jsAlpha);
             
             jpPre.add(new Label("Peso Error"));          
-            jsModPesoError = new SpinnerNumberModel(CP.getPesoError(),0.01,10,0.01);
-            JSpinner jsPesoError = new JSpinner(jsModPesoError);
+            jsModPesoError = new SpinnerNumberModel(0.01,0.01,10,0.01);
+            jsPesoError = new JSpinner(jsModPesoError);
             jsModPesoError.addChangeListener(this);
             jpPre.add(jsPesoError);
             
@@ -142,10 +148,23 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
             add(jpPre);
         }
+        setControlPyRuta(CP, rutaIn);
     }
 
+    /** Fija los nuevos valores para {@link #CP} y {@link #rutaAux} y actualiza la presentación.
+     * Uno o los dos pueden ser null.
+     */
+    public void setControlPyRuta(ControlPredictivo CP,Ruta ruta) {
+    	this.CP=CP;
+    	this.rutaAux=ruta;
+    	if(CP!=null) setTr(CP.ruta); 
+    	actualiza();
+    }
+    
     /** Lo que añadimos al panel */
     protected void cosasAPintar(Graphics g0) {
+    	super.cosasAPintar(g0);
+    	if(CP==null) return; //si no hay control predictivo, ¡no pintamos nada! :-)
         //colocamos el coche en su posición actual
         situaCoche(CP.carroOriginal.getX(), CP.carroOriginal.getY(), CP.carroOriginal.getTita());
         super.cosasAPintar(g0);
@@ -201,27 +220,42 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         }
     }
 
+    
+    
     /** programa el repintado del panel actulizando los valores de los spiners, etiquetas etc.*/
     public void actualiza() {
-        //barra de progreso con el comando
-        if (CP.comandoCalculado > 0) {
-            jpbComandoI.setValue(pbMax);
-            jpbComandoD.setValue((int) (CP.comandoCalculado * pbMax / (Math.PI / 4)));
-        } else {
-            jpbComandoD.setValue(0);
-            jpbComandoI.setValue((int) (CP.comandoCalculado * pbMax / (Math.PI / 4)));
-        }
-        //texto con el comando
-        jlComando.setText(String.format("%+04.2fº", Math.toDegrees(CP.comandoCalculado)));
-        //texto con la distancia
-        jlDistancia.setText(String.format("DL=%+04.2f", CP.distanciaLateral));
+    	boolean hayCP=(CP!=null);
+    	if(hayCP) {
+    		//barra de progreso con el comando
+    		if (CP.comandoCalculado > 0) {
+    			jpbComandoI.setValue(pbMax);
+    			jpbComandoD.setValue((int) (CP.comandoCalculado * pbMax / (Math.PI / 4)));
+    		} else {
+    			jpbComandoD.setValue(0);
+    			jpbComandoI.setValue((int) (CP.comandoCalculado * pbMax / (Math.PI / 4)));
+    		}
+    		//texto con el comando
+    		jlComando.setText(String.format("%+04.2fº", Math.toDegrees(CP.comandoCalculado)));
+    		//texto con la distancia
+    		jlDistancia.setText(String.format("DL=%+04.2f", CP.distanciaLateral));
 
-        //reflejamos valores usados por controlador
-        jsModHCont.setValue(CP.horControl);
-        jsModHPred.setValue(CP.horPrediccion);
-        jsModLanda.setValue(CP.landa);
-        setTr(CP.ruta);
-
+    		//reflejamos valores usados por controlador
+    		jsModHCont.setValue(CP.horControl);
+    		jsModHPred.setValue(CP.horPrediccion);
+    		jsModLanda.setValue(CP.landa);
+    		jsModPesoError.setValue(CP.getPesoError());
+    		setTr(CP.ruta);
+    	} 
+    	jpbComandoD.setEnabled(hayCP);
+    	jpbComandoI.setEnabled(hayCP);
+    	jlComando.setEnabled(hayCP);
+    	jlDistancia.setEnabled(hayCP);
+    	jsAlpha.setEnabled(hayCP);
+    	jsHorCont.setEnabled(hayCP);
+    	jsHorPred.setEnabled(hayCP);
+    	jsLanda.setEnabled(hayCP);
+    	jsPesoError.setEnabled(hayCP);
+    	jsDistMax.setEnabled(hayCP && (rutaAux!=null));
         super.actualiza();
     }
 
@@ -355,9 +389,13 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 //		for (int i = 0; i < rutaPrueba.length; i++) {
         pmp.actualiza();
         LoggerDouble lgCV=LoggerFactory.nuevoLoggerDouble(controlador, "comandoVolante", 1000/250);
-        LoggerDouble lgError=LoggerFactory.nuevoLoggerDouble(controlador, "error", 1000/250);
+        LoggerArrayDoubles lgError=LoggerFactory.nuevoLoggerArrayDoubles(controlador, "error", 1000/250);
+        lgError.setDescripcion("[error angular,error laterar]");
         Logger lgInstantes=LoggerFactory.nuevoLoggerTiempo(controlador, "Ciclo");
-        Logger lgNoUsado=LoggerFactory.nuevoLoggerDouble(controlador,"NoUsado");
+        LoggerArrayDoubles lgTrayectoria=LoggerFactory.nuevoLoggerArrayDoubles(controlador,"Posicion");
+        lgTrayectoria.setDescripcion("[pos X, Pos y]");
+        LoggerArrayDoubles lgDeseada=LoggerFactory.nuevoLoggerArrayDoubles(controlador, "Deseada");
+        lgDeseada.setDescripcion("Punto más cercano [X,Y]");
         Logger lgParadas=null;
         
         //Una ves definidos todos, abrimos ventana de Loggers
@@ -383,13 +421,16 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                 carroOri.setConsignaVolante(comandoVolante);
                 carroViejo.setConsignaVolante(comandoVolante);   
                 carroOri.setPostura(carroOri.getX(),carroOri.getY(),carroOri.getTita(),carroOri.getVolante());
+                lgTrayectoria.add(carroOri.getX(),carroOri.getY());
                 carroOri.calculaEvolucion(comandoVolante, 2, 0.2);
                 carroViejo.calculaEvolucion(comandoVolante, 2, 0.2);
                 //indice = ControlPredictivo.calculaDistMinOptimizado(rutaPrueba, carroOri.getX(), carroOri.getY(), indice);
                 indice = UtilCalculos.indiceMasCercano(rutaPrueba, carroOri.getX(), carroOri.getY());
+                indice=controlador.indMinAnt;
 //                System.out.println(indice);
-                double error = rutaPruebaRellena[indice][2] - carroOri.getTita();
-                lgError.add(error);
+                double errorAngular = rutaPruebaRellena[indice][2] - carroOri.getTita();
+                lgError.add(errorAngular, controlador.distanciaLateral);
+                lgDeseada.add(rutaPruebaRellena[indice][0],rutaPruebaRellena[indice][1]);
                 //System.out.println("Error " + error);
                 pmp.actualiza();
             } else {
