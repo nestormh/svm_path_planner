@@ -858,5 +858,10 @@ public class ManejaLMS {
 		}
 		
 	}
+
+	/** @return si el LSM esta en modo de envio continuo */
+	public boolean isEnvioContinuo() {
+		return thContinuo.isEmitiendo();
+	}
 	
 }

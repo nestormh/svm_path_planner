@@ -9,7 +9,9 @@ import javax.swing.JFrame;
 import sibtra.util.EligeSerial;
 
 
-/** Aplicación para mostrar los barridos */
+/** Aplicación para mostrar los barridos.
+ * Sólo se actualiza mientras el cursor esté sobre la ventana.
+ */
 @SuppressWarnings("serial")
 public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 
