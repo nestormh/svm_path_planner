@@ -3,22 +3,15 @@ package sibtra.controlcarro;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import sibtra.gps.PanelExaminaRuta;
-import sibtra.gps.Ruta;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelDatos;
 import sibtra.util.SpinnerDouble;
@@ -27,6 +20,7 @@ import sibtra.util.SpinnerInt;
 /**
  * {@link PanelDatos} para mostrar la información del carro y permitir fijar consignas de
  * velocidad y volante.
+ * Permite la auto-actulización ya que defina {@link #actualiza()}
  * @author alberto
  */
 public class PanelCarro extends PanelDatos implements ActionListener, ChangeListener {
@@ -244,7 +238,7 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 	}
 
 	/** Actualiza campos con datos del {@link ControlCarro} */
-	public void actualizaCarro() {
+	public void actualiza() {
 		boolean hayDato=contCarro.getBytes()!=cuentaBytes;
 		cuentaBytes=contCarro.getBytes();
 		if(hayDato)
@@ -256,8 +250,9 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 			jbParaControl.setEnabled(true);
 		else
 			jbParaControl.setEnabled(false);
+		super.actualiza();
 	}
-
+	
 	/**
 	 * @param args
 	 */

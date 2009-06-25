@@ -41,9 +41,8 @@ import sibtra.gps.PanelGPSTriumph;
 import sibtra.gps.PanelGrabarRuta;
 import sibtra.gps.PanelMuestraRuta;
 import sibtra.gps.Ruta;
-import sibtra.imu.AngulosIMU;
 import sibtra.imu.ConexionSerialIMU;
-import sibtra.imu.PanelMuestraAngulosIMU;
+import sibtra.imu.PanelIMU;
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
@@ -121,7 +120,7 @@ public class NavegaPredictivo implements ActionListener {
 	private JFrame ventadaPeque=null;
 
     private PanelGPSTriumph pgt;
-    private PanelMuestraAngulosIMU pmai;
+    private PanelIMU panIMU;
     private PanelMiraObstaculo pmo;
 	private PanelMiraObstaculoSubjetivo pmoS;
 	private PanelMuestraRuta pmr;
@@ -310,7 +309,6 @@ public class NavegaPredictivo implements ActionListener {
 
         //Panel del GPS
         pgt = new PanelGPSTriumph(conGPS);
-        pgt.actualizaGPS(new GPSData());
         tbPanelIzdo.add("GPS",new JScrollPane(pgt));
 
         //Panel del Coche
@@ -318,9 +316,8 @@ public class NavegaPredictivo implements ActionListener {
         tbPanelIzdo.add("Coche",new JScrollPane(pmCoche));
 
         //Panel de la Imu
-        pmai = new PanelMuestraAngulosIMU();
-        pmai.actualizaAngulo(new AngulosIMU(0, 0, 0, 0));
-        tbPanelIzdo.add("IMU",new JScrollPane(pmai));
+        panIMU = new PanelIMU(conIMU);
+        tbPanelIzdo.add("IMU",new JScrollPane(panIMU));
         
         panGrabar=new PanelGrabarRuta(conGPS,actGrabarRuta,actPararGrabarRuta);
         panGrabar.setEnabled(true);
@@ -430,34 +427,8 @@ public class NavegaPredictivo implements ActionListener {
         ventadaPeque.setUndecorated(true); //para que no aparezcan el marco
         ventadaPeque.pack();
         ventadaPeque.setVisible(true);
-        
-    	//Tread para refrescar los paneles de la ventana
-        Thread thRefresco = new Thread() {
-        	/** Milisegundos del periodo de actualización */
-        	private long milisPeriodo=500;
 
-            public void run() {
-    			setName("Refresco Numeros");
-        		while (true){
-//        			pgt.setEnabled(true);
-        			//GPS
-        			pgt.actualizaGPS(conGPS.getPuntoActualTemporal());
-        			pgt.repinta();
-        			//IMU
-    				pmai.actualizaAngulo(conIMU.getAngulo());
-    				pmai.repinta();
-    				//Coche
-    				pmCoche.actualizaCarro();
-    				pmCoche.repinta();
-    				
-    				//Loggers
-    				pmLog.repinta();
-
-    				try{Thread.sleep(milisPeriodo);} catch (Exception e) {}	
-        		}
-            }
-        };
-        thRefresco.start();
+        //El refreco de los paneles de números lo programan con timers los propios paneles.
         
         //thread para refrescar ventana del RF y calcular distancia al obstaculo
         Thread thRF = new Thread() {
