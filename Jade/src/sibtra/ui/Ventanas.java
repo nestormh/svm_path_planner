@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -88,10 +89,6 @@ public class Ventanas  implements ActionListener  {
         tbPanelDecho=new JTabbedPane();
 
 
-        //Loggers en solapa con scroll panel
-        pmLog=new PanelLoggers();
-        tbPanelDecho.add("Loggers",new JScrollPane(pmLog));
-
         
         
 //        tbPanelDecho.setPreferredSize(new Dimension(500,600));
@@ -124,6 +121,8 @@ public class Ventanas  implements ActionListener  {
         //menu de ayuda
         menuAyuda=new JMenu("Ayuda");
         jmiAcercaDe=new JMenuItem("Acerca de Verdino");
+        jmiAcercaDe.addActionListener(this);
+        menuAyuda.add(jmiAcercaDe);
 
         ventanaPrincipal.setJMenuBar(barraMenu); //ponemos barra en la ventana
 
@@ -169,6 +168,12 @@ public class Ventanas  implements ActionListener  {
     }
 
     void muestraVentanas() {
+        //Loggers en solapa con scroll panel
+    	//Lo punemos cuando todos hayan apuntado sus loggers
+        pmLog=new PanelLoggers();
+        tbPanelDecho.add("Loggers",new JScrollPane(pmLog));
+
+
     	//añadimos el boton de salir al final del menu de archivos
         menuArchivo.addSeparator(); //separador =============================
         menuArchivo.add(miSalir);
@@ -241,15 +246,23 @@ public class Ventanas  implements ActionListener  {
      * @param panel
      * @para titulo Nombre que llevará la solapa
      * @param enDerecho true se pone a la derecha, si no a la izda.
+     * @para conScroll se mete panel dentro de scroll panel
      */
-    public void añadePanel(JPanel panel, String titulo, boolean enDerecho) {
+    public void añadePanel(JPanel panel, String titulo, boolean enDerecho, boolean conScroll) {
     	if(panel==null) return;
+    	JComponent ca=conScroll ? new JScrollPane(panel) : panel;
+    		
     	if(enDerecho)
-    		tbPanelDecho.add(titulo, new JScrollPane(panel));
+    		tbPanelDecho.add(titulo, ca );
     	else
-    		tbPanelIzdo.add(titulo, new JScrollPane(panel));
+    		tbPanelIzdo.add(titulo, ca );
     }
 
+    /** como {@link #añadePanel(JPanel, String, boolean, boolean)} con escroll */
+    public void añadePanel(JPanel panel, String titulo, boolean enDerecho) {
+    	añadePanel(panel, titulo, enDerecho, true);
+    }
+    
     /**
      * Añade panel pasado a la solapa del lado que tenga menos solapas
      * @param panel

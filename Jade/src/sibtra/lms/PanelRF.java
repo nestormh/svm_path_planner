@@ -30,15 +30,14 @@ public class PanelRF extends PanelMuestraBarrido {
 	public PanelRF(ManejaLMS manLms) {
 		super((short)80);
 		manLMS=manLms;
-		
-		//pedimos las zonas para establecerlas en el panel
 		try {
+			System.out.println(getClass().getName()+": Pedimos las zonas para establecerlas en el panel");
 			setZona(manLMS.recibeZona((byte)0, true));
 			setZona(manLMS.recibeZona((byte)1, true));
 			setZona(manLMS.recibeZona((byte)2, true));
 				
 		} catch (LMSException e){
-			System.err.println("Problema al pedir las zonas:"+e.getMessage());
+			System.err.println(getClass().getName()+": Problema al pedir las zonas:"+e.getMessage());
 		}
 
 		{
@@ -62,7 +61,7 @@ public class PanelRF extends PanelMuestraBarrido {
 				actualiza();
 			}
 		};
-		new Timer(200, taskPerformer);
+		new Timer(200, taskPerformer).start();
 
 		
 
@@ -84,7 +83,6 @@ public class PanelRF extends PanelMuestraBarrido {
 		public synchronized void suspender() {
 			if(!suspendido) {
 				suspendido=true;
-//				notify();
 			}
 		}
 		
@@ -123,8 +121,9 @@ public class PanelRF extends PanelMuestraBarrido {
 
 	/** Actualiza la etiqueta de tiempo y barra de progreso, o desactivoa si LSM no emitiendo continuo */
 	public void actualiza() {
-		if(thActuliza.isSuspendido() && manLMS.isEnvioContinuo() ) {
+		if(!thActuliza.isSuspendido() && manLMS.isEnvioContinuo() ) {
 			jpbTRF.setValue((int) deltaT);
+			//TODO que sea una media ya que el valor varía mucho
 			jlTiempo.setText(String.format("Tiempo RF= %5d ms", deltaT));
 			jpbTRF.setEnabled(true);
 			jlTiempo.setEnabled(true);

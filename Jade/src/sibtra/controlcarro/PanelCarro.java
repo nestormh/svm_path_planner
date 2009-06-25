@@ -250,6 +250,7 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 			jbParaControl.setEnabled(true);
 		else
 			jbParaControl.setEnabled(false);
+//		System.out.print("C");
 		super.actualiza();
 	}
 	

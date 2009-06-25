@@ -144,6 +144,7 @@ public class PanelDatos extends JPanel {
 			//creamos el action listener y el timer
 			ActionListener taskPerformer = new ActionListener() {
 				public void actionPerformed(ActionEvent evt) {
+//					System.out.print("+");
 					actualiza();
 				}
 			};

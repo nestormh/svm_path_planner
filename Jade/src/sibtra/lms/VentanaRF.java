@@ -16,26 +16,29 @@ public class VentanaRF extends JFrame {
 	
 	public VentanaRF(String ptoRF) {
 		super("Ventana RF");
-		//Conectamos a RF
+		System.out.println("Conectamos a RF en: "+ptoRF);
 		try { 		
 			manLMS=new ManejaLMS(ptoRF);
 			manLMS.setDistanciaMaxima(80);
 			manLMS.CambiaAModo25(); 
+
+			//creamos panel muestra barrido
+			panRF=new PanelRF(manLMS);
+			add(panRF);
+
 			manLMS.pideBarridoContinuo((short)0,(short) 180, (short)1);
 		} catch (LMSException e) {
 			System.err.println("No fue posible conectar o configurar RF: "+e.getMessage());
 			System.exit(1);
 		}
 
-		//creamos panel muestra barrido
-		panRF=new PanelRF(manLMS);
-		panRF.actualizacionContinua();
-		add(panRF);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		pack();
 		setVisible(true);
-
+		setBounds(0, 384, 1000, 700);
+		panRF.actualizacionContinua();
+		
 	}
 	/**
 	 * @param args

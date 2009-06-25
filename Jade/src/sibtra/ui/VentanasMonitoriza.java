@@ -20,11 +20,11 @@ import sibtra.util.EligeSerial;
  */
 public class VentanasMonitoriza extends Ventanas {
 
-	private static final int periodoActulizacion = 0;
+	private static final int periodoActulizacion = 200;
 	
-	static final String[] puertosPorDefecto={"/dev/ttyM1" //GPS
-		, "/dev/ttyS1" //RF
+	static final String[] puertosPorDefecto={"/dev/ttyMI1" //GPS
 		,"/dev/ttyUSB0" //IMU
+		, "/dev/ttyS1" //RF
 		,"/dev/ttyMI0" //Carro
 		};
 	
@@ -98,22 +98,28 @@ public class VentanasMonitoriza extends Ventanas {
         
         //Panel del GPS
         panelGPS = new PanelGPSTriumph(conexionGPS);
-        añadePanel(panelGPS, "GPS",true);
+        añadePanel(panelGPS, "GPS",false);
         panelGPS.actulizacionPeridodica(periodoActulizacion);
 
         //Panel del Coche
         panelCarro=new PanelCarro(conexionCarro);
-        añadePanel(panelCarro, "Coche",true);
+        añadePanel(panelCarro, "Coche",false);
         panelCarro.actulizacionPeridodica(periodoActulizacion);
 
         //Panel de la Imu
         panelIMU = new PanelIMU(conexionIMU);
-        añadePanel(panelIMU,"IMU",true);
+        añadePanel(panelIMU,"IMU",false);
         panelIMU.actulizacionPeridodica(periodoActulizacion);
         
         //Panel del RF
         panelRF=new PanelRF(conexionRF);
-        añadePanel(panelRF, "RF", false); //a la izquierda
+        añadePanel(panelRF, "RF", true, false); //a la izquierda sin scroll
+		try { 		
+			conexionRF.pideBarridoContinuo((short)0,(short) 180, (short)1);
+		} catch (LMSException e) {
+			System.err.println("No fue posible Comenzar con envío continuo");
+			System.exit(1);
+		}
         panelRF.actualizacionContinua();
         
         //Terminamos la inicialización de Ventanas
@@ -130,7 +136,7 @@ public class VentanasMonitoriza extends Ventanas {
      * @param args Seriales para GPS, IMU, RF y Carro. Si no se pasan se usan las por defecto.
      */
     public static void main(String[] args) {   
-        if(args==null)
+        if(args==null || args.length==0)
         	new VentanasMonitoriza(); //usara los por defecto
         else {
             String[] puertos=null;

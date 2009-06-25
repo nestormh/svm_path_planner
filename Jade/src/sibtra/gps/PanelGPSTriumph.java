@@ -49,6 +49,7 @@ public class PanelGPSTriumph extends PanelMuestraGPSData {
 			ldCal.Actualiza(gpsCT,false);
 			ldOK.Actualiza(gpsCT,false);
 		}
+//		System.out.print("G");
 		super.actualiza();
 	}
 
