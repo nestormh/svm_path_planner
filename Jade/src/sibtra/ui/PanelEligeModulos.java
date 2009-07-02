@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 
@@ -31,7 +32,7 @@ public class PanelEligeModulos extends JPanel {
 	private Class[] arrClasDectObs;
 	private JComboBox jcombDireccion;
 	private JComboBox jcombVelocidad;
-	private JComboBox jcombDetecObstaculos;
+	private JList jcombDetecObstaculos;
 	private VentanasMonitoriza ventanaMonitoriza;
 
 	public PanelEligeModulos(VentanasMonitoriza ventMonito) {
@@ -66,7 +67,7 @@ public class PanelEligeModulos extends JPanel {
 		add(jcombVelocidad);
 		
 		add(new JLabel("Detector obstaculos",JLabel.TRAILING));
-		jcombDetecObstaculos=new JComboBox(arrNomClasDectObs);
+		jcombDetecObstaculos=new JList(arrNomClasDectObs);
 		add(jcombDetecObstaculos);
 		
 		
@@ -74,8 +75,8 @@ public class PanelEligeModulos extends JPanel {
 	}
 	
 	private String[] nombreClases(Class[] arrClas) {
-		String[] resp=new String[arrClasMotor.length];
-		for(int i=0; i<arrClasMotor.length; i++ ) {
+		String[] resp=new String[arrClas.length];
+		for(int i=0; i<arrClas.length; i++ ) {
 			try {
 				Class ca=arrClas[i];
 				Method mn=ca.getMethod("getNombre", (Class[])null);
