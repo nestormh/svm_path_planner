@@ -2,16 +2,15 @@ package sibtra.rfycarro;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.io.IOException;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import sibtra.lms.BarridoAngular;
 import sibtra.util.ManejaJoystick;
-
-import com.centralnexus.input.Joystick;
+import sibtra.util.PanelJoystick;
 
 public abstract class FuturoJoystick {
 	/**
@@ -33,7 +32,15 @@ public abstract class FuturoJoystick {
 		JFrame ventana=new JFrame("Futuro Joystick");
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		final PanelFuturoObstaculo pfo=new PanelFuturoObstaculo(fo);
-		ventana.add(pfo);
+		JPanel central=new JPanel();
+		ventana.add(central);
+		central.setLayout(new BoxLayout(central,BoxLayout.PAGE_AXIS));
+		central.add(pfo);
+		
+		ManejaJoystick joy = new ManejaJoystick();
+		PanelJoystick panJ=new PanelJoystick(joy);
+		central.add(panJ);
+		
 		
 		{ //panel inferior para variar alfa y velocidad
 			JPanel jpSur=new JPanel();
@@ -55,11 +62,11 @@ public abstract class FuturoJoystick {
 		fo.distanciaAObstaculo(Math.toRadians(10), ba);
 		pfo.setBarrido(ba);
 		pfo.actualiza();
+		panJ.actualiza();
 
 
-		ManejaJoystick joy = new ManejaJoystick();
 		for (;;) {
-			joy.poll();
+			panJ.actualiza();
 			jlXAlfa.setText(String.format("X= %f  Alfa=%f º."
 					, joy.getX(),Math.toDegrees(joy.getAlfa())));
 			double distancia=fo.distanciaAObstaculo(joy.getAlfa(), ba);
@@ -69,6 +76,7 @@ public abstract class FuturoJoystick {
 					,joy.getY()));
 			pfo.setBarrido(ba);
 			pfo.actualiza();
+			
 			try {
 				Thread.sleep(200);
 			} catch(InterruptedException e) {
