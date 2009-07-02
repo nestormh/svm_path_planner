@@ -244,9 +244,9 @@ public class Ventanas  implements ActionListener  {
     /**
      * Añade panel pasado a la solapa de uno de los lados
      * @param panel
-     * @para titulo Nombre que llevará la solapa
+     * @param titulo Nombre que llevará la solapa
      * @param enDerecho true se pone a la derecha, si no a la izda.
-     * @para conScroll se mete panel dentro de scroll panel
+     * @param conScroll se mete panel dentro de scroll panel
      */
     public void añadePanel(JPanel panel, String titulo, boolean enDerecho, boolean conScroll) {
     	if(panel==null) return;
@@ -266,9 +266,14 @@ public class Ventanas  implements ActionListener  {
     /**
      * Añade panel pasado a la solapa del lado que tenga menos solapas
      * @param panel
-     * @para titulo Nombre que llevará la solapa
+     * @param titulo Nombre que llevará la solapa
      */
     public void añadePanel(JPanel panel, String titulo) {
     	añadePanel(panel, titulo, tbPanelDecho.getTabCount()<tbPanelIzdo.getTabCount());
     }
+    
+	public void quitaPanel(JPanel panel) {
+		//TODO buscar panel y eliminarlo, puede estar dentro del Scroll panel.
+	}
+
 }

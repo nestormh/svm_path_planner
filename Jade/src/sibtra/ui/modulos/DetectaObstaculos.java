@@ -1,6 +1,6 @@
 package sibtra.ui.modulos;
 
-public interface Obstaculos extends Modulo {
+public interface DetectaObstaculos extends Modulo {
 	
 	/** @return distancia en metros libre de obstaculos */
 	public double getDistanciaLibre();

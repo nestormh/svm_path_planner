@@ -8,5 +8,9 @@ package sibtra.ui.modulos;
  *
  */
 public interface CalculoDireccion {
+	
+	/** @return la consigna de velocida calculada */
+	public double getConsignaDireccion();
+
 
 }

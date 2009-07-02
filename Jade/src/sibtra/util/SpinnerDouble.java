@@ -8,6 +8,11 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+/**
+ * Spinner que automáticamente invoca el set para modificar parámetro asociado.
+ * @author alberto
+ *
+ */
 public class SpinnerDouble extends JSpinner implements ChangeListener {
 	
 	private Object objeto;

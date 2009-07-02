@@ -3,7 +3,11 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/usr/share/java/jama.jar"/>
-	<classpathentry kind="lib" path="/usr/share/java/RXTXcomm.jar"/>
+	<classpathentry kind="lib" path="/usr/share/java/RXTXcomm.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/usr/lib/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/jade/jade.jar"/>
 	<classpathentry kind="lib" path="lib/jade/http.jar"/>
 	<classpathentry kind="lib" path="lib/jade/iiop.jar"/>

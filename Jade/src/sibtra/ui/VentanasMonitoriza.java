@@ -28,15 +28,17 @@ public class VentanasMonitoriza extends Ventanas {
 		,"/dev/ttyMI0" //Carro
 		};
 	
-	ControlCarro conexionCarro;
-	GPSConnectionTriumph conexionGPS;
-	ConexionSerialIMU conexionIMU;  
-	ManejaLMS conexionRF;	
+	public ControlCarro conexionCarro=null;
+	public GPSConnectionTriumph conexionGPS=null;
+	public ConexionSerialIMU conexionIMU=null;  
+	public ManejaLMS conexionRF=null;	
 	
 	PanelGPSTriumph panelGPS;
     PanelIMU panelIMU;
     PanelCarro panelCarro;
     PanelRF panelRF;
+
+	private PanelEligeModulos panSelModulos;
 
     
     /** Abre la conexion a los 4 perifericos y los paneles de monitorizacion
@@ -44,54 +46,55 @@ public class VentanasMonitoriza extends Ventanas {
      */	
 	public VentanasMonitoriza(String[] args) {
 		super();
-        if (args == null || args.length < 4) {
-            System.err.println("Son necesarios 4 argumentos con los puertos seriales");
-            System.exit(1);
-        }
+		if (args != null && args.length >= 4) {
 
-        //Conectamos Carro
-        System.out.println("Abrimos conexión al Carro en "+args[3]);
-        conexionCarro = new ControlCarro(args[3]);
+			//Conectamos Carro
+			System.out.println("Abrimos conexión al Carro en "+args[3]);
+			conexionCarro = new ControlCarro(args[3]);
 
-        if (conexionCarro.isOpen() == false) {
-            System.err.println("No se obtuvo Conexion al Carro");            
-        }
-		
-        //conexión de la IMU
-        System.out.println("Abrimos conexión IMU en "+args[1]);
-        conexionIMU = new ConexionSerialIMU();
-        if (!conexionIMU.ConectaPuerto(args[1], 5)) {
-            System.err.println("Problema en conexión serial con la IMU");
-            System.exit(1);
-        }
+			if (conexionCarro.isOpen() == false) {
+				System.err.println("No se obtuvo Conexion al Carro");            
+			}
 
-        //comunicación con GPS
-        System.out.println("Abrimos conexión GPS en "+args[0]);
-        try {
-            conexionGPS = new GPSConnectionTriumph(args[0]);
-        } catch (Exception e) {
-            System.err.println("Problema a crear GPSConnection:" + e.getMessage());
-            System.exit(1);
-        }
-        if (conexionGPS == null) {
-            System.err.println("No se obtuvo GPSConnection");
-            System.exit(1);
-        }
-        conexionGPS.setCsIMU(conexionIMU);
-        conexionGPS.setCsCARRO(conexionCarro);
+			//conexión de la IMU
+			System.out.println("Abrimos conexión IMU en "+args[1]);
+			conexionIMU = new ConexionSerialIMU();
+			if (!conexionIMU.ConectaPuerto(args[1], 5)) {
+				System.err.println("Problema en conexión serial con la IMU");
+				System.exit(1);
+			}
+
+			//comunicación con GPS
+			System.out.println("Abrimos conexión GPS en "+args[0]);
+			try {
+				conexionGPS = new GPSConnectionTriumph(args[0]);
+			} catch (Exception e) {
+				System.err.println("Problema a crear GPSConnection:" + e.getMessage());
+				System.exit(1);
+			}
+			if (conexionGPS == null) {
+				System.err.println("No se obtuvo GPSConnection");
+				System.exit(1);
+			}
+			conexionGPS.setCsIMU(conexionIMU);
+			conexionGPS.setCsCARRO(conexionCarro);
 
 
-        //Conectamos a RF
-        System.out.println("Abrimos conexión LMS en "+args[2]);
-        try {
-            conexionRF = new ManejaLMS(args[2]);
-            conexionRF.setDistanciaMaxima(80);
-//            manLMS.setResolucionAngular((short)100);
-            conexionRF.CambiaAModo25();
+			//Conectamos a RF
+			System.out.println("Abrimos conexión LMS en "+args[2]);
+			try {
+				conexionRF = new ManejaLMS(args[2]);
+				conexionRF.setDistanciaMaxima(80);
+//				manLMS.setResolucionAngular((short)100);
+				conexionRF.CambiaAModo25();
 
-        } catch (LMSException e) {
-            System.err.println("No fue posible conectar o configurar RF");
-        }
+			} catch (LMSException e) {
+				System.err.println("No fue posible conectar o configurar RF");
+			}
+		} else {
+			System.err.println("Son necesarios 4 argumentos con los puertos seriales");
+//			System.exit(1);
+		}
 
         //==============================================================================
         // Tenemos todas las conexiones, creamos los paneles básicos
@@ -122,6 +125,10 @@ public class VentanasMonitoriza extends Ventanas {
 		}
         panelRF.actualizacionContinua();
         
+        //Añadimos panel de selección de modulos
+        panSelModulos=new PanelEligeModulos();
+        añadePanel(panSelModulos, "Modulos", true);
+        
         //Terminamos la inicialización de Ventanas
         muestraVentanas();
         
@@ -140,7 +147,7 @@ public class VentanasMonitoriza extends Ventanas {
         	new VentanasMonitoriza(); //usara los por defecto
         else {
             String[] puertos=null;
-            if ( args.length < 3) {
+            if ( args.length == 1) {
             	//no se han pasado argumentos suficioentes, pedimos los puertos interactivamente
             	String[] titulos = {"GPS", "IMU", "RF", "Coche"};
             	puertos = new EligeSerial(titulos).getPuertos();
