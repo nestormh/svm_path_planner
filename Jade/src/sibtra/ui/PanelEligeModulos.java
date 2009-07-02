@@ -4,8 +4,10 @@
 package sibtra.ui;
 
 import java.awt.GridLayout;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -30,9 +32,12 @@ public class PanelEligeModulos extends JPanel {
 	private JComboBox jcombDireccion;
 	private JComboBox jcombVelocidad;
 	private JComboBox jcombDetecObstaculos;
+	private VentanasMonitoriza ventanaMonitoriza;
 
-	public PanelEligeModulos() {
+	public PanelEligeModulos(VentanasMonitoriza ventMonito) {
 		super(new GridLayout(0,2,10,10));
+		
+		ventanaMonitoriza=ventMonito;
 		
 		arrClasMotor=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.Motor", "sibtra.ui.modulos");
 		String[] arrNomClasMotor=nombreClases(arrClasMotor);
@@ -48,7 +53,7 @@ public class PanelEligeModulos extends JPanel {
 			
 		
 		//ponemos etiqueta y selector
-		add(new JLabel("Motor Elegido",JLabel.TRAILING));
+		add(new JLabel("Motor",JLabel.TRAILING));
 		jcombMotor=new JComboBox(arrNomClasMotor);
 		add(jcombMotor);
 		
@@ -60,7 +65,7 @@ public class PanelEligeModulos extends JPanel {
 		jcombVelocidad=new JComboBox(arrNomClasVel);
 		add(jcombVelocidad);
 		
-		add(new JLabel("Motor Elegido",JLabel.TRAILING));
+		add(new JLabel("Detector obstaculos",JLabel.TRAILING));
 		jcombDetecObstaculos=new JComboBox(arrNomClasDectObs);
 		add(jcombDetecObstaculos);
 		
@@ -72,7 +77,9 @@ public class PanelEligeModulos extends JPanel {
 		String[] resp=new String[arrClasMotor.length];
 		for(int i=0; i<arrClasMotor.length; i++ ) {
 			try {
-				Method mn=arrClas[i].getMethod("getNombre", (Class[])null);
+				Class ca=arrClas[i];
+				Method mn=ca.getMethod("getNombre", (Class[])null);
+				//instanciamos objeto con constructor vacio
 				Object ob=arrClas[i].newInstance();
 				resp[i]=(String)mn.invoke(ob, (Object[])null);
 			} catch (Exception e) {

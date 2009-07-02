@@ -126,7 +126,7 @@ public class VentanasMonitoriza extends Ventanas {
         panelRF.actualizacionContinua();
         
         //Añadimos panel de selección de modulos
-        panSelModulos=new PanelEligeModulos();
+        panSelModulos=new PanelEligeModulos(this);
         añadePanel(panSelModulos, "Modulos", true);
         
         //Terminamos la inicialización de Ventanas

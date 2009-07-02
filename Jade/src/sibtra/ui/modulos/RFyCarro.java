@@ -20,14 +20,16 @@ public class RFyCarro implements DetectaObstaculos {
 	static final String NOMBRE="Range Finder y direccion";
 	static final String DESCRIPCION="Detecta la distancia libre basándose en el Range finder y la posición de la dirección";
 	
-	private final VentanasMonitoriza ventMonitoriza;
+	private VentanasMonitoriza ventanaMonitoriza=null;
 	private FuturoObstaculo futObstaculo;
 	private PanelFuturoObstaculo panelFutObstaculo;
 	private ThreadSupendible thActulizacion;
 	private double distanciaLibre;
 	
-	public RFyCarro(final VentanasMonitoriza ventanaMonitoriza) {
-		this.ventMonitoriza=ventanaMonitoriza;
+	public RFyCarro() {};
+	
+	public void setVentanaMonitoriza(VentanasMonitoriza ventMonitoriza) {
+		ventanaMonitoriza=ventMonitoriza;
 		
 		futObstaculo=new FuturoObstaculo();
 		panelFutObstaculo=new PanelFuturoObstaculo(futObstaculo);
@@ -39,8 +41,8 @@ public class RFyCarro implements DetectaObstaculos {
 			BarridoAngular ba=null;
 			@Override
 			protected void accion() {
-				ba=ventMonitoriza.conexionRF.esperaNuevoBarrido(ba);
-				double alfa=ventMonitoriza.conexionCarro.getAnguloVolante();
+				ba=ventanaMonitoriza.conexionRF.esperaNuevoBarrido(ba);
+				double alfa=ventanaMonitoriza.conexionCarro.getAnguloVolante();
 				distanciaLibre=futObstaculo.distanciaAObstaculo(alfa, ba);
 				panelFutObstaculo.setBarrido(ba);
 				panelFutObstaculo.actualiza();
@@ -53,6 +55,8 @@ public class RFyCarro implements DetectaObstaculos {
 	 * @see sibtra.ui.modulos.DetectaObstaculos#getDistanciaLibre()
 	 */
 	public double getDistanciaLibre() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
 		return distanciaLibre;
 	}
 
@@ -75,6 +79,8 @@ public class RFyCarro implements DetectaObstaculos {
 	 * @see sibtra.ui.modulos.Modulo#terminar()
 	 */
 	public void terminar() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
 		thActulizacion.suspender();
 	}
 

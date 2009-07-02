@@ -23,17 +23,19 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 	private final static String DESCRIPCION="Usa el Joystick para definir direccion y velocidad";
 	protected static final long milisActulizacion = 200;
 	
-	private VentanasMonitoriza ventMonitoriza;
+	private VentanasMonitoriza ventanaMonitoriza=null;
 	private ManejaJoystick manJoy;
 	private ThreadSupendible thCiclico;
 	private PanelJoystick panJoy;
+	
+	public NavegaJoystick() {};
 
-	public NavegaJoystick(VentanasMonitoriza ventMoni) {
-		ventMonitoriza=ventMoni;
+	public void setVentanaMonitoriza(VentanasMonitoriza ventMoni) {
+		ventanaMonitoriza=ventMoni;
 		manJoy=new ManejaJoystick();
 		panJoy=new PanelJoystick(manJoy);
 
-		ventMonitoriza.añadePanel(panJoy, "Joystick", false);
+		ventanaMonitoriza.añadePanel(panJoy, "Joystick", false);
 		
 		thCiclico=new ThreadSupendible() {
 			@Override
@@ -48,11 +50,15 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 
 	/** @return directamente la velocidad que me da {@link ManejaJoystick} */
 	public double getConsignaVelocidad() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
 		return manJoy.getVelocidad();
 	}
 
 	/** @return directamente el alfa que calcula {@link ManejaJoystick} */
 	public double getConsignaDireccion() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
 		return manJoy.getAlfa();
 	}
 
@@ -72,6 +78,8 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 
 	/** Suspendemos el {@link #thCiclico} */
 	public void terminar() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
 		thCiclico.suspender();
 	}
 

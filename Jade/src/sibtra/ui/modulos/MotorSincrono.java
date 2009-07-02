@@ -23,7 +23,7 @@ public class MotorSincrono implements Motor {
 	
 	final static String NOMBRE="Motor Sincrono";
 	final static String DESCRIPCION="Ejecuta las acciones de control con un periodo fijo";
-	private VentanasMonitoriza ventanaMonitoriza;
+	private VentanasMonitoriza ventanaMonitoriza=null;
 	Ruta rutaActual=null;
 	private CalculoDireccion calculadorDireccion;
 	private CalculoVelocidad calculadorVelocidad;
@@ -42,8 +42,12 @@ public class MotorSincrono implements Motor {
 	//Variables 
 	protected double consignaVelAnterior;
 	
+	public MotorSincrono() {
+		
+	}
 	
-	public MotorSincrono(VentanasMonitoriza ventMonito) {
+	
+	public void setVentanaMonitoriza(VentanasMonitoriza ventMonito) {
 		ventanaMonitoriza=ventMonito;
 		
 		panel=new PanelSincrono();
@@ -95,11 +99,15 @@ public class MotorSincrono implements Motor {
 
 	/** activamos el {@link #thCiclico} */
 	public void actuar() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
 		thCiclico.activar();
 	}
 
 	/** suspendemos el {@link #thCiclico} */
 	public void parar() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
 		thCiclico.suspender();
 	}
 
@@ -107,6 +115,8 @@ public class MotorSincrono implements Motor {
 	 * @see sibtra.ui.modulos.Motor#getRutaSeleccionada()
 	 */
 	public Ruta getRutaSeleccionada() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
 		if(rutaActual!=null) return rutaActual;
 		// TODO Buscar los proveedores de ruta, seleccionarlos y elegir una ruta
 		return null;
@@ -128,6 +138,8 @@ public class MotorSincrono implements Motor {
 
 	/** Suspendemos el {@link #thCiclico} y quitamos panel */
 	public void terminar() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
 		ventanaMonitoriza.quitaPanel(panel);
 		thCiclico.suspender();
 	}
