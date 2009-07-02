@@ -33,26 +33,26 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 
 	
 	private static final int MaxLen = 812;
-	private CommPortIdentifier idPuertoCom;
-	private SerialPort puertoSerie;
-	InputStream flujoEntrada;
-	OutputStream flujoSalida;
+	private CommPortIdentifier idPuertoCom=null;
+	private SerialPort puertoSerie=null;
+	InputStream flujoEntrada=null;
+	OutputStream flujoSalida=null;
 	/** Buffer donde se van almacenando los caracteres recibidos */
 	private byte[] buf;
 	/** Para indicar si el puerto está abierto */
-	private boolean abierto;
+	private boolean abierto=false;
 	/** Para indicar que no hemos terminado de recibir el mensaje */
-	private boolean enMensaje;
+	private boolean enMensaje=false;
 	/** Indice con el que se va recorriendo el {@link #buf} */
-	private int indBuf;
+	private int indBuf=0;
 	/** Longitud total del mensaje, según indica este */
-	private int lenTot;
+	private int lenTot=0;
 
 	/** Donde se almacena los últimos angulos recibidos */
-	private AngulosIMU angulo;
+	private AngulosIMU angulo=null;
 	
 	/** Logger para registra cada nuevo conjunto de angulos */
-	private LoggerArrayDoubles logAngulos;
+	private LoggerArrayDoubles logAngulos=null;
 
 	/**
 	 * Inicialización del puerto serie. 
@@ -71,6 +71,15 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 	 * @return
 	 */
 	public boolean ConectaPuerto(String NombrePuerto, double frecuencia) {
+		buf=new byte[MaxLen]; // creamos del tamaño máximo de telegrama
+		enMensaje=false;
+		logAngulos=LoggerFactory.nuevoLoggerArrayDoubles(this, "angulosIMU");
+		logAngulos.setDescripcion("Angulos [roll,pitch,yaw]");
+
+		if(NombrePuerto.equals("/dev/null")) {
+			System.out.println(getClass().getName()+": Trabajamos sin conexion");
+			return true;
+		}
 		try {
 			idPuertoCom=CommPortIdentifier.getPortIdentifier(NombrePuerto);
 		} catch (NoSuchPortException e) {
@@ -116,19 +125,19 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 
 //		//Fijamos el umbral de recepción
 //		try {
-//			puertoSerie.enableReceiveThreshold(15); //un byte se puede recibir => detectar confirmaciones
-//			if(puertoSerie.isReceiveThresholdEnabled()) {
-//				System.err.println("\n Fijado umbral a : "+puertoSerie.getReceiveThreshold());
-//			} else {
-//				System.err.println("\n No se ha podido fijar el umbral de entrada");
-//			}
+//		puertoSerie.enableReceiveThreshold(15); //un byte se puede recibir => detectar confirmaciones
+//		if(puertoSerie.isReceiveThresholdEnabled()) {
+//		System.err.println("\n Fijado umbral a : "+puertoSerie.getReceiveThreshold());
+//		} else {
+//		System.err.println("\n No se ha podido fijar el umbral de entrada");
+//		}
 //		}  catch (UnsupportedCommOperationException e) {
-//			System.err.println("\n Puerto no soporta fijar Umbral de entrada: "+e.getMessage());
-//			//return false; seguimos aunque no haya 			
+//		System.err.println("\n Puerto no soporta fijar Umbral de entrada: "+e.getMessage());
+//		//return false; seguimos aunque no haya 			
 //		}
 
-		
-		
+
+
 		try {
 			flujoEntrada = puertoSerie.getInputStream();
 		} catch (IOException e) {
@@ -149,14 +158,10 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 		} catch (TooManyListenersException e) {
 			System.err.println("Demasiados menajadores !!! "+e.getMessage());
 		}
-		
+
 		abierto=true;
-		buf=new byte[MaxLen]; // creamos del tamaño máximo de telegrama
-		enMensaje=false;
-		logAngulos=LoggerFactory.nuevoLoggerArrayDoubles(this, "angulosIMU");
-		logAngulos.setDescripcion("Angulos [roll,pitch,yaw]");
 		return initIMU() && fijaFrecuencia(frecuencia);
-		
+
 	}
 
 	public boolean initIMU() {
@@ -320,6 +325,7 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 	 * @return true si se pudo, false si falló.
 	 */
 	public boolean fijaFrecuencia(double herzios) {
+		if(!abierto) return false;
 		if(herzios>100 || herzios<1.53e-6)
 			return false;
 		int skip=(int)Math.floor(100/herzios)-1;

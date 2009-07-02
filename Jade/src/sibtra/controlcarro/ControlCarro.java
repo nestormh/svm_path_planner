@@ -49,9 +49,6 @@ public class ControlCarro implements SerialPortEventListener {
 	 */
 
 
-	/** Para saber si el puerto serial está abierto */
-	private boolean open;
-
 	/** Maximo comando en el avance */
 	public final static int MINAVANCE = 100;
 	/** Minimo comando en el avance */
@@ -71,8 +68,7 @@ public class ControlCarro implements SerialPortEventListener {
 	private static int CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO=2156;
 //	public static final double RADIANES_POR_CUENTA 
 //		= Math.toRadians(15) / (CARRO_CENTRO - CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO);
-	public static final double RADIANES_POR_CUENTA 
-	= Math.toRadians(45) / CARRO_CENTRO ;
+	public static final double RADIANES_POR_CUENTA = Math.toRadians(45) / CARRO_CENTRO ;
 
 	/** Periodo de envío de mensajes por parte del PIC ¿? */
 	static double T = 0.096; // Version anterior 0.087
@@ -101,15 +97,22 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Integral del controlador PID de la velocidad  en {@link #controlVel()}*/
 	double integral = 0;
 
-	private ControlCarroSerialParameters parameters;
+	// Campos relativos a la conexión serial =========================================================
+	private ControlCarroSerialParameters parameters=null;
 
-	private OutputStream os;
+	private OutputStream outputStream=null;
 
-	private InputStream is;
+	private InputStream inputStream=null;
 
-	private CommPortIdentifier portId;
+	private CommPortIdentifier portId=null;
 
-	private SerialPort sPort;
+	private SerialPort sPort=null;
+	
+	/** Para saber si el puerto serial está abierto */
+	private boolean open=false;
+
+	// Fin de campos relativos a conexión serial =======================================================
+
 
 	/** Ultima velocidad de avance calculada en cuentas por segundo */
 	private double velocidadCS = 0;
@@ -229,19 +232,21 @@ public class ControlCarro implements SerialPortEventListener {
 	 * @param portName nombre del puerto serial 
 	 */
 	public ControlCarro(String portName) {
+		if(!portName.equals("/dev/null")) { 
+			parameters = new ControlCarroSerialParameters(portName, 9600, 0, 0, 8,
+					1, 0);
+			try {
+				openConnection();
+			} catch (ControlCarroConnectionException e2) {
 
-		parameters = new ControlCarroSerialParameters(portName, 9600, 0, 0, 8,
-				1, 0);
-		try {
-			openConnection();
-		} catch (ControlCarroConnectionException e2) {
-
-			System.out.println("Error al abrir el puerto " + portName);
-			System.out.flush();
+				System.out.println("Error al abrir el puerto " + portName);
+				System.out.flush();
+			}
+			if (isOpen())
+				System.out.println("Puerto Abierto " + portName);
+		} else {
+			System.out.println(this.getClass().getName()+": Trabajamos sin conexión ");
 		}
-		if (isOpen())
-			System.out.println("Puerto Abierto " + portName);
-
 		logAngVel=LoggerFactory.nuevoLoggerArrayDoubles(this, "carroAngVel",12);
 		logAngVel.setDescripcion("Carro [Ang en Rad,Vel en m/s]");
 		
@@ -294,8 +299,8 @@ public class ControlCarro implements SerialPortEventListener {
 		// Open the input and output streams for the connection. If they won't
 		// open, close the port before throwing an exception.
 		try {
-			os = sPort.getOutputStream();
-			is = sPort.getInputStream();
+			outputStream = sPort.getOutputStream();
+			inputStream = sPort.getInputStream();
 		} catch (IOException e) {
 			sPort.close();
 			throw new ControlCarroConnectionException(
@@ -380,8 +385,8 @@ public class ControlCarro implements SerialPortEventListener {
 		if (sPort != null) {
 			try {
 				// close the i/o streams.
-				os.close();
-				is.close();
+				outputStream.close();
+				inputStream.close();
 			} catch (IOException e) {
 				System.err.println(e);
 			}
@@ -413,7 +418,7 @@ public class ControlCarro implements SerialPortEventListener {
 			return;
 		while (newData != -1) {
 			try {
-				newData = is.read();
+				newData = inputStream.read();
 				TotalBytes++;
 				if (newData == -1) {
 					break;
@@ -421,18 +426,18 @@ public class ControlCarro implements SerialPortEventListener {
 				if (newData!=250)
 					continue;
 				//newdata vale 250
-				newData = is.read();
+				newData = inputStream.read();
 				if (newData != 251)
 					continue; //TODO faltaría considerar el caso de varios 255 seguidos
 				//newdata vale 251
 				//Ya tenemos la cabecera de un mensaje válido
 				//leemos los datos del mensaje en buffer
-				buffer[1] = is.read();
-				buffer[2] = is.read();
-				buffer[3] = is.read();
-				buffer[4] = is.read();
-				buffer[5] = is.read();
-				newData = is.read();
+				buffer[1] = inputStream.read();
+				buffer[2] = inputStream.read();
+				buffer[3] = inputStream.read();
+				buffer[4] = inputStream.read();
+				buffer[5] = inputStream.read();
+				newData = inputStream.read();
 				if (newData != 255)  //no está la marca de fin de paquete
 					continue; //no lo consideramos
 				//Ya tenemos paquete valido en buffer
@@ -528,7 +533,7 @@ public class ControlCarro implements SerialPortEventListener {
 	
 	/** @return Objeto de escritura del puerto serie */
 	public OutputStream getOutputStream() {
-		return os;
+		return outputStream;
 
 	}
 
@@ -825,22 +830,25 @@ public class ControlCarro implements SerialPortEventListener {
 		a[8] = ConsignaNumPasosFreno;
 		a[9] = 255;
 
-
+		if(isOpen()) {
 		for (int i = 0; i < 10; i++)
 			try {
-				os.write(a[i]);
+				outputStream.write(a[i]);
 
 			} catch (Exception e) {
 				System.out.println("Error al enviar, " + e.getMessage());
 				System.out.println(e.getStackTrace());
 				try {
 					System.out.println("Se va a proceder a vaciar el buffer");
-					os.flush();
+					outputStream.flush();
 				} catch (Exception e2) {
 					System.out.println("Error al vaciar el buffer, "
 							+ e2.getMessage());
 				}
 			}
+		} else {
+			System.err.println(getClass().getName()+": Conexion no abierta al tratar de enviar ");
+		}
 	}
 
 
