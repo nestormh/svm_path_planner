@@ -84,6 +84,7 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		thCiclico.suspender();
+		ventanaMonitoriza.quitaPanel(panJoy);
 	}
 
 }
