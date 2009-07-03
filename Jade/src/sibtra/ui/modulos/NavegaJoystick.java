@@ -31,6 +31,9 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 	public NavegaJoystick() {};
 
 	public void setVentanaMonitoriza(VentanasMonitoriza ventMoni) {
+		if(ventMoni==ventanaMonitoriza)
+			//el la misma, no hacemos nada
+			return;
 		ventanaMonitoriza=ventMoni;
 		manJoy=new ManejaJoystick();
 		panJoy=new PanelJoystick(manJoy);

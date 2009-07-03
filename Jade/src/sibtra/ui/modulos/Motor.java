@@ -30,6 +30,6 @@ public interface Motor extends Modulo {
 	
 	public void setCalculadorDireccion(CalculoDireccion calDir);
 	
-	public void setDetectaObstaculos(Vector<DetectaObstaculos> dectObs);
+	public void setDetectaObstaculos(DetectaObstaculos[] dectObs);
 	
 }

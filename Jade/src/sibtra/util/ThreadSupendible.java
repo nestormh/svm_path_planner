@@ -44,12 +44,14 @@ public abstract class ThreadSupendible extends Thread {
 
 	public final void run() {
 		while(true) {
-			accion();
+			//antes de actuar vemos si estamos suspendidos
+			//para poder estar suspendidos inicialmente
 			try {
 				synchronized (this) {
 					while (suspendido) wait(); 
 				}
 			} catch (InterruptedException e) {	}
+			accion();
 		}
 	}
 

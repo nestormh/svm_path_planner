@@ -273,7 +273,8 @@ public class Ventanas  implements ActionListener  {
     }
     
 	public void quitaPanel(JPanel panel) {
-		//TODO buscar panel y eliminarlo, puede estar dentro del Scroll panel.
+		tbPanelDecho.remove(panel);
+		tbPanelIzdo.remove(panel);
 	}
 
 }

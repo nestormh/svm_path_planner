@@ -29,6 +29,9 @@ public class RFyCarro implements DetectaObstaculos {
 	public RFyCarro() {};
 	
 	public void setVentanaMonitoriza(VentanasMonitoriza ventMonitoriza) {
+		if(ventMonitoriza==ventanaMonitoriza)
+			//el la misma, no hacemos nada
+			return;
 		ventanaMonitoriza=ventMonitoriza;
 		
 		futObstaculo=new FuturoObstaculo();

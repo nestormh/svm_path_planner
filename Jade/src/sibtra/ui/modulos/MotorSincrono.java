@@ -25,14 +25,14 @@ public class MotorSincrono implements Motor {
 	final static String DESCRIPCION="Ejecuta las acciones de control con un periodo fijo";
 	private VentanasMonitoriza ventanaMonitoriza=null;
 	Ruta rutaActual=null;
-	private CalculoDireccion calculadorDireccion;
-	private CalculoVelocidad calculadorVelocidad;
-	private Vector<DetectaObstaculos> detectoresObstaculos;
+	private CalculoDireccion calculadorDireccion=null;
+	private CalculoVelocidad calculadorVelocidad=null;
+	private DetectaObstaculos[] detectoresObstaculos=null;
 	private PanelSincrono panel;
 	private ThreadSupendible thCiclico;
 
 	//Parámetros
-	protected long periodoMuestreoMili = 200;
+	protected int periodoMuestreoMili = 200;
 	protected double cotaAngulo=Math.toRadians(45);
 	protected double umbralMinimaVelocidad=0.2;
 	protected double pendienteFrenado=1.0;
@@ -48,6 +48,9 @@ public class MotorSincrono implements Motor {
 	
 	
 	public void setVentanaMonitoriza(VentanasMonitoriza ventMonito) {
+		if(ventMonito==ventanaMonitoriza)
+			//el la misma, no hacemos nada
+			return;
 		ventanaMonitoriza=ventMonito;
 		
 		panel=new PanelSincrono();
@@ -74,8 +77,8 @@ public class MotorSincrono implements Motor {
 	            
 	            //vemos la minima distancia de los detectores
 	            double distMinin=Double.MAX_VALUE;
-	            for(int i=0; i<detectoresObstaculos.size(); i++)
-	            	distMinin=Math.min(distMinin, detectoresObstaculos.elementAt(i).getDistanciaLibre());
+	            for(int i=0; i<detectoresObstaculos.length; i++)
+	            	distMinin=Math.min(distMinin, detectoresObstaculos[i].getDistanciaLibre());
 	            
 	            double velRampa=(distMinin-margenColision)*pendienteFrenado;
 	            consignaVelocidad=Math.min(consignaVelocidad, velRampa);
@@ -101,6 +104,9 @@ public class MotorSincrono implements Motor {
 	public void actuar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
+        //Solo podemos actuar si está todo inicializado
+        if(calculadorDireccion==null || calculadorVelocidad==null || detectoresObstaculos==null)
+        	throw new IllegalStateException("Faltan modulos por inicializar");
 		thCiclico.activar();
 	}
 
@@ -140,8 +146,8 @@ public class MotorSincrono implements Motor {
 	public void terminar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
-		ventanaMonitoriza.quitaPanel(panel);
 		thCiclico.suspender();
+		ventanaMonitoriza.quitaPanel(panel);
 	}
 
 	public void setCalculadorDireccion(CalculoDireccion calDir) {
@@ -152,7 +158,7 @@ public class MotorSincrono implements Motor {
 		calculadorVelocidad=calVel;
 	}
 
-	public void setDetectaObstaculos(Vector<DetectaObstaculos> dectObs) {
+	public void setDetectaObstaculos(DetectaObstaculos[] dectObs) {
 		detectoresObstaculos=dectObs;
 	}
 	
@@ -161,7 +167,7 @@ public class MotorSincrono implements Motor {
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setUmbralMinimaVelocidad",0,6,0.1), "Min Vel");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setPendienteFrenado",0.1,3,0.1), "Pend Frenado");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setMargenColision",0.1,10,0.1), "Margen col");
-			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setMaximoIncrementoVelodidad",0,6,0.1), "Max Inc V");
+			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setMaximoIncrementoVelocidad",0,6,0.1), "Max Inc V");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setCotaAnguloGrados",5,45,1), "Cota Angulo");
 			añadeAPanel(new SpinnerInt(MotorSincrono.this,"setPeriodoMuestreoMili",20,2000,20), "Per Muest");
 		}
@@ -207,11 +213,11 @@ public class MotorSincrono implements Motor {
 		this.pendienteFrenado = pendienteFrenado;
 	}
 
-	public long getPeriodoMuestreoMili() {
+	public int getPeriodoMuestreoMili() {
 		return periodoMuestreoMili;
 	}
 
-	public void setPeriodoMuestreoMili(long periodoMuestreoMili) {
+	public void setPeriodoMuestreoMili(int periodoMuestreoMili) {
 		this.periodoMuestreoMili = periodoMuestreoMili;
 	}
 
