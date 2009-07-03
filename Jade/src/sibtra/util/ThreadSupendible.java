@@ -15,6 +15,7 @@ package sibtra.util;
 public abstract class ThreadSupendible extends Thread {
 
 	private boolean suspendido=true;
+	private boolean terminado=false;
 
 	/** Arranca el thread suspendido */
 	public ThreadSupendible() {
@@ -41,14 +42,20 @@ public abstract class ThreadSupendible extends Thread {
 		return suspendido;
 	}
 
-
+	public final synchronized void terminar() {
+		terminado=true;
+		notify();  //por si esta suspendido
+	}
+	
 	public final void run() {
 		while(true) {
 			//antes de actuar vemos si estamos suspendidos
 			//para poder estar suspendidos inicialmente
 			try {
 				synchronized (this) {
-					while (suspendido) wait(); 
+					while (!terminado && suspendido)
+						wait(); 
+					if(terminado) return; //dejamos de ejecutarnos
 				}
 			} catch (InterruptedException e) {	}
 			accion();

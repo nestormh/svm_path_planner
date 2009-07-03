@@ -48,6 +48,7 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 			}
 		};
 		thCiclico.setName(NOMBRE);
+		thCiclico.activar();
 		
 	}
 
@@ -83,7 +84,7 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 	public void terminar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
-		thCiclico.suspender();
+		thCiclico.terminar();
 		ventanaMonitoriza.quitaPanel(panJoy);
 	}
 

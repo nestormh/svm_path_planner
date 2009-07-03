@@ -3,6 +3,8 @@
 package sibtra.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -273,8 +275,44 @@ public class Ventanas  implements ActionListener  {
     }
     
 	public void quitaPanel(JPanel panel) {
-		tbPanelDecho.remove(panel);
-		tbPanelIzdo.remove(panel);
+		//miramos si están en panel derecho
+		JTabbedPane jtpAct=tbPanelDecho;
+		for(int i=0; i<jtpAct.getComponentCount(); i++) {
+			Component coa=jtpAct.getComponentAt(i);
+			if(coa.equals(panel)) {
+				jtpAct.remove(i);
+				return;
+			} else if(coa instanceof JScrollPane
+					&& ((JScrollPane) coa).getViewport().getView().equals(panel)) {
+				jtpAct.remove(i); 
+				return;
+			}
+		}
+		jtpAct=tbPanelIzdo;
+		for(int i=0; i<jtpAct.getComponentCount(); i++) {
+			Component coa=jtpAct.getComponentAt(i);
+			if(coa.equals(panel)) {
+				jtpAct.remove(i);
+				return;
+			} else if(coa instanceof JScrollPane
+					&& ((JScrollPane) coa).getViewport().getView().equals(panel)) {
+				jtpAct.remove(i); 
+				return;
+			}
+		}
+//		//miramos si están en panel izdo
+//		jtpAct=tbPanelIzdo;
+//		for(int i=0; i<jtpAct.getComponentCount(); i++) {
+//			Component coa=jtpAct.getComponentAt(i);
+//			if(coa.equals(panel))
+//				jtpAct.remove(i);
+//			else if(coa instanceof Container) 
+//				for(Component subcoa: ((Container)coa).getComponents())
+//					if(subcoa.equals(panel)) {
+//						jtpAct.remove(i);
+//						return;
+//					}
+//		}
 	}
 
 }

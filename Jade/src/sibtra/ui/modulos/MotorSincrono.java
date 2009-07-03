@@ -146,7 +146,7 @@ public class MotorSincrono implements Motor {
 	public void terminar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
-		thCiclico.suspender();
+		thCiclico.terminar();
 		ventanaMonitoriza.quitaPanel(panel);
 	}
 

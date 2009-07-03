@@ -52,6 +52,7 @@ public class RFyCarro implements DetectaObstaculos {
 			}
 		};
 		thActulizacion.setName(NOMBRE);
+		thActulizacion.activar();
 	}
 
 	/**
@@ -84,7 +85,8 @@ public class RFyCarro implements DetectaObstaculos {
 	public void terminar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
-		thActulizacion.suspender();
+		thActulizacion.terminar();
+		ventanaMonitoriza.quitaPanel(panelFutObstaculo);
 	}
 
 }
