@@ -64,6 +64,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		{//nuevo panel para añadir debajo
 			JPanel jpPre=new PanelFlow();
 			
+			//TODO usar labels dato
 			jla=jlDistLin=new JLabel("   ??.???");
 		    Font Grande = jla.getFont().deriveFont(20.0f);
 			jla.setBorder(BorderFactory.createTitledBorder(
@@ -159,7 +160,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			Point2D pxPtoActual=point2Pixel(MI.posActual);
 
 			//vemos si hay información de colisión
-			if(!Double.isNaN(MI.dist)) {
+			if(!Double.isNaN(MI.getDistanciaLineal())) {
 				//estamos dentro del camino
 				//Lineas indicando de donde empezó el barrido
 				g.setStroke(new BasicStroke());
@@ -184,7 +185,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 				GeneralPath gp=null;
 				if(MI.encontradoInicioD && (gp=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1,MI.esCerrada))!=null) g.draw(gp);
 				if(MI.encontradoInicioI && (gp=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1,MI.esCerrada))!=null) g.draw(gp);
-				if(MI.dist>0) {
+				if(MI.getDistanciaLineal()>0) {
 					//marcamos el pto mínimo
 					g.setStroke(new BasicStroke());
 					g.setColor(Color.RED);
@@ -213,7 +214,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 							,point2Pixel(MI.Tr[MI.iLibre])));
 
 				}
-				if(!Double.isInfinite(MI.distCamino) && MI.indSegObs!=Integer.MAX_VALUE) {
+				if(!Double.isInfinite(MI.getDistanciaCamino()) && MI.indSegObs!=Integer.MAX_VALUE) {
 					//tenemos los índices
 					g.setStroke(new BasicStroke(3));
 					g.setColor(Color.GREEN);
@@ -265,7 +266,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			situaCoche(MI.posActual[0], MI.posActual[1], MI.Yaw);
 			barrAng=MI.barr;
 		}
-		if(MI==null || Double.isNaN(MI.dist)) {
+		if(MI==null || Double.isNaN(MI.getDistanciaLineal())) {
 			jlDistLin.setEnabled(false);
 			jlDistCam.setEnabled(false);
 			jlFuera.setEnabled(true);
@@ -273,16 +274,16 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		} else {
 			jlFuera.setEnabled(false);
 			jlDistLin.setEnabled(true);
-			if(MI.dist>0) {
-				jlDistLin.setText(String.format("%9.3f m", MI.dist));
+			if(MI.getDistanciaLineal()>0) {
+				jlDistLin.setText(String.format("%9.3f m", MI.getDistanciaLineal()));
 				jlDistLin.setForeground(Color.RED);
 			} else {
-				jlDistLin.setText(String.format("%9.3f m", -MI.dist));
+				jlDistLin.setText(String.format("%9.3f m", -MI.getDistanciaLineal()));
 				jlDistLin.setForeground(Color.GREEN);				
 			}
 			if(MI.indSegObs!=Integer.MAX_VALUE) {
 				jlDistCam.setEnabled(true);
-				jlDistCam.setText(String.format("%9.3f m", MI.distCamino));				
+				jlDistCam.setText(String.format("%9.3f m", MI.getDistanciaCamino()));				
 			} else jlDistCam.setEnabled(false);
 		}
 		super.actualiza();

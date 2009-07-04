@@ -71,12 +71,12 @@ public class MiraObstaculo {
 	BarridoAngular barr;
 
 	/** Distancia lineal a la que se encuentra el obstáculo teóricamente más cercano */
-	double dist;
+	protected double distanciaLineal;
 	
 	/** Distancia en camino donde está el obstáculo más cercano (sobre camino).
 	 * Será MAX_VALUE si no se ha encontrado
 	 */
-	double distCamino;
+	protected double distanciaCamino;
 
 	/** indice del segmento de la trayectoria donde está el coche */
 	int indiceCoche=-1;
@@ -224,7 +224,7 @@ public class MiraObstaculo {
 		barr=barrAct;
 		posActual=posicionLocal;
 		Yaw=yawA; //si está ya en radianes, si no tendríamos que hacerer el cambio.
-		dist=Double.NaN; //por si fallan las primeras comprobaciones
+		distanciaLineal=Double.NaN; //por si fallan las primeras comprobaciones
 
 		//Inicializamos todas las variables del algoritmo
 		ColIzda=false; //colisión por la izda.
@@ -251,7 +251,7 @@ public class MiraObstaculo {
 			if(indiceCoche==0 && !esCerrada) {
 				//No hay opción al anterior
 				log("Cochoe está antes del primer punto");
-				return dist; //NaN
+				return distanciaLineal; //NaN
 			} else {
 				indiceCoche=(indiceCoche+Tr.length-1)%Tr.length; //anterior generalizado
 				if (!dentroSegmento(posicionLocal, indiceCoche)) {
@@ -259,7 +259,7 @@ public class MiraObstaculo {
 						System.err.println("No está tampoco en segmento anterior a pesar de distacia < camino");
 					//esta fuera del camino
 					estaFuera=true;
-					return dist; //NaN					
+					return distanciaLineal; //NaN					
 				}
 			}
 		estaFuera=false;
@@ -274,7 +274,7 @@ public class MiraObstaculo {
 		double difDir=UtilCalculos.anguloVectores(vCamino, v);
 		if(Math.abs(difDir)>(PI_2)) {
 			System.out.println("Estamos yendo hacia atrás");
-			return dist; //salimos 
+			return distanciaLineal; //salimos 
 		}
 
 		//Tenemos que buscar que punto del borde derecho e izquierdo comienza el barrido
@@ -350,7 +350,7 @@ public class MiraObstaculo {
 		
 		if(!encontradoInicioD && !encontradoInicioI) {
 			System.err.println("No se ha encontrado ningún inicio !!!");
-			return dist; //NaN
+			return distanciaLineal; //NaN
 		}
 		
 		//procedemos a recorrer los puntos para ver si hay algo dentro
@@ -449,7 +449,7 @@ public class MiraObstaculo {
 			for(int i=iAD+1; i<=iAI; i++)
 				if(barr.getDistancia(i)<barr.getDistancia(indMin))
 					indMin=i;
-			dist=barr.getDistancia(indMin);
+			distanciaLineal=barr.getDistancia(indMin);
 			//Tenemos que buscar pto dentro del camino más cercano
 			if(!buscaSegmentoObstaculo(posicionLocal,iAD, iAI,indMin))
 				//usamos hasta donde hemos podido explorar
@@ -458,13 +458,13 @@ public class MiraObstaculo {
 			log("los rayos se han cruzado y no hay colisión en los 2 o alguno no se a iniciado");
 			if(ColIzda) {
 				//usamos el punto de la trayectoria hasta donde podemos llegar
-				dist=-UtilCalculos.distanciaPuntos(Tr[iLibre=iptoI],posActual);
+				distanciaLineal=-UtilCalculos.distanciaPuntos(Tr[iLibre=iptoI],posActual);
 				//Tenemos que buscar pto dentro del camino más cercano
 				if(!buscaSegmentoObstaculo(posicionLocal, 0, iAI))
 					//usamos hasta donde hemos podido explorar
 					indSegObs=iptoI;
 			} else  if(ColDecha) {
-				dist=-UtilCalculos.distanciaPuntos(Tr[iLibre=iptoD],posActual);
+				distanciaLineal=-UtilCalculos.distanciaPuntos(Tr[iLibre=iptoD],posActual);
 				//Tenemos que buscar pto dentro del camino más cercano
 				if(!buscaSegmentoObstaculo(posicionLocal, iAD, barr.numDatos()-1))
 					//usamos hasta donde hemos podido explorar
@@ -475,15 +475,15 @@ public class MiraObstaculo {
 				//Si alguno no iniciado su índice será negativo
 				iLibre=indSegObs=(iptoD<iptoI)?iptoI:iptoD;
 				indBarrSegObs=Integer.MAX_VALUE;
-				dist=-UtilCalculos.distanciaPuntos(Tr[iLibre],posActual);
+				distanciaLineal=-UtilCalculos.distanciaPuntos(Tr[iLibre],posActual);
 				encontradoSegObs=false;
 			}
 		}
 			
 		log("Indice del segmento coche "+(indiceCoche-1)
 				+" anterior al obstáculo ("+encontradoSegObs+")"+indSegObs);
-		distCamino=largoTramo(indiceCoche,indSegObs);
-		return distCamino;
+		distanciaCamino=largoTramo(indiceCoche,indSegObs);
+		return distanciaCamino;
 	}
 
 	
@@ -742,7 +742,7 @@ public class MiraObstaculo {
 
 	
 	public String toString() {
-		String ret="Lineal="+dist+" camino="+distCamino;
+		String ret="Lineal="+distanciaLineal+" camino="+distanciaCamino;
 		ret+=" \n indiceCoche ="+indiceCoche 
 		    + " estaFuera "+ estaFuera
 			+" encontradoInicioD:"+encontradoInicioD +"  iptoDini ="+iptoDini
@@ -758,5 +758,19 @@ public class MiraObstaculo {
 				+" indBarrSegObs ("+encontradoSegObs+") ="+indBarrSegObs
 		;
 		return ret;
+	}
+
+	/**
+	 * @return the distanciaCamino
+	 */
+	public double getDistanciaCamino() {
+		return distanciaCamino;
+	}
+
+	/**
+	 * @return the distanciaLineal
+	 */
+	public double getDistanciaLineal() {
+		return distanciaLineal;
 	}
 }

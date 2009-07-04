@@ -25,6 +25,8 @@ import sibtra.lms.ZonaLMS;
 import sibtra.lms.ZonaRadialLMS;
 import sibtra.lms.ZonaRectangularLMS;
 import sibtra.lms.ZonaSegmentadaLMS;
+import sibtra.util.LabelDato;
+import sibtra.util.LabelDatoFormato;
 import sibtra.util.UtilCalculos;
 
 @SuppressWarnings("serial")
@@ -82,6 +84,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		super(distanciaMaxima);
 		MI=miObs;
 
+		//TODO Poner LabelDatos
 		jlDistLin=new JLabel("Lineal ??.???");
 		Font Grande = jlDistLin.getFont().deriveFont(20.0f);
 		jlDistLin.setFont(Grande);
@@ -89,6 +92,8 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		jlDistLin.setEnabled(false);
 		jpChecks.add(Box.createHorizontalStrut(15));
 		jpChecks.add(jlDistLin);
+		
+//		jpChecks.añadeAPanel(new LabelDatoFormato("##.##",MiraObstaculo.class,"getDistanciaLineal","%f5.2"),"Dist. Lineal");
 
 		jlDistCamino=new JLabel("Camino ??.???");
 		jlDistCamino.setFont(Grande);
@@ -96,6 +101,12 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		jlDistCamino.setEnabled(false);
 		jpChecks.add(Box.createHorizontalStrut(15));
 		jpChecks.add(jlDistCamino);
+
+//		LabelDato labCamino=new LabelDato("##.##") {
+//		};
+//		jpChecks.añadeAPanel(new LabelDatoFormato("##.##",MiraObstaculo.class,"getDistanciaCamino","%f5.2"),"Dist. Camino");
+
+		
 		
 
 	}
@@ -145,14 +156,14 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 			g.draw(gpTr);
 		}
 		//pintamos la distancia mínima etc.
-		if(MI.hayDatos && !java.lang.Double.isNaN(MI.dist))  {
+		if(MI.hayDatos && !java.lang.Double.isNaN(MI.getDistanciaLineal()))  {
 			g.setStroke(new BasicStroke(2));
 			g.setColor(Color.WHITE);
 			//los de la derecha e izquierda que están libres
 			g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
 			g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
 
-			if(MI.dist>0) {
+			if(MI.getDistanciaLineal()>0) {
 				//marcamos el pto mínimo
 				g.setStroke(new BasicStroke());
 				g.setColor(Color.RED);
@@ -194,7 +205,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 					,pointReal2pixel(MI.Bi[MI.iptoI])));
 
 			//Pintamos en verde la distancia sobre el camino
-			if(!Double.isInfinite(MI.distCamino) && MI.indSegObs<MI.Tr.length) {
+			if(!Double.isInfinite(MI.getDistanciaCamino()) && MI.indSegObs<MI.Tr.length) {
 				//tenemos los índices
 				g.setStroke(new BasicStroke(3));
 				g.setColor(Color.GREEN);
@@ -255,19 +266,19 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 	public void actualiza() {
 		if(MI!=null) 		
 			super.setBarrido(MI.barr);
-		if(MI==null || java.lang.Double.isNaN(MI.dist)) {
+		if(MI==null || java.lang.Double.isNaN(MI.getDistanciaLineal())) {
 			jlDistLin.setText("Fuera");
 			jlDistLin.setForeground(Color.RED);
 		} else  {
-			if (MI.dist>0) {
-				jlDistLin.setText(String.format("Lineal %6.3f m", MI.dist));
+			if (MI.getDistanciaLineal()>0) {
+				jlDistLin.setText(String.format("Lineal %6.3f m", MI.getDistanciaLineal()));
 				jlDistLin.setForeground(Color.RED);
 			} else {
-				jlDistLin.setText(String.format("Lineal %6.3f m", -MI.dist));
+				jlDistLin.setText(String.format("Lineal %6.3f m", -MI.getDistanciaLineal()));
 				jlDistLin.setForeground(Color.GREEN);
 			}
-			if(!Double.isInfinite(MI.distCamino)) {
-				jlDistCamino.setText(String.format("Camino %6.3f m", MI.distCamino));
+			if(!Double.isInfinite(MI.getDistanciaCamino())) {
+				jlDistCamino.setText(String.format("Camino %6.3f m", MI.getDistanciaCamino()));
 				jlDistCamino.setEnabled(true);
 			}
 		}
