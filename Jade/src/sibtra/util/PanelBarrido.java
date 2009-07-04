@@ -18,11 +18,8 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D.Double;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
@@ -219,20 +216,22 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 					}
 				}
 				
-				//cemicírculo central del ancho del coche
-				Point2D.Double pxAncho=point2Pixel(-Parametros.medioAnchoCarro,Parametros.medioAnchoCarro);
+				//Marcamos el ancho del coche
 				g.setStroke(new BasicStroke());
 				g.setColor(Color.WHITE);
-				g.draw(new Arc2D.Double(pxAncho.x,pxAncho.y
-						,(pxCentro.x-pxAncho.x)*2,(pxCentro.y-pxAncho.y)*2
-						,0,180
-						,Arc2D.CHORD
+				//como arco
+//				Point2D.Double pxAncho=point2Pixel(-Parametros.medioAnchoCarro,Parametros.medioAnchoCarro);
+//				g.draw(new Arc2D.Double(pxAncho.x,pxAncho.y
+//						,(pxCentro.x-pxAncho.x)*2,(pxCentro.y-pxAncho.y)*2
+//						,0,180
+//						,Arc2D.CHORD
+//						));
+				//como rectangulo
+				Point2D.Double pxEsquina=point2Pixel(-Parametros.medioAnchoCarro,0.5);
+				g.draw(new Rectangle2D.Double(pxEsquina.x,pxEsquina.y
+						,(pxCentro.x-pxEsquina.x)*2,(pxCentro.y-pxEsquina.y)
 						));
-//				g.draw(new Arc2D.Double(pxCentro.getX()-TamMarca/2, pxCentro.getY()-TamMarca/2 //esquina rectángulo
-//						, TamMarca, TamMarca //Tamaño rectángulo
-//						, 0, 180 //rango de ángulos
-//						,Arc2D.CHORD //ralla entre los extremos
-//				));
+				
 				cosasAPintar(g0);
 			}
 		};
@@ -261,18 +260,6 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 		{
 			//Abajo los checks para mostrar Rejillas y reglas
 			jpChecks=new PanelFlow();
-			jpChecks.setBorder(
-					BorderFactory.createCompoundBorder(
-							BorderFactory.createEmptyBorder(5, 5, 5, 5)
-							,BorderFactory.createLineBorder(Color.BLACK)
-					)
-			);
-			
-			jpChecks.add(Box.createHorizontalStrut(15));
-			
-			jpChecks.add(new JLabel("Mostrar: "));
-			
-			jpChecks.add(Box.createHorizontalStrut(15));
 
 			jcbRegla=new JCheckBox("Regla",true);
 			jcbRegla.addChangeListener(this);
@@ -291,8 +278,10 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 		
 	}
 
+	/** Método que sobrescriben clases hijas para añadis las cosas que quieren pintar.
+	 * Deben poner super.cosasAPintar(g0) para que se pinte lo del padre tambien
+	 */
 	protected void cosasAPintar(Graphics g0) {
-		// TODO Apéndice de método generado automáticamente
 		
 	}
 	
@@ -362,14 +351,10 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 
 	/** No hacenos nada */
 	public void mouseEntered(MouseEvent arg0) {
-		// TODO Apéndice de método generado automáticamente
-		
 	}
 
 	/** no hacemos nada */
 	public void mouseExited(MouseEvent arg0) {
-		// TODO Apéndice de método generado automáticamente
-		
 	}
 
 	/** Programa el repintado del panel */
