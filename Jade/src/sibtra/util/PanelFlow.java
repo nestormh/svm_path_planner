@@ -4,13 +4,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Insets;
 
-import javax.swing.JPanel;
-
 /** Panel con FlowLayout que adapta su tamaño minimo para reflejar el número de 
  * filas que necesita
  * @author alberto
  */
-public class PanelFlow extends JPanel {
+public class PanelFlow extends PanelDatos {
 	
 	FlowLayout fL=null;
 	

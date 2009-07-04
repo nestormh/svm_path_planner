@@ -23,6 +23,7 @@ import javax.swing.event.ChangeListener;
 
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.PanelMuestraBarrido;
+import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.Parametros;
 
@@ -37,35 +38,38 @@ public class PanelFuturoObstaculo extends PanelMuestraBarrido {
 	FuturoObstaculo futObs;
 	/** Tamaño de la marca del punto más cercano */
 	double TamCruz=10;
-	private JLabel jlDistLin;
+//	private JLabel jlDistLin;
 	private JProgressBar jpbDistancia;
+	private PanelFlow panelInformacion;
 	
 	public PanelFuturoObstaculo(FuturoObstaculo fo) {
 		super((short) 80);
 		futObs=fo;
 
-		JLabel jla=null;
-		Border blackline = BorderFactory.createLineBorder(Color.black);
+//		JLabel jla=null;
+//		Border blackline = BorderFactory.createLineBorder(Color.black);
 		{//nuevo panel para añadir debajo
-			JPanel jpPre=new PanelFlow();
+			panelInformacion=new PanelFlow();
 			
-			jla=jlDistLin=new JLabel("   ??.???");
-		    Font Grande = jla.getFont().deriveFont(20.0f);
-			jla.setBorder(BorderFactory.createTitledBorder(
-				       blackline, "Dist Libre"));
-		    jla.setFont(Grande);
-			jla.setHorizontalAlignment(JLabel.CENTER);
-			jla.setEnabled(false);
-//			jla.setMinimumSize(new Dimension(300, 20));
-			jla.setPreferredSize(new Dimension(130, 45));
-			jpPre.add(jla);
+//			jla=jlDistLin=new JLabel("   ??.???");
+//		    Font Grande = jla.getFont().deriveFont(20.0f);
+//			jla.setBorder(BorderFactory.createTitledBorder(
+//				       blackline, "Dist Libre"));
+//		    jla.setFont(Grande);
+//			jla.setHorizontalAlignment(JLabel.CENTER);
+//			jla.setEnabled(false);
+////			jla.setMinimumSize(new Dimension(300, 20));
+//			jla.setPreferredSize(new Dimension(130, 45));
+//			jpPre.add(jla);
+			
+			panelInformacion.añadeAPanel(new LabelDatoFormato("##.##",FuturoObstaculo.class,"getDistanciaLibre","%5.2f"), "Dist Libre");
 			
 			jpbDistancia=new JProgressBar(JProgressBar.HORIZONTAL,0,80);
 			//TODO que el largo se ajuste a todo lo que quede de espacio
 			jpbDistancia.setPreferredSize(new Dimension(800,20));
-			jpPre.add(jpbDistancia);
+			panelInformacion.add(jpbDistancia);
 			
-			add(jpPre);
+			add(panelInformacion);
 		}
 			
 		
@@ -126,13 +130,11 @@ public class PanelFuturoObstaculo extends PanelMuestraBarrido {
 	 * Se debe invocar cuando {@link #MI} realiza un nuevo cálculo. 
 	 */
 	public void actualiza() {
+		panelInformacion.actualizaDatos(futObs);
 		if(futObs!=null) {
-			jlDistLin.setText(String.format("%5.2f", futObs.distanciaObs));
-			jlDistLin.setEnabled(true);
-			jpbDistancia.setValue((int)futObs.distanciaObs);
+			jpbDistancia.setValue((int)futObs.getDistanciaLibre());
 			jpbDistancia.setEnabled(false);
 		} else {
-			jlDistLin.setEnabled(false);
 			jpbDistancia.setEnabled(false);
 		}
 		
