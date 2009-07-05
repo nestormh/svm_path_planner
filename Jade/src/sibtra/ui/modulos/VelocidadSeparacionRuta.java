@@ -1,0 +1,204 @@
+/**
+ * 
+ */
+package sibtra.ui.modulos;
+
+import javax.swing.JOptionPane;
+
+import sibtra.gps.GPSData;
+import sibtra.ui.VentanasMonitoriza;
+import sibtra.util.LabelDatoFormato;
+import sibtra.util.PanelFlow;
+import sibtra.util.SpinnerDouble;
+import sibtra.util.UtilCalculos;
+
+/**
+ * @author alberto
+ *
+ */
+public class VelocidadSeparacionRuta implements CalculoVelocidad {
+	
+	String NOMBRE="Velocidad Ruta";
+	String DESCRIPCION="Velocidad según ruta, se minora con la distancia lateral y error de orientación";
+	private VentanasMonitoriza ventanaMonitoriza;
+	private double[][] Tr;
+	private PanelFlow panelDatos;
+	// Parametros ======================================================
+	private double gananciaLateral=1;
+	private double gananciaVelocidad=2;
+	private double velocidadMaxima=2.5;
+	private double factorReduccionV=0.7;
+	private double VelocidadMinima=1;
+	// variables interesantes ===========================================
+	private double errorLateral;
+	private double errorOrientacion;
+	private double velocidadReferencia;
+	private double consigna;
+	
+	public VelocidadSeparacionRuta() {};
+
+	/* (non-Javadoc)
+	 * @see sibtra.ui.modulos.Modulo#setVentanaMonitoriza(sibtra.ui.VentanasMonitoriza)
+	 */
+	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonitoriza) {
+		if(ventanaMonitoriza!=null)
+			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
+		ventanaMonitoriza=ventMonitoriza;
+		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada();
+		if(Tr==null) {
+			JOptionPane.showMessageDialog(ventanaMonitoriza.ventanaPrincipal,
+				    "El módulo "+NOMBRE+" necesita ruta para continuar.",
+				    "Sin ruta",
+				    JOptionPane.ERROR_MESSAGE);
+			ventanaMonitoriza=null;
+			return false;
+		}
+		
+		//Definimos panel y ponemos ajuste para los parámetros y etiquetas con las variables
+		panelDatos=new PanelFlow();
+		panelDatos.añadeAPanel(new LabelDatoFormato("##.##",this.getClass(),"getConsigna","%5.2f m/s"), "Consigna");
+		panelDatos.añadeAPanel(new LabelDatoFormato("##.## m",this.getClass(),"getErrorLateral","%5.2f m"), "Err Lat");
+		panelDatos.añadeAPanel(new LabelDatoFormato("##.##",this.getClass(),"getErrorOrientacionGrados","%5.2f º"), "Err Ori");
+		panelDatos.añadeAPanel(new LabelDatoFormato("##.## m/s",this.getClass(),"getVelocidadReferencia","%5.2f m/s"), "Vel Ref");
+		
+		panelDatos.añadeAPanel(new SpinnerDouble(this,"setFactorReduccionV",0.05,1,0.05), "Fact Reduc");
+		panelDatos.añadeAPanel(new SpinnerDouble(this,"setGananciaLateral",0.1,10,0.1), "Gan Lat");
+		panelDatos.añadeAPanel(new SpinnerDouble(this,"setGananciaVelocidad",0.1,10,0.1), "Gan Vel");
+		panelDatos.añadeAPanel(new SpinnerDouble(this,"setVelocidadMaxima",1,7,0.25), "Vel Maxima");
+		panelDatos.añadeAPanel(new SpinnerDouble(this,"setVelocidadMinima",1,7,0.25), "Vel Minima");
+		
+		ventanaMonitoriza.añadePanel(panelDatos, "Vel Ruta", false, false);
+
+		return true;
+	}
+
+	/**
+	 * Método para decidir la consigna de velocidad para cada instante.
+	 * Se tiene en cuenta el error en la orientación y el error lateral para reducir la 
+	 * consigna de velocidad. 
+	 * @return
+	 */
+	public double getConsignaVelocidad() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
+		consigna = 0;
+		velocidadMaxima = 2.5;
+		VelocidadMinima = 1;
+        //Calculamos el comando            	
+        GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();
+        if(pa==null) {
+        	System.err.println("Modulo "+NOMBRE+":No tenemos punto GPS con que hacer los cáclulos");
+        	return consigna=Double.NaN;  // lo indicamos así??
+        }
+        double x=pa.getXLocal();
+        double y=pa.getYLocal();
+        double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
+		int indMin = UtilCalculos.indiceMasCercano(Tr,x,y);
+		double dx = Tr[indMin][0]-x;
+		double dy = Tr[indMin][1]-y;
+		errorLateral = Math.sqrt(dx*dx + dy*dy);
+		errorOrientacion = Tr[indMin][2] - angAct;
+		velocidadReferencia=Tr[indMin][3];
+		//referencia minorada
+		consigna=velocidadReferencia*factorReduccionV;
+		//acotamos a velocidad máxima
+		if (velocidadReferencia>velocidadMaxima)
+			consigna = velocidadMaxima;
+		//minoramos la consigna con los errores
+		consigna -=  Math.abs(errorOrientacion)*gananciaVelocidad + Math.abs(errorLateral)*gananciaLateral;        
+		// Solo con esta condición el coche no se detiene nunca,aunque la referencia de la ruta sea cero
+		if (consigna <= VelocidadMinima)
+			if( velocidadReferencia >= VelocidadMinima )
+				// Con esta condición se contempla el caso de que la consigna sea < 0
+				consigna = VelocidadMinima;
+			else 
+				// De esta manera si la velocidad de la ruta disminuye hasta cero el coche se 
+				// detiene, en vez de seguir a velocidad mínima como ocurría antes. En este caso también
+				// está contemplado el caso de que la consigna sea < 0
+				consigna = velocidadReferencia;
+		//actulizamos la presetación
+		panelDatos.actualizaDatos(this);
+		return consigna; 
+	}
+
+	/* (sin Javadoc)
+	 * @see sibtra.ui.modulos.Modulo#getDescripcion()
+	 */
+	public String getDescripcion() {
+		return DESCRIPCION;
+	}
+
+	/* (sin Javadoc)
+	 * @see sibtra.ui.modulos.Modulo#getNombre()
+	 */
+	public String getNombre() {
+		return NOMBRE;
+	}
+
+	/* (non-Javadoc)
+	 * @see sibtra.ui.modulos.Modulo#terminar()
+	 */
+	public void terminar() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
+		ventanaMonitoriza.quitaPanel(panelDatos);
+
+	}
+
+	public double getConsigna() {
+		return consigna;
+	}
+
+	public double getErrorLateral() {
+		return errorLateral;
+	}
+
+	public double getErrorOrientacionGrados() {
+		return Math.toDegrees(errorOrientacion);
+	}
+
+	public double getFactorReduccionV() {
+		return factorReduccionV;
+	}
+
+	public double getGananciaLateral() {
+		return gananciaLateral;
+	}
+
+	public double getGananciaVelocidad() {
+		return gananciaVelocidad;
+	}
+
+	public double getVelocidadMaxima() {
+		return velocidadMaxima;
+	}
+
+	public double getVelocidadMinima() {
+		return VelocidadMinima;
+	}
+
+	public double getVelocidadReferencia() {
+		return velocidadReferencia;
+	}
+
+	public void setFactorReduccionV(double factorReduccionV) {
+		this.factorReduccionV = factorReduccionV;
+	}
+
+	public void setGananciaLateral(double gananciaLateral) {
+		this.gananciaLateral = gananciaLateral;
+	}
+
+	public void setGananciaVelocidad(double gananciaVelocidad) {
+		this.gananciaVelocidad = gananciaVelocidad;
+	}
+
+	public void setVelocidadMaxima(double velocidadMaxima) {
+		this.velocidadMaxima = velocidadMaxima;
+	}
+
+	public void setVelocidadMinima(double velocidadMinima) {
+		VelocidadMinima = velocidadMinima;
+	}
+
+}
