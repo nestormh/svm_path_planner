@@ -2,6 +2,8 @@ package sibtra.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
@@ -197,5 +199,37 @@ public abstract class ClasesEnPaquete {
 				System.out.println("\t"+clasesImp[i].getName());
 		}
     }
+
+    /** Dado el array de clases ivoca el metodo getNombre() de cada clase y devueve la respuesta en misma
+     * posición del array de String resultado
+     * @return array con los resultados de invorcar getNombre(). NULL para las clases que den algún problema.
+     */
+	public static String[] nombreClases(Class[] arrClas) {
+		String[] resp=new String[arrClas.length];
+		for(int i=0; i<arrClas.length; i++ ) {
+				Class ca=arrClas[i];
+				resp[i]=null; //se quedará así si hay algún problema
+				try {
+					Method mn=ca.getMethod("getNombre", (Class[])null);
+					//instanciamos objeto con constructor vacio
+					Object ob=arrClas[i].newInstance();
+					String nombre=(String)mn.invoke(ob, (Object[])null);
+					resp[i]=nombre;
+				} catch (SecurityException e) {
+					System.err.println("nombreClases: problema de seguridad al acceder a la clase "+ca.getName());
+				} catch (IllegalArgumentException e) {
+					System.err.println("nombreClases: problema de argumentos al acceder a getNombre() de la clase "+ca.getName());
+				} catch (NoSuchMethodException e) {
+					System.err.println("nombreClases: la clase "+ca.getName()+" no tiene el método getNombre()");
+				} catch (InstantiationException e) {
+					System.err.println("nombreClases: la clase "+ca.getName()+" no se puede instanciar");
+				} catch (IllegalAccessException e) {
+					System.err.println("nombreClases: no podemos acceder al método getNombre() de la clase "+ca.getName());
+				} catch (InvocationTargetException e) {
+					System.err.println("nombreClases: invocación a getNombre() de la clase "+ca.getName()+" produjo excepción");
+				}
+		}
+		return resp;
+	}
 
 }

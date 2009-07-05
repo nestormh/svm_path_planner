@@ -28,10 +28,10 @@ public class RFyCarro implements DetectaObstaculos {
 	
 	public RFyCarro() {};
 	
-	public void setVentanaMonitoriza(VentanasMonitoriza ventMonitoriza) {
-		if(ventMonitoriza==ventanaMonitoriza)
-			//el la misma, no hacemos nada
-			return;
+	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonitoriza) {
+		if(ventanaMonitoriza!=null) {
+			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
+		}
 		ventanaMonitoriza=ventMonitoriza;
 		
 		futObstaculo=new FuturoObstaculo();
@@ -53,6 +53,7 @@ public class RFyCarro implements DetectaObstaculos {
 		};
 		thActulizacion.setName(NOMBRE);
 		thActulizacion.activar();
+		return true;
 	}
 
 	/**
@@ -79,7 +80,7 @@ public class RFyCarro implements DetectaObstaculos {
 	}
 
 	/**
-	 * Sólo suspende {@link #thActulizacion}.
+	 * Termina el {@link #thActulizacion} y quita el {@link #panelFutObstaculo}
 	 * @see sibtra.ui.modulos.Modulo#terminar()
 	 */
 	public void terminar() {

@@ -482,6 +482,7 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 
 	/** programa el repintado del panel */
 	public void actualiza() {
+		//TODO debería ser un repinta, dejar actualiza para la llamada interna?
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {

@@ -4,11 +4,7 @@
 package sibtra.ui.modulos;
 
 import sibtra.ui.VentanasMonitoriza;
-import sibtra.util.LabelDato;
-import sibtra.util.LabelDatoFormato;
 import sibtra.util.ManejaJoystick;
-import sibtra.util.PanelDatos;
-import sibtra.util.PanelFlow;
 import sibtra.util.PanelJoystick;
 import sibtra.util.ThreadSupendible;
 
@@ -27,13 +23,18 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 	private ManejaJoystick manJoy;
 	private ThreadSupendible thCiclico;
 	private PanelJoystick panJoy;
+	/** Puede ser terminado varias veces, para no repetir el procedimiento */
+	private boolean terminado=false;
 	
 	public NavegaJoystick() {};
 
-	public void setVentanaMonitoriza(VentanasMonitoriza ventMoni) {
+	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMoni) {
+		if(ventanaMonitoriza!=null && ventMoni!=ventanaMonitoriza) {
+			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar en otra ventana");
+		}
 		if(ventMoni==ventanaMonitoriza)
-			//el la misma, no hacemos nada
-			return;
+			//el la misma, no hacemos nada ya que implementa 2 interfaces y puede ser elegido 2 veces
+			return true;
 		ventanaMonitoriza=ventMoni;
 		manJoy=new ManejaJoystick();
 		panJoy=new PanelJoystick(manJoy);
@@ -49,7 +50,7 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 		};
 		thCiclico.setName(NOMBRE);
 		thCiclico.activar();
-		
+		return true; //inicialización correcta
 	}
 
 	/** @return directamente la velocidad que me da {@link ManejaJoystick} */
@@ -84,8 +85,10 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 	public void terminar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
+		if(terminado) return; //ya fue terminado
 		thCiclico.terminar();
 		ventanaMonitoriza.quitaPanel(panJoy);
+		terminado=true;
 	}
 
 }

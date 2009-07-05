@@ -40,6 +40,10 @@ public class VentanasMonitoriza extends Ventanas {
 
 	private PanelEligeModulos panSelModulos;
 
+	private PanelTrayectoria panelTrayectoria;
+
+	private double desviacionMagnetica;
+
     
     /** Abre la conexion a los 4 perifericos y los paneles de monitorizacion
      * @param args nombre de los puertos de: GPS, RF, IMU, Carro 
@@ -139,6 +143,17 @@ public class VentanasMonitoriza extends Ventanas {
 		this(puertosPorDefecto);
 	}
 	
+	/** Los calculadores, obstaculos, etc. solicitan la ruta a través de este método. 
+	 * Si no hay ninguna seleccionada se tendrá que buscar a un selector de ruta para elegir una
+	 * @return la ruta que se va a seguir  
+	 */
+	public double[][] getTrayectoriaSeleccionada() {
+		if(panelTrayectoria==null)
+			panelTrayectoria=new PanelTrayectoria(this);
+		return panelTrayectoria.getTrayectoria();
+	}
+
+	
     /**
      * @param args Seriales para GPS, IMU, RF y Carro. Si no se pasan se usan las por defecto.
      */
@@ -161,5 +176,18 @@ public class VentanasMonitoriza extends Ventanas {
             new VentanasMonitoriza(puertos);
         }
     }
+
+	public void setDesviacionMagnetica(double desMag) {
+		// TODO para recibir desviacion magnetica recibida de fichero
+		desviacionMagnetica=desMag;
+	}
+
+	/**
+	 * @return the desviacionMagnetica
+	 */
+	public double getDesviacionMagnetica() {
+		return desviacionMagnetica;
+	}
+	
     
 }

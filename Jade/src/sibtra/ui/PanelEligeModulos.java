@@ -3,27 +3,21 @@
  */
 package sibtra.ui;
 
-import jade.domain.introspection.DeadAgent;
-
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SpringLayout;
-
 
 import sibtra.ui.modulos.CalculoDireccion;
 import sibtra.ui.modulos.CalculoVelocidad;
 import sibtra.ui.modulos.DetectaObstaculos;
+import sibtra.ui.modulos.Modulo;
 import sibtra.ui.modulos.Motor;
 import sibtra.util.ClasesEnPaquete;
 
@@ -58,16 +52,16 @@ public class PanelEligeModulos extends JPanel {
 		ventanaMonitoriza=ventMonito;
 		
 		arrClasMotor=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.Motor", "sibtra.ui.modulos");
-		String[] arrNomClasMotor=nombreClases(arrClasMotor);
+		String[] arrNomClasMotor=ClasesEnPaquete.nombreClases(arrClasMotor);
 			
 		arrClasDir=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.CalculoDireccion", "sibtra.ui.modulos");
-		String[] arrNomClasDir=nombreClases(arrClasDir);
+		String[] arrNomClasDir=ClasesEnPaquete.nombreClases(arrClasDir);
 			
 		arrClasVel=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.CalculoVelocidad", "sibtra.ui.modulos");
-		String[] arrNomClasVel=nombreClases(arrClasVel);
+		String[] arrNomClasVel=ClasesEnPaquete.nombreClases(arrClasVel);
 			
 		arrClasDectObs=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.DetectaObstaculos", "sibtra.ui.modulos");
-		String[] arrNomClasDectObs=nombreClases(arrClasDectObs);
+		String[] arrNomClasDectObs=ClasesEnPaquete.nombreClases(arrClasDectObs);
 			
 		
 		//Para seleccionar los 3 tipos de módulos
@@ -157,20 +151,21 @@ public class PanelEligeModulos extends JPanel {
 				int[] decSel=jcombDetecObstaculos.getSelectedIndices();
 				obsDetec=new DetectaObstaculos[decSel.length]; //array para acoger objetos detectores
 				System.out.println(getClass().getName()+": Hay "+decSel.length+" detectores seleccionados");
-				for(int i=0;i<decSel.length;i++){
+				for(int ids=0;ids<decSel.length;ids++){
+					int i=decSel[ids];
 					if(arrClasDectObs[i].equals(arrClasMotor[indMot])) {
 						System.out.println(getClass().getName()+": clase de motor y detector "+i+" son la misma");
-						obsDetec[i]=(DetectaObstaculos)obMotor;
+						obsDetec[ids]=(DetectaObstaculos)obMotor;
 					} else if(arrClasDectObs[i].equals(arrClasDir[indDir])) {
 						System.out.println(getClass().getName()+": clase de direccion y y detector "+i+" son la misma");
-						obsDetec[i]=(DetectaObstaculos)obDireccion;
+						obsDetec[ids]=(DetectaObstaculos)obDireccion;
 					} else if(arrClasDectObs[i].equals(arrClasVel[indVel])) {
 						System.out.println(getClass().getName()+": clase de velocidad y detector "+i+"  son la misma");
-						obsDetec[i]=(DetectaObstaculos)obVelocidad;
+						obsDetec[ids]=(DetectaObstaculos)obVelocidad;
 					} else {
 						//clases distintas, tenemos que crear objeto
 						Class<DetectaObstaculos> clasDet=arrClasDectObs[i];				
-						obsDetec[i]=(DetectaObstaculos)clasDet.newInstance();
+						obsDetec[ids]=(DetectaObstaculos)clasDet.newInstance();
 					}
 				}
 								
@@ -178,12 +173,51 @@ public class PanelEligeModulos extends JPanel {
 				System.err.println(getClass().getName()+": problemas en el proceso de creacion "+excep.getMessage());
 				excep.printStackTrace();
 			}
-			// Tenemos los objetos, procedemos a inicializarlos
-			obMotor.setVentanaMonitoriza(ventanaMonitoriza);
-			obDireccion.setVentanaMonitoriza(ventanaMonitoriza);
-			obVelocidad.setVentanaMonitoriza(ventanaMonitoriza);
-			for(DetectaObstaculos doa: obsDetec)
-				doa.setVentanaMonitoriza(ventanaMonitoriza);
+			// Tenemos los objetos, procedemos a inicializarlos Comprobando si hay algún problema
+			// si alguna inicialización falla, terminamos los módulos inicializados y salimos
+			if(!obMotor.setVentanaMonitoriza(ventanaMonitoriza)) {
+				avisaFalloMoudulo(obMotor);
+				obsDetec=null;
+				obVelocidad=null;
+				obDireccion=null;
+				obMotor=null;
+				return;
+			}
+			if(!obDireccion.setVentanaMonitoriza(ventanaMonitoriza)) {
+				avisaFalloMoudulo(obDireccion);
+				obMotor.terminar();
+				obsDetec=null;
+				obVelocidad=null;
+				obDireccion=null;
+				obMotor=null;
+				return;
+			}
+			if(!obVelocidad.setVentanaMonitoriza(ventanaMonitoriza)) {
+				avisaFalloMoudulo(obVelocidad);
+				obDireccion.terminar();
+				obMotor.terminar();
+				obsDetec=null;
+				obVelocidad=null;
+				obDireccion=null;
+				obMotor=null;
+				return;
+			}
+			for(int i=0; i<obsDetec.length;i++) {
+				if(!obsDetec[i].setVentanaMonitoriza(ventanaMonitoriza))
+				{
+					avisaFalloMoudulo(obsDetec[i]);
+					for(int j=0;j<i;j++)
+						obsDetec[j].terminar();
+					obVelocidad.terminar();
+					obDireccion.terminar();
+					obMotor.terminar();
+					obsDetec=null;
+					obVelocidad=null;
+					obDireccion=null;
+					obMotor=null;
+					return;
+				}
+			}
 			//le comunicamos los modulos al motor
 			obMotor.setCalculadorDireccion(obDireccion);
 			obMotor.setCalculadorVelocidad(obVelocidad);
@@ -193,6 +227,15 @@ public class PanelEligeModulos extends JPanel {
 			this.setEnabled(false);
 			accionActivar.setEnabled(true);
 			accionBorrar.setEnabled(true);
+		}
+		
+		/** Saca ventana avisando fallo del arranque */
+		private void avisaFalloMoudulo(Modulo mod) {
+		JOptionPane.showMessageDialog(ventanaMonitoriza.ventanaPrincipal,
+			    "No se inicializamo correctamente el módulo "+mod.getNombre()
+			    +"\nSe cancela la creacion",
+			    "Fallo arranque",
+			    JOptionPane.ERROR_MESSAGE);
 		}
 	}
 	
@@ -252,22 +295,5 @@ public class PanelEligeModulos extends JPanel {
 			accionActivar.setEnabled(false);
 			accionParar.setEnabled(false);
 		}
-	}
-
-	private String[] nombreClases(Class[] arrClas) {
-		String[] resp=new String[arrClas.length];
-		for(int i=0; i<arrClas.length; i++ ) {
-			try {
-				Class ca=arrClas[i];
-				Method mn=ca.getMethod("getNombre", (Class[])null);
-				//instanciamos objeto con constructor vacio
-				Object ob=arrClas[i].newInstance();
-				resp[i]=(String)mn.invoke(ob, (Object[])null);
-			} catch (Exception e) {
-				System.err.println("Error al invocar getNombre() de clase "+arrClas[i].getName());
-				e.printStackTrace();
-			}
-		}
-		return resp;
 	}
 }

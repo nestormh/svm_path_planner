@@ -3,12 +3,11 @@
  */
 package sibtra.ui.modulos;
 
-import java.util.Vector;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
+import java.awt.GridLayout;
 
 import sibtra.gps.Ruta;
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelDatos;
 import sibtra.util.SpinnerDouble;
 import sibtra.util.SpinnerInt;
@@ -41,16 +40,18 @@ public class MotorSincrono implements Motor {
 	
 	//Variables 
 	protected double consignaVelAnterior;
+	protected double consignaVolante;
+	protected double consignaVelocidadRecibida;
 	
 	public MotorSincrono() {
 		
 	}
 	
 	
-	public void setVentanaMonitoriza(VentanasMonitoriza ventMonito) {
-		if(ventMonito==ventanaMonitoriza)
-			//el la misma, no hacemos nada
-			return;
+	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonito) {
+		if(ventanaMonitoriza!=null) {
+			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
+		}
 		ventanaMonitoriza=ventMonito;
 		
 		panel=new PanelSincrono();
@@ -64,7 +65,7 @@ public class MotorSincrono implements Motor {
 				//apuntamos cual debe ser el instante siguiente
 	            tSig = System.currentTimeMillis() + periodoMuestreoMili;
 	            //Direccion =============================================================
-	            double consignaVolante=calculadorDireccion.getConsignaDireccion();
+	            consignaVolante=calculadorDireccion.getConsignaDireccion();
 	            UtilCalculos.limita(consignaVolante, -cotaAngulo, cotaAngulo);
 
 	            double velocidadActual = ventanaMonitoriza.conexionCarro.getVelocidadMS();
@@ -73,7 +74,7 @@ public class MotorSincrono implements Motor {
                 	ventanaMonitoriza.conexionCarro.setAnguloVolante(-consignaVolante);
 
                 // Velocidad =============================================================
-	            double consignaVelocidad=calculadorVelocidad.getConsignaVelocidad();
+	            double consignaVelocidad=consignaVelocidadRecibida=calculadorVelocidad.getConsignaVelocidad();
 	            
 	            //vemos la minima distancia de los detectores
 	            double distMinin=Double.MAX_VALUE;
@@ -87,8 +88,11 @@ public class MotorSincrono implements Motor {
 	            if(incrementoConsigna>maximoIncrementoVelocidad)
 	            	consignaVelocidad=consignaVelAnterior+maximoIncrementoVelocidad;
             	ventanaMonitoriza.conexionCarro.setConsignaAvanceMS(consignaVelocidad);
+            	
+            	//Guardamos valor para la siguiente iteracion
+            	consignaVelAnterior=consignaVelocidad;
 
-
+            	panel.repinta();  //actualizamos las etiquetas
 	            //esparmos hasta que haya pasado el tiempo convenido
 				while (System.currentTimeMillis() < tSig) {
 	                try {
@@ -98,6 +102,7 @@ public class MotorSincrono implements Motor {
 			}
 		};
 		thCiclico.setName(NOMBRE);
+		return true;
 	}
 
 	/** activamos el {@link #thCiclico} */
@@ -115,17 +120,6 @@ public class MotorSincrono implements Motor {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		thCiclico.suspender();
-	}
-
-	/* (sin Javadoc)
-	 * @see sibtra.ui.modulos.Motor#getRutaSeleccionada()
-	 */
-	public Ruta getRutaSeleccionada() {
-		if(ventanaMonitoriza==null)
-			throw new IllegalStateException("Aun no inicializado");
-		if(rutaActual!=null) return rutaActual;
-		// TODO Buscar los proveedores de ruta, seleccionarlos y elegir una ruta
-		return null;
 	}
 
 	/* (sin Javadoc)
@@ -164,12 +158,20 @@ public class MotorSincrono implements Motor {
 	
 	class PanelSincrono extends PanelDatos {
 		public PanelSincrono() {
+			super();
+			setLayout(new GridLayout(0,4));
+			//TODO Definir los tamaños adecuados o poner layout
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setUmbralMinimaVelocidad",0,6,0.1), "Min Vel");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setPendienteFrenado",0.1,3,0.1), "Pend Frenado");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setMargenColision",0.1,10,0.1), "Margen col");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setMaximoIncrementoVelocidad",0,6,0.1), "Max Inc V");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setCotaAnguloGrados",5,45,1), "Cota Angulo");
 			añadeAPanel(new SpinnerInt(MotorSincrono.this,"setPeriodoMuestreoMili",20,2000,20), "Per Muest");
+			//TODO ponel labels que muestren la informacion recibida de los otros módulos y la que se aplica.
+			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVelAnterior","%4.2 m/s"), "Cons Vel");
+			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVelocidadRecibida","%4.2 m/s"), "Vel Calc");
+			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVolanteGrados","%4.2 "), "Cons Vol");
+			
 		}
 	}
 
@@ -227,6 +229,30 @@ public class MotorSincrono implements Motor {
 
 	public void setUmbralMinimaVelocidad(double umbralMinimaVelocidad) {
 		this.umbralMinimaVelocidad = umbralMinimaVelocidad;
+	}
+
+
+	/**
+	 * @return the consignaVelAnterior
+	 */
+	public double getConsignaVelAnterior() {
+		return consignaVelAnterior;
+	}
+
+
+	/**
+	 * @return the consignaVelocidadRecibida
+	 */
+	public double getConsignaVelocidadRecibida() {
+		return consignaVelocidadRecibida;
+	}
+
+
+	/**
+	 * @return the consignaVolante
+	 */
+	public double getConsignaVolanteGrados() {
+		return Math.toDegrees(consignaVolante);
 	}
 
 }

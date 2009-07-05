@@ -12,9 +12,11 @@ import sibtra.ui.VentanasMonitoriza;
  */
 public interface Modulo {
 	
-	/** Para que las clases tengan constructor vacío 
-	 * y con este método se le pasa la ventana minitoriza */
-	public void setVentanaMonitoriza(VentanasMonitoriza ventMonitoriza);
+	/** Para que las clases tengan constructor vacío, 
+	 * con este método se realiza la inicializacion.
+	 * @return si el módulo se pudo inicializar bien
+	 */
+	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonitoriza);
 	
 	/** @return Descripcion breve del módulo */
 	public String getDescripcion();

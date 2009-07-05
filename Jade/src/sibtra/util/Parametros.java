@@ -16,5 +16,8 @@ public abstract class Parametros {
 	/** Distancia entre el eje trasero y el RF */
 	public static double distRFEje=1.9;
 
+	public static double anchoCoche=medioAnchoCarro*2;
+	
+	public static double largoCoche=2;
 
 }

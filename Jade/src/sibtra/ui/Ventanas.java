@@ -4,7 +4,6 @@ package sibtra.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,7 +36,7 @@ public class Ventanas  implements ActionListener  {
 	
     
 	/** La ventana principal ocupará casi toda la pantalla grande */
-	JFrame ventanaPrincipal=null;
+	public JFrame ventanaPrincipal=null;
 	/** Ocupará toda la pantalla pequeña (táctil) */
 	JFrame ventadaPeque=null;
 

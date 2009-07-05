@@ -24,10 +24,6 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	
 	/** Longitud del vector que marca el rumbo en cada punto */
 	private static final double tamRumbo = 50;
-	/** Largo del coche en metros */
-	protected double largoCoche=2;
-	/** ancho del coche en metros */
-	protected double anchoCoche = 1;
 
 	/** Array de dos o tres columnas con los puntos que forman la trayectoria */
 	protected double Tr[][]=null;
@@ -163,14 +159,14 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 				g.setStroke(new BasicStroke(3));
 				g.setPaint(Color.GRAY);
 				g.setColor(Color.GRAY);
-				double[] esqDD={posXCoche+anchoCoche/2*Math.sin(orientacionCoche)
-						,posYCoche-anchoCoche/2*Math.cos(orientacionCoche) };
-				double[] esqDI={posXCoche-anchoCoche/2*Math.sin(orientacionCoche)
-						,posYCoche+anchoCoche/2*Math.cos(orientacionCoche) };
-				double[] esqPD={esqDD[0]-largoCoche*Math.cos(orientacionCoche)
-						,esqDD[1]-largoCoche*Math.sin(orientacionCoche) };
-				double[] esqPI={esqDI[0]-largoCoche*Math.cos(orientacionCoche)
-						,esqDI[1]-largoCoche*Math.sin(orientacionCoche) };
+				double[] esqDD={posXCoche+Parametros.anchoCoche/2*Math.sin(orientacionCoche)
+						,posYCoche-Parametros.anchoCoche/2*Math.cos(orientacionCoche) };
+				double[] esqDI={posXCoche-Parametros.anchoCoche/2*Math.sin(orientacionCoche)
+						,posYCoche+Parametros.anchoCoche/2*Math.cos(orientacionCoche) };
+				double[] esqPD={esqDD[0]-Parametros.largoCoche*Math.cos(orientacionCoche)
+						,esqDD[1]-Parametros.largoCoche*Math.sin(orientacionCoche) };
+				double[] esqPI={esqDI[0]-Parametros.largoCoche*Math.cos(orientacionCoche)
+						,esqDI[1]-Parametros.largoCoche*Math.sin(orientacionCoche) };
 				Point2D pxDD=point2Pixel(esqDD);
 				Point2D pxDI=point2Pixel(esqDI);
 				Point2D pxPD=point2Pixel(esqPD);

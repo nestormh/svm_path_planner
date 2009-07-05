@@ -47,7 +47,7 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 	private JCheckBox jcbRejillaRecta;
 
 	//Abajo los checks para mostrar o no las zonas y el barrido
-	protected JPanel jpChecks;
+	protected PanelFlow jpChecks;
 	
 	/**
 	 * Distancia maxima a representar
