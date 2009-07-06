@@ -5,7 +5,9 @@ package sibtra.ui.modulos;
 
 import java.awt.GridLayout;
 
+import sibtra.gps.GPSData;
 import sibtra.gps.Ruta;
+import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelDatos;
@@ -29,6 +31,7 @@ public class MotorSincrono implements Motor {
 	private DetectaObstaculos[] detectoresObstaculos=null;
 	private PanelSincrono panel;
 	private ThreadSupendible thCiclico;
+	private Coche modCoche;
 
 	//Parámetros
 	protected int periodoMuestreoMili = 200;
@@ -39,9 +42,10 @@ public class MotorSincrono implements Motor {
 	protected double maximoIncrementoVelocidad=0.1;
 	
 	//Variables 
-	protected double consignaVelAnterior;
+	protected double consignaVelocidad;
 	protected double consignaVolante;
 	protected double consignaVelocidadRecibida;
+	protected double consignaVolanteRecibida;
 	
 	public MotorSincrono() {
 		
@@ -57,6 +61,9 @@ public class MotorSincrono implements Motor {
 		panel=new PanelSincrono();
 		ventanaMonitoriza.añadePanel(panel, NOMBRE);
 		
+        //inicializamos modelo del coche
+        modCoche = new Coche();
+		
 		thCiclico=new ThreadSupendible() {
 			private long tSig;
 
@@ -64,9 +71,24 @@ public class MotorSincrono implements Motor {
 			protected void accion() {
 				//apuntamos cual debe ser el instante siguiente
 	            tSig = System.currentTimeMillis() + periodoMuestreoMili;
+	            //Actulizamos el modelo del coche =======================================
+	            GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();
+	            if(pa==null) {
+	            	System.err.println("Modulo "+NOMBRE+":No tenemos punto GPS con que hacer los cáclulos");
+	            	//se usa los valores de la evolución
+	            } else {
+	            	//sacamos los datos del GPS
+	            	double x=pa.getXLocal();
+	            	double y=pa.getYLocal();
+	            	double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
+	            	//TODO Realimentar posición del volante y la velocidad del coche.
+	            	modCoche.setPostura(x, y, angAct);
+	            }
+
 	            //Direccion =============================================================
-	            consignaVolante=calculadorDireccion.getConsignaDireccion();
-	            UtilCalculos.limita(consignaVolante, -cotaAngulo, cotaAngulo);
+	            double consignaVolanteAnterior=consignaVolante;
+	            consignaVolante=consignaVolanteRecibida=calculadorDireccion.getConsignaDireccion();
+	            consignaVolante=UtilCalculos.limita(consignaVolante, -cotaAngulo, cotaAngulo);
 
 	            double velocidadActual = ventanaMonitoriza.conexionCarro.getVelocidadMS();
                 //Cuando está casi parado no tocamos el volante
@@ -74,7 +96,10 @@ public class MotorSincrono implements Motor {
                 	ventanaMonitoriza.conexionCarro.setAnguloVolante(-consignaVolante);
 
                 // Velocidad =============================================================
-	            double consignaVelocidad=consignaVelocidadRecibida=calculadorVelocidad.getConsignaVelocidad();
+            	//Guardamos valor para la siguiente iteracion
+            	double consignaVelAnterior=consignaVelocidad;
+            	
+	            consignaVelocidad=consignaVelocidadRecibida=calculadorVelocidad.getConsignaVelocidad();
 	            
 	            //vemos la minima distancia de los detectores
 	            double distMinin=Double.MAX_VALUE;
@@ -89,8 +114,9 @@ public class MotorSincrono implements Motor {
 	            	consignaVelocidad=consignaVelAnterior+maximoIncrementoVelocidad;
             	ventanaMonitoriza.conexionCarro.setConsignaAvanceMS(consignaVelocidad);
             	
-            	//Guardamos valor para la siguiente iteracion
-            	consignaVelAnterior=consignaVelocidad;
+            	//Hacemos evolucionar el modelo del coche
+                modCoche.calculaEvolucion(consignaVolante, velocidadActual, (double)periodoMuestreoMili / 1000.0);
+
 
             	panel.repinta();  //actualizamos las etiquetas
 	            //esparmos hasta que haya pasado el tiempo convenido
@@ -168,11 +194,20 @@ public class MotorSincrono implements Motor {
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setCotaAnguloGrados",5,45,1), "Cota Angulo");
 			añadeAPanel(new SpinnerInt(MotorSincrono.this,"setPeriodoMuestreoMili",20,2000,20), "Per Muest");
 			//TODO ponel labels que muestren la informacion recibida de los otros módulos y la que se aplica.
-			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVelAnterior","%4.2 m/s"), "Cons Vel");
+			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVelocidad","%4.2 m/s"), "Cons Vel");
 			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVelocidadRecibida","%4.2 m/s"), "Vel Calc");
 			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVolanteGrados","%4.2 "), "Cons Vol");
+			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVolanteRecibidaGrados","%4.2 m/s"), "Vol Calc");
 			
 		}
+	}
+
+
+	/** @return modelo del coche que actuliza este motor */
+	public Coche getModeloCoche() {
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
+		return modCoche;
 	}
 
 	public double getCotaAngulo() {
@@ -233,10 +268,10 @@ public class MotorSincrono implements Motor {
 
 
 	/**
-	 * @return the consignaVelAnterior
+	 * @return the consignaVelocidad
 	 */
-	public double getConsignaVelAnterior() {
-		return consignaVelAnterior;
+	public double getConsignaVelocidad() {
+		return consignaVelocidad;
 	}
 
 
@@ -253,6 +288,13 @@ public class MotorSincrono implements Motor {
 	 */
 	public double getConsignaVolanteGrados() {
 		return Math.toDegrees(consignaVolante);
+	}
+
+	/**
+	 * @return the consignaVolante
+	 */
+	public double getConsignaVolanteRecibidaGrados() {
+		return Math.toDegrees(consignaVolanteRecibida);
 	}
 
 }

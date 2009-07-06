@@ -3,6 +3,8 @@
  */
 package sibtra.ui.modulos;
 
+import sibtra.predictivo.Coche;
+
 
 /**
  * @author alberto
@@ -23,5 +25,10 @@ public interface Motor extends Modulo {
 	public void setCalculadorDireccion(CalculoDireccion calDir);
 	
 	public void setDetectaObstaculos(DetectaObstaculos[] dectObs);
+	
+	/** El motor debe llevar un modelo el coche que actualiza con cada nuevo dato de GPS, IMU, etc.
+	 * Los modulos consultan el estado del coche a través de este modelo
+	 */
+	public Coche getModeloCoche();
 	
 }

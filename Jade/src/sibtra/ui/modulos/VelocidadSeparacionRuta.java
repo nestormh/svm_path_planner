@@ -5,7 +5,7 @@ package sibtra.ui.modulos;
 
 import javax.swing.JOptionPane;
 
-import sibtra.gps.GPSData;
+import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
@@ -28,12 +28,13 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 	private double gananciaVelocidad=2;
 	private double velocidadMaxima=2.5;
 	private double factorReduccionV=0.7;
-	private double VelocidadMinima=1;
+	private double velocidadMinima=1;
 	// variables interesantes ===========================================
 	private double errorLateral;
 	private double errorOrientacion;
 	private double velocidadReferencia;
 	private double consigna;
+	private Coche modCoche;
 	
 	public VelocidadSeparacionRuta() {};
 
@@ -53,6 +54,9 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 			ventanaMonitoriza=null;
 			return false;
 		}
+		
+		//obtenemos modelo del coche
+		modCoche=ventanaMonitoriza.getMotor().getModeloCoche();
 		
 		//Definimos panel y ponemos ajuste para los parámetros y etiquetas con las variables
 		panelDatos=new PanelFlow();
@@ -82,17 +86,10 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		consigna = 0;
-		velocidadMaxima = 2.5;
-		VelocidadMinima = 1;
-        //Calculamos el comando            	
-        GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();
-        if(pa==null) {
-        	System.err.println("Modulo "+NOMBRE+":No tenemos punto GPS con que hacer los cáclulos");
-        	return consigna=Double.NaN;  // lo indicamos así??
-        }
-        double x=pa.getXLocal();
-        double y=pa.getYLocal();
-        double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
+		//obtenemos posicion y orientación del modelo del coche.
+        double x=modCoche.getX();
+        double y=modCoche.getY();
+        double angAct = modCoche.getTita();
 		int indMin = UtilCalculos.indiceMasCercano(Tr,x,y);
 		double dx = Tr[indMin][0]-x;
 		double dy = Tr[indMin][1]-y;
@@ -107,10 +104,10 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 		//minoramos la consigna con los errores
 		consigna -=  Math.abs(errorOrientacion)*gananciaVelocidad + Math.abs(errorLateral)*gananciaLateral;        
 		// Solo con esta condición el coche no se detiene nunca,aunque la referencia de la ruta sea cero
-		if (consigna <= VelocidadMinima)
-			if( velocidadReferencia >= VelocidadMinima )
+		if (consigna <= velocidadMinima)
+			if( velocidadReferencia >= velocidadMinima )
 				// Con esta condición se contempla el caso de que la consigna sea < 0
-				consigna = VelocidadMinima;
+				consigna = velocidadMinima;
 			else 
 				// De esta manera si la velocidad de la ruta disminuye hasta cero el coche se 
 				// detiene, en vez de seguir a velocidad mínima como ocurría antes. En este caso también
@@ -174,7 +171,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 	}
 
 	public double getVelocidadMinima() {
-		return VelocidadMinima;
+		return velocidadMinima;
 	}
 
 	public double getVelocidadReferencia() {
@@ -198,7 +195,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 	}
 
 	public void setVelocidadMinima(double velocidadMinima) {
-		VelocidadMinima = velocidadMinima;
+		this.velocidadMinima = velocidadMinima;
 	}
 
 }

@@ -12,6 +12,7 @@ import sibtra.imu.PanelIMU;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.lms.PanelRF;
+import sibtra.ui.modulos.Motor;
 import sibtra.util.EligeSerial;
 
 /**
@@ -189,5 +190,10 @@ public class VentanasMonitoriza extends Ventanas {
 		return desviacionMagnetica;
 	}
 	
-    
+	/** Metodo que deben usar los otros módulos para llegar al módulo motor
+	 * @return el motor seleccionado o null si no hay ninguno.
+	 */
+    public Motor getMotor() {
+    	return panSelModulos.obMotor;
+    }
 }
