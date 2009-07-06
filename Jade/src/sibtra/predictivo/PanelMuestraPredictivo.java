@@ -80,6 +80,11 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
     /** Constructor necesita el controlador predictivo */
     public PanelMuestraPredictivo(ControlPredictivo contPredic, Ruta rutaIn) {
+    	this(contPredic);
+    	rutaAux=rutaIn;
+    }
+    
+    public PanelMuestraPredictivo(ControlPredictivo contPredic) {
         super();
         {//nuevo panel para añadir debajo
 //            JPanel jpPre = new JPanel(new FlowLayout(FlowLayout.LEADING));
@@ -127,6 +132,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
             jsModDistMax = new SpinnerNumberModel(0.7, 0.05, 1, 0.05);
             jsDistMax = new JSpinner(jsModDistMax);
             jsModDistMax.addChangeListener(this);
+            jsDistMax.setEnabled(false); //solo se habilita si hay ruta axiliar
             jpPre.add(jsDistMax);
 
             jpPre.add(new Label("Alpha"));          
@@ -148,7 +154,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
             add(jpPre);
         }
-        setControlPyRuta(CP, rutaIn);
+        setControlP(contPredic);
     }
 
     /** Fija los nuevos valores para {@link #CP} y {@link #rutaAux} y actualiza la presentación.
@@ -157,7 +163,18 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     public void setControlPyRuta(ControlPredictivo CP,Ruta ruta) {
     	this.CP=CP;
     	this.rutaAux=ruta;
+    	jsDistMax.setEnabled(this.rutaAux!=null);
     	if(CP!=null) setTr(CP.ruta); 
+    	actualiza();
+    }
+    
+    /** Fija los nuevos valores para {@link #CP} y {@link #rutaAux} y actualiza la presentación.
+     * Uno o los dos pueden ser null.
+     */
+    public void setControlP(ControlPredictivo CP) {
+    	this.CP=CP;
+    	if(CP!=null) setTr(CP.ruta); 
+    	jsDistMax.setEnabled(this.rutaAux!=null);
     	actualiza();
     }
     

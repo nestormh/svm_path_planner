@@ -93,6 +93,13 @@ public class PanelEligeModulos extends JPanel {
 		add(new JButton(accionParar));
 		add(new JButton(accionBorrar));
 		
+		//ponemos los botones tambien en el menu de opciones
+		ventanaMonitoriza.menuAcciones.add(accionActivar);
+		ventanaMonitoriza.menuAcciones.add(accionParar);
+		ventanaMonitoriza.menuAcciones.add(accionCrear);
+		ventanaMonitoriza.menuAcciones.add(accionBorrar);
+		
+		
 	}
 	
 	class AccionCrear extends AbstractAction {
