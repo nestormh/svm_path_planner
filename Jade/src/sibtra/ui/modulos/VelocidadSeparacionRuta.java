@@ -99,7 +99,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 		//referencia minorada
 		consigna=velocidadReferencia*factorReduccionV;
 		//acotamos a velocidad máxima
-		if (velocidadReferencia>velocidadMaxima)
+		if (consigna>velocidadMaxima)
 			consigna = velocidadMaxima;
 		//minoramos la consigna con los errores
 		consigna -=  Math.abs(errorOrientacion)*gananciaVelocidad + Math.abs(errorLateral)*gananciaLateral;        
