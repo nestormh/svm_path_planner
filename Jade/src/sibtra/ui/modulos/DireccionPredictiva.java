@@ -57,7 +57,7 @@ public class DireccionPredictiva implements CalculoDireccion {
 		//Definimos panel y ponemos ajuste para los parámetros y etiquetas con las variables
         panelPredictivo=new PanelMuestraPredictivo(controlPredictivo);
         panelPropio=new PanelFlow();
-        panelPropio.añadeAPanel(new LabelDatoFormato("##.##",this.getClass(),"getConsignaGrados","%5.2f º"), "Consigna");
+        panelPropio.añadeAPanel(new LabelDatoFormato(this.getClass(),"getConsignaGrados","%5.2f º"), "Consigna");
         panelPredictivo.add(panelPropio);
         ventanaMonitoriza.añadePanel(panelPredictivo, "Predictivo",true,false);
 

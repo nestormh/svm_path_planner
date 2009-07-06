@@ -28,10 +28,10 @@ public class PanelGPSTriumph extends PanelMuestraGPSData {
 			throw new IllegalArgumentException("Conexion a GPS no puede ser null");
 		gpsCT=gct;
 		//linea con datos de calidad del enlace
-		ldCal=new LabelDatoFormato("  ### %  ",GPSConnectionTriumph.class,"getCalidadLink","%4.0f %%");
+		ldCal=new LabelDatoFormato(GPSConnectionTriumph.class,"getCalidadLink","%4.0f %%");
 //		lda.setPreferredSize(new Dimension(100,50));
 		añadeAPanel(ldCal, "Cali Enlace");
-		ldOK=new LabelDatoFormato("   ####   ",GPSConnectionTriumph.class,"getNumOKLink"," %10d");
+		ldOK=new LabelDatoFormato(GPSConnectionTriumph.class,"getNumOKLink"," %10d");
 //		lda.setPreferredSize(new Dimension(100,50));
 		añadeAPanel(ldOK, "Paq OK Enlace");
 	}

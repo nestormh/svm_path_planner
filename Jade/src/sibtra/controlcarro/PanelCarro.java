@@ -75,10 +75,10 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		setLayout(new GridLayout(0,3)); //empezamos con 4 columnas
 
 		//angulo volante
-		añadeAPanel(new LabelDatoFormato("##.##º",ControlCarro.class,"getAnguloVolanteGrados","%5.2f º")
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getAnguloVolanteGrados","%5.2f º")
 		, "Ángulo Volante");		
 		//Consigna Volante en grados
-		añadeAPanel(new LabelDatoFormato("##.## º",ControlCarro.class,"getConsignaAnguloVolanteGrados","%5.2f º")
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getConsignaAnguloVolanteGrados","%5.2f º")
 		, "Csg Volante º");
 //		//consigna volante en cuentas 	
 //		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getConsignaVolante","%10d")
@@ -95,10 +95,10 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		}
 
 		//Velocidad en m/s
-		añadeAPanel(new LabelDatoFormato("##.##",ControlCarro.class,"getVelocidadMS","%5.2f")
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getVelocidadMS","%5.2f m/s")
 		, "Vel. m/s");
 		//Consigna Velocidad
-		añadeAPanel(new LabelDatoFormato("####",ControlCarro.class,"getConsignaAvanceMS","%5.2f")
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getConsignaAvanceMS","%5.2f m/s")
 		, "Csg Velo");
 		{// spiner consigna velocidad en m/s
 			jspMConsignaVelocidad=new SpinnerNumberModel(1.0,0.0,6.0,0.1);
@@ -112,13 +112,13 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		}
 
 		//Bytes
-		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getBytes","%10d")
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getBytes","%10d")
 		, "Bytes");
 		//cuenta volante
-		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getVolante","%10d")
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getVolante","%10d")
 		, "Cuenta Volante");
 		//Comando
-		añadeAPanel(new LabelDatoFormato("######",ControlCarro.class,"getComando","%10.2f")
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getComando","%10.2f")
 		, "Comando");
 
 		{//barra progreso comando velocidad
@@ -180,11 +180,11 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		}
 
 		//Alarma Freno
-		añadeAPanel(new LabelDatoFormato("#",ControlCarro.class,"getFreno","%10d")
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getFreno","%10d")
 		, "Alarm. Freno");
 
 		//Alarma Freno
-		añadeAPanel(new LabelDatoFormato("#",ControlCarro.class,"getDesfreno","%10d")
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getDesfreno","%10d")
 		, "Alar. Desfreno");
 
 		añadeAPanel(new SpinnerDouble(contCarro,"setFactorFreno",0,50,0.1), "Fact Freno");

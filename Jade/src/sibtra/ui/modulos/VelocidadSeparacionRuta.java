@@ -60,10 +60,10 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 		
 		//Definimos panel y ponemos ajuste para los parámetros y etiquetas con las variables
 		panelDatos=new PanelFlow();
-		panelDatos.añadeAPanel(new LabelDatoFormato("##.##",this.getClass(),"getConsigna","%5.2f m/s"), "Consigna");
-		panelDatos.añadeAPanel(new LabelDatoFormato("##.## m",this.getClass(),"getErrorLateral","%5.2f m"), "Err Lat");
-		panelDatos.añadeAPanel(new LabelDatoFormato("##.##",this.getClass(),"getErrorOrientacionGrados","%5.2f º"), "Err Ori");
-		panelDatos.añadeAPanel(new LabelDatoFormato("##.## m/s",this.getClass(),"getVelocidadReferencia","%5.2f m/s"), "Vel Ref");
+		panelDatos.añadeAPanel(new LabelDatoFormato(this.getClass(),"getConsigna","%5.2f m/s"), "Consigna");
+		panelDatos.añadeAPanel(new LabelDatoFormato(this.getClass(),"getErrorLateral","%5.2f m"), "Err Lat");
+		panelDatos.añadeAPanel(new LabelDatoFormato(this.getClass(),"getErrorOrientacionGrados","%5.2f º"), "Err Ori");
+		panelDatos.añadeAPanel(new LabelDatoFormato(this.getClass(),"getVelocidadReferencia","%5.2f m/s"), "Vel Ref");
 		
 		panelDatos.añadeAPanel(new SpinnerDouble(this,"setFactorReduccionV",0.05,1,0.05), "Fact Reduc");
 		panelDatos.añadeAPanel(new SpinnerDouble(this,"setGananciaLateral",0.1,10,0.1), "Gan Lat");

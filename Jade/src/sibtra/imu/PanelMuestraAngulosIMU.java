@@ -25,17 +25,17 @@ public class PanelMuestraAngulosIMU extends PanelDatos implements IMUEventListen
 		super();
 		setLayout(new GridLayout(0,2)); //empezamos con 3 columnas
 		//roll
-		LabelDato lda=new LabelDatoFormato("??:??:??.??",AngulosIMU.class,"getRoll","%+10.4f");
+		LabelDato lda=new LabelDatoFormato(AngulosIMU.class,"getRoll","%+10.4f");
 		añadeAPanel(lda,"Roll");
 
 		//Pitch
-		añadeAPanel(new LabelDatoFormato("+???.????",AngulosIMU.class,"getPitch","%+10.4f")
+		añadeAPanel(new LabelDatoFormato(AngulosIMU.class,"getPitch","%+10.4f")
 		, "Pitch");
 		//Yaw
-		añadeAPanel(new LabelDatoFormato("+???.????",AngulosIMU.class,"getYaw","%+10.4f")
+		añadeAPanel(new LabelDatoFormato(AngulosIMU.class,"getYaw","%+10.4f")
 		, "Yaw");
 		//contador
-		añadeAPanel(new LabelDatoFormato("+???.????",AngulosIMU.class,"getContador","%7d")
+		añadeAPanel(new LabelDatoFormato(AngulosIMU.class,"getContador","%7d")
 		, "Contador");
 	}
 

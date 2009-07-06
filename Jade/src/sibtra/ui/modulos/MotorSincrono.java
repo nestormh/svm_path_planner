@@ -194,10 +194,10 @@ public class MotorSincrono implements Motor {
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setCotaAnguloGrados",5,45,1), "Cota Angulo");
 			añadeAPanel(new SpinnerInt(MotorSincrono.this,"setPeriodoMuestreoMili",20,2000,20), "Per Muest");
 			//TODO ponel labels que muestren la informacion recibida de los otros módulos y la que se aplica.
-			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVelocidad","%4.2f m/s"), "Cons Vel");
-			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVelocidadRecibida","%4.2f m/s"), "Vel Calc");
-			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVolanteGrados","%4.2f "), "Cons Vol");
-			añadeAPanel(new LabelDatoFormato("##.##",MotorSincrono.class,"getConsignaVolanteRecibidaGrados","%4.2f m/s"), "Vol Calc");
+			añadeAPanel(new LabelDatoFormato(MotorSincrono.class,"getConsignaVelocidad","%4.2f m/s"), "Cons Vel");
+			añadeAPanel(new LabelDatoFormato(MotorSincrono.class,"getConsignaVelocidadRecibida","%4.2f m/s"), "Vel Calc");
+			añadeAPanel(new LabelDatoFormato(MotorSincrono.class,"getConsignaVolanteGrados","%4.2f º"), "Cons Vol");
+			añadeAPanel(new LabelDatoFormato(MotorSincrono.class,"getConsignaVolanteRecibidaGrados","%4.2f º"), "Vol Calc");
 			
 		}
 	}

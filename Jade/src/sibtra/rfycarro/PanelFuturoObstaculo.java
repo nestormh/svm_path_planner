@@ -62,7 +62,7 @@ public class PanelFuturoObstaculo extends PanelMuestraBarrido {
 //			jla.setPreferredSize(new Dimension(130, 45));
 //			jpPre.add(jla);
 			
-			panelInformacion.añadeAPanel(new LabelDatoFormato("##.##",FuturoObstaculo.class,"getDistanciaLibre","%5.2f"), "Dist Libre");
+			panelInformacion.añadeAPanel(new LabelDatoFormato(FuturoObstaculo.class,"getDistanciaLibre","%5.2f m"), "Dist Libre");
 			
 			jpbDistancia=new JProgressBar(JProgressBar.HORIZONTAL,0,80);
 			//TODO que el largo se ajuste a todo lo que quede de espacio
