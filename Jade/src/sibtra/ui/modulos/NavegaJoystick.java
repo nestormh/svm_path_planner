@@ -39,7 +39,7 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 		manJoy=new ManejaJoystick();
 		panJoy=new PanelJoystick(manJoy);
 
-		ventanaMonitoriza.añadePanel(panJoy, "Joystick", false);
+		ventanaMonitoriza.añadePanel(panJoy, "Joystick", false,false);
 		
 		thCiclico=new ThreadSupendible() {
 			@Override

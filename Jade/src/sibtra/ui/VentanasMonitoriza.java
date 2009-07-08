@@ -116,7 +116,7 @@ public class VentanasMonitoriza extends Ventanas {
 
         //Panel de la Imu
         panelIMU = new PanelIMU(conexionIMU);
-        añadePanel(panelIMU,"IMU",false);
+        añadePanel(panelIMU,"IMU",false,false);
         panelIMU.actulizacionPeridodica(periodoActulizacion);
         
         //Panel del RF

@@ -11,6 +11,7 @@ import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelDatos;
+import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
 import sibtra.util.SpinnerInt;
 import sibtra.util.ThreadSupendible;
@@ -59,7 +60,7 @@ public class MotorSincrono implements Motor {
 		ventanaMonitoriza=ventMonito;
 		
 		panel=new PanelSincrono();
-		ventanaMonitoriza.añadePanel(panel, NOMBRE);
+		ventanaMonitoriza.añadePanel(panel, NOMBRE,false,false);
 		
         //inicializamos modelo del coche
         modCoche = new Coche();
@@ -182,10 +183,10 @@ public class MotorSincrono implements Motor {
 		detectoresObstaculos=dectObs;
 	}
 	
-	class PanelSincrono extends PanelDatos {
+	class PanelSincrono extends PanelFlow {
 		public PanelSincrono() {
 			super();
-			setLayout(new GridLayout(0,4));
+//			setLayout(new GridLayout(0,4));
 			//TODO Definir los tamaños adecuados o poner layout
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setUmbralMinimaVelocidad",0,6,0.1), "Min Vel");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setPendienteFrenado",0.1,3,0.1), "Pend Frenado");

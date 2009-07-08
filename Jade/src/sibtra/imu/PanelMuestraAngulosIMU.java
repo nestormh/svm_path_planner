@@ -10,20 +10,21 @@ import javax.swing.JFrame;
 import sibtra.util.LabelDato;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelDatos;
+import sibtra.util.PanelFlow;
 
 /**
  * Mostrar los 3 angulos y el contador de recepción de la IMU
  * @author alberto
  *
  */
-public class PanelMuestraAngulosIMU extends PanelDatos implements IMUEventListener {
+public class PanelMuestraAngulosIMU extends PanelFlow implements IMUEventListener {
 	
 	/**	Contador del último dato presentado */
 	private int contadorUltimo=0;
 
 	public PanelMuestraAngulosIMU() {
 		super();
-		setLayout(new GridLayout(0,2)); //empezamos con 3 columnas
+//		setLayout(new GridLayout(0,2)); //empezamos con 3 columnas
 		//roll
 		LabelDato lda=new LabelDatoFormato(AngulosIMU.class,"getRoll","%+10.4f");
 		añadeAPanel(lda,"Roll");

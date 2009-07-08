@@ -7,7 +7,7 @@ package sibtra.util;
  * @author alberto
  *
  */
-public class PanelJoystick extends PanelDatos {
+public class PanelJoystick extends PanelFlow {
 	
 	private ManejaJoystick manejaJoystick;
 
