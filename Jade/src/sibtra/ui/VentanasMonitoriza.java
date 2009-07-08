@@ -3,10 +3,19 @@
  */
 package sibtra.ui;
 
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+
 import sibtra.controlcarro.ControlCarro;
 import sibtra.controlcarro.PanelCarro;
 import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.PanelGPSTriumph;
+import sibtra.gps.PanelGrabarRuta;
+import sibtra.gps.PanelMuestraRuta;
 import sibtra.imu.ConexionSerialIMU;
 import sibtra.imu.PanelIMU;
 import sibtra.lms.LMSException;
@@ -44,6 +53,13 @@ public class VentanasMonitoriza extends Ventanas {
 	private PanelTrayectoria panelTrayectoria;
 
 	private double desviacionMagnetica;
+
+	private Action actGrabarRuta;
+	private Action actPararGrabarRuta;
+
+	private JPanel panelGrabar;
+
+	private PanelMuestraRuta panelMuestraRuta;
 
     
     /** Abre la conexion a los 4 perifericos y los paneles de monitorizacion
@@ -130,6 +146,20 @@ public class VentanasMonitoriza extends Ventanas {
 		}
         panelRF.actualizacionContinua();
         
+        //Panel para grabar
+        actGrabarRuta=new AccionGrabarRuta();
+        actPararGrabarRuta=new AccionPararGrabarRuta();
+        panelGrabar=new JPanel();
+        panelGrabar.setLayout(new BoxLayout(panelGrabar, BoxLayout.PAGE_AXIS));
+        panelGrabar.add(new PanelGrabarRuta(conexionGPS,actGrabarRuta,actPararGrabarRuta));
+        panelMuestraRuta=new PanelMuestraRuta(null);
+        panelGrabar.add(panelMuestraRuta);
+        añadePanel(panelGrabar, "Grabar", false, false);
+        menuAcciones.add(actGrabarRuta);
+        menuAcciones.add(actPararGrabarRuta);
+        menuAcciones.addSeparator();
+
+        
         //Añadimos panel de selección de modulos
         panSelModulos=new PanelEligeModulos(this);
         añadePanel(panSelModulos, "Modulos", true);
@@ -196,4 +226,30 @@ public class VentanasMonitoriza extends Ventanas {
     public Motor getMotor() {
     	return panSelModulos.obMotor;
     }
+    
+    class AccionGrabarRuta extends AbstractAction {
+    	public AccionGrabarRuta(){
+    		super("Grabar Ruta");
+    		setEnabled(true);
+    	}
+    
+        public void actionPerformed(ActionEvent e) {
+        	panelMuestraRuta.setRuta(conexionGPS.getBufferRutaEspacial());
+        	actGrabarRuta.setEnabled(false);
+        	actPararGrabarRuta.setEnabled(true);
+        }
+    }
+    
+    class AccionPararGrabarRuta extends AbstractAction {
+    	public AccionPararGrabarRuta() {
+			super("Parar Grabar Ruta");
+			setEnabled(false);
+    	}
+        public void actionPerformed(ActionEvent e) {
+    		panelMuestraRuta.setRuta(conexionGPS.getBufferEspacial());
+        	actGrabarRuta.setEnabled(true);
+        	actPararGrabarRuta.setEnabled(false);
+        }
+    }
+
 }
