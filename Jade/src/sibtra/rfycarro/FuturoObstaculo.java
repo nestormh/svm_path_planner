@@ -53,6 +53,7 @@ public class FuturoObstaculo {
 	public double distanciaAObstaculo(double alfa, BarridoAngular barr) {
 		//copiamos los valores pasados
 		bAct=barr;
+		alfa=-alfa; //TODO convenio del volante, izda es negativo
 		alfaAct=alfa;
 		if(Math.abs(alfa)>Math.toRadians(0.1)) {
 			//la orientación no es 0: Caso general

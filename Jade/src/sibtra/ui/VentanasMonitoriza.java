@@ -152,7 +152,7 @@ public class VentanasMonitoriza extends Ventanas {
         panelGrabar=new JPanel();
         panelGrabar.setLayout(new BoxLayout(panelGrabar, BoxLayout.PAGE_AXIS));
         panelGrabar.add(new PanelGrabarRuta(conexionGPS,actGrabarRuta,actPararGrabarRuta));
-        panelMuestraRuta=new PanelMuestraRuta(null);
+        panelMuestraRuta=new PanelMuestraRuta(conexionGPS.getBufferEspacial());
         panelGrabar.add(panelMuestraRuta);
         añadePanel(panelGrabar, "Grabar", false, false);
         menuAcciones.add(actGrabarRuta);

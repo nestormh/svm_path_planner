@@ -881,7 +881,7 @@ public class ControlCarro implements SerialPortEventListener {
 		//Limitamos el comando maximo a aplicar
 		comando=UtilCalculos.limita(comando, -255, 255);
 		//umbralizamos la zona muerta
-		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 80, -1);
+		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 60, -1);
 //				, -90/FactorFreno+comandoAnt);  //TODO da valores positivos
 		
 

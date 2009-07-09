@@ -19,7 +19,7 @@ public class VentanaGPSTriumph extends JFrame {
 	private GPSConnectionTriumph gpsCT;
 
 	/** Milisegundos del periodo de actualización */
-	private int milisPeriodo=500;
+	private int milisPeriodo=550;
 
 
 	public VentanaGPSTriumph(GPSConnectionTriumph gct) {

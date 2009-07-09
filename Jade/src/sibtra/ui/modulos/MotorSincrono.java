@@ -94,7 +94,7 @@ public class MotorSincrono implements Motor {
 	            double velocidadActual = ventanaMonitoriza.conexionCarro.getVelocidadMS();
                 //Cuando está casi parado no tocamos el volante
                 if (velocidadActual >= umbralMinimaVelocidad)
-                	ventanaMonitoriza.conexionCarro.setAnguloVolante(-consignaVolante);
+                	ventanaMonitoriza.conexionCarro.setAnguloVolante(consignaVolante);
 
                 // Velocidad =============================================================
             	//Guardamos valor para la siguiente iteracion
