@@ -795,7 +795,7 @@ public class NavegaPredictivo implements ActionListener {
                 velocidadActual = contCarro.getVelocidadMS();
                 //Cuando está casi parado no tocamos el volante
                 if (velocidadActual >= umbralMinimaVelocidad)
-                	contCarro.setAnguloVolante(-comandoVolante);
+                	contCarro.setAnguloVolante(comandoVolante);
                 
             	consignaVelocidad = calculaConsignaVel(); 
 		System.out.println("Consigna de calcula: "+consignaVelocidad);

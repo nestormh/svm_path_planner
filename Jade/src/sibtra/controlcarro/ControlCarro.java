@@ -122,7 +122,11 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Total de bytes recibidos desde el PIC por la serial */
 	private int TotalBytes = 0;
 
-	/** Posición del volante recibida desde el PIC */
+	/** Posición del volante recibida desde el PIC. 
+	 * El 0 (valor más pequeño) está con el volante maś a la izquierda.
+	 * A partir de esa posición el valor irá creciendo.
+	 * Cuando esté en medio tendrá el valor {@link #CARRO_CENTRO}.
+	 * */
 	private int volante = 32768;
 
 	/** Cuentas del encoder de avance de la tracción, tiene corregido el desbordamiento */
@@ -485,7 +489,7 @@ public class ControlCarro implements SerialPortEventListener {
 		velocidadMS = velocidadCS / PULSOS_METRO;
 
 		//apuntamos angulo volante en radianes y velocidad en m/sg
-		logAngVel.add((volante - CARRO_CENTRO) * RADIANES_POR_CUENTA,velocidadMS);
+		logAngVel.add(getAnguloVolante(),velocidadMS);
 
 		// System.out.println("T: " +
 		// (System.currentTimeMillis() - lastPaquete) +
@@ -556,7 +560,7 @@ public class ControlCarro implements SerialPortEventListener {
 	}
 
 	/**
-	 * Devuelve la posicion actual del volante
+	 * Devuelve la posicion actual del volante en cuentas
 	 * 
 	 */
 	public int getVolante() {
@@ -564,16 +568,14 @@ public class ControlCarro implements SerialPortEventListener {
 	}
 
 	/**
-	 * @return Devuelve el angulo del volante en radianes respecto al centro (+
-	 *         izquierda, - derecha).
+	 * @return Devuelve el angulo del volante en radianes respecto al centro (+izquierda, - derecha).
 	 */
 	public double getAnguloVolante() {
-		return (volante - CARRO_CENTRO) * RADIANES_POR_CUENTA;
+		return (CARRO_CENTRO-volante) * RADIANES_POR_CUENTA;
 	}
 
 	/**
-	 * @return Devuelve el angulo del volante en grados respecto al centro (+
-	 *         izquierda, - derecha).
+	 * @return Devuelve el angulo del volante en grados respecto al centro (+izquierda, - derecha).
 	 */
 	public double getAnguloVolanteGrados() {
 		return Math.toDegrees(getAnguloVolante());
@@ -633,7 +635,7 @@ public class ControlCarro implements SerialPortEventListener {
 	/**
 	 * Obtiene la consigna del volante
 	 * 
-	 * @return Devuelve la consigna del volante
+	 * @return Devuelve la consigna del volante en cuentas
 	 */
 	public int getConsignaVolante() {
 		return ConsignaVolante;
@@ -645,7 +647,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 * @return Devuelve la consigna del volante en radianes
 	 */
 	public double getConsignaAnguloVolante() {
-		return (ConsignaVolante - CARRO_CENTRO) * RADIANES_POR_CUENTA;
+		return ( CARRO_CENTRO-ConsignaVolante) * RADIANES_POR_CUENTA;
 	}
 
 	/**
@@ -669,40 +671,36 @@ public class ControlCarro implements SerialPortEventListener {
 	/**
 	 * Fija consigna del volante
 	 * 
-	 * @param comandoVolante
-	 *            angulo deseado en radianes desde el centro (+izquierda, -
-	 *            derecha)
+	 * @param comandoVolante angulo deseado en radianes desde el centro (+izquierda, -derecha)
 	 */
 	public void setAnguloVolante(double comandoVolante) {
-		setVolante((int) Math.floor(comandoVolante / RADIANES_POR_CUENTA)
-				+ CARRO_CENTRO);
+		setVolante( CARRO_CENTRO - (int)Math.floor(comandoVolante / RADIANES_POR_CUENTA) );
 	}
 
 	/**
 	 * Fija la posicion del volante a las cuentas indicadas
 	 * 
-	 * @param Angulo
-	 *            Numero de cuentas a las que fijar el volante
+	 * @param Angulo Numero de cuentas a las que fijar el volante
 	 */
-	public void setVolante(int Angulo) {
+	private void setVolante(int Angulo) {
 		ConsignaVolante=UtilCalculos.limita(Angulo, 0, 65535);
 		ConsignaSentidoFreno=NOCAMBIAR_FRENO;  //No modifica el freno
 		ConsignaNumPasosFreno = NumPasosFreno; //TODO sobra
 		Envia();
 	}
 
-	/**
-	 * Fija la posicion del volante a n cuentas a partir de la posicion actual
-	 * 
-	 * @param deltaAngulo
-	 *            Numero de cuentas a desplazar a partir de la posicion actual
-	 */
-	public void setRVolante(int deltaAngulo) {
-		ConsignaVolante = UtilCalculos.limita(ConsignaVolante + deltaAngulo, 0, 65535);
-		ConsignaSentidoFreno=NOCAMBIAR_FRENO;
-		ConsignaNumPasosFreno = NumPasosFreno; //TODO sobra
-		Envia();
-	}
+//	/**
+//	 * Fija la posicion del volante a n cuentas a partir de la posicion actual
+//	 * 
+//	 * @param deltaAngulo
+//	 *            Numero de cuentas a desplazar a partir de la posicion actual
+//	 */
+//	public void setRVolante(int deltaAngulo) {
+//		ConsignaVolante = UtilCalculos.limita(ConsignaVolante + deltaAngulo, 0, 65535);
+//		ConsignaSentidoFreno=NOCAMBIAR_FRENO;
+//		ConsignaNumPasosFreno = NumPasosFreno; //TODO sobra
+//		Envia();
+//	}
 
 
 	/**
