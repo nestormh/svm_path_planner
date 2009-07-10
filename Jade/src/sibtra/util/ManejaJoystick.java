@@ -46,7 +46,7 @@ public class ManejaJoystick {
         float x=joystick.getX();
         if(x>MaxX) return AlfaMaximo;
         if(x<MinX) return -AlfaMaximo;
-        double alfa=(AlfaMaximo*2/(MaxX-MinX)*(x-MinX)-AlfaMaximo);
+        double alfa=-(AlfaMaximo*2/(MaxX-MinX)*(x-MinX)-AlfaMaximo);
         return alfa;
 	}
 
