@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import javax.swing.JFrame;
 
+import sibtra.gps.Trayectoria;
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
@@ -19,7 +20,7 @@ public class Navega2Matlab {
 
 	private ManejaLMS manLMS;
 
-	double[][] Tr=null;
+	Trayectoria Tr=null;
 	private MiraObstaculo mi;
 	private JFrame ventanaPMOS;
 	private JFrame ventanaPMO;
@@ -31,7 +32,7 @@ public class Navega2Matlab {
 		if(TrSeguir==null) {
 			System.err.println("Necesaria ruta a seguir");
 		}
-		Tr=TrSeguir;
+		Tr=new Trayectoria(TrSeguir);
 
 		//Conectamos a RF
 		try { 		
@@ -42,7 +43,7 @@ public class Navega2Matlab {
 			System.err.println("No fue posible conectar o configurar RF");
 		}
 
-		System.out.println("Longitud de la trayectoria="+Tr.length);
+		System.out.println("Longitud de la trayectoria="+Tr.length());
 
 		mi=new MiraObstaculo(Tr);
 		try {
@@ -84,8 +85,8 @@ public class Navega2Matlab {
 		try {
 			manLMS.pideBarrido((short)0, (short)180, (short)1);
 			BarridoAngular ba=manLMS.recibeBarrido();
-			double[] ptoAct={posicionLocal[0], posicionLocal[1]};
-			dist=mi.masCercano(ptoAct, yawA, ba);
+			Tr.situaCoche(posicionLocal[0], posicionLocal[1]);
+			dist=mi.masCercano(yawA, ba);
 			pmo.actualiza();
 			PMOS.actualiza();
 			if(Double.isInfinite(dist))

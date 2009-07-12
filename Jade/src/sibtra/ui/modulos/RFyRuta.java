@@ -6,6 +6,7 @@ package sibtra.ui.modulos;
 import javax.swing.JOptionPane;
 
 import sibtra.gps.GPSData;
+import sibtra.gps.Trayectoria;
 import sibtra.lms.BarridoAngular;
 import sibtra.rfyruta.MiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculo;
@@ -28,7 +29,7 @@ public class RFyRuta implements DetectaObstaculos {
 	private PanelMiraObstaculoSubjetivo panelMiraObsSub;
 	private ThreadSupendible thActulizacion;
 	private double distanciaLibre;
-	private double[][] Tr;
+	private Trayectoria Tr;
 
 	public RFyRuta() {};
 	/* (sin Javadoc)
@@ -63,16 +64,12 @@ public class RFyRuta implements DetectaObstaculos {
 			protected void accion() {
 				ba=ventanaMonitoriza.conexionRF.esperaNuevoBarrido(ba);
 				GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();                            
-	            double[] ptoAct=null;
 	            double angAct=Double.NaN;
 	            if(pa!=null) {
-	            	ptoAct= new double[2];
-	            	ptoAct[0]=pa.getXLocal(); ptoAct[1]=pa.getYLocal();
 	            	angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
-	            }
-				if (ptoAct!=null) {
+	            	Tr.situaCoche(pa.getXLocal(), pa.getYLocal());
 					//calculamos distancia a obstáculo más cercano
-					distanciaLibre = miraObstaculo.masCercano(ptoAct, angAct, ba);
+					distanciaLibre = miraObstaculo.masCercano(angAct, ba);
 				} else {
 					//no podemos calcular nada
 					distanciaLibre = Double.POSITIVE_INFINITY; 

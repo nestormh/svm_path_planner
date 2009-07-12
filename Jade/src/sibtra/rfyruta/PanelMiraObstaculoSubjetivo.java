@@ -19,14 +19,13 @@ import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import sibtra.lms.PanelMuestraBarrido;
+import sibtra.gps.Trayectoria;
 import sibtra.lms.BarridoAngular;
+import sibtra.lms.PanelMuestraBarrido;
 import sibtra.lms.ZonaLMS;
 import sibtra.lms.ZonaRadialLMS;
 import sibtra.lms.ZonaRectangularLMS;
 import sibtra.lms.ZonaSegmentadaLMS;
-import sibtra.util.LabelDato;
-import sibtra.util.LabelDatoFormato;
 import sibtra.util.UtilCalculos;
 
 @SuppressWarnings("serial")
@@ -565,7 +564,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		
 		System.out.println("Longitud de la trayectoria="+Tr.length);
 		
-		MiraObstaculo mi=new MiraObstaculo(Tr);		
+		MiraObstaculo mi=new MiraObstaculo(new Trayectoria(Tr));		
 		PanelMiraObstaculoSubjetivo pMOS=new PanelMiraObstaculoSubjetivo(mi,(short)80);
 		
 
@@ -601,8 +600,8 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 //			ba.datos[i]=(short)((15.0)*100.0);
 			ba.datos[i]=(short)((Math.sin((double)i/(ba.numDatos()-1)*Math.PI*13.6)*3.0+10.0)*100.0);
 		}
-		double[] ptoAct={-26, 14};
-		double dist=mi.masCercano(ptoAct, Math.toRadians(90), ba);
+		mi.tray.situaCoche(-26, 14);
+		double dist=mi.masCercano(Math.toRadians(90), ba);
 		pmo.actualiza();
 		pMOS.actualiza();
 		System.out.println("Distancia="+dist);
@@ -635,8 +634,8 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 							+Dpor)*100.0);
 				}
 
-				double diAct=mi.masCercano(Tr[inTr]
-				                               , Math.atan2(Tr[inTr][1]-Tr[inTrAnt][1],Tr[inTr][0]-Tr[inTrAnt][0]), barAct);
+				mi.tray.situaCoche(Tr[inTr]);
+				double diAct=mi.masCercano(Math.atan2(Tr[inTr][1]-Tr[inTrAnt][1],Tr[inTr][0]-Tr[inTrAnt][0]), barAct);
 				pmo.actualiza();
 				pMOS.actualiza();
 				System.out.println("Indice "+inTr+" distancia "+diAct);

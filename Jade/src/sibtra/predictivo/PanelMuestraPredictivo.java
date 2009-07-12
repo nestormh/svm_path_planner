@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Label;
@@ -17,7 +16,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -30,6 +28,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import sibtra.gps.Ruta;
+import sibtra.gps.Trayectoria;
 import sibtra.log.Logger;
 import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerDouble;
@@ -37,7 +36,6 @@ import sibtra.log.LoggerFactory;
 import sibtra.log.VentanaLoggers;
 import sibtra.util.PanelFlow;
 import sibtra.util.PanelMuestraTrayectoria;
-import sibtra.util.UtilCalculos;
 
 /**
  * Panel para mostrar la información del control predictivo y poder depurarlo.
@@ -225,7 +223,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         }
         if (ce.getSource() == jsModDistMax) {
             double distMax = jsModDistMax.getNumber().doubleValue();
-            CP.setRuta(rutaAux.toTr(distMax));
+            CP.setRuta(new Trayectoria(rutaAux,distMax));
         }
         if (ce.getSource() == jsModAlpha){
         	double alpha = jsModAlpha.getNumber().doubleValue();
@@ -282,7 +280,6 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     public static void main(String[] args) {
         final Coche carroOri = new Coche();
         final CocheModeloAntiguo carroViejo = new CocheModeloAntiguo();
-//        final Coche carroOri = new Coche();
         final VentanaLoggers vl; //ventana de los loggers
         double vel = 2;
         double consVolante = 0;
@@ -294,23 +291,9 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         int horCont = 3;
         double paramLanda = 1;
         double paramTs = 0.2;
-//        double[][] rutaPrueba = ControlPredictivo.generaRuta(200,0.25);
-        int numPuntos = 200;
-        double[][] rutaPrueba = new double[numPuntos][3];
-        rutaPrueba[0][0] = 0;
-        rutaPrueba[0][1] = 0;
-        rutaPrueba[0][2] = 0;
-        for (int i = 1; i < numPuntos; i++) {
-            rutaPrueba[i][0] = 40 * Math.cos(i * 2 * Math.PI / numPuntos) - 40;
-            rutaPrueba[i][1] = 40 * Math.sin(i * 2 * Math.PI / numPuntos);
-//            rutaPrueba[i][1] = rutaPrueba[i][0]*2;
-//            rutaPrueba[i][1] = 3*Math.sin(rutaPrueba[i][0]*2*Math.PI/20);
-            rutaPrueba[i][2] = Math.atan2((rutaPrueba[i][1] - rutaPrueba[i - 1][1]),
-                    (rutaPrueba[i][0] - rutaPrueba[i - 1][0]));
 
-        }
         Ruta re;
-        double[][] rutaPruebaRellena;
+        Trayectoria rutaPruebaRellena;
 //        String fichero = "Rutas/Parq20";
         String fichero = "Rutas/Iter1";
 //          String fichero = "Rutas/casa23";
@@ -320,27 +303,25 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
             re = (Ruta) ois.readObject();
             ois.close();
-            //rutaPrueba = re.toTr();
             double distMax = 0.5;
-            rutaPruebaRellena = re.toTr(distMax);
-            System.out.println(rutaPruebaRellena.length);
+            rutaPruebaRellena = new Trayectoria(re,distMax);
+            System.out.println(rutaPruebaRellena.length());
             System.out.println("Abrimos el fichero");
 
         } catch (IOException ioe) {
             re = new Ruta();
-            rutaPruebaRellena = new double[1][1];
+            rutaPruebaRellena = null;
             System.err.println("Error al abrir el fichero " + fichero);
             System.err.println(ioe.getMessage());
         } catch (ClassNotFoundException cnfe) {
             re = new Ruta();
-            rutaPruebaRellena = new double[1][1];
+            rutaPruebaRellena = null;
             System.err.println("Objeto leído inválido: " + cnfe.getMessage());
         }
 
 
         carroOri.setPostura(-1, -1, 0.5, 0.0);
         carroViejo.setPostura(-1, -1, 0.5, 0.0);
-//        carroOri.setPostura(rutaPrueba[2][0],rutaPrueba[2][1],rutaPrueba[2][2]+0.3,0);
 
         ControlPredictivo controlador = new ControlPredictivo(carroOri, rutaPruebaRellena,
                 horPredic, horCont, paramLanda, paramTs);
@@ -401,9 +382,6 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         ventana.setVisible(true);
 
 
-
-
-//		for (int i = 0; i < rutaPrueba.length; i++) {
         pmp.actualiza();
         LoggerDouble lgCV=LoggerFactory.nuevoLoggerDouble(controlador, "comandoVolante", 1000/250);
         LoggerArrayDoubles lgError=LoggerFactory.nuevoLoggerArrayDoubles(controlador, "error", 1000/250);
@@ -441,13 +419,11 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                 lgTrayectoria.add(carroOri.getX(),carroOri.getY());
                 carroOri.calculaEvolucion(comandoVolante, 2, 0.2);
                 carroViejo.calculaEvolucion(comandoVolante, 2, 0.2);
-                //indice = ControlPredictivo.calculaDistMinOptimizado(rutaPrueba, carroOri.getX(), carroOri.getY(), indice);
-                indice = UtilCalculos.indiceMasCercano(rutaPrueba, carroOri.getX(), carroOri.getY());
                 indice=controlador.indMinAnt;
 //                System.out.println(indice);
-                double errorAngular = rutaPruebaRellena[indice][2] - carroOri.getTita();
+                double errorAngular = rutaPruebaRellena.rumbo[indice] - carroOri.getTita();
                 lgError.add(errorAngular, controlador.distanciaLateral);
-                lgDeseada.add(rutaPruebaRellena[indice][0],rutaPruebaRellena[indice][1]);
+                lgDeseada.add(rutaPruebaRellena.x[indice],rutaPruebaRellena.y[indice]);
                 //System.out.println("Error " + error);
                 pmp.actualiza();
             } else {

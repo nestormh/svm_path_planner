@@ -5,12 +5,12 @@ package sibtra.ui.modulos;
 
 import javax.swing.JOptionPane;
 
+import sibtra.gps.Trayectoria;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
-import sibtra.util.UtilCalculos;
 
 /**
  * @author alberto
@@ -21,7 +21,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 	String NOMBRE="Velocidad Ruta";
 	String DESCRIPCION="Velocidad según ruta, se minora con la distancia lateral y error de orientación";
 	private VentanasMonitoriza ventanaMonitoriza;
-	private double[][] Tr;
+	private Trayectoria Tr;
 	private PanelFlow panelDatos;
 	// Parametros ======================================================
 	private double gananciaLateral=1;
@@ -87,15 +87,11 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 			throw new IllegalStateException("Aun no inicializado");
 		consigna = 0;
 		//obtenemos posicion y orientación del modelo del coche.
-        double x=modCoche.getX();
-        double y=modCoche.getY();
         double angAct = modCoche.getTita();
-		int indMin = UtilCalculos.indiceMasCercano(Tr,x,y);
-		double dx = Tr[indMin][0]-x;
-		double dy = Tr[indMin][1]-y;
-		errorLateral = Math.sqrt(dx*dx + dy*dy);
-		errorOrientacion = Tr[indMin][2] - angAct;
-		velocidadReferencia=Tr[indMin][3];
+		int indMin = Tr.indiceMasCercano();  //la posición del coche ya la ha puesto el motor
+		errorLateral = Tr.distanciaAlMasCercano();
+		errorOrientacion = Tr.rumbo[indMin] - angAct;
+		velocidadReferencia=Tr.velocidad[indMin];
 		//referencia minorada
 		consigna=velocidadReferencia*factorReduccionV;
 		//acotamos a velocidad máxima

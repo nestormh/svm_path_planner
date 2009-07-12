@@ -3,14 +3,11 @@
  */
 package sibtra.ui.modulos;
 
-import java.awt.GridLayout;
-
 import sibtra.gps.GPSData;
-import sibtra.gps.Ruta;
+import sibtra.gps.Trayectoria;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.util.LabelDatoFormato;
-import sibtra.util.PanelDatos;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
 import sibtra.util.SpinnerInt;
@@ -26,7 +23,7 @@ public class MotorSincrono implements Motor {
 	final static String NOMBRE="Motor Sincrono";
 	final static String DESCRIPCION="Ejecuta las acciones de control con un periodo fijo";
 	private VentanasMonitoriza ventanaMonitoriza=null;
-	Ruta rutaActual=null;
+	Trayectoria trayActual=null;
 	private CalculoDireccion calculadorDireccion=null;
 	private CalculoVelocidad calculadorVelocidad=null;
 	private DetectaObstaculos[] detectoresObstaculos=null;
@@ -85,6 +82,10 @@ public class MotorSincrono implements Motor {
 	            	//TODO Realimentar posición del volante y la velocidad del coche.
 	            	modCoche.setPostura(x, y, angAct);
 	            }
+	            if(trayActual!=null)
+	            	//para actulizar en indice del más cercano
+	            	trayActual.situaCoche(modCoche.getX(), modCoche.getY());
+	            	
 
 	            //Direccion =============================================================
 	            double consignaVolanteAnterior=consignaVolante;
@@ -139,6 +140,9 @@ public class MotorSincrono implements Motor {
         //Solo podemos actuar si está todo inicializado
         if(calculadorDireccion==null || calculadorVelocidad==null || detectoresObstaculos==null)
         	throw new IllegalStateException("Faltan modulos por inicializar");
+        //vemos si hay trayectoria y la apuntamos
+        if(ventanaMonitoriza.hayTrayectoria())
+        	trayActual=ventanaMonitoriza.getTrayectoriaSeleccionada();
 		thCiclico.activar();
 	}
 
@@ -183,6 +187,7 @@ public class MotorSincrono implements Motor {
 		detectoresObstaculos=dectObs;
 	}
 	
+	@SuppressWarnings("serial")
 	class PanelSincrono extends PanelFlow {
 		public PanelSincrono() {
 			super();

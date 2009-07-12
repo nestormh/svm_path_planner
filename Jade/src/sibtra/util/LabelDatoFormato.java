@@ -5,7 +5,6 @@ package sibtra.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 
 /**
  * Clase para todas aquellas etiquetas cuyo valor se actualiza invocando 
@@ -13,6 +12,7 @@ import java.lang.reflect.Type;
  * @author alberto
  *
  */
+@SuppressWarnings("serial")
 public class LabelDatoFormato extends LabelDato {
 
 	/** metodo que invocar */

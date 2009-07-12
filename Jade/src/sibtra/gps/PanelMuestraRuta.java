@@ -13,6 +13,7 @@ import sibtra.util.PanelMuestraTrayectoria;
  * Atiende eventos de GPS y actualiza posición del coche.
  * @author alberto
  */
+@SuppressWarnings("serial")
 public class PanelMuestraRuta extends PanelMuestraTrayectoria implements  GpsEventListener {
 	
 	protected Ruta RU;
@@ -25,7 +26,7 @@ public class PanelMuestraRuta extends PanelMuestraTrayectoria implements  GpsEve
 		super();
 		RU=rupas;
 		if(RU!=null)
-			setTr(RU.toTr());
+			setTr(new Trayectoria(RU));
 		//Si queremoa añadir algo al panel inferiro	
 		//		jpSur.add(jcbEscalas);
 
@@ -62,7 +63,7 @@ public class PanelMuestraRuta extends PanelMuestraTrayectoria implements  GpsEve
 	/** Actualiza la presentación a la situación del pto pasado */
 	public void nuevoPunto(GPSData ultPto) {
 		if(RU==null) return;
-		setTr(RU.toTr());		
+		setTr(new Trayectoria(RU));		
 		double x=ultPto.getXLocal();
 		double y=ultPto.getYLocal();
 		double yaw=ultPto.getAngulo();

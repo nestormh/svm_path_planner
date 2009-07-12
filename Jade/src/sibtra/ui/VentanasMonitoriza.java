@@ -16,6 +16,7 @@ import sibtra.gps.GPSConnectionTriumph;
 import sibtra.gps.PanelGPSTriumph;
 import sibtra.gps.PanelGrabarRuta;
 import sibtra.gps.PanelMuestraRuta;
+import sibtra.gps.Trayectoria;
 import sibtra.imu.ConexionSerialIMU;
 import sibtra.imu.PanelIMU;
 import sibtra.lms.LMSException;
@@ -178,10 +179,15 @@ public class VentanasMonitoriza extends Ventanas {
 	 * Si no hay ninguna seleccionada se tendrá que buscar a un selector de ruta para elegir una
 	 * @return la ruta que se va a seguir  
 	 */
-	public double[][] getTrayectoriaSeleccionada() {
+	public Trayectoria getTrayectoriaSeleccionada() {
 		if(panelTrayectoria==null)
 			panelTrayectoria=new PanelTrayectoria(this);
 		return panelTrayectoria.getTrayectoria();
+	}
+	
+	/** @return si hay alguna trayectoria definida (si algún módulo la ha pedido)*/
+	public boolean hayTrayectoria() {
+		return panelTrayectoria!=null && panelTrayectoria.trayectoriaActual!=null;
 	}
 
 	

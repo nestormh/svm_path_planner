@@ -3,6 +3,7 @@
  */
 package sibtra.ui.modulos;
 
+import sibtra.gps.Trayectoria;
 import sibtra.ui.VentanasMonitoriza;
 
 /**
@@ -17,7 +18,7 @@ public class EligeDestino implements SeleccionRuta {
 	/* (non-Javadoc)
 	 * @see sibtra.ui.modulos.SeleccionRuta#getTrayectoria()
 	 */
-	public double[][] getTrayectoria() {
+	public Trayectoria getTrayectoria() {
 		// TODO Auto-generated method stub
 		return null;
 	}

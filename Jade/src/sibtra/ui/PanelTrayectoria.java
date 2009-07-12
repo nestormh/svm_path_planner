@@ -10,6 +10,7 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
+import sibtra.gps.Trayectoria;
 import sibtra.ui.modulos.SeleccionRuta;
 import sibtra.util.ClasesEnPaquete;
 import sibtra.util.PanelFlow;
@@ -19,6 +20,7 @@ import sibtra.util.PanelMuestraTrayectoria;
  * @author alberto
  *
  */
+@SuppressWarnings("serial")
 public class PanelTrayectoria extends PanelMuestraTrayectoria {
 
 
@@ -28,7 +30,7 @@ public class PanelTrayectoria extends PanelMuestraTrayectoria {
 	private Class[] arrClasSelecRuta;
 	private String[] arrNomClasMotor;
 	private SeleccionRuta obSelRuta=null;
-	private double[][] trayectoriaActual=null;
+	Trayectoria trayectoriaActual=null;
 	private AccionCambiarModulo accCambiaModulo;
 
 	public PanelTrayectoria(VentanasMonitoriza monitoriza) {
@@ -134,7 +136,7 @@ public class PanelTrayectoria extends PanelMuestraTrayectoria {
 
 	}
 	
-	public double[][] getTrayectoria() {
+	public Trayectoria getTrayectoria() {
 		// TODO Auto-generated method stub
 		return trayectoriaActual;
 	}

@@ -10,6 +10,8 @@ import java.util.Vector;
 
 import javax.swing.JCheckBox;
 
+import sibtra.gps.Trayectoria;
+
 
 /**
  * Panel que usa {@link PanelMapa} para mostrar una trayectoria la y posición del coche.
@@ -26,7 +28,7 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	private static final double tamRumbo = 50;
 
 	/** Array de dos o tres columnas con los puntos que forman la trayectoria */
-	protected double Tr[][]=null;
+	protected Trayectoria tray=null;
 
 	/** Vector de puntos de la trayectoria a marcar de manera especial */
 	Vector<Integer> indiceMarcar=null;
@@ -95,16 +97,16 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 		super.cosasAPintar(g0);
 		Graphics2D g=(Graphics2D)g0;
 		//pintamos el trayecto si lo hay
-		if(Tr!=null && Tr.length>0) {
+		if(tray!=null && tray.length()>0) {
 			g.setStroke(new BasicStroke());
 			g.setColor(Color.YELLOW);
 			if(!jcbMostrarPuntos.isSelected()) {
-				GeneralPath gptr=pathArrayXY(Tr);
+				GeneralPath gptr=pathTrayectoria(tray);
 				if(gptr!=null) {
 					g.draw(gptr);
 				}
 			} else {
-				puntosArray(g,Tr);
+				puntosTrayectoria(g,tray);
 			}
 			//Marcamos puntos si se a asignado vector de índice
 			if(indiceMarcar!=null && indiceMarcar.size()>0) {
@@ -112,8 +114,8 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 				g.setStroke(new BasicStroke());
 				g.setColor(Color.RED);
 				for(int ia=0; ia<indiceMarcar.size(); ia++)
-					if (indiceMarcar.get(ia)<Tr.length) {
-						double pa[]=Tr[indiceMarcar.get(ia)];
+					if (indiceMarcar.get(ia)<tray.length()) {
+						double pa[]={tray.x[indiceMarcar.get(ia)],tray.y[indiceMarcar.get(ia)]};
 						if(pa[0]<=esqSI.getX() && pa[0]>=esqID.getX()
 								&& pa[1]<=esqSI.getY() && pa[1]>=esqID.getY() ) {
 							//esta dentro del recuadro
@@ -127,19 +129,19 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 					}
 			}
 
-			if(jcbMostrarRumbo.isSelected() && Tr[0].length>=3) {
+			if(jcbMostrarRumbo.isSelected()) {
 				g.setStroke(new BasicStroke());
 				g.setColor(Color.BLUE);
 				//pintamos los puntos que están dentro del recuadro
-				for(int i=0; i<Tr.length; i++) {
-					double pa[]=Tr[i];
+				for(int i=0; i<tray.length(); i++) {
+					double pa[]={tray.x[i],tray.y[i]};
 					if(pa[0]<=esqSI.getX() && pa[0]>=esqID.getX()
 							&& pa[1]<=esqSI.getY() && pa[1]>=esqID.getY() ) {
 						//esta dentro del recuadro
 						Point2D px=point2Pixel(pa);
 						int x=(int)px.getX(), y=(int)px.getY();
-						int Dx=(int)(-tamRumbo*Math.sin(pa[2]));
-						int Dy=(int)(-tamRumbo*Math.cos(pa[2]));
+						int Dx=(int)(-tamRumbo*Math.sin(tray.rumbo[i]));
+						int Dy=(int)(-tamRumbo*Math.cos(tray.rumbo[i]));
 						g.drawLine(x, y
 								, x+Dx, y+Dy);
 					}
@@ -205,14 +207,35 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 		}
 	}
 
+	/**
+	 * Pinta los puntos del array como aspas
+	 * @param g donde pintar
+	 * @param v puntos a pintar (x,y)
+	 */
+	protected void puntosTrayectoria(Graphics2D g, Trayectoria tra) {
+		//pintamos los puntos que están dentro del recuadro
+		for(int i=0; i<tra.length(); i++) {
+			if(tra.x[i]<=esqSI.getX() && tra.x[i]>=esqID.getX()
+					&& tra.y[i]<=esqSI.getY() && tra.y[i]>=esqID.getY() ) {
+				//esta dentro del recuadro
+				Point2D px=point2Pixel(tra.x[i],tra.y[i]);
+				int x=(int)px.getX(), y=(int)px.getY();
+				g.drawLine(x-tamCruz, y-tamCruz
+						, x+tamCruz, y+tamCruz);
+				g.drawLine(x-tamCruz, y+tamCruz
+						, x+tamCruz, y-tamCruz);
+			}
+		}
+	}
+
 	/** Los límites que necesitamos son los de la ruta a representar */
 	protected double[] limites() {
 		double axis[]=super.limites();
-		if(Tr!=null) {
-			axis[0]=min(0,axis[0],Tr);
-			axis[1]=max(0,axis[1],Tr);
-			axis[2]=min(1,axis[2],Tr);
-			axis[3]=max(1,axis[3],Tr);
+		if(tray!=null) {
+			axis[0]=UtilCalculos.minimo(axis[0],tray.x);
+			axis[1]=UtilCalculos.maximo(axis[1],tray.x);
+			axis[2]=UtilCalculos.minimo(axis[2],tray.y);
+			axis[3]=UtilCalculos.maximo(axis[3],tray.y);
 		}
 		if(!Double.isNaN(posXCoche)) {
 			if(posXCoche<axis[0]) axis[0]=posXCoche;
@@ -238,7 +261,7 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 				|| (!esCerrado && ifin<=iini)
 				)
 			return null;
-		int numPuntos=(iini<ifin)?(ifin-iini):(Tr.length-iini+ifin);
+		int numPuntos=(iini<ifin)?(ifin-iini):(v.length-iini+ifin);
 		GeneralPath perimetro = 
 			new GeneralPath(GeneralPath.WIND_EVEN_ODD, numPuntos);
 
@@ -273,24 +296,59 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 		return pathArrayXY(v, false);
 	}
 	
+	/**
+	 * Genera {@link GeneralPath} con cierto rango de puntos en {@link Trayectoria}. 
+	 * Si la trayectoria es cerrada, indice final puede ser menor que el inicial.
+	 * @param tr {@link Trayectoria} de la que sacar los puntos
+	 * @param iini indice del primer punto
+	 * @param ifin indice siguiente del último punto
+	 * @return {@link GeneralPath} con los puntos considerados
+	 */
+	protected GeneralPath pathTrayectoria(Trayectoria tr, int iini, int ifin) {
+		if(tr==null || tr.length()==0 
+				|| iini<0 || iini>tr.length() 
+				|| ifin<0 || ifin>tr.length()
+				|| (!tr.esCerrada() && ifin<=iini)
+				)
+			return null;
+		int numPuntos=(iini<ifin)?(ifin-iini):(tr.length()-iini+ifin);
+		GeneralPath perimetro = 
+			new GeneralPath(GeneralPath.WIND_EVEN_ODD, numPuntos);
+
+		Point2D.Double px=point2Pixel(tr.x[iini],tr.y[iini]);
+		perimetro.moveTo((float)px.getX(),(float)px.getY());
+		int i=(iini+1)%tr.length();
+		for(int cont=2; cont<=numPuntos; cont++) {
+			px=point2Pixel(tr.x[i],tr.y[i]);
+			//Siguientes puntos son lineas
+			perimetro.lineTo((float)px.getX(),(float)px.getY());
+			i=(i+1)%tr.length();
+		}
+		return perimetro;
+	}
 	
+	/** @return Ídem que {@link #pathTrayectoria(Trayectoria, int, int, boolean)} usando todo el array.	 */
+	protected GeneralPath pathTrayectoria(Trayectoria tr) {
+		if(tr==null)
+			return null;
+		return pathTrayectoria(tr, 0, tr.length());
+		
+	}
+	
+
 	/** Establece la trayectoria a representar, pero no actualiza el panel
 	 * 
 	 * @param tr debe tener al menos 2 columnas
 	 */
-	public void setTr(double[][] tr) {
-		if(tr==null || tr.length==0) {
+	public void setTr(Trayectoria tr) {
+		if(tr==null || tr.length()==0) {
 			jcbMostrarPuntos.setEnabled(false);
 			jcbMostrarRumbo.setEnabled(false);
-		} else
-			if (tr[0].length<2)
-				throw new IllegalArgumentException("La trayectoria pasada no tiene 2 columnas");
-			else {
-				jcbMostrarPuntos.setEnabled(true);
-				if(tr[0].length>=3)
-					jcbMostrarRumbo.setEnabled(true);
-			}
-		Tr=tr;
+		} else {
+			jcbMostrarPuntos.setEnabled(true);
+			jcbMostrarRumbo.setEnabled(true);
+		}
+		tray=tr;
 	}
 	
 	/** @param im vector de indice de puntos a marcar, null para no marcar */

@@ -5,6 +5,7 @@ package sibtra.ui.modulos;
 
 import javax.swing.JOptionPane;
 
+import sibtra.gps.Trayectoria;
 import sibtra.predictivo.Coche;
 import sibtra.predictivo.ControlPredictivo;
 import sibtra.predictivo.PanelMuestraPredictivo;
@@ -21,7 +22,7 @@ public class DireccionPredictiva implements CalculoDireccion {
 	String NOMBRE="Direccion Predictiva";
 	String DESCRIPCION="Calcula sólo la dirección usando control predictivo";
 	private VentanasMonitoriza ventanaMonitoriza;
-	private double[][] Tr;
+	private Trayectoria Tr;
 	private ControlPredictivo controlPredictivo;
 	private Coche modCoche;
 	private PanelMuestraPredictivo panelPredictivo;

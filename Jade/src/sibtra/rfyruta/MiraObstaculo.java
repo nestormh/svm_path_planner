@@ -3,6 +3,7 @@
  */
 package sibtra.rfyruta;
 
+import sibtra.gps.Trayectoria;
 import sibtra.lms.BarridoAngular;
 import sibtra.util.UtilCalculos;
 
@@ -19,12 +20,13 @@ public class MiraObstaculo {
 
 	/** Ancho para el camino	 */
 	double anchoCamino=1.5;
-	
-	/** Trayectoria */
-	double[][] Tr;
 
-	/** Si la trayectoria es cerrada */
-	boolean esCerrada;
+	/** de donde provienen los puntos */
+	Trayectoria tray;
+
+	/** Trayectoria */
+	//TODO eliminar Tr y hacerlo todo con tray
+	double[][] Tr;
 
 	/** Borde Derecho */
 	double[][] Bd;
@@ -98,6 +100,7 @@ public class MiraObstaculo {
 	/** Se activa cuando esta fuera del camino */
 	boolean estaFuera=true;
 
+
 	/**
 	 * Constructor necesita conocer la ruta que se va a seguir.
 	 * A partir de ella generará los bordes de la carretera
@@ -105,25 +108,24 @@ public class MiraObstaculo {
 	 * @param si la trayectoria es cerrada o no.
 	 * @param debug si queremos activar mensajes de depuracion
 	 */
-	public MiraObstaculo(double[][] trayectoria, boolean esCerrada, boolean debug) {
-		this.esCerrada=esCerrada;
+	public MiraObstaculo(Trayectoria tra, boolean debug) {
 		this.debug=debug;
-		if(trayectoria==null || trayectoria.length<2 || trayectoria[1].length<2)
+		if(tra==null || tra.length()<2)
 			throw (new IllegalArgumentException("Trayectoria no tienen las dimensiones mínimas"));
-		Tr=trayectoria;
+		tray=tra;
+		Tr=new double[tray.length()][2];
+		for(int i=0;i<tray.length();i++) {
+			Tr[i][0]=tray.x[i];
+			Tr[i][1]=tray.y[i];
+		}
 		construyeCamino(Tr, anchoCamino);
 		indiceCoche=0;
 				
 	}
 
 	/** Constructor sin debug */
-	public MiraObstaculo(double[][] trayectoria, boolean esCerrada) {
-		this(trayectoria, esCerrada, false);
-	}
-	
-	/** Constructor sin debug y trayectoria supuesta abierta*/
-	public MiraObstaculo(double[][] trayectoria) {
-		this(trayectoria, false, false);
+	public MiraObstaculo(Trayectoria tra) {
+		this(tra, false);
 	}
 	
 	
@@ -156,7 +158,7 @@ public class MiraObstaculo {
 		double[] p1=tr[0];
 		double[] p2=tr[1];
 		double[] v2= {p2[0]-p1[0],p2[1]-p1[1]};
-		if( !esCerrada) {	
+		if( !tray.esCerrada()) {	
 			//los 2 primeros puntos
 			double modV2=Math.sqrt(v2[0]*v2[0]+v2[1]*v2[1]);
 			//unitario girado 90º
@@ -192,7 +194,7 @@ public class MiraObstaculo {
 			Bi[i][0]=p1[0]-vpc[0];	Bi[i][1]=p1[1]-vpc[1];
 			
 		}
-		if (!esCerrada){
+		if (!tray.esCerrada()){
 			//los 2 últimos puntos
 			double modV2=Math.sqrt(v2[0]*v2[0]+v2[1]*v2[1]);
 			//unitario girado 90º
@@ -215,14 +217,16 @@ public class MiraObstaculo {
 	
 	/**
 	 * En un momento dado nos dice a que distancia se encuentra el obstaculo más cercano
+	 * La posición del coche debe estar establecida en la trayectoria {@link #tray}.
 	 * @param posicionLocal Posición en coordenadas locales donde nos encontramos
 	 * @param yawA rumbo actual del vehiculo hacia el norte (EN RADIANES)
 	 * @param barrAct último barrido angular
 	 * @return Distancia libre en el camino. 
 	 */
-	public double masCercano(double[] posicionLocal, double yawA, BarridoAngular barrAct) {
+	public double masCercano(double yawA, BarridoAngular barrAct) {
+		//TODO cambiar para que sólo prescindir de Tr
 		barr=barrAct;
-		posActual=posicionLocal;
+		double[] posicionLocal=posActual=tray.getPosicionCoche();
 		Yaw=yawA; //si está ya en radianes, si no tendríamos que hacerer el cambio.
 		distanciaLineal=Double.NaN; //por si fallan las primeras comprobaciones
 
@@ -240,15 +244,17 @@ public class MiraObstaculo {
 		//Si en la iteración anterior estabamos fuera buscamos desde el principio
 		if(estaFuera) indiceCoche=-1;
 		//punto de la trayectoria más cercano a la posición local
-		indiceCoche=UtilCalculos.indiceMasCercanoOptimizado(Tr, esCerrada, posicionLocal, indiceCoche);
+//		indiceCoche=UtilCalculos.indiceMasCercanoOptimizado(Tr, tray.esCerrada(), posicionLocal, indiceCoche);
+		indiceCoche=tray.indiceMasCercano();
 		
-		double distATr=UtilCalculos.distanciaPuntos(posicionLocal, Tr[indiceCoche]);
+//		double distATr=UtilCalculos.distanciaPuntos(posicionLocal, Tr[indiceCoche]);
+		double distATr=tray.distanciaAlMasCercano();
 		//El coche solo puede estar en el segmento del más cercano o en el anterior
-		if ((indiceCoche==(Tr.length-1) && !esCerrada) 
+		if ((indiceCoche==(Tr.length-1) && !tray.esCerrada()) 
 				|| !dentroSegmento(posicionLocal, indiceCoche))
 			//no puede estar en indiceCoche
 			//Tenemos que ver si está en el anterior
-			if(indiceCoche==0 && !esCerrada) {
+			if(indiceCoche==0 && !tray.esCerrada()) {
 				//No hay opción al anterior
 				log("Cochoe está antes del primer punto");
 				return distanciaLineal; //NaN
@@ -302,7 +308,7 @@ public class MiraObstaculo {
 						(alcanzable=(UtilCalculos.largoVector(vD)<=barrAct.getDistanciaMaxima())) //se alcance
 						&& !enRango //no hayamos entrado en rango
 						&& !seFueCamino //no se haya ido todo el camino del rango del RF
-						&& (esCerrada || iptoDini<(Bd.length-1)) //no se haya acabado la trayectoria
+						&& (tray.esCerrada() || iptoDini<(Bd.length-1)) //no se haya acabado la trayectoria
 						&& iptoDini!=indiceCoche  //no hayamos dado toda la vuelta
 				);
 				//encontrado si, es alcanzable y estamos en el rango
@@ -337,7 +343,7 @@ public class MiraObstaculo {
 						(alcanzable=(UtilCalculos.largoVector(v2)<=barrAct.getDistanciaMaxima()))
 						&& !enRango
 						&& !seFueCamino //no se haya ido todo el camino del rango del RF						
-						&& (esCerrada || iptoIini<(Bi.length-1))
+						&& (tray.esCerrada() || iptoIini<(Bi.length-1))
 						&& iptoIini!=indiceCoche  //no hayamos dado toda la vuelve
 				);
 				encontradoInicioI=alcanzable && enRango;
@@ -360,7 +366,7 @@ public class MiraObstaculo {
 		iptoD=(avanD?iptoDini:0); //0 si no se ha iniciado
 		iptoI--;  iptoD--; //se incrementan al entrar en el bucle
 		while (avanD) {
-			if(!esCerrada && iptoD==(Bd.length-1)) {
+			if(!tray.esCerrada() && iptoD==(Bd.length-1)) {
 				log("No queda borde derecho, no podemos seguir avanzando");
 				avanD=false;
 			} else {
@@ -398,7 +404,7 @@ public class MiraObstaculo {
 			}
 		}
 		while (avanI) {
-			if(!esCerrada && iptoI==(Bi.length-1)) {
+			if(!tray.esCerrada() && iptoI==(Bi.length-1)) {
 				log("No queda borde izdo, no podemos seguir avanzando"	);
 				avanI=false;
 			} else {
@@ -518,7 +524,7 @@ public class MiraObstaculo {
 	 */
 	private boolean buscaSegmentoObstaculo(double[] posicionLocal, int indComBarrido,int indFinBarrido, int indiceMasCercano) {
 		int incSegObs; //incremento sobre la posición del coche donde se encuentra el ostaculo 
-		incSegObs=esCerrada?Tr.length-1:Tr.length-indiceCoche-1; //para limitar la búsquda
+		incSegObs=tray.esCerrada()?Tr.length-1:Tr.length-indiceCoche-1; //para limitar la búsquda
 		indBarrSegObs=Integer.MAX_VALUE;
 		encontradoSegObs=false;
 		int nuevoIncSegObst;
@@ -566,10 +572,10 @@ public class MiraObstaculo {
 			throw new IllegalArgumentException("Pasado indice negativo");
 		if(i>=Tr.length)
 			throw new IllegalArgumentException("Indice supera largo trayectoria");
-		if(!esCerrada && i==(Tr.length-1))
+		if(!tray.esCerrada() && i==(Tr.length-1))
 			throw new IllegalArgumentException("Es abierta y se a pasado úlitmo indice válido");
 		int psig=i+1;
-		if(esCerrada && i==(Tr.length-1)) 
+		if(tray.esCerrada() && i==(Tr.length-1)) 
 			psig=0;
 		
 		//usamos directamente el área con sentido en todo el cuadrilátero.
@@ -615,12 +621,12 @@ public class MiraObstaculo {
 //			throw new IllegalArgumentException("Pasado indice negativo");
 //		if(i>=Tr.length)
 //			throw new IllegalArgumentException("Indice supera largo trayectoria");
-//		if(!esCerrada && i==(Tr.length-1))
+//		if(!tray.esCerrada() && i==(Tr.length-1))
 //			throw new IllegalArgumentException("Es abierta y se a pasado úlitmo indice válido");
 //		int psig=i+1;
-//		if(esCerrada && i==(Tr.length-1)) psig=0;
+//		if(tray.esCerrada() && i==(Tr.length-1)) psig=0;
 //		int pant=i-1;
-//		if(esCerrada && i==0) pant=Tr.length-1;
+//		if(tray.esCerrada() && i==0) pant=Tr.length-1;
 //		
 //		double distI=distanciaPuntos(pto, Tr[i]);
 //		double distI1=distanciaPuntos(pto, Tr[psig]);
@@ -637,10 +643,10 @@ public class MiraObstaculo {
 			throw new IllegalArgumentException("Inidice inicial fuera de rango válido "+iini);
 		if(ifin<0 || ifin>=Tr.length)
 			throw new IllegalArgumentException("Inidice final fuera de rango válido "+ifin);
-		if(!esCerrada && iini>ifin)
+		if(!tray.esCerrada() && iini>ifin)
 			throw new IllegalArgumentException("No es cerrada y indice inicial ("+iini+") > inidice final ("+ifin+")");
 		
-		if(!esCerrada && iini>ifin || ifin>=Tr.length)
+		if(!tray.esCerrada() && iini>ifin || ifin>=Tr.length)
 			return Double.POSITIVE_INFINITY;
 		double largo=0;
 		for(int i=iini; i!=ifin; i=(i+1)%Tr.length) {
@@ -648,75 +654,6 @@ public class MiraObstaculo {
 			largo+=UtilCalculos.largoVector(v);
 		}
 		return largo;
-	}
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		double[][] Tr={{ 18.656355 , 1.793361}
-		,{ 19.540099 , 1.855596}
-		,{ 20.247094 , 1.905385}
-		,{ 21.163414 , 2.129761}
-		,{ 21.870409 , 2.179549}
-		,{ 22.754152 , 2.241785}
-		,{ 23.461147 , 2.291573}
-		,{ 24.344890 , 2.353809}
-		,{ 25.084462 , 2.565738}
-		,{ 25.968205 , 2.627974}
-		,{ 26.675200 , 2.677762}
-		,{ 27.558943 , 2.739998}
-		,{ 28.265937 , 2.789787}
-		,{ 28.972932 , 2.839576}
-		,{ 29.889252 , 3.063952}
-		,{ 30.628824 , 3.275880}
-		,{ 31.368396 , 3.487809}
-		,{ 32.140545 , 3.861878}
-		,{ 32.735946 , 4.223499}
-		,{ 33.508095 , 4.597568}
-		,{ 33.959325 , 5.108882}
-		,{ 34.554725 , 5.470504}
-		,{ 35.071110 , 6.306098}
-		,{ 35.587495 , 7.141692}
-		,{ 35.894553 , 7.802700}
-		,{ 36.234190 , 8.625847}
-		,{ 36.364500 , 9.274407}
-		,{ 36.318061 , 9.910520}
-		,{ 36.271622 , 10.546633}
-		,{ 36.081012 , 11.332439}
-		,{ 35.857824 , 11.956105}
-		,{ 35.602059 , 12.417631}
-		,{ 35.136968 , 12.704570}
-		,{ 34.527705 , 13.141201}
-		,{ 34.062614 , 13.428140}
-		,{ 33.597522 , 13.715078}
-		,{ 32.746356 , 13.814982}
-		,{ 32.071938 , 13.927334}
-		,{ 31.397520 , 14.039685}
-		,{ 30.690525 , 13.989896}
-		,{ 29.983529 , 13.940107}
-		,{ 29.276534 , 13.890319}
-		,{ 28.569539 , 13.840530}
-		,{ 27.862543 , 13.790741}
-		,{ 27.155548 , 13.740952}
-		,{ 26.239226 , 13.516576}
-		,{ 25.532231 , 13.466787}
-		,{ 24.825235 , 13.416999}
-		,{ 24.118240 , 13.367210}
-		,{ 23.201918 , 13.142834}
-		,{ 22.494923 , 13.093046}
-		};
-		
-		MiraObstaculo MI=new MiraObstaculo(Tr);
-		
-		System.out.println("Bdj=[");
-		for(int i=0; i<MI.Bd.length; i++)
-			System.out.println(MI.Bd[i][0]+","+MI.Bd[i][1]);
-		System.out.println("];");
-		
-		System.out.println("Bij=[");
-		for(int i=0; i<MI.Bi.length; i++)
-			System.out.println(MI.Bi[i][0]+","+MI.Bi[i][1]);
-		System.out.println("];");
 	}
 
 	/**

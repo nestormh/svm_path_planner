@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 
 import sibtra.gps.GPSData;
 import sibtra.gps.Ruta;
+import sibtra.gps.Trayectoria;
 import sibtra.ui.VentanasMonitoriza;
 
 /**
@@ -40,7 +41,7 @@ public class CargaRutaFichero implements SeleccionRuta {
 	/* (non-Javadoc)
 	 * @see sibtra.ui.modulos.SeleccionRuta#getTrayectoria()
 	 */
-	public double[][] getTrayectoria() {
+	public Trayectoria getTrayectoria() {
     	//necestamos leer archivo con la ruta
     	int devuelto = jfc.showOpenDialog(ventanaMonitoriza.ventanaPrincipal);
     	if (devuelto != JFileChooser.APPROVE_OPTION) {
@@ -68,10 +69,10 @@ public class CargaRutaFichero implements SeleccionRuta {
         //Rellenamos la trayectoria con la nueva versión de toTr,que 
         //introduce puntos en la trayectoria de manera que la separación
         //entre dos puntos nunca sea mayor de la distMax
-        double[][] Tr = rutaEspacial.toTr(distMaxTr);
+        Trayectoria Tr = new Trayectoria(rutaEspacial,distMaxTr);
 
 
-        System.out.println("Longitud de la trayectoria=" + Tr.length);
+        System.out.println("Longitud de la trayectoria=" + Tr.length());
 
 
 		return Tr;
