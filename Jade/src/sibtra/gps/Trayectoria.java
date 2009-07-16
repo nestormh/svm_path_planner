@@ -4,6 +4,7 @@
 package sibtra.gps;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import sibtra.imu.AngulosIMU;
 import sibtra.util.UtilCalculos;
@@ -226,12 +227,19 @@ public class Trayectoria {
 			velocidadR.add(velocidad[i]);
 		}
 		//convertimos las listas a array
-		x=new double[xR.size()]; System.arraycopy(xR.toArray(), 0, x, 0, xR.size());
-		y=new double[yR.size()]; System.arraycopy(yR.toArray(), 0, y, 0, yR.size());
-		z=new double[zR.size()]; System.arraycopy(zR.toArray(), 0, z, 0, zR.size());
-		rumbo=new double[rumboR.size()]; System.arraycopy(rumboR.toArray(), 0, rumbo, 0, rumboR.size());
-		velocidad=new double[velocidadR.size()]; System.arraycopy(velocidadR.toArray(), 0, velocidad, 0, velocidadR.size());
-		x=new double[xR.size()]; System.arraycopy(xR.toArray(), 0, x, 0, xR.size());	
+		x=listaAArray(xR);
+		y=listaAArray(yR);
+		z=listaAArray(zR);
+		rumbo=listaAArray(rumboR);
+		velocidad=listaAArray(xR);
+	}
+
+	/** @return array a partir de lista */
+	private double[] listaAArray(List<Double> li ) {
+		double[] res=new double[li.size()];
+		for(int i=0; i<li.size(); i++)
+			res[i]=li.get(i);
+		return res;
 	}
 	
 	

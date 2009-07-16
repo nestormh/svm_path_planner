@@ -3,6 +3,7 @@
  */
 package sibtra.ui.modulos;
 
+import sibtra.controlcarro.ControlCarro;
 import sibtra.gps.GPSData;
 import sibtra.gps.Trayectoria;
 import sibtra.predictivo.Coche;
@@ -44,6 +45,7 @@ public class MotorSincrono implements Motor {
 	protected double consignaVolante;
 	protected double consignaVelocidadRecibida;
 	protected double consignaVolanteRecibida;
+	protected double distanciaMinima;
 	
 	public MotorSincrono() {
 		
@@ -104,11 +106,11 @@ public class MotorSincrono implements Motor {
 	            consignaVelocidad=consignaVelocidadRecibida=calculadorVelocidad.getConsignaVelocidad();
 	            
 	            //vemos la minima distancia de los detectores
-	            double distMinin=Double.MAX_VALUE;
+	            distanciaMinima=Double.MAX_VALUE;
 	            for(int i=0; i<detectoresObstaculos.length; i++)
-	            	distMinin=Math.min(distMinin, detectoresObstaculos[i].getDistanciaLibre());
+	            	distanciaMinima=Math.min(distanciaMinima, detectoresObstaculos[i].getDistanciaLibre());
 	            
-	            double velRampa=(distMinin-margenColision)*pendienteFrenado;
+	            double velRampa=(distanciaMinima-margenColision)*pendienteFrenado;
 	            consignaVelocidad=Math.min(consignaVelocidad, velRampa);
 	            
 	            double incrementoConsigna=consignaVelocidad-consignaVelAnterior;
@@ -146,11 +148,13 @@ public class MotorSincrono implements Motor {
 		thCiclico.activar();
 	}
 
-	/** suspendemos el {@link #thCiclico} */
+	/** suspendemos el {@link #thCiclico} y paramos PID de {@link ControlCarro } */
 	public void parar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		thCiclico.suspender();
+		//paramos el PID de control carro
+		ventanaMonitoriza.conexionCarro.stopControlVel();
 	}
 
 	/* (sin Javadoc)
@@ -204,6 +208,7 @@ public class MotorSincrono implements Motor {
 			añadeAPanel(new LabelDatoFormato(MotorSincrono.class,"getConsignaVelocidadRecibida","%4.2f m/s"), "Vel Calc");
 			añadeAPanel(new LabelDatoFormato(MotorSincrono.class,"getConsignaVolanteGrados","%4.2f º"), "Cons Vol");
 			añadeAPanel(new LabelDatoFormato(MotorSincrono.class,"getConsignaVolanteRecibidaGrados","%4.2f º"), "Vol Calc");
+			añadeAPanel(new LabelDatoFormato(MotorSincrono.class,"getDistanciaMinima","%4.2f m"), "Dist Min");
 			
 		}
 	}
@@ -301,6 +306,14 @@ public class MotorSincrono implements Motor {
 	 */
 	public double getConsignaVolanteRecibidaGrados() {
 		return Math.toDegrees(consignaVolanteRecibida);
+	}
+
+
+	/**
+	 * @return el distanciaMinima
+	 */
+	public double getDistanciaMinima() {
+		return distanciaMinima;
 	}
 
 }

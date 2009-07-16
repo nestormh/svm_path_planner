@@ -62,6 +62,7 @@ public class RFyRuta implements DetectaObstaculos {
 		thActulizacion=new ThreadSupendible() {
 			BarridoAngular ba=null;
 			protected void accion() {
+				double dl=Double.POSITIVE_INFINITY;
 				ba=ventanaMonitoriza.conexionRF.esperaNuevoBarrido(ba);
 				GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();                            
 	            double angAct=Double.NaN;
@@ -69,12 +70,15 @@ public class RFyRuta implements DetectaObstaculos {
 	            	angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
 	            	Tr.situaCoche(pa.getXLocal(), pa.getYLocal());
 					//calculamos distancia a obstáculo más cercano
-					distanciaLibre = miraObstaculo.masCercano(angAct, ba);
+					dl = miraObstaculo.masCercano(angAct, ba);
 				} else {
 					//no podemos calcular nada
-					distanciaLibre = Double.POSITIVE_INFINITY; 
+					dl = Double.POSITIVE_INFINITY; 
 				}
+	            if(Double.isNaN(dl))
+	            	dl=Double.POSITIVE_INFINITY;
 				//actualizamos paneles
+	            distanciaLibre=dl;
 				panelMiraObs.actualiza();
 				panelMiraObsSub.actualiza();
 			}
