@@ -69,6 +69,8 @@ public class Trayectoria {
 		z=new double[indUltimo+1];
 		rumbo=new double[indUltimo+1];
 		velocidad=new double[indUltimo+1];
+		if(indUltimo==-1)  //si la ruta no tienen puntos
+			return;
 		double desvMagnética = ruta.getDesviacionM();
 		GPSData ptoA;
 		GPSData ptoB = ruta.getPunto(0);                
@@ -231,7 +233,7 @@ public class Trayectoria {
 		y=listaAArray(yR);
 		z=listaAArray(zR);
 		rumbo=listaAArray(rumboR);
-		velocidad=listaAArray(xR);
+		velocidad=listaAArray(velocidadR);
 	}
 
 	/** @return array a partir de lista */
