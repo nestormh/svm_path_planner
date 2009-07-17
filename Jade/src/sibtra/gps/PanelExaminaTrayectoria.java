@@ -33,14 +33,12 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 	
 
 	private JButton jbPrimero;
-	private JButton jbAnterior;
 	private SpinnerNumberModel spm;
 	private JSpinner jsDato;
 	private JLabel jlDeMaximo;
-	private JButton jbSiguiente;
 	private JButton jbUltimo;
 	private JLabel jlInfoPtoAct;
-	private String cadenaInfoPto="(%6.2f,%6.2f,%6.2f)  %6.2fº %4.2f m/s";
+	private String cadenaInfoPto="Punto Actual: (%6.2f,%6.2f,%6.2f)  %6.2fº %4.2f m/s";
 	private JLabel jlInfoTray;
 	private String cadenaInfoTray=" Longitud: %7.2f m Cerrada:%s";
 
@@ -65,12 +63,6 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 			jbPrimero.setEnabled(false);
 			jpInfGen.add(jbPrimero);
 			
-			jbAnterior=new JButton("<");
-			jbAnterior.setToolTipText("Anterior");
-			jbAnterior.addActionListener(this);
-			jbAnterior.setEnabled(false);
-			jpInfGen.add(jbAnterior);
-			
 			spm=new SpinnerNumberModel(1,1,100000,1);
 			spm.addChangeListener(this);
 			jsDato=new JSpinner(spm);
@@ -81,12 +73,6 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 			jlDeMaximo=new JLabel(" de ???? ");
 			jpInfGen.add(jlDeMaximo);
 			jlDeMaximo.setEnabled(false);
-			
-			jbSiguiente=new JButton(">");
-			jbSiguiente.setToolTipText("Siguiente");
-			jbSiguiente.addActionListener(this);
-			jbSiguiente.setEnabled(false);
-			jpInfGen.add(jbSiguiente);
 			
 			jbUltimo=new JButton(">>");
 			jbUltimo.setToolTipText("Ultimo");
@@ -120,9 +106,7 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 		boolean hayPtos=hayTra && tray.length()>0;
 		jlInfoTray.setEnabled(hayTra);
 		jbPrimero.setEnabled(hayPtos);
-		jbAnterior.setEnabled(hayPtos);
 		jsDato.setEnabled(hayPtos);
-		jbSiguiente.setEnabled(hayPtos);
 		jbUltimo.setEnabled(hayPtos);
 		jlInfoPtoAct.setEnabled(hayPtos);
 		jlDeMaximo.setEnabled(hayTra);
@@ -147,12 +131,7 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 			spm.setValue(1);
 		} else if(ae.getSource()==jbUltimo) {
 			spm.setValue(tray.length());
-		} else if (ae.getSource()==jbAnterior && (Integer)spm.getValue()>1) {
-			spm.setValue((Integer)spm.getValue()-1);
-		} else if (ae.getSource()==jbSiguiente 
-				&& (Integer)spm.getValue()<tray.length()) {
-			spm.setValue((Integer)spm.getValue()+1);
-		}
+		} 
 	}
 
 	/* (non-Javadoc)
