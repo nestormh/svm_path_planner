@@ -107,6 +107,19 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 				}
 			} else {
 				puntosTrayectoria(g,tray);
+				//pintamos en verde el más cercano al coche
+				g.setColor(Color.GREEN);
+				int i=tray.indiceMasCercano(posXCoche, posYCoche);
+				if(tray.x[i]<=esqSI.getX() && tray.x[i]>=esqID.getX()
+						&& tray.y[i]<=esqSI.getY() && tray.y[i]>=esqID.getY() ) {
+					//esta dentro del recuadro
+					Point2D px=point2Pixel(tray.x[i],tray.y[i]);
+					int x=(int)px.getX(), y=(int)px.getY();
+					g.drawLine(x-tamCruz, y-tamCruz
+							, x+tamCruz, y+tamCruz);
+					g.drawLine(x-tamCruz, y+tamCruz
+							, x+tamCruz, y-tamCruz);
+				}				
 			}
 			//Marcamos puntos si se a asignado vector de índice
 			if(indiceMarcar!=null && indiceMarcar.size()>0) {
@@ -340,7 +353,7 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	 * 
 	 * @param tr debe tener al menos 2 columnas
 	 */
-	public void setTr(Trayectoria tr) {
+	public void setTrayectoria(Trayectoria tr) {
 		if(tr==null || tr.length()==0) {
 			jcbMostrarPuntos.setEnabled(false);
 			jcbMostrarRumbo.setEnabled(false);

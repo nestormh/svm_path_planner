@@ -498,4 +498,8 @@ public class Trayectoria {
 		return ultimaPosCoche;
 	}
 
+	public double getLargo() {
+		return largo;
+	}
+
 }

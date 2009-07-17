@@ -162,7 +162,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     	this.CP=CP;
     	this.rutaAux=ruta;
     	jsDistMax.setEnabled(this.rutaAux!=null);
-    	if(CP!=null) setTr(CP.ruta); 
+    	if(CP!=null) setTrayectoria(CP.ruta); 
     	actualiza();
     }
     
@@ -171,7 +171,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
      */
     public void setControlP(ControlPredictivo CP) {
     	this.CP=CP;
-    	if(CP!=null) setTr(CP.ruta); 
+    	if(CP!=null) setTrayectoria(CP.ruta); 
     	jsDistMax.setEnabled(this.rutaAux!=null);
     	actualiza();
     }
@@ -259,7 +259,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     		jsModHPred.setValue(CP.horPrediccion);
     		jsModLanda.setValue(CP.landa);
     		jsModPesoError.setValue(CP.getPesoError());
-    		setTr(CP.ruta);
+    		setTrayectoria(CP.ruta);
     	} 
     	jpbComandoD.setEnabled(hayCP);
     	jpbComandoI.setEnabled(hayCP);

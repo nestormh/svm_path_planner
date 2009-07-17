@@ -26,7 +26,7 @@ public class PanelMuestraRuta extends PanelMuestraTrayectoria implements  GpsEve
 		super();
 		RU=rupas;
 		if(RU!=null)
-			setTr(new Trayectoria(RU));
+			setTrayectoria(new Trayectoria(RU));
 		//Si queremoa añadir algo al panel inferiro	
 		//		jpSur.add(jcbEscalas);
 
@@ -63,7 +63,7 @@ public class PanelMuestraRuta extends PanelMuestraTrayectoria implements  GpsEve
 	/** Actualiza la presentación a la situación del pto pasado */
 	public void nuevoPunto(GPSData ultPto) {
 		if(RU==null) return;
-		setTr(new Trayectoria(RU));		
+		setTrayectoria(new Trayectoria(RU));		
 		double x=ultPto.getXLocal();
 		double y=ultPto.getYLocal();
 		double yaw=ultPto.getAngulo();
