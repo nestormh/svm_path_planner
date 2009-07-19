@@ -23,6 +23,7 @@ import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.lms.PanelRF;
 import sibtra.ui.modulos.Motor;
+import sibtra.ui.modulos.UsuarioTrayectoria;
 import sibtra.util.EligeSerial;
 
 /**
@@ -49,9 +50,9 @@ public class VentanasMonitoriza extends Ventanas {
     PanelCarro panelCarro;
     PanelRF panelRF;
 
-	private PanelEligeModulos panSelModulos;
+	PanelEligeModulos panSelModulos;
 
-	private PanelTrayectoria panelTrayectoria;
+	PanelTrayectoria panelTrayectoria;
 
 	private double desviacionMagnetica;
 
@@ -158,8 +159,6 @@ public class VentanasMonitoriza extends Ventanas {
         añadePanel(panelGrabar, "Grabar", false, false);
         menuAcciones.add(actGrabarRuta);
         menuAcciones.add(actPararGrabarRuta);
-        menuAcciones.addSeparator();
-
         
         //Añadimos panel de selección de modulos
         panSelModulos=new PanelEligeModulos(this);
@@ -175,14 +174,25 @@ public class VentanasMonitoriza extends Ventanas {
 		this(puertosPorDefecto);
 	}
 	
-	/** Los calculadores, obstaculos, etc. solicitan la ruta a través de este método. 
-	 * Si no hay ninguna seleccionada se tendrá que buscar a un selector de ruta para elegir una
+	/** Los {@link UsuarioTrayectoria} (calculadores, motores, etc.) solicitan la ruta a través de 
+	 * este método.
+	 * La primera vez se abre el {@link #panelTrayectoria}.
+	 * @param objUsaTr necesario conocer el objeto que solicita la ruta para avisarle cuando hay cambio 
 	 * @return la ruta que se va a seguir  
 	 */
-	public Trayectoria getTrayectoriaSeleccionada() {
+	public Trayectoria getTrayectoriaSeleccionada(UsuarioTrayectoria objUsaTr) {
 		if(panelTrayectoria==null)
 			panelTrayectoria=new PanelTrayectoria(this);
-		return panelTrayectoria.getTrayectoria();
+		return panelTrayectoria.getTrayectoria(objUsaTr);
+	}
+	
+	/** Indica que no va ha necesitar más la trayectoria. 
+	 * Se invocará cuando un módulo vaya a destruirse. 
+	 */
+	public void liberaTrayectoria(UsuarioTrayectoria objUsaTr) {
+		if(panelTrayectoria==null)
+			throw new IllegalStateException("Se trata de liberar trayectoria no solicitada");
+		panelTrayectoria.liberaTrayectoria(objUsaTr);
 	}
 	
 	/** @return si hay alguna trayectoria definida (si algún módulo la ha pedido)*/

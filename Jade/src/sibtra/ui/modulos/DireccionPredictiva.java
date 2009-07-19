@@ -17,7 +17,7 @@ import sibtra.util.PanelFlow;
  * @author alberto
  *
  */
-public class DireccionPredictiva implements CalculoDireccion {
+public class DireccionPredictiva implements CalculoDireccion, UsuarioTrayectoria {
 	
 	String NOMBRE="Direccion Predictiva";
 	String DESCRIPCION="Calcula sólo la dirección usando control predictivo";
@@ -41,7 +41,7 @@ public class DireccionPredictiva implements CalculoDireccion {
 		if(ventanaMonitoriza!=null)
 			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		ventanaMonitoriza=ventMonitoriza;
-		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada();
+		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada(this);
 		if(Tr==null) {
 			JOptionPane.showMessageDialog(ventanaMonitoriza.ventanaPrincipal,
 				    "El módulo "+NOMBRE+" necesita ruta para continuar.",
@@ -97,10 +97,18 @@ public class DireccionPredictiva implements CalculoDireccion {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		ventanaMonitoriza.quitaPanel(panelPredictivo);
+		ventanaMonitoriza.liberaTrayectoria(this);
 	}
 	
 	public double getConsignaGrados() {
 		return Math.toDegrees(consigna);
+	}
+	
+	/** Cambiamos la trayectoria en {@link #controlPredictivo} y en {@link #panelPredictivo} */
+	public void nuevaTrayectoria(Trayectoria tr) {
+		controlPredictivo.setRuta(tr);
+		panelPredictivo.setTrayectoria(tr);
+		panelPredictivo.actualiza();
 	}
 
 }

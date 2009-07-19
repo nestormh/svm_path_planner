@@ -26,6 +26,7 @@ import sibtra.util.ClasesEnPaquete;
  * @author alberto
  *
  */
+@SuppressWarnings("serial")
 public class PanelEligeModulos extends JPanel {
 	
 	private Class[] arrClasMotor;
@@ -37,10 +38,10 @@ public class PanelEligeModulos extends JPanel {
 	private JComboBox jcombVelocidad;
 	private JList jcombDetecObstaculos;
 	private VentanasMonitoriza ventanaMonitoriza;
-	private AccionCrear accionCrear;
-	private AccionActivar accionActivar;
-	private AccionParar accionParar;
-	private AccionBorrar accionBorrar;
+	AccionCrear accionCrear;
+	AccionActivar accionActivar;
+	AccionParar accionParar;
+	AccionBorrar accionBorrar;
 	public Motor obMotor;
 	public CalculoDireccion obDireccion;
 	public CalculoVelocidad obVelocidad;
@@ -88,6 +89,7 @@ public class PanelEligeModulos extends JPanel {
 		accionBorrar=new AccionBorrar();
 		
 		//ponemos los botones de las acciones
+        ventanaMonitoriza.menuAcciones.addSeparator();
 		add(new JButton(accionCrear));
 		add(new JButton(accionActivar));
 		add(new JButton(accionParar));

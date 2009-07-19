@@ -19,7 +19,7 @@ import sibtra.util.UtilCalculos;
  * @author alberto
  *
  */
-public class MotorSincrono implements Motor {
+public class MotorSincrono implements Motor, UsuarioTrayectoria {
 	
 	final static String NOMBRE="Motor Sincrono";
 	final static String DESCRIPCION="Ejecuta las acciones de control con un periodo fijo";
@@ -144,7 +144,7 @@ public class MotorSincrono implements Motor {
         	throw new IllegalStateException("Faltan modulos por inicializar");
         //vemos si hay trayectoria y la apuntamos
         if(ventanaMonitoriza.hayTrayectoria())
-        	trayActual=ventanaMonitoriza.getTrayectoriaSeleccionada();
+        	trayActual=ventanaMonitoriza.getTrayectoriaSeleccionada(this);
 		thCiclico.activar();
 	}
 
@@ -171,12 +171,14 @@ public class MotorSincrono implements Motor {
 		return NOMBRE;
 	}
 
-	/** Suspendemos el {@link #thCiclico} y quitamos panel */
+	/** Suspendemos el {@link #thCiclico}, quitamos panel, liberamos la trayectoria */
 	public void terminar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		thCiclico.terminar();
 		ventanaMonitoriza.quitaPanel(panel);
+		if(trayActual!=null)  //si hemos cogido una trayectoria la liberamos
+			ventanaMonitoriza.liberaTrayectoria(this);
 	}
 
 	public void setCalculadorDireccion(CalculoDireccion calDir) {
@@ -314,6 +316,12 @@ public class MotorSincrono implements Motor {
 	 */
 	public double getDistanciaMinima() {
 		return distanciaMinima;
+	}
+
+
+	/** apuntamos la nueva trayectoria */
+	public void nuevaTrayectoria(Trayectoria tra) {
+		trayActual=tra;
 	}
 
 }

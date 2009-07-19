@@ -110,6 +110,16 @@ public class MiraObstaculo {
 	 */
 	public MiraObstaculo(Trayectoria tra, boolean debug) {
 		this.debug=debug;
+		nuevaTrayectoria(tra);
+	}
+
+	/** Constructor sin debug */
+	public MiraObstaculo(Trayectoria tra) {
+		this(tra, false);
+	}
+	
+	/** Establece tra como nueva {@link #tray} y crea los bordes */
+	public void nuevaTrayectoria(Trayectoria tra) {
 		if(tra==null || tra.length()<2)
 			throw (new IllegalArgumentException("Trayectoria no tienen las dimensiones mínimas"));
 		tray=tra;
@@ -119,15 +129,9 @@ public class MiraObstaculo {
 			Tr[i][1]=tray.y[i];
 		}
 		construyeCamino(Tr, anchoCamino);
-		indiceCoche=0;
-				
+		indiceCoche=0;		
 	}
 
-	/** Constructor sin debug */
-	public MiraObstaculo(Trayectoria tra) {
-		this(tra, false);
-	}
-	
 	
 	/** @return the debug */
 	public boolean isDebug() {
@@ -710,4 +714,5 @@ public class MiraObstaculo {
 	public double getDistanciaLineal() {
 		return distanciaLineal;
 	}
+
 }

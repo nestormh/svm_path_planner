@@ -16,7 +16,7 @@ import sibtra.util.SpinnerDouble;
  * @author alberto
  *
  */
-public class VelocidadSeparacionRuta implements CalculoVelocidad {
+public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayectoria {
 	
 	String NOMBRE="Velocidad Ruta";
 	String DESCRIPCION="Velocidad según ruta, se minora con la distancia lateral y error de orientación";
@@ -26,8 +26,8 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 	// Parametros ======================================================
 	private double gananciaLateral=1;
 	private double gananciaVelocidad=2;
-	private double velocidadMaxima=2.5;
-	private double factorReduccionV=0.7;
+	private double velocidadMaxima=5.0;
+	private double factorReduccionV=0.6;
 	private double velocidadMinima=1;
 	// variables interesantes ===========================================
 	private double errorLateral;
@@ -45,7 +45,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 		if(ventanaMonitoriza!=null)
 			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		ventanaMonitoriza=ventMonitoriza;
-		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada();
+		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada(this);
 		if(Tr==null) {
 			JOptionPane.showMessageDialog(ventanaMonitoriza.ventanaPrincipal,
 				    "El módulo "+NOMBRE+" necesita ruta para continuar.",
@@ -135,6 +135,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		ventanaMonitoriza.quitaPanel(panelDatos);
+		ventanaMonitoriza.liberaTrayectoria(this);
 
 	}
 
@@ -192,6 +193,11 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad {
 
 	public void setVelocidadMinima(double velocidadMinima) {
 		this.velocidadMinima = velocidadMinima;
+	}
+
+	/** apuntamos la nueva trayectoria */
+	public void nuevaTrayectoria(Trayectoria tra) {
+		Tr=tra;
 	}
 
 }

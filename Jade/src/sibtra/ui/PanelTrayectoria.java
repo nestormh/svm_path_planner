@@ -4,6 +4,7 @@
 package sibtra.ui;
 
 import java.awt.event.ActionEvent;
+import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
@@ -13,9 +14,9 @@ import javax.swing.JOptionPane;
 import sibtra.gps.PanelExaminaTrayectoria;
 import sibtra.gps.Trayectoria;
 import sibtra.ui.modulos.SeleccionRuta;
+import sibtra.ui.modulos.UsuarioTrayectoria;
 import sibtra.util.ClasesEnPaquete;
 import sibtra.util.PanelFlow;
-import sibtra.util.PanelMuestraTrayectoria;
 
 /**
  * @author alberto
@@ -24,10 +25,11 @@ import sibtra.util.PanelMuestraTrayectoria;
 @SuppressWarnings("serial")
 public class PanelTrayectoria extends PanelExaminaTrayectoria {
 
-
+	/** Para apuntar todos los obetos que han pedido trayectoria y poder avisarlos si hay cambio */
+	Vector<UsuarioTrayectoria> usanTr=new Vector<UsuarioTrayectoria>(10);  //espacio para unos 10 modulos
 	private VentanasMonitoriza ventanaMonitorizar;
 	private PanelFlow panelInferior;
-	private AccionCambiarRuta accCambiaRuta;
+	private AccionCambiarTrayectoria accCambiaTrayectoria;
 	private Class[] arrClasSelecRuta;
 	private String[] arrNomClasMotor;
 	private SeleccionRuta obSelRuta=null;
@@ -44,10 +46,15 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 
 		
 		panelInferior=new PanelFlow();
+        ventanaMonitorizar.menuAcciones.addSeparator();
+		//accion de cambiar de trayectoria
+		accCambiaTrayectoria=new AccionCambiarTrayectoria();
+		panelInferior.add(new JButton(accCambiaTrayectoria));
+		ventanaMonitorizar.menuAcciones.add(accCambiaTrayectoria);
+		//accion de cambiar de modulo
 		accCambiaModulo=new AccionCambiarModulo();
 		panelInferior.add(new JButton(accCambiaModulo));
-		accCambiaRuta=new AccionCambiarRuta();
-		panelInferior.add(new JButton(accCambiaRuta));
+		ventanaMonitorizar.menuAcciones.add(accCambiaModulo);
 		
 		
 		add(panelInferior);
@@ -65,21 +72,41 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 		}
 		
 		public void actionPerformed(ActionEvent ae) {
+			if(ventanaMonitorizar.panSelModulos.accionParar.isEnabled()) {
+				//los modulos están activos => no podemos cambiar
+				JOptionPane.showMessageDialog(ventanaMonitorizar.ventanaPrincipal,
+					    "El motor esto activa no se puede cambiar modulo de trayectoria",
+					    "Motor activo",
+					    JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+				
 			eligeModuloYTrayectoria();
 			setTrayectoria(trayectoriaActual);
 			actualiza();
 		}
 	}
 
-	class AccionCambiarRuta extends AbstractAction {
+	class AccionCambiarTrayectoria extends AbstractAction {
 
-		public AccionCambiarRuta() {
-			super("Cambiar Ruta");
+		public AccionCambiarTrayectoria() {
+			super("Cambiar Trayectoria");
 		}
 		
 		public void actionPerformed(ActionEvent ae) {
+			if(ventanaMonitorizar.panSelModulos.accionParar.isEnabled()) {
+				//los modulos están activos => no podemos cambiar
+				JOptionPane.showMessageDialog(ventanaMonitorizar.ventanaPrincipal,
+					    "El motor está activo no se puede cambiar trayectoria",
+					    "Motor activo",
+					    JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 			trayectoriaActual=obSelRuta.getTrayectoria();
 			setTrayectoria(trayectoriaActual);
+			//avisamos a todos los apuntados
+			for(UsuarioTrayectoria uta: usanTr)
+				uta.nuevaTrayectoria(trayectoriaActual);
 			actualiza();
 		}
 	}
@@ -137,9 +164,16 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 
 	}
 	
-	public Trayectoria getTrayectoria() {
-		// TODO Auto-generated method stub
+	Trayectoria getTrayectoria(UsuarioTrayectoria objUsaTr) {
+		//Lo apuntamos
+		usanTr.add(objUsaTr);
 		return trayectoriaActual;
+	}
+
+	void liberaTrayectoria(UsuarioTrayectoria objUsaTr) {
+		if(!usanTr.remove(objUsaTr))
+			System.err.println(getClass().getName()+": se intenta borrar objeto no apuntado: ("
+					+objUsaTr.getClass().getName()+")="+objUsaTr);
 	}
 
 }

@@ -18,7 +18,7 @@ import sibtra.util.ThreadSupendible;
  * @author alberto
  *
  */
-public class RFyRuta implements DetectaObstaculos {
+public class RFyRuta implements DetectaObstaculos, UsuarioTrayectoria {
 
 	static final String NOMBRE="RF y Ruta";
 	static final String DESCRIPCION="Detecta obstaculos basandose en el RF y la Ruta";
@@ -40,7 +40,7 @@ public class RFyRuta implements DetectaObstaculos {
 			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		}
 		ventanaMonitoriza=ventMonitoriza;
-		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada();
+		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada(this);
 		if(Tr==null) {
 			JOptionPane.showMessageDialog(ventanaMonitoriza.ventanaPrincipal,
 				    "El módulo "+NOMBRE+" necesita ruta para continuar.",
@@ -103,7 +103,7 @@ public class RFyRuta implements DetectaObstaculos {
 	}
 
 	/**
-	 * Termina el {@link #thActulizacion} y quita los dos paneles
+	 * Termina el {@link #thActulizacion}, quita los dos paneles y libera trayectoria
 	 */
 	public void terminar() {
 		if(ventanaMonitoriza==null)
@@ -111,6 +111,14 @@ public class RFyRuta implements DetectaObstaculos {
 		thActulizacion.terminar();
 		ventanaMonitoriza.quitaPanel(panelMiraObs);
 		ventanaMonitoriza.quitaPanel(panelMiraObsSub);
+		ventanaMonitoriza.liberaTrayectoria(this);
+	}
+	
+	/** Indicamos el cambio a {@link #miraObstaculo} */
+	public void nuevaTrayectoria(Trayectoria tra) {
+		miraObstaculo.nuevaTrayectoria(tra);
+		panelMiraObs.setTrayectoria(tra);
+		panelMiraObs.actualiza();
 	}
 
 }

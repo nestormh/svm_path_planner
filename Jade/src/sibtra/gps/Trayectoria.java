@@ -37,7 +37,7 @@ public class Trayectoria {
 	public double[] velocidad=null;
 	
 	/** copia todos los campos de trOriginal sobre los de la trayectoria actual */
-	public void copia(Trayectoria trOriginal) {
+	protected void copia(Trayectoria trOriginal) {
 		esCerrada=trOriginal.esCerrada;
 		distanciaMaxima=trOriginal.distanciaMaxima;
 		
@@ -139,10 +139,7 @@ public class Trayectoria {
 	
 	/** Constructor a partir de trayectoria pero con otra separación minima */
 	public Trayectoria(Trayectoria tr, double distMax) {
-		if(distMax>=distanciaMaxima) {
-			copia(tr);
-		}
-		//Debemos ajustar a la nueva distancia Maxima
+		copia(tr);
 		nuevaDistanciaMaxima(distMax);
 	}
 	
@@ -185,7 +182,11 @@ public class Trayectoria {
 		esCerrada=false;
 	}
 	
-	public void nuevaDistanciaMaxima(double distMax) {
+	/** Cambia la distancia máxima añadiendo puntos si es necesario.
+	 * Es privado. Si se quiera trayectoria con otra distancia maxima, usar constructor.
+	 * @param distMax
+	 */
+	protected void nuevaDistanciaMaxima(double distMax) {
 		if(distMax>=distanciaMaxima)
 			return; //ya lo tenemos, no hay que hacer nada
 		ArrayList<Double> xR=new ArrayList<Double>();
@@ -237,7 +238,7 @@ public class Trayectoria {
 	}
 
 	/** @return array a partir de lista */
-	private double[] listaAArray(List<Double> li ) {
+	protected double[] listaAArray(List<Double> li ) {
 		double[] res=new double[li.size()];
 		for(int i=0; i<li.size(); i++)
 			res[i]=li.get(i);
@@ -259,7 +260,7 @@ public class Trayectoria {
 	 *  @param umbral distancia para considerar ruta cerrada.
 	 * @return indice del ultimo punto de la ruta a tener en cuenta. Si es abierta será el índice del último pto de la ruta.
 	 */
-	private int indiceUltimoConsiderar(Ruta ruta, double umbral){
+	protected int indiceUltimoConsiderar(Ruta ruta, double umbral){
 		int indiceFinal = ruta.getNumPuntos()-1;
 		esCerrada=false;
 		//necesitamos al menos 2 puntos
