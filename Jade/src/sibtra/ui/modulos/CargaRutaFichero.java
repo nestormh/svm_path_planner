@@ -12,6 +12,7 @@ import sibtra.gps.GPSData;
 import sibtra.gps.Ruta;
 import sibtra.gps.Trayectoria;
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.ui.defs.SeleccionRuta;
 
 /**
  * Moudulo para cargar ruta de fichero.

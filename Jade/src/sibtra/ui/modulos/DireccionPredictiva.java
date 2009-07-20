@@ -10,6 +10,8 @@ import sibtra.predictivo.Coche;
 import sibtra.predictivo.ControlPredictivo;
 import sibtra.predictivo.PanelMuestraPredictivo;
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.ui.defs.CalculoDireccion;
+import sibtra.ui.defs.UsuarioTrayectoria;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 

@@ -7,6 +7,7 @@ import sibtra.lms.BarridoAngular;
 import sibtra.rfycarro.FuturoObstaculo;
 import sibtra.rfycarro.PanelFuturoObstaculo;
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.ui.defs.DetectaObstaculos;
 import sibtra.util.ThreadSupendible;
 
 /**
@@ -57,7 +58,7 @@ public class RFyCarro implements DetectaObstaculos {
 	}
 
 	/**
-	 * @see sibtra.ui.modulos.DetectaObstaculos#getDistanciaLibre()
+	 * @see sibtra.ui.defs.DetectaObstaculos#getDistanciaLibre()
 	 */
 	public double getDistanciaLibre() {
 		if(ventanaMonitoriza==null)
@@ -66,14 +67,14 @@ public class RFyCarro implements DetectaObstaculos {
 	}
 
 	/**
-	 * @see sibtra.ui.modulos.Modulo#getDescripcion()
+	 * @see sibtra.ui.defs.Modulo#getDescripcion()
 	 */
 	public String getDescripcion() {
 		return DESCRIPCION;
 	}
 
 	/**
-	 * @see sibtra.ui.modulos.Modulo#getNombre()
+	 * @see sibtra.ui.defs.Modulo#getNombre()
 	 */
 	public String getNombre() {
 		return NOMBRE;
@@ -81,7 +82,7 @@ public class RFyCarro implements DetectaObstaculos {
 
 	/**
 	 * Termina el {@link #thActulizacion} y quita el {@link #panelFutObstaculo}
-	 * @see sibtra.ui.modulos.Modulo#terminar()
+	 * @see sibtra.ui.defs.Modulo#terminar()
 	 */
 	public void terminar() {
 		if(ventanaMonitoriza==null)

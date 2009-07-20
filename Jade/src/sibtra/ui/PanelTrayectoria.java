@@ -13,8 +13,8 @@ import javax.swing.JOptionPane;
 
 import sibtra.gps.PanelExaminaTrayectoria;
 import sibtra.gps.Trayectoria;
-import sibtra.ui.modulos.SeleccionRuta;
-import sibtra.ui.modulos.UsuarioTrayectoria;
+import sibtra.ui.defs.SeleccionRuta;
+import sibtra.ui.defs.UsuarioTrayectoria;
 import sibtra.util.ClasesEnPaquete;
 import sibtra.util.PanelFlow;
 
@@ -41,7 +41,8 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 		ventanaMonitorizar=monitoriza;
 		
 		//buscamos los modulos SeleccionaRuta y sus nombres
-		arrClasSelecRuta=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.SeleccionRuta", "sibtra.ui.modulos");
+		arrClasSelecRuta=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.SeleccionRuta", "sibtra.ui.modulos"
+				,ventanaMonitorizar.panSelModulos.cargadorClases);
 		arrNomClasMotor=ClasesEnPaquete.nombreClases(arrClasSelecRuta);
 
 		

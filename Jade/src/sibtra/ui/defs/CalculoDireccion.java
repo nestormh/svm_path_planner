@@ -1,7 +1,8 @@
 /**
  * 
  */
-package sibtra.ui.modulos;
+package sibtra.ui.defs;
+
 
 /**
  * @author alberto

@@ -1,4 +1,4 @@
-package sibtra.ui.modulos;
+package sibtra.ui.defs;
 
 import sibtra.gps.Trayectoria;
 

@@ -4,6 +4,8 @@
 package sibtra.ui.modulos;
 
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.ui.defs.CalculoDireccion;
+import sibtra.ui.defs.CalculoVelocidad;
 import sibtra.util.ManejaJoystick;
 import sibtra.util.PanelJoystick;
 import sibtra.util.ThreadSupendible;
@@ -68,14 +70,14 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 	}
 
 	/**
-	 * @see sibtra.ui.modulos.Modulo#getDescripcion()
+	 * @see sibtra.ui.defs.Modulo#getDescripcion()
 	 */
 	public String getDescripcion() {
 		return DESCRIPCION;
 	}
 
 	/**
-	 * @see sibtra.ui.modulos.Modulo#getNombre()
+	 * @see sibtra.ui.defs.Modulo#getNombre()
 	 */
 	public String getNombre() {
 		return NOMBRE;

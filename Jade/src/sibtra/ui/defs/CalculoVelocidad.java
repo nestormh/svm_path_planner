@@ -1,4 +1,5 @@
-package sibtra.ui.modulos;
+package sibtra.ui.defs;
+
 
 public interface CalculoVelocidad extends Modulo {
 	

@@ -7,6 +7,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -14,11 +15,12 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import sibtra.ui.modulos.CalculoDireccion;
-import sibtra.ui.modulos.CalculoVelocidad;
-import sibtra.ui.modulos.DetectaObstaculos;
-import sibtra.ui.modulos.Modulo;
-import sibtra.ui.modulos.Motor;
+import sibtra.ui.defs.CalculoDireccion;
+import sibtra.ui.defs.CalculoVelocidad;
+import sibtra.ui.defs.DetectaObstaculos;
+import sibtra.ui.defs.Modulo;
+import sibtra.ui.defs.Motor;
+import sibtra.util.CargadorDeModulos;
 import sibtra.util.ClasesEnPaquete;
 
 /**
@@ -42,51 +44,46 @@ public class PanelEligeModulos extends JPanel {
 	AccionActivar accionActivar;
 	AccionParar accionParar;
 	AccionBorrar accionBorrar;
+	AccionRefrescar accionRefrescar;
 	public Motor obMotor;
 	public CalculoDireccion obDireccion;
 	public CalculoVelocidad obVelocidad;
 	public DetectaObstaculos[] obsDetec;
+	ClassLoader cargadorClases;
+	private DefaultListModel modeloLista;
 
 	public PanelEligeModulos(VentanasMonitoriza ventMonito) {
 		super(new GridLayout(0,2,10,10));
 		
 		ventanaMonitoriza=ventMonito;
 		
-		arrClasMotor=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.Motor", "sibtra.ui.modulos");
-		String[] arrNomClasMotor=ClasesEnPaquete.nombreClases(arrClasMotor);
-			
-		arrClasDir=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.CalculoDireccion", "sibtra.ui.modulos");
-		String[] arrNomClasDir=ClasesEnPaquete.nombreClases(arrClasDir);
-			
-		arrClasVel=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.CalculoVelocidad", "sibtra.ui.modulos");
-		String[] arrNomClasVel=ClasesEnPaquete.nombreClases(arrClasVel);
-			
-		arrClasDectObs=ClasesEnPaquete.clasesImplementan("sibtra.ui.modulos.DetectaObstaculos", "sibtra.ui.modulos");
-		String[] arrNomClasDectObs=ClasesEnPaquete.nombreClases(arrClasDectObs);
-			
 		
 		//Para seleccionar los 3 tipos de módulos
 		add(new JLabel("Motor",JLabel.TRAILING));
-		jcombMotor=new JComboBox(arrNomClasMotor);
+		jcombMotor=new JComboBox();
 		add(jcombMotor);
 		
 		add(new JLabel("Calculo Direccion",JLabel.TRAILING));
-		jcombDireccion=new JComboBox(arrNomClasDir);
+		jcombDireccion=new JComboBox();
 		add(jcombDireccion);
 		
 		add(new JLabel("Calculo Velocidad",JLabel.TRAILING));
-		jcombVelocidad=new JComboBox(arrNomClasVel);
+		jcombVelocidad=new JComboBox();
 		add(jcombVelocidad);
 		
 		add(new JLabel("Detector obstaculos",JLabel.TRAILING));
-		jcombDetecObstaculos=new JList(arrNomClasDectObs);
+		modeloLista=new DefaultListModel();
+		jcombDetecObstaculos=new JList(modeloLista);
 		add(jcombDetecObstaculos);
+		
+		refrescaModulos();
 		
 		//Instanciamos las Acciones
 		accionCrear=new AccionCrear();
 		accionActivar=new AccionActivar();
 		accionParar=new AccionParar();
 		accionBorrar=new AccionBorrar();
+		accionRefrescar=new AccionRefrescar();
 		
 		//ponemos los botones de las acciones
         ventanaMonitoriza.menuAcciones.addSeparator();
@@ -94,14 +91,45 @@ public class PanelEligeModulos extends JPanel {
 		add(new JButton(accionActivar));
 		add(new JButton(accionParar));
 		add(new JButton(accionBorrar));
+		add(new JButton(accionRefrescar));
 		
 		//ponemos los botones tambien en el menu de opciones
 		ventanaMonitoriza.menuAcciones.add(accionActivar);
 		ventanaMonitoriza.menuAcciones.add(accionParar);
 		ventanaMonitoriza.menuAcciones.add(accionCrear);
 		ventanaMonitoriza.menuAcciones.add(accionBorrar);
+		ventanaMonitoriza.menuAcciones.add(accionRefrescar);
 		
 		
+	}
+	
+	protected void refrescaModulos() {
+		
+		cargadorClases = new CargadorDeModulos(CargadorDeModulos.class.getClassLoader(),"sibtra.ui.modulos");
+
+		arrClasMotor=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.Motor", "sibtra.ui.modulos",cargadorClases);
+		String[] arrNomClasMotor=ClasesEnPaquete.nombreClases(arrClasMotor);
+		jcombMotor.removeAllItems();
+		for(String sa: arrNomClasMotor)
+			jcombMotor.addItem(sa);
+		
+		arrClasDir=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.CalculoDireccion", "sibtra.ui.modulos",cargadorClases);
+		String[] arrNomClasDir=ClasesEnPaquete.nombreClases(arrClasDir);
+		jcombDireccion.removeAllItems();
+		for(String sa: arrNomClasDir)
+			jcombDireccion.addItem(sa);
+			
+		arrClasVel=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.CalculoVelocidad", "sibtra.ui.modulos",cargadorClases);
+		String[] arrNomClasVel=ClasesEnPaquete.nombreClases(arrClasVel);
+		jcombVelocidad.removeAllItems();
+		for(String sa: arrNomClasVel)
+			jcombVelocidad.addItem(sa);
+			
+		arrClasDectObs=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.DetectaObstaculos", "sibtra.ui.modulos",cargadorClases);
+		String[] arrNomClasDectObs=ClasesEnPaquete.nombreClases(arrClasDectObs);
+		modeloLista.removeAllElements();
+		for(String sa: arrNomClasDectObs)
+			modeloLista.addElement(sa);
 	}
 	
 	class AccionCrear extends AbstractAction {
@@ -156,7 +184,7 @@ public class PanelEligeModulos extends JPanel {
 					Class<CalculoVelocidad> clasVel=arrClasVel[indVel];				
 					obVelocidad=(CalculoVelocidad)clasVel.newInstance();
 				}
-				
+
 				int[] decSel=jcombDetecObstaculos.getSelectedIndices();
 				obsDetec=new DetectaObstaculos[decSel.length]; //array para acoger objetos detectores
 				System.out.println(getClass().getName()+": Hay "+decSel.length+" detectores seleccionados");
@@ -278,6 +306,19 @@ public class PanelEligeModulos extends JPanel {
 		}
 	}
 	
+	
+	class AccionRefrescar extends AbstractAction {
+		
+		public AccionRefrescar() {
+			super("Refresca Modulos");
+			setEnabled(true);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			refrescaModulos();
+			PanelEligeModulos.this.repaint();
+		}
+	}
 	
 	class AccionBorrar extends AbstractAction {
 		

@@ -8,6 +8,8 @@ import javax.swing.JOptionPane;
 import sibtra.gps.Trayectoria;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.ui.defs.CalculoVelocidad;
+import sibtra.ui.defs.UsuarioTrayectoria;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;

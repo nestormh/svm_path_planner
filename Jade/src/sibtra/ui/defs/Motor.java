@@ -1,7 +1,7 @@
 /**
  * 
  */
-package sibtra.ui.modulos;
+package sibtra.ui.defs;
 
 import sibtra.predictivo.Coche;
 

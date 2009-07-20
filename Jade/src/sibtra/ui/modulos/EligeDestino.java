@@ -5,6 +5,7 @@ package sibtra.ui.modulos;
 
 import sibtra.gps.Trayectoria;
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.ui.defs.SeleccionRuta;
 
 /**
  * @author alberto

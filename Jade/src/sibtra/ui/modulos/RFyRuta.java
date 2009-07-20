@@ -12,6 +12,8 @@ import sibtra.rfyruta.MiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculoSubjetivo;
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.ui.defs.DetectaObstaculos;
+import sibtra.ui.defs.UsuarioTrayectoria;
 import sibtra.util.ThreadSupendible;
 
 /**

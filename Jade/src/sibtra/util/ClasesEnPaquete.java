@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import sibtra.ui.defs.Motor;
+
 /** Para obtener clases de en un paquete
  * obtenido de 
  * http://forums.sun.com/thread.jspa?threadID=341935                                 
@@ -19,6 +21,29 @@ import java.util.List;
  *
  */
 public abstract class ClasesEnPaquete {
+	
+	static List<File> dondeEncontrarPaquete(String packageName,ClassLoader classLoader) throws IOException {
+		if(packageName==null)
+			throw new IllegalArgumentException("Nombre de paquete no puede ser null\n");
+		if(classLoader==null)
+			throw new IllegalArgumentException("ClassLoader no puede ser null\n");
+        String path = packageName.replace('.', '/');
+        Enumeration<URL> resources = classLoader.getResources(path);
+        List<File> dirs = new ArrayList<File>();
+        while (resources.hasMoreElements()) {
+            URL resource = resources.nextElement();
+            File fa=new File(resource.getFile());
+            if(fa.exists())
+            	dirs.add(fa);
+        }
+        return dirs;
+	}
+	
+	static List<File> dondeEncontrarPaquete(String packageName) throws IOException {
+		return dondeEncontrarPaquete(packageName, Thread.currentThread().getContextClassLoader());
+	}
+	
+	
     /**
      * Scans all classes accessible from the context class loader which belong to the given package and subpackages.
      *
@@ -27,20 +52,12 @@ public abstract class ClasesEnPaquete {
      * @throws ClassNotFoundException
      * @throws IOException
      */
-    private static Class[] getClasses(String packageName)
+    private static Class[] getClasses(String packageName, ClassLoader cl)
             throws ClassNotFoundException, IOException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        assert classLoader != null;
-        String path = packageName.replace('.', '/');
-        Enumeration<URL> resources = classLoader.getResources(path);
-        List<File> dirs = new ArrayList<File>();
-        while (resources.hasMoreElements()) {
-            URL resource = resources.nextElement();
-            dirs.add(new File(resource.getFile()));
-        }
+        List<File> dirs = dondeEncontrarPaquete(packageName,cl);
         ArrayList<Class> classes = new ArrayList<Class>();
         for (File directory : dirs) {
-            classes.addAll(findClasses(directory, packageName));
+            classes.addAll(findClasses(directory, packageName, cl));
         }
         return classes.toArray(new Class[classes.size()]);
     }
@@ -53,7 +70,7 @@ public abstract class ClasesEnPaquete {
      * @return The classes
      * @throws ClassNotFoundException
      */
-    private static List<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
+    private static List<Class> findClasses(File directory, String packageName, ClassLoader cl) throws ClassNotFoundException {
         List<Class> classes = new ArrayList<Class>();
         if (!directory.exists()) {
             return classes;
@@ -62,28 +79,38 @@ public abstract class ClasesEnPaquete {
         for (File file : files) {
             if (file.isDirectory()) {
                 assert !file.getName().contains(".");
-                classes.addAll(findClasses(file, packageName + "." + file.getName()));
+                classes.addAll(findClasses(file, packageName + "." + file.getName(),cl));
             } else if (file.getName().endsWith(".class")) {
-                classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
+            	classes.add(cl.loadClass((packageName + '.' + file.getName().substring(0, file.getName().length() - 6))));
             }
         }
         return classes;
+    }
+    
+    static File findFicheroClase(File directory, String nombreClase) {
+    	String nomFichClase = nombreClase.substring(nombreClase.lastIndexOf('.')+1)+".class";
+    	File fichClase=new File(directory,nomFichClase);
+    	if(fichClase.exists())
+    		return fichClase;
+    	else
+    		return null;
     }
     
     /**
      * Clases que implementan un determinado interface en un determinado paquete (y sus subpaquetes)
      * @param nombreInterface interface a implementar
      * @param nombrePaquete paquete donde buscar
+     * @param cl cargador de clases a utilizar
      * @return array con las clases que lo cumplen, vacío so no hay ninguna
      */
-    public static Class[] clasesImplementan(String nombreInterface, String nombrePaquete) {
+    public static Class[] clasesImplementan(String nombreInterface, String nombrePaquete, ClassLoader cl) {
     	if(nombreInterface==null || nombreInterface.length()==0)
     		throw new IllegalArgumentException("El nombre del interface debe ser cadena no vacía");
     	if(nombrePaquete==null || nombrePaquete.length()==0)
     		throw new IllegalArgumentException("El nombre del paquete debe ser cadena no vacía");
         ArrayList<Class> clasCumple = new ArrayList<Class>();
         try {
-			Class[] arrClas= ClasesEnPaquete.getClasses(nombrePaquete);
+			Class[] arrClas= ClasesEnPaquete.getClasses(nombrePaquete,cl);
 			for(int i=0; i<arrClas.length; i++) {
 				Class ca=arrClas[i];
 				if(!ca.isInterface() && !ca.isMemberClass() && !ca.isLocalClass() && !ca.isAnonymousClass() 
@@ -110,11 +137,22 @@ public abstract class ClasesEnPaquete {
         return clasCumple.toArray(new Class[clasCumple.size()]);
     }
     
-    
+    /**
+     * Clases que implementan un determinado interface en un determinado paquete (y sus subpaquetes)
+     * Se usa cargador de clases por defecto
+     * @param nombreInterface interface a implementar
+     * @param nombrePaquete paquete donde buscar
+     * @return array con las clases que lo cumplen, vacío so no hay ninguna
+     */
+    public static Class[] clasesImplementan(String nombreInterface, String nombrePaquete) {
+    	return clasesImplementan(nombreInterface, nombrePaquete,
+    			Thread.currentThread().getContextClassLoader());
+    }    
     public static void main(String[] args) {
     
     	try {
-			Class[] arrClas= ClasesEnPaquete.getClasses("sibtra.ui.modulos");
+			Class[] arrClas= ClasesEnPaquete.getClasses("sibtra.ui.modulos"
+					,Thread.currentThread().getContextClassLoader());
 			
 			System.out.println("Encontradas: ");
 			for(int i=0; i<arrClas.length; i++) {
@@ -168,7 +206,9 @@ public abstract class ClasesEnPaquete {
 			System.err.println("IOException:"+e.getMessage());
 			e.printStackTrace();
 		}
+		char c='s';
 		
+		do {
 		System.out.println("\n\n\nDirectamente:");
 		{ 
 			String intAct="sibtra.ui.modulos.CalculoDireccion";
@@ -198,6 +238,32 @@ public abstract class ClasesEnPaquete {
 			for(int i=0;i<clasesImp.length;i++)
 				System.out.println("\t"+clasesImp[i].getName());
 		}
+		
+		ClassLoader cargador=new CargadorDeModulos(CargadorDeModulos.class.getClassLoader(),"sibtra.ui.modulos");
+
+		Class<Motor> motNew;
+		Motor obMotor=null;
+		try {
+			Object obj=(cargador.loadClass("sibtra.ui.modulos.MotorNuevo").newInstance());
+			Object obj2=(cargador.loadClass("sibtra.ui.modulos.MotorNuevo").newInstance());
+			System.out.println("Clase:"+obj.getClass());
+			obMotor=(Motor)obj;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Motor nuevo es: "+obMotor.getNombre());
+		
+		System.out.append("Entra para repetir (q para salir");
+			
+		try {
+			c=(char) System.in.read();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		} while (c!=(int)'q');
     }
 
     /** Dado el array de clases ivoca el metodo getNombre() de cada clase y devueve la respuesta en misma

@@ -22,8 +22,8 @@ import sibtra.imu.PanelIMU;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.lms.PanelRF;
-import sibtra.ui.modulos.Motor;
-import sibtra.ui.modulos.UsuarioTrayectoria;
+import sibtra.ui.defs.Motor;
+import sibtra.ui.defs.UsuarioTrayectoria;
 import sibtra.util.EligeSerial;
 
 /**
