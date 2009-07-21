@@ -189,6 +189,7 @@ public class ControlPredictivo {
 	}
 	
 	public void setRuta(Trayectoria nuevaRuta){
+		this.indMinAnt=-1;
 		this.ruta = nuevaRuta;
 	}
 

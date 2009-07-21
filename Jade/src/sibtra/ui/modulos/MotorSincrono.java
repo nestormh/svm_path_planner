@@ -64,7 +64,7 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 		ventanaMonitoriza=ventMonito;
 		
 		panel=new PanelSincrono();
-		ventanaMonitoriza.añadePanel(panel, NOMBRE,false,false);
+		ventanaMonitoriza.añadePanel(panel, getNombre(),false,false);
 		
         //inicializamos modelo del coche
         modCoche = new Coche();
@@ -172,19 +172,7 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 	}
 
 	protected void accionPeriodica() {
-        //Actulizamos el modelo del coche =======================================
-        GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();
-        if(pa==null) {
-        	System.err.println("Modulo "+NOMBRE+":No tenemos punto GPS con que hacer los cáclulos");
-        	//se usa los valores de la evolución
-        } else {
-        	//sacamos los datos del GPS
-        	double x=pa.getXLocal();
-        	double y=pa.getYLocal();
-        	double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
-        	//TODO Realimentar posición del volante y la velocidad del coche.
-        	modCoche.setPostura(x, y, angAct);
-        }
+		actualizaModeloCoche();
         if(trayActual!=null)
         	//para actulizar en indice del más cercano
         	trayActual.situaCoche(modCoche.getX(), modCoche.getY());
@@ -225,6 +213,23 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 
     	panel.actualizaDatos(MotorSincrono.this);  //actualizamos las etiquetas
 		
+	}
+	
+	protected void actualizaModeloCoche() {
+        //Actulizamos el modelo del coche =======================================
+        GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();
+        if(pa==null) {
+        	System.err.println("Modulo "+NOMBRE+":No tenemos punto GPS con que hacer los cáclulos");
+        	//se usa los valores de la evolución
+        } else {
+        	//sacamos los datos del GPS
+        	double x=pa.getXLocal();
+        	double y=pa.getYLocal();
+        	double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
+        	//TODO Realimentar posición del volante y la velocidad del coche.
+        	modCoche.setPostura(x, y, angAct);
+        }
+
 	}
 	
 	/** @return modelo del coche que actuliza este motor */

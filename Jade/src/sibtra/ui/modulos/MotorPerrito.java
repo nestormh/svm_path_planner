@@ -8,6 +8,8 @@ import sibtra.gps.Trayectoria;
 import sibtra.lms.BarridoAngular;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.Motor;
+import sibtra.util.LabelDatoFormato;
+import sibtra.util.SpinnerDouble;
 
 /**
  * @author alberto
@@ -21,40 +23,30 @@ public class MotorPerrito extends MotorSincrono implements Motor {
 	double distMax=0.3;
 	double velAcercamiento=2.0;
 	private BarridoAngular ba=null;
+	private double[] angDistRF={0,80 };
 	
 	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonito) {
-		return super.setVentanaMonitoriza(ventMonito);
-		
-//		panel=new PanelSincrono() {
-//			public PanelSincrono() {
-//				super();
-//				añadeAPanel(new SpinnerDouble(MotorPerrito.this,"setDistMax",0.1,3,0.1), "Dist Ptos");
-//				añadeAPanel(new SpinnerDouble(MotorPerrito.this,"setVelAcercamiento",1,6,0.2), "Vel acerca");
-//			}
-//		};
-		
+		if(!super.setVentanaMonitoriza(ventMonito))
+			return false;
+		//Sustituimos panel Sincrono por panelPerrito
+		ventanaMonitoriza.quitaPanel(panel);
+		panel=new PanelPerrito();
+		ventanaMonitoriza.añadePanel(panel, getNombre(),false,false);
+		return true;
 	}
 	
 	protected void accionPeriodica() {
 		BarridoAngular nuevoBa=ventanaMonitoriza.conexionRF.ultimoBarrido();
-		double[] angDistRF={0,80 };
+		actualizaModeloCoche();
 		if(nuevoBa!=ba && nuevoBa!=null) {
 			ba=nuevoBa;
-			GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();                            
-			double[] ptoAct=null;
-			double angAct=Double.NaN;
-			if(pa!=null) {
-				ptoAct= new double[2];
-				ptoAct[0]=pa.getXLocal(); ptoAct[1]=pa.getYLocal();
-				angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
-			}
-			/* Calculamos a que distancia y en que ángulo se encuentra el objetivo*/
 			angDistRF = getAnguloDistObjetivo(ba);
 		}
 		/* Partiendo de la posición y orientación del coche y de la distancia a la que se
 		 * encuentra el objetivo y a que ángulo, se calculan las coordenadas locales
 		 * del objetivo*/
-		double[] coorObjetivo = calculaCoorLocalObjetivo(modCoche.getX(),modCoche.getY(),angDistRF[0],angDistRF[1]);
+		double[] coorObjetivo = calculaCoorLocalObjetivo(modCoche.getX(),modCoche.getY()
+				,angDistRF[0]+modCoche.getTita(),angDistRF[1]+10);
 		double[] coorCoche = {modCoche.getX(),modCoche.getY()};
 		/* Calculamos la ruta hasta el objetivo*/
 		Trayectoria Tr = new Trayectoria(coorObjetivo,coorCoche,distMax,velAcercamiento);
@@ -79,8 +71,8 @@ public class MotorPerrito extends MotorSincrono implements Motor {
 		// Para ángulos del rf < de pi/2 el coseno es positivo, por lo tanto el objetivo 
 		// está a la derecha según el sistema de ref del coche. Pero para el rf ángulos 
 		// < de pi/2 es estar a la izquierda. No es problema, se le cambia el signo.
-		coorObjetivo[0] = coorXCoche + Math.cos(anguloRF)*distRF;
-		coorObjetivo[1] = coorYCoche + Math.sin(anguloRF)*distRF;
+		coorObjetivo[0] = coorXCoche + Math.cos(anguloRF-Math.PI/2)*distRF;
+		coorObjetivo[1] = coorYCoche + Math.sin(anguloRF-Math.PI/2)*distRF;
 		return coorObjetivo;
 	}
 
@@ -135,5 +127,24 @@ public class MotorPerrito extends MotorSincrono implements Motor {
 		this.velAcercamiento = velAcercamiento;
 	}
 
+	public double getDistanciaRF() {
+		return angDistRF[1];
+	}
+	public double getAnguloRFGrados() {
+		return Math.toDegrees(angDistRF[0]);
+	}
+
+	protected class PanelPerrito extends PanelSincrono {
+		
+		public PanelPerrito() {
+			super();
+			añadeAPanel(new SpinnerDouble(MotorPerrito.this,"setDistMax",0.1,3,0.1), "Dist Ptos");
+			añadeAPanel(new SpinnerDouble(MotorPerrito.this,"setVelAcercamiento",1,6,0.2), "Vel acerca");
+			añadeAPanel(new LabelDatoFormato(MotorPerrito.class,"getDistanciaRF","%6.2f m"), "Dist RF");
+			añadeAPanel(new LabelDatoFormato(MotorPerrito.class,"getAnguloRFGrados","%5.2f º"), "Ang RF");
+
+		}
+
+	}
 
 }

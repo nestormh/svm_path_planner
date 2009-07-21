@@ -144,7 +144,7 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 					, tray.x[indSel] 
 					, tray.y[indSel] 
 					, tray.z[indSel] 
-					, tray.rumbo[indSel] 
+					, Math.toDegrees(tray.rumbo[indSel]) 
 					, tray.velocidad[indSel] 
 					));
 			situaCoche(tray.x[indSel], tray.y[indSel], tray.rumbo[indSel]);

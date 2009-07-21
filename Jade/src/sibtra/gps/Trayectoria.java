@@ -192,7 +192,7 @@ public class Trayectoria {
 		double dz = ((puntoFinal.length>3)?puntoFinal[2]:0.0) - ((puntoInicial.length>3)?puntoInicial[2]:0.0);
 		double zini=((puntoFinal.length>3)?puntoFinal[2]:0.0);
 		double distEntrePtos = Math.sqrt(dx*dx +dy*dy);
-		double angEntrePtos = Math.atan2(dy,dx);
+		double angEntrePtos = Math.PI-Math.atan2(dy,dx);
 		int numPuntos = (int)Math.ceil(distEntrePtos/distMax);
 		double incX = dx/numPuntos;
 		double incY = dy/numPuntos;

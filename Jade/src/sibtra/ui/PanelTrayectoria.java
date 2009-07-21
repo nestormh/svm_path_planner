@@ -104,7 +104,6 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 				return;
 			}
 			setNuevaTrayectoria(obSelRuta.getTrayectoria());
-			actualiza();
 		}
 	}
 
@@ -179,6 +178,7 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 		//avisamos a todos los apuntados
 		for(UsuarioTrayectoria uta: usanTr)
 			uta.nuevaTrayectoria(tr);
+		actualiza();
 	}
 
 }
