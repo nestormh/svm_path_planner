@@ -21,7 +21,6 @@ import sibtra.util.PanelFlow;
  */
 public class DireccionPredictiva implements CalculoDireccion, UsuarioTrayectoria {
 	
-	private static final double COTA_ANGULO = Math.toRadians(30);
 	String NOMBRE="Direccion Predictiva";
 	String DESCRIPCION="Calcula sólo la dirección usando control predictivo";
 	private VentanasMonitoriza ventanaMonitoriza;
@@ -75,14 +74,7 @@ public class DireccionPredictiva implements CalculoDireccion, UsuarioTrayectoria
 	public double getConsignaDireccion() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
-        consigna = controlPredictivo.calculaComando(); 
-        if (consigna > COTA_ANGULO) {
-        	consigna = COTA_ANGULO;
-        }
-        if (consigna < -COTA_ANGULO) {
-        	consigna = -COTA_ANGULO;
-        //System.out.println("Comando " + comandoVolante);
-        }
+        consigna = controlPredictivo.calculaComando();       
         panelPredictivo.actualiza();
         panelPropio.actualizaDatos(this);
 		return consigna;
