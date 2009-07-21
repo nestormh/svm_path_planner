@@ -39,7 +39,7 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 
 	//Parámetros
 	protected int periodoMuestreoMili = 200;
-	protected double cotaAngulo=Math.toRadians(45);
+	protected double cotaAngulo=Math.toRadians(30);
 	protected double umbralMinimaVelocidad=0.2;
 	protected double pendienteFrenado=1.0;
 	protected double margenColision=3.0;
@@ -208,7 +208,7 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setPendienteFrenado",0.1,3,0.1), "Pend Frenado");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setMargenColision",0.1,10,0.1), "Margen col");
 			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setMaximoIncrementoVelocidad",0,6,0.1), "Max Inc V");
-			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setCotaAnguloGrados",5,45,1), "Cota Angulo");
+			añadeAPanel(new SpinnerDouble(MotorSincrono.this,"setCotaAnguloGrados",5,30,1), "Cota Angulo");
 			añadeAPanel(new SpinnerInt(MotorSincrono.this,"setPeriodoMuestreoMili",20,2000,20), "Per Muest");
 			//TODO ponel labels que muestren la informacion recibida de los otros módulos y la que se aplica.
 			añadeAPanel(new LabelDatoFormato(MotorSincrono.class,"getConsignaVelocidad","%4.2f m/s"), "Cons Vel");
