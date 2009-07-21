@@ -26,16 +26,16 @@ import sibtra.util.UtilCalculos;
  */
 public class MotorSincrono implements Motor, UsuarioTrayectoria {
 	
-	final static String NOMBRE="Motor Sincrono";
-	final static String DESCRIPCION="Ejecuta las acciones de control con un periodo fijo";
-	private VentanasMonitoriza ventanaMonitoriza=null;
+	protected String NOMBRE="Motor Sincrono";
+	protected String DESCRIPCION="Ejecuta las acciones de control con un periodo fijo";
+	protected VentanasMonitoriza ventanaMonitoriza=null;
 	Trayectoria trayActual=null;
-	private CalculoDireccion calculadorDireccion=null;
-	private CalculoVelocidad calculadorVelocidad=null;
-	private DetectaObstaculos[] detectoresObstaculos=null;
-	private PanelSincrono panel;
-	private ThreadSupendible thCiclico;
-	private Coche modCoche;
+	protected CalculoDireccion calculadorDireccion=null;
+	protected CalculoVelocidad calculadorVelocidad=null;
+	protected DetectaObstaculos[] detectoresObstaculos=null;
+	protected PanelSincrono panel;
+	protected ThreadSupendible thCiclico;
+	protected Coche modCoche;
 
 	//Parámetros
 	protected int periodoMuestreoMili = 200;
@@ -75,65 +75,16 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 			@Override
 			protected void accion() {
 				//apuntamos cual debe ser el instante siguiente
-	            tSig = System.currentTimeMillis() + periodoMuestreoMili;
-	            //Actulizamos el modelo del coche =======================================
-	            GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();
-	            if(pa==null) {
-	            	System.err.println("Modulo "+NOMBRE+":No tenemos punto GPS con que hacer los cáclulos");
-	            	//se usa los valores de la evolución
-	            } else {
-	            	//sacamos los datos del GPS
-	            	double x=pa.getXLocal();
-	            	double y=pa.getYLocal();
-	            	double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
-	            	//TODO Realimentar posición del volante y la velocidad del coche.
-	            	modCoche.setPostura(x, y, angAct);
-	            }
-	            if(trayActual!=null)
-	            	//para actulizar en indice del más cercano
-	            	trayActual.situaCoche(modCoche.getX(), modCoche.getY());
-	            	
+		        tSig = System.currentTimeMillis() + periodoMuestreoMili;
 
-	            //Direccion =============================================================
-	            double consignaVolanteAnterior=consignaVolante;
-	            consignaVolante=consignaVolanteRecibida=calculadorDireccion.getConsignaDireccion();
-	            consignaVolante=UtilCalculos.limita(consignaVolante, -cotaAngulo, cotaAngulo);
-
-	            double velocidadActual = ventanaMonitoriza.conexionCarro.getVelocidadMS();
-                //Cuando está casi parado no tocamos el volante
-                if (velocidadActual >= umbralMinimaVelocidad)
-                	ventanaMonitoriza.conexionCarro.setAnguloVolante(consignaVolante);
-
-                // Velocidad =============================================================
-            	//Guardamos valor para la siguiente iteracion
-            	double consignaVelAnterior=consignaVelocidad;
-            	
-	            consignaVelocidad=consignaVelocidadRecibida=calculadorVelocidad.getConsignaVelocidad();
-	            
-	            //vemos la minima distancia de los detectores
-	            distanciaMinima=Double.MAX_VALUE;
-	            for(int i=0; i<detectoresObstaculos.length; i++)
-	            	distanciaMinima=Math.min(distanciaMinima, detectoresObstaculos[i].getDistanciaLibre());
-	            
-	            double velRampa=(distanciaMinima-margenColision)*pendienteFrenado;
-	            consignaVelocidad=Math.min(consignaVelocidad, velRampa);
-	            
-	            double incrementoConsigna=consignaVelocidad-consignaVelAnterior;
-	            if(incrementoConsigna>maximoIncrementoVelocidad)
-	            	consignaVelocidad=consignaVelAnterior+maximoIncrementoVelocidad;
-            	ventanaMonitoriza.conexionCarro.setConsignaAvanceMS(consignaVelocidad);
-            	
-            	//Hacemos evolucionar el modelo del coche
-                modCoche.calculaEvolucion(consignaVolante, velocidadActual, (double)periodoMuestreoMili / 1000.0);
-
-
-            	panel.actualizaDatos(MotorSincrono.this);  //actualizamos las etiquetas
-	            //esparmos hasta que haya pasado el tiempo convenido
+				accionPeriodica();
+		        //esparmos hasta que haya pasado el tiempo convenido
 				while (System.currentTimeMillis() < tSig) {
-	                try {
-	                    Thread.sleep(tSig - System.currentTimeMillis());
-	                } catch (Exception e) {}
-	            }
+		            try {
+		                Thread.sleep(tSig - System.currentTimeMillis());
+		            } catch (Exception e) {}
+		        }
+
 			}
 		};
 		thCiclico.setName(NOMBRE);
@@ -199,7 +150,7 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 	}
 	
 	@SuppressWarnings("serial")
-	class PanelSincrono extends PanelFlow {
+	protected class PanelSincrono extends PanelFlow {
 		public PanelSincrono() {
 			super();
 //			setLayout(new GridLayout(0,4));
@@ -220,7 +171,62 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 		}
 	}
 
+	protected void accionPeriodica() {
+        //Actulizamos el modelo del coche =======================================
+        GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();
+        if(pa==null) {
+        	System.err.println("Modulo "+NOMBRE+":No tenemos punto GPS con que hacer los cáclulos");
+        	//se usa los valores de la evolución
+        } else {
+        	//sacamos los datos del GPS
+        	double x=pa.getXLocal();
+        	double y=pa.getYLocal();
+        	double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
+        	//TODO Realimentar posición del volante y la velocidad del coche.
+        	modCoche.setPostura(x, y, angAct);
+        }
+        if(trayActual!=null)
+        	//para actulizar en indice del más cercano
+        	trayActual.situaCoche(modCoche.getX(), modCoche.getY());
+        	
 
+        //Direccion =============================================================
+        double consignaVolanteAnterior=consignaVolante;
+        consignaVolante=consignaVolanteRecibida=calculadorDireccion.getConsignaDireccion();
+        consignaVolante=UtilCalculos.limita(consignaVolante, -cotaAngulo, cotaAngulo);
+
+        double velocidadActual = ventanaMonitoriza.conexionCarro.getVelocidadMS();
+        //Cuando está casi parado no tocamos el volante
+        if (velocidadActual >= umbralMinimaVelocidad)
+        	ventanaMonitoriza.conexionCarro.setAnguloVolante(consignaVolante);
+
+        // Velocidad =============================================================
+    	//Guardamos valor para la siguiente iteracion
+    	double consignaVelAnterior=consignaVelocidad;
+    	
+        consignaVelocidad=consignaVelocidadRecibida=calculadorVelocidad.getConsignaVelocidad();
+        
+        //vemos la minima distancia de los detectores
+        distanciaMinima=Double.MAX_VALUE;
+        for(int i=0; i<detectoresObstaculos.length; i++)
+        	distanciaMinima=Math.min(distanciaMinima, detectoresObstaculos[i].getDistanciaLibre());
+        
+        double velRampa=(distanciaMinima-margenColision)*pendienteFrenado;
+        consignaVelocidad=Math.min(consignaVelocidad, velRampa);
+        
+        double incrementoConsigna=consignaVelocidad-consignaVelAnterior;
+        if(incrementoConsigna>maximoIncrementoVelocidad)
+        	consignaVelocidad=consignaVelAnterior+maximoIncrementoVelocidad;
+    	ventanaMonitoriza.conexionCarro.setConsignaAvanceMS(consignaVelocidad);
+    	
+    	//Hacemos evolucionar el modelo del coche
+        modCoche.calculaEvolucion(consignaVolante, velocidadActual, (double)periodoMuestreoMili / 1000.0);
+
+
+    	panel.actualizaDatos(MotorSincrono.this);  //actualizamos las etiquetas
+		
+	}
+	
 	/** @return modelo del coche que actuliza este motor */
 	public Coche getModeloCoche() {
 		if(ventanaMonitoriza==null)

@@ -182,6 +182,36 @@ public class Trayectoria {
 		esCerrada=false;
 	}
 	
+	public Trayectoria (double[] puntoInicial, double[] puntoFinal, double distMax,double vel){
+		if(puntoInicial==null || puntoFinal==null ||puntoInicial.length==0 || puntoFinal.length==0)
+			throw new IllegalArgumentException("Para construir trayectoria se necesitan los puntos inicial y final");
+		if ( puntoInicial.length<2 || puntoFinal.length<2)
+			throw new IllegalArgumentException("Los puntos inicial y final tienen que tener al menos coordenadas (x,y)");		
+		double dx = puntoFinal[0] - puntoInicial[0];
+		double dy = puntoFinal[1] - puntoInicial[1];
+		double dz = ((puntoFinal.length>3)?puntoFinal[2]:0.0) - ((puntoInicial.length>3)?puntoInicial[2]:0.0);
+		double zini=((puntoFinal.length>3)?puntoFinal[2]:0.0);
+		double distEntrePtos = Math.sqrt(dx*dx +dy*dy);
+		double angEntrePtos = Math.atan2(dy,dx);
+		int numPuntos = (int)Math.ceil(distEntrePtos/distMax);
+		double incX = dx/numPuntos;
+		double incY = dy/numPuntos;
+		double incZ = dz/numPuntos;
+		x=new double[numPuntos];
+		y=new double[numPuntos];
+		z=new double[numPuntos];
+		velocidad=new double[numPuntos];
+		rumbo=new double[numPuntos];
+		for (int i=0;i<numPuntos;i++){
+			x[i] = puntoInicial[0] + incX*i;
+			y[i] = puntoInicial[1] + incY*i;
+			z[i] = zini + incZ*i;
+			rumbo[i] = angEntrePtos;
+			velocidad[i] = vel ; 
+		}
+		esCerrada = false;
+	}
+	
 	/** Cambia la distancia máxima añadiendo puntos si es necesario.
 	 * Es privado. Si se quiera trayectoria con otra distancia maxima, usar constructor.
 	 * @param distMax

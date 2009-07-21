@@ -186,6 +186,11 @@ public class VentanasMonitoriza extends Ventanas {
 		return panelTrayectoria.getTrayectoria(objUsaTr);
 	}
 	
+	/** Por si un módulo quiere cambiar la trayectoria actual */
+	public void setNuevaTrayectoria(Trayectoria tr) {
+		panelTrayectoria.setNuevaTrayectoria(tr);
+	}
+	
 	/** Indica que no va ha necesitar más la trayectoria. 
 	 * Se invocará cuando un módulo vaya a destruirse. 
 	 */

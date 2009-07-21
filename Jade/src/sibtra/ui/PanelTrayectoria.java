@@ -103,11 +103,7 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 					    JOptionPane.ERROR_MESSAGE);
 				return;
 			}
-			trayectoriaActual=obSelRuta.getTrayectoria();
-			setTrayectoria(trayectoriaActual);
-			//avisamos a todos los apuntados
-			for(UsuarioTrayectoria uta: usanTr)
-				uta.nuevaTrayectoria(trayectoriaActual);
+			setNuevaTrayectoria(obSelRuta.getTrayectoria());
 			actualiza();
 		}
 	}
@@ -175,6 +171,14 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 		if(!usanTr.remove(objUsaTr))
 			System.err.println(getClass().getName()+": se intenta borrar objeto no apuntado: ("
 					+objUsaTr.getClass().getName()+")="+objUsaTr);
+	}
+	
+	void setNuevaTrayectoria(Trayectoria tr) {
+		trayectoriaActual=tr;
+		setTrayectoria(tr);
+		//avisamos a todos los apuntados
+		for(UsuarioTrayectoria uta: usanTr)
+			uta.nuevaTrayectoria(tr);
 	}
 
 }
