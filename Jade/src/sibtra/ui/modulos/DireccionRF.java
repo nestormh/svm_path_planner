@@ -6,6 +6,7 @@ import sibtra.ui.defs.CalculoDireccion;
 import sibtra.ui.modulos.MotorSincrono.PanelSincrono;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
+import sibtra.util.ThreadSupendible;
 
 public class DireccionRF implements CalculoDireccion {
 	String NOMBRE="Direccion RangeFinder";
@@ -16,14 +17,13 @@ public class DireccionRF implements CalculoDireccion {
 	private double consignaDir;
 	private double distancia;
 	private PanelDirRF panel;
+	private int indMinAnt = -1;
+	private ThreadSupendible thActulizacion;
+	private int rangoInd = 10;
 
 	public double getConsignaDireccion() {
-		BarridoAngular nuevoBa=ventanaMonitoriza.conexionRF.ultimoBarrido();		
-		if(nuevoBa!=ba && nuevoBa!=null) {
-			ba=nuevoBa;
-			angDistRF = getAnguloDistObjetivo(ba);
-		}
-		consignaDir = -(angDistRF[0]-Math.PI);
+		angDistRF = getAnguloDistObjetivo(ba);
+		consignaDir = angDistRF[0]-Math.PI;
 		distancia = angDistRF[1];
 		return consignaDir;
 	}
@@ -38,16 +38,28 @@ public class DireccionRF implements CalculoDireccion {
 		double distMin = Double.POSITIVE_INFINITY;
 		double[] anguloDistRF = new double[2];
 		int indMinDist = 0;
-		for (int i=0; i<=ba.numDatos();i++){
-			if (ba.getDistancia(i)< distMin){
-				indMinDist = i;
-				distMin = ba.getDistancia(i);
+		if (indMinAnt < 0){ // Búsqueda exaustiva
+			for (int i=0; i<ba.numDatos();i++){
+				if (ba.getDistancia(i)< distMin){
+					indMinDist = i;
+					distMin = ba.getDistancia(i);
+				}
 			}
-		}
+		}else { // Búsqueda en torno al ángulo donde se detectó el objetivo anteriormente
+			int indInf = ((indMinAnt - rangoInd ) < 0)?0:(indMinAnt - rangoInd);
+			int indSup = ((indMinAnt + rangoInd) > ba.numDatos())?ba.numDatos():(indMinAnt + rangoInd);
+			for(int i=indInf; i < indSup;i++){
+				if (ba.getDistancia(i)< distMin){
+					indMinDist = i;
+					distMin = ba.getDistancia(i);
+				}
+			}
+		}		
 		anguloDistRF[0] = ba.getAngulo(indMinDist);
 		anguloDistRF[1] = ba.getDistancia(indMinDist);
 		return anguloDistRF;
 	}
+	
 
 	public String getDescripcion() {
 		return DESCRIPCION;
@@ -61,6 +73,14 @@ public class DireccionRF implements CalculoDireccion {
 		if(ventanaMonitoriza!=null)
 			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		ventanaMonitoriza=ventMonitoriza;
+		thActulizacion=new ThreadSupendible() {
+			BarridoAngular ba=null;
+			@Override
+			protected void accion() {
+				ba=ventanaMonitoriza.conexionRF.esperaNuevoBarrido(ba);				
+			}
+		};
+		thActulizacion.setName(NOMBRE);
 		panel=new PanelDirRF();
 		ventanaMonitoriza.añadePanel(panel, getNombre(),false,false);
 
