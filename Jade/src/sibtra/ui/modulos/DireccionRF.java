@@ -1,5 +1,11 @@
 package sibtra.ui.modulos;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
+
 import sibtra.lms.BarridoAngular;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.CalculoDireccion;
@@ -101,7 +107,9 @@ public class DireccionRF implements CalculoDireccion {
 
 			//TODO ponel labels que muestren la informacion recibida de los otros módulos y la que se aplica.
 			añadeAPanel(new LabelDatoFormato(DireccionRF.class,"getConsignaDirGrados","%6.2f º"), "Ang RF");
-			añadeAPanel(new LabelDatoFormato(DireccionRF.class,"getDistancia","%6.2f m"), "Dist RF");			
+			añadeAPanel(new LabelDatoFormato(DireccionRF.class,"getDistancia","%6.2f m"), "Dist RF");
+			IniciaBusqueda iniBusqueda = new IniciaBusqueda();
+			añadeAPanel(new JButton(iniBusqueda), "Reiniciar Búsqueda");			
 			
 		}
 	}
@@ -112,6 +120,20 @@ public class DireccionRF implements CalculoDireccion {
 
 	public double getDistancia() {
 		return distancia;
+	}
+	
+	class IniciaBusqueda extends AbstractAction{
+		
+		public IniciaBusqueda(){
+			super("Reinicia la búsqueda");
+			setEnabled(true);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			indMinAnt = -1;
+			setEnabled(true);			
+		}
+		
 	}
 
 }
