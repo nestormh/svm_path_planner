@@ -10,6 +10,7 @@ import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.Motor;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.SpinnerDouble;
+import sibtra.util.UtilCalculos;
 
 /**
  * @author alberto
@@ -23,7 +24,7 @@ public class MotorPerrito extends MotorSincrono implements Motor {
 	double distMax=0.3;
 	double velAcercamiento=2.0;
 	private BarridoAngular ba=null;
-	private double[] angDistRF={0,80 };
+	private double[] angDistRF={0,80};
 	
 	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonito) {
 		if(!super.setVentanaMonitoriza(ventMonito))
@@ -36,23 +37,30 @@ public class MotorPerrito extends MotorSincrono implements Motor {
 	}
 	
 	protected void accionPeriodica() {
-		BarridoAngular nuevoBa=ventanaMonitoriza.conexionRF.ultimoBarrido();
-		actualizaModeloCoche();
-		if(nuevoBa!=ba && nuevoBa!=null) {
-			ba=nuevoBa;
-			angDistRF = getAnguloDistObjetivo(ba);
-		}
-		/* Partiendo de la posición y orientación del coche y de la distancia a la que se
-		 * encuentra el objetivo y a que ángulo, se calculan las coordenadas locales
-		 * del objetivo*/
-		double[] coorObjetivo = calculaCoorLocalObjetivo(modCoche.getX(),modCoche.getY()
-				,angDistRF[0]+modCoche.getTita(),angDistRF[1]+10);
-		double[] coorCoche = {modCoche.getX(),modCoche.getY()};
-		/* Calculamos la ruta hasta el objetivo*/
-		Trayectoria Tr = new Trayectoria(coorObjetivo,coorCoche,distMax,velAcercamiento);
-		ventanaMonitoriza.setNuevaTrayectoria(Tr);
+		consignaVolante=consignaVolanteRecibida=calculadorDireccion.getConsignaDireccion();
+        consignaVolante=UtilCalculos.limita(consignaVolante, -cotaAngulo, cotaAngulo);
+        ventanaMonitoriza.conexionCarro.setAnguloVolante(consignaVolante);
+        double velocidadActual = ventanaMonitoriza.conexionCarro.getVelocidadMS();
+        consignaVelocidad=consignaVelocidadRecibida=calculadorVelocidad.getConsignaVelocidad();
+        ventanaMonitoriza.conexionCarro.setConsignaAvanceMS(consignaVelocidad);
+        panel.actualizaDatos(MotorPerrito.this);
+//		BarridoAngular nuevoBa=ventanaMonitoriza.conexionRF.ultimoBarrido();
+//		actualizaModeloCoche();
+//		if(nuevoBa!=ba && nuevoBa!=null) {
+//			ba=nuevoBa;
+//			angDistRF = getAnguloDistObjetivo(ba);
+//		}
+//		/* Partiendo de la posición y orientación del coche y de la distancia a la que se
+//		 * encuentra el objetivo y a que ángulo, se calculan las coordenadas locales
+//		 * del objetivo*/
+//		double[] coorObjetivo = calculaCoorLocalObjetivo(modCoche.getX(),modCoche.getY()
+//				,angDistRF[0]+modCoche.getTita(),angDistRF[1]+10);
+//		double[] coorCoche = {modCoche.getX(),modCoche.getY()};
+//		/* Calculamos la ruta hasta el objetivo*/
+//		Trayectoria Tr = new Trayectoria(coorObjetivo,coorCoche,distMax,velAcercamiento);
+//		ventanaMonitoriza.setNuevaTrayectoria(Tr);
 
-		super.accionPeriodica();
+		//super.accionPeriodica();
 
 	}
     
