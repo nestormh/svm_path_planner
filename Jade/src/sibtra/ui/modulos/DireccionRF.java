@@ -27,10 +27,7 @@ public class DireccionRF implements CalculoDireccion {
 	private ThreadSupendible thActulizacion;
 	private int rangoInd = 10;
 
-	public double getConsignaDireccion() {
-		angDistRF = getAnguloDistObjetivo(ba);
-		consignaDir = angDistRF[0]-Math.PI;
-		distancia = angDistRF[1];
+	public double getConsignaDireccion() {		
 		return consignaDir;
 	}
 	
@@ -61,6 +58,7 @@ public class DireccionRF implements CalculoDireccion {
 				}
 			}
 		}		
+		indMinAnt = indMinDist;
 		anguloDistRF[0] = ba.getAngulo(indMinDist);
 		anguloDistRF[1] = ba.getDistancia(indMinDist);
 		return anguloDistRF;
@@ -79,16 +77,20 @@ public class DireccionRF implements CalculoDireccion {
 		if(ventanaMonitoriza!=null)
 			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		ventanaMonitoriza=ventMonitoriza;
+		panel=new PanelDirRF();
+		ventanaMonitoriza.añadePanel(panel,NOMBRE);
 		thActulizacion=new ThreadSupendible() {
 			BarridoAngular ba=null;
 			@Override
 			protected void accion() {
-				ba=ventanaMonitoriza.conexionRF.esperaNuevoBarrido(ba);				
+				ba=ventanaMonitoriza.conexionRF.esperaNuevoBarrido(ba);
+				angDistRF = getAnguloDistObjetivo(ba);
+				consignaDir = angDistRF[0]-Math.PI/2;				
 			}
 		};
 		thActulizacion.setName(NOMBRE);
-		panel=new PanelDirRF();
-		ventanaMonitoriza.añadePanel(panel, getNombre(),false,false);
+		thActulizacion.activar();
+		
 
 		return true;
 	}
