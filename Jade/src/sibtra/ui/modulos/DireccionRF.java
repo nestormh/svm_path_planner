@@ -96,7 +96,9 @@ public class DireccionRF implements CalculoDireccion {
 	}
 
 	public void terminar() {
-		// TODO Auto-generated method stub
+		if(ventanaMonitoriza==null)
+			throw new IllegalStateException("Aun no inicializado");
+		ventanaMonitoriza.quitaPanel(panel);
 
 	}
 	
