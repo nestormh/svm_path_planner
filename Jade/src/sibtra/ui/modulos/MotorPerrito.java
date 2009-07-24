@@ -10,6 +10,7 @@ import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.Motor;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.SpinnerDouble;
+import sibtra.util.ThreadSupendible;
 import sibtra.util.UtilCalculos;
 
 /**
@@ -33,6 +34,23 @@ public class MotorPerrito extends MotorSincrono implements Motor {
 		ventanaMonitoriza.quitaPanel(panel);
 		panel=new PanelPerrito();
 		ventanaMonitoriza.añadePanel(panel, getNombre(),false,false);
+		thCiclico=new ThreadSupendible() {
+			private long tSig;
+
+			@Override
+			protected void accion() {
+				//apuntamos cual debe ser el instante siguiente
+		        tSig = System.currentTimeMillis() + periodoMuestreoMili;
+				accionPeriodica();
+		        //esparmos hasta que haya pasado el tiempo convenido
+				while (System.currentTimeMillis() < tSig) {
+		            try {
+		                Thread.sleep(tSig - System.currentTimeMillis());
+		            } catch (Exception e) {}
+		        }
+			}
+		};
+		thCiclico.setName(NOMBRE);
 		return true;
 	}
 	
