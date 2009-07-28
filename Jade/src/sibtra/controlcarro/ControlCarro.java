@@ -52,7 +52,7 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Maximo comando en el avance */
 	public final static int MINAVANCE = 100;
 	/** Minimo comando en el avance */
-	public final static int MAXAVANCE = 250;
+	public final static int MAXAVANCE = 240;
 	
 	/** Numero de cuentas necesarias para alcanzar un metro	 */
 	public final static double PULSOS_METRO = 74;
