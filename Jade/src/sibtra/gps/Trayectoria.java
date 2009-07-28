@@ -3,6 +3,14 @@
  */
 package sibtra.gps;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,8 +23,17 @@ import sibtra.util.UtilCalculos;
  * @author alberto
  *
  */
-public class Trayectoria {
+public class Trayectoria implements Serializable {
 
+	/**
+	 * Número de serie. IMPORTANTE porque vamos a salvarlo en fichero directamente.
+	 * Si cambiamos estructura del objeto tenemos que cambiar el número de serie y ver 
+	 * como se cargan versiones anteriores.
+	 * Para saber si es necesario cambiar el número ver 
+	 *  http://java.sun.com/j2se/1.5.0/docs/guide/serialization/spec/version.html#9419
+	 */
+ 	private static final long serialVersionUID = 1L;
+	
 	private static final double alejamientoRazonable = 0;
 	boolean esCerrada=false;
 	double distanciaMaxima=Double.MAX_VALUE;
@@ -28,13 +45,20 @@ public class Trayectoria {
 	double[] ultimaPosCoche=null;
 	
 	/** Longitud de la trayectoria */
-	double largo=0.0;
+	double largo=-1.0;
 	
 	public double[] x=null;
 	public double[] y=null;
 	public double[] z=null;
 	public double[] rumbo=null;
 	public double[] velocidad=null;
+	
+	public String toString() {
+		String res=String.format("Tr {num=%d,%s,l=%f m}", length()
+				,esCerrada?"cerrada":"abierta"
+			, getLargo());
+		return res;
+	}
 	
 	/** copia todos los campos de trOriginal sobre los de la trayectoria actual */
 	protected void copia(Trayectoria trOriginal) {
@@ -486,14 +510,16 @@ public class Trayectoria {
 		return UtilCalculos.distanciaPuntos(pto, ultimaPosCoche);
 	}
 	
-	/** @return el largo de la trayectoria entre los puntos de los indices pasados */
+	/**
+	 * Calcula largo de la trayectoria entre indIni y punto anterior al indFin 
+	 * @return el largo de la trayectoria entre los puntos de los indices pasados */
 	public double largo(int indIni,int indFin) {
 		if(indIni<0 || indIni>x.length || indFin<0 || indFin>x.length)
 			throw new IllegalArgumentException("Indices fuera de rango");
-		if(!esCerrada && indIni>indFin)
+		if(!esCerrada && indIni>indFin )
 			throw new IllegalArgumentException("Indice inicial el mayor que final (y no es cerrada)");
     	double dist = 0;
-    	for (int i=indIni;i!=indFin;i++){
+    	for (int i=indIni;i!=(indFin+x.length-1)%x.length;i++){
     		double dx=x[i]-x[(i+1)%x.length];
             double dy=y[i]-y[(i+1)%x.length];
             dist += Math.sqrt(dx*dx+dy*dy);
@@ -516,21 +542,73 @@ public class Trayectoria {
     	return i+1;
 	}
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
 	/** @return la última posición establecida con {@link #situaCoche(double[])} */
 	public double[] getPosicionCoche() {
 		return ultimaPosCoche;
 	}
 
 	public double getLargo() {
+		if(largo<0)
+			if(esCerrada)
+				largo=largo(0, 0);
+			else
+				largo=largo(0, length());
 		return largo;
+	}
+
+	/**
+	 * Salva la trayecetoria actual en el fichero indicado
+	 * @param nombreFichero fichero en el que salvar la trayectoria
+	 * @return si se salvó correctamente
+	 */
+	public boolean salvaAFichero(String nombreFichero)  {
+		try {
+			File file = new File(nombreFichero);
+			ObjectOutputStream oos;
+			oos = new ObjectOutputStream(new FileOutputStream(file));
+			oos.writeObject(this);
+			return true;
+		} catch (Exception e) {
+			System.err.println("Problema al salvar trayectoria en fichero "+nombreFichero);
+			return false;
+		}
+	}
+
+	/**
+	 * Carga la trayecetoria del fichero indicado
+	 * @param nombreFichero fichero del que cargar la trayectoria
+	 * @return trayectoria cargada o null si hay error
+	 */
+	public static Trayectoria cargaDeFichero(String nombreFichero)  {
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(nombreFichero));
+			Trayectoria trayectoria=(Trayectoria)ois.readObject();
+			return trayectoria;
+		} catch (Exception e) {
+			System.err.println("Problema al cargar trayectoria del fichero "+nombreFichero);
+			return null;
+		}
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+
+		String nombreFichero="Trayectorias/pru1";
+		int nptos=20;
+		double[][] dtos=new double[nptos][];
+		for(int i=0;i<nptos;i++) {
+			double[] da={i,i};
+			dtos[i]=da;
+		}
+		Trayectoria tr=new Trayectoria(dtos);
+		
+		tr.salvaAFichero(nombreFichero);
+		
+		Trayectoria tc=Trayectoria.cargaDeFichero(nombreFichero);
+		System.out.println("Trayectoria leida:"+tc);
+		
 	}
 
 }
