@@ -52,7 +52,7 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Maximo comando en el avance */
 	public final static int MINAVANCE = 100;
 	/** Minimo comando en el avance */
-	public final static int MAXAVANCE = 255;
+	public final static int MAXAVANCE = 250;
 	
 	/** Numero de cuentas necesarias para alcanzar un metro	 */
 	public final static double PULSOS_METRO = 74;
@@ -193,9 +193,9 @@ public class ControlCarro implements SerialPortEventListener {
 //	private double kPDesfreno = 1.5;
 	
 	/** Ganancia proporcional del PID de avance */
-	private double kPAvance = 2.5;
+	private double kPAvance = 1.5;
 	/** Ganancia defivativa del PID de avance */
-	private double kDAvance = 0.2;
+	private double kDAvance = 0.3;
 	/** Ganancia integral del PID de avance */
 	private double kIAvance = 0.1;
 
@@ -206,10 +206,10 @@ public class ControlCarro implements SerialPortEventListener {
 	private double consignaVel = 0;
 
 	/** Maximo incremento permitido en el comando para evitar aceleraciones bruscas */
-	private int maxInc = 10;
+	private int maxInc = 1;
         
 	/** Zona Muerta donde el motor empieza a actuar realmente 	 */
-	static final int ZonaMuerta = 80;
+	static final int ZonaMuerta = 60;
         
 	/** Numero de paquetes recibidos validos */
 	private int NumPaquetes = 0;
@@ -877,9 +877,9 @@ public class ControlCarro implements SerialPortEventListener {
 		IncComando=UtilCalculos.limita(IncComando,-maxInc,maxInc);
 		comando=comandoAnt+IncComando;
 		//Limitamos el comando maximo a aplicar
-		comando=UtilCalculos.limita(comando, -255, 255);
+		comando=UtilCalculos.limita(comando, -255, MAXAVANCE);
 		//umbralizamos la zona muerta
-		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, 60, -1);
+		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, ZonaMuerta, -1);
 //				, -90/FactorFreno+comandoAnt);  //TODO da valores positivos
 		
 
