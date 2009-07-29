@@ -63,17 +63,6 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 				));
 	}
 
-    /**
-	 * Obtiene posición relativa al RF de una medida del RF
-	 * @param i indice del barrido a considerar
-	 * @return posición real obtenidad a partir de posición actual y rumbo en {@link #MI}
-	 */
-	protected Point2D ptoRF2Point(int i) {
-		double ang=MI.barr.getAngulo(i);
-		double dist=MI.barr.getDistancia(i);
-		return new Point2D.Double(dist*Math.cos(ang),dist*Math.sin(ang));
-	}
-
 
 	/**
 	 * Crea parte grafica junto con slider de zoom
@@ -167,7 +156,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 				g.setStroke(new BasicStroke());
 				g.setColor(Color.RED);
 				g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
-						,point2Pixel(ptoRF2Point(MI.indMin))));
+						,point2Pixel(MI.barr.getPunto(MI.indMin))));
 
 				if(MI.iAD<MI.iAI) {
 					g.setStroke(new BasicStroke(3));
@@ -176,10 +165,10 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 					GeneralPath perimetro = 
 						new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
 
-					Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
+					Point2D.Double px=point2Pixel(MI.barr.getPunto(MI.iAD));
 					perimetro.moveTo((float)px.getX(),(float)px.getY());
 					for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
-						px=point2Pixel(ptoRF2Point(i));
+						px=point2Pixel(MI.barr.getPunto(i));
 						perimetro.lineTo((float)px.getX(),(float)px.getY());
 					}
 					g.draw(perimetro);
@@ -221,7 +210,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 					//marcamos pto barrido dió obstáculo camino más cercano
 					g.setStroke(new BasicStroke());
 					g.draw(new Line2D.Double(pxCentro
-							,point2Pixel(ptoRF2Point(MI.indBarrSegObs))));
+							,point2Pixel(MI.barr.getPunto(MI.indBarrSegObs))));
 				}
 			}
 
