@@ -20,23 +20,24 @@ import sibtra.ui.defs.CalculoVelocidad;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
+import sibtra.util.SpinnerInt;
 import sibtra.util.ThreadSupendible;
 
 public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
-	String NOMBRE="Perseguidor RF";
-	String DESCRIPCION="Calcula el angulo del volante para aproximarse al objetivo mas cercano";
+	String NOMBRE="Perseguidor";
+	String DESCRIPCION="Calcula el angulo del volante y la velocidad para aproximarse al objetivo mas cercano";
 	private VentanasMonitoriza ventanaMonitoriza;
-	private BarridoAngular ba=null;
+	private BarridoAngular ultimoBarrido=null;
 	private double[] angDistRF={0,80};
-	private double consignaDir;
-	private double distancia;
+	private double consignaDir=0.0;
+	private double distancia=Double.POSITIVE_INFINITY;
 	private PanelPerseguidor panel;
 	private int indMinAnt = -1;
 	private ThreadSupendible thActulizacion;
 	private int rangoInd = 10;
-	private double velCrucero = 2.5;
-	private int indInf;
-	private int indSup;
+	private double velCrucero = 2;
+	private int indInf=-1;
+	private int indSup=-1;
 	private boolean terminado=false;
 
 	public double getConsignaDireccion() {		
@@ -46,7 +47,7 @@ public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
 	public double getConsignaVelocidad() {
 		double velocidad = velCrucero;
 		if (angDistRF[1] > 5){
-			velocidad = velCrucero + angDistRF[1]*0.2;
+			velocidad = velCrucero + angDistRF[1]*0.05;
 		}		
 		return velocidad;
 	}
@@ -89,9 +90,8 @@ public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
 	}
 
 	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonitoriza) {
-		if(ventanaMonitoriza!=null && ventMonitoriza!=ventanaMonitoriza) {
-			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar en otra ventana");
-		}
+		if(ventanaMonitoriza!=null && ventMonitoriza!=ventanaMonitoriza)
+			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		if(ventMonitoriza==ventanaMonitoriza)
 			//el la misma, no hacemos nada ya que implementa 2 interfaces y puede ser elegido 2 veces
 			return true;
@@ -99,12 +99,12 @@ public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
 		panel=new PanelPerseguidor();
 		ventanaMonitoriza.añadePanel(panel,NOMBRE,true,false);
 		thActulizacion=new ThreadSupendible() {
-			BarridoAngular ba=null;
 			@Override
 			protected void accion() {
-				ba=ventanaMonitoriza.conexionRF.esperaNuevoBarrido(ba);
-				angDistRF = getAnguloDistObjetivo(ba);
+				ultimoBarrido=ventanaMonitoriza.conexionRF.esperaNuevoBarrido(ultimoBarrido);
+				angDistRF = getAnguloDistObjetivo(ultimoBarrido);
 				consignaDir = angDistRF[0]-Math.PI/2;
+				distancia = angDistRF[1];
 				panel.actualiza();
 			}
 		};
@@ -127,7 +127,7 @@ public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
 	@SuppressWarnings("serial")
 	protected class PanelPerseguidor extends PanelMuestraBarrido {
 		private PanelFlow panelInformacion;
-
+			
 		public PanelPerseguidor()  {
 			super((short)80);
 			{//nuevo panel para añadir debajo
@@ -135,6 +135,7 @@ public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
 				panelInformacion.añadeAPanel(new LabelDatoFormato(PerseguidorRF.class,"getConsignaDirGrados","%6.2f º"), "Ang RF");
 				panelInformacion.añadeAPanel(new LabelDatoFormato(PerseguidorRF.class,"getDistancia","%6.2f m"), "Dist RF");
 				panelInformacion.añadeAPanel(new SpinnerDouble(PerseguidorRF.this,"setVelCrucero",0.05,4,0.05), "Vel Crucero");
+				panelInformacion.añadeAPanel(new SpinnerInt(PerseguidorRF.this,"setRangoInd",1,100,1), "Rang Ind");
 				IniciaBusqueda iniBusqueda = new IniciaBusqueda();
 				panelInformacion.añadeAPanel(new JButton(iniBusqueda), "Reiniciar Búsqueda");			
 				add(panelInformacion);
@@ -144,22 +145,22 @@ public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
 		protected void cosasAPintar(Graphics g0) {
 			super.cosasAPintar(g0);
 			Graphics2D g=(Graphics2D)g0;
-			if(ba==null) return;
+			if(ultimoBarrido==null || indInf<0 || indSup<0) return;
 			g.setColor(Color.MAGENTA);
 			//linea a donde comienza y termina la exploración y el seleccionado
 			Point2D.Double pxCentro=point2Pixel(0.0,0.0);			
-			g.draw(new Line2D.Double(pxCentro,point2Pixel(ba.getPunto(indInf))));
-			g.draw(new Line2D.Double(pxCentro,point2Pixel(ba.getPunto(indSup-1))));
-			g.draw(new Line2D.Double(pxCentro,point2Pixel(ba.getPunto(indMinAnt))));
+			g.draw(new Line2D.Double(pxCentro,point2Pixel(ultimoBarrido.getPunto(indInf))));
+			g.draw(new Line2D.Double(pxCentro,point2Pixel(ultimoBarrido.getPunto(indSup-1))));
+			g.draw(new Line2D.Double(pxCentro,point2Pixel(ultimoBarrido.getPunto(indMinAnt))));
 			//Marcamos en rojo la parte explorada del camino
 			g.setStroke(new BasicStroke(3));
 			g.setColor(Color.RED);
 			GeneralPath perimetro = 
 				new GeneralPath(GeneralPath.WIND_EVEN_ODD,indSup-indInf );
-			Point2D.Double px=point2Pixel(ba.getPunto(indInf));
+			Point2D.Double px=point2Pixel(ultimoBarrido.getPunto(indInf));
 			perimetro.moveTo((float)px.getX(),(float)px.getY());
 			for(int i=indInf+1; i<indSup; i++ ) {
-				px=point2Pixel(ba.getPunto(i));
+				px=point2Pixel(ultimoBarrido.getPunto(i));
 				perimetro.lineTo((float)px.getX(),(float)px.getY());
 			}
 			g.draw(perimetro);
@@ -170,10 +171,10 @@ public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
 		 * y actualiza la presentación
 		 */
 		public void actualiza() {
-			if(ba!=null) 		
-				super.setBarrido(ba);
+			if(ultimoBarrido!=null) 		
+				setBarrido(ultimoBarrido);
 			panelInformacion.actualizaDatos(PerseguidorRF.this);
-			actualiza();
+			super.actualiza();
 		}
 	}
 
@@ -206,6 +207,20 @@ public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
 
 	public void setVelCrucero(double velCrucero) {
 		this.velCrucero = velCrucero;
+	}
+
+	/**
+	 * @return el rangoInd
+	 */
+	public int getRangoInd() {
+		return rangoInd;
+	}
+
+	/**
+	 * @param rangoInd el rangoInd a establecer
+	 */
+	public void setRangoInd(int rangoInd) {
+		this.rangoInd = rangoInd;
 	}
 	
 }
