@@ -284,6 +284,14 @@ public class PanelEligeModulos extends JPanel {
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			if(ventanaMonitoriza.isZPulsada()) {
+				JOptionPane.showMessageDialog(ventanaMonitoriza.ventanaPrincipal,
+					    "La Zeta de seguiridad está pulsada",
+					    "Z pulsada",
+					    JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+				
 			obMotor.actuar();
 			setEnabled(false);
 			accionParar.setEnabled(true);
@@ -299,6 +307,8 @@ public class PanelEligeModulos extends JPanel {
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			if(obMotor==null)
+				return;
 			obMotor.parar();
 			setEnabled(false);
 			accionActivar.setEnabled(true);

@@ -3,11 +3,14 @@
  */
 package sibtra.ui;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import sibtra.controlcarro.ControlCarro;
@@ -25,6 +28,7 @@ import sibtra.lms.PanelRF;
 import sibtra.ui.defs.Motor;
 import sibtra.ui.defs.UsuarioTrayectoria;
 import sibtra.util.EligeSerial;
+import sibtra.util.ThreadSupendible;
 
 /**
  * @author alberto
@@ -62,6 +66,12 @@ public class VentanasMonitoriza extends Ventanas {
 	private JPanel panelGrabar;
 
 	private PanelMuestraRuta panelMuestraRuta;
+
+	private ThreadSupendible thZeta;
+
+	protected boolean zPulsada=true;
+
+	private JLabel jlZeta;
 
     
     /** Abre la conexion a los 4 perifericos y los paneles de monitorizacion
@@ -163,6 +173,37 @@ public class VentanasMonitoriza extends Ventanas {
         //Añadimos panel de selección de modulos
         panSelModulos=new PanelEligeModulos(this);
         añadePanel(panSelModulos, "Modulos", true);
+        
+        //Monitorizacion de la Z
+        jlZeta=new JLabel("Zeta");
+        jlZeta.setForeground(Color.RED);
+        barraMenu.add(Box.createHorizontalGlue());
+        barraMenu.add(jlZeta);
+        thZeta=new ThreadSupendible() {
+
+			@Override
+			protected void accion() {
+				if(conexionCarro.getAlarma()==1) {
+					if (!zPulsada) {
+						//se acaba de pulsar la Z
+						//paramos
+						panSelModulos.accionParar.actionPerformed(null);
+						jlZeta.setForeground(Color.RED);
+					}
+				} else {
+					if(zPulsada) {
+						//Se acaba de soltar la Z
+						jlZeta.setForeground(Color.GREEN);
+					}
+				}
+				zPulsada=conexionCarro.getAlarma()==1;
+	            try {
+	                Thread.sleep(10);
+	            } catch (Exception e) {}
+			}
+        };
+        thZeta.setName("Periodico VentanaMonitoriza");
+        thZeta.activar();
         
         //Terminamos la inicialización de Ventanas
         muestraVentanas();
@@ -272,5 +313,12 @@ public class VentanasMonitoriza extends Ventanas {
         	actPararGrabarRuta.setEnabled(false);
         }
     }
+
+	/**
+	 * @return el zPulsada
+	 */
+	public boolean isZPulsada() {
+		return zPulsada;
+	}
 
 }
