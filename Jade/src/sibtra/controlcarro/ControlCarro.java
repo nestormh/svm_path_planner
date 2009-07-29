@@ -210,6 +210,7 @@ public class ControlCarro implements SerialPortEventListener {
         
 	/** Zona Muerta donde el motor empieza a actuar realmente 	 */
 	static final int ZonaMuerta = 60;
+	private static final double limiteIntegral = 40;
         
 	/** Numero de paquetes recibidos validos */
 	private int NumPaquetes = 0;
@@ -867,14 +868,14 @@ public class ControlCarro implements SerialPortEventListener {
 		//derivativo como y(k)-y(k-2)
 		double derivativo = error - errorAnt +  derivativoAnt;
 
-		if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
+		if ( (integral < limiteIntegral)) //if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
 			integral += errorAnt;
 
 		double comandotemp = kPAvance * error + kDAvance * derivativo + kIAvance * integral;
 		double IncComando = comandotemp - comandoAnt;
 		
 		//Limitamos el incremento de comando
-		IncComando=UtilCalculos.limita(IncComando,-maxInc,maxInc);
+		IncComando=UtilCalculos.limita(IncComando,-255,maxInc);
 		comando=comandoAnt+IncComando;
 		//Limitamos el comando maximo a aplicar
 		comando=UtilCalculos.limita(comando, -255, MAXAVANCE);
