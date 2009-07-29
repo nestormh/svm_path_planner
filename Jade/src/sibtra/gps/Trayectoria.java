@@ -3,16 +3,20 @@
  */
 package sibtra.gps;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.StringTokenizer;
 
 import sibtra.imu.AngulosIMU;
 import sibtra.util.UtilCalculos;
@@ -54,9 +58,12 @@ public class Trayectoria implements Serializable {
 	public double[] velocidad=null;
 	
 	public String toString() {
-		String res=String.format("Tr {num=%d,%s,l=%f m}", length()
+		String res=String.format(Locale.US,"Tr {num=%d,%s,l=%f m}", length()
 				,esCerrada?"cerrada":"abierta"
 			, getLargo());
+		for(int i=0;i<length();i++)
+			res+=String.format(Locale.US,"\n(%f , %f , %f) %fº %fm/s",x[i],y[i],z[i]
+			      ,Math.toDegrees(rumbo[i]),velocidad[i]);
 		return res;
 	}
 	
@@ -562,11 +569,14 @@ public class Trayectoria implements Serializable {
 	 * @return si se salvó correctamente
 	 */
 	public boolean salvaAFichero(String nombreFichero)  {
+		if (nombreFichero==null || nombreFichero.length()==0)
+			throw new IllegalArgumentException("Necesario nombre de fichero ");
 		try {
 			File file = new File(nombreFichero);
 			ObjectOutputStream oos;
 			oos = new ObjectOutputStream(new FileOutputStream(file));
 			oos.writeObject(this);
+			oos.close();
 			return true;
 		} catch (Exception e) {
 			System.err.println("Problema al salvar trayectoria en fichero "+nombreFichero);
@@ -580,9 +590,12 @@ public class Trayectoria implements Serializable {
 	 * @return trayectoria cargada o null si hay error
 	 */
 	public static Trayectoria cargaDeFichero(String nombreFichero)  {
+		if (nombreFichero==null || nombreFichero.length()==0)
+			throw new IllegalArgumentException("Necesario nombre de fichero ");
 		try {
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(nombreFichero));
 			Trayectoria trayectoria=(Trayectoria)ois.readObject();
+			ois.close();
 			return trayectoria;
 		} catch (Exception e) {
 			System.err.println("Problema al cargar trayectoria del fichero "+nombreFichero);
@@ -590,6 +603,91 @@ public class Trayectoria implements Serializable {
 		}
 	}
 
+//	/**
+//	 * Salva la trayecetoria actual en el fichero indicado
+//	 * @param nombreFichero fichero en el que salvar la trayectoria
+//	 * @return si se salvó correctamente
+//	 */
+//	public boolean salvaAFicheroOct(String nombreFichero)  {
+//		if (nombreFichero==null || nombreFichero.length()==0)
+//			throw new IllegalArgumentException("Necesario nombre de fichero ");
+//		try {
+//			FileWriter fileW = new FileWriter(nombreFichero);
+//			//primera linea
+//			fileW.write("# Created by "+getClass().getName()+", "+System.currentTimeMillis());
+//			//TODO Hacer clase para salvar en octave?? usar MAT
+//			return true;
+//		} catch (Exception e) {
+//			System.err.println("Problema al cargar trayectoria del fichero "+nombreFichero);
+//			return false;
+//		}
+//	}
+
+	/**
+	 * Carga matriz Tr de fichero octave y genera nueva trayectoria con los datos
+	 * @param nombreFichero fichero donde cargarla
+	 * @return la nueva trayectoria o null si hay algún problema
+	 */
+	public static Trayectoria cargaDeFicheroOctave(String nombreFichero)  {
+		if (nombreFichero==null || nombreFichero.length()==0)
+			throw new IllegalArgumentException("Necesario nombre de fichero ");
+		Trayectoria nuevaTr=null;
+		double[][] datTr=null;
+		try {
+			BufferedReader fent=new BufferedReader( new FileReader(nombreFichero));
+			//Cabecera
+			String lin=fent.readLine();
+			//nombre
+			while((lin=fent.readLine())!=null) {
+				StringTokenizer st=new StringTokenizer(lin);
+				st.nextToken(); //#
+				if(!"name:".equals(st.nextToken())) throw null;
+				String nombre=st.nextToken();
+				//tipo
+				lin=fent.readLine();
+				st=new StringTokenizer(lin);
+				st.nextToken(); //#
+				if(!"type:".equals(st.nextToken())) throw null;
+				String tipo=st.nextToken();
+				if("scalar".equals(tipo)) {
+					fent.readLine();
+					continue;
+				}
+				if(!"matrix".equals(tipo)) throw null;
+				//filas
+				lin=fent.readLine();
+				st=new StringTokenizer(lin);
+				st.nextToken(); //#
+				if(!"rows:".equals(st.nextToken())) throw null;
+				int filas=Integer.valueOf(st.nextToken());
+				//columnas
+				lin=fent.readLine();
+				st=new StringTokenizer(lin);
+				st.nextToken(); //#
+				if(!"columns:".equals(st.nextToken())) throw null;
+				int columnas=Integer.valueOf(st.nextToken());
+				if(!"Tr".equals(nombre)) {
+					//quitamos todas las filas
+					for(int i=1;i<=filas;i++)
+						fent.readLine();
+					continue;  //probamos siguiente matriz
+				} 
+				//leemos la matriz
+				datTr=new double[filas][columnas];
+				for(int i=0; i<filas; i++) {
+					lin=fent.readLine();
+					st=new StringTokenizer(lin);
+					for(int j=0;j<columnas;j++)
+						datTr[i][j]=Double.valueOf(st.nextToken());
+				}
+				nuevaTr=new Trayectoria(datTr);
+			}
+			return nuevaTr;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
 	/**
 	 * @param args
 	 */
@@ -608,6 +706,9 @@ public class Trayectoria implements Serializable {
 		
 		Trayectoria tc=Trayectoria.cargaDeFichero(nombreFichero);
 		System.out.println("Trayectoria leida:"+tc);
+		
+		Trayectoria tcot=Trayectoria.cargaDeFicheroOctave("Trayectorias/prueba.oct");
+		System.out.println("Trayectoria leida:"+tcot);
 		
 	}
 
