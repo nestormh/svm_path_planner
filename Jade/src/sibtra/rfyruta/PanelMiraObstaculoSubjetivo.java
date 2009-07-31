@@ -148,8 +148,12 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 			g.setStroke(new BasicStroke(2));
 			g.setColor(Color.WHITE);
 			//los de la derecha e izquierda que están libres
-			g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
-			g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
+			GeneralPath gp2=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1);
+			if(gp2!=null)
+				g.draw(gp2);
+			gp2=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1);
+			if(gp2!=null)
+				g.draw(gp2);
 
 			if(MI.getDistanciaLineal()>0) {
 				//marcamos el pto mínimo

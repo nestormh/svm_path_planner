@@ -151,7 +151,7 @@ public class VentanasMonitoriza extends Ventanas {
         panelRF=new PanelRF(conexionRF);
         añadePanel(panelRF, "RF", true, false); //a la izquierda sin scroll
 		try { 		
-			conexionRF.pideBarridoContinuo((short)0,(short) 180, (short)1);
+			conexionRF.pideBarridoContinuo((short)20,(short) 160, (short)1);
 		} catch (LMSException e) {
 			System.err.println("No fue posible Comenzar con envío continuo");
 			System.exit(1);
@@ -165,6 +165,7 @@ public class VentanasMonitoriza extends Ventanas {
         panelGrabar.setLayout(new BoxLayout(panelGrabar, BoxLayout.PAGE_AXIS));
         panelGrabar.add(new PanelGrabarRuta(conexionGPS,actGrabarRuta,actPararGrabarRuta));
         panelMuestraRuta=new PanelMuestraRuta(conexionGPS.getBufferEspacial());
+        conexionGPS.addGpsEventListener(panelMuestraRuta);
         panelGrabar.add(panelMuestraRuta);
         añadePanel(panelGrabar, "Grabar", false, false);
         menuAcciones.add(actGrabarRuta);

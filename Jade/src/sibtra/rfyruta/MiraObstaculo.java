@@ -19,7 +19,7 @@ public class MiraObstaculo {
 	private boolean debug = true;
 
 	/** Ancho para el camino	 */
-	double anchoCamino=1.5;
+	double anchoCamino=1.2;
 
 	/** de donde provienen los puntos */
 	Trayectoria tray;
