@@ -1038,7 +1038,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 */
 	public void stopControlVel() {
 		controlando = false;
-		comandoAnt = MINAVANCE;
+		comandoAnt = 0;
 		Avanza(0);
 	}
 
