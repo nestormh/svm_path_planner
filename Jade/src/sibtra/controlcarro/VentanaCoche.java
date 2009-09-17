@@ -9,28 +9,18 @@ import sibtra.util.EligeSerial;
 /** 
  * Ventana para la monitorización de la información recibida del coche a través
  * del {@link ControlCarro}. 
- * Hace uso del {@link PanelCarro} y añade tread para hacer actualización periódica
+ * Hace uso del {@link PanelCarro} activa su auto-actualización.
  * @author alberto,jonay
  *
  */
 
 @SuppressWarnings("serial")
-public class VentanaCoche extends JFrame implements Runnable {
+public class VentanaCoche extends JFrame {
 
-	private Thread ThreadPanel;
 	private PanelCarro panCarro;
 	/** Milisegundos del periodo de actualización */
-	private long milisPeriodo=500;
+	private int milisPeriodo=500;
 
-	
-	public void run() {
-		while (true){
-			setEnabled(true);
-			panCarro.actualizaCarro();
-			panCarro.repinta();
-			try{Thread.sleep(milisPeriodo);} catch (Exception e) {}	
-		}
-	}
 
 	/**
 	 * Costructor crea el {@link PanelCarro} y el thread de actualización
@@ -43,11 +33,9 @@ public class VentanaCoche extends JFrame implements Runnable {
 		panCarro=new PanelCarro(cc);
 
 		add(panCarro,BorderLayout.CENTER);
+		panCarro.actulizacionPeridodica(milisPeriodo);
 		pack();
 		setVisible(true);
-		ThreadPanel = new Thread(this);
-		ThreadPanel.start();
-
 	}
 	
 	
@@ -57,10 +45,11 @@ public class VentanaCoche extends JFrame implements Runnable {
 	}
 
 	/** @param milisPeriodo milisegundo a utilizar en la actualización. Deben ser >=0 */ 
-	public void setMilisPeriodo(long milisPeriodo) {
+	public void setMilisPeriodo(int milisPeriodo) {
 		if(milisPeriodo<=0)
 			throw new IllegalArgumentException("Milisegundos de actulización "+milisPeriodo+" deben ser >=0");
-		this.milisPeriodo = milisPeriodo;
+		this.milisPeriodo=milisPeriodo;
+		panCarro.actulizacionPeridodica(milisPeriodo);
 	}
 
 	/** Crea la ventana con usando la serial pasada como primer parámetro. Si no se pasa

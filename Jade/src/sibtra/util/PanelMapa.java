@@ -1,7 +1,6 @@
 package sibtra.util;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -16,14 +15,12 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 
@@ -115,48 +112,6 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 		return pixel2Point(px.getX(), px.getY());
 	}
 	
-	/**
-	 * Devuelve mínimo de entre min y el mínimo de columna ind del vector v.
-	 * @param ind columna a comprobar
-	 * @param min minimo inicial
-	 * @param v vector cuya columna se va a recorrer
-	 * @return mínimo de entre min y el mínimo de columna ind del vector v
-	 */
-	protected static double min(int ind,double min, double[][] v) {
-		if(v!=null && v.length>0 && v[0].length>=ind)
-			for(int i=0; i<v.length; i++)
-				if(v[i][ind]<min)
-					min=v[i][ind];
-		return min;
-	}
-	
-	/**
-	 * @return Mínimo de la columna ind de los 3 vectores pasados
-	 */
-	protected static double min(int ind, double[][] v1, double[][] v2, double[][] v3) {
-		return min(ind,min(ind,min(ind,java.lang.Double.POSITIVE_INFINITY,v1),v2),v3);
-	}
-	
-	/**
-	 * Devuelve maximo de entre max y el máximo de columna ind del vector v.
-	 * @param ind columna a comprobar
-	 * @param max máximo inicial
-	 * @param v vector cuya columna se va a recorrer
-	 * @return maximo de entre max y el máximo de columna ind del vector v
-	 */
-	protected static double max(int ind,double max, double[][] v) {
-		if(v!=null && v.length>0 && v[0].length>=ind)
-			for(int i=0; i<v.length; i++)
-				if(v[i][ind]>max)
-					max=v[i][ind];
-		return max;
-	}
-	
-	/** @return Máximo de la columna ind de los 3 vectores pasados */
-	protected static double max(int ind, double[][] v1, double[][] v2, double[][] v3) {
-		return max(ind,max(ind,max(ind,java.lang.Double.NEGATIVE_INFINITY,v1),v2),v3);
-	}
-
 	/**	
 	 * Dado pixel de la pantalla determina a que punto del mundo real corresponde. 
 	 * @param x coordenada x del pixel
@@ -482,6 +437,7 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 
 	/** programa el repintado del panel */
 	public void actualiza() {
+		//TODO debería ser un repinta, dejar actualiza para la llamada interna?
 		//programamos la actualizacion de la ventana
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {

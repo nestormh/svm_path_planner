@@ -164,103 +164,6 @@ public class UtilCalculos {
 		return normalizaAngulo(Ti);
 	}
 
-	/**
-	 * Indice del punto más cercano de ruta al punto
-	 * @param ruta array con los puntos de la tractoria
-	 * @param posX Coordenada x del punto
-	 * @param posY Coordenada y del punto
-	 * @return Índice de la ruta en el que se encuentra el punto de la 
-	 * ruta más cercano al punto (posX,posY)
-	 */
-	public static int indiceMasCercano(double[][] ruta,double posX,double posY){
-	    //Buscar punto más cercano al coche
-	        double distMin=Double.POSITIVE_INFINITY;
-	        int indMin=0;
-	        double dx;
-	        double dy;
-	        for(int i=0; i<ruta.length; i++) {
-	            dx=posX-ruta[i][0];
-	            dy=posY-ruta[i][1];
-	            double dist=Math.sqrt(dx*dx+dy*dy);
-	            if(dist<distMin) {
-	                indMin=i;
-	                distMin=dist;
-	            }
-	            
-	        }
-	        return indMin;
-	}
-
-	/**
-	 * Indice del punto más cercano de ruta al punto
-	 * @param ruta array con los puntos de la tractoria
-	 * @param pos punto a buscar
-	 * @return Índice de la ruta en el que se encuentra el punto de la 
-	 * ruta más cercano al punto pos
-	 */
-	public static int indiceMasCercano(double[][] ruta,double pos[]){
-		return indiceMasCercano(ruta, pos[0], pos[1]);
-	}
-
-	/**
-	 * Método optimizado de búsqueda del punto más cercano utilizando 
-	 * la información del último punto más cercano. Si en el parámetro indMinAnt se pasa
-	 * un número negativo realiza una búsqueda exaustiva
-	 * @param ruta array con los puntos de la tractoria
-	 * @param esCerrada si la ruta debe considerarse cerrada
-	 * @param posX Coordenada x del punto
-	 * @param posY Coordenada y del punto
-	 * @param indMinAnt indice donde estaba el mínimo en la iteración anterior
-	 * @return Índice de la ruta en el que se encuentra el punto de la 
-	 * ruta más cercano al punto pos
-	 */
-	public static int indiceMasCercanoOptimizado(double[][] ruta, boolean esCerrada,double posX,double posY,int indMinAnt){        
-	    if(indMinAnt<0){
-	    	return indiceMasCercano(ruta, posX, posY);
-	    }
-	    double dx;
-	    double dy;
-	    double distMin=Double.POSITIVE_INFINITY;
-	    int indMin=0;
-	    int indiceInicial = indMinAnt - 10;
-	    if (esCerrada){
-	    	indiceInicial = (indMinAnt + ruta.length - 10)%ruta.length;
-	    }else{        	
-	    	if (indiceInicial <= 0)
-	            indiceInicial = 0;
-	    }        
-	    boolean encontrado=false;
-		for(int i=indiceInicial;encontrado!=true; i=(i+1)%ruta.length) {
-	            dx=posX-ruta[i][0];
-	            dy=posY-ruta[i][1];
-	            double dist=Math.sqrt(dx*dx+dy*dy);                
-	            if(dist<=distMin) {
-	                indMin=i;
-	                distMin=dist;                   
-	            }else{                    
-	                encontrado=true;
-	            }   
-	    }
-	    return indMin;
-	}
-
-	/**
-	 * Método optimizado de búsqueda del punto más cercano utilizando 
-	 * la información del último punto más cercano. Se busca entorno a ese.
-	 * Si en el parámetro indMinAnt se pasa un número negativo realiza una búsqueda exaustiva
-	 * @param ruta array con los puntos de la tractoria
-	 * @param esCerrada si la ruta debe considerarse cerrada
-	 * @param pos punto a buscar
-	 * @param indMinAnt indice donde estaba el mínimo en la iteración anterior. Si es negativo no se tiene en cuenta
-	 * @return Índice de la ruta en el que se encuentra el punto de la 
-	 * ruta más cercano al punto pos
-	 */
-	public static int indiceMasCercanoOptimizado(double[][] ruta, boolean esCerrada,double[] pos,int indMinAnt){
-		if(pos==null)
-			throw new IllegalArgumentException("Vector de posición pasado es NULL");
-		return indiceMasCercanoOptimizado(ruta, esCerrada, pos[0], pos[1], indMinAnt);
-	}
-
 	/** @return distancia ecuclídea entre p1 y p2	 */
 	public static double distanciaPuntos(double[] p1, double[] p2) {
 		double[] d={p1[0]-p2[0], p1[1]-p2[1]};
@@ -270,5 +173,65 @@ public class UtilCalculos {
 	/** @return largo euclídeo del vector */
 	public static double largoVector(double[] d) {
 		return Math.sqrt(d[0]*d[0]+d[1]*d[1]);
+	}
+	
+	/** @return el minimo de entre min y los valores en vect */
+	public static double minimo(double min, double[] vect) {
+		if(vect!=null && vect.length>0)
+			for(int i=0; i<vect.length; i++)
+				if(vect[i]<min)
+					min=vect[i];
+		return min;
+	}
+	
+	/** @return el maximo de entre max y los valores en vect */
+	public static double maximo(double max, double[] vect) {
+		if(vect!=null && vect.length>0)
+			for(int i=0; i<vect.length; i++)
+				if(vect[i]>max)
+					max=vect[i];
+		return max;
+	}
+
+	/**
+	 * Devuelve mínimo de entre min y el mínimo de columna ind del vector v.
+	 * @param ind columna a comprobar
+	 * @param min minimo inicial
+	 * @param v vector cuya columna se va a recorrer
+	 * @return mínimo de entre min y el mínimo de columna ind del vector v
+	 */
+	protected static double min(int ind,double min, double[][] v) {
+		if(v!=null && v.length>0 && v[0].length>=ind)
+			for(int i=0; i<v.length; i++)
+				if(v[i][ind]<min)
+					min=v[i][ind];
+		return min;
+	}
+
+	/**
+	 * @return Mínimo de la columna ind de los 3 vectores pasados
+	 */
+	protected static double min(int ind, double[][] v1, double[][] v2, double[][] v3) {
+		return min(ind,min(ind,min(ind,java.lang.Double.POSITIVE_INFINITY,v1),v2),v3);
+	}
+
+	/**
+	 * Devuelve maximo de entre max y el máximo de columna ind del vector v.
+	 * @param ind columna a comprobar
+	 * @param max máximo inicial
+	 * @param v vector cuya columna se va a recorrer
+	 * @return maximo de entre max y el máximo de columna ind del vector v
+	 */
+	protected static double max(int ind,double max, double[][] v) {
+		if(v!=null && v.length>0 && v[0].length>=ind)
+			for(int i=0; i<v.length; i++)
+				if(v[i][ind]>max)
+					max=v[i][ind];
+		return max;
+	}
+
+	/** @return Máximo de la columna ind de los 3 vectores pasados */
+	protected static double max(int ind, double[][] v1, double[][] v2, double[][] v3) {
+		return max(ind,max(ind,max(ind,java.lang.Double.NEGATIVE_INFINITY,v1),v2),v3);
 	}
 }

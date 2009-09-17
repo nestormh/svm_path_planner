@@ -1,5 +1,6 @@
 package sibtra.util;
 
+import java.awt.Dimension;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -81,6 +82,9 @@ public class SpinnerInt extends JSpinner implements ChangeListener {
 		snm.addChangeListener(this);
 		setModel(snm);
 		setEnabled(true);
+		//TODO determinar el tamaño de otra manera
+		setMinimumSize(new Dimension(100,50));
+		setPreferredSize(getMinimumSize());
 	}
 
 	public void stateChanged(ChangeEvent ce) {

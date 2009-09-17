@@ -41,9 +41,9 @@ import sibtra.gps.PanelGPSTriumph;
 import sibtra.gps.PanelGrabarRuta;
 import sibtra.gps.PanelMuestraRuta;
 import sibtra.gps.Ruta;
-import sibtra.imu.AngulosIMU;
+import sibtra.gps.Trayectoria;
 import sibtra.imu.ConexionSerialIMU;
-import sibtra.imu.PanelMuestraAngulosIMU;
+import sibtra.imu.PanelIMU;
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
@@ -55,7 +55,6 @@ import sibtra.rfyruta.MiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculoSubjetivo;
 import sibtra.util.EligeSerial;
-import sibtra.util.UtilCalculos;
 
 /**
  * Para realizar la navegación controlando el coche con @link {@link ControlPredictivo}
@@ -94,7 +93,7 @@ public class NavegaPredictivo implements ActionListener {
 	/** Variable que indicará cuando se quiere navegar */
 	private boolean navegando=false;
 
-	double[][] Tr = null;
+	Trayectoria Tr = null;
     private MiraObstaculo mi;
     private double desMag;
     Coche modCoche;
@@ -121,7 +120,7 @@ public class NavegaPredictivo implements ActionListener {
 	private JFrame ventadaPeque=null;
 
     private PanelGPSTriumph pgt;
-    private PanelMuestraAngulosIMU pmai;
+    private PanelIMU panIMU;
     private PanelMiraObstaculo pmo;
 	private PanelMiraObstaculoSubjetivo pmoS;
 	private PanelMuestraRuta pmr;
@@ -151,7 +150,8 @@ public class NavegaPredictivo implements ActionListener {
 	private JTabbedPane tbPanelIzdo;
 
 	/** Se le han de pasar los 3 puertos series para: IMU, GPS, RF y Coche (en ese orden)*/
-    public NavegaPredictivo(String[] args) {
+    @SuppressWarnings("serial")
+	public NavegaPredictivo(String[] args) {
         if (args == null || args.length < 4) {
             System.err.println("Son necesarios 4 argumentos con los puertos seriales");
             System.exit(1);
@@ -310,7 +310,6 @@ public class NavegaPredictivo implements ActionListener {
 
         //Panel del GPS
         pgt = new PanelGPSTriumph(conGPS);
-        pgt.actualizaGPS(new GPSData());
         tbPanelIzdo.add("GPS",new JScrollPane(pgt));
 
         //Panel del Coche
@@ -318,9 +317,8 @@ public class NavegaPredictivo implements ActionListener {
         tbPanelIzdo.add("Coche",new JScrollPane(pmCoche));
 
         //Panel de la Imu
-        pmai = new PanelMuestraAngulosIMU();
-        pmai.actualizaAngulo(new AngulosIMU(0, 0, 0, 0));
-        tbPanelIzdo.add("IMU",new JScrollPane(pmai));
+        panIMU = new PanelIMU(conIMU);
+        tbPanelIzdo.add("IMU",new JScrollPane(panIMU));
         
         panGrabar=new PanelGrabarRuta(conGPS,actGrabarRuta,actPararGrabarRuta);
         panGrabar.setEnabled(true);
@@ -430,34 +428,8 @@ public class NavegaPredictivo implements ActionListener {
         ventadaPeque.setUndecorated(true); //para que no aparezcan el marco
         ventadaPeque.pack();
         ventadaPeque.setVisible(true);
-        
-    	//Tread para refrescar los paneles de la ventana
-        Thread thRefresco = new Thread() {
-        	/** Milisegundos del periodo de actualización */
-        	private long milisPeriodo=500;
 
-            public void run() {
-    			setName("Refresco Numeros");
-        		while (true){
-//        			pgt.setEnabled(true);
-        			//GPS
-        			pgt.actualizaGPS(conGPS.getPuntoActualTemporal());
-        			pgt.repinta();
-        			//IMU
-    				pmai.actualizaAngulo(conIMU.getAngulo());
-    				pmai.repinta();
-    				//Coche
-    				pmCoche.actualizaCarro();
-    				pmCoche.repinta();
-    				
-    				//Loggers
-    				pmLog.repinta();
-
-    				try{Thread.sleep(milisPeriodo);} catch (Exception e) {}	
-        		}
-            }
-        };
-        thRefresco.start();
+        //El refreco de los paneles de números lo programan con timers los propios paneles.
         
         //thread para refrescar ventana del RF y calcular distancia al obstaculo
         Thread thRF = new Thread() {
@@ -482,7 +454,8 @@ public class NavegaPredictivo implements ActionListener {
     	            }
     				if (mi != null && ptoAct!=null) {
     					//calculamos distancia a obstáculo más cercano
-    					distRF = mi.masCercano(ptoAct, angAct, ba);
+    					Tr.situaCoche(ptoAct);
+    					distRF = mi.masCercano(angAct, ba);
     				} else {
     					//ponemos posición y barrido ya que no se puede tomar de otro sitio
     					if(ptoAct!=null) pmo.setPosicionYawBarrido(ptoAct, angAct, ba);
@@ -621,17 +594,16 @@ public class NavegaPredictivo implements ActionListener {
         double refVelocidad;
         double errorOrientacion;      
         double errorLateral;
-        int indMin = UtilCalculos.indiceMasCercano(Tr,modCoche.getX(),modCoche.getY());
-        double dx = Tr[indMin][0]-modCoche.getX();
-        double dy = Tr[indMin][1]-modCoche.getY();
-        errorLateral = Math.sqrt(dx*dx + dy*dy);
+        //la posición del coche se ha establecido en Tr
+        int indMin = Tr.indiceMasCercano();
+        errorLateral = Tr.distanciaAlMasCercano();
 //        errorOrientacion = cp.getOrientacionDeseada() - modCoche.getTita();
-        errorOrientacion = Tr[indMin][2] - modCoche.getTita();
+        errorOrientacion = Tr.rumbo[indMin] - modCoche.getTita();
 //        System.out.println("Error en la orientación "+errorOrientacion);
-        if (Tr[indMin][3]>velocidadMax){
+        if (Tr.velocidad[indMin]>velocidadMax){
             refVelocidad = velocidadMax;
         }else
-            refVelocidad = Tr[indMin][3]; 
+            refVelocidad = Tr.velocidad[indMin]; 
         consigna = refVelocidad - Math.abs(errorOrientacion)*gananciaVel - Math.abs(errorLateral)*gananciaLateral;        
 /*      Solo con esta condición el coche no se detiene nunca,aunque la referencia de la 
  * 		ruta sea cero*/
@@ -654,16 +626,9 @@ public class NavegaPredictivo implements ActionListener {
      * @return Índice del punto que se encuentra a la distancia de frenado
      */
     public int buscaPuntoFrenado(double distFrenado){
-    	int indCercano = UtilCalculos.indiceMasCercano(Tr, modCoche.getX(),modCoche.getY());
-    	double dist = 0;
-    	int i = 0;    	
-    	for (i=indCercano;dist<distFrenado;i++){
-    		double dx=Tr[i][0]-Tr[(i+1)%Tr.length][0];
-            double dy=Tr[i][1]-Tr[(i+1)%Tr.length][1];
-            dist = dist + Math.sqrt(dx*dx+dy*dy);
-    	}
-    	return i;
+    	return Tr.indiceHastaLargo(distFrenado, Tr.indiceMasCercano());
     }
+
     /**
      * Calcula la distancia a la que se encuentra el punto en el que se quiere que el coche
      * se detenga
@@ -672,14 +637,7 @@ public class NavegaPredictivo implements ActionListener {
      * coche se detenga
      */
     public double mideDistanciaFrenado(int puntoFrenado){
-    	double distFrenado=0;
-    	int indCercano = UtilCalculos.indiceMasCercano(Tr, modCoche.getX(),modCoche.getY());    	   	
-    	for (int i=indCercano;i<puntoFrenado;i++){
-    		double dx=Tr[i][0]-Tr[(i+1)%Tr.length][0];
-            double dy=Tr[i][1]-Tr[(i+1)%Tr.length][1];
-            distFrenado = distFrenado + Math.sqrt(dx*dx+dy*dy);
-    	}
-    	return distFrenado;
+    	return Tr.largo(Tr.indiceMasCercano(), puntoFrenado);
     }
     /**
      * calcula la rampa decreciente de consignas de velocidad para realizar el frenado
@@ -744,12 +702,12 @@ public class NavegaPredictivo implements ActionListener {
         //Rellenamos la trayectoria con la nueva versión de toTr,que 
         //introduce puntos en la trayectoria de manera que la separación
         //entre dos puntos nunca sea mayor de la distMax
-        Tr = rutaEspacial.toTr(distMaxTr);
+        Tr = new Trayectoria(rutaEspacial,distMaxTr);
 
 
-        System.out.println("Longitud de la trayectoria=" + Tr.length);
+        System.out.println("Longitud de la trayectoria=" + Tr.length());
 
-        mi = new MiraObstaculo(Tr,rutaEspacial.esRutaCerrada());
+        mi = new MiraObstaculo(Tr);
 //        mi.nuevaPosicion(); 
         pmo.setMiraObstaculo(mi);
         pmoS.setMiraObstaculo(mi);
@@ -812,6 +770,7 @@ public class NavegaPredictivo implements ActionListener {
                 // volante a la invocación de setPostura
                 //TODO Realimentar posición del volante
                 modCoche.setPostura(ptoAct[0], ptoAct[1], angAct);
+                Tr.situaCoche(ptoAct);
                 double comandoVolante = cp.calculaComando();                
                 if (comandoVolante > COTA_ANGULO) {
                     comandoVolante = COTA_ANGULO;
@@ -824,7 +783,7 @@ public class NavegaPredictivo implements ActionListener {
                 velocidadActual = contCarro.getVelocidadMS();
                 //Cuando está casi parado no tocamos el volante
                 if (velocidadActual >= umbralMinimaVelocidad)
-                	contCarro.setAnguloVolante(-comandoVolante);
+                	contCarro.setAnguloVolante(comandoVolante);
                 
             	consignaVelocidad = calculaConsignaVel(); 
 		System.out.println("Consigna de calcula: "+consignaVelocidad);

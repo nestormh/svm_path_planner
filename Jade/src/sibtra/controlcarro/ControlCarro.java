@@ -49,13 +49,10 @@ public class ControlCarro implements SerialPortEventListener {
 	 */
 
 
-	/** Para saber si el puerto serial está abierto */
-	private boolean open;
-
 	/** Maximo comando en el avance */
 	public final static int MINAVANCE = 100;
 	/** Minimo comando en el avance */
-	public final static int MAXAVANCE = 255;
+	public final static int MAXAVANCE = 240;
 	
 	/** Numero de cuentas necesarias para alcanzar un metro	 */
 	public final static double PULSOS_METRO = 74;
@@ -71,8 +68,7 @@ public class ControlCarro implements SerialPortEventListener {
 	private static int CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO=2156;
 //	public static final double RADIANES_POR_CUENTA 
 //		= Math.toRadians(15) / (CARRO_CENTRO - CUENTAS_PARA_15_GRADOS_DESDE_EL_CENTRO);
-	public static final double RADIANES_POR_CUENTA 
-	= Math.toRadians(45) / CARRO_CENTRO ;
+	public static final double RADIANES_POR_CUENTA = Math.toRadians(45) / CARRO_CENTRO ;
 
 	/** Periodo de envío de mensajes por parte del PIC ¿? */
 	static double T = 0.096; // Version anterior 0.087
@@ -101,15 +97,22 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Integral del controlador PID de la velocidad  en {@link #controlVel()}*/
 	double integral = 0;
 
-	private ControlCarroSerialParameters parameters;
+	// Campos relativos a la conexión serial =========================================================
+	private ControlCarroSerialParameters parameters=null;
 
-	private OutputStream os;
+	private OutputStream outputStream=null;
 
-	private InputStream is;
+	private InputStream inputStream=null;
 
-	private CommPortIdentifier portId;
+	private CommPortIdentifier portId=null;
 
-	private SerialPort sPort;
+	private SerialPort sPort=null;
+	
+	/** Para saber si el puerto serial está abierto */
+	private boolean open=false;
+
+	// Fin de campos relativos a conexión serial =======================================================
+
 
 	/** Ultima velocidad de avance calculada en cuentas por segundo */
 	private double velocidadCS = 0;
@@ -119,7 +122,11 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Total de bytes recibidos desde el PIC por la serial */
 	private int TotalBytes = 0;
 
-	/** Posición del volante recibida desde el PIC */
+	/** Posición del volante recibida desde el PIC. 
+	 * El 0 (valor más pequeño) está con el volante maś a la izquierda.
+	 * A partir de esa posición el valor irá creciendo.
+	 * Cuando esté en medio tendrá el valor {@link #CARRO_CENTRO}.
+	 * */
 	private int volante = 32768;
 
 	/** Cuentas del encoder de avance de la tracción, tiene corregido el desbordamiento */
@@ -186,9 +193,9 @@ public class ControlCarro implements SerialPortEventListener {
 //	private double kPDesfreno = 1.5;
 	
 	/** Ganancia proporcional del PID de avance */
-	private double kPAvance = 2.5;
+	private double kPAvance = 1.5;
 	/** Ganancia defivativa del PID de avance */
-	private double kDAvance = 0.2;
+	private double kDAvance = 0.3;
 	/** Ganancia integral del PID de avance */
 	private double kIAvance = 0.1;
 
@@ -203,8 +210,7 @@ public class ControlCarro implements SerialPortEventListener {
         
 	/** Zona Muerta donde el motor empieza a actuar realmente 	 */
 	static final int ZonaMuerta = 60;
-
-	private static final double limiteIntegral = 50;
+	private static final double limiteIntegral = 40;
         
 	/** Numero de paquetes recibidos validos */
 	private int NumPaquetes = 0;
@@ -231,19 +237,21 @@ public class ControlCarro implements SerialPortEventListener {
 	 * @param portName nombre del puerto serial 
 	 */
 	public ControlCarro(String portName) {
+		if(!portName.equals("/dev/null")) { 
+			parameters = new ControlCarroSerialParameters(portName, 9600, 0, 0, 8,
+					1, 0);
+			try {
+				openConnection();
+			} catch (ControlCarroConnectionException e2) {
 
-		parameters = new ControlCarroSerialParameters(portName, 9600, 0, 0, 8,
-				1, 0);
-		try {
-			openConnection();
-		} catch (ControlCarroConnectionException e2) {
-
-			System.out.println("Error al abrir el puerto " + portName);
-			System.out.flush();
+				System.out.println("Error al abrir el puerto " + portName);
+				System.out.flush();
+			}
+			if (isOpen())
+				System.out.println("Puerto Abierto " + portName);
+		} else {
+			System.out.println(this.getClass().getName()+": Trabajamos sin conexión ");
 		}
-		if (isOpen())
-			System.out.println("Puerto Abierto " + portName);
-
 		logAngVel=LoggerFactory.nuevoLoggerArrayDoubles(this, "carroAngVel",12);
 		logAngVel.setDescripcion("Carro [Ang en Rad,Vel en m/s]");
 		
@@ -296,8 +304,8 @@ public class ControlCarro implements SerialPortEventListener {
 		// Open the input and output streams for the connection. If they won't
 		// open, close the port before throwing an exception.
 		try {
-			os = sPort.getOutputStream();
-			is = sPort.getInputStream();
+			outputStream = sPort.getOutputStream();
+			inputStream = sPort.getInputStream();
 		} catch (IOException e) {
 			sPort.close();
 			throw new ControlCarroConnectionException(
@@ -382,8 +390,8 @@ public class ControlCarro implements SerialPortEventListener {
 		if (sPort != null) {
 			try {
 				// close the i/o streams.
-				os.close();
-				is.close();
+				outputStream.close();
+				inputStream.close();
 			} catch (IOException e) {
 				System.err.println(e);
 			}
@@ -415,7 +423,7 @@ public class ControlCarro implements SerialPortEventListener {
 			return;
 		while (newData != -1) {
 			try {
-				newData = is.read();
+				newData = inputStream.read();
 				TotalBytes++;
 				if (newData == -1) {
 					break;
@@ -423,18 +431,18 @@ public class ControlCarro implements SerialPortEventListener {
 				if (newData!=250)
 					continue;
 				//newdata vale 250
-				newData = is.read();
+				newData = inputStream.read();
 				if (newData != 251)
 					continue; //TODO faltaría considerar el caso de varios 255 seguidos
 				//newdata vale 251
 				//Ya tenemos la cabecera de un mensaje válido
 				//leemos los datos del mensaje en buffer
-				buffer[1] = is.read();
-				buffer[2] = is.read();
-				buffer[3] = is.read();
-				buffer[4] = is.read();
-				buffer[5] = is.read();
-				newData = is.read();
+				buffer[1] = inputStream.read();
+				buffer[2] = inputStream.read();
+				buffer[3] = inputStream.read();
+				buffer[4] = inputStream.read();
+				buffer[5] = inputStream.read();
+				newData = inputStream.read();
 				if (newData != 255)  //no está la marca de fin de paquete
 					continue; //no lo consideramos
 				//Ya tenemos paquete valido en buffer
@@ -482,7 +490,7 @@ public class ControlCarro implements SerialPortEventListener {
 		velocidadMS = velocidadCS / PULSOS_METRO;
 
 		//apuntamos angulo volante en radianes y velocidad en m/sg
-		logAngVel.add((volante - CARRO_CENTRO) * RADIANES_POR_CUENTA,velocidadMS);
+		logAngVel.add(getAnguloVolante(),velocidadMS);
 
 		// System.out.println("T: " +
 		// (System.currentTimeMillis() - lastPaquete) +
@@ -530,7 +538,7 @@ public class ControlCarro implements SerialPortEventListener {
 	
 	/** @return Objeto de escritura del puerto serie */
 	public OutputStream getOutputStream() {
-		return os;
+		return outputStream;
 
 	}
 
@@ -553,7 +561,7 @@ public class ControlCarro implements SerialPortEventListener {
 	}
 
 	/**
-	 * Devuelve la posicion actual del volante
+	 * Devuelve la posicion actual del volante en cuentas
 	 * 
 	 */
 	public int getVolante() {
@@ -561,16 +569,14 @@ public class ControlCarro implements SerialPortEventListener {
 	}
 
 	/**
-	 * @return Devuelve el angulo del volante en radianes respecto al centro (+
-	 *         izquierda, - derecha).
+	 * @return Devuelve el angulo del volante en radianes respecto al centro (+izquierda, - derecha).
 	 */
 	public double getAnguloVolante() {
-		return (volante - CARRO_CENTRO) * RADIANES_POR_CUENTA;
+		return (CARRO_CENTRO-volante) * RADIANES_POR_CUENTA;
 	}
 
 	/**
-	 * @return Devuelve el angulo del volante en grados respecto al centro (+
-	 *         izquierda, - derecha).
+	 * @return Devuelve el angulo del volante en grados respecto al centro (+izquierda, - derecha).
 	 */
 	public double getAnguloVolanteGrados() {
 		return Math.toDegrees(getAnguloVolante());
@@ -630,7 +636,7 @@ public class ControlCarro implements SerialPortEventListener {
 	/**
 	 * Obtiene la consigna del volante
 	 * 
-	 * @return Devuelve la consigna del volante
+	 * @return Devuelve la consigna del volante en cuentas
 	 */
 	public int getConsignaVolante() {
 		return ConsignaVolante;
@@ -642,7 +648,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 * @return Devuelve la consigna del volante en radianes
 	 */
 	public double getConsignaAnguloVolante() {
-		return (ConsignaVolante - CARRO_CENTRO) * RADIANES_POR_CUENTA;
+		return ( CARRO_CENTRO-ConsignaVolante) * RADIANES_POR_CUENTA;
 	}
 
 	/**
@@ -666,40 +672,36 @@ public class ControlCarro implements SerialPortEventListener {
 	/**
 	 * Fija consigna del volante
 	 * 
-	 * @param comandoVolante
-	 *            angulo deseado en radianes desde el centro (+izquierda, -
-	 *            derecha)
+	 * @param comandoVolante angulo deseado en radianes desde el centro (+izquierda, -derecha)
 	 */
 	public void setAnguloVolante(double comandoVolante) {
-		setVolante((int) Math.floor(comandoVolante / RADIANES_POR_CUENTA)
-				+ CARRO_CENTRO);
+		setVolante( CARRO_CENTRO - (int)Math.floor(comandoVolante / RADIANES_POR_CUENTA) );
 	}
 
 	/**
 	 * Fija la posicion del volante a las cuentas indicadas
 	 * 
-	 * @param Angulo
-	 *            Numero de cuentas a las que fijar el volante
+	 * @param Angulo Numero de cuentas a las que fijar el volante
 	 */
-	public void setVolante(int Angulo) {
+	private void setVolante(int Angulo) {
 		ConsignaVolante=UtilCalculos.limita(Angulo, 0, 65535);
 		ConsignaSentidoFreno=NOCAMBIAR_FRENO;  //No modifica el freno
 		ConsignaNumPasosFreno = NumPasosFreno; //TODO sobra
 		Envia();
 	}
 
-	/**
-	 * Fija la posicion del volante a n cuentas a partir de la posicion actual
-	 * 
-	 * @param deltaAngulo
-	 *            Numero de cuentas a desplazar a partir de la posicion actual
-	 */
-	public void setRVolante(int deltaAngulo) {
-		ConsignaVolante = UtilCalculos.limita(ConsignaVolante + deltaAngulo, 0, 65535);
-		ConsignaSentidoFreno=NOCAMBIAR_FRENO;
-		ConsignaNumPasosFreno = NumPasosFreno; //TODO sobra
-		Envia();
-	}
+//	/**
+//	 * Fija la posicion del volante a n cuentas a partir de la posicion actual
+//	 * 
+//	 * @param deltaAngulo
+//	 *            Numero de cuentas a desplazar a partir de la posicion actual
+//	 */
+//	public void setRVolante(int deltaAngulo) {
+//		ConsignaVolante = UtilCalculos.limita(ConsignaVolante + deltaAngulo, 0, 65535);
+//		ConsignaSentidoFreno=NOCAMBIAR_FRENO;
+//		ConsignaNumPasosFreno = NumPasosFreno; //TODO sobra
+//		Envia();
+//	}
 
 
 	/**
@@ -827,22 +829,25 @@ public class ControlCarro implements SerialPortEventListener {
 		a[8] = ConsignaNumPasosFreno;
 		a[9] = 255;
 
-
+		if(isOpen()) {
 		for (int i = 0; i < 10; i++)
 			try {
-				os.write(a[i]);
+				outputStream.write(a[i]);
 
 			} catch (Exception e) {
 				System.out.println("Error al enviar, " + e.getMessage());
 				System.out.println(e.getStackTrace());
 				try {
 					System.out.println("Se va a proceder a vaciar el buffer");
-					os.flush();
+					outputStream.flush();
 				} catch (Exception e2) {
 					System.out.println("Error al vaciar el buffer, "
 							+ e2.getMessage());
 				}
 			}
+		} else {
+			System.err.println(getClass().getName()+": Conexion no abierta al tratar de enviar ");
+		}
 	}
 
 
@@ -863,7 +868,7 @@ public class ControlCarro implements SerialPortEventListener {
 		//derivativo como y(k)-y(k-2)
 		double derivativo = error - errorAnt +  derivativoAnt;
 
-		if ( (integral < limiteIntegral)) // (comandoAnt > 0 )&& (comandoAnt < 254 ) &&
+		if ( (integral < limiteIntegral)) //if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
 			integral += errorAnt;
 
 		double comandotemp = kPAvance * error + kDAvance * derivativo + kIAvance * integral;
@@ -873,7 +878,7 @@ public class ControlCarro implements SerialPortEventListener {
 		IncComando=UtilCalculos.limita(IncComando,-255,maxInc);
 		comando=comandoAnt+IncComando;
 		//Limitamos el comando maximo a aplicar
-		comando=UtilCalculos.limita(comando, -255, 255);
+		comando=UtilCalculos.limita(comando, -255, MAXAVANCE);
 		//umbralizamos la zona muerta
 		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, ZonaMuerta, -1);
 //				, -90/FactorFreno+comandoAnt);  //TODO da valores positivos

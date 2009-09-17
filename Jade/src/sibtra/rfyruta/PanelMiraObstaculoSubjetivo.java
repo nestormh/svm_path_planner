@@ -19,8 +19,9 @@ import javax.swing.Box;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import sibtra.lms.PanelMuestraBarrido;
+import sibtra.gps.Trayectoria;
 import sibtra.lms.BarridoAngular;
+import sibtra.lms.PanelMuestraBarrido;
 import sibtra.lms.ZonaLMS;
 import sibtra.lms.ZonaRadialLMS;
 import sibtra.lms.ZonaRectangularLMS;
@@ -62,17 +63,6 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 				));
 	}
 
-    /**
-	 * Obtiene posición relativa al RF de una medida del RF
-	 * @param i indice del barrido a considerar
-	 * @return posición real obtenidad a partir de posición actual y rumbo en {@link #MI}
-	 */
-	protected Point2D ptoRF2Point(int i) {
-		double ang=MI.barr.getAngulo(i);
-		double dist=MI.barr.getDistancia(i);
-		return new Point2D.Double(dist*Math.cos(ang),dist*Math.sin(ang));
-	}
-
 
 	/**
 	 * Crea parte grafica junto con slider de zoom
@@ -82,6 +72,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		super(distanciaMaxima);
 		MI=miObs;
 
+		//TODO Poner LabelDatos
 		jlDistLin=new JLabel("Lineal ??.???");
 		Font Grande = jlDistLin.getFont().deriveFont(20.0f);
 		jlDistLin.setFont(Grande);
@@ -89,6 +80,8 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		jlDistLin.setEnabled(false);
 		jpChecks.add(Box.createHorizontalStrut(15));
 		jpChecks.add(jlDistLin);
+		
+//		jpChecks.añadeAPanel(new LabelDatoFormato("##.##",MiraObstaculo.class,"getDistanciaLineal","%f5.2"),"Dist. Lineal");
 
 		jlDistCamino=new JLabel("Camino ??.???");
 		jlDistCamino.setFont(Grande);
@@ -96,6 +89,12 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		jlDistCamino.setEnabled(false);
 		jpChecks.add(Box.createHorizontalStrut(15));
 		jpChecks.add(jlDistCamino);
+
+//		LabelDato labCamino=new LabelDato("##.##") {
+//		};
+//		jpChecks.añadeAPanel(new LabelDatoFormato("##.##",MiraObstaculo.class,"getDistanciaCamino","%f5.2"),"Dist. Camino");
+
+		
 		
 
 	}
@@ -145,19 +144,23 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 			g.draw(gpTr);
 		}
 		//pintamos la distancia mínima etc.
-		if(MI.hayDatos && !java.lang.Double.isNaN(MI.dist))  {
+		if(MI.hayDatos && !java.lang.Double.isNaN(MI.getDistanciaLineal()))  {
 			g.setStroke(new BasicStroke(2));
 			g.setColor(Color.WHITE);
 			//los de la derecha e izquierda que están libres
-			g.draw(pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1));
-			g.draw(pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1));
+			GeneralPath gp2=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1);
+			if(gp2!=null)
+				g.draw(gp2);
+			gp2=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1);
+			if(gp2!=null)
+				g.draw(gp2);
 
-			if(MI.dist>0) {
+			if(MI.getDistanciaLineal()>0) {
 				//marcamos el pto mínimo
 				g.setStroke(new BasicStroke());
 				g.setColor(Color.RED);
 				g.draw(new Line2D.Double(pointReal2pixel(MI.posActual)
-						,point2Pixel(ptoRF2Point(MI.indMin))));
+						,point2Pixel(MI.barr.getPunto(MI.indMin))));
 
 				if(MI.iAD<MI.iAI) {
 					g.setStroke(new BasicStroke(3));
@@ -166,10 +169,10 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 					GeneralPath perimetro = 
 						new GeneralPath(GeneralPath.WIND_EVEN_ODD, MI.iAI-MI.iAD+1);
 
-					Point2D.Double px=point2Pixel(ptoRF2Point(MI.iAD));
+					Point2D.Double px=point2Pixel(MI.barr.getPunto(MI.iAD));
 					perimetro.moveTo((float)px.getX(),(float)px.getY());
 					for(int i=MI.iAD+1; i<=MI.iAI; i++ ) {
-						px=point2Pixel(ptoRF2Point(i));
+						px=point2Pixel(MI.barr.getPunto(i));
 						perimetro.lineTo((float)px.getX(),(float)px.getY());
 					}
 					g.draw(perimetro);
@@ -194,7 +197,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 					,pointReal2pixel(MI.Bi[MI.iptoI])));
 
 			//Pintamos en verde la distancia sobre el camino
-			if(!Double.isInfinite(MI.distCamino) && MI.indSegObs<MI.Tr.length) {
+			if(!Double.isInfinite(MI.getDistanciaCamino()) && MI.indSegObs<MI.Tr.length) {
 				//tenemos los índices
 				g.setStroke(new BasicStroke(3));
 				g.setColor(Color.GREEN);
@@ -211,7 +214,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 					//marcamos pto barrido dió obstáculo camino más cercano
 					g.setStroke(new BasicStroke());
 					g.draw(new Line2D.Double(pxCentro
-							,point2Pixel(ptoRF2Point(MI.indBarrSegObs))));
+							,point2Pixel(MI.barr.getPunto(MI.indBarrSegObs))));
 				}
 			}
 
@@ -255,19 +258,19 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 	public void actualiza() {
 		if(MI!=null) 		
 			super.setBarrido(MI.barr);
-		if(MI==null || java.lang.Double.isNaN(MI.dist)) {
+		if(MI==null || java.lang.Double.isNaN(MI.getDistanciaLineal())) {
 			jlDistLin.setText("Fuera");
 			jlDistLin.setForeground(Color.RED);
 		} else  {
-			if (MI.dist>0) {
-				jlDistLin.setText(String.format("Lineal %6.3f m", MI.dist));
+			if (MI.getDistanciaLineal()>0) {
+				jlDistLin.setText(String.format("Lineal %6.3f m", MI.getDistanciaLineal()));
 				jlDistLin.setForeground(Color.RED);
 			} else {
-				jlDistLin.setText(String.format("Lineal %6.3f m", -MI.dist));
+				jlDistLin.setText(String.format("Lineal %6.3f m", -MI.getDistanciaLineal()));
 				jlDistLin.setForeground(Color.GREEN);
 			}
-			if(!Double.isInfinite(MI.distCamino)) {
-				jlDistCamino.setText(String.format("Camino %6.3f m", MI.distCamino));
+			if(!Double.isInfinite(MI.getDistanciaCamino())) {
+				jlDistCamino.setText(String.format("Camino %6.3f m", MI.getDistanciaCamino()));
 				jlDistCamino.setEnabled(true);
 			}
 		}
@@ -554,7 +557,7 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 		
 		System.out.println("Longitud de la trayectoria="+Tr.length);
 		
-		MiraObstaculo mi=new MiraObstaculo(Tr);		
+		MiraObstaculo mi=new MiraObstaculo(new Trayectoria(Tr));		
 		PanelMiraObstaculoSubjetivo pMOS=new PanelMiraObstaculoSubjetivo(mi,(short)80);
 		
 
@@ -590,8 +593,8 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 //			ba.datos[i]=(short)((15.0)*100.0);
 			ba.datos[i]=(short)((Math.sin((double)i/(ba.numDatos()-1)*Math.PI*13.6)*3.0+10.0)*100.0);
 		}
-		double[] ptoAct={-26, 14};
-		double dist=mi.masCercano(ptoAct, Math.toRadians(90), ba);
+		mi.tray.situaCoche(-26, 14);
+		double dist=mi.masCercano(Math.toRadians(90), ba);
 		pmo.actualiza();
 		pMOS.actualiza();
 		System.out.println("Distancia="+dist);
@@ -624,8 +627,8 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 							+Dpor)*100.0);
 				}
 
-				double diAct=mi.masCercano(Tr[inTr]
-				                               , Math.atan2(Tr[inTr][1]-Tr[inTrAnt][1],Tr[inTr][0]-Tr[inTrAnt][0]), barAct);
+				mi.tray.situaCoche(Tr[inTr]);
+				double diAct=mi.masCercano(Math.atan2(Tr[inTr][1]-Tr[inTrAnt][1],Tr[inTr][0]-Tr[inTrAnt][0]), barAct);
 				pmo.actualiza();
 				pMOS.actualiza();
 				System.out.println("Indice "+inTr+" distancia "+diAct);

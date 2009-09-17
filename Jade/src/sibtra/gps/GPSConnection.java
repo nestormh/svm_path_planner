@@ -30,20 +30,17 @@ public class GPSConnection implements SerialPortEventListener {
 	/** Numero máximo de puntos acumulados en el buffer de ruta */
 	private static final int MAXBUFFER = 1000;
 
-//	private static final double NULLANG = -5 * Math.PI;
-
-
 	/** si el puerto serial está abierto*/
-	protected boolean open;
+	protected boolean open=false;
 
 	/** Los parámetros seriales instalados en el puerto */
 	protected SerialParameters parameters=null;
 	
-	protected InputStream is;    
-	protected OutputStream os;
+	protected InputStream inputStream=null;    
+	protected OutputStream outputStream=null;
 
-	protected CommPortIdentifier portId;
-	protected SerialPort sPort;
+	protected CommPortIdentifier portId=null;
+	protected SerialPort sPort=null;
 
 	/** Cadena en la que se van almacenando los trozos de mensajes que se van recibiendo */
 	protected String cadenaTemp = "";
@@ -130,6 +127,18 @@ public class GPSConnection implements SerialPortEventListener {
 	 */
 	public void openConnection(SerialParameters serPar) throws SerialConnectionException {
 		parameters=serPar;
+
+		//TODO constructor vacio que no llama a otros no mola.
+		logLocales=LoggerFactory.nuevoLoggerArrayDoubles(this, "CoordLoc");
+		logLocales.setDescripcion("Coordenadas locales [X,Y,Z]");
+		logLocales.setMuestrasSg(2);
+		logEdadCor=LoggerFactory.nuevoLoggerDouble(this, "edadCorreccion");
+		logEdadCor.setMuestrasSg(2);
+
+		if(parameters.getPortName().equals("/dev/null")) {
+			System.out.println(getClass().getName()+": Trabajamos sin conexion");
+			return;
+		}
 		// Obtain a CommPortIdentifier object for the port you want to open.
 		try {
 			portId =
@@ -160,7 +169,7 @@ public class GPSConnection implements SerialPortEventListener {
 		// Open the input and output streams for the connection. If they won't
 		// open, close the port before throwing an exception.
 		try {            
-			is = sPort.getInputStream();
+			inputStream = sPort.getInputStream();
 		} catch (IOException e) {
 			sPort.close();
 			throw new SerialConnectionException("Error opening i/o streams");
@@ -168,7 +177,7 @@ public class GPSConnection implements SerialPortEventListener {
 
 		//Obtenemos el flujo de salida
 		try {
-			os = sPort.getOutputStream();
+			outputStream = sPort.getOutputStream();
 		} catch (IOException e) {
 			System.err.println("\n No se pudo obtener flujo de salida para puerto ");
 			throw new SerialConnectionException("Error obteniendo flujo de salida");
@@ -200,11 +209,6 @@ public class GPSConnection implements SerialPortEventListener {
 
 		sPort.disableReceiveTimeout();
 		
-		logLocales=LoggerFactory.nuevoLoggerArrayDoubles(this, "CoordLoc");
-		logLocales.setDescripcion("Coordenadas locales [X,Y,Z]");
-		logLocales.setMuestrasSg(2);
-		logEdadCor=LoggerFactory.nuevoLoggerDouble(this, "edadCorreccion");
-		logEdadCor.setMuestrasSg(2);
 	}
 
 	/**
@@ -263,7 +267,7 @@ public class GPSConnection implements SerialPortEventListener {
 		if (sPort != null) {
 			try {
 				// close the i/o streams.                
-				is.close();                
+				inputStream.close();                
 			} catch (IOException e) {
 				System.err.println(e);
 			}
@@ -279,7 +283,8 @@ public class GPSConnection implements SerialPortEventListener {
          Send a one second break signal.
 	 */
 	public void sendBreak() {
-		sPort.sendBreak(1000);
+		if(isOpen())
+			sPort.sendBreak(1000);
 	}
 	
 	/**
@@ -306,8 +311,8 @@ public class GPSConnection implements SerialPortEventListener {
 	public synchronized void serialEvent(SerialPortEvent e) {
 		if (e.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
-				while (is.available() != 0) {
-					int val = is.read();
+				while (inputStream.available() != 0) {
+					int val = inputStream.read();
 					if (val != 10) {
 						cadenaTemp += (char) val;
 					} else {

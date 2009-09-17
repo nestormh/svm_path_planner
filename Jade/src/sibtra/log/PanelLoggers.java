@@ -166,7 +166,8 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
         	nombColumnas[COL_CAPA]="Capacidad";
         	
     		//Apuntamos los logger disponibles
-    		vecLA=new Vector<ApuntaLog>(LoggerFactory.vecLoggers.size());
+        	int NumLoggers=(LoggerFactory.vecLoggers!=null)?LoggerFactory.vecLoggers.size():0;
+    		vecLA=new Vector<ApuntaLog>(NumLoggers);
     		for(Iterator<Logger> lit=LoggerFactory.vecLoggers.iterator(); lit.hasNext();) {
     			Logger la=lit.next();
     			vecLA.add(new ApuntaLog(la,true));

@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
  * @author alberto
  *
  */
+@SuppressWarnings("serial")
 public class LabelDatoFormato extends LabelDato {
 
 	/** metodo que invocar */
@@ -23,13 +24,24 @@ public class LabelDatoFormato extends LabelDato {
 	
 	/**
 	 * Crea etiqueta con texto inicial
+	 * @param clase clase cuyo método vamos a invocar
+	 * @param nomMetodo nombre del metodo a invocar en cada actulización
+	 * @param formato formato de {@link String.format} que se utilizara en cada actulización
 	 * @param textoInicial
+	 */
+	public LabelDatoFormato(Class clase, String nomMetodo, String formato, String textoInicial) {
+		this(clase,nomMetodo,formato);
+		setText(textoInicial);
+	}
+
+	/**
+	 * Crea etiqueta con texto inicial aplicandoles el formato a valor inicial por defecto (0)
 	 * @param clase clase cuyo método vamos a invocar
 	 * @param nomMetodo nombre del metodo a invocar en cada actulización
 	 * @param formato formato de {@link String.format} que se utilizara en cada actulización
 	 */
-	public LabelDatoFormato(String textoInicial,Class clase, String nomMetodo, String formato) {
-		super(textoInicial);
+	public LabelDatoFormato(Class clase, String nomMetodo, String formato) {
+		super("######");
 		this.formato=formato;
 		this.clase=clase;
 		if(clase==null)
@@ -43,6 +55,17 @@ public class LabelDatoFormato extends LabelDato {
 			throw new IllegalArgumentException("El metodo "+nomMetodo
 					+ " no existe sin argumentos en la calse "
 					+ clase.getCanonicalName());			
+		}
+		//Vamos a ver de que tipo es el valor retornado
+		try {
+			Class tipoRetorno=metodo.getReturnType();
+			if(tipoRetorno.equals(Double.TYPE)){
+				setText(String.format(formato, (double)0.0));
+			} else if(tipoRetorno.equals(Integer.TYPE)) {
+				setText(String.format(formato, (int)0));				
+			}
+		} catch (Exception e) {
+			//dejamos el texto por defecto
 		}
 	}
 	

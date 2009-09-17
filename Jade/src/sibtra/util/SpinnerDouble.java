@@ -1,5 +1,6 @@
 package sibtra.util;
 
+import java.awt.Dimension;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -8,6 +9,11 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+/**
+ * Spinner que automáticamente invoca el set para modificar parámetro asociado.
+ * @author alberto
+ *
+ */
 public class SpinnerDouble extends JSpinner implements ChangeListener {
 	
 	private Object objeto;
@@ -75,6 +81,9 @@ public class SpinnerDouble extends JSpinner implements ChangeListener {
 		snm.addChangeListener(this);
 		setModel(snm);
 		setEnabled(true);
+		//TODO determinar el tamaño de otra manera
+		setMinimumSize(new Dimension(100,50));
+		setPreferredSize(getMinimumSize());
 	}
 
 	public void stateChanged(ChangeEvent ce) {

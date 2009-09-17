@@ -6,7 +6,6 @@ package sibtra.gps;
 import java.io.Serializable;
 import java.util.Vector;
 
-import sibtra.imu.AngulosIMU;
 import sibtra.util.UtilCalculos;
 import Jama.Matrix;
 
@@ -63,13 +62,15 @@ public class Ruta implements Serializable {
 	/** Desviación estandar de la desviación magnética media */
 	double desEstDM;
 
-	int indiceFinal;
-
-	static double distFrenado = 5;
-
-	private boolean esCerrada;
-
-
+	/** @return distancia cartesiana entre los dos puntos calculanda usando las coordenadas locales */
+	public static double distEntrePuntos(GPSData ptoA,GPSData ptoB){
+		//TODO usar la coordenada Z
+		double dist=Double.POSITIVE_INFINITY;
+		double dx = ptoB.getXLocal()-ptoA.getXLocal();
+		double dy = ptoB.getYLocal()-ptoA.getYLocal();                    
+		dist = Math.sqrt(dx*dx + dy*dy);
+		return dist;
+	}
 
 
 
@@ -78,7 +79,6 @@ public class Ruta implements Serializable {
 		puntos=new Vector<GPSData>();
 		tamMaximo=Integer.MAX_VALUE;
 		esEspacial=false;
-		indiceFinal = 0;
 	}
 
 	/**
@@ -89,7 +89,6 @@ public class Ruta implements Serializable {
 		puntos=new Vector<GPSData>();
 		tamMaximo=tamañoMaximo;
 		esEspacial=false;
-		indiceFinal = 0;
 	}
 
 	/**
@@ -100,7 +99,6 @@ public class Ruta implements Serializable {
 		puntos=new Vector<GPSData>();
 		tamMaximo=Integer.MAX_VALUE;
 		this.esEspacial=esEspacial;
-		indiceFinal = 0;
 	}
 
 	/**
@@ -112,7 +110,6 @@ public class Ruta implements Serializable {
 		puntos=new Vector<GPSData>();
 		tamMaximo=tamañoMaximo;
 		this.esEspacial=esEspacial;
-		indiceFinal = 0;
 	}
 
 	/**
@@ -171,32 +168,10 @@ public class Ruta implements Serializable {
 	}
 
 	/**
-	 * @return the ptoCentro
-	 */
-	public GPSData getPtoCentro() {
-		return centro;
-	}
-
-	/**
-	 * Fija el centro sin actualizar el sistema local.
-	 * @param ptoCentro the ptoCentro to set
-	 */
-	private void setPtoCentro(GPSData ptoCentro) {
-		this.centro = ptoCentro;
-	}
-
-	/**
 	 * @return the t
 	 */
 	public Matrix getT() {
 		return T;
-	}
-
-	/**
-	 * @param t the t to set
-	 */
-	private void setT(Matrix t) {
-		T = t;
 	}
 
 	/**
@@ -408,278 +383,14 @@ public class Ruta implements Serializable {
 
 	}
 
-	/** @return Ídem que {@link #toTr(double)} con distancia infinito, por lo que no añadirá puntos.	  */
-	public double[][] toTr() {
-		return toTr(Double.MAX_VALUE);
-	}
-	
 	/**
-	 * Rellena la trayectoria con puntos intermedios de manera que la distancia entre
-	 * los nuevos puntos nunca sea mayor que distMax. Los puntos intermedios calculados
-	 * tienen sus valores de orientación y velocidad interpolados entre el punto anterior
-	 * y el punto actual. En caso de que la velocidad y la orientación no hayan podido ser 
-	 * recogidas del sensor de velocidad del coche y de la IMU respectivamente, los 
-	 * valores se calculan a partir de los puntos del GPS usando calculaAnguloGPS()
-	 * y calculaVelocidadGPS() de la clase GPSData
-	 * @param distMin
-	 * @return
-	 */
-
-	public double[][] toTr(double distMax) {
-		if(getNumPuntos()==0)
-			return null;
-		esRutaCerrada();
-		int ptosAñadidos = calculaPuntosAAñadir(distMax);
-//		System.out.println("Puntos añadidos " + ptosAñadidos);
-//		System.out.println("Indice final " + indiceFinal);
-//		System.out.println("numero de puntos en el vector original " + getNumPuntos());
-		double desvMagnética = getDesviacionM();
-		int L = indiceFinal+1;
-		int ptosTotales = L+ptosAñadidos;
-//		System.out.println("Puntos Totales " + ptosTotales);
-		double[][] rutaRellena = new double[ptosTotales][4];
-		GPSData ptoC;
-		int i = 0;       
-		int indice = 0;
-		GPSData ptoA = getPunto(0);
-		GPSData ptoB = getPunto(1);                
-		AngulosIMU aiA = ptoA.getAngulosIMU();
-		double titaA = (aiA != null) ? Math.toRadians(aiA.getYaw()) : ptoA.calculaAnguloGPS(ptoB);
-		double velA = (ptoA.getVelocidad()!=Double.NaN)? ptoA.getVelocidad() : ptoA.calculaVelocidadGPS(ptoB);
-		for (int numItera = 1; numItera < indiceFinal+(esCerrada?2:1); numItera++) {
-			i = (i + 1)%L;
-			//apuntamos el punto actual.
-			rutaRellena[indice][0] = ptoA.getXLocal();
-			rutaRellena[indice][1] = ptoA.getYLocal();                
-			rutaRellena[indice][2] = titaA + desvMagnética;
-			rutaRellena[indice][3] = velA;
-			
-			//hacemos los cálculos para B, ya que será el futuro A
-			
-			//sólo tendremos pto siguiente si es cerrada o no estamos al final
-			ptoC = (esCerrada || i<indiceFinal)?getPunto((i+1)%L):null;                                  
-
-			AngulosIMU aiB = ptoB.getAngulosIMU();
-			double titaB;
-			if(aiB != null) 
-				titaB=Math.toRadians(aiB.getYaw());
-			else if(ptoC!=null)
-				titaB=ptoB.calculaAnguloGPS(ptoC);
-			else
-				titaB=titaA; //usamos el mismo de A
-			
-			double velB;
-			if(ptoB.getVelocidad()!=Double.NaN)
-				velB=ptoB.getVelocidad();
-			else if(ptoC!=null)
-				velB=ptoB.calculaVelocidadGPS(ptoC);
-			else
-				velB=velA; //usamos la misma que A
-
-			//Vamos a ver cuantos puntos intermedios tenemos que añadir
-			double dx = ptoB.getXLocal() - ptoA.getXLocal();
-			double dy = ptoB.getYLocal() - ptoA.getYLocal();
-			double separacion = Math.sqrt(dx * dx + dy * dy);
-
-			//hay que rellenar con puntos intermedios (o no si sale 0)
-			int numPuntosIntermedios=(int) Math.ceil(separacion / distMax)-1;
-//			System.out.print(numPuntosIntermedios+" ");
-
-
-			double dtita = UtilCalculos.normalizaAngulo(titaB - titaA);  //variación en angulo  en el tramo
-			double dVelocidad = velB - velA;  //variacion en velocidad en el tramo
-			for (int k = 1; k <= numPuntosIntermedios; k++) {
-				//Tendremos (numPuntosIntermedios+1) tramos intermedios.
-				//Por eso dividimos todas las magnitudes por (numPuntosIntermedios+1)
-				rutaRellena[indice+k][0] = ptoA.getXLocal() + k*(dx/(numPuntosIntermedios+1));
-				rutaRellena[indice+k][1] = ptoA.getYLocal() + k*(dy/(numPuntosIntermedios+1));
-				rutaRellena[indice+k][2] = titaA + k*(dtita/(numPuntosIntermedios+1)) + desvMagnética;
-				rutaRellena[indice+k][3] = velA + k*(dVelocidad/(numPuntosIntermedios+1));
-			}
-			//Sumamos los puntos añadidos                
-			indice = indice + numPuntosIntermedios+1;
-			//Actual punto B pasa a ser el nuevo A
-			ptoA=ptoB; titaA=titaB; velA=velB;
-			// y C pasa a ser B
-			ptoB=ptoC;
-		}
-		if (!esCerrada) {
-			//tenemos que añadir el último punto.
-//			System.out.println("La ruta está abierta");
-			//apuntamos el punto actual.
-			rutaRellena[indice][0] = ptoA.getXLocal();
-			rutaRellena[indice][1] = ptoA.getYLocal();                
-			rutaRellena[indice][2] = titaA + desvMagnética;
-			rutaRellena[indice][3] = velA;
-
-			//se hace un fade out de la velocidad si hay mas de 4 puntos ??
-			if (ptosTotales> 4) {
-				double dist = 0;
-				int j;
-				for(j = ptosTotales-2;dist < distFrenado && j>0;j--){            		            	
-					double dx = rutaRellena[j][0] - rutaRellena[j+1][0];
-					double dy = rutaRellena[j][1] - rutaRellena[j+1][1];
-					dist += Math.sqrt(dx*dx + dy*dy);
-//					System.out.println("La distancia medida es "+dist);            		
-				}
-				double incremento  = rutaRellena[j][3]/(ptosTotales-j-1);            	            
-				double velPunto=0;
-				for (int k=ptosTotales-1;k>j;k--){
-					rutaRellena[k][3] = velPunto;
-					velPunto += incremento;
-//					System.out.println("La velocidad del punto " + k+ " es "+ rutaRellena[k][3]);
-				}
-			}
-		}            
-		return rutaRellena;
-	}
-	
-//	Lo quitamos porque es peligrosa
-//	/**Versión del toTr() pasándole como ruta original un double[][]
-//	 * 
-//	 * @param distMax
-//	 * @param ptosTotal
-//	 * @param rutaOriginal Vector de 3 columnas (x,y,tita) y tantas filas como puntos
-//	 * tenga la ruta
-//	 * @return
-//	 */
-//	public double[][] toTr(double distMax,int ptosTotal,double[][] rutaOriginal) {  
-//		int indice = 0;
-//		double desvMagnética = getDesviacionM();
-//		double[][] rutaRellena = new double[rutaOriginal.length + ptosTotal][3];
-//		for (int i = 1; i < rutaOriginal.length; i++) {                
-//			double dx = rutaOriginal[i][0] - rutaOriginal[i-1][0];
-//			double dy = rutaOriginal[i][1] - rutaOriginal[i-1][1];
-//			double dtita = UtilCalculos.normalizaAngulo(rutaOriginal[i][2]-rutaOriginal[i-1][2]);
-//			double separacion = Math.sqrt(dx * dx + dy * dy);
-//			int numPuntos = (int) Math.floor(separacion / distMax);
-//			rutaRellena[indice][0] = rutaOriginal[i-1][0];
-//			rutaRellena[indice][1] = rutaOriginal[i-1][1];                
-//			rutaRellena[indice][2] = rutaOriginal[i-1][2];
-//			for (int k = 1; k < numPuntos; k++) {
-//				rutaRellena[indice+k][0] = rutaOriginal[i-1][0] + k*(dx / numPuntos);
-//				rutaRellena[indice+k][1] = rutaOriginal[i-1][1] + k*(dy / numPuntos);
-//				rutaRellena[indice+k][2] = rutaOriginal[i-1][2] + k*(dtita / numPuntos)+desvMagnética;
-//			}
-//			indice = indice + numPuntos;
-//		}
-//		return rutaRellena;
-//	}
-	
-	/** Miro a ver cuantos puntos tengo que añadir en total para saber que
-	 * tamaño tiene que tener el vector rellenado
-	 */
-	private int calculaPuntosAAñadir(double distMax){
-		int puntosAAñadir = 0;
-		int numPuntosIntermedios;
-		double separacion;
-		for(int i=1; i<=indiceFinal;i++) {
-			GPSData ptoA = getPunto(i-1);
-			GPSData ptoB = getPunto(i);
-			separacion = distEntrePuntos(ptoA, ptoB);                    
-			numPuntosIntermedios = (int)Math.ceil(separacion/distMax)-1;
-//			System.out.print(numPuntosIntermedios+" ");
-			puntosAAñadir +=  numPuntosIntermedios;                   
-		}
-		if (esCerrada){
-			GPSData ptoA = getPunto(indiceFinal);
-			GPSData ptoB = getPunto(0);                                
-			separacion = distEntrePuntos(ptoA, ptoB);          
-			numPuntosIntermedios = (int)Math.ceil(separacion/distMax)-1;
-//			System.out.print(numPuntosIntermedios+" ");
-			puntosAAñadir +=  numPuntosIntermedios;
-		}
-//		System.out.println(" ");
-		return puntosAAñadir;
-	}
-	
-	/**
-	 * Método que mide la distancia entre el último punto de la ruta y el primero
-	 * para decidir si la ruta está cerrada o no. Debido a que el principio de la ruta
-	 * y el final pueden estar solapados, no solo hay que comprobar la distancia 
-	 * entre el último punto y el primero, si no también con los puntos siguientes
-	 * al primero para ver con cual se da la distancia mínima. Cuando ya tenemos la 
-	 * distMin se comprueba si el valor está por debajo del umbral que indica si ambos
-	 * puntos están lo sufientemente cerca como para suponer que la ruta está cerrada 
-	 *  
-	 * @return si la ruta es cerrada o no
-	 */
-	public boolean esRutaCerrada(){
-		esCerrada=false;
-		//necesitamos al menos 2 puntos
-		if(getNumPuntos()<2)
-			return esCerrada;
-		double umbral = 3;
-		double distAux;
-		double distMin = Double.POSITIVE_INFINITY;
-		GPSData ptoInicial = getPunto(0);
-		GPSData ptoAux = getPunto(getNumPuntos()-1);
-		distAux = distEntrePuntos(ptoInicial,ptoAux);
-		int i = getNumPuntos()-1;
-		int indiceAux = getNumPuntos()-1;
-		while ((distAux <= distMin) && (i>=1)){
-			distMin = distAux;
-			indiceAux = i;
-			i = i - 1;
-			ptoAux = getPunto(i);
-			distAux = distEntrePuntos(ptoInicial,ptoAux);        		
-		}
-		if (indiceAux==1) {
-			esCerrada = false;
-			indiceFinal = getNumPuntos()-1;
-//			System.out.println("La ruta está abierta de verdad");        		
-		} else if (distMin < umbral){
-			esCerrada = true;
-			boolean encontrado = false;
-			indiceFinal = indiceAux;
-//			System.out.println("La ruta está cerrada");        		
-			if (esCerrada){
-				for (int j=indiceFinal;encontrado!=true;j--){
-					GPSData ptoInicio = getPunto(0);
-					GPSData ptoA = getPunto(j);
-					GPSData ptoAnt = getPunto(j-1);
-					double anguloFinal = ptoA.calculaAnguloGPS(ptoInicio);
-					double anguloPtoA = ptoAnt.calculaAnguloGPS(ptoA);
-					if (Math.abs(anguloFinal-anguloPtoA)<Math.PI/6){
-						encontrado = true;
-						indiceFinal = j;
-					}
-				}            	
-			}
-		}
-		else {
-			esCerrada = false;
-			indiceFinal = getNumPuntos()-1;
-//			System.out.println("La ruta está abierta");
-		}
-		return esCerrada;        
-	}
-
-	/** @return distancia cartesiana entre los dos puntos calculanda usando las coordenadas locales */
-	public static double distEntrePuntos(GPSData ptoA,GPSData ptoB){
-		double dist=Double.POSITIVE_INFINITY;
-		double dx = ptoB.getXLocal()-ptoA.getXLocal();
-		double dy = ptoB.getYLocal()-ptoA.getYLocal();                    
-		dist = Math.sqrt(dx*dx + dy*dy);
-		return dist;
-	}
-
-	/**
+	 * Aplica {@link #distEntrePuntos(GPSData, GPSData)} a los puntos de indices pasados
 	 * @param ind1 indice del primer punto considerado
 	 * @param ind2 indice del segundo punto considerado 
 	 * @return distancia cartesiana entre los dos puntos calculanda usando las coordenadas locales 
 	 * */
 	public double distEntrePuntos(int ind1, int ind2){
-		double dist=Double.POSITIVE_INFINITY;
-//		System.out.println(ind1 + " >? " + getNumPuntos());
-		GPSData ptoA = getPunto(ind1);
-		GPSData ptoB = getPunto(ind2);
-//		System.out.println(ptoA.getXLocal());
-//		System.out.println(ptoB.getXLocal());
-		double dx = ptoB.getXLocal()-ptoA.getXLocal();
-		double dy = ptoB.getYLocal()-ptoA.getYLocal();                    
-		dist = Math.sqrt(dx*dx + dy*dy);
-		return dist;
+		return distEntrePuntos(getPunto(ind1), getPunto(ind2));
 	}
 
 	/**

@@ -6,11 +6,9 @@ package sibtra.util;
 
 
 import java.io.BufferedOutputStream;
-import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;

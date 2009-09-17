@@ -37,7 +37,7 @@ public class FuturoObstaculo {
 	int indMin;
 	/** Barrido que se usó en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
 	BarridoAngular bAct;
-	double distanciaObs;
+	double distanciaLibre;
 
 	public FuturoObstaculo() {
 		
@@ -90,7 +90,7 @@ public class FuturoObstaculo {
 			}
 			//Tenemos un punto, calculamos tiempo al mismo
 			double angAvance=angMin-anguloInterior;
-			return distanciaObs=(angAvance*radioCur);
+			return distanciaLibre=(angAvance*radioCur);
 		} else { 
 			//la orientación en practicamente 0
 			radioCur=Double.POSITIVE_INFINITY;
@@ -108,9 +108,9 @@ public class FuturoObstaculo {
 			}
 			if(indMin<0) {
 				System.err.println("ABSURDO: No hay minimo con alfa=0");
-				return distanciaObs=Double.NaN;
+				return distanciaLibre=Double.NaN;
 			}
-			return distanciaObs=distMin;
+			return distanciaLibre=distMin;
 		}
 	}
 
@@ -125,7 +125,14 @@ public class FuturoObstaculo {
 	
 	public double tiempoAObstaculo(double velMS) {
 		velAngular=velMS/radioCur;
-		return distanciaObs/velMS;
+		return distanciaLibre/velMS;
+	}
+
+	/**
+	 * @return the distanciaLibre tras la última invocación a {@link #distanciaAObstaculo(double, BarridoAngular)}
+	 */
+	public double getDistanciaLibre() {
+		return distanciaLibre;
 	}
 
 

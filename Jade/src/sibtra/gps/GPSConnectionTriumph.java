@@ -132,8 +132,8 @@ public class GPSConnectionTriumph extends GPSConnection {
 	public synchronized void serialEvent(SerialPortEvent e) {
 		if (e.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
-				while (is.available() != 0) {
-					int val = is.read();
+				while (inputStream.available() != 0) {
+					int val = inputStream.read();
 					//añadimos nuevo byte recibido
 					if(indFin==(buff.length-1)) {
 						log(ERR,"Buffer se llenó. Resetamos");
@@ -587,8 +587,12 @@ u1 cs(u1 const* src, int count)
 	 * @param comando comando de texto a enviar al GPS
 	 */
 	public void comandoGPS(String comando) {
+		if(!isOpen()) {
+			System.err.println(getClass().getName()+": Tratando de enviar comando cuando no tenemos conexion");
+			return;
+		}
 		try {
-		os.write(comando.getBytes());
+		outputStream.write(comando.getBytes());
 		log(INFO,"Enviado Comando:>"+comando+"<");
 		} catch (Exception e) {
 			log(WAR,"Problema al enviar comando Triumph:"+e.getMessage());

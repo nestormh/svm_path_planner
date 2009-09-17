@@ -3,7 +3,6 @@ package sibtra.rfyruta;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -25,10 +24,10 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 
 import sibtra.gps.Ruta;
+import sibtra.gps.Trayectoria;
 import sibtra.lms.BarridoAngular;
 import sibtra.util.PanelFlow;
 import sibtra.util.PanelMuestraTrayectoria;
-import sibtra.util.UtilCalculos;
 
 /**
  * Clase amiga de {@link MiraObstaculo} que muestar graficamente resultado de sus cálculos.
@@ -64,6 +63,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		{//nuevo panel para añadir debajo
 			JPanel jpPre=new PanelFlow();
 			
+			//TODO usar labels dato
 			jla=jlDistLin=new JLabel("   ??.???");
 		    Font Grande = jla.getFont().deriveFont(20.0f);
 			jla.setBorder(BorderFactory.createTitledBorder(
@@ -101,7 +101,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 	
 	public void setMiraObstaculo(MiraObstaculo mi) {
 		MI=mi;
-		if(MI!=null) setTr(MI.Tr);
+		if(MI!=null) setTrayectoria(MI.tray);
 		actualiza();
 	}
 
@@ -159,7 +159,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			Point2D pxPtoActual=point2Pixel(MI.posActual);
 
 			//vemos si hay información de colisión
-			if(!Double.isNaN(MI.dist)) {
+			if(!Double.isNaN(MI.getDistanciaLineal())) {
 				//estamos dentro del camino
 				//Lineas indicando de donde empezó el barrido
 				g.setStroke(new BasicStroke());
@@ -182,9 +182,9 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 				g.setColor(Color.WHITE);
 				//los de la derecha e izquierda que están libres
 				GeneralPath gp=null;
-				if(MI.encontradoInicioD && (gp=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1,MI.esCerrada))!=null) g.draw(gp);
-				if(MI.encontradoInicioI && (gp=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1,MI.esCerrada))!=null) g.draw(gp);
-				if(MI.dist>0) {
+				if(MI.encontradoInicioD && (gp=pathArrayXY(MI.Bd, MI.iptoDini, MI.iptoD+1,MI.tray.esCerrada()))!=null) g.draw(gp);
+				if(MI.encontradoInicioI && (gp=pathArrayXY(MI.Bi, MI.iptoIini, MI.iptoI+1,MI.tray.esCerrada()))!=null) g.draw(gp);
+				if(MI.getDistanciaLineal()>0) {
 					//marcamos el pto mínimo
 					g.setStroke(new BasicStroke());
 					g.setColor(Color.RED);
@@ -213,12 +213,12 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 							,point2Pixel(MI.Tr[MI.iLibre])));
 
 				}
-				if(!Double.isInfinite(MI.distCamino) && MI.indSegObs!=Integer.MAX_VALUE) {
+				if(!Double.isInfinite(MI.getDistanciaCamino()) && MI.indSegObs!=Integer.MAX_VALUE) {
 					//tenemos los índices
 					g.setStroke(new BasicStroke(3));
 					g.setColor(Color.GREEN);
 					if((gp=pathArrayXY(MI.Tr, MI.indiceCoche
-							, MI.indSegObs+1, MI.esCerrada))!=null) g.draw(gp);
+							, MI.indSegObs+1, MI.tray.esCerrada()))!=null) g.draw(gp);
 					g.draw(new Line2D.Double(point2Pixel(MI.Bi[MI.indSegObs])
 							,point2Pixel(MI.Bd[MI.indSegObs])));
 					g.draw(new Line2D.Double(point2Pixel(MI.Bi[MI.indiceCoche])
@@ -265,7 +265,7 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 			situaCoche(MI.posActual[0], MI.posActual[1], MI.Yaw);
 			barrAng=MI.barr;
 		}
-		if(MI==null || Double.isNaN(MI.dist)) {
+		if(MI==null || Double.isNaN(MI.getDistanciaLineal())) {
 			jlDistLin.setEnabled(false);
 			jlDistCam.setEnabled(false);
 			jlFuera.setEnabled(true);
@@ -273,16 +273,16 @@ public class PanelMiraObstaculo extends PanelMuestraTrayectoria {
 		} else {
 			jlFuera.setEnabled(false);
 			jlDistLin.setEnabled(true);
-			if(MI.dist>0) {
-				jlDistLin.setText(String.format("%9.3f m", MI.dist));
+			if(MI.getDistanciaLineal()>0) {
+				jlDistLin.setText(String.format("%9.3f m", MI.getDistanciaLineal()));
 				jlDistLin.setForeground(Color.RED);
 			} else {
-				jlDistLin.setText(String.format("%9.3f m", -MI.dist));
+				jlDistLin.setText(String.format("%9.3f m", -MI.getDistanciaLineal()));
 				jlDistLin.setForeground(Color.GREEN);				
 			}
 			if(MI.indSegObs!=Integer.MAX_VALUE) {
 				jlDistCam.setEnabled(true);
-				jlDistCam.setText(String.format("%9.3f m", MI.distCamino));				
+				jlDistCam.setText(String.format("%9.3f m", MI.getDistanciaCamino()));				
 			} else jlDistCam.setEnabled(false);
 		}
 		super.actualiza();
@@ -356,11 +356,11 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 			esInteractivo=!Caminar; //Si no camina, será interactivo
 		}
 		
-		double [][] Tr=rutaEspacial.toTr();
-		System.out.println("Longitud de la trayectoria="+Tr.length
-				+" es cerrad="+rutaEspacial.esRutaCerrada());
+		Trayectoria Tr=new Trayectoria(rutaEspacial);
+		System.out.println("Longitud de la trayectoria="+Tr.length()
+				+" es cerrad="+Tr.esCerrada());
 
-		MiraObstaculo mi=new MiraObstaculo(Tr,rutaEspacial.esRutaCerrada());
+		MiraObstaculo mi=new MiraObstaculo(Tr);
 		PanelMiraObstaculo pmo=null;
 		if(esInteractivo) {
 			JFrame ventana=new JFrame("Panel Mira Obstáculo");
@@ -390,7 +390,7 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 					}
 					if(even.getButton()==MouseEvent.BUTTON3) {
 						System.out.println("Pulsado Boton "+even.getButton()+" pedimos los cálculos");
-						MI.masCercano(MI.posActual, MI.Yaw, MI.barr);
+						MI.masCercano(MI.Yaw, MI.barr);
 
 						actualiza();
 						System.out.println(MI);
@@ -433,7 +433,8 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 								barAct.datos[i]=(short)((Math.random()*60+2)*100.0);
 						}
 						long tini=System.currentTimeMillis();
-						MI.masCercano(npos, Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
+						MI.tray.situaCoche(npos);
+						MI.masCercano(Math.atan2(nuevaPos.getY()-posAngulo.getY(), nuevaPos.getX()-posAngulo.getX())
 								, barAct);
 						actualiza();
 						System.out.println(MI);
@@ -442,10 +443,7 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 					} else {
 						//Sacamos indice de pto más cercano
 						Point2D.Double pos = pixel2Point(even.getX(),even.getY());
-						System.out.println("Indice de Tr más cercano:"+UtilCalculos.indiceMasCercano(MI.Tr, pos.getX(), pos.getY()));
-						System.out.println("Indice de Db más cercano:"+UtilCalculos.indiceMasCercano(MI.Bd, pos.getX(), pos.getY()));
-						System.out.println("Indice de Bi más cercano:"+UtilCalculos.indiceMasCercano(MI.Bi, pos.getX(), pos.getY()));
-
+						System.out.println("Indice de Tr más cercano:"+MI.tray.indiceMasCercano(pos.getX(), pos.getY()));
 					}
 					//al final llamamos al del padre
 					super.mouseReleased(even);
@@ -466,8 +464,8 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 //			ba.datos[i]=(short)((15.0)*100.0);
 			ba.datos[i]=(short)((Math.sin((double)i/(ba.numDatos()-1)*Math.PI*13.6)*3.0+10.0)*100.0);
 		}
-		double[] ptoAct={-26, 10};
-		double dist=mi.masCercano(ptoAct, Math.toRadians(90), ba);
+		Tr.situaCoche(-26, 10);
+		double dist=mi.masCercano( Math.toRadians(90), ba);
 		if(esInteractivo) pmo.actualiza();
 		System.out.println(mi);
 		if(Caminar) {
@@ -490,8 +488,8 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 						barAct.datos[i]=(short)((Math.random()*60+2)*100);
 				}
 				long tini=System.currentTimeMillis();
-				double diAct=mi.masCercano(Tr[inTr]
-				                               , Math.atan2(Tr[inTr][1]-Tr[inTrAnt][1],Tr[inTr][0]-Tr[inTrAnt][0]), barAct);
+				Tr.situaCoche(Tr.x[inTr],Tr.y[inTr]);
+				double diAct=mi.masCercano(Math.atan2(Tr.y[inTr]-Tr.y[inTrAnt],Tr.x[0]-Tr.x[0]), barAct);
 				long tfin=System.currentTimeMillis();
 				System.out.println(iteracion+"- Indice "+inTr+" distancia "+diAct
 						+"  Tarda:"+(tfin-tini));
@@ -502,7 +500,7 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 					} catch (Exception e) { }
 				}
 				inTrAnt=inTr;
-				inTr=(inTr+3)%Tr.length;
+				inTr=(inTr+3)%Tr.length();
 			}
 		}
 	}

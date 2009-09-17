@@ -7,21 +7,19 @@ import sibtra.log.VentanaLoggers;
 import sibtra.util.EligeSerial;
 
 /**
- * Ventana con información del GPS Triumph. Aparte del panel GPSData 
- * tiene información especifica del GPS. 
- * Crea hilo para refrescarse periodicamente, NO utiliza los eventos del GPS.
+ * Ventana con información del GPS Triumph mediante un {@link PanelGPSTriumph}.
+ * Activa el auto-refresco del panel, NO utiliza los eventos del GPS.
  * @author alberto
  *
  */
-public class VentanaGPSTriumph extends JFrame implements Runnable {
+public class VentanaGPSTriumph extends JFrame {
 
 	private PanelGPSTriumph pGPST;
 	
 	private GPSConnectionTriumph gpsCT;
-	private Thread ThreadPanel;
 
 	/** Milisegundos del periodo de actualización */
-	private long milisPeriodo=500;
+	private int milisPeriodo=550;
 
 
 	public VentanaGPSTriumph(GPSConnectionTriumph gct) {
@@ -33,32 +31,21 @@ public class VentanaGPSTriumph extends JFrame implements Runnable {
 		add(pGPST,BorderLayout.CENTER);
 		pack();
 		setVisible(true);
-		ThreadPanel = new Thread(this);
-		ThreadPanel.start();
-	}
-
-	/** Función del thread para refrescar ventana */
-	public void run() {
-		while (true){
-			setEnabled(true);
-			//TODO el ultimo punto debería depender de lo seleccionado en MuestraGPSData
-			pGPST.actualizaGPS(gpsCT.getPuntoActualTemporal());
-			pGPST.repinta();
-			try{Thread.sleep(milisPeriodo);} catch (Exception e) {}	
-		}
+		pGPST.actulizacionPeridodica(milisPeriodo);
 	}
 
 	
 	/** @return milisegundos del periodo de actualización */
-	public long getMilisPeriodo() {
+	public int getMilisPeriodo() {
 		return milisPeriodo;
 	}
 
 	/** @param milisPeriodo milisegundo a utilizar en la actualización. Deben ser >=0 */ 
-	public void setMilisPeriodo(long milisPeriodo) {
+	public void setMilisPeriodo(int milisPeriodo) {
 		if(milisPeriodo<=0)
 			throw new IllegalArgumentException("Milisegundos de actulización "+milisPeriodo+" deben ser >=0");
 		this.milisPeriodo = milisPeriodo;
+		pGPST.actulizacionPeridodica(milisPeriodo);
 	}
 
 	/**

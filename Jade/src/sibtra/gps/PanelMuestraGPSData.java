@@ -72,23 +72,23 @@ public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener 
 //		velocidad=aCopiar.velocidad;
 //		velocidadGPS=aCopiar.velocidadGPS;		
 		//hora
-		LabelDato lda=new LabelDatoFormato("??:??:??.??",GPSData.class,"getHora","%s");
+		LabelDato lda=new LabelDatoFormato(GPSData.class,"getHora","%s","??:??:??.??");
 		añadeAPanel(lda,"Hora");
 
 		//Latitud
-		añadeAPanel(new LabelDatoFormato("+?? ??.?????",GPSData.class,"getLatitudText","%s")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getLatitudText","%s","+?? ??.?????")
 		, "Latitud");
 		//Longitud
-		añadeAPanel(new LabelDatoFormato("+??? ??.?????",GPSData.class,"getLongitudText","%s")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getLongitudText","%s","??:??:??.??")
 		,"Longitud");
 		//RMS
-		añadeAPanel(new LabelDatoFormato("?.???",GPSData.class,"getRms","%2.3f")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getRms","%2.3f")
 		,"RMS");
 		//Número satélites
-		añadeAPanel(new LabelDatoFormato("?",GPSData.class,"getSatelites","%1d")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getSatelites","%1d")
 		,"Num Satelites");
 		//Edad correción diferencial
-		añadeAPanel(new LabelDatoFormato("??? sg",GPSData.class,"getAge","%3.0f sg")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getAge","%3.0f sg")
 		, "Edad Correccion");
 		//Coordenadas locales por separado
 		añadeAPanel(new LabelDato("+???.??") {
@@ -128,22 +128,22 @@ public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener 
 		}
 		,"Z Local");
 		//altura
-		añadeAPanel(new LabelDatoFormato("+????.??",GPSData.class,"getAltura","%+8.2f"), "Altura");
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getAltura","%+8.2f"), "Altura");
 
 		//Velocidad m/€s
-		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getVelocidad","%+6.2f")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getVelocidad","%+6.2f")
 		, "Velocidad m/s");
 
-		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getDesvLatitud","%+7.3f")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getDesvLatitud","%+7.3f")
 		, "Desv. Latitud");
 
-		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getDesvLongitud","%+7.3f")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getDesvLongitud","%+7.3f")
 		, "Des. Longitud");
 
-		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getDesvAltura","%+7.3f")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getDesvAltura","%+7.3f")
 		, "Desv. Altura");
 
-		añadeAPanel(new LabelDatoFormato("+??.??",GPSData.class,"getVelocidad","%+7.3f")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getVelocidad","%+7.3f")
 		, "Velocidad");
 //		Yaw
 		añadeAPanel(new LabelDato("+????.??") {
@@ -160,7 +160,7 @@ public class PanelMuestraGPSData extends PanelDatos implements GpsEventListener 
 		}
 		,"Yaw IMU");
 		//Angulo calculado
-		añadeAPanel(new LabelDatoFormato("+????.??",GPSData.class,"getAngulo","%+8.2f")
+		añadeAPanel(new LabelDatoFormato(GPSData.class,"getAngulo","%+8.2f")
 		,"Angulo Calc.");
 		//Diff angulos
 		añadeAPanel(new LabelDato("+????.??"){

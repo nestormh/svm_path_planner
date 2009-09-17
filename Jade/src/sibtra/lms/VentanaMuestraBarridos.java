@@ -7,9 +7,12 @@ import java.awt.event.WindowListener;
 import javax.swing.JFrame;
 
 import sibtra.util.EligeSerial;
+import sibtra.util.ThreadSupendible;
 
 
-/** Aplicación para mostrar los barridos */
+/** Aplicación para mostrar los barridos.
+ * Sólo se actualiza mientras el cursor esté sobre la ventana.
+ */
 @SuppressWarnings("serial")
 public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 
@@ -17,7 +20,7 @@ public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 	private PanelMuestraBarrido pmb;
 	/** contendrá el último barrido recibido del LMS */
 	private BarridoAngular barrAct=null;
-	private ThreadActulizacion thActuliza;
+	private ThreadSupendible thActuliza;
 	public VentanaMuestraBarridos(String ptoRF) {
 		super("Muestra Barrido");
 		//Conectamos a RF
@@ -44,8 +47,14 @@ public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 			System.err.println("Problema al pedir las zonas:"+e.getMessage());
 		}
 		
-		thActuliza=new ThreadActulizacion();
-		thActuliza.start(); //arranca suspendido
+		thActuliza=new ThreadSupendible() {
+			@Override
+			protected void accion() {
+				actualizaBarrido();
+			}			
+		};
+//		thActuliza=new ThreadActualizacion();
+//		thActuliza.start(); //arranca suspendido
 		
 		addWindowListener(this);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -55,40 +64,12 @@ public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 
 	}
 
-	class ThreadActulizacion extends Thread {
-		private boolean suspendido=true;
-		
-		public synchronized void activar() {
-			if(suspendido) {
-				suspendido=false;
-				notify();
-			}
-		}
-		
-		public synchronized void suspender() {
-			if(!suspendido) {
-				suspendido=true;
-//				notify();
-			}
-		}
-		
-		public synchronized  boolean isSuspendido() {
-			return suspendido;
-		}
-		
-
-		public void run() {
-			while(true) {
-				actualizaBarrido();
-				try {
-//					Thread.sleep(100); ya no esperamos ya que actualiza barrido espera.
-					synchronized (this) {
-						while (suspendido) wait(); 
-					}
-				} catch (InterruptedException e) {	}
-			}
-		}
-	}
+//	class ThreadActualizacion extends ThreadSupendible {
+//		@Override
+//		protected void accion() {
+//			actualizaBarrido();
+//		}
+//	}
 	
 	public void actualizaBarrido() {
 		long t0=System.currentTimeMillis();

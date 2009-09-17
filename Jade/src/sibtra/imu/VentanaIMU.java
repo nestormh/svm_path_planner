@@ -11,31 +11,29 @@ import sibtra.util.EligeSerial;
 /** 
  * Ventana para la monitorización de la información recibida de la IMU
  * a través de  {@link ConexionSerialIMU}. 
- * Hace uso del {@link PanelMuestraAngulosIMU} y añade tread para hacer actualización periódica.
+ * Hace uso del {@link PanelIMU} y programa su actulización periodica.
  * NO utiliza los eventos de recepción de la IMU.
  * @author alberto
  *
  */
 @SuppressWarnings("serial")
-public class VentanaIMU extends JFrame  implements Runnable {
+public class VentanaIMU extends JFrame {
 
-
-		private Thread ThreadPanel;
 		
-		private PanelMuestraAngulosIMU panAngIMU;
+		private PanelIMU panIMU;
 		
 		/** Conexión a la IMU*/
 		private ConexionSerialIMU conSerIMU;
 		
 		/** Milisegundos del periodo de actualización */
-		private long milisPeriodo=500;
+		private int milisPeriodo=500;
 
 		
 		public void run() {
 			while (true){
 				setEnabled(true);
-				panAngIMU.actualizaAngulo(conSerIMU.getAngulo());
-				panAngIMU.repinta();
+				panIMU.actualizaAngulo(conSerIMU.getAngulo());
+				panIMU.repinta();
 				try{Thread.sleep(milisPeriodo);} catch (Exception e) {}	
 			}
 		}
@@ -49,27 +47,27 @@ public class VentanaIMU extends JFrame  implements Runnable {
 			if(csi==null) 
 				throw new IllegalArgumentException("Conexion serial IMU no puede ser null");
 			conSerIMU=csi;
-			panAngIMU=new PanelMuestraAngulosIMU();
+			panIMU=new PanelIMU(csi);
 
-			add(panAngIMU,BorderLayout.CENTER);
+			add(panIMU,BorderLayout.CENTER);
 			pack();
 			setVisible(true);
-			ThreadPanel = new Thread(this);
-			ThreadPanel.start();
-
+			
+			panIMU.actulizacionPeridodica(milisPeriodo);
 		}
 		
 		
 		/** @return milisegundos del periodo de actualización */
-		public long getMilisPeriodo() {
+		public int getMilisPeriodo() {
 			return milisPeriodo;
 		}
 
 		/** @param milisPeriodo milisegundo a utilizar en la actualización. Deben ser >=0 */ 
-		public void setMilisPeriodo(long milisPeriodo) {
+		public void setMilisPeriodo(int milisPeriodo) {
 			if(milisPeriodo<=0)
 				throw new IllegalArgumentException("Milisegundos de actulización "+milisPeriodo+" deben ser >=0");
 			this.milisPeriodo = milisPeriodo;
+			panIMU.actulizacionPeridodica(milisPeriodo);
 		}
 
 		/** Crea la ventana con usando la serial pasada como primer parámetro. Si no se pasa

@@ -78,8 +78,13 @@ public class ManejaLMS {
 	 */
 	public ManejaLMS(String puertoSerie, ManejaTelegramas mantel) {
 		manTel=mantel;
-		manTel.ConectaPuerto(puertoSerie);
-		manTel.setDefaultTimeOut(500);
+		if(!puertoSerie.equals("/dev/null")) {
+			manTel.ConectaPuerto(puertoSerie);
+			manTel.setDefaultTimeOut(500);
+		} else {
+			manTel=null;
+			System.out.println(getClass().getName()+": Trabajamos sin conexion");
+		}
 		
 		//valores por defecto supuestos
 		manMen=new UtilMensajes((short)50,(short)180,true,(byte)0);
@@ -115,6 +120,10 @@ public class ManejaLMS {
 	 * @return si fue posible fijar y confirmar el paso
 	 */
 	void configura500K(int maxIntenos) throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		lmsVivo=false;
 		if (!manTel.isInicializado())
 			throw new LMSException("Puerto aún no inicializado");
@@ -170,7 +179,11 @@ public class ManejaLMS {
 	/** Tranta de conectar con LMS a 500Kba y determinar su configuración */ 
 	void configuraInicial() throws LMSException {
 		
-        // Lo pasamos a 500K si no lo está aún
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
+       // Lo pasamos a 500K si no lo está aún
 		if(!lmsVivo)
 			configura500K();
 		if(!configuradoCodigo) {
@@ -192,6 +205,10 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	public synchronized void CambiaAModo25() throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -220,6 +237,10 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	protected void CambiaAModoInstalacion() throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		//pasamos al modo 00
 		System.out.println("Tratamos de pasar a modo instalación");
@@ -253,6 +274,10 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	protected synchronized byte[] ObtieneParte1Configuracion() throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return null;
+		}
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -282,6 +307,10 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	protected synchronized void CambiaParte1Configuracion(byte[] menConfigura) throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -325,6 +354,10 @@ public class ManejaLMS {
 			throw new LMSException("Estamos en medio de una peticion");
 		System.out.println("Tratamos de fijar la variante");
 
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		final byte[] menVariante={(byte)0x3b, (byte)0xb4, 0, 0x32, 0};  //Mensaje ejemplo
 		UtilMensajes.word2Men(rangoAngular,menVariante,1);  //valores actuales
@@ -399,6 +432,10 @@ public class ManejaLMS {
 	 * @throws LMSException si hay problemas en la comunicación.
 	 */
 	public void setCodigo(boolean enMilimetros, byte codigoRango) throws LMSException{
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		configuraInicial();
 		if(configuradoCodigo && manMen.isEnMilimetros()==enMilimetros && manMen.getCodigoRango()==codigoRango)
 			return; //configuración igual a la pedida
@@ -513,6 +550,10 @@ public class ManejaLMS {
 	 * @throws LMSException  en caso de cualquier problema
 	 */
 	public synchronized ZonaLMS recibeZona(byte queZona, boolean elConjunto1) throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return null;
+		}
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -545,6 +586,10 @@ public class ManejaLMS {
 	 * @throws LMSException  si hay problemas en la comunicación.
 	 */
 	public synchronized void solicitaDistancia() throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		if(!lmsVivo) throw new LMSException("LMS no esta vivo");
 		if(pidiendo!=PIDIENDO_NADA)
 			throw new LMSException("Estamos en medio de una peticion");
@@ -561,6 +606,10 @@ public class ManejaLMS {
 	 * @throws LMSException si hay problemas en la comunicación.
 	 */
 	public synchronized double[] recibeDistancia() throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return null;
+		}
 		if(pidiendo!=PIDIENDO_DISTANCIAS)
 			throw new LMSException("NO acabamos de pedir distancias");
 		//Recibimos respuesta
@@ -576,6 +625,10 @@ public class ManejaLMS {
 	
 	/** Cierra la conexión serial. */
 	public void cierraPuerto() {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		manTel.cierraPuerto();
 	}
 
@@ -588,6 +641,10 @@ public class ManejaLMS {
 	 */
 	public synchronized void pideBarrido(short anguloInicial, short anguloFinal,
 			short numPromedios) throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		
 		configuraInicial();
 		if(pidiendo!=PIDIENDO_NADA)
@@ -641,6 +698,10 @@ public class ManejaLMS {
 	 * @throws LMSException 
 	 */
 	public synchronized BarridoAngular recibeBarrido() throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return null;
+		}
 		if(pidiendo!=PIDIENDO_BARRIDO)
 			throw new LMSException("No acabamos de pedir barrido");
 		//Recibimos respuesta
@@ -664,6 +725,10 @@ public class ManejaLMS {
 	 */
 	public synchronized void pideBarridoContinuo(short anguloInicial, short anguloFinal,
 			short numPromedios) throws LMSException {
+		if(manTel==null) {
+			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
+			return;
+		}
 		
 		configuraInicial();
 		if(pidiendo!=PIDIENDO_NADA && pidiendo!=PIDIENDO_CONTINUO 
@@ -857,6 +922,11 @@ public class ManejaLMS {
 			}
 		}
 		
+	}
+
+	/** @return si el LSM esta en modo de envio continuo */
+	public boolean isEnvioContinuo() {
+		return thContinuo.isEmitiendo();
 	}
 	
 }

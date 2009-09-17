@@ -2,22 +2,17 @@ package sibtra.rfycarro;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.io.IOException;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import sibtra.lms.BarridoAngular;
-
-import com.centralnexus.input.Joystick;
+import sibtra.util.ManejaJoystick;
+import sibtra.util.PanelJoystick;
 
 public abstract class FuturoJoystick {
-	public final static float MinY=0.0014648885f;
-	public final static float MaxY=0.005401776f;
-	public final static float MinX=5.1881466E-4f;
-	public final static float MaxX=0.0055543687f;
-	public final static double AlfaMaximo=Math.toRadians(45);
 	/**
 	 * @param args
 	 */
@@ -37,7 +32,15 @@ public abstract class FuturoJoystick {
 		JFrame ventana=new JFrame("Futuro Joystick");
 		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		final PanelFuturoObstaculo pfo=new PanelFuturoObstaculo(fo);
-		ventana.add(pfo);
+		JPanel central=new JPanel();
+		ventana.add(central);
+		central.setLayout(new BoxLayout(central,BoxLayout.PAGE_AXIS));
+		central.add(pfo);
+		
+		ManejaJoystick joy = new ManejaJoystick();
+		PanelJoystick panJ=new PanelJoystick(joy);
+		central.add(panJ);
+		
 		
 		{ //panel inferior para variar alfa y velocidad
 			JPanel jpSur=new JPanel();
@@ -59,33 +62,28 @@ public abstract class FuturoJoystick {
 		fo.distanciaAObstaculo(Math.toRadians(10), ba);
 		pfo.setBarrido(ba);
 		pfo.actualiza();
+		panJ.actualiza();
 
 
-        try {
-			Joystick joy = Joystick.createInstance();
-	        for (;;) {
-	            joy.poll();
-	            float x=joy.getX();
-	            double alfa=-(AlfaMaximo*2/(MaxX-MinX)*(x-MinX)-AlfaMaximo);
-				jlXAlfa.setText(String.format("X= %f  Alfa=%f º."
-						, x,Math.toDegrees(alfa)));
-				double distancia=fo.distanciaAObstaculo(alfa, ba);
-				double velMS=6/(MaxY-MinY)*(MaxY-joy.getY());
-				jlDistancia.setText(String.format("Distancia= %5.2f m Velocidad=%f Tiempo=%5.2f sg"
-						, distancia,velMS, fo.tiempoAObstaculo(velMS)));
-	    		pfo.setBarrido(ba);
-	    		pfo.actualiza();
-	            try {
-	                Thread.sleep(200);
-	            } catch(InterruptedException e) {
-	                break;
-	            }
-	        }
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		for (;;) {
+			panJ.actualiza();
+			jlXAlfa.setText(String.format("X= %f  Alfa=%f º."
+					, joy.getX(),Math.toDegrees(joy.getAlfa())));
+			double distancia=fo.distanciaAObstaculo(joy.getAlfa(), ba);
+			jlDistancia.setText(String.format("Distancia= %5.2f m Velocidad=%f Tiempo=%5.2f sg Avance=%5.2f Y=%f"
+					, distancia,joy.getVelocidad(), fo.tiempoAObstaculo(joy.getVelocidad())
+					,joy.getAvance()
+					,joy.getY()));
+			pfo.setBarrido(ba);
+			pfo.actualiza();
+			
+			try {
+				Thread.sleep(200);
+			} catch(InterruptedException e) {
+				break;
+			}
 		}
+
 
 	}
 

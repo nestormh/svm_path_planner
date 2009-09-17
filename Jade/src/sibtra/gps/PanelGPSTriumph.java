@@ -1,17 +1,14 @@
 package sibtra.gps;
 
-import java.awt.FlowLayout;
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import sibtra.util.LabelDato;
+
 import sibtra.util.LabelDatoFormato;
-import sibtra.util.PanelDatos;
 
 /**
  * Panel para mostrar información y gestionar GPS Triumph. 
  * La información se muestra usando {@link PanelMuestraGPSData} y se añaden
  * widget específicos de Triumph.
+ * Define {@link #actualiza()}, por lo que permite programar auto-refresco.
  * @author alberto
  *
  */
@@ -31,16 +28,18 @@ public class PanelGPSTriumph extends PanelMuestraGPSData {
 			throw new IllegalArgumentException("Conexion a GPS no puede ser null");
 		gpsCT=gct;
 		//linea con datos de calidad del enlace
-		ldCal=new LabelDatoFormato("  ### %  ",GPSConnectionTriumph.class,"getCalidadLink","%4.0f %%");
+		ldCal=new LabelDatoFormato(GPSConnectionTriumph.class,"getCalidadLink","%4.0f %%");
 //		lda.setPreferredSize(new Dimension(100,50));
 		añadeAPanel(ldCal, "Cali Enlace");
-		ldOK=new LabelDatoFormato("   ####   ",GPSConnectionTriumph.class,"getNumOKLink"," %10d");
+		ldOK=new LabelDatoFormato(GPSConnectionTriumph.class,"getNumOKLink"," %10d");
 //		lda.setPreferredSize(new Dimension(100,50));
 		añadeAPanel(ldOK, "Paq OK Enlace");
 	}
 
-	public void actualizaGPS(GPSData ngpsdt) {
+	/** Actualiza en base al ultimo punto temporal */
+	protected void actualiza() {
 		//TODO actualizacion ldCAL etc.
+		GPSData ngpsdt=gpsCT.getPuntoActualTemporal();
 		actualizaPunto(ngpsdt);
 		if(cuentaEnlaceUltimo!=gpsCT.getNumOKLink()) {
 			ldCal.Actualiza(gpsCT,true);
@@ -50,14 +49,8 @@ public class PanelGPSTriumph extends PanelMuestraGPSData {
 			ldCal.Actualiza(gpsCT,false);
 			ldOK.Actualiza(gpsCT,false);
 		}
-	}
-
-	/**
-	 * @see sibtra.gps.GpsEventListener#handleGpsEvent(sibtra.gps.GpsEvent)
-	 */
-	public void handleGpsEvent(GpsEvent ev) {
-		actualizaGPS(ev.getNuevoPunto());
-		repinta();
+//		System.out.print("G");
+		super.actualiza();
 	}
 
 	/** programamos la actualizacion del panel */

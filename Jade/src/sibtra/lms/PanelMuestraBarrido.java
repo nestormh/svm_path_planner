@@ -65,25 +65,29 @@ public class PanelMuestraBarrido extends PanelBarrido {
 			jcbBarrido=new JCheckBox("Barrido",true);
 			jcbBarrido.addChangeListener(this);
 			jpChecks.add(jcbBarrido);
+			jcbBarrido.setEnabled(false);
 			
 			jpChecks.add(Box.createHorizontalStrut(15));
 			
 			jcbZonaA=new JCheckBox("Zona A",true);
 			jcbZonaA.addChangeListener(this);
 			jpChecks.add(jcbZonaA);
+			jcbZonaA.setEnabled(false);
 			
 			jpChecks.add(Box.createHorizontalStrut(15));
 			
 			jcbZonaB=new JCheckBox("Zona B",true);
 			jcbZonaB.addChangeListener(this);
 			jpChecks.add(jcbZonaB);
+			jcbZonaB.setEnabled(false);
 			
 			jpChecks.add(Box.createHorizontalStrut(15));
 			
 			jcbZonaC=new JCheckBox("Zona C",true);
 			jcbZonaC.addChangeListener(this);
 			jpChecks.add(jcbZonaC);
-			
+			jcbZonaC.setEnabled(false);
+
 			jpChecks.add(Box.createHorizontalStrut(15));
 			
 		}
@@ -181,8 +185,11 @@ public class PanelMuestraBarrido extends PanelBarrido {
 		//TODO seguramente es más correcto copiarlo
 		barridoAct=barr;
 		
-		if(barr==null)
+		if(barr==null) {
+			jcbBarrido.setEnabled(false);
 			return;
+		}
+		jcbBarrido.setEnabled(true);
 		//cambiamos color de nombres de las zonas si están infringidas
 		if(barr.infringeA())
 			jcbZonaA.setForeground(Color.RED);
@@ -224,15 +231,34 @@ public class PanelMuestraBarrido extends PanelBarrido {
 	 * @param zona a actualizar
 	 */
 	public void setZona(ZonaLMS zona) {
+		if (zona==null) return;
 		if(zona.isConjunto1()){
 			//es del conjunto 1
-			if(zona.getQueZona()==ZonaLMS.ZONA_A) Zona1A=zona;
-			if(zona.getQueZona()==ZonaLMS.ZONA_B) Zona1B=zona;
-			if(zona.getQueZona()==ZonaLMS.ZONA_C) Zona1C=zona;
+			if(zona.getQueZona()==ZonaLMS.ZONA_A) { 
+				Zona1A=zona;
+				jcbZonaA.setEnabled(true);
+			}
+			if(zona.getQueZona()==ZonaLMS.ZONA_B) {
+				Zona1B=zona;
+				jcbZonaB.setEnabled(true);
+			}
+			if(zona.getQueZona()==ZonaLMS.ZONA_C) {
+				Zona1C=zona;
+				jcbZonaC.setEnabled(true);
+			}
 		} else {
-			if(zona.getQueZona()==ZonaLMS.ZONA_A) Zona2A=zona;
-			if(zona.getQueZona()==ZonaLMS.ZONA_B) Zona2B=zona;
-			if(zona.getQueZona()==ZonaLMS.ZONA_C) Zona2C=zona;
+			if(zona.getQueZona()==ZonaLMS.ZONA_A) {
+				Zona2A=zona;
+				jcbZonaA.setEnabled(true);
+			}
+			if(zona.getQueZona()==ZonaLMS.ZONA_B) {
+				Zona2B=zona;
+				jcbZonaB.setEnabled(true);
+			}
+			if(zona.getQueZona()==ZonaLMS.ZONA_C) {
+				Zona2C=zona;
+				jcbZonaC.setEnabled(true);
+			}
 		}
 		repaint();
 	}

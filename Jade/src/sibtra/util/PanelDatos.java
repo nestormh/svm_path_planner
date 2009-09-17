@@ -3,6 +3,8 @@ package sibtra.util;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -10,6 +12,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
@@ -33,6 +36,9 @@ public class PanelDatos extends JPanel {
 	/** Las etiquetas que se añaden y que deben actualizarse */
 	private Vector<LabelDato> vecLabels=new Vector<LabelDato>();
 	
+
+	private Timer timerActulizacion;
+
 	/** Constructor sin definir panel por defecto */
 	public PanelDatos() {
 		fuenteLabel = getFont().deriveFont(18.0f);
@@ -119,9 +125,44 @@ public class PanelDatos extends JPanel {
 		//atualizamos etiquetas en array
 		for(int i=0; i<vecLabels.size(); i++)
 			vecLabels.elementAt(i).Actualiza(nuevoObj,hayDato);
-
 	}
 
+	/** Método que se invocará en la {@link #actulizacionPeridodica(int)}.
+	 * En esta clase llama al {@link #repaint()}. 
+	 * Las clases hijas que quieran hacer uso de la actualización tredrá que modificarla
+	 */
+	protected void actualiza() {
+		repaint();
+	}
+	
+	/** Establece timer para la actulización periódica del panel.
+	 * Si ya existe uno simplemente cambia el periodo.
+	 * @param periodoMili periodo de actulización en milisegundos
+	 */
+	public void actulizacionPeridodica(int periodoMili) {
+		if(timerActulizacion==null) {
+			//creamos el action listener y el timer
+			ActionListener taskPerformer = new ActionListener() {
+				public void actionPerformed(ActionEvent evt) {
+//					System.out.print("+");
+					actualiza();
+				}
+			};
+			timerActulizacion=new Timer(periodoMili, taskPerformer);
+		} else 
+			//basta con modificar el delay
+			timerActulizacion.setDelay(periodoMili);
+		timerActulizacion.start();
+	}
+
+	/** Detiene la acutualización periodica si existe alguna */
+	public void actualizacionPeriodicaParar() {
+		if(timerActulizacion==null) return;
+		timerActulizacion.stop();
+	}
+	
+
+	
 	/** programamos la actualizacion del panel */
 	public void repinta() {
 		SwingUtilities.invokeLater(new Runnable() {
