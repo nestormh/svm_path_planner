@@ -89,7 +89,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 			throw new IllegalStateException("Aun no inicializado");
 		consigna = 0;
 		//obtenemos posicion y orientación del modelo del coche.
-        double angAct = modCoche.getTita();
+        double angAct = modCoche.getYaw();
 		int indMin = Tr.indiceMasCercano();  //la posición del coche ya la ha puesto el motor
 		errorLateral = Tr.distanciaAlMasCercano();
 		errorOrientacion = Tr.rumbo[indMin] - angAct;

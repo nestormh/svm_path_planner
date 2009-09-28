@@ -598,7 +598,7 @@ public class NavegaPredictivo implements ActionListener {
         int indMin = Tr.indiceMasCercano();
         errorLateral = Tr.distanciaAlMasCercano();
 //        errorOrientacion = cp.getOrientacionDeseada() - modCoche.getTita();
-        errorOrientacion = Tr.rumbo[indMin] - modCoche.getTita();
+        errorOrientacion = Tr.rumbo[indMin] - modCoche.getYaw();
 //        System.out.println("Error en la orientación "+errorOrientacion);
         if (Tr.velocidad[indMin]>velocidadMax){
             refVelocidad = velocidadMax;

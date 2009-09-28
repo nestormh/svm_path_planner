@@ -226,8 +226,9 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
         	double x=pa.getXLocal();
         	double y=pa.getYLocal();
         	double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
+        	double angVolante=ventanaMonitoriza.conexionCarro.getAnguloVolante();
         	//TODO Realimentar posición del volante y la velocidad del coche.
-        	modCoche.setPostura(x, y, angAct);
+        	modCoche.setPostura(x, y, angAct, angVolante);
         }
 
 	}

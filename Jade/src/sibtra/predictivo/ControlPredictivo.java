@@ -254,14 +254,14 @@ public class ControlPredictivo {
         double vectorDeseadoX = ruta.x[indMinAnt] - carroSim.getX() + Math.cos(ruta.rumbo[indMinAnt]);
         double vectorDeseadoY = ruta.y[indMinAnt] - carroSim.getY() + Math.sin(ruta.rumbo[indMinAnt]);
         orientacionesDeseadas[0] = Math.atan2(vectorDeseadoX,vectorDeseadoY);
-        predicOrientacion[0] = carroSim.getTita();
+        predicOrientacion[0] = carroSim.getYaw();
         vectorError[0] = orientacionesDeseadas[0] - predicOrientacion[0];
         prediccionPosicion[0][0] = carroSim.getX();
         prediccionPosicion[0][1] = carroSim.getY();
         int indMin = indMinAnt;
         for (int i=1; i<horPrediccion;i++ ){
             carroSim.calculaEvolucion(comando,velocidad,Ts);
-            predicOrientacion[i] = carroSim.getTita();
+            predicOrientacion[i] = carroSim.getYaw();
             indMin = ruta.indiceMasCercanoOptimizado(carroSim.getX(),carroSim.getY(),indMin);
 //            indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());
             vectorDeseadoX = ruta.x[indMin] - carroSim.getX() + Math.cos(ruta.rumbo[indMin]);
@@ -336,7 +336,7 @@ public class ControlPredictivo {
         
         for (int i=0;i<horPrediccion;i++){
             carroEscalon.calculaEvolucion(Math.PI/6,velocidad, Ts);
-            respuestaEscalon[i] = carroEscalon.getTita();
+            respuestaEscalon[i] = carroEscalon.getYaw();
         }
         return respuestaEscalon;
     }

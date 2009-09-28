@@ -181,7 +181,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     	super.cosasAPintar(g0);
     	if(CP==null) return; //si no hay control predictivo, ¡no pintamos nada! :-)
         //colocamos el coche en su posición actual
-        situaCoche(CP.carroOriginal.getX(), CP.carroOriginal.getY(), CP.carroOriginal.getTita());
+        situaCoche(CP.carroOriginal.getX(), CP.carroOriginal.getY(), CP.carroOriginal.getYaw());
         super.cosasAPintar(g0);
         Graphics2D g = (Graphics2D) g0;
 
@@ -279,14 +279,14 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
      */
     public static void main(String[] args) {
         final Coche carroOri = new Coche();
-        final CocheModeloAntiguo carroViejo = new CocheModeloAntiguo();
+//        final CocheModeloAntiguo carroViejo = new CocheModeloAntiguo();
         final VentanaLoggers vl; //ventana de los loggers
         double vel = 2;
         double consVolante = 0;
         carroOri.setVelocidad(vel);
         carroOri.setConsignaVolante(consVolante);
-        carroViejo.setVelocidad(vel);
-        carroViejo.setConsignaVolante(consVolante);
+//        carroViejo.setVelocidad(vel);
+//        carroViejo.setConsignaVolante(consVolante);
         int horPredic = 10;
         int horCont = 3;
         double paramLanda = 1;
@@ -321,7 +321,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
 
         carroOri.setPostura(-1, -1, 0.5, 0.0);
-        carroViejo.setPostura(-1, -1, 0.5, 0.0);
+//        carroViejo.setPostura(-1, -1, 0.5, 0.0);
 
         ControlPredictivo controlador = new ControlPredictivo(carroOri, rutaPruebaRellena,
                 horPredic, horCont, paramLanda, paramTs);
@@ -414,14 +414,14 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
                 //System.out.println("Comando " + comandoVolante);
                 }
                 carroOri.setConsignaVolante(comandoVolante);
-                carroViejo.setConsignaVolante(comandoVolante);   
-                carroOri.setPostura(carroOri.getX(),carroOri.getY(),carroOri.getTita(),carroOri.getVolante());
+//                carroViejo.setConsignaVolante(comandoVolante);   
+                carroOri.setPostura(carroOri.getX(),carroOri.getY(),carroOri.getYaw(),carroOri.getVolante());
                 lgTrayectoria.add(carroOri.getX(),carroOri.getY());
                 carroOri.calculaEvolucion(comandoVolante, 2, 0.2);
-                carroViejo.calculaEvolucion(comandoVolante, 2, 0.2);
+//                carroViejo.calculaEvolucion(comandoVolante, 2, 0.2);
                 indice=controlador.indMinAnt;
 //                System.out.println(indice);
-                double errorAngular = rutaPruebaRellena.rumbo[indice] - carroOri.getTita();
+                double errorAngular = rutaPruebaRellena.rumbo[indice] - carroOri.getYaw();
                 lgError.add(errorAngular, controlador.distanciaLateral);
                 lgDeseada.add(rutaPruebaRellena.x[indice],rutaPruebaRellena.y[indice]);
                 //System.out.println("Error " + error);

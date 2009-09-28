@@ -5,6 +5,7 @@
 
 package sibtra.predictivo;
 
+import sibtra.util.UtilCalculos;
 import Jama.Matrix;
 
 /**
@@ -25,7 +26,6 @@ public class Coche implements Cloneable {
     protected double tita = 0;
     protected double consignaVolante;
     protected double consignaVelocidad;
-    protected double volante;
     protected double velocidad;
     
     /**
@@ -49,7 +49,6 @@ public class Coche implements Cloneable {
         tita = original.tita;
         consignaVolante = original.consignaVolante;
         consignaVelocidad = original.consignaVelocidad;
-        volante = original.volante;
         velocidad = original.velocidad;
         return this;
     }
@@ -81,11 +80,13 @@ public class Coche implements Cloneable {
         double[][] arrayA = {{-1.578046155995488,0.118413876943000},
                             {0.078046155995488,-0.618413876943000}};
         double[] arrayB = {1.696460032938488,-0.696460032938488};
-        double[] arrayC = {1.0,0.0};
+        double[][] arrayC = {{1.0 ,0.0}};
         double[] arrayD = {0};
         A = new Matrix(arrayA,2,2);
         B = new Matrix(arrayB,2);
-        C = new Matrix(arrayC,2);
+//        C = new Matrix(arrayC,1,2);
+        C = new Matrix(arrayC);
+        C.print(10,	3);
         D = new Matrix(arrayD,1);
         estado = new Matrix(2,1);
         longitud = 1.7;
@@ -102,7 +103,7 @@ public class Coche implements Cloneable {
      * @param matrixD array de doubles 1x1
      * @param longi Longitud en metros del coche
      */
-    public Coche(double[][] matrixA,double[] matrixB,double[] matrixC,double[] matrixD,double longi){
+    public Coche(double[][] matrixA,double[] matrixB,double[][] matrixC,double[] matrixD,double longi){
     	//llamamos constructor por defecto
     	this();
     	if(matrixA==null || matrixA.length!=2 || matrixA[0].length!=2 
@@ -113,14 +114,14 @@ public class Coche implements Cloneable {
     	//modificamos con las matrices pasadas
         A = new Matrix(matrixA,2,2);
         B = new Matrix(matrixB,2);
-        C = new Matrix(matrixC,2);
+        C = new Matrix(matrixC,1,2);
         D = new Matrix(matrixD,1);
         longitud = longi;
     }
     
     /** @return valor real del volante */
     public double getVolante(){       
-        return volante;
+        return C.times(estado).get(0,0);
     }
     /** @return valor real de la velocidad */
     public double getVelocidad(){
@@ -162,7 +163,7 @@ public class Coche implements Cloneable {
         return y;
     }
     
-    public double getTita(){
+    public double getYaw(){
         return tita;
     }
     /**
@@ -191,8 +192,7 @@ public class Coche implements Cloneable {
         x = posX;
         y = posY;
         tita = orientacion;
-        volante = posVolante;
-        estado.set(0,0,posVolante);
+        setVolante(posVolante);
     }
     /**
      * Recoge la posición y orientación del vehículo. La fuente de la 
@@ -208,8 +208,7 @@ public class Coche implements Cloneable {
         x = posX;
         y = posY;
         tita = orientacion;
-        volante = posVolante;
-        estado.set(0,0,posVolante);
+        setVolante(posVolante);
         estado.set(1,0,velVolante);
     }
     public void setVelocidad(double vel){
@@ -240,30 +239,22 @@ public class Coche implements Cloneable {
         consignaVelocidad = velocidad;/*Por ahora no existe modelo dinámico para 
         calcular la evolución de la velocidad del vehículo, por lo que se supone
         la velocidad igual a la consigna de la velocidad*/
-        Matrix estadoAux = A.times(estado).plus(B.times(this.consignaVolante)).times(Ts);
-        Matrix alfa = C.transpose().times(estado.plus(estadoAux));
-        estado.plusEquals(estadoAux);
-        volante = alfa.get(0,0);
+        
+        //evoluciona el modelo de la bicicleta
+        Matrix alfa = C.times(estado);
+        double volante = alfa.get(0,0);
         //System.out.println("alfa escalar " + alfaEscalar);
         x = Math.cos(tita)*velocidad*Ts + x;
         y = Math.sin(tita)*velocidad*Ts + y;
         tita = ((Math.tan(volante)/longitud)*velocidad*Ts + tita);//%2*Math.PI
-        tita = normalizaAngulo(tita);
+        tita = UtilCalculos.normalizaAngulo(tita);
+        
+        //Evoluciona el volante
+        Matrix estadoAux = A.times(estado).plus(B.times(this.consignaVolante)).times(Ts);
+        estado.plusEquals(estadoAux);
         
 
     }    
-    /**
-     * Se le pasa un ángulo en radianes y devuelve ese mismo ángulo entre 
-     * -PI y PI
-     * @param angulo Ángulo a corregir
-     * @return Ángulo en radianes corregido
-     */
-    static double normalizaAngulo(double angulo){
-        angulo -= 2*Math.PI*Math.floor(angulo/(2*Math.PI));
-        if (angulo >= Math.PI)
-            angulo -= 2*Math.PI;
-        return angulo;
-    }
     /**
      * Calcula la evolución del vehículo en un instante de muestreo 
      * suponiendo velocidad cte = 1.5
@@ -305,8 +296,8 @@ public class Coche implements Cloneable {
     public static void main(String[] args) {
         // TODO code application logic here
 //        double[][] arrayA = {{-2.8,-1.8182},{1.0,0}};
-        System.out.println(normalizaAngulo(7.5));
-        System.out.println(normalizaAngulo(-7.5));
+        System.out.println(UtilCalculos.normalizaAngulo(7.5));
+        System.out.println(UtilCalculos.normalizaAngulo(-7.5));
         System.exit(0);
         Matrix A = new Matrix(2,2);
         Matrix B = new Matrix(2,1);
@@ -341,5 +332,33 @@ public class Coche implements Cloneable {
     /*public recogeDatos(){
         
     }*/
+
+	/**
+	 * @param tita the tita to set
+	 */
+	public void setYaw(double tita) {
+		this.tita = tita;
+	}
+
+	/**
+	 * @param volante the volante to set
+	 */
+	public void setVolante(double volante) {
+		this.estado.set(0,0,volante);
+	}
+
+	/**
+	 * @param x the x to set
+	 */
+	public void setX(double x) {
+		this.x = x;
+	}
+
+	/**
+	 * @param y the y to set
+	 */
+	public void setY(double y) {
+		this.y = y;
+	}
     
 }
