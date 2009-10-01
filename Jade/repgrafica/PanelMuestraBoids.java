@@ -12,10 +12,17 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Vector;
 
 import javax.swing.JApplet;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -35,6 +42,9 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 	private boolean play = false;
 	private boolean colocandoObs = false;
 	private boolean colocandoBan = false;
+	private boolean salvar = false;
+	private boolean cargar = false;
+	JFileChooser selectorArchivo = new JFileChooser(new File("./Escenarios"));
 	// Esto no debería estar en la clase de la interfaz gráfica
 	int tamanoBandada;
 	Vector<Boid> bandada = new Vector<Boid>();
@@ -62,6 +72,8 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 	JButton pausa = new JButton("Play");
 	JButton colocarObs = new JButton("Pulse para colocar obstáculos");
 	JButton colocarBan = new JButton("Pulse para colocar la bandada");
+	JButton botonSalvar = new JButton("Salvar escenario");
+	JButton botonCargar = new JButton("Cargar escenario");
 	
 	public void init(){
 		//Esto no debería estar en la clase de la interfaz gráfica
@@ -89,6 +101,8 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		panelNorte.add(pausa);
 		panelNorte.add(colocarObs);
 		panelNorte.add(colocarBan);
+		panelNorte.add(botonSalvar);
+		panelNorte.add(botonCargar);
 		spinnerCohesion.addChangeListener(this);
 		spinnerSeparacion.addChangeListener(this);
 		spinnerAlineacion.addChangeListener(this);
@@ -98,6 +112,8 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		pausa.addActionListener(this);
 		colocarObs.addActionListener(this);
 		colocarBan.addActionListener(this);
+		botonSalvar.addActionListener(this);
+		botonCargar.addActionListener(this);
 		cp.add(BorderLayout.SOUTH,panelSur);
 		cp.add(BorderLayout.NORTH,panelNorte);
 	}
@@ -118,26 +134,63 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		return this.tamanoBandada;
 	}
 	
+	public void salvarEscenario(String fichero){
+		try {
+			File file = new File(fichero);
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
+			oos.writeObject(obstaculos);
+			oos.close();
+		} catch (IOException ioe) {
+			System.err.println("Error al escribir en el fichero " + fichero);
+			System.err.println(ioe.getMessage());
+		}
+	}
+	
+	public void cargarEscenario(String fichero) throws ClassNotFoundException{
+		try {
+			File file = new File(fichero);
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+			obstaculos = (Vector<Obstaculo>) ois.readObject();
+			pintor.obstaculosPintar = obstaculos;
+			repaint();
+			ois.close();
+		} catch (IOException ioe) {
+			System.err.println("Error al leer en el fichero " + fichero);
+			System.err.println(ioe.getMessage());
+		}
+	}
+	
 	public static void main(String[] args){
 //		Vector<Boid> bandada = new Vector<Boid>();
 //		Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
 		PanelMuestraBoids ventana = new PanelMuestraBoids();
 		ventana.setTamanoBan(30);
+		//Bucle para crear la bandada
 		for (int j = 0;j<ventana.getTamanoBan();j++){
 			double posAux[] = {Math.random()*800,Math.random()};
 			double velAux[] = {Math.random(),Math.random()};
 			Matrix posi = new Matrix(posAux,2);
 			Matrix vel = new Matrix(velAux,2);			
-			ventana.getBandada().add(new Boid(posi,vel));
-//			double posObstaculos[] = {Math.random()*500+500,500};
-//			double velObstaculos[] = {0,0};
-//			Matrix posiObs = new Matrix(posObstaculos,2);
-//			Matrix velObs = new Matrix(velObstaculos,2);
+			ventana.getBandada().add(new Boid(posi,vel));				
 //			ventana.getObstaculos().add(new Obstaculo(posiObs,velObs));
 		}
+		
+		//Bucle para crear los bordes
 		ventana.pintor.introducirBandada(ventana.getBandada());
 //		ventana.pintor.introducirObstaculos(ventana.getObstaculos());
 		Console.run(ventana,1500,1000);
+		int alturaPanel = ventana.getHeight();
+		int anchuraPanel = ventana.pintor.getWidth();
+		System.out.println(alturaPanel+ "  "+anchuraPanel);
+//		for (int j=0; j<=anchuraPanel;j++){
+//			for (int i = 0;i < alturaPanel;i++){
+//				double posObstaculos[] = {j,i};
+//				double velObstaculos[] = {0,0};				
+//				Matrix posiObs = new Matrix(posObstaculos,2);
+//				Matrix velObs = new Matrix(velObstaculos,2);
+//				ventana.getObstaculos().add(new Obstaculo(posiObs,velObs));
+//			}
+//		}
 		while(true){
 			while(ventana.play){
 				for (int j = 0;j<ventana.getTamanoBan();j++){
@@ -176,15 +229,13 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		}
 	}
 
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e){
 		if (e.getSource() == pausa){
 			if (!play){ // La etiqueta del botón cambia
 				pausa.setText("Pausa");
-				System.out.println("Pulsé el play");
 			}
 			if (play){
 				pausa.setText("Play");
-				System.out.println("Pulsé el pause");
 			}
 			play = !play;
 		}
@@ -210,7 +261,28 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 			}
 			colocandoBan = !colocandoBan;
 		}
+        if (e.getSource() == botonSalvar) {            
+            int devuelto = selectorArchivo.showSaveDialog(null);
+            if (devuelto == JFileChooser.APPROVE_OPTION) {
+                File file = selectorArchivo.getSelectedFile();
+                salvarEscenario(file.getAbsolutePath());
+            }            
+        }
+        if (e.getSource() == botonCargar) {            
+            int devuelto = selectorArchivo.showOpenDialog(null);
+            if (devuelto == JFileChooser.APPROVE_OPTION) {
+                File file = selectorArchivo.getSelectedFile();               
+                try {
+					cargarEscenario(file.getAbsolutePath());
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+                
+            }            
+        }
 	}
+	
 
 	public void mouseClicked(MouseEvent e) {
 		if (colocandoObs){
@@ -218,8 +290,9 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 			double vel[] = {0,0};
 			Matrix posicion = new Matrix(pos,2);
 			Matrix velocidad = new Matrix(vel,2);
-			this.getObstaculos().add(new Obstaculo(posicion,velocidad));
-			pintor.introducirObstaculo(new Obstaculo(posicion,velocidad));
+			Obstaculo nuevoObs = new Obstaculo(posicion,velocidad);
+			this.getObstaculos().add(nuevoObs);
+			pintor.introducirObstaculo(nuevoObs);
 			System.out.println("Hay "+pintor.obstaculosPintar.size()+" obstáculos");
 			repaint();
 		}

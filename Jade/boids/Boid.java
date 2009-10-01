@@ -19,14 +19,14 @@ import com.bruceeckel.swing.Console;
 
 import Jama.Matrix;
 
-public class Boid{
+public class Boid implements Serializable{
 	/**Vector con las componentes de velocidad del boid*/
 	Matrix velocidad;
 	/**Vector con las componentes de posicion del boid*/
 	Matrix posicion;
 	/**Objeto gráfico que representará al boid*/
 	GeneralPath triangulo;
-	static double pesoCohesion = 0.05;
+	static double pesoCohesion = 0.01;
 	static double pesoSeparacion = 10;
 	static double pesoAlineacion = 1;
 	static double pesoObjetivo = 5;
@@ -76,7 +76,8 @@ public class Boid{
 		Matrix velMedia = new Matrix(pos,2);
 		for (int i=0;i < bandada.size();i++){
 			if (i != indBoid)
-				velMedia = velMedia.plus(bandada.elementAt(i).getVelocidad());
+				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 100)
+					velMedia = velMedia.plus(bandada.elementAt(i).getVelocidad());
 		}
 		velMedia = velMedia.timesEquals(1/bandada.size()-1);
 		velMedia = velMedia.minus(this.getVelocidad());
