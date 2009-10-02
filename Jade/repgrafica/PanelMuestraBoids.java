@@ -175,22 +175,38 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 //			ventana.getObstaculos().add(new Obstaculo(posiObs,velObs));
 		}
 		
-		//Bucle para crear los bordes
+		
 		ventana.pintor.introducirBandada(ventana.getBandada());
 //		ventana.pintor.introducirObstaculos(ventana.getObstaculos());
-		Console.run(ventana,1500,1000);
-		int alturaPanel = ventana.getHeight();
+		Console.run(ventana,1200,1000);
+		int alturaPanel = ventana.pintor.getHeight();
 		int anchuraPanel = ventana.pintor.getWidth();
 		System.out.println(alturaPanel+ "  "+anchuraPanel);
-//		for (int j=0; j<=anchuraPanel;j++){
-//			for (int i = 0;i < alturaPanel;i++){
-//				double posObstaculos[] = {j,i};
-//				double velObstaculos[] = {0,0};				
-//				Matrix posiObs = new Matrix(posObstaculos,2);
-//				Matrix velObs = new Matrix(velObstaculos,2);
-//				ventana.getObstaculos().add(new Obstaculo(posiObs,velObs));
-//			}
-//		}
+//		Bucle para crear los bordes
+		int cont = 1;
+		for (int k=0; k<2;k++){			
+			for (int i = 0;i < alturaPanel;i=i+10){
+				double posObstaculos[] = {cont,i};
+				double velObstaculos[] = {0,0};				
+				Matrix posiObs = new Matrix(posObstaculos,2);
+				Matrix velObs = new Matrix(velObstaculos,2);
+				ventana.getObstaculos().add(new Obstaculo(posiObs,velObs));
+			}
+			cont = anchuraPanel-10;
+		}
+		cont = 1;
+		for (int k=0; k<2;k++){			
+			for (int i = 0;i < anchuraPanel;i=i+10){
+				double posObstaculos[] = {i,cont};
+				double velObstaculos[] = {0,0};				
+				Matrix posiObs = new Matrix(posObstaculos,2);
+				Matrix velObs = new Matrix(velObstaculos,2);
+				ventana.getObstaculos().add(new Obstaculo(posiObs,velObs));
+			}
+			cont = alturaPanel-15;
+		}
+		System.out.println("cont = "+cont);
+		ventana.pintor.introducirObstaculos(ventana.getObstaculos());
 		while(true){
 			while(ventana.play){
 				for (int j = 0;j<ventana.getTamanoBan();j++){
@@ -198,10 +214,10 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 							,ventana.getObstaculos(),j,Boid.getObjetivo());
 				}
 				ventana.pintor.repaint();
-				try {
-	            	Thread.sleep(50);
-	        	} catch (Exception e) {
-	        	}
+//				try {
+//	            	Thread.sleep(50);
+//	        	} catch (Exception e) {
+//	        	}
 			}
 		}
 		

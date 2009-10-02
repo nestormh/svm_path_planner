@@ -26,12 +26,12 @@ public class Boid implements Serializable{
 	Matrix posicion;
 	/**Objeto gráfico que representará al boid*/
 	GeneralPath triangulo;
-	static double pesoCohesion = 0.01;
+	static double pesoCohesion = 0;
 	static double pesoSeparacion = 10;
-	static double pesoAlineacion = 1;
-	static double pesoObjetivo = 5;
+	static double pesoAlineacion = 2;
+	static double pesoObjetivo = 1;
 	static double pesoObstaculo = 10;
-	static double velMax = 3;
+	static double velMax = 5;
 	static double coorObjetivo[] = {800,800};
 	static Matrix objetivo = new Matrix(coorObjetivo,2);
 	/**Constructor donde se inicializa la posición y velocidad de cada boid,
@@ -76,7 +76,7 @@ public class Boid implements Serializable{
 		Matrix velMedia = new Matrix(pos,2);
 		for (int i=0;i < bandada.size();i++){
 			if (i != indBoid)
-				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 100)
+				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 50)
 					velMedia = velMedia.plus(bandada.elementAt(i).getVelocidad());
 		}
 		velMedia = velMedia.timesEquals(1/bandada.size()-1);
