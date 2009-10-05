@@ -2,7 +2,10 @@ package boids;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
+
+import com.sun.org.apache.regexp.internal.recompile;
 
 import Jama.Matrix;
 
@@ -13,7 +16,8 @@ public class Obstaculo implements Serializable{
 	/**Vector con las componentes de posicion del boid*/
 	Matrix posicion;
 	/**Forma geométrica con la que se pintará el obstáculo*/
-	GeneralPath triangulo;
+//	GeneralPath triangulo;
+	Rectangle2D cuadrado;
 	
 	/**
 	 * Constructor general
@@ -26,14 +30,15 @@ public class Obstaculo implements Serializable{
 		/**Inicialización del aspecto gráfico del cuerpo del boid*/
 		float ptosX[] = {5,0,10};
 		float ptosY[] = {0,5,5};
-		triangulo = new GeneralPath(GeneralPath.WIND_NON_ZERO,ptosX.length);
-		triangulo.moveTo (ptosX[0], ptosY[0]);
-
-		for (int index = 1; index < ptosX.length; index++) {
-		 	 triangulo.lineTo(ptosX[index], ptosY[index]);
-		};
-		triangulo.closePath();
-		triangulo.transform(AffineTransform.getTranslateInstance(posicion.get(0,0),posicion.get(1,0)));
+		cuadrado = new Rectangle2D.Double(posicion.get(0,0),posicion.get(1,0),10,10);
+//		triangulo = new GeneralPath(GeneralPath.WIND_NON_ZERO,ptosX.length);
+//		triangulo.moveTo (ptosX[0], ptosY[0]);
+//
+//		for (int index = 1; index < ptosX.length; index++) {
+//		 	 triangulo.lineTo(ptosX[index], ptosY[index]);
+//		};
+//		triangulo.closePath();
+//		triangulo.transform(AffineTransform.getTranslateInstance(posicion.get(0,0),posicion.get(1,0)));
 	}
 	public Matrix getPosicion(){
 		return posicion;
@@ -47,7 +52,7 @@ public class Obstaculo implements Serializable{
 	public void setVelocidad(Matrix vel) {
 		this.posicion = vel;		
 	}
-	public GeneralPath getForma(){
-		return triangulo;
+	public Rectangle2D getForma(){
+		return cuadrado;
 	}
 }

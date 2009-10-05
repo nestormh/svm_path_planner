@@ -12,6 +12,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
+//import java.awt.geom.Line2D.Double;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,6 +41,7 @@ import boids.Obstaculo;
 
 public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionListener,MouseListener{
 
+	private static Line2D rectaObjetivo;
 	private boolean play = false;
 	private boolean colocandoObs = false;
 	private boolean colocandoBan = false;
@@ -160,6 +163,10 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		}
 	}
 	
+	public static Line2D getRectaObjetivo(){
+		return rectaObjetivo;
+	}
+	
 	public static void main(String[] args){
 //		Vector<Boid> bandada = new Vector<Boid>();
 //		Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
@@ -210,22 +217,42 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		double distMin = Double.POSITIVE_INFINITY;
 		int indMin = 0;
 		int indMinAnt = 0;
+		boolean caminoOcupado = false;
+		boolean liderEncontrado = false;
+		
+		//----------------BUCLE PRINCIPAL------------------------------------
+		
 		while(true){
 			while(ventana.play){
 				for (int j = 0;j<ventana.getTamanoBan();j++){
 					ventana.getBandada().elementAt(j).mover(ventana.getBandada()
 							,ventana.getObstaculos(),j,Boid.getObjetivo());
-					double dist = ventana.getBandada().elementAt(j).getDistObjetivo();
-					if (dist < distMin){
+					Line2D recta = 
+						new Line2D.Double(ventana.getBandada().elementAt(j).getPosicion().get(0,0)
+							,ventana.getBandada().elementAt(j).getPosicion().get(1,0)
+							,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
+					for (int i = 0;i<ventana.getObstaculos().size();i++){												
+						caminoOcupado = recta.intersects(ventana.getObstaculos().elementAt(i).getForma());
+						if (caminoOcupado)
+							break;
+					}
+					double dist = ventana.getBandada().elementAt(j).getDistObjetivo();					
+					if (dist < distMin && caminoOcupado == false){
 						distMin = dist;
 						indMin = j;
-					}
+						liderEncontrado = true;
+					}					
 				}
 				//El lider será el que se encuentre más cerca del objetivo
+//				rectaObjetivo.setLine(new Line2D.Double(ventana.getBandada().elementAt(indMin).getPosicion().get(0,0)
+//						,ventana.getBandada().elementAt(indMin).getPosicion().get(1,0)
+//						,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0)));
 				ventana.getBandada().elementAt(indMinAnt).setLider(false);
-				ventana.getBandada().elementAt(indMin).setLider(true);
+				if (liderEncontrado)
+					ventana.getBandada().elementAt(indMin).setLider(true);
 				indMinAnt = indMin;
 				distMin = Double.POSITIVE_INFINITY;
+				liderEncontrado = false;
 				ventana.pintor.repaint();
 //				try {
 //	            	Thread.sleep(50);
