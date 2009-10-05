@@ -6,6 +6,8 @@
 package sibtra.predictivo;
 
 import sibtra.gps.Trayectoria;
+import sibtra.log.LoggerArrayDoubles;
+import sibtra.log.LoggerFactory;
 import sibtra.util.UtilCalculos;
 import Jama.Matrix;
 
@@ -54,7 +56,7 @@ public class ControlPredictivo {
     /** Almacena las orientaciones de la prediccion*/
     double[] predicOrientacion;
     /** Almacena las posiciones x e y de la prediccion*/
-    double[][] prediccionPosicion;
+    double[][] prediccionPosPorFilas;
     /** Último comando calculado por el controlador predictivo*/
     double comandoCalculado;
     /** Distancia lateral mínima del coche a la ruta */ 
@@ -77,6 +79,11 @@ public class ControlPredictivo {
 	/** Hace las veces de ganancia proporcional al error
 	 * 
 	 */
+	private LoggerArrayDoubles logPredicOrientacion;
+	private LoggerArrayDoubles logPredicPosX;
+	private LoggerArrayDoubles logPredicPosY;
+	private LoggerArrayDoubles logVectorError;
+	private LoggerArrayDoubles logParametros;
 
 	/**
      * 
@@ -101,46 +108,32 @@ public class ControlPredictivo {
         //pedir memoria cada vez
         G = new Matrix(horPrediccion,horControl);
         this.landaEye = Matrix.identity(horControl,horControl).times(landa);
-        prediccionPosicion = new double[horPrediccion][2];
+        prediccionPosPorFilas = new double[2][horPrediccion];
         predicOrientacion = new double[horPrediccion];
         vectorError = new double[horPrediccion];
         orientacionesDeseadas = new double[horPrediccion];
         respuestaEscalon = new double[horPrediccion];
-/**
- * Constructor donde también se le pasa la información de si la ruta está cerrada o no
- */
-    }
-    public ControlPredictivo(Coche carroOri,Trayectoria ruta,int horPrediccion,int horControl,double landa,double Ts,boolean rutaCerrada){
-        carroOriginal = carroOri;
-        carroSim = (Coche)carroOri.clone();
-        carroEscalon=(Coche)carroOriginal.clone();
-        this.horPrediccion = horPrediccion;
-        this.horControl = horControl;
-        this.landa = landa;
-        this.ruta = ruta;
-        this.Ts = Ts;
-        this.indMinAnt = -1;
         
-        
-        // creamos todas las matrices que se usan en las iteraciones para evitar tener que 
-        //pedir memoria cada vez
-        G = new Matrix(horPrediccion,horControl);
-        this.landaEye = Matrix.identity(horControl,horControl).times(landa);
-        prediccionPosicion = new double[horPrediccion][2];
-        predicOrientacion = new double[horPrediccion];
-        vectorError = new double[horPrediccion];
-        orientacionesDeseadas = new double[horPrediccion];
-        respuestaEscalon = new double[horPrediccion];
+        logPredicOrientacion=LoggerFactory.nuevoLoggerArrayDoubles(this, "PrediccionOrientacion");
+        logPredicPosX=LoggerFactory.nuevoLoggerArrayDoubles(this, "PrediccionPosicionX");
+        logPredicPosY=LoggerFactory.nuevoLoggerArrayDoubles(this, "PrediccionPosicionY");
+        logVectorError=LoggerFactory.nuevoLoggerArrayDoubles(this, "VectorError");
+        logParametros=LoggerFactory.nuevoLoggerArrayDoubles(this, "ParametrosPredictivo");
+        logParametros.add(horControl,horPrediccion,landa,alpha,pesoError);
+        logParametros.setDescripcion("[horControl,horPrediccion,landa,alpha,pesoError]");
 
     }
-	public double getPesoError() {		
+
+    public double getPesoError() {		
 		return pesoError;
 	}
 	public void setAlpha(double alpha2) {
 		alpha = alpha2;		
+        logParametros.add(horControl,horPrediccion,landa,alpha,pesoError);
 	}
 	public void setPesoError(double pesoError2) {
 		pesoError = pesoError2;		
+        logParametros.add(horControl,horPrediccion,landa,alpha,pesoError);
 	}
     /** @return Devuelve el primer componente del vector {@link #orientacionesDeseadas} */
     public double getOrientacionDeseada() {
@@ -153,6 +146,7 @@ public class ControlPredictivo {
 	
 	/** establece horizonte de control, recalculando {@link #G} si es necesario */
 	public void setHorControl(int horControl) {
+        logParametros.add(horControl,horPrediccion,landa,alpha,pesoError);
 		if (horControl==this.horControl)
 			return;
 		this.horControl = horControl;
@@ -166,10 +160,11 @@ public class ControlPredictivo {
 	
 	/** establece horizonte de predicción, recalculando {@link #G} s es necesario */
 	public void setHorPrediccion(int horPrediccion) {
+        logParametros.add(horControl,horPrediccion,landa,alpha,pesoError);
 		if(horPrediccion==this.horPrediccion)
 			return;
 		this.horPrediccion = horPrediccion;
-        prediccionPosicion = new double[horPrediccion][2];
+        prediccionPosPorFilas = new double[2][horPrediccion];
         G = new Matrix(horPrediccion,horControl);
         predicOrientacion = new double[horPrediccion];
         vectorError = new double[horPrediccion];
@@ -182,6 +177,7 @@ public class ControlPredictivo {
 	}
 	
 	public void setLanda(double landa) {
+        logParametros.add(horControl,horPrediccion,landa);
 		if(landa==this.landa)
 			return;
 		this.landa = landa;
@@ -256,8 +252,8 @@ public class ControlPredictivo {
         orientacionesDeseadas[0] = Math.atan2(vectorDeseadoX,vectorDeseadoY);
         predicOrientacion[0] = carroSim.getYaw();
         vectorError[0] = orientacionesDeseadas[0] - predicOrientacion[0];
-        prediccionPosicion[0][0] = carroSim.getX();
-        prediccionPosicion[0][1] = carroSim.getY();
+        prediccionPosPorFilas[0][0] = carroSim.getX();
+        prediccionPosPorFilas[1][0] = carroSim.getY();
         int indMin = indMinAnt;
         for (int i=1; i<horPrediccion;i++ ){
             carroSim.calculaEvolucion(comando,velocidad,Ts);
@@ -276,10 +272,14 @@ public class ControlPredictivo {
             // si alpha está entre 0 y 1 se pesan más los instantes más alejados
             double coefError = Math.pow(pesoError*alpha,horPrediccion-i);
             vectorError[i] = coefError*(UtilCalculos.normalizaAngulo(orientacionesDeseadas[i] - predicOrientacion[i]));
-            prediccionPosicion[i][0] = carroSim.getX();
-            prediccionPosicion[i][1] = carroSim.getY();
+            prediccionPosPorFilas[0][i] = carroSim.getX();
+            prediccionPosPorFilas[1][i] = carroSim.getY();
         }
         
+        logPredicOrientacion.add(predicOrientacion);
+        logPredicPosX.add(prediccionPosPorFilas[0]);
+        logPredicPosY.add(prediccionPosPorFilas[1]);
+        logVectorError.add(vectorError);
         return vectorError;
     }
     
@@ -303,7 +303,7 @@ public class ControlPredictivo {
 //        Matrix masLandaEye = GtporG.plus(landaEye);
         Matrix vectorU = Gt.times(G).plus(landaEye).inverse().times(Gt).times(M.transpose());
         //vectorU.print(1,6);
-        comandoCalculado = vectorU.get(0,0) +  carroOriginal.getConsignaVolante();        
+        comandoCalculado = vectorU.get(0,0) +  carroOriginal.getConsignaVolante();
         return comandoCalculado;
        
     }    

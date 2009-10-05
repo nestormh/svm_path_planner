@@ -230,6 +230,7 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
          * Como los loggers no se pueden borrar, basta con mirar el número 
          * */
         void añadeNuevosLoggers() {
+        	//TODO contemplar el caso de que se borren loggers
         	if(LoggerFactory.vecLoggers==null)
         		return;
         	if(LoggerFactory.vecLoggers.size()==vecLA.size()) return; // no hay nuevos

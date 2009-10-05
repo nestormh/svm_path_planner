@@ -188,6 +188,11 @@ public class LoggerFactory {
 		vecLoggers.add(la); //apuntamos el logger a la lista
 		return la;
 	}
+	
+	/** Elimina de {@link #vecLoggers} el logger pasado */ 
+	public static void borraLogger(Logger log) {
+		vecLoggers.removeElement(log);
+	}
 
 	/** Activa todos los loggers para el tiempo de experimento
 	 * @param duracionSg duración estimada del experimento
@@ -252,8 +257,6 @@ public class LoggerFactory {
 			// TODO Bloque catch generado automáticamente
 			e.printStackTrace();
 		}
-
 	}
-
 
 }

@@ -186,7 +186,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         Graphics2D g = (Graphics2D) g0;
 
         //pintamos la trayectoria predicha
-        GeneralPath gpPred = pathArrayXY(CP.prediccionPosicion);
+        GeneralPath gpPred = pathArrayXY(CP.prediccionPosPorFilas);
         if (gpPred != null) {
             g.setStroke(new BasicStroke());
             g.setColor(Color.WHITE);
@@ -195,7 +195,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
         //pintamos la orientación final
         {
-            double[] pini = CP.prediccionPosicion[CP.horPrediccion - 1];
+            double[] pini = CP.prediccionPosPorFilas[CP.horPrediccion - 1];
             double ori = CP.predicOrientacion[CP.horPrediccion - 1];
             g.setStroke(new BasicStroke());
             g.setColor(Color.RED);

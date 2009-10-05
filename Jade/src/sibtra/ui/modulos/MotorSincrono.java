@@ -6,6 +6,9 @@ package sibtra.ui.modulos;
 import sibtra.controlcarro.ControlCarro;
 import sibtra.gps.GPSData;
 import sibtra.gps.Trayectoria;
+import sibtra.log.LoggerArrayDoubles;
+import sibtra.log.LoggerFactory;
+import sibtra.log.LoggerInt;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.CalculoDireccion;
@@ -51,9 +54,15 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 	protected double consignaVelocidadRecibida;
 	protected double consignaVolanteRecibida;
 	protected double distanciaMinima;
+	private LoggerArrayDoubles loger;
+	private LoggerInt logerMasCercano;
 	
 	public MotorSincrono() {
 		
+		loger=LoggerFactory.nuevoLoggerArrayDoubles(this, "Loger"+NOMBRE,100/periodoMuestreoMili);
+		loger.setDescripcion("[consignaVolanteRecibida,consignaVolanteAplicada,consignaVelocidadRecibida"
+				 +", consignaVelocidadLimitadaRampa, consignaVelocidadAplicada,distanciaMinimaDetectores]");
+		logerMasCercano=LoggerFactory.nuevoLoggerInt(this, "IndiceMasCercano", 1000/periodoMuestreoMili);
 	}
 	
 	
@@ -135,6 +144,8 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 		ventanaMonitoriza.quitaPanel(panel);
 		if(trayActual!=null)  //si hemos cogido una trayectoria la liberamos
 			ventanaMonitoriza.liberaTrayectoria(this);
+		LoggerFactory.borraLogger(loger);
+		LoggerFactory.borraLogger(logerMasCercano);
 	}
 
 	public void setCalculadorDireccion(CalculoDireccion calDir) {
@@ -173,9 +184,11 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 
 	protected void accionPeriodica() {
 		actualizaModeloCoche();
-        if(trayActual!=null)
+        if(trayActual!=null) {
         	//para actulizar en indice del más cercano
         	trayActual.situaCoche(modCoche.getX(), modCoche.getY());
+        	logerMasCercano.add(trayActual.indiceMasCercano());
+        }
         	
 
         //Direccion =============================================================
@@ -200,7 +213,7 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
         	distanciaMinima=Math.min(distanciaMinima, detectoresObstaculos[i].getDistanciaLibre());
         
         double velRampa=(distanciaMinima-margenColision)*pendienteFrenado;
-        consignaVelocidad=Math.min(consignaVelocidad, velRampa);
+        double consignaVelocidadRampa=consignaVelocidad=Math.min(consignaVelocidad, velRampa);
         
         double incrementoConsigna=consignaVelocidad-consignaVelAnterior;
         if(incrementoConsigna>maximoIncrementoVelocidad)
@@ -212,6 +225,9 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 
 
     	panel.actualizaDatos(MotorSincrono.this);  //actualizamos las etiquetas
+    	
+    	loger.add(consignaVolanteRecibida,consignaVolante,consignaVelocidadRecibida
+    			, consignaVelocidadRampa, consignaVelocidad,distanciaMinima);
 		
 	}
 	

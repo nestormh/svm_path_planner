@@ -6,6 +6,8 @@ package sibtra.ui.modulos;
 import javax.swing.JOptionPane;
 
 import sibtra.gps.Trayectoria;
+import sibtra.log.LoggerArrayDoubles;
+import sibtra.log.LoggerFactory;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.CalculoVelocidad;
@@ -37,8 +39,13 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 	private double velocidadReferencia;
 	private double consigna;
 	private Coche modCoche;
+	private LoggerArrayDoubles log;
 	
-	public VelocidadSeparacionRuta() {};
+	public VelocidadSeparacionRuta() {
+		log=LoggerFactory.nuevoLoggerArrayDoubles(this, "Logger"+NOMBRE);
+		log.setDescripcion("[errorLateral,errorOrientacion,velocidadReferencia,consignaCalculada,"
+				+"consignaEnviada,factorReduccionV,velocidadMaxima, velocidadMinima]");
+	};
 
 	/* (non-Javadoc)
 	 * @see sibtra.ui.modulos.Modulo#setVentanaMonitoriza(sibtra.ui.VentanasMonitoriza)
@@ -100,7 +107,8 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 		if (consigna>velocidadMaxima)
 			consigna = velocidadMaxima;
 		//minoramos la consigna con los errores
-		consigna -=  Math.abs(errorOrientacion)*gananciaVelocidad + Math.abs(errorLateral)*gananciaLateral;        
+		consigna -=  Math.abs(errorOrientacion)*gananciaVelocidad + Math.abs(errorLateral)*gananciaLateral;
+		double consignaCalculada =consigna;
 		// Solo con esta condición el coche no se detiene nunca,aunque la referencia de la ruta sea cero
 		if (consigna <= velocidadMinima)
 			if( velocidadReferencia >= velocidadMinima )
@@ -113,6 +121,8 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 				consigna = velocidadReferencia;
 		//actulizamos la presetación
 		panelDatos.actualizaDatos(this);
+		log.add(errorLateral,errorOrientacion,velocidadReferencia,consignaCalculada, consigna
+				,factorReduccionV,velocidadMaxima, velocidadMinima);
 		return consigna; 
 	}
 
@@ -138,6 +148,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 			throw new IllegalStateException("Aun no inicializado");
 		ventanaMonitoriza.quitaPanel(panelDatos);
 		ventanaMonitoriza.liberaTrayectoria(this);
+		LoggerFactory.borraLogger(log);
 
 	}
 
