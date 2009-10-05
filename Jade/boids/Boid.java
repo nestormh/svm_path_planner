@@ -26,6 +26,7 @@ public class Boid implements Serializable{
 	Matrix posicion;
 	/**Objeto gráfico que representará al boid*/
 	GeneralPath triangulo;
+	public boolean lider = false;
 	static double pesoCohesion = 0;
 	static double pesoSeparacion = 10;
 	static double pesoAlineacion = 2;
@@ -55,17 +56,20 @@ public class Boid implements Serializable{
 	 *  con sus compañeros de bandada*/
 	public Matrix cohesion(Vector<Boid> bandada,int indBoid){
 		double pos[] = {0,0};
+		Matrix velCohesion = new Matrix(pos,2);
+		int cont = 0;
 		Matrix centroMasa = new Matrix(pos,2);
 		for (int i=0;i < bandada.size();i++){
 			if (i != indBoid)
-				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 50)
+				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 50){
 					centroMasa = centroMasa.plus(bandada.elementAt(i).getPosicion());
+					cont++;
+				}
 		}
-		centroMasa = centroMasa.timesEquals(1/bandada.size()-1);
-		Matrix velCohesion = new Matrix(pos,2);
-		velCohesion = centroMasa.minus(this.getPosicion()).times(pesoCohesion);
-//		System.out.println("Cohesión");
-//		velCohesion.print(1,0);
+		if (cont != 0){
+			centroMasa = centroMasa.timesEquals(1/cont);
+			velCohesion = (centroMasa.minus(this.getPosicion())).times(pesoCohesion);
+		}		
 		return velCohesion;
 	}
 	
@@ -211,13 +215,20 @@ public class Boid implements Serializable{
 	static public void setEvitaObstaculo(double evitaObs){
 		pesoObstaculo = evitaObs;
 	}
+	/**Determina la velocidad máxima, en módulo, para todos los boids (es estático)*/	
 	static public void setVelMax(double veloMax){
 		velMax = veloMax;
 	}
-	
+	/**Fija la posición del objetivo*/
 	static public void setObjetivo(double x,double y){
 		objetivo.set(0,0,x);
 		objetivo.set(1,0,y);
+	}
+	
+	/**Calcula la distancia euclidea existente entre el Boid y el objetivo*/
+	public double getDistObjetivo(){
+		 double distancia = (objetivo.minus(this.getPosicion())).norm2();
+		return distancia;		
 	}
 	
 	/*Geters de los parametros de los Boids*/
@@ -242,6 +253,12 @@ public class Boid implements Serializable{
 	}
 	public static Matrix getObjetivo(){
 		return objetivo;
+	}
+	public boolean isLider() {
+		return lider;
+	}
+	public void setLider(boolean lider) {
+		this.lider = lider;
 	}
 	
 
@@ -286,7 +303,7 @@ public class Boid implements Serializable{
 	        } catch (Exception e) {
 	        }
 		}
-	}
+	}	
 }
 
 class panelMuestraBoid extends JPanel{

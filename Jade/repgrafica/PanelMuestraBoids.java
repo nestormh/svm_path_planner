@@ -207,12 +207,25 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		}
 		System.out.println("cont = "+cont);
 		ventana.pintor.introducirObstaculos(ventana.getObstaculos());
+		double distMin = Double.POSITIVE_INFINITY;
+		int indMin = 0;
+		int indMinAnt = 0;
 		while(true){
 			while(ventana.play){
 				for (int j = 0;j<ventana.getTamanoBan();j++){
 					ventana.getBandada().elementAt(j).mover(ventana.getBandada()
 							,ventana.getObstaculos(),j,Boid.getObjetivo());
+					double dist = ventana.getBandada().elementAt(j).getDistObjetivo();
+					if (dist < distMin){
+						distMin = dist;
+						indMin = j;
+					}
 				}
+				//El lider será el que se encuentre más cerca del objetivo
+				ventana.getBandada().elementAt(indMinAnt).setLider(false);
+				ventana.getBandada().elementAt(indMin).setLider(true);
+				indMinAnt = indMin;
+				distMin = Double.POSITIVE_INFINITY;
 				ventana.pintor.repaint();
 //				try {
 //	            	Thread.sleep(50);
@@ -226,7 +239,6 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == spinnerCohesion){
 			Boid.setCohesion(spCohesion.getNumber().doubleValue());
-			System.out.println("Entra en stateChanged");
 		}
 		if (e.getSource() == spinnerSeparacion){
 			Boid.setSeparacion(spSeparacion.getNumber().doubleValue());
@@ -391,7 +403,10 @@ class Dibujante extends JPanel{
 		super.paintComponent(g2);
 		// Pinto los Boids
 		for (int i=0;i<bandadaPintar.size();i++){
-			g2.setColor(Color.blue);
+			if (bandadaPintar.elementAt(i).isLider())
+				g2.setColor(Color.green);
+			else
+				g2.setColor(Color.blue);
 			g2.draw(bandadaPintar.elementAt(i).getForma());
 			g2.fill(bandadaPintar.elementAt(i).getForma());
 		}
