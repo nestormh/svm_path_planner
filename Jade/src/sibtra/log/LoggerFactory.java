@@ -24,7 +24,7 @@ import sibtra.util.SalvaMATv4;
 public class LoggerFactory {
 	
 	/** Vector que apuntará a todos los loggers solicitados*/
-	static Vector<Logger> vecLoggers=null;
+	static Vector<Logger> vecLoggers=new Vector<Logger>();
 	
 	/** Instante de tiempo que representa nuestro tiempo 0*/
 	static long t0=0;

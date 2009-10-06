@@ -41,11 +41,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 	private Coche modCoche;
 	private LoggerArrayDoubles log;
 	
-	public VelocidadSeparacionRuta() {
-		log=LoggerFactory.nuevoLoggerArrayDoubles(this, "Logger"+NOMBRE);
-		log.setDescripcion("[errorLateral,errorOrientacion,velocidadReferencia,consignaCalculada,"
-				+"consignaEnviada,factorReduccionV,velocidadMaxima, velocidadMinima]");
-	};
+	public VelocidadSeparacionRuta() {};
 
 	/* (non-Javadoc)
 	 * @see sibtra.ui.modulos.Modulo#setVentanaMonitoriza(sibtra.ui.VentanasMonitoriza)
@@ -82,6 +78,11 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 		
 		ventanaMonitoriza.añadePanel(panelDatos, "Vel Ruta", false, false);
 
+		//Creamos loggers del módulo
+		log=LoggerFactory.nuevoLoggerArrayDoubles(this, "VelocidadSeparacion");
+		log.setDescripcion("[errorLateral,errorOrientacion,velocidadReferencia,consignaCalculada,"
+				+"consignaEnviada,factorReduccionV,velocidadMaxima, velocidadMinima]");
+	
 		return true;
 	}
 

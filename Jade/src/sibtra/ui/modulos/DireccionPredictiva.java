@@ -33,7 +33,7 @@ public class DireccionPredictiva implements CalculoDireccion, UsuarioTrayectoria
 	private double consigna;
 	private PanelFlow panelPropio;
 	
-	public DireccionPredictiva() {};
+	public DireccionPredictiva() {}
 
 
 	/* (non-Javadoc)

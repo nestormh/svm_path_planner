@@ -54,16 +54,11 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 	protected double consignaVelocidadRecibida;
 	protected double consignaVolanteRecibida;
 	protected double distanciaMinima;
-	private LoggerArrayDoubles loger;
-	private LoggerInt logerMasCercano;
+	//loggers
+	protected LoggerArrayDoubles loger;
+	protected LoggerInt logerMasCercano;
 	
-	public MotorSincrono() {
-		
-		loger=LoggerFactory.nuevoLoggerArrayDoubles(this, "Loger"+NOMBRE,100/periodoMuestreoMili);
-		loger.setDescripcion("[consignaVolanteRecibida,consignaVolanteAplicada,consignaVelocidadRecibida"
-				 +", consignaVelocidadLimitadaRampa, consignaVelocidadAplicada,distanciaMinimaDetectores]");
-		logerMasCercano=LoggerFactory.nuevoLoggerInt(this, "IndiceMasCercano", 1000/periodoMuestreoMili);
-	}
+	public MotorSincrono() {}
 	
 	
 	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonito) {
@@ -97,6 +92,12 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 			}
 		};
 		thCiclico.setName(NOMBRE);
+		//creamos loggers del módulo
+		loger=LoggerFactory.nuevoLoggerArrayDoubles(this, "MotorSincrono",100/periodoMuestreoMili);
+		loger.setDescripcion("[consignaVolanteRecibida,consignaVolanteAplicada,consignaVelocidadRecibida"
+				 +", consignaVelocidadLimitadaRampa, consignaVelocidadAplicada,distanciaMinimaDetectores]");
+		logerMasCercano=LoggerFactory.nuevoLoggerInt(this, "IndiceMasCercano", 1000/periodoMuestreoMili);
+
 		return true;
 	}
 

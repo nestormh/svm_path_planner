@@ -340,5 +340,15 @@ public class ControlPredictivo {
         }
         return respuestaEscalon;
     }
+    
+    protected void finalize() throws Throwable {
+    	//borramos todos los loggers
+    	LoggerFactory.borraLogger(logPredicOrientacion);
+    	LoggerFactory.borraLogger(logPredicPosX);
+    	LoggerFactory.borraLogger(logPredicPosY);
+    	LoggerFactory.borraLogger(logVectorError);
+    	LoggerFactory.borraLogger(logParametros);
+    	super.finalize();
+    }
 		
 }

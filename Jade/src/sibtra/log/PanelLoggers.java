@@ -15,6 +15,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -35,6 +36,7 @@ import sibtra.util.SalvaMATv4;
  */
 public class PanelLoggers extends JTabbedPane implements ActionListener {
 
+	private JButton actualizaButton;
 	private JButton activaButton;
 	private JButton salvaButton;
 	private SpinnerNumberModel segActiva;
@@ -115,7 +117,13 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 				buttonPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
 				buttonPane.add(Box.createHorizontalGlue());
+				
+				actualizaButton=new JButton("R");
+				actualizaButton.addActionListener(this);
+				buttonPane.add(actualizaButton);
 
+				buttonPane.add(Box.createRigidArea(new Dimension(10, 0)));
+				
 				limpiaButton=new JButton("Limpiar");
 				limpiaButton.addActionListener(this);
 				buttonPane.add(limpiaButton);
@@ -226,33 +234,38 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
         	}
         }
 
-        /** Mira a ver si hay nuevos loggers y los añade. 
-         * Como los loggers no se pueden borrar, basta con mirar el número 
+        /** Revisa la lista de loggers para ver los que se han añadido o borrado 
          * */
-        void añadeNuevosLoggers() {
-        	//TODO contemplar el caso de que se borren loggers
-        	if(LoggerFactory.vecLoggers==null)
+        void actualizaListaLoggers() {
+        	if(LoggerFactory.vecLoggers==null || LoggerFactory.vecLoggers.size()==0)
         		return;
-        	if(LoggerFactory.vecLoggers.size()==vecLA.size()) return; // no hay nuevos
-        	//Comprobamos toda la lista de loggers por si han cambiado de posición
-        	int ultimoAnt=vecLA.size();
-        	int añadidos=0;
+        	boolean modificada=false; //apuntamos si hay cambio para actualizar tabla
+        	//Buscamos nuevos loggers añadidos
         	for(int i=0; i<LoggerFactory.vecLoggers.size(); i++) {
         		Logger la=LoggerFactory.vecLoggers.get(i);
-        		//probamos primero en la posición correspondiente
-        		if(i<vecLA.size() && vecLA.get(i).la==la) continue;
-        		//si no lo buscamos en todos
         		boolean encontrado=false;
         		for(int j=0; !encontrado && j<vecLA.size(); j++)
         			encontrado=(la==vecLA.get(j).la);
         		if(encontrado) continue;
         		//si no se encontró lo añadimos
         		vecLA.add(new ApuntaLog(la,true));
-        		añadidos++;
+        		modificada=true;
         	}
-        	// Indicamos nuevas filas añadidas
-        	if (añadidos>0)
-        		fireTableRowsInserted(ultimoAnt+1, ultimoAnt+añadidos-1);
+        	//eliminamos loggers borrados
+        	for(int i=0; i<vecLA.size(); i++) {
+        		ApuntaLog alAct=vecLA.get(i);
+        		boolean encontrado=false;
+        		for(int j=0; !encontrado && j<LoggerFactory.vecLoggers.size(); j++)
+        			encontrado=(alAct.la==LoggerFactory.vecLoggers.get(j));
+        		if(encontrado) continue;
+        		//si no se encontró lo borramos
+        		vecLA.removeElementAt(i);
+        		i--; //porque se ha desplazado el vector
+        		modificada=true;
+        	}
+        	// Indicamos datos han cambiado
+        	if (modificada)
+        		fireTableDataChanged();
         }
         /** @return el largo maximo de los elementos que aparecen en la comulna. 
          * Se computa del maximo texto a sacar y el titulo
@@ -293,7 +306,12 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 		}
 
     }
-	public void actionPerformed(ActionEvent ae) {
+
+    public void actionPerformed(ActionEvent ae) {
+    	//Para el boton actuziza
+    	if(ae.getSource()==actualizaButton) {
+    		repinta();
+    	}
 		//Para el boton Activa
 		if(ae.getSource()==activaButton 
 				|| ae.getSource()==limpiaButton
@@ -347,10 +365,38 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 	public void repinta() {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				((ModeloTablaLoggers)(tablaLoggers.getModel())).añadeNuevosLoggers();
+				((ModeloTablaLoggers)(tablaLoggers.getModel())).actualizaListaLoggers();
 				repaint();
 			}
 		});
+	}
+	
+	public static void main(String[] args) {
+		Object este=new Object();
+		
+		JFrame ventana=new JFrame("PanelLoggers");
+		ventana.add(new PanelLoggers());
+		
+		ventana.pack();
+		ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		ventana.setVisible(true);
+		
+		
+		try { Thread.sleep(4000); } catch (Exception e){}
+
+		Logger l1=LoggerFactory.nuevoLoggerArrayDoubles(este, "l1");
+		System.out.println("Creamos primer logger");
+		try { Thread.sleep(5000); } catch (Exception e){}
+
+		Logger l2=LoggerFactory.nuevoLoggerArrayDoubles(este, "l2");
+		System.out.println("Creamos segundo logger");
+		try { Thread.sleep(5000); } catch (Exception e){}
+
+		LoggerFactory.borraLogger(l1);
+		System.out.println("Borramos primer logger");
+		try { Thread.sleep(5000); } catch (Exception e){}
+		
+		
 	}
 		
 }
