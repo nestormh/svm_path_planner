@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Line2D;
 import java.io.Serializable;
 import java.util.Vector;
 
@@ -26,12 +27,16 @@ public class Boid implements Serializable{
 	Matrix posicion;
 	/**Objeto gráfico que representará al boid*/
 	GeneralPath triangulo;
+	/**Linea que muestra la dirección del desplazamiento del boid*/
+	Line2D lineaDireccion = new Line2D.Double();
+	Vector<Matrix> rutaBoid = new Vector<Matrix>();
 	public boolean lider = false;
-	static double pesoCohesion = 0;
+	static double pesoCohesion = 0.05;
 	static double pesoSeparacion = 10;
 	static double pesoAlineacion = 2;
 	static double pesoObjetivo = 1;
 	static double pesoObstaculo = 10;
+	static double pesoLider = 10;
 	static double velMax = 5;
 	static double coorObjetivo[] = {800,800};
 	static Matrix objetivo = new Matrix(coorObjetivo,2);
@@ -40,9 +45,11 @@ public class Boid implements Serializable{
 	public Boid(Matrix posicion, Matrix velocidad) {
 		this.velocidad = velocidad;
 		this.posicion = posicion;
+		lineaDireccion.setLine(this.posicion.get(0,0),this.posicion.get(1,0),
+				this.velocidad.get(0,0),this.velocidad.get(1, 0));
 		/**Inicialización del aspecto gráfico del cuerpo del boid*/
-		float ptosX[] = {5,0,10};
-		float ptosY[] = {0,5,5};
+		float ptosX[] = {0,-2,2};
+		float ptosY[] = {1,-1,-1};
 		triangulo = new GeneralPath(GeneralPath.WIND_NON_ZERO,ptosX.length);
 		triangulo.moveTo (ptosX[0], ptosY[0]);
 
@@ -56,20 +63,32 @@ public class Boid implements Serializable{
 	 *  con sus compañeros de bandada*/
 	public Matrix cohesion(Vector<Boid> bandada,int indBoid){
 		double pos[] = {0,0};
+		boolean liderCerca = false;
+		int indLider = 0;
 		Matrix velCohesion = new Matrix(pos,2);
 		int cont = 0;
-		Matrix centroMasa = new Matrix(pos,2);
-		for (int i=0;i < bandada.size();i++){
-			if (i != indBoid)
-				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 50){
-					centroMasa = centroMasa.plus(bandada.elementAt(i).getPosicion());
-					cont++;
-				}
+		Matrix centroMasa = new Matrix(pos,2);		
+		if (!this.isLider()){ // El lider no se cohesiona con nadie
+			for (int i=0;i < bandada.size();i++){
+				if (i != indBoid)
+					if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 100){
+						if (bandada.elementAt(i).isLider()){
+							liderCerca = true;
+							indLider = i;
+							break;
+						}
+						centroMasa = centroMasa.plus(bandada.elementAt(i).getPosicion());
+						cont++;
+					}
+			}
+			if (cont != 0 && liderCerca == false){
+				centroMasa = centroMasa.timesEquals(1/cont);
+				velCohesion = (centroMasa.minus(this.getPosicion())).times(pesoCohesion);
+			}
+			if(liderCerca == true){
+				velCohesion = (bandada.elementAt(indLider).getPosicion().minus(this.getPosicion())).times(pesoLider);
+			}			
 		}
-		if (cont != 0){
-			centroMasa = centroMasa.timesEquals(1/cont);
-			velCohesion = (centroMasa.minus(this.getPosicion())).times(pesoCohesion);
-		}		
 		return velCohesion;
 	}
 	
@@ -111,7 +130,10 @@ public class Boid implements Serializable{
 	public Matrix seguirObjetivo(Vector<Boid> bandada,int indBoid,Matrix obj){
 		Matrix velObj = new Matrix(2,1);
 		velObj = obj.minus(bandada.elementAt(indBoid).getPosicion());
-		velObj = velObj.times(pesoObjetivo);
+		if(this.isLider()) // El lider es atraido con más fuerza por el objetivo
+			velObj = velObj.times(pesoObjetivo*10);
+		else
+			velObj = velObj.times(pesoObjetivo);
 		return velObj;
 	}
 	
@@ -157,12 +179,22 @@ public class Boid implements Serializable{
 		despAlineacion = alineacion(bandada, indBoid);
 		despObjetivo = seguirObjetivo(bandada,indBoid,obj);
 		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid));
-//		desp = this.getVelocidad().plus(cohesion(bandada, indBoid).plus(separacion(bandada, indBoid)));
 		desp = limitaVelocidad(despCohesion.plus(despSeparacion).plus(despAlineacion).plus(despObjetivo).plus(despObstaculo).plus(this.getVelocidad()));
 		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
 		this.setVelocidad(desp);
-//		this.setVelocidad(this.getVelocidad().plus(cohesion(bandada, indBoid).plus(separacion(bandada, indBoid))));
 		this.setPosicion(this.getPosicion().plus(this.getVelocidad()));
+		setLineaDireccion(getPosicion().get(0,0),getPosicion().get(1,0),
+				(getPosicion().plus(getVelocidad().times(2))).get(0,0),
+				(getPosicion().plus(getVelocidad().times(2))).get(1,0));
+		this.nuevoPuntoRuta(this.getPosicion());
+	}
+	
+	private void nuevoPuntoRuta(Matrix pto){
+		this.rutaBoid.add(pto);
+	}
+	
+	public Vector<Matrix> getRutaBoid(){
+		return rutaBoid;
 	}
 	
 	public Matrix getPosicion() {
@@ -193,8 +225,21 @@ public class Boid implements Serializable{
 		return triangulo;
 	}
 	
+	public Line2D getLineaDireccion() {
+		return lineaDireccion;
+	}
+	public void setLineaDireccion(Line2D direccion) {
+		this.lineaDireccion = direccion;
+	}
+	public void setLineaDireccion(double xPtoa,double yPtoa,double xPtob, double yPtob) {
+		this.lineaDireccion.setLine(xPtoa,yPtoa,xPtob,yPtob);
+	}
 	/** Seters estáticos para cambiar los parámetros de comportamiento
 	 *  de los Boids*/
+	
+	static public void setPesoLider(double peso){
+		pesoLider = peso;
+	}
 	
 	static public void setCohesion(double cohesion){
 		pesoCohesion = cohesion;
@@ -232,6 +277,9 @@ public class Boid implements Serializable{
 	}
 	
 	/*Geters de los parametros de los Boids*/
+	public static double getPesoLider() {
+		return pesoLider;
+	}
 	
 	public static double getPesoAlineacion() {
 		return pesoAlineacion;
