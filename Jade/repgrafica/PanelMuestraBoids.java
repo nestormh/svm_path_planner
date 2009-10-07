@@ -13,6 +13,7 @@ import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 //import java.awt.geom.Line2D.Double;
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,11 +50,14 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 	private boolean cargar = false;
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Escenarios"));
 	// Esto no debería estar en la clase de la interfaz gráfica
-	int tamanoBandada;
+	int tamanoBandada = 20;
 	Vector<Boid> bandada = new Vector<Boid>();
 	Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
 	//Hasta aqui
 	Dibujante pintor = new Dibujante();
+	JLabel etiquetaPesoLider = new JLabel("Liderazgo");
+	SpinnerNumberModel spPesoLider = new SpinnerNumberModel(Boid.getPesoLider(),0,100,0.01);
+	JSpinner spinnerPesoLider = new JSpinner(spPesoLider);
 	JLabel etiquetaCohesion = new JLabel("Cohesión");
 	SpinnerNumberModel spCohesion = new SpinnerNumberModel(Boid.getPesoCohesion(),0,100,0.01);
 	JSpinner spinnerCohesion = new JSpinner(spCohesion);
@@ -72,11 +76,17 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 	JLabel etiquetaVelMax = new JLabel("Velocidad Máxima");
 	SpinnerNumberModel spVelMax = new SpinnerNumberModel(Boid.getVelMax(),0,100,0.01);
 	JSpinner spinnerVelMax = new JSpinner(spVelMax);
+	JLabel etiquetaNumBoids = new JLabel("Número de Boids");
+	SpinnerNumberModel spNumBoids = new SpinnerNumberModel(this.getTamanoBan(),1,200,1);
+	JSpinner spinnerNumBoids = new JSpinner(spNumBoids);
 	JButton pausa = new JButton("Play");
-	JButton colocarObs = new JButton("Pulse para colocar obstáculos");
-	JButton colocarBan = new JButton("Pulse para colocar la bandada");
+	JButton colocarObs = new JButton("Colocar obstáculos");
+	JButton colocarBan = new JButton("Colocar la bandada");
 	JButton botonSalvar = new JButton("Salvar escenario");
 	JButton botonCargar = new JButton("Cargar escenario");
+	JButton botonBorrarBandada = new JButton("Borrar Bandada");
+	JButton botonCrearBandada = new JButton("Crear Bandada");
+	public double tiempo;
 	
 	public void init(){
 		//Esto no debería estar en la clase de la interfaz gráfica
@@ -89,6 +99,8 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		cp.add(pintor);
 		JPanel panelSur = new JPanel(new FlowLayout());
 		JPanel panelNorte = new JPanel(new FlowLayout());
+		panelSur.add(etiquetaPesoLider);
+		panelSur.add(spinnerPesoLider);
 		panelSur.add(etiquetaCohesion);
 		panelSur.add(spinnerCohesion);
 		panelSur.add(etiquetaSeparacion);
@@ -101,22 +113,30 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		panelSur.add(spinnerEvitaObs);		
 		panelSur.add(etiquetaVelMax);
 		panelSur.add(spinnerVelMax);
+		panelNorte.add(etiquetaNumBoids);
+		panelNorte.add(spinnerNumBoids);
+		panelNorte.add(botonCrearBandada);
+		panelNorte.add(botonBorrarBandada);
 		panelNorte.add(pausa);
 		panelNorte.add(colocarObs);
 		panelNorte.add(colocarBan);
 		panelNorte.add(botonSalvar);
-		panelNorte.add(botonCargar);
+		panelNorte.add(botonCargar);		
+		spinnerPesoLider.addChangeListener(this);
 		spinnerCohesion.addChangeListener(this);
 		spinnerSeparacion.addChangeListener(this);
 		spinnerAlineacion.addChangeListener(this);
 		spinnerObjetivo.addChangeListener(this);
 		spinnerEvitaObs.addChangeListener(this);
 		spinnerVelMax.addChangeListener(this);
+		spinnerNumBoids.addChangeListener(this);
 		pausa.addActionListener(this);
 		colocarObs.addActionListener(this);
 		colocarBan.addActionListener(this);
 		botonSalvar.addActionListener(this);
 		botonCargar.addActionListener(this);
+		botonBorrarBandada.addActionListener(this);
+		botonCrearBandada.addActionListener(this);
 		cp.add(BorderLayout.SOUTH,panelSur);
 		cp.add(BorderLayout.NORTH,panelNorte);
 	}
@@ -168,10 +188,8 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 	}
 	
 	public static void main(String[] args){
-//		Vector<Boid> bandada = new Vector<Boid>();
-//		Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
 		PanelMuestraBoids ventana = new PanelMuestraBoids();
-		ventana.setTamanoBan(30);
+		ventana.setTamanoBan(ventana.getTamanoBandada());
 		//Bucle para crear la bandada
 		for (int j = 0;j<ventana.getTamanoBan();j++){
 			double posAux[] = {Math.random()*800,Math.random()};
@@ -179,20 +197,41 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 			Matrix posi = new Matrix(posAux,2);
 			Matrix vel = new Matrix(velAux,2);			
 			ventana.getBandada().add(new Boid(posi,vel));				
-//			ventana.getObstaculos().add(new Obstaculo(posiObs,velObs));
 		}
 		
 		
 		ventana.pintor.introducirBandada(ventana.getBandada());
-//		ventana.pintor.introducirObstaculos(ventana.getObstaculos());
 		Console.run(ventana,1200,1000);
 		int alturaPanel = ventana.pintor.getHeight();
 		int anchuraPanel = ventana.pintor.getWidth();
 		System.out.println(alturaPanel+ "  "+anchuraPanel);
+//		double esquinaSupIzq[] = {0,0};
+//		double esquinaInfIzq[] = {0,alturaPanel-20};
+//		double esquinaSupDer[] = {anchuraPanel-10,0};
+// 		Matrix matEsquinaSupIzq = new Matrix(esquinaSupIzq,2);
+// 		Matrix matEsquinaInfIzq = new Matrix(esquinaInfIzq,2);
+// 		Matrix matEsquinaSupDer = new Matrix(esquinaSupDer,2);
+//		Obstaculo bordeIzquierdo = new Obstaculo(matEsquinaSupIzq,new Matrix(2,1));
+//		bordeIzquierdo.setHeight(alturaPanel);
+//		bordeIzquierdo.setWidth(10);
+//		Obstaculo bordeSuperior = new Obstaculo(matEsquinaSupIzq,new Matrix(2,1));
+//		bordeSuperior.setHeight(10);
+//		bordeSuperior.setWidth(anchuraPanel);
+//		Obstaculo bordeInferior = new Obstaculo(matEsquinaInfIzq,new Matrix(2,1));
+//		bordeInferior.setHeight(10);
+//		bordeInferior.setWidth(anchuraPanel);
+//		Obstaculo bordeDerecho = new Obstaculo(matEsquinaSupDer,new Matrix(2,1));
+//		bordeDerecho.setHeight(alturaPanel);
+//		bordeDerecho.setWidth(10);
+//		ventana.getObstaculos().add(bordeIzquierdo);
+//		ventana.getObstaculos().add(bordeSuperior);
+//		ventana.getObstaculos().add(bordeInferior);
+//		ventana.getObstaculos().add(bordeDerecho);
+		
 //		Bucle para crear los bordes
 		int cont = 1;
 		for (int k=0; k<2;k++){			
-			for (int i = 0;i < alturaPanel;i=i+10){
+			for (int i = 0;i < alturaPanel;i=i+20){
 				double posObstaculos[] = {cont,i};
 				double velObstaculos[] = {0,0};				
 				Matrix posiObs = new Matrix(posObstaculos,2);
@@ -203,7 +242,7 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		}
 		cont = 1;
 		for (int k=0; k<2;k++){			
-			for (int i = 0;i < anchuraPanel;i=i+10){
+			for (int i = 0;i < anchuraPanel;i=i+20){
 				double posObstaculos[] = {i,cont};
 				double velObstaculos[] = {0,0};				
 				Matrix posiObs = new Matrix(posObstaculos,2);
@@ -219,51 +258,61 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		int indMinAnt = 0;
 		boolean caminoOcupado = false;
 		boolean liderEncontrado = false;
+		double distObjetivo = Double.POSITIVE_INFINITY;
 		
-		//----------------BUCLE PRINCIPAL------------------------------------
-		
-		while(true){
-			while(ventana.play){
-				for (int j = 0;j<ventana.getTamanoBan();j++){
-					ventana.getBandada().elementAt(j).mover(ventana.getBandada()
-							,ventana.getObstaculos(),j,Boid.getObjetivo());
-					Line2D recta = 
-						new Line2D.Double(ventana.getBandada().elementAt(j).getPosicion().get(0,0)
-							,ventana.getBandada().elementAt(j).getPosicion().get(1,0)
-							,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
-					for (int i = 0;i<ventana.getObstaculos().size();i++){												
-						caminoOcupado = recta.intersects(ventana.getObstaculos().elementAt(i).getForma());
-						if (caminoOcupado)
-							break;
+		//----------------BUCLE PRINCIPAL------------------------------------		
+		while (true){
+//			&& (distObjetivo > 50)
+			if (ventana.getBandada().size() > 0){
+				while(ventana.play){
+					for (int j = 0;j<ventana.getTamanoBan();j++){
+						ventana.getBandada().elementAt(j).mover(ventana.getBandada()
+								,ventana.getObstaculos(),j,Boid.getObjetivo());
+						Line2D recta = 
+							new Line2D.Double(ventana.getBandada().elementAt(j).getPosicion().get(0,0)
+									,ventana.getBandada().elementAt(j).getPosicion().get(1,0)
+									,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
+						for (int i = 0;i<ventana.getObstaculos().size();i++){												
+							caminoOcupado = recta.intersects(ventana.getObstaculos().elementAt(i).getForma());
+							if (caminoOcupado)
+								break;
+						}
+						double dist = ventana.getBandada().elementAt(j).getDistObjetivo();					
+						if (dist < distMin && caminoOcupado == false){
+							distMin = dist;
+							indMin = j;
+							liderEncontrado = true;
+						}					
 					}
-					double dist = ventana.getBandada().elementAt(j).getDistObjetivo();					
-					if (dist < distMin && caminoOcupado == false){
-						distMin = dist;
-						indMin = j;
-						liderEncontrado = true;
-					}					
+					ventana.getBandada().elementAt(indMinAnt).setLider(false);
+					if (liderEncontrado){
+						ventana.getBandada().elementAt(indMin).setLider(true);
+						distObjetivo = Boid.getObjetivo().minus(ventana.getBandada().elementAt(indMin).getPosicion()).norm2(); 
+					}
+					else
+						distObjetivo = Double.POSITIVE_INFINITY;
+					indMinAnt = indMin;
+					distMin = Double.POSITIVE_INFINITY;
+					liderEncontrado = false;
+					ventana.pintor.repaint();
+
+//					try {
+//					Thread.sleep(50);
+//					} catch (Exception e) {
+//					}
 				}
-				//El lider será el que se encuentre más cerca del objetivo
-//				rectaObjetivo.setLine(new Line2D.Double(ventana.getBandada().elementAt(indMin).getPosicion().get(0,0)
-//						,ventana.getBandada().elementAt(indMin).getPosicion().get(1,0)
-//						,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0)));
-				ventana.getBandada().elementAt(indMinAnt).setLider(false);
-				if (liderEncontrado)
-					ventana.getBandada().elementAt(indMin).setLider(true);
-				indMinAnt = indMin;
-				distMin = Double.POSITIVE_INFINITY;
-				liderEncontrado = false;
-				ventana.pintor.repaint();
-//				try {
-//	            	Thread.sleep(50);
-//	        	} catch (Exception e) {
-//	        	}
 			}
 		}
+//		System.out.println("El tiempo transcurrido es "+((System.currentTimeMillis()-ventana.getTiempo())/1000));
+//		ventana.pintor.repaint();
+//		System.out.println("El tiempo de repintado es "+((System.currentTimeMillis()-ventana.getTiempo())/1000));
 		
 	}
 
 	public void stateChanged(ChangeEvent e) {
+		if (e.getSource() == spinnerPesoLider){
+			Boid.setPesoLider(spPesoLider.getNumber().doubleValue());
+		}
 		if (e.getSource() == spinnerCohesion){
 			Boid.setCohesion(spCohesion.getNumber().doubleValue());
 		}
@@ -282,15 +331,23 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		if (e.getSource() == spinnerVelMax){
 			Boid.setVelMax(spVelMax.getNumber().doubleValue());
 		}
+		if (e.getSource() == spinnerNumBoids){
+			this.setTamanoBan(spNumBoids.getNumber().intValue());
+		}
 	}
 
 	public void actionPerformed(ActionEvent e){
 		if (e.getSource() == pausa){
 			if (!play){ // La etiqueta del botón cambia
 				pausa.setText("Pausa");
+				tiempo = System.currentTimeMillis();
+				botonBorrarBandada.setEnabled(false);
+				botonCrearBandada.setEnabled(false);
 			}
 			if (play){
 				pausa.setText("Play");
+				botonBorrarBandada.setEnabled(true);
+				botonCrearBandada.setEnabled(true);
 			}
 			play = !play;
 		}
@@ -300,7 +357,7 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 				colocarBan.setEnabled(false);
 			}
 			if (colocandoObs){
-				colocarObs.setText("Pulse para colocar obstáculos");
+				colocarObs.setText("Colocar obstáculos");
 				colocarBan.setEnabled(true);
 			}
 			colocandoObs = !colocandoObs;
@@ -311,7 +368,7 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 				colocarObs.setEnabled(false);
 			}
 			if (colocandoBan){
-				colocarBan.setText("Pulse para colocar la Bandada");
+				colocarBan.setText("Colocar la Bandada");
 				colocarObs.setEnabled(true);
 			}
 			colocandoBan = !colocandoBan;
@@ -336,6 +393,21 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
                 
             }            
         }
+        if (e.getSource() == botonBorrarBandada){
+        	getBandada().clear();
+        	pintor.getBandadaPintar().clear();
+        	pintor.repaint();
+        }
+        if (e.getSource() == botonCrearBandada){
+        	getBandada().clear();
+        	pintor.getBandadaPintar().clear();
+        	for (int i=0; i< getTamanoBan();i++){
+        		getBandada().add(new Boid(new Matrix(2,1),new Matrix(2,1)));	
+        	}
+        	System.out.println("Creando bandada");
+        	System.out.println(getBandada().size());
+        }
+        pintor.introducirBandada(getBandada());
 	}
 	
 
@@ -358,6 +430,7 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 				Matrix posi = new Matrix(pos,2);
 				double vel[] = {0,0};
 				Matrix velo = new Matrix(vel,2);
+				this.getBandada().elementAt(i).resetRuta();
 				this.getBandada().elementAt(i).getForma().transform(AffineTransform.getTranslateInstance(pos[0]-getBandada().elementAt(i).getPosicion().get(0,0),
 						pos[1]-getBandada().elementAt(i).getPosicion().get(1,0)));
 				this.getBandada().elementAt(i).setPosicion(posi);			
@@ -390,6 +463,22 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public double getTiempo() {
+		return tiempo;
+	}
+
+	public void setTiempo(double tiempo) {
+		this.tiempo = tiempo;
+	}
+
+	public int getTamanoBandada() {
+		return tamanoBandada;
+	}
+
+	public void setTamanoBandada(int tamanoBandada) {
+		this.tamanoBandada = tamanoBandada;
 	}
 
 }
@@ -427,16 +516,46 @@ class Dibujante extends JPanel{
 	
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
+		Matrix centroMasa = new Matrix(2,1);
 		super.paintComponent(g2);
 		// Pinto los Boids
-		for (int i=0;i<bandadaPintar.size();i++){
-			if (bandadaPintar.elementAt(i).isLider())
-				g2.setColor(Color.green);
-			else
-				g2.setColor(Color.blue);
-			g2.draw(bandadaPintar.elementAt(i).getForma());
-			g2.fill(bandadaPintar.elementAt(i).getForma());
-		}
+//		if (bandadaPintar.size() > 0){
+			for (int i=0;i<bandadaPintar.size();i++){
+				if (bandadaPintar.elementAt(i).isLider()){
+					g2.setColor(Color.green);
+					g2.drawOval((int)bandadaPintar.elementAt(i).getPosicion().get(0,0)-100,
+							(int)bandadaPintar.elementAt(i).getPosicion().get(1,0)-100,
+							200,200);
+					GeneralPath rutaLider = new GeneralPath();
+					rutaLider.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
+							bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
+					for(int k=1;k<bandadaPintar.elementAt(i).getRutaBoid().size();k++){
+						rutaLider.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
+								bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
+					}
+					g2.draw(rutaLider);
+				}
+				else
+					g2.setColor(Color.blue);
+				g2.draw(bandadaPintar.elementAt(i).getForma());
+				g2.fill(bandadaPintar.elementAt(i).getForma());
+				g2.draw(bandadaPintar.elementAt(i).getLineaDireccion());
+//				GeneralPath ruta = new GeneralPath();
+//				ruta.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
+//				bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
+//				for(int k=1;k<bandadaPintar.elementAt(i).getRutaBoid().size();k++){
+//				ruta.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
+//				bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
+//				}
+//				g2.draw(ruta);
+				centroMasa = centroMasa.plus(bandadaPintar.elementAt(i).getPosicion());
+			}
+//		}
+		// Pinto el centro de masa
+		centroMasa.timesEquals((double)1/(double)bandadaPintar.size());		
+		g2.setColor(Color.cyan);
+		g2.drawOval((int)centroMasa.get(0,0)-2,(int)centroMasa.get(1,0)-2,4,4);
+		
 		// Pinto los obstáculos
 		for (int i=0;i<obstaculosPintar.size();i++){
 			g2.setColor(Color.red);
