@@ -282,17 +282,23 @@ public abstract class ClasesEnPaquete {
 					String nombre=(String)mn.invoke(ob, (Object[])null);
 					resp[i]=nombre;
 				} catch (SecurityException e) {
-					System.err.println("nombreClases: problema de seguridad al acceder a la clase "+ca.getName());
+					System.err.println("nombreClases: problema de seguridad al acceder a la clase "+ca.getName()
+							+": "+e.getMessage());
 				} catch (IllegalArgumentException e) {
-					System.err.println("nombreClases: problema de argumentos al acceder a getNombre() de la clase "+ca.getName());
+					System.err.println("nombreClases: problema de argumentos al acceder a getNombre() de la clase "+ca.getName()
+							+": "+e.getMessage());
 				} catch (NoSuchMethodException e) {
-					System.err.println("nombreClases: la clase "+ca.getName()+" no tiene el método getNombre()");
+					System.err.println("nombreClases: la clase "+ca.getName()+" no tiene el método getNombre()"
+							+": "+e.getMessage());
 				} catch (InstantiationException e) {
-					System.err.println("nombreClases: la clase "+ca.getName()+" no se puede instanciar");
+					System.err.println("nombreClases: la clase "+ca.getName()+" no se puede instanciar"
+							+": "+e.getMessage());
 				} catch (IllegalAccessException e) {
-					System.err.println("nombreClases: no podemos acceder al método getNombre() de la clase "+ca.getName());
+					System.err.println("nombreClases: no podemos acceder al método getNombre() de la clase "+ca.getName()
+							+": "+e.getMessage());
 				} catch (InvocationTargetException e) {
-					System.err.println("nombreClases: invocación a getNombre() de la clase "+ca.getName()+" produjo excepción");
+					System.err.println("nombreClases: invocación a getNombre() de la clase "+ca.getName()+" produjo excepción"
+							+": "+e.getMessage());
 				}
 		}
 		return resp;

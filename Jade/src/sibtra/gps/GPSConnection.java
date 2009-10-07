@@ -82,6 +82,11 @@ public class GPSConnection implements SerialPortEventListener {
 	/** Logger para registrar la edad de las correcciones */
 	protected LoggerDouble logEdadCor;
 
+	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato espacial */
+	private Object mutexDatoEspacial;
+	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato temporal */
+	private Object mutexDatoTemporal;
+
 	/**
 	 * Constructor por defecto no hace nada.
 	 * Para usar el puerto hay que invocar a {@link #setParameters(SerialParameters)} 
@@ -394,6 +399,9 @@ public class GPSConnection implements SerialPortEventListener {
 		logEdadCor.add(data.getAge());
 		
 		avisaListeners(seAñadeEspacial); //avisamos a todos los listeners
+		//Despertamos thread a la espera de datos
+		mutexDatoTemporal.notifyAll();
+		if(seAñadeEspacial) mutexDatoEspacial.notifyAll();
         data = new GPSData(data);//creamos nuevo punto copia del anterior
 
 	}
@@ -629,12 +637,50 @@ public class GPSConnection implements SerialPortEventListener {
 	public void setCsIMU(ConexionSerialIMU csIMU) {
 		this.csIMU = csIMU;
 	}
+	
+	/** Fija el valor de {@link #csCarro} */
 	public void setCsCARRO(ControlCarro carro){
-            this.csCarro = carro;
-        }
-        
-        public ControlCarro getCsCARRO() {
-            return this.csCarro;
-        }
+		this.csCarro = carro;
+	}
+
+	/** @return {@link #csCarro} establecido */
+	public ControlCarro getCsCARRO() {
+		return this.csCarro;
+	}
+
+	/**
+	 * Bloquea el thread si no se ha recibido nuevo dato espacial desde el que se pasa
+	 * @param datoAnterior ultimo punto espacil que conoce el thread
+	 * @return el nuevo punto espacial
+	 */
+	public GPSData esperaNuevoDatoEspacial(GPSData datoAnterior) {
+		synchronized (mutexDatoEspacial) {
+			while(datoAnterior==getPuntoActualEspacial())
+				try {
+					mutexDatoEspacial.wait(); //nos quedamos bloqueados en mutexDatos
+				}catch (InterruptedException e) {
+					//No hacemos nada si somos interrumpidos
+				}
+		}
+		return getPuntoActualEspacial();
+	}
+	
+	/**
+	 * Bloquea el thread si no se ha recibido nuevo dato temporal desde el que se pasa
+	 * @param datoAnterior ultimo punto temporal que conoce el thread
+	 * @return el nuevo punto temporal
+	 */
+	public GPSData esperaNuevoDatoTemporal(GPSData datoAnterior) {
+		synchronized (mutexDatoTemporal) {
+			while(datoAnterior==getPuntoActualTemporal())
+				try {
+					mutexDatoTemporal.wait(); //nos quedamos bloqueados en mutexDatos
+				}catch (InterruptedException e) {
+					//No hacemos nada si somos interrumpidos
+				}
+		}
+		return getPuntoActualTemporal();
+	}
+	
 }
 

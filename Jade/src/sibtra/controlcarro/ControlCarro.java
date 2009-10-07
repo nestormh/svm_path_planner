@@ -1,4 +1,3 @@
-//package carrito.server.serial;
 /* @(#)SerialConnection.java	1.6 98/07/17 SMI
  *
  * Clase de Control del veh�culo Guistub
@@ -230,6 +229,9 @@ public class ControlCarro implements SerialPortEventListener {
 	private LoggerArrayDoubles logControl;
 
 	double FactorFreno=20;
+	
+	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato */
+	private Object mutexDatos;
 
 	/**
 	 * Crea la conexión serial al carro en el puerto indicado.
@@ -533,6 +535,8 @@ public class ControlCarro implements SerialPortEventListener {
 
 
 		NumPaquetes++;
+		//despertamos hilos pendientes de nuevos datos
+		mutexDatos.notifyAll();
 		logMenRecibidos.add(volante,avance,(int)velocidadCS,alarma,incCuentas,(int)incTiempo);
 	}
 	
@@ -1123,6 +1127,22 @@ public class ControlCarro implements SerialPortEventListener {
 	public boolean isControlando() {
 		return controlando;
 	}
-
+	
+	/**
+	 * Bloquea el thread si no se ha recibido mensaje desde el que se pasa
+	 * @param numeroDePaquete numero del último paquete recibido
+	 * @return el número del nuevo paquete recibido
+	 */
+	public int esperaNuevosDatos(int numeroDePaquete) {
+		synchronized (mutexDatos) {
+			while(numeroDePaquete==NumPaquetes)
+				try {
+					mutexDatos.wait(); //nos quedamos bloqueados en mutexDatos
+				}catch (InterruptedException e) {
+					//No hacemos nada si somos interrumpidos
+				}
+		}
+		return NumPaquetes;  
+	}
 
 }

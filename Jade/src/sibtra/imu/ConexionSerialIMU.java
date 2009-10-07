@@ -53,6 +53,9 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 	
 	/** Logger para registra cada nuevo conjunto de angulos */
 	private LoggerArrayDoubles logAngulos=null;
+	
+	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato */
+	private Object mutexDatos;
 
 	/**
 	 * Inicialización del puerto serie. 
@@ -302,6 +305,7 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 					angulo=new AngulosIMU(dis.readFloat(),dis.readFloat(),dis.readFloat(),dis.readUnsignedShort());
 //					System.out.printf("%7d: %15f %15f %15f\n",angulo.contador,angulo.roll,angulo.pitch,angulo.yaw);
 					logAngulos.add(angulo.roll,angulo.pitch,angulo.yaw);
+					mutexDatos.notifyAll();
 					avisaListeners();
 				} catch (IOException e) {
 					System.err.println("Problemas al leer floats del mensaje");
@@ -440,4 +444,21 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 		return angulo;
 	}
 
+	/**
+	 * Bloquea el thread si no hay angulos distintos (más nuevos) que los pasados
+	 * @param ultimosAngulos que conoce el thread
+	 * @return nuevos águlos recibidos
+	 */
+	public AngulosIMU esperaNuevosDatos(AngulosIMU ultimosAngulos) {
+		synchronized (mutexDatos) {
+			while(ultimosAngulos==angulo)
+				try {
+					mutexDatos.wait(); //nos quedamos bloqueados en mutexDatos
+				}catch (InterruptedException e) {
+					//No hacemos nada si somos interrumpidos
+				}
+		}
+		return angulo;  
+	}
+	
 }

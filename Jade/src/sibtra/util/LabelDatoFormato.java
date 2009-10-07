@@ -63,6 +63,8 @@ public class LabelDatoFormato extends LabelDato {
 				setText(String.format(formato, (double)0.0));
 			} else if(tipoRetorno.equals(Integer.TYPE)) {
 				setText(String.format(formato, (int)0));				
+			} else if(tipoRetorno.equals(Long.TYPE)) {
+				setText(String.format(formato, (long)0));				
 			}
 		} catch (Exception e) {
 			//dejamos el texto por defecto

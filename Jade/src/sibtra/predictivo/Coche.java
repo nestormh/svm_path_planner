@@ -5,6 +5,7 @@
 
 package sibtra.predictivo;
 
+import sibtra.util.Parametros;
 import sibtra.util.UtilCalculos;
 import Jama.Matrix;
 
@@ -19,20 +20,27 @@ public class Coche implements Cloneable {
     protected Matrix B;   
     protected Matrix C;
     protected Matrix D;
+    /** Distancia entre eje ruedas posteriores y eje de rueda(s) delanteras.*/
     protected double longitud;
+    /** Estado del modelo del volante. En esta representación corresponde a ángulo y velocidad angular del volante */
     protected Matrix estado;
+    /** coordenad X de la posición del vehículo. Eje X en dirección Norte */
     protected double x = 0;
+    /** Corrdenada Y de la posición del vehículo. Eje Y en dirección Oeste.*/
     protected double y = 0;
-    protected double tita = 0;
+    /** Orientación del veículo con respecto al norte */
+    protected double yaw = 0;
+    /** Entrada al modelo de evolución del volante */
     protected double consignaVolante;
     protected double consignaVelocidad;
+    /** Velocidad lineal del vehículo */
     protected double velocidad;
     
     /**
      * Copia los campos del objeto coche original sobre el objeto actual. 
      * No se duplican las matrices el espacio de los estados A,B,C,D, debido 
      * a que el objeto original y el actual deben de usar las mismas matrices.
-     * El resto de campos se duplican (x,y,tita y el estado)
+     * El resto de campos se duplican (x,y,yaw y el estado)
      * @param original
      * @return Este objeto
      */
@@ -46,7 +54,7 @@ public class Coche implements Cloneable {
             estado = (Matrix)original.estado.clone();
         x = original.x;
         y = original.y;
-        tita = original.tita;
+        yaw = original.yaw;
         consignaVolante = original.consignaVolante;
         consignaVelocidad = original.consignaVelocidad;
         velocidad = original.velocidad;
@@ -68,7 +76,7 @@ public class Coche implements Cloneable {
     /**
      * Constructor por defecto. Asigna a las matrices del espacio 
      * de los estados el valor definido por defecto. También inicializa 
-     * la longitud del vehículo a 1.7 metros
+     * la longitud del vehículo a {@link Parametros.batalla} 
      */
     public Coche(){
     
@@ -89,7 +97,7 @@ public class Coche implements Cloneable {
         C.print(10,	3);
         D = new Matrix(arrayD,1);
         estado = new Matrix(2,1);
-        longitud = 1.7;
+        longitud =Parametros.batalla;
        
     }
 
@@ -164,7 +172,7 @@ public class Coche implements Cloneable {
     }
     
     public double getYaw(){
-        return tita;
+        return yaw;
     }
     /**
      * Recoge la posición y orientación del vehículo. La fuente de la 
@@ -177,7 +185,7 @@ public class Coche implements Cloneable {
     public void setPostura(double posX,double posY,double orientacion){
         x = posX;
         y = posY;
-        tita = orientacion;        
+        yaw = orientacion;        
     }
     /**
      * Recoge la posición y orientación del vehículo. La fuente de la 
@@ -191,7 +199,7 @@ public class Coche implements Cloneable {
     public void setPostura(double posX,double posY,double orientacion,double posVolante){
         x = posX;
         y = posY;
-        tita = orientacion;
+        yaw = orientacion;
         setVolante(posVolante);
     }
     /**
@@ -207,16 +215,19 @@ public class Coche implements Cloneable {
     public void setPostura(double posX,double posY,double orientacion,double posVolante, double velVolante){
         x = posX;
         y = posY;
-        tita = orientacion;
+        yaw = orientacion;
         setVolante(posVolante);
         estado.set(1,0,velVolante);
     }
+    
     public void setVelocidad(double vel){
         velocidad = vel;    
     }
+
     public void setConsignaVelocidad(double consignaVelocidad){
         this.consignaVelocidad = consignaVelocidad;    
     }
+    
     public void setConsignaVolante(double consignaVolante){
         this.consignaVolante = consignaVolante;
     }
@@ -226,70 +237,59 @@ public class Coche implements Cloneable {
     	estado.set(0, 0, 0.0);
     	estado.set(1, 0, 0.0);
     }
+
+    
+    /** Evoluciona el modelo de la bicicleta a partir de la posición del volante sacado de {@link #estado}
+     * y de la {@link #velocidad}. Actuliazando los nuevos valores para {@link #x}, {@link #y} y {@link #yaw}.
+     * @param Ts segundo de evolución a calcular
+     */
+    public void evolucionaBicicleta(double Ts) {
+        //evoluciona el modelo de la bicicleta
+        Matrix alfa = C.times(estado);
+        double volante = alfa.get(0,0);
+        //System.out.println("alfa escalar " + alfaEscalar);
+        x = Math.cos(yaw)*velocidad*Ts + x;
+        y = Math.sin(yaw)*velocidad*Ts + y;
+        yaw = ((Math.tan(volante)/longitud)*velocidad*Ts + yaw);//%2*Math.PI
+        yaw = UtilCalculos.normalizaAngulo(yaw);    	
+    }
+
+    /**
+     * Calcula la evolución {@link #estado} del volante dada la {@link #consignaVolante}
+     * @param Ts segundos de la evolución.
+     */
+    public void evolucionaVolante(double Ts) {
+        //Evoluciona el volante
+        Matrix estadoAux = A.times(estado).plus(B.times(this.consignaVolante)).times(Ts);
+        estado.plusEquals(estadoAux);
+    }
+    
     /**
      * Calcula la evolución del vehículo en un instante de muestreo
      * @param volante Orientación del volante
      * @param velocidad Velocidad lineal del vehículo
      * @param Ts Periodo de muestreo
-     * @return Devuelve el ángulo del volante
      */
     public void calculaEvolucion(double consignaVolante,double velocidad,double Ts){
         this.consignaVolante = consignaVolante;
-        this.velocidad = velocidad;
-        consignaVelocidad = velocidad;/*Por ahora no existe modelo dinámico para 
+        setConsignaVolante(consignaVolante);
+        setVelocidad(velocidad);
+        setConsignaVelocidad(velocidad); /*Por ahora no existe modelo dinámico para 
         calcular la evolución de la velocidad del vehículo, por lo que se supone
         la velocidad igual a la consigna de la velocidad*/
-        
-        //evoluciona el modelo de la bicicleta
-        Matrix alfa = C.times(estado);
-        double volante = alfa.get(0,0);
-        //System.out.println("alfa escalar " + alfaEscalar);
-        x = Math.cos(tita)*velocidad*Ts + x;
-        y = Math.sin(tita)*velocidad*Ts + y;
-        tita = ((Math.tan(volante)/longitud)*velocidad*Ts + tita);//%2*Math.PI
-        tita = UtilCalculos.normalizaAngulo(tita);
-        
-        //Evoluciona el volante
-        Matrix estadoAux = A.times(estado).plus(B.times(this.consignaVolante)).times(Ts);
-        estado.plusEquals(estadoAux);
-        
 
-    }    
-    /**
-     * Calcula la evolución del vehículo en un instante de muestreo 
-     * suponiendo velocidad cte = 1.5
-     * @param volante Consigna para la orientación del volante
-     * @param Ts Periodo de muestreo
-     */
-    public void calculaEvolucion(double volante,double Ts){
+        calculaEvolucion(Ts);
         
-        calculaEvolucion(volante,1.5,Ts);
     }
-    /**
-     * Calcula la evolución del vehículo durante n instantes de muestreo
-     * manteniendo constante el comando del volante
-     * @param volante Consigna para la orientación del volante
-     * @param velocidad Velocidad lineal del coche
-     * @param Ts Periodo de muestreo
-     * @param n Número de iteraciones
-     * @return
+    
+    /** Calcula la evolución del vehículo con los valores establecidos en los distintos campos
+     * @param Ts segundos de la evolución
      */
-//    public Matrix calculaEvolucion(double volante,double velocidad,double Ts,int n){
-//        
-//        Matrix angulo = null;
-//        for (int i = 0; i < n; i++) {
-//            angulo = calculaEvolucion(volante,velocidad,Ts);
-//            System.out.println("Ángulo");
-//            angulo.print(1, 6);
-//            System.out.println("Estado");
-//            estado.print(1,6);
-//            System.out.println("X " + x);
-//            System.out.println("Y " + y);
-//            System.out.println("TITA " + tita);
-//        }
-//        
-//        return angulo;
-//    }
+    public void calculaEvolucion(double Ts) {
+        evolucionaBicicleta(Ts);        
+        evolucionaVolante(Ts);
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -334,10 +334,10 @@ public class Coche implements Cloneable {
     }*/
 
 	/**
-	 * @param tita the tita to set
+	 * @param yaw the yaw to set
 	 */
-	public void setYaw(double tita) {
-		this.tita = tita;
+	public void setYaw(double yaw) {
+		this.yaw = yaw;
 	}
 
 	/**
