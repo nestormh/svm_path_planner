@@ -30,7 +30,7 @@ public class Obstaculo implements Serializable{
 		/**Inicialización del aspecto gráfico del cuerpo del boid*/
 		float ptosX[] = {5,0,10};
 		float ptosY[] = {0,5,5};
-		cuadrado = new Rectangle2D.Double(posicion.get(0,0),posicion.get(1,0),10,10);
+		cuadrado = new Rectangle2D.Double(posicion.get(0,0),posicion.get(1,0),15,15);
 //		triangulo = new GeneralPath(GeneralPath.WIND_NON_ZERO,ptosX.length);
 //		triangulo.moveTo (ptosX[0], ptosY[0]);
 //
@@ -44,6 +44,7 @@ public class Obstaculo implements Serializable{
 		return posicion;
 	}
 	public void setPosicion(Matrix pos) {
+		cuadrado.setRect(pos.get(0,0),pos.get(1,0),15,15);
 		this.posicion = pos;		
 	}
 	public Matrix getVelocidad(){
