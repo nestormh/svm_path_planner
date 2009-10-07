@@ -37,7 +37,7 @@ public class Boid implements Serializable{
 	static double pesoObjetivo = 1;
 	static double pesoObstaculo = 10;
 	static double pesoLider = 10;
-	static double velMax = 5;
+	static double velMax = 15;
 	static double coorObjetivo[] = {800,800};
 	static Matrix objetivo = new Matrix(coorObjetivo,2);
 	/**Constructor donde se inicializa la posición y velocidad de cada boid,
@@ -58,6 +58,7 @@ public class Boid implements Serializable{
 		};
 		triangulo.closePath();
 		triangulo.transform(AffineTransform.getTranslateInstance(posicion.get(0,0),posicion.get(1,0)));
+		this.nuevoPuntoRuta(this.getPosicion());
 	}
 	/** Esta regla genera un vector velocidad que hace que el boid se agrupe
 	 *  con sus compañeros de bandada*/
@@ -186,7 +187,6 @@ public class Boid implements Serializable{
 		setLineaDireccion(getPosicion().get(0,0),getPosicion().get(1,0),
 				(getPosicion().plus(getVelocidad().times(2))).get(0,0),
 				(getPosicion().plus(getVelocidad().times(2))).get(1,0));
-		this.nuevoPuntoRuta(this.getPosicion());
 	}
 	
 	private void nuevoPuntoRuta(Matrix pto){
@@ -196,13 +196,17 @@ public class Boid implements Serializable{
 	public Vector<Matrix> getRutaBoid(){
 		return rutaBoid;
 	}
+	 public void resetRuta(){
+		 rutaBoid.clear();
+	 }
 	
 	public Matrix getPosicion() {
 		return posicion;
 	}
 	
 	public void setPosicion(Matrix pos) {
-		this.posicion = pos;		
+		this.posicion = pos;
+		nuevoPuntoRuta(this.posicion);
 	}
 //	public void setPosicion(double x, double y) {
 //		this.posicion.set(0,0,x);
