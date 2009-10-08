@@ -58,7 +58,8 @@ public class LoggerDouble extends Logger {
 	/** Borra los datos almacenados */
 	void clear() {
 		super.clear();
-		datos.setSize(0);
+		if(datos!=null)
+			datos.setSize(0);
 	}
 
 	/**	Devuelve String en formato para fichero octave de texto	 */	

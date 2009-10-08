@@ -3,7 +3,6 @@ package sibtra.log;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -11,6 +10,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -34,14 +35,15 @@ import sibtra.util.SalvaMATv4;
  * @author alberto
  *
  */
-public class PanelLoggers extends JTabbedPane implements ActionListener {
+public class PanelLoggers extends JTabbedPane {
 
-	private JButton actualizaButton;
-	private JButton activaButton;
-	private JButton salvaButton;
+	private Action accionRefrescar;
+	private Action accionLimpiar;
+	private Action accionDesactivar;
+	private Action accionActivar;
+	private Action accionSalvar;
+
 	private SpinnerNumberModel segActiva;
-	private JButton limpiaButton;
-	private JButton desactivaButton;
 	private JTable tablaLoggers;
 
 	/** Clase para apuntar en un vector el logger y si está seleccionado */
@@ -118,27 +120,65 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 
 				buttonPane.add(Box.createHorizontalGlue());
 				
-				actualizaButton=new JButton("R");
-				actualizaButton.addActionListener(this);
-				buttonPane.add(actualizaButton);
+				accionRefrescar=new AbstractAction("Refrescar") {
+//					{ setName("Refrescar"); }
+					public void actionPerformed(ActionEvent e) {
+						repinta();
+					}
+				};
+				buttonPane.add(new JButton(accionRefrescar));
 
 				buttonPane.add(Box.createRigidArea(new Dimension(10, 0)));
 				
-				limpiaButton=new JButton("Limpiar");
-				limpiaButton.addActionListener(this);
-				buttonPane.add(limpiaButton);
+				accionLimpiar=new AbstractAction("Limpiar") {
+					public void actionPerformed(ActionEvent e){
+						//actuamos sobre aquellos loggers seleccionados
+						for(int i=0; i<vecLA.size(); i++){
+							if(!vecLA.get(i).sel) continue; // nos saltamso los no seleccionados
+							Logger la=vecLA.get(i).la;
+							la.clear();
+//							System.out.println("Limpiando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
+//									+" para "+sgAct+" segundos.");
+						}
+						tablaLoggers.repaint();
+					}
+				};
+				buttonPane.add(new JButton(accionLimpiar));
 				
 				buttonPane.add(Box.createRigidArea(new Dimension(10, 0)));
 				
-				desactivaButton=new JButton("Desactiva");
-				desactivaButton.addActionListener(this);
-				buttonPane.add(desactivaButton);
+				accionDesactivar=new AbstractAction("Desactiva") {
+					public void actionPerformed(ActionEvent e){
+						//actuamos sobre aquellos loggers seleccionados
+						for(int i=0; i<vecLA.size(); i++){
+							if(!vecLA.get(i).sel) continue; // nos saltamso los no seleccionados
+							Logger la=vecLA.get(i).la;
+							la.desactiva();
+//							System.out.println("Desactivando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
+//									+" para "+sgAct+" segundos.");
+						}
+						tablaLoggers.repaint();
+					}
+				};
+				buttonPane.add(new JButton(accionDesactivar));
 				
 				buttonPane.add(Box.createRigidArea(new Dimension(10, 0)));
 				
-				activaButton=new JButton("Activar");
-				activaButton.addActionListener(this);
-				buttonPane.add(activaButton);
+				accionActivar=new AbstractAction("Activa") {
+					public void actionPerformed(ActionEvent e){
+						//actuamos sobre aquellos loggers seleccionados
+						int sgAct=segActiva.getNumber().intValue();
+						for(int i=0; i<vecLA.size(); i++){
+							if(!vecLA.get(i).sel) continue; // nos saltamso los no seleccionados
+							Logger la=vecLA.get(i).la;
+							la.activa(sgAct);
+//							System.out.println("Activando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
+//									+" para "+sgAct+" segundos.");
+						}
+						tablaLoggers.repaint();
+					}
+				};
+				buttonPane.add(new JButton(accionActivar));
 				
 				buttonPane.add(new JLabel(" para "));
 				segActiva=new SpinnerNumberModel(300,10,3600,5);
@@ -146,9 +186,29 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 				buttonPane.add(new JLabel(" sg."));
 				
 				
-				salvaButton=new JButton("Salva");
-				salvaButton.addActionListener(this);
-				buttonPane.add(salvaButton);
+				accionSalvar=new AbstractAction("Salvar") {
+					public void actionPerformed(ActionEvent ae){
+						String nombBase="Datos/PruPanLog";
+						String nombCompleto=nombBase+new SimpleDateFormat("yyyyMMddHHmm").format(new Date())
+						+".mat"
+						;
+						System.out.println("Escribiendo en Fichero "+nombCompleto);
+						try {
+							SalvaMATv4 smv4=new SalvaMATv4(nombCompleto);
+							for(int i=0; i<vecLA.size(); i++){
+								if(!vecLA.get(i).sel) continue; // nos saltamos los no seleccionados
+								Logger la=vecLA.get(i).la;
+								la.vuelcaMATv4(smv4);
+								System.out.println("Volcando Logger:"+la.objeto.getClass().getName()+":"+la.nombre);
+							}		
+							smv4.close();
+						} catch (IOException e) {
+							// TODO Bloque catch generado automáticamente
+							e.printStackTrace();
+						}
+					}
+				};
+				buttonPane.add(new JButton(accionSalvar));
 				panAct.add(buttonPane);
 			}
 			//Añadimos panel a la pestaña
@@ -307,60 +367,6 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 
     }
 
-    public void actionPerformed(ActionEvent ae) {
-    	//Para el boton actuziza
-    	if(ae.getSource()==actualizaButton) {
-    		repinta();
-    	}
-		//Para el boton Activa
-		if(ae.getSource()==activaButton 
-				|| ae.getSource()==limpiaButton
-				|| ae.getSource()==desactivaButton
-		) {
-			//actuamos sobre aquellos loggers seleccionados
-			int sgAct=segActiva.getNumber().intValue();
-			for(int i=0; i<vecLA.size(); i++){
-				if(!vecLA.get(i).sel) continue; // nos saltamso los no seleccionados
-				Logger la=vecLA.get(i).la;
-				if (ae.getSource()==activaButton) {
-					la.activa(sgAct);
-//					System.out.println("Activando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
-//							+" para "+sgAct+" segundos.");
-				} else if (ae.getSource()==limpiaButton) {
-					la.clear();
-//					System.out.println("Limpiando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
-//							+" para "+sgAct+" segundos.");
-				} else if (ae.getSource()==desactivaButton) {
-					la.desactiva();
-//					System.out.println("Desactivando Logger:"+la.objeto.getClass().getName()+":"+la.nombre
-//							+" para "+sgAct+" segundos.");
-				}
-			}
-			tablaLoggers.repaint();
-		}
-		if(ae.getSource()==salvaButton) {
-			String nombBase="Datos/PruPanLog";
-			String nombCompleto=nombBase+new SimpleDateFormat("yyyyMMddHHmm").format(new Date())
-			+".mat"
-			;
-			System.out.println("Escribiendo en Fichero "+nombCompleto);
-			try {
-				SalvaMATv4 smv4=new SalvaMATv4(nombCompleto);
-				for(int i=0; i<vecLA.size(); i++){
-					if(!vecLA.get(i).sel) continue; // nos saltamos los no seleccionados
-					Logger la=vecLA.get(i).la;
-					la.vuelcaMATv4(smv4);
-					System.out.println("Volcando Logger:"+la.objeto.getClass().getName()+":"+la.nombre);
-				}		
-				smv4.close();
-			} catch (IOException e) {
-				// TODO Bloque catch generado automáticamente
-				e.printStackTrace();
-			}
-		}
-			
-	}
-
 	/** programamos la actualizacion del panel */
 	public void repinta() {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -397,6 +403,41 @@ public class PanelLoggers extends JTabbedPane implements ActionListener {
 		try { Thread.sleep(5000); } catch (Exception e){}
 		
 		
+	}
+
+	/**
+	 * @return el accionActivar
+	 */
+	public Action getAccionActivar() {
+		return accionActivar;
+	}
+
+	/**
+	 * @return el accionDesactivar
+	 */
+	public Action getAccionDesactivar() {
+		return accionDesactivar;
+	}
+
+	/**
+	 * @return el accionLimpiar
+	 */
+	public Action getAccionLimpiar() {
+		return accionLimpiar;
+	}
+
+	/**
+	 * @return el accionRefrescar
+	 */
+	public Action getAccionRefrescar() {
+		return accionRefrescar;
+	}
+
+	/**
+	 * @return el accionSalvar
+	 */
+	public Action getAccionSalvar() {
+		return accionSalvar;
 	}
 		
 }

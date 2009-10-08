@@ -127,7 +127,20 @@ public class Ventanas  implements ActionListener  {
 
         ventanaPrincipal.setJMenuBar(barraMenu); //ponemos barra en la ventana
 
-        	
+        //Loggers en solapa con scroll panel
+    	//Lo punemos cuando todos hayan apuntado sus loggers
+        pmLog=new PanelLoggers();
+        tbPanelDecho.add("Loggers",new JScrollPane(pmLog));
+
+        //Menu con las acciones del los loggers
+        JMenu menuLoggers=new JMenu("Loggers");
+        barraMenu.add(menuLoggers);
+        menuLoggers.add(pmLog.getAccionRefrescar());
+        menuLoggers.add(pmLog.getAccionActivar());
+        menuLoggers.add(pmLog.getAccionDesactivar());
+        menuLoggers.add(pmLog.getAccionLimpiar());
+        menuLoggers.add(pmLog.getAccionSalvar());
+	
         
         //Mostramos la ventana principal con el tamaño y la posición deseada
         ventanaPrincipal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -136,7 +149,7 @@ public class Ventanas  implements ActionListener  {
         splitPanel.setDividerLocation(500); //Ajustamos para que no aparezca la barra a la dercha
 
         //La ventana Secundaria
-        ventadaPeque=new JFrame("VERDINO");
+        ventadaPeque=new JFrame("Tactil Verdino");
         panelCentralPeque=new JPanel();
         panelCentralPeque.setLayout(new BoxLayout(panelCentralPeque,BoxLayout.PAGE_AXIS));
         ventadaPeque.add(panelCentralPeque);
@@ -169,11 +182,9 @@ public class Ventanas  implements ActionListener  {
     }
 
     void muestraVentanas() {
-        //Loggers en solapa con scroll panel
-    	//Lo punemos cuando todos hayan apuntado sus loggers
-        pmLog=new PanelLoggers();
-        tbPanelDecho.add("Loggers",new JScrollPane(pmLog));
 
+    	//Refrescamos los loggers
+    	pmLog.getAccionRefrescar().actionPerformed(null);
 
     	//añadimos el boton de salir al final del menu de archivos
         menuArchivo.addSeparator(); //separador =============================

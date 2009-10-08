@@ -91,7 +91,8 @@ public class Logger {
 	
 	/** Borra los datos almacenados */
 	void clear() {
-		tiempos.setSize(0);
+		if(tiempos!=null)
+			tiempos.setSize(0);
 	}
 	
 	/** @return si está activo */

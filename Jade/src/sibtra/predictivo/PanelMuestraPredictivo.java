@@ -195,7 +195,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
         //pintamos la orientación final
         {
-            double[] pini = CP.prediccionPosPorFilas[CP.horPrediccion - 1];
+            double[] pini = { CP.prediccionPosPorFilas[0][CP.horPrediccion - 1], CP.prediccionPosPorFilas[1][CP.horPrediccion - 1]};
             double ori = CP.predicOrientacion[CP.horPrediccion - 1];
             g.setStroke(new BasicStroke());
             g.setColor(Color.RED);
