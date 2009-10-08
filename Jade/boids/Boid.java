@@ -36,7 +36,7 @@ public class Boid implements Serializable{
 	static double pesoAlineacion = 2;
 	static double pesoObjetivo = 1;
 	static double pesoObstaculo = 10;
-	static double pesoLider = 10;
+	static double pesoLider = 1;
 	static double velMax = 15;
 	static double coorObjetivo[] = {800,800};
 	static Matrix objetivo = new Matrix(coorObjetivo,2);
@@ -59,6 +59,59 @@ public class Boid implements Serializable{
 		triangulo.closePath();
 		triangulo.transform(AffineTransform.getTranslateInstance(posicion.get(0,0),posicion.get(1,0)));
 		this.nuevoPuntoRuta(this.getPosicion());
+	}
+	
+	/**Método optimizado para calcular la cohesión, alineación y separación para un boid. 
+	 * Sólo usa un bucle for, y no una para cada regla*/
+	
+	public Matrix aliCoheSep(Vector<Boid> bandada,int indBoid){
+		double pos[] = {0,0};
+		Matrix velResultante = new Matrix(2,1);
+		Matrix velMedia = new Matrix(2,1);
+		Matrix centroMasa = new Matrix(2,1);
+		Matrix velCohesion = new Matrix(pos,2);
+		Matrix separa = new Matrix(pos,2);
+		boolean liderCerca = false;
+		int indLider = 0;
+		int cont = 0;
+		// Bucle que recorre toda la bandada
+		for (int i=0;i < bandada.size();i++){
+			if (i != indBoid){
+				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 30)
+					velMedia = velMedia.plus(bandada.elementAt(i).getVelocidad());
+				// if para la alineacion
+				if (!this.isLider()){
+					if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 100){
+						if (bandada.elementAt(i).isLider()){
+							liderCerca = true;
+							indLider = i;
+							break;
+						}
+						centroMasa = centroMasa.plus(bandada.elementAt(i).getPosicion());
+						cont++;
+					}
+				} // if (!this.isLider()) para la cohesion
+				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 30){
+					separa = separa.minus(bandada.elementAt(i).getPosicion().minus(this.getPosicion()));
+					separa = separa.times(pesoSeparacion);
+				}// if para la separacion
+			} // if (i != indBoid) para todas las reglas
+		} // for principal
+		
+		// calculos para la velocidad de alineación
+		velMedia = velMedia.timesEquals(1/bandada.size()-1);
+		velMedia = velMedia.minus(this.getVelocidad());
+		velMedia = velMedia.times(pesoAlineacion);
+		// calculos para la cohesión
+		if (cont != 0 && liderCerca == false){
+			centroMasa = centroMasa.timesEquals(1/cont);
+			velCohesion = (centroMasa.minus(this.getPosicion())).times(pesoCohesion);
+		}
+		if(liderCerca == true){
+			velCohesion = (bandada.elementAt(indLider).getPosicion().minus(this.getPosicion())).times(pesoLider);
+		}
+		velResultante = (velMedia.plus(velCohesion)).plus(separa);
+		return velResultante;
 	}
 	/** Esta regla genera un vector velocidad que hace que el boid se agrupe
 	 *  con sus compañeros de bandada*/
@@ -113,17 +166,15 @@ public class Boid implements Serializable{
 	
 	public Matrix separacion(Vector<Boid> bandada,int indBoid){
 		double pos[] = {0,0};
-		Matrix c = new Matrix(pos,2);
+		Matrix separa = new Matrix(pos,2);
 		for (int i=0;i < bandada.size();i++){
 			if (i!=indBoid)
 				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 30){
-					c = c.minus(bandada.elementAt(i).getPosicion().minus(this.getPosicion()));
-					c = c.times(pesoSeparacion);
-//					System.out.println("Separación");
-//					c.print(1,0);
+					separa = separa.minus(bandada.elementAt(i).getPosicion().minus(this.getPosicion()));
+					separa = separa.times(pesoSeparacion);
 				}
 		}				
-		return c;
+		return separa;
 	}
 	
 	/**Regla que permite fijar un objetivo para que los boids lo persigan*/
@@ -142,6 +193,7 @@ public class Boid implements Serializable{
 	
 	public Matrix limitaVelocidad(Matrix vel){
 		Matrix velLimitada = new Matrix(2,1);
+		vel.print(10,3);
 		velLimitada = vel;
 		if (Math.abs(vel.norm2()) > velMax)
 			velLimitada = vel.times(1/vel.norm2()).times(velMax);
@@ -167,20 +219,21 @@ public class Boid implements Serializable{
 	 * 	, calcula el desplazamiento y lo realiza*/
 	
 	public void mover(Vector<Boid> bandada,Vector<Obstaculo> obstaculos,int indBoid, Matrix obj){
-		double velCte[] = {-0.5,-0.5};
-		Matrix despCte = new Matrix(velCte,2);
 		Matrix desp = new Matrix(2,1);
-		Matrix despCohesion = new Matrix(2,1);
-		Matrix despSeparacion = new Matrix(2,1);
-		Matrix despAlineacion = new Matrix(2,1);
+//		Matrix despCohesion = new Matrix(2,1);
+//		Matrix despSeparacion = new Matrix(2,1);
+//		Matrix despAlineacion = new Matrix(2,1);
 		Matrix despObjetivo = new Matrix(2,1);
+		Matrix despAliCoheSep = new Matrix(2,1);
 		Matrix despObstaculo = new Matrix(2,1);
-		despCohesion = cohesion(bandada, indBoid);
-		despSeparacion = separacion(bandada, indBoid);
-		despAlineacion = alineacion(bandada, indBoid);
+//		despCohesion = cohesion(bandada, indBoid);
+//		despSeparacion = separacion(bandada, indBoid);
+//		despAlineacion = alineacion(bandada, indBoid);
+		despAliCoheSep = aliCoheSep(bandada, indBoid);
 		despObjetivo = seguirObjetivo(bandada,indBoid,obj);
 		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid));
-		desp = limitaVelocidad(despCohesion.plus(despSeparacion).plus(despAlineacion).plus(despObjetivo).plus(despObstaculo).plus(this.getVelocidad()));
+		desp = limitaVelocidad(((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad()));
+//		desp = limitaVelocidad(despCohesion.plus(despSeparacion).plus(despAlineacion).plus(despObjetivo).plus(despObstaculo).plus(this.getVelocidad()));
 		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
 		this.setVelocidad(desp);
 		this.setPosicion(this.getPosicion().plus(this.getVelocidad()));
