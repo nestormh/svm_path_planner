@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -23,6 +24,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 
 import sibtra.log.PanelLoggers;
 
@@ -112,6 +114,7 @@ public class Ventanas  implements ActionListener  {
         barraMenu.add(menuArchivo);
 
         miSalir=new JMenuItem("Salir");
+        miSalir.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_Q,KeyEvent.CTRL_MASK));
         miSalir.addActionListener(this);
         //lo añadimos al menu al final
         
@@ -250,6 +253,7 @@ public class Ventanas  implements ActionListener  {
 
     /** Metodo para terminar la ejecución */
     protected void Terminar() {
+    	System.out.println("Terminamos ...");
 		System.exit(0);
 	}
 

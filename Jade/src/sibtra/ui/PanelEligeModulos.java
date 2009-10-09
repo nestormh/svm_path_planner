@@ -120,27 +120,44 @@ public class PanelEligeModulos extends JPanel {
 
 		arrClasMotor=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.Motor", "sibtra.ui.modulos",cargadorClases);
 		String[] arrNomClasMotor=ClasesEnPaquete.nombreClases(arrClasMotor);
+		Object motorSeleccionado=jcombMotor.getSelectedItem();
 		jcombMotor.removeAllItems();
 		for(String sa: arrNomClasMotor)
 			jcombMotor.addItem(sa);
+		if(motorSeleccionado!=null)
+			jcombMotor.setSelectedItem(motorSeleccionado);
 		
 		arrClasDir=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.CalculoDireccion", "sibtra.ui.modulos",cargadorClases);
 		String[] arrNomClasDir=ClasesEnPaquete.nombreClases(arrClasDir);
+		Object direccionSeleccionado=jcombDireccion.getSelectedItem();
 		jcombDireccion.removeAllItems();
 		for(String sa: arrNomClasDir)
 			jcombDireccion.addItem(sa);
+		if(direccionSeleccionado!=null)
+			jcombDireccion.setSelectedItem(direccionSeleccionado);
 			
 		arrClasVel=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.CalculoVelocidad", "sibtra.ui.modulos",cargadorClases);
 		String[] arrNomClasVel=ClasesEnPaquete.nombreClases(arrClasVel);
+		Object velocidadSeleccinada=jcombVelocidad.getSelectedItem();
 		jcombVelocidad.removeAllItems();
 		for(String sa: arrNomClasVel)
 			jcombVelocidad.addItem(sa);
+		if(velocidadSeleccinada!=null)
+			jcombVelocidad.setSelectedItem(velocidadSeleccinada);
 			
 		arrClasDectObs=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.DetectaObstaculos", "sibtra.ui.modulos",cargadorClases);
 		String[] arrNomClasDectObs=ClasesEnPaquete.nombreClases(arrClasDectObs);
+		Object[] detecctoresSeleccionados=jcombDetecObstaculos.getSelectedValues();
 		modeloLista.removeAllElements();
 		for(String sa: arrNomClasDectObs)
 			modeloLista.addElement(sa);
+//		jcombDetecObstaculos.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		int[] indicesSeleccionados=new int[detecctoresSeleccionados.length];
+		for(int i=0; i<detecctoresSeleccionados.length;i++) {
+			jcombDetecObstaculos.setSelectedValue(detecctoresSeleccionados[i], true); //borra las selecciones anteriores :-(
+			indicesSeleccionados[i]=jcombDetecObstaculos.getSelectedIndex();
+		}
+		jcombDetecObstaculos.setSelectedIndices(indicesSeleccionados);
 	}
 	
 	class AccionCrear extends AbstractAction {
