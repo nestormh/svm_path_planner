@@ -5,6 +5,7 @@ package sibtra.ui;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.DefaultListModel;
@@ -14,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import sibtra.ui.defs.CalculoDireccion;
 import sibtra.ui.defs.CalculoVelocidad;
@@ -94,11 +96,20 @@ public class PanelEligeModulos extends JPanel {
 		add(new JButton(accionRefrescar));
 		
 		//ponemos los botones tambien en el menu de opciones
-		ventanaMonitoriza.menuAcciones.add(accionActivar);
-		ventanaMonitoriza.menuAcciones.add(accionParar);
+		ventanaMonitoriza.menuAcciones.add(accionActivar)
+			.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_F1,0));
+		ventanaMonitoriza.menuAcciones.add(accionParar)
+			.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_F2,0));
 		ventanaMonitoriza.menuAcciones.add(accionCrear);
 		ventanaMonitoriza.menuAcciones.add(accionBorrar);
 		ventanaMonitoriza.menuAcciones.add(accionRefrescar);
+//		KeyStroke.getKeyStroke( KeyEvent.VK_F1);
+		
+		//ponemos key bindings es forma alternativa de asociar teclas a acciones
+//		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F1"), "ActivarModulos");
+//		getActionMap().put("ActivarModulos", accionActivar);
+//		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F2"), "PararModulos");
+//		getActionMap().put("PararModulos", accionParar);
 		
 		
 	}
