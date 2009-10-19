@@ -27,6 +27,17 @@ public class GPSConnectionTriumph extends GPSConnection {
 	/** Tamaño máximo del mensaje */
 	private static final int MAXMENSAJE = 5000;
 
+	/** comando que se envía al GPS para comenzar el envío periódico de datos. Hay varias opciones
+	 * <ul>
+	 * <li>"em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/DL,jps/ET}:0.2\n"
+	 * <li>"%em%em,,{nmea/{GGA:0.2,GSA,GST,VTG},jps/DL}:1\n"
+	 * <li>"%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG}:1\n"
+	 * <li> (Actual) "%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL:0.4}:1\n"
+	 * <li>"%em%em,,{jps/RT,nmea/GGA,jps/PG,jps/ET}:5\n"
+	 * </ul>
+	 */
+	private static final String comandoPeriodicoPorDefecto = "%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL:0.4}:1\n";
+
 //	private static final double NULLANG = -5 * Math.PI;
 
 
@@ -60,6 +71,17 @@ public class GPSConnectionTriumph extends GPSConnection {
 
 	/** Para registrar calidad que viene en paquete DL */
 	private LoggerDouble logCalDL;
+
+	/** Ultimo comando de envío periódico que se envió. Permite la reactivación si es necesario dar un comando intermedio */
+	private String comandoEnvioPeriodico=null;
+
+	/** Para conseguir la exclusión mutua y el bloquo a la espera de respuesta de texto */
+	private Object mutexRespuestaTexto=new Object();
+
+	/** Contendrá la última respuesta de texto no considerada que se ha recibido */
+	private String respuestaTexto=null;
+
+	private GPSData ultimaPosicionBase;
 	
 	public static int ERR=0;
 	public static int WAR=0;
@@ -105,14 +127,8 @@ public class GPSConnectionTriumph extends GPSConnection {
 	public GPSConnectionTriumph(String portName, int baudios, int nivelLog) throws SerialConnectionException {
 		super(portName,baudios);
 		this.nivelLog=nivelLog;
-		comandoGPS("%dM%dm\n");
-//		comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/DL,jps/ET}:0.2\n");
-		//GGA cada segundo, GSA,GST,VTG y DL cada segundo
-//		comandoGPS("%em%em,,{nmea/{GGA:0.2,GSA,GST,VTG},jps/DL}:1\n");
-//		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG}:1\n");
-		comandoGPS("%em%em,,{nmea/GGA:0.2,nmea/GSA,nmea/GST,nmea/VTG,jps/DL:0.4}:1\n");
-//		comandoGPS("%em%em,,{jps/RT,nmea/GGA,jps/PG,jps/ET}:5\n");
 		
+		comienzaEnvioPeriodico();
 		//ponemos muestras por segundo a la frecuencia de los GGA
 		logLocales.setMuestrasSg(5);
 		logEdadCor.setMuestrasSg(5);
@@ -123,6 +139,93 @@ public class GPSConnectionTriumph extends GPSConnection {
 	}
 
 
+	/** Manda comando de envío periódico y lo apunta en {@link #comandoEnvioPeriodico} */
+	public void comienzaEnvioPeriodico(String comandoEnvioPeriodico) {
+		this.comandoEnvioPeriodico=comandoEnvioPeriodico;
+		comandoGPS("%dM%dm\n");
+		comandoGPS(comandoEnvioPeriodico);
+	}
+	
+	/** Manda úlimo comando de envío periódico en {@link #comandoEnvioPeriodico},
+	 *  o el comando por defecto en {@link #comandoPeriodicoPorDefecto} si no se ha mandado uno previo */
+	public void comienzaEnvioPeriodico() {
+		if (comandoEnvioPeriodico==null)
+			comandoEnvioPeriodico=comandoPeriodicoPorDefecto;
+		comandoGPS("%dM%dm\n");
+		comandoGPS(comandoEnvioPeriodico);
+	}
+	
+	/** Obtiene la posición de la base */
+	public GPSData posicionDeLaBase() {
+		return posicionDeLaBase(false);
+	}
+	
+	public GPSData posicionDeLaBase(boolean refrescada) {
+		if( ultimaPosicionBase==null || refrescada) {
+			//Tenemos que pedir la posición de la base
+			String respuesta=null; //copia local de la respuesta
+			String prefijo="%"+Thread.currentThread().getId()+"%";
+			synchronized (mutexRespuestaTexto) {
+				ultimaPosicionBase=null;
+				respuestaTexto=null;
+				comandoGPS(prefijo+"print,/par/pos/pd/ref/pos/geo\n");
+				try {
+					do {
+					mutexRespuestaTexto.wait(5000);
+					} while (respuestaTexto!=null && !respuestaTexto.startsWith(prefijo));
+				} catch (InterruptedException e) {
+					System.out.println(getClass().getName()+": Interrumpido esperando respuesta");
+				}
+				respuesta=respuestaTexto;
+			}
+			if(respuesta==null ) {
+				System.err.println(getClass().getName()+": No se obtuvo respuesta o no corresponde:"+respuesta);
+				return null;
+			} else {
+				try {
+					//Tenemos la respuesta a nuestro comando, parseamos la posición de la base
+					String[] campos=respuesta.substring(respuesta.indexOf('{')+1
+							, respuesta.indexOf('}')-1).split(",");
+					if(campos[0].equals("UNDEF"))
+						//Rober no conoce la posición de la base
+						return null;
+					if(!campos[0].equals("W84")) {
+						System.err.println(getClass().getName()+": la posición no es W84:"+respuesta);
+						return null;
+					} 
+					String strLat=campos[1];
+					//grados
+					double latitud=Double.valueOf(strLat.substring(1, strLat.indexOf('d')));
+					//minutos
+					latitud+=Double.valueOf(strLat.substring(strLat.indexOf('d')+1,strLat.indexOf('m')))/60.0;
+					//segundos
+					latitud+=Double.valueOf(strLat.substring(strLat.indexOf('m')+1,strLat.indexOf('s')))/3600.0;
+					//signo
+					latitud*=(strLat.substring(0,1).equals("N"))?1.0:-1.0;
+
+					String strLon=campos[2];
+					//grados
+					double longitud=Double.valueOf(strLon.substring(1, strLon.indexOf('d')));
+					//minutos
+					longitud+=Double.valueOf(strLon.substring(strLon.indexOf('d')+1,strLon.indexOf('m')))/60.0;
+					//segundos
+					longitud+=Double.valueOf(strLon.substring(strLon.indexOf('m')+1,strLon.indexOf('s')))/3600.0;
+					//signo
+					longitud*=(strLon.substring(0,1).equals("E"))?1.0:-1.0;
+
+					double altura=Double.valueOf(campos[3]);
+
+					ultimaPosicionBase=new GPSData(latitud,longitud,altura);
+				} catch (Exception e) {
+					System.err.println(getClass().getName()+": No se pudo interpretar correctamente la posición de la base"
+							+ " con respuesta >"+respuesta+"<"
+							+":"+e.getMessage());
+					return null;
+				}
+			}
+		}
+		return ultimaPosicionBase;
+	}
 	
 
 	/**
@@ -280,9 +383,11 @@ public class GPSConnectionTriumph extends GPSConnection {
 		return ((buff[ind]>=33) && (buff[ind]<=47)) ;
 	}
 
-	/** Se invoca cuando se recibe una cadena de texto que no es NMEA */
+	/** Se invoca cuando se recibe una cadena de texto que no es NMEA 
+	 * Se apunta en {@link #respuestaTexto} y se avisa a los bloqueados en {@link #mutexRespuestaTexto} 
+	 */
 	void nuevaCadenaTexto(String mensaje) {
-		//TODO considerar mensajes de texto propietarios GREIS
+		log(INFO,"Recibida cadena de texto >"+mensaje+"<");
 	}
 	
 	/** Se invoca cuando se recibe una cadena binaria propietaria GREIS */
@@ -501,11 +606,11 @@ public class GPSConnectionTriumph extends GPSConnection {
 				int posArroba=cadena.indexOf('@');
 				String CS=cadena.substring(posArroba+1);
 				//TODO comprobamos checksum
-//				int csc=checksum8(buff, indIni, larMen-2);
-//				if( csc!=Byte.valueOf(CS,16) ) {
-//					log(WAR,"Error checksum "+csc+"!="+CS+". Ignoramos mensaje");
-//					return;
-//				}
+				int csc=checksum8(buff, indIni, larMen-2);
+				if( csc!=Byte.valueOf(CS,16) ) {
+					log(WAR,"Error checksum "+csc+"!="+CS+". Ignoramos mensaje");
+					return;
+				}
 				String[] campos=cadena.substring(0, posArroba).split(",");
 				//el checksum es correcto
 				if(campos.length<4) {
@@ -543,8 +648,30 @@ public class GPSConnectionTriumph extends GPSConnection {
 			} catch (Exception e) {
 				log(WAR,"Error parseando campo DL:"+e.getMessage()+" Ignoramos");
 			}
+			
 			return;
 		}
+
+		// Respuesta a un comando enviado
+//		[RE] Reply
+//		  struct RE {var} {
+//		    a1 reply[]; // Reply
+//		  };
+		if(buff[indIni]==(byte)'R' && buff[indIni+1]==(byte)'E') {
+			//convertimos a string
+			try {
+				//Quitamos RE y tamaño ###
+				String cadena=new String(buff,indIni+5,larMen-5);
+				log(INFO,"Respuesta: >"+cadena+"<");
+				//No tiene Checksum que comprobar
+				nuevaRespuesta(cadena);
+			} catch (Exception e) {
+				log(WAR,"Error parseando campo RE:"+e.getMessage()+" Ignoramos");
+			}
+			
+			return;
+		}
+		
 		//contenido del mensaje en crudo
 		System.out.print("Binaria ("+larMen+"):"+new String(buff,indIni,5)+" >");
 		for(int i=indIni+5; i<=indFin; i++)
@@ -599,6 +726,17 @@ u1 cs(u1 const* src, int count)
 		}
 	}
 
+	/** Se invoca cada vez que se recive cadena RE###.
+	 * pone {@link #respuestaTexto} con respuesta recibida y despierta thread esperando en {@link #mutexRespuestaTexto}
+	 * @param mensaje el recibido (sin RE###)
+	 */
+	private void nuevaRespuesta(String mensaje) {
+		synchronized (mutexRespuestaTexto) {
+			respuestaTexto=mensaje;
+			mutexRespuestaTexto.notifyAll();
+		}
+	}
+	
 	/** Calidad del enlace con la base */
 	public double getCalidadLink() {
 		return calidadLink;
@@ -620,9 +758,18 @@ u1 cs(u1 const* src, int count)
 				
 		try {
 			gpsC=new GPSConnectionTriumph("/dev/ttyUSB0",115200,INFO);
-//			gpsC.comandoGPS("%DL%out,,jps/DL\n");
+//			gpsC.comandoGPS("%Dm%dm\n");
+			gpsC.comandoGPS("%DL%out,,jps/DL\n");
 
-//			try { Thread.sleep(5000); } catch (Exception e) {}
+			try { Thread.sleep(5000); } catch (Exception e) {}
+			
+			gpsC.comandoGPS("%pb%print,/par/pos/pd/ref/pos/geo\n");
+			gpsC.comandoGPS("%ver% print,rcv/ver\n");
+
+			try { Thread.sleep(5000); } catch (Exception e) {}
+//			gpsC.comandoGPS("%Dm%dm\n");
+			GPSData posB=gpsC.posicionDeLaBase();
+			System.out.println("Posición de la base:"+posB);
 //
 //			gpsC.comandoGPS("em,,{jps/RT,nmea/GGA,jps/PO,jps/BL,nmea/GST,jps/ET}:10\n");
 			try { Thread.sleep(10000000); } catch (Exception e) {}
