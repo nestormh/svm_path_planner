@@ -25,8 +25,12 @@ import java.util.Vector;
 
 import javax.swing.JApplet;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
@@ -42,39 +46,43 @@ import boids.Obstaculo;
 
 public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionListener,MouseListener{
 
-	private static Line2D rectaObjetivo;
+	private static double distOk = 50;
+	private boolean objetivoEncontrado;
 	private boolean play = false;
 	private boolean colocandoObs = false;
 	private boolean colocandoBan = false;
-	private boolean salvar = false;
-	private boolean cargar = false;
+	private boolean pintarEscena = false;
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Escenarios"));
 	// Esto no debería estar en la clase de la interfaz gráfica
 	int tamanoBandada = 20;
 	Vector<Boid> bandada = new Vector<Boid>();
+	Vector<Boid> boidsOk = new Vector<Boid>();
 	Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
 	//Hasta aqui
+	JMenuBar barraMenu = new JMenuBar(); 
+	JMenu menuArchivo = new JMenu("Archivo");
+	JMenu menuBandada = new JMenu("Bandada");
 	Dibujante pintor = new Dibujante();
 	JLabel etiquetaPesoLider = new JLabel("Liderazgo");
-	SpinnerNumberModel spPesoLider = new SpinnerNumberModel(Boid.getPesoLider(),0,100,0.01);
+	SpinnerNumberModel spPesoLider = new SpinnerNumberModel(Boid.getPesoLider(),0,100,0.1);
 	JSpinner spinnerPesoLider = new JSpinner(spPesoLider);
 	JLabel etiquetaCohesion = new JLabel("Cohesión");
-	SpinnerNumberModel spCohesion = new SpinnerNumberModel(Boid.getPesoCohesion(),0,100,0.01);
+	SpinnerNumberModel spCohesion = new SpinnerNumberModel(Boid.getPesoCohesion(),0,100,0.1);
 	JSpinner spinnerCohesion = new JSpinner(spCohesion);
 	JLabel etiquetaSeparacion = new JLabel("Separación");
-	SpinnerNumberModel spSeparacion = new SpinnerNumberModel(Boid.getPesoSeparacion(),0,100,0.01);
+	SpinnerNumberModel spSeparacion = new SpinnerNumberModel(Boid.getPesoSeparacion(),0,1000,0.1);
 	JSpinner spinnerSeparacion = new JSpinner(spSeparacion);
 	JLabel etiquetaAlineacion = new JLabel("Alineación");
-	SpinnerNumberModel spAlineacion = new SpinnerNumberModel(Boid.getPesoAlineacion(),0,100,0.01);
+	SpinnerNumberModel spAlineacion = new SpinnerNumberModel(Boid.getPesoAlineacion(),0,100,0.1);
 	JSpinner spinnerAlineacion = new JSpinner(spAlineacion);
 	JLabel etiquetaObjetivo = new JLabel("Velocidad Objetivo");
-	SpinnerNumberModel spObjetivo = new SpinnerNumberModel(Boid.getPesoObjetivo(),0,100,0.01);
+	SpinnerNumberModel spObjetivo = new SpinnerNumberModel(Boid.getPesoObjetivo(),0,100,0.1);
 	JSpinner spinnerObjetivo = new JSpinner(spObjetivo);
 	JLabel etiquetaEvitaObs = new JLabel("Evitar Obstáculos");
-	SpinnerNumberModel spEvitaObs = new SpinnerNumberModel(Boid.getPesoObstaculo(),0,100,0.01);
+	SpinnerNumberModel spEvitaObs = new SpinnerNumberModel(Boid.getPesoObstaculo(),0,1000,0.1);
 	JSpinner spinnerEvitaObs = new JSpinner(spEvitaObs);
 	JLabel etiquetaVelMax = new JLabel("Velocidad Máxima");
-	SpinnerNumberModel spVelMax = new SpinnerNumberModel(Boid.getVelMax(),0,100,0.01);
+	SpinnerNumberModel spVelMax = new SpinnerNumberModel(Boid.getVelMax(),0,100,1);
 	JSpinner spinnerVelMax = new JSpinner(spVelMax);
 	JLabel etiquetaNumBoids = new JLabel("Número de Boids");
 	SpinnerNumberModel spNumBoids = new SpinnerNumberModel(this.getTamanoBan(),1,200,1);
@@ -82,21 +90,31 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 	JButton pausa = new JButton("Play");
 	JButton colocarObs = new JButton("Colocar obstáculos");
 	JButton colocarBan = new JButton("Colocar la bandada");
-	JButton botonSalvar = new JButton("Salvar escenario");
-	JButton botonCargar = new JButton("Cargar escenario");
-	JButton botonBorrarBandada = new JButton("Borrar Bandada");
-	JButton botonCrearBandada = new JButton("Crear Bandada");
+	JMenuItem botonSalvar = new JMenuItem("Salvar escenario");
+	JMenuItem botonCargar = new JMenuItem("Cargar escenario");
+	JMenuItem botonBorrarBandada = new JMenuItem("Borrar Bandada");
+	JMenuItem botonCrearBandada = new JMenuItem("Crear Bandada");
+	JCheckBox checkBoxPintar = new JCheckBox("Dibujar");
 	public double tiempo;
 	
 	public void init(){
-		//Esto no debería estar en la clase de la interfaz gráfica
-//		bandada = new Vector<Boid>();
-//		obstaculos = new Vector<Obstaculo>();
-		// Hasta aqui
 		Container cp = getContentPane();
-//		cp.setLayout(new FlowLayout());
+		//Añadimos elemtentos al menu de bandada
+		menuBandada.add(botonCrearBandada);
+		menuBandada.add(botonBorrarBandada);
+		menuBandada.add(colocarBan);
+		barraMenu.add(menuBandada);
+		//Añadimos elementos al menu de archivo
+		menuArchivo.add(botonCargar);		
+		menuArchivo.add(botonSalvar);		
+		barraMenu.add(menuArchivo);
+//		Añadimos elemtentos al menu de bandada
+		menuBandada.add(botonCrearBandada);
+		menuBandada.add(botonBorrarBandada);
+		barraMenu.add(menuBandada);		
 		pintor.addMouseListener(this);
 		cp.add(pintor);
+		this.setJMenuBar(barraMenu);
 		JPanel panelSur = new JPanel(new FlowLayout());
 		JPanel panelNorte = new JPanel(new FlowLayout());
 		panelSur.add(etiquetaPesoLider);
@@ -113,15 +131,16 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		panelSur.add(spinnerEvitaObs);		
 		panelSur.add(etiquetaVelMax);
 		panelSur.add(spinnerVelMax);
+		panelNorte.add(checkBoxPintar);
 		panelNorte.add(etiquetaNumBoids);
 		panelNorte.add(spinnerNumBoids);
-		panelNorte.add(botonCrearBandada);
-		panelNorte.add(botonBorrarBandada);
+//		panelNorte.add(botonCrearBandada);
+//		panelNorte.add(botonBorrarBandada);
 		panelNorte.add(pausa);
 		panelNorte.add(colocarObs);
 		panelNorte.add(colocarBan);
-		panelNorte.add(botonSalvar);
-		panelNorte.add(botonCargar);		
+//		panelNorte.add(botonSalvar);
+//		panelNorte.add(botonCargar);		
 		spinnerPesoLider.addChangeListener(this);
 		spinnerCohesion.addChangeListener(this);
 		spinnerSeparacion.addChangeListener(this);
@@ -137,6 +156,7 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		botonCargar.addActionListener(this);
 		botonBorrarBandada.addActionListener(this);
 		botonCrearBandada.addActionListener(this);
+		checkBoxPintar.addActionListener(this);
 		cp.add(BorderLayout.SOUTH,panelSur);
 		cp.add(BorderLayout.NORTH,panelNorte);
 	}
@@ -182,11 +202,14 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 			System.err.println(ioe.getMessage());
 		}
 	}
-	
-	public static Line2D getRectaObjetivo(){
-		return rectaObjetivo;
+	public void traspasarBoid(int indBoid){
+		if(bandada.size()>0){
+			boidsOk.add(bandada.remove(indBoid));
+			setTamanoBandada(bandada.size());
+		}
+		else
+			System.err.println("La bandada principal está vacía");
 	}
-	
 	public static void main(String[] args){
 		PanelMuestraBoids ventana = new PanelMuestraBoids();
 		ventana.setTamanoBan(ventana.getTamanoBandada());
@@ -204,7 +227,6 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		Console.run(ventana,1200,1000);
 		int alturaPanel = ventana.pintor.getHeight();
 		int anchuraPanel = ventana.pintor.getWidth();
-		System.out.println(alturaPanel+ "  "+anchuraPanel);
 //		double esquinaSupIzq[] = {0,0};
 //		double esquinaInfIzq[] = {0,alturaPanel-20};
 //		double esquinaSupDer[] = {anchuraPanel-10,0};
@@ -251,82 +273,78 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 			}
 			cont = alturaPanel-15;
 		}
-		System.out.println("cont = "+cont);
 		ventana.pintor.introducirObstaculos(ventana.getObstaculos());
 		double distMin = Double.POSITIVE_INFINITY;
 		int indMin = 0;
 		int indMinAnt = 0;
-		boolean caminoOcupado = false;
 		boolean liderEncontrado = false;
 		double distObjetivo = Double.POSITIVE_INFINITY;
 		
 		//----------------BUCLE PRINCIPAL------------------------------------		
 		while (true){
 //			&& (distObjetivo > 50)
-			if (ventana.getBandada().size() > 0){
-				while(ventana.play){
+//			!ventana.isObjetivoEncontrado() && 
+			if (ventana.play){
+				while(!ventana.isObjetivoEncontrado() && ventana.play && ventana.getBandada().size() > 0 ){
 					for (int j = 0;j<ventana.getTamanoBan();j++){
 						ventana.getBandada().elementAt(j).mover(ventana.getBandada()
 								,ventana.getObstaculos(),j,Boid.getObjetivo());
-						Line2D recta = 
-							new Line2D.Double(ventana.getBandada().elementAt(j).getPosicion().get(0,0)
-									,ventana.getBandada().elementAt(j).getPosicion().get(1,0)
-									,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
-						for (int i = 0;i<ventana.getObstaculos().size();i++){												
-							caminoOcupado = recta.intersects(ventana.getObstaculos().elementAt(i).getForma());
-							if (caminoOcupado)
-								break;
-						}
-						double dist = ventana.getBandada().elementAt(j).getDistObjetivo();					
-						if (dist < distMin && caminoOcupado == false){
-							distMin = dist;
-							indMin = j;
-							liderEncontrado = true;
+						// Buscamos al lider
+						if (ventana.getBandada().elementAt(j).isCaminoLibre()){
+							double dist = ventana.getBandada().elementAt(j).getDistObjetivo();
+							if (dist < distMin){
+								distMin = dist;
+								indMin = j;
+								liderEncontrado = true;
+							}
 						}					
 					}
 					ventana.getBandada().elementAt(indMinAnt).setLider(false);
 					if (liderEncontrado){
 						ventana.getBandada().elementAt(indMin).setLider(true);
-						distObjetivo = Boid.getObjetivo().minus(ventana.getBandada().elementAt(indMin).getPosicion()).norm2(); 
+						distObjetivo = Boid.getObjetivo().minus(ventana.getBandada().elementAt(indMin).getPosicion()).norm2();
+//						ventana.setObjetivoEncontrado(distObjetivo < 15);
+					}
+					if (distObjetivo < distOk ){
+						ventana.traspasarBoid(indMin);
+//						numBoidsOk++; // Incremento el numero de boids que han llegado al objetivo
 					}
 					else
 						distObjetivo = Double.POSITIVE_INFINITY;
 					indMinAnt = indMin;
 					distMin = Double.POSITIVE_INFINITY;
 					liderEncontrado = false;
-					ventana.pintor.repaint();
-
-//					try {
-//					Thread.sleep(50);
-//					} catch (Exception e) {
-//					}
+					if (ventana.pintarEscena)
+						ventana.pintor.repaint();
 				}
-			}
+				if (ventana.isObjetivoEncontrado()){
+					System.out.println("El tiempo transcurrido es "+((System.currentTimeMillis()-ventana.getTiempo())/1000));
+					ventana.pintor.repaint();					
+//					System.out.println("El tiempo de repintado es "+((System.currentTimeMillis()-ventana.getTiempo())/1000));
+				}
+			}	
 		}
-//		System.out.println("El tiempo transcurrido es "+((System.currentTimeMillis()-ventana.getTiempo())/1000));
-//		ventana.pintor.repaint();
-//		System.out.println("El tiempo de repintado es "+((System.currentTimeMillis()-ventana.getTiempo())/1000));
-		
 	}
+	
 
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == spinnerPesoLider){
 			Boid.setPesoLider(spPesoLider.getNumber().doubleValue());
 		}
 		if (e.getSource() == spinnerCohesion){
-			Boid.setCohesion(spCohesion.getNumber().doubleValue());
+			Boid.setPesoCohesion(spCohesion.getNumber().doubleValue());
 		}
 		if (e.getSource() == spinnerSeparacion){
-			Boid.setSeparacion(spSeparacion.getNumber().doubleValue());
+			Boid.setPesoSeparacion(spSeparacion.getNumber().doubleValue());
 		}
 		if (e.getSource() == spinnerAlineacion){
-			Boid.setAlineacion(spAlineacion.getNumber().doubleValue());
+			Boid.setPesoAlineacion(spAlineacion.getNumber().doubleValue());
 		}
 		if (e.getSource() == spinnerObjetivo){
-			Boid.setVelObjetivo(spObjetivo.getNumber().doubleValue());
+			Boid.setPesoObjetivo(spObjetivo.getNumber().doubleValue());
 		}
 		if (e.getSource() == spinnerEvitaObs){
-			Boid.setEvitaObstaculo(spEvitaObs.getNumber().doubleValue());
+			Boid.setPesoObstaculo(spEvitaObs.getNumber().doubleValue());
 		}
 		if (e.getSource() == spinnerVelMax){
 			Boid.setVelMax(spVelMax.getNumber().doubleValue());
@@ -343,6 +361,7 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 				tiempo = System.currentTimeMillis();
 				botonBorrarBandada.setEnabled(false);
 				botonCrearBandada.setEnabled(false);
+				setObjetivoEncontrado(false);
 			}
 			if (play){
 				pausa.setText("Play");
@@ -404,10 +423,10 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
         	for (int i=0; i< getTamanoBan();i++){
         		getBandada().add(new Boid(new Matrix(2,1),new Matrix(2,1)));	
         	}
-        	System.out.println("Creando bandada");
-        	System.out.println(getBandada().size());
         }
-        pintor.introducirBandada(getBandada());
+        if (e.getSource() == checkBoxPintar){
+        	pintarEscena = checkBoxPintar.isSelected();
+        }
 	}
 	
 
@@ -426,9 +445,10 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 		if (colocandoBan){
 			
 			for (int i=0;i<this.getBandada().size();i++){
-				double pos[] = {e.getX()+Math.random()*getTamanoBan()*2, e.getY()+Math.random()*getTamanoBan()*2};
+//				double pos[] = {e.getX()+Math.random()*getTamanoBan()*2, e.getY()+Math.random()*getTamanoBan()*2};
+				double pos[] = {e.getX()+Math.random(), e.getY()+Math.random()};
 				Matrix posi = new Matrix(pos,2);
-				double vel[] = {0,0};
+				double vel[] = {Math.random(),Math.random()};
 				Matrix velo = new Matrix(vel,2);
 				this.getBandada().elementAt(i).resetRuta();
 				this.getBandada().elementAt(i).getForma().transform(AffineTransform.getTranslateInstance(pos[0]-getBandada().elementAt(i).getPosicion().get(0,0),
@@ -436,6 +456,7 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 				this.getBandada().elementAt(i).setPosicion(posi);			
 				this.getBandada().elementAt(i).setVelocidad(velo);
 			}
+			pintor.introducirBandada(getBandada());
 			repaint();
 		}
 		if (!colocandoBan && !colocandoObs){		
@@ -479,6 +500,14 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 
 	public void setTamanoBandada(int tamanoBandada) {
 		this.tamanoBandada = tamanoBandada;
+	}
+
+	public boolean isObjetivoEncontrado() {
+		return objetivoEncontrado;
+	}
+
+	public void setObjetivoEncontrado(boolean objetivoEncontrado) {
+		this.objetivoEncontrado = objetivoEncontrado;
 	}
 
 }
@@ -540,14 +569,14 @@ class Dibujante extends JPanel{
 				g2.draw(bandadaPintar.elementAt(i).getForma());
 				g2.fill(bandadaPintar.elementAt(i).getForma());
 				g2.draw(bandadaPintar.elementAt(i).getLineaDireccion());
-//				GeneralPath ruta = new GeneralPath();
-//				ruta.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
-//				bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
-//				for(int k=1;k<bandadaPintar.elementAt(i).getRutaBoid().size();k++){
-//				ruta.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
-//				bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
-//				}
-//				g2.draw(ruta);
+				GeneralPath ruta = new GeneralPath();
+				ruta.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
+				bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
+				for(int k=1;k<bandadaPintar.elementAt(i).getRutaBoid().size();k++){
+				ruta.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
+				bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
+				}
+				g2.draw(ruta);
 				centroMasa = centroMasa.plus(bandadaPintar.elementAt(i).getPosicion());
 			}
 //		}
