@@ -314,6 +314,8 @@ public class Ventanas  implements ActionListener  {
     }
     
 	public void quitaPanel(JPanel panel) {
+		//Destruimos el panel
+		invocaDestruir(panel); //para que quite etiquetas de resumne.
 		//miramos si están en panel derecho
 		JTabbedPane jtpAct=tbPanelDecho;
 		for(int i=0; i<jtpAct.getComponentCount(); i++) {
@@ -353,5 +355,20 @@ public class Ventanas  implements ActionListener  {
 //					}
 //		}
 	}
+
+	
+    /** Para el componente actual, y sus descendientes recursivamente, 
+     * mira a ver si el {@link PanelDatos} y le invoca {@link PanelDatos.destruir()}  */
+    private void invocaDestruir(Component ca) {
+    	if(ca instanceof Container) {
+    		if(ca instanceof PanelDatos) {
+    			((PanelDatos)ca).destruir();
+    		}
+    		//aplicamos a sus hijos
+    		for (Component comA: ((Container)ca).getComponents())
+    			invocaDestruir(comA);
+    	}
+	}
+
 
 }

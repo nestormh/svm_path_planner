@@ -247,9 +247,24 @@ public class PanelDatos extends JPanel {
 		});
 	}
 	
-
+	/** fija el nuevo {@link #panelResumen} */	
 	public void setPanelResumen(JPanel panelResumen) {
 		this.panelResumen=panelResumen;		
+	}
+	
+	/** Acciones que se realizan cuando se a a destruir el panel.
+	 * Por ahora es quitar las @link {@link LabelDato} de {@link #panelResumen} */
+	public void destruir() {
+		for(LabelDato lda: vecLabels)
+			if(lda.esCopiaParaResumen()) {
+				panelResumen.remove(lda);
+			}
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		destruir();
+		super.finalize();
 	}
 
 }
