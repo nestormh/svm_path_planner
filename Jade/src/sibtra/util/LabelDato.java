@@ -7,7 +7,9 @@ import javax.swing.JLabel;
  * @author alberto
  *
  */
-public class LabelDato extends JLabel {
+public class LabelDato extends JLabel  {
+
+	protected LabelDato copiaResumen=null;
 
 	/**
 	 * Ponemos texto y quedamos deshabilitada
@@ -26,5 +28,25 @@ public class LabelDato extends JLabel {
 	 */
 	public void Actualiza(Object dato, boolean hayCambio){
 		setEnabled(hayCambio);
+	}
+
+	/** crea otro LabelDato con la mismas características que el actual */
+	public LabelDato copiaParaResumen() {
+		copiaResumen=new LabelDato(getText());
+		copiaResumen.copiaResumen=copiaResumen; //apunta a si mismo para indicar que esta en resumen
+		copiaResumen.setEnabled(isEnabled());
+		return copiaResumen;
+	}
+	
+	public void borradaCopiaResumen() {
+		copiaResumen=null;
+	}
+	
+	public boolean tieneCopiaParaResumen() {
+		return copiaResumen!=null;
+	}
+	
+	public boolean esCopiaParaResumen() {
+		return copiaResumen==this;
 	}
 }

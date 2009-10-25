@@ -4,7 +4,9 @@ package sibtra.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -27,6 +29,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
 import sibtra.log.PanelLoggers;
+import sibtra.util.PanelDatos;
 
 /**
  * Clase que tiene el esquema básico de las dos ventanas de la aplicación.
@@ -68,6 +71,7 @@ public class Ventanas  implements ActionListener  {
 	
 	private JMenu menuAyuda;
 	private JMenuItem jmiAcercaDe;
+	private JPanel panelResumen;
 
 	/**
 	 * Despues del constructor y de añadir todo lo que se quiera hay que invocar 
@@ -104,6 +108,11 @@ public class Ventanas  implements ActionListener  {
         		,tbPanelIzdo
         		,tbPanelDecho
         );
+        
+        
+		//Panel Resumen
+		panelResumen=new JPanel( new GridLayout(0,4));
+		añadePanel(panelResumen, "Resumen",true,false);
 
         ventanaPrincipal.getContentPane().add(splitPanel, BorderLayout.CENTER);
 
@@ -266,6 +275,9 @@ public class Ventanas  implements ActionListener  {
      */
     public void añadePanel(JPanel panel, String titulo, boolean enDerecho, boolean conScroll) {
     	if(panel==null) return;
+
+    	apuntaResumen(panel); //Si es panel de datos 
+    	
     	JComponent ca=conScroll ? new JScrollPane(panel) : panel;
     		
     	if(enDerecho)
@@ -274,7 +286,20 @@ public class Ventanas  implements ActionListener  {
     		tbPanelIzdo.add(titulo, ca );
     }
 
-    /** como {@link #añadePanel(JPanel, String, boolean, boolean)} con escroll */
+    /** Para el componente actual, y sus descendientes recursivamente, 
+     * mira a ver si el {@link PanelDatos} y le apunta el {@link #panelResumen}  */
+    private void apuntaResumen(Component ca) {
+    	if(ca instanceof Container) {
+    		if(ca instanceof PanelDatos) {
+    			((PanelDatos)ca).setPanelResumen(panelResumen);
+    		}
+    		//aplicamos a sus hijos
+    		for (Component comA: ((Container)ca).getComponents())
+    			apuntaResumen(comA);
+    	}
+	}
+
+	/** como {@link #añadePanel(JPanel, String, boolean, boolean)} con escroll */
     public void añadePanel(JPanel panel, String titulo, boolean enDerecho) {
     	añadePanel(panel, titulo, enDerecho, true);
     }

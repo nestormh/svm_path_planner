@@ -5,12 +5,16 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.Border;
@@ -38,6 +42,7 @@ public class PanelDatos extends JPanel {
 	
 
 	private Timer timerActulizacion;
+	private JPanel panelResumen=null;
 
 	/** Constructor sin definir panel por defecto */
 	public PanelDatos() {
@@ -63,6 +68,20 @@ public class PanelDatos extends JPanel {
 		vecLabels.add(lda);
 	}
 	
+	/** 
+	 * Elimina lda a la lista de etiquetas gestionadas {@link #vecLabels}, pero sin quitarla
+	 * de ningún panel.
+	 * @param lda etiqueta
+	 */
+	public void quitaLabel(LabelDato lda) {
+		vecLabels.removeElement(lda);
+		for(LabelDato la: vecLabels) {
+			if(la.copiaResumen==lda)
+				la.borradaCopiaResumen();
+		}
+			
+	}
+	
 	/** Asigna el panel por defecto */
 	public void setPanelPorDefecto(JPanel panPorDefecto) {
 		jpPorDefecto=panPorDefecto;
@@ -83,9 +102,65 @@ public class PanelDatos extends JPanel {
 		añadeLabel(lda);
 		lda.setHorizontalAlignment(JLabel.CENTER);
 		lda.setFont(fuenteLabel);
+    	// ponemos popups
+    	lda.addMouseListener(new MouseAdapter() {
+    		public void mousePressed(MouseEvent me)
+    		{
+    			muestraPopUp(me);
+    		}
+
+    		public void mouseReleased(MouseEvent me)
+    		{
+    			muestraPopUp(me);
+    		}
+    	});
+
 		añadeAPanel((JComponent)lda, Titulo, false, panAñadir);		
 	}
 	
+	protected void muestraPopUp(MouseEvent me) {
+		final LabelDato lda;
+		if(panelResumen!=null && me.isPopupTrigger()) {
+			lda=(LabelDato)me.getSource();
+			JPopupMenu popup = new JPopupMenu();
+			if(!lda.esCopiaParaResumen()) {
+				//está en un panel normal
+				JMenuItem item = new JMenuItem("Poner en Resumen");
+				popup.add(item);
+				if(!lda.tieneCopiaParaResumen()) {
+					//aún no tiene copia
+					item.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e)
+						{
+							String Titulo=((TitledBorder)lda.getBorder()).getTitle();
+							LabelDato lres=lda.copiaParaResumen();
+//							System.out.println("Se eligió poner en resumen de "+lres);
+							añadeAPanel(lres, Titulo, panelResumen);
+							panelResumen.repaint();
+						}
+					});
+				} else {
+					//ya tiene copia, debe estar deshabilitado
+					item.setEnabled(false);
+				}
+			} else {
+				// es la copia en resumen
+				JMenuItem item = new JMenuItem("Quitar de Resumen");
+				popup.add(item);
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e)
+					{
+						quitaLabel(lda);
+						panelResumen.remove(lda);
+//						System.out.println("Se quitó "+lda);
+						panelResumen.repaint();
+					}
+				});
+			}
+			popup.show(me.getComponent(), me.getX(), me.getY());
+		}
+	}
+
 	/** Añade etiqueta con todas las configuraciones por defecto en el
 	 * panel por defecto.
 	 * @param lda etiqueta a añadir
@@ -172,4 +247,9 @@ public class PanelDatos extends JPanel {
 		});
 	}
 	
+
+	public void setPanelResumen(JPanel panelResumen) {
+		this.panelResumen=panelResumen;		
+	}
+
 }
