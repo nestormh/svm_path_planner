@@ -46,8 +46,10 @@ public class GPSConnection implements SerialPortEventListener {
 	protected String cadenaTemp = "";
 	
 	/** último punto recibido */
-	protected GPSData data = new GPSData();    
-
+	protected GPSData data = new GPSData();
+	
+	/** Centro fijado externamente */
+	protected GPSData centroFijado = null;
 
 	/** Almacena ruta temporal cargada de fichero */
 	protected Ruta rutaTemporal = null;
@@ -299,6 +301,33 @@ public class GPSConnection implements SerialPortEventListener {
 	public boolean isOpen() {
 		return open;
 	}
+	
+	/**
+	 * Fija el punto central para el sistema local. 
+	 * Si es != null apartir de este momento se usará
+	 * como centro de todas las rutas (incluso de las cargadas).
+	 * Si es == null se "libera" el centro y se usará el de {@link #rutaEspacial}, 
+	 * {@link #bufferRutaEspacial} ó {@link #bufferEspacial} (la primera que esté definida)
+	 * @param centro nuevo valor para {@link #centroFijado}
+	 */
+	public void fijaCentro(GPSData centro) {
+		centroFijado=centro;
+		if(centroFijado!=null) {
+			//fijamos el centro del buffer Temporal
+			bufferTemporal.actualizaSistemaLocal(centroFijado);
+			//fijamos el centro en el resto de los buffers
+			cambiaSistemaLocalTodosLosBuffers(bufferTemporal);
+		} else {
+			//Si es null se usa el centro de rutaTemporal, bufferRutaEspecial o rutaEspacial
+			Ruta rutasComprobar[]={rutaEspacial, bufferRutaEspacial, bufferEspacial };
+			for(Ruta ra: rutasComprobar)
+				if(ra!=null) {
+					ra.actualizaSistemaLocal();
+					cambiaSistemaLocalTodosLosBuffers(ra);
+					break; //ya tenemos una no null => no seguimos
+				}
+		}
+	}
 
 	/**
          Handles SerialPortEvents. The two types of SerialPortEvents that this
@@ -370,7 +399,7 @@ public class GPSConnection implements SerialPortEventListener {
 		if(!bufferEspacial.tieneSistemaLocal())  {
 			System.out.println("Se actualiza local de buffer Espacial");
 			bufferEspacial.actualizaSistemaLocal(data);
-			updateBuffers(bufferEspacial);
+			cambiaSistemaLocalTodosLosBuffers(bufferEspacial);
 		}
 		bufferEspacial.setCoordenadasLocales(data);
 
@@ -390,7 +419,7 @@ public class GPSConnection implements SerialPortEventListener {
 				//sistema local con primer punto de la ruta espacial
 				bufferRutaEspacial.actualizaSistemaLocal(bufferRutaEspacial.getPunto(0));
 				//todos los demás con ese sistema local
-				updateBuffers(bufferRutaEspacial);
+				cambiaSistemaLocalTodosLosBuffers(bufferRutaEspacial);
 			}
 
 		}
@@ -411,42 +440,18 @@ public class GPSConnection implements SerialPortEventListener {
 	 * que estén creadas. Nos basamos en sistema local de pasado como parámetro.
 	 * @param rutaRef ruta cuyo sistema local se usa como referencia.
 	 */
-	private void updateBuffers(Ruta rutaRef) {
+	protected void cambiaSistemaLocalTodosLosBuffers(Ruta rutaRef) {
 		if(rutaRef==null)
 			return;
 
 		rutaRef.actualizaCoordenadasLocales();
-		Ruta ba;
-		ba=bufferEspacial;
-		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(rutaRef);
-			ba.actualizaCoordenadasLocales();
-		}
-		ba=bufferTemporal;
-		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(rutaRef);
-			ba.actualizaCoordenadasLocales();
-		}
-		ba=bufferRutaEspacial;
-		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(rutaRef);
-			ba.actualizaCoordenadasLocales();
-		}
-		ba=bufferRutaTemporal;
-		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(rutaRef);
-			ba.actualizaCoordenadasLocales();
-		}
-		ba=rutaEspacial;
-		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(rutaRef);
-			ba.actualizaCoordenadasLocales();
-		}
-		ba=rutaTemporal;
-		if(ba!=null && ba!=rutaRef) {
-			ba.actualizaSistemaLocal(rutaRef);
-			ba.actualizaCoordenadasLocales();
-		}
+		Ruta arrayRutas[]={ bufferEspacial, bufferTemporal, bufferRutaEspacial, bufferRutaTemporal
+				, rutaEspacial , rutaTemporal };
+		for(Ruta ba: arrayRutas)
+			if(ba!=null && ba!=rutaRef) {
+				ba.actualizaSistemaLocal(rutaRef);
+				ba.actualizaCoordenadasLocales();
+			}
 	}
 
 
@@ -503,11 +508,15 @@ public class GPSConnection implements SerialPortEventListener {
 		bufferRutaEspacial = new Ruta(true);
 		bufferRutaTemporal = new Ruta(false);
 		
-		if(rutaEspacial!=null) {
+		if(centroFijado!=null) {
+			bufferRutaEspacial.actualizaSistemaLocal(centroFijado);
+			bufferRutaTemporal.actualizaSistemaLocal(centroFijado);
+		} else if(rutaEspacial!=null) {
 			//si se ha cargado una ruta se usa el sistema local de la ruta espacial cargada
 			bufferRutaEspacial.actualizaSistemaLocal(rutaEspacial);
 			bufferRutaTemporal.actualizaSistemaLocal(rutaEspacial);
 		}
+		//en caso contrario el sistema local se fijará al guardar el primer punto en bufferRutaEspacial
 
 		enRuta = true;
 	}    
@@ -557,7 +566,13 @@ public class GPSConnection implements SerialPortEventListener {
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
 			rutaEspacial=(Ruta)ois.readObject();
 			rutaTemporal=(Ruta)ois.readObject();
-			updateBuffers(rutaEspacial); // En updateBuffers se actualiza el sistema local
+			if(centroFijado!=null) {
+				//si hay centro fijado se usa ese sistema local
+				rutaEspacial.actualizaSistemaLocal(centroFijado);
+				rutaTemporal.actualizaSistemaLocal(centroFijado);
+			} else
+				//usamos el sistema local de la rutaEspacial recién cargada
+				cambiaSistemaLocalTodosLosBuffers(rutaEspacial);
 			ois.close();
 		} catch (IOException ioe) {
 			System.err.println("Error al abrir el fichero " + fichero);
@@ -603,7 +618,7 @@ public class GPSConnection implements SerialPortEventListener {
 	/** avisa a todos los listeners con un evento. Siempre se manda evento temporal.
 	 * Si ha habido cambio espacial se manda también evento espacial 
 	 * @param seAñadeEspacial si se añadió en buffer espacial*/
-	private void avisaListeners(boolean seAñadeEspacial) {
+	protected void avisaListeners(boolean seAñadeEspacial) {
 	    for ( int j = 0; j < listeners.size(); j++ ) {
 	        GpsEventListener gel = listeners.get(j);
 	        if ( gel != null ) {
