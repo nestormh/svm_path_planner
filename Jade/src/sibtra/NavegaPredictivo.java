@@ -171,6 +171,9 @@ public class NavegaPredictivo implements ActionListener {
         System.out.println("Abrimos conexión GPS en "+args[0]);
         try {
             conGPS = new GPSConnectionTriumph(args[0]);
+			if(conGPS.esperaCentroBase())
+				conGPS.fijaCentro(conGPS.posicionDeLaBase());
+			conGPS.comienzaEnvioPeriodico();
         } catch (Exception e) {
             System.err.println("Problema a crear GPSConnection:" + e.getMessage());
             System.exit(1);

@@ -1,23 +1,11 @@
 package sibtra;
 
 import sibtra.controlcarro.ControlCarro;
-import sibtra.controlcarro.PanelCarro;
 import sibtra.gps.GPSConnectionTriumph;
-import sibtra.gps.GPSData;
-import sibtra.gps.PanelGPSTriumph;
-import sibtra.imu.AngulosIMU;
 import sibtra.imu.ConexionSerialIMU;
-import sibtra.imu.PanelMuestraAngulosIMU;
-import sibtra.lms.BarridoAngular;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
-import sibtra.predictivo.Coche;
-import sibtra.predictivo.ControlPredictivo;
-import sibtra.predictivo.PanelMuestraPredictivo;
 import sibtra.rfyruta.MiraObstaculo;
-import sibtra.rfyruta.PanelMiraObstaculo;
-import sibtra.util.EligeSerial;
-import sibtra.util.UtilCalculos;
 
 public class Seguimiento {
 	/** Distancia máxima entre los puntos de la ruta entre el objetivo y el coche*/
@@ -50,6 +38,9 @@ public class Seguimiento {
         System.out.println("Abrimos conexión GPS");
         try {
             gpsCon = new GPSConnectionTriumph(args[0]);
+			if(gpsCon.esperaCentroBase())
+				gpsCon.fijaCentro(gpsCon.posicionDeLaBase());
+			gpsCon.comienzaEnvioPeriodico();
         } catch (Exception e) {
             System.err.println("Problema a crear GPSConnection:" + e.getMessage());
             System.exit(1);

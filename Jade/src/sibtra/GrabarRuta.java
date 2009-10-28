@@ -67,6 +67,10 @@ public class GrabarRuta implements GpsEventListener,
         System.out.println("Abrimos conexión GPS");
         try {
             gpsCon = new GPSConnectionTriumph(args[0]);
+			if(gpsCon.esperaCentroBase())
+				gpsCon.fijaCentro(gpsCon.posicionDeLaBase());
+			gpsCon.comienzaEnvioPeriodico();
+
         } catch (Exception e) {
             System.err.println("Promblema a crear GPSConnection:" + e.getMessage());
             System.exit(1);

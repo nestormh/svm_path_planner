@@ -101,6 +101,14 @@ public class VentanasMonitoriza extends Ventanas {
 			System.out.println("Abrimos conexión GPS en "+args[0]);
 			try {
 				conexionGPS = new GPSConnectionTriumph(args[0]);
+				System.out.println("Esperamos por la posición de la base");
+				if(conexionGPS.esperaCentroBase(20)) {
+					conexionGPS.fijaCentro(conexionGPS.posicionDeLaBase());
+					System.out.println("Base en "+conexionGPS.posicionDeLaBase());
+				} else
+					System.err.println("NO se consiguió la posición de la base");
+				System.out.println("Comenzamos envío periódico desde GPS");
+				conexionGPS.comienzaEnvioPeriodico();
 			} catch (Exception e) {
 				System.err.println("Problema a crear GPSConnection:" + e.getMessage());
 				System.exit(1);

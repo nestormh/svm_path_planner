@@ -65,7 +65,10 @@ public class VentanaGPSTriumph extends JFrame {
 		} else puertos=args;
 		
 		try {
-			GPSConnectionTriumph gpsT=new GPSConnectionTriumph(puertos[0]);		
+			GPSConnectionTriumph gpsT=new GPSConnectionTriumph(puertos[0]);
+			if(gpsT.esperaCentroBase())
+				gpsT.fijaCentro(gpsT.posicionDeLaBase());
+			gpsT.comienzaEnvioPeriodico();
 			VentanaGPSTriumph pc = new VentanaGPSTriumph(gpsT);
 			pc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			

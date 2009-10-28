@@ -84,7 +84,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 	private GPSData ultimaPosicionBase;
 	
 	public static int ERR=0;
-	public static int WAR=0;
+	public static int WAR=5;
 	public static int INFO=15;
 	
 	protected void log(int nivel,String msg) {
@@ -124,11 +124,17 @@ public class GPSConnectionTriumph extends GPSConnection {
 		this(portName,baudios,ERR);
 	}
 	
+	/**
+	 * Crea conexión a Triumph en puerto serial y baudios indicados.
+	 * Configura el envío periódico.
+	 * @param portName nombre puerto donde encontrar al GPS
+	 * @param baudio velocidad de la comunicacion en baudios
+	 * @param nivelLog nivel para los mensajes de depuración ({@value #INFO}, {@value #WAR} ó {@value #ERR})
+	 */
 	public GPSConnectionTriumph(String portName, int baudios, int nivelLog) throws SerialConnectionException {
 		super(portName,baudios);
 		this.nivelLog=nivelLog;
 		
-		comienzaEnvioPeriodico();
 		//ponemos muestras por segundo a la frecuencia de los GGA
 		logLocales.setMuestrasSg(5);
 		logEdadCor.setMuestrasSg(5);
@@ -144,6 +150,25 @@ public class GPSConnectionTriumph extends GPSConnection {
 		this.comandoEnvioPeriodico=comandoEnvioPeriodico;
 		comandoGPS("%dM%dm\n");
 		comandoGPS(comandoEnvioPeriodico);
+	}
+	
+	/** Solicita la posición de la base varias veces hasta que la consiga o pasen los intentos
+	 * @return si se consiguió posición de la base */
+	public boolean esperaCentroBase(int intentos) {
+		int intact=intentos;
+		long espera=5000;
+		while ((posicionDeLaBase(true)!=null) && (--intact)>0) { 
+			try {
+				Thread.sleep(espera); //esperamos
+				espera*=2; //duplicamos la espera para la siguiente vez
+			} catch (Exception e) {};
+		}
+		return ultimaPosicionBase!=null;
+	}
+	
+	/** invoca {@link #esperaCentroBase(int)} con 10 intentos */
+	public boolean esperaCentroBase() {
+		return esperaCentroBase(10);
 	}
 	
 	/** Manda úlimo comando de envío periódico en {@link #comandoEnvioPeriodico},
@@ -341,7 +366,8 @@ public class GPSConnectionTriumph extends GPSConnection {
 			}
 		}
 	}
-
+	
+	/** @return el largo del mensaje a partir de los 3 caracteres exadecimales */ 
 	private int largo() {
 		int lar=0;
 		int indAct=indIni+2;
@@ -758,6 +784,9 @@ u1 cs(u1 const* src, int count)
 				
 		try {
 			gpsC=new GPSConnectionTriumph("/dev/ttyUSB0",115200,INFO);
+			if(gpsC.esperaCentroBase())
+				gpsC.fijaCentro(gpsC.posicionDeLaBase());
+			gpsC.comienzaEnvioPeriodico();
 //			gpsC.comandoGPS("%Dm%dm\n");
 			gpsC.comandoGPS("%DL%out,,jps/DL\n");
 
