@@ -31,12 +31,17 @@ public class Boid implements Serializable{
 	Line2D lineaDireccion = new Line2D.Double();
 	Vector<Matrix> rutaBoid = new Vector<Matrix>();
 	public boolean lider = false;
+	public boolean caminoLibre = false;
+	static double radioObstaculo = 50;
+	static double radioCohesion = 100;
+	static double radioSeparacion = 100;
+	static double radioAlineacion = 30;
 	static double pesoCohesion = 0.05;
-	static double pesoSeparacion = 10;
-	static double pesoAlineacion = 2;
-	static double pesoObjetivo = 1;
-	static double pesoObstaculo = 10;
-	static double pesoLider = 1;
+	static double pesoSeparacion = 100;
+	static double pesoAlineacion = 0.5;
+	static double pesoObjetivo = 0.1;
+	static double pesoObstaculo = 300;
+	static double pesoLider = 5;
 	static double velMax = 15;
 	static double coorObjetivo[] = {800,800};
 	static Matrix objetivo = new Matrix(coorObjetivo,2);
@@ -74,30 +79,36 @@ public class Boid implements Serializable{
 		boolean liderCerca = false;
 		int indLider = 0;
 		int cont = 0;
+		double dist = 0;
 		// Bucle que recorre toda la bandada
 		for (int i=0;i < bandada.size();i++){
 			if (i != indBoid){
-				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 30)
+				dist = bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();
+				if (dist < radioAlineacion)
 					velMedia = velMedia.plus(bandada.elementAt(i).getVelocidad());
 				// if para la alineacion
-				if (!this.isLider()){
-					if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 100){
+				if (!this.isLider() && !liderCerca){
+					if (dist < radioCohesion){
 						if (bandada.elementAt(i).isLider()){
 							liderCerca = true;
 							indLider = i;
-							break;
 						}
-						centroMasa = centroMasa.plus(bandada.elementAt(i).getPosicion());
-						cont++;
+						else{
+							centroMasa = centroMasa.plus(bandada.elementAt(i).getPosicion());
+							cont++;
+						}
 					}
 				} // if (!this.isLider()) para la cohesion
-				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 30){
+				if (dist < radioSeparacion){
 					separa = separa.minus(bandada.elementAt(i).getPosicion().minus(this.getPosicion()));
-					separa = separa.times(pesoSeparacion);
+					// Los boids más cercanos tienen que producir más repulsión
+					if (dist != 0)
+						separa = separa.times(1/(dist)*(dist));
 				}// if para la separacion
 			} // if (i != indBoid) para todas las reglas
 		} // for principal
-		
+		// calculos para la separacion
+		separa = separa.times(pesoSeparacion);
 		// calculos para la velocidad de alineación
 		velMedia = velMedia.timesEquals(1/bandada.size()-1);
 		velMedia = velMedia.minus(this.getVelocidad());
@@ -125,7 +136,7 @@ public class Boid implements Serializable{
 		if (!this.isLider()){ // El lider no se cohesiona con nadie
 			for (int i=0;i < bandada.size();i++){
 				if (i != indBoid)
-					if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 100){
+					if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < radioCohesion){
 						if (bandada.elementAt(i).isLider()){
 							liderCerca = true;
 							indLider = i;
@@ -193,7 +204,6 @@ public class Boid implements Serializable{
 	
 	public Matrix limitaVelocidad(Matrix vel){
 		Matrix velLimitada = new Matrix(2,1);
-		vel.print(10,3);
 		velLimitada = vel;
 		if (Math.abs(vel.norm2()) > velMax)
 			velLimitada = vel.times(1/vel.norm2()).times(velMax);
@@ -205,13 +215,23 @@ public class Boid implements Serializable{
 	public Matrix evitaObstaculo(Vector<Obstaculo> obstaculos,Boid b){
 		double pos[] = {0,0};
 		Matrix c = new Matrix(pos,2);
+		boolean caminoOcupado = false;
+		double dist = 0;
+		Line2D recta = 
+			new Line2D.Double(this.getPosicion().get(0,0),this.getPosicion().get(1,0)
+						,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
 		for (int i=0;i < obstaculos.size();i++){
-			if (Math.abs(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < 40){
+			dist = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();
+			if (dist < radioObstaculo ){
 				c = c.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
-				c = c.times(pesoObstaculo);
-//				c = c.times(1/Math.abs(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()));
+				if (dist != 0)
+					c = c.times(1/(dist)*(dist));				
 			}
-		}				
+			if (!caminoOcupado)// Sólo se calcula la intersección mientras el camino siga sin ocupar
+				caminoOcupado = recta.intersects(obstaculos.elementAt(i).getForma());
+		}
+		c = c.times(pesoObstaculo);
+		setCaminoLibre(!caminoOcupado); // Si no tiene el camino ocupado por el momento es el lider
 		return c;
 	}
 	
@@ -237,9 +257,9 @@ public class Boid implements Serializable{
 		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
 		this.setVelocidad(desp);
 		this.setPosicion(this.getPosicion().plus(this.getVelocidad()));
-		setLineaDireccion(getPosicion().get(0,0),getPosicion().get(1,0),
-				(getPosicion().plus(getVelocidad().times(2))).get(0,0),
-				(getPosicion().plus(getVelocidad().times(2))).get(1,0));
+//		setLineaDireccion(getPosicion().get(0,0),getPosicion().get(1,0),
+//				(getPosicion().plus(getVelocidad().times(2))).get(0,0),
+//				(getPosicion().plus(getVelocidad().times(2))).get(1,0));
 	}
 	
 	private void nuevoPuntoRuta(Matrix pto){
@@ -298,23 +318,23 @@ public class Boid implements Serializable{
 		pesoLider = peso;
 	}
 	
-	static public void setCohesion(double cohesion){
+	static public void setPesoCohesion(double cohesion){
 		pesoCohesion = cohesion;
 	}
 	
-	static public void setSeparacion(double separacion){
+	static public void setPesoSeparacion(double separacion){
 		pesoSeparacion = separacion;
 	}
 	
-	static public void setAlineacion(double alineacion){
+	static public void setPesoAlineacion(double alineacion){
 		pesoAlineacion = alineacion;
 	}
 	
-	static public void setVelObjetivo(double objetivo){
+	static public void setPesoObjetivo(double objetivo){
 		pesoObjetivo = objetivo;
 	}
 	
-	static public void setEvitaObstaculo(double evitaObs){
+	static public void setPesoObstaculo(double evitaObs){
 		pesoObstaculo = evitaObs;
 	}
 	/**Determina la velocidad máxima, en módulo, para todos los boids (es estático)*/	
@@ -408,6 +428,50 @@ public class Boid implements Serializable{
 	        } catch (Exception e) {
 	        }
 		}
+	}
+
+	public boolean isCaminoLibre() {
+		return caminoLibre;
+	}
+
+	public void setCaminoLibre(boolean caminoLibre) {
+		this.caminoLibre = caminoLibre;
+	}
+
+	public static double getRadioAlineacion() {
+		return radioAlineacion;
+	}
+
+	public static void setRadioAlineacion(double radioAlineacion) {
+		Boid.radioAlineacion = radioAlineacion;
+	}
+
+	public static double getRadioCohesion() {
+		return radioCohesion;
+	}
+
+	public static void setRadioCohesion(double radioCohesion) {
+		Boid.radioCohesion = radioCohesion;
+	}
+
+	public static double getRadioSeparacion() {
+		return radioSeparacion;
+	}
+
+	public static void setRadioSeparacion(double radioSeparacion) {
+		Boid.radioSeparacion = radioSeparacion;
+	}
+
+	public static double getRadioObstaculo() {
+		return radioObstaculo;
+	}
+
+	public static void setRadioObstaculo(double radioObstaculo) {
+		Boid.radioObstaculo = radioObstaculo;
+	}
+
+	public void setRutaBoid(Vector<Matrix> rutaBoid) {
+		this.rutaBoid = rutaBoid;
 	}	
 }
 
