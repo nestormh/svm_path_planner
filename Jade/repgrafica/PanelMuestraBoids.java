@@ -299,12 +299,18 @@ public class PanelMuestraBoids extends JApplet implements ChangeListener,ActionL
 							}
 						}					
 					}
-					ventana.getBandada().elementAt(indMinAnt).setLider(false);
-					if (liderEncontrado){
+					if (indMinAnt<ventana.getBandada().size())
+						ventana.getBandada().elementAt(indMinAnt).setLider(false);
+					if (liderEncontrado && (indMin<ventana.getBandada().size())){
 						ventana.getBandada().elementAt(indMin).setLider(true);
 						distObjetivo = Boid.getObjetivo().minus(ventana.getBandada().elementAt(indMin).getPosicion()).norm2();
-//						ventana.setObjetivoEncontrado(distObjetivo < 15);
 					}
+//					ventana.getBandada().elementAt(indMinAnt).setLider(false);
+//					if (liderEncontrado){
+//						ventana.getBandada().elementAt(indMin).setLider(true);
+//						distObjetivo = Boid.getObjetivo().minus(ventana.getBandada().elementAt(indMin).getPosicion()).norm2();
+////						ventana.setObjetivoEncontrado(distObjetivo < 15);
+//					}
 					if (distObjetivo < distOk ){
 						ventana.traspasarBoid(indMin);
 //						numBoidsOk++; // Incremento el numero de boids que han llegado al objetivo
