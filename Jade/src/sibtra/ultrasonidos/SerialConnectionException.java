@@ -29,7 +29,11 @@
  * purposes.
  */
 
+package sibtra.ultrasonidos;
 
+/**
+ * @author evelio
+ */
 public class SerialConnectionException extends Exception {
 
     /**

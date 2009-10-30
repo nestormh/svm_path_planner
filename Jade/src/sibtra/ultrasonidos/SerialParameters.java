@@ -29,10 +29,15 @@
  * purposes.
  */
 
-import javax.comm.*;
+package sibtra.ultrasonidos;
+
+import gnu.io.SerialPort;
+
 
 /**
 A class that stores parameters for serial ports. 
+
+@author evelio
 */
 public class SerialParameters {
 

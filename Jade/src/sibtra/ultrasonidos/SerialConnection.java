@@ -29,16 +29,32 @@
  * purposes.
  */
 
-import javax.comm.*;
-import java.io.*;
+package sibtra.ultrasonidos;
+
 import java.awt.TextArea;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.TooManyListenersException;
+
+import gnu.io.CommPortIdentifier;
+import gnu.io.CommPortOwnershipListener;
+import gnu.io.NoSuchPortException;
+import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+import gnu.io.UnsupportedCommOperationException;
+
 
 /**
 A class that handles the details of a serial connection. Reads from one 
 TextArea and writes to a second TextArea. 
 Holds the state of the connection.
+
+@author evelio
 */
 public class SerialConnection implements SerialPortEventListener, 
 					 CommPortOwnershipListener {
