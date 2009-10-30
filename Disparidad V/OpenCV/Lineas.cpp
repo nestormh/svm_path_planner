@@ -89,10 +89,10 @@ void Lineas::Insert(CvPoint *item, int pos) {
 				
 				printf ("--- Insert(vertical) ---\n");
 				
-				if ((item[0].x >= aux[0].x) && (item[1].x <= aux[1].x)) {		// La nueva está contenida en una existente			
+				if ((item[0].y >= aux[0].y) && (item[1].y <= aux[1].y)) {		// La nueva está contenida en una existente			
 					insert = false;
 					printf ("No se inserta (contenida vertical)\n");
-				} else if ((item[0].x <= aux[0].x) && (item[1].x >= aux[1].x)) { 	// La nueva contiene a una existente -> se deja la mayor
+				} else if ((item[0].y <= aux[0].y) && (item[1].y >= aux[1].y)) { 	// La nueva contiene a una existente -> se deja la mayor
 					printf("Modificada vertical \n");
 					aux[0] = item[0];
 					aux[1] = item[1];
@@ -104,10 +104,10 @@ void Lineas::Insert(CvPoint *item, int pos) {
 					printf ("No se inserta superpuesta vertical\n");
 				}
 			} else {						// Horizontales
-				if ((item[0].y >= aux[0].y) && (item[1].y <= aux[1].y)) {
+				if ((item[0].x >= aux[0].x) && (item[1].x <= aux[1].x)) {
 					insert = false;
 					printf ("No se inserta (contenida horizontal)\n");
-				} else if ((item[0].y <= aux[0].y) && (item[1].y >= aux[1].y)) {
+				} else if ((item[0].x <= aux[0].x) && (item[1].x >= aux[1].x)) {
 					printf("Modificada horizontal\n");
 					aux[0] = item[0];
 					aux[1] = item[1];

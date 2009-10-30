@@ -581,7 +581,7 @@ void lineasV2(IplImage *src, Lineas *vertical, CvSeq *diagonal){
 	cvSetImageROI(src, cvRect(DISCARD, 0, src->width - DISCARD, src->height));	// Descartar la zona correspondiente a disparidades peque�as
 
 	line = (CvPoint*) malloc (2 * sizeof (CvPoint));
-	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 20, 20, 30 ); //2 10*CV_PI/180 40 30 20
+	lines = cvHoughLines2( src, storage, CV_HOUGH_PROBABILISTIC, 2, 10*CV_PI/180, 20, 15, 40 ); //2 10*CV_PI/180 20 20 30
 
 
 //printf ("Secuencia desordenada\n");
@@ -1175,13 +1175,18 @@ void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal,
 				rectColor = CV_RGB(255,255,0);
 			else
 				rectColor = CV_RGB(0,255,0);
+				
+//rectColor = CV_RGB(255,0,0);			// Resaltado para artículo
 
 			cvRectangle(color_dst, cvPoint(MIN(hor[0].x, hor[1].x), MIN(ver[0].y, ver[1].y)), cvPoint(MAX(hor[0].x, hor[1].x), MAX(ver[0].y, ver[1].y)), rectColor);
 //printf("Rectángulo: %d %d %d %d\n", MIN(hor[0].x, hor[1].x), MIN(ver[0].y, ver[1].y), MAX(hor[0].x, hor[1].x), MAX(ver[0].y, ver[1].y));
 
-
+//if (ver[0].x < 46)					// Resaltado para artículo
+//	rectColor = CV_RGB(0,0,0);
+//else
+//	rectColor = CV_RGB(255,255,255);
 			sprintf(auxText, "%.2f m",(float)(0.545*425/ver[0].x));
-			cvPutText (color_dst, auxText, cvPoint(MIN(hor[0].x, hor[1].x), MIN(ver[0].y, ver[1].y) - 1), &font, rectColor);
+			cvPutText (color_dst, auxText, cvPoint(MIN(hor[0].x, hor[1].x), MAX(ver[0].y, ver[1].y) - 1), &font, rectColor);
 
 			cvShowImage( "Obstaculos", color_dst );
 			printf ("Posible obstaculo a %f m (disparidad %d)\n", (float)(0.545*425/ver[0].x), ver[0].x);
@@ -1294,6 +1299,7 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 				 *storageMN;
 	
 	mapaDisparidad = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
+	//	if(!cvSaveImage("mapaDisparidad.jpg",mapaDisparidad)) printf("Could not save: %s\n","fichero");
 	imagenDisparidad = cvCreateImage(cvSize(MAXD,cvGetSize(left).height), IPL_DEPTH_8U, 1);
 	imagenDisparidadH = cvCreateImage(cvSize(cvGetSize(left).width, MAXD), IPL_DEPTH_8U, 1);
 
@@ -1329,6 +1335,7 @@ clock_t start = clock();
 //cvShowImage ("Derecha", derecha);
 
 	correlacion (izquierda, derecha, MAXD, mapaDisparidad);
+		
 	
 	/* Disparidad V */
 	crearImagen (mapaDisparidad, imagenDisparidad);
@@ -1425,7 +1432,7 @@ int main (int argc, char* argv[]){
 	parameter ajustes;
 	int frameNr;
 	char filename[30];
-	const char *prefix = "Series/estherpedro";
+	const char *prefix = "Series/estherpedroFuera";
 	
 	bool trackbar;
 		
@@ -1434,7 +1441,7 @@ int main (int argc, char* argv[]){
 	CvCapture *videoIzq = 0;
 	CvCapture *videoDer = 0;
 
-	source = 4;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
+	source = 0;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
 
 	switch (source) {
 		case 1:
@@ -1507,8 +1514,8 @@ int main (int argc, char* argv[]){
 			
 		switch (source){
 			case 0: {		// Im�genes est�ticas
-				izquierda = cvLoadImage("Series/estherpedro_left_5.bmp");
-				derecha = cvLoadImage("Series/estherpedro_right_5.bmp");
+				izquierda = cvLoadImage("Series/estherpedroFuera_left_7c.bmp"); //135
+				derecha = cvLoadImage("Series/estherpedroFuera_right_7c.bmp");
 
 				if (!izquierda || !derecha){
 					printf ("Error leyendo im�genes\n");
@@ -1527,8 +1534,7 @@ int main (int argc, char* argv[]){
 				}
 
 				if (!cvGrabFrame(videoDer)){              // capture a frame 
-  					printf("Could not grab a frame\n\7");
-  					exit(0);
+  					printf("Could not grab (0);
 				}
 			
 				izquierda=cvRetrieveFrame(videoIzq);           // retrieve the captured frame
@@ -1614,8 +1620,10 @@ int main (int argc, char* argv[]){
 		}
 		
 		disparity (izquierda, derecha, ajustes);
-//cvShowImage ("Izquierda", izquierda);	
-//cvShowImage ("Derecha", derecha);	
+		
+		
+cvShowImage ("Izquierda", izquierda);	
+cvShowImage ("Derecha", derecha);	
 
 
 		if ((source == 4) || (source == 0)){					// La propia funci�n de captura se encarga de la memoria
