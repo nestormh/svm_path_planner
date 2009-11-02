@@ -338,6 +338,10 @@ public class Simulador {
 	public void setNumBoidsOkDeseados(int numBoidsOkDeseados) {
 		this.numBoidsOkDeseados = numBoidsOkDeseados;
 	}
+
+	public double getTiempoInvertido() {
+		return tiempoInvertido;
+	}
 	
 	//----------------------------------------------------------------------------
 	//----------------Final de los Getters y Setters------------------------------

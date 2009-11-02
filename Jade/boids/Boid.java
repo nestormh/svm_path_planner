@@ -32,12 +32,12 @@ public class Boid implements Serializable{
 	Vector<Matrix> rutaBoid = new Vector<Matrix>();
 	public boolean lider = false;
 	public boolean caminoLibre = false;
-	static double radioObstaculo = 50;
+	static double radioObstaculo = 30;
 	static double radioCohesion = 100;
 	static double radioSeparacion = 100;
 	static double radioAlineacion = 30;
 	static double pesoCohesion = 0.05;
-	static double pesoSeparacion = 100;
+	static double pesoSeparacion = 10;
 	static double pesoAlineacion = 0.5;
 	static double pesoObjetivo = 0.1;
 	static double pesoObstaculo = 300;
