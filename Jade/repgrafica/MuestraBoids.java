@@ -185,6 +185,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	JCheckBox checkBoxPintar = new JCheckBox("Dibujar");
 	JButton configurar = new JButton("Configurar simulación batch");
 	JButton simulacionBatch = new JButton("Ejecutar simulación batch");
+	JLabel tiempoConsumido = new JLabel("0");
 	public double tiempo;
 	ConfigParam configurador;
 	
@@ -235,6 +236,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		panelNorte.add(colocarBan);
 		panelNorte.add(configurar);
 		panelNorte.add(simulacionBatch);
+		panelNorte.add(tiempoConsumido);
 //		panelNorte.add(botonSalvar);
 //		panelNorte.add(botonCargar);		
 		spinnerPesoLider.addChangeListener(this);
@@ -548,6 +550,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 					gui.pintor.repaint();
 			}
 			if (gui.batch){
+				gui.getSim().getBoidsOk().clear();
 				gui.getSim().setNumBoidsOkDeseados(gui.getConfigurador().getNumBoidsOk());
 				gui.getSim().setTiempoMax(gui.getConfigurador().getTMax());
 				for(int i=0;i<gui.getConfigurador().getVectorSim().size();i++){
@@ -555,14 +558,14 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	    						gui.getConfigurador().getNomParam());
 	    				gui.getSim().crearBandada();
 	    				gui.getSim().posicionarBandada(gui.getSim().getPosInicial());	    				
-	    				gui.getSim().simuPorLotes();        			
+	    				gui.getSim().simuPorLotes();
+	    				gui.tiempoConsumido.setText("Tardó " + gui.getSim().getTiempoInvertido() + " seg");
 	    				if (gui.pintarEscena){
 	    					for(int j=0;j<gui.getSim().getBoidsOk().size();j++){
 	    						gui.getSim().getBoidsOk().elementAt(j).setRutaBoid(
 	    								gui.getSim().mejoraRuta(
 	    								gui.getSim().getBoidsOk().elementAt(j).getRutaBoid()));
-	    					}
-	    					
+	    					}	    					
 	    					gui.pintor.introducirBandada(gui.getSim().getBoidsOk());
 	    					gui.pintor.repaint();     	    				
 	    				}	    				
@@ -572,8 +575,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	    				System.out.println(gui.getSim().getNumBoidsOk());
 	    		}
 				gui.batch = false;
-				gui.simulacionBatch.setEnabled(true);
-				gui.getSim().getBoidsOk().clear();
+				gui.simulacionBatch.setEnabled(true);				
 			}			
 		}
 	}
