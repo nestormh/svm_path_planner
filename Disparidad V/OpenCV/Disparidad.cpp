@@ -312,6 +312,55 @@ cvShowImage("Preprocesado", img);
 	cvReleaseImage (&temp);
 }
 
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCI�N:
+	PAR�METROS: wnd -> Lado de la ventana
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void sumNeigh (IplImage *src, IplImage *dst, int wnd){
+
+	int i, j;
+	cvSet(dst, cvScalar(0));
+
+
+	for (i = 0; i < src->height; i++){
+		((short *)(dst->imageData + i*dst->widthStep))[0] = 0;
+
+		// Inicializar el primer elemento de la fila con la suma de los wnd+1 primeros elementos
+		for (j=0; j <= wnd; j++){
+			((short *)(dst->imageData + i*dst->widthStep))[0]+=((short *)(src->imageData + i*src->widthStep))[j];
+		}
+
+//printf ("[%d, 0]: %d\n", i, ((short *)(dst->imageData + i*dst->widthStep))[0]);
+
+		for (j = 1; j < src->width; j++){
+	//	printf ("[%d, %d]", i, j);
+
+			// El valor inicial del elemento es el del anterior
+			((short *)(dst->imageData + i*dst->widthStep))[j]=((short *)(dst->imageData + i*dst->widthStep))[j-1];
+
+			// Si no se queda parte de la ventana fuera por la derecha, se suma el elemento siguiente
+			if (j < src->width - wnd - 1){
+				((short *)(dst->imageData + i*dst->widthStep))[j] += ((short *)(src->imageData + i*src->widthStep))[j+wnd];
+				//printf (" suma (%d):%d ", j+wnd, ((short *)(src->imageData + i*src->widthStep))[j+wnd]);
+			}
+
+			// Si no se queda parte de la ventana fuera por la izquierda, se resta el elemento anterior
+			if (j > wnd){
+				((short *)(dst->imageData + i*dst->widthStep))[j] -= ((short *)(src->imageData + i*src->widthStep))[j-wnd-1];
+				//printf (" resta(%d):%d ", j-wnd-1, ((short *)(src->imageData + i*src->widthStep))[j-wnd-1]);
+			}
+			//printf ("valor: %d\n", ((short *)(dst->imageData + i*dst->widthStep))[j]);
+		}
+
+
+	}
+
+}
+
+
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
 	   FUNCI�N:
@@ -346,8 +395,8 @@ void correlacion (IplImage *left, IplImage *right, int d, IplImage *mapa){
 	cvScale(left, auxL, 1, -127);
 	cvScale(right, auxR, 1, -127);
 
-	kernel = cvCreateMat(1, 9, CV_8UC1);						// Inicializar el kernel de convoluci�n
-	cvSet(kernel, cvScalar(1));
+//	kernel = cvCreateMat(1, 9, CV_8UC1);						// Inicializar el kernel de convoluci�n
+//	cvSet(kernel, cvScalar(1));
 	
 	for (i=d-1; i > 0 ; i--){
 		cvResetImageROI(auxL);									
@@ -362,14 +411,31 @@ void correlacion (IplImage *left, IplImage *right, int d, IplImage *mapa){
 
 		cvResetImageROI(auxS);		
 
-		cvFilter2D(auxS, corr, kernel, cvPoint(-1, -1));	// Convoluci�n (en los bordes rellena para cubrir el kernel)
+//		cvFilter2D(auxS, corr, kernel, cvPoint(-1, -1));	// Convoluci�n (en los bordes rellena para cubrir el kernel)
 
+		sumNeigh(auxS, corr, 4);
+
+//		cvShowImage ("Debug", auxS);
+
+//		cvShowImage ("Debug2", corr);
 /*Construir mapa de disparidad */	
 		if (i != d-1) {										
+			cvSetImageROI(corr,cvRect(i, 0, auxL->width - i, auxL->height));
+			cvSetImageROI(min,cvRect(i, 0, auxL->width - i, auxL->height));
+			cvSetImageROI(mask,cvRect(i, 0, auxL->width - i, auxL->height));
+			cvSetImageROI(mapa,cvRect(i, 0, auxL->width - i, auxL->height));
+			cvSetImageROI(auxU,cvRect(i, 0, auxL->width - i, auxL->height));
+
 			cvMin(corr, min, min);							// Actualizar la "imagen" de m�nimos
 			cvCmp(corr, min, mask, CV_CMP_EQ);				// Buscar los pixeles de la capa actual que represntan minimos
 			cvSet (auxU, cvScalar(i));						// Construir imagen 
 			cvCopy(auxU, mapa, mask);						// Poner al valor de la "capa" los pixeles con valor minimo 	
+
+			cvResetImageROI(mapa);
+			cvResetImageROI(auxU);
+			cvResetImageROI(mask);
+			cvResetImageROI(corr);
+			cvResetImageROI(min);
 		} else {
 			cvCopy(corr, min);								// Inicializar la imagen de m�nimos
 			cvSet (mapa, cvScalar(0));						// Inicializar el mapa de disparidad
@@ -1319,6 +1385,9 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 cvShowImage ("Izquierda", izquierda);	
 cvShowImage ("Derecha", derecha);	
 
+cvNamedWindow("Debug", CV_WINDOW_AUTOSIZE);
+cvNamedWindow("Debug2", CV_WINDOW_AUTOSIZE);
+
 	
 clock_t start = clock();
 
@@ -1335,8 +1404,8 @@ clock_t start = clock();
 //cvShowImage ("Derecha", derecha);
 
 	correlacion (izquierda, derecha, MAXD, mapaDisparidad);
-		
-	
+
+
 	/* Disparidad V */
 	crearImagen (mapaDisparidad, imagenDisparidad);
 	cvThreshold(imagenDisparidad, imagenDisparidad, 10, 255, CV_THRESH_BINARY);			// Umbralizar
@@ -1361,25 +1430,23 @@ clock_t start = clock();
 /********************* Definiendo regi�n de inter�s en base a las l�neas verticales ****************/
 	nVer = vLines->GetN();
 	index = vLines->GetIndex();
-	
-cvNamedWindow("Debug", CV_WINDOW_AUTOSIZE);
-	
+
 	cvSetZero(imagenDisparidadH);
-	for (i= 0; i < nVer; i ++){		
+	for (i= 0; i < nVer; i ++){
 		ver = (CvPoint *) cvGetSeqElem(vLines->GetLine(index[i]), 0);
 
 		crearRDM (mapaDisparidadReducido, mapaDisparidad, ver, 3);
-		
+
 		crearImagenH(mapaDisparidadReducido, imagenDisparidadH, ver[0].x);
-		
+
 		cvThreshold(imagenDisparidadH, imagenDisparidadH, 5, 255, CV_THRESH_BINARY);			// Umbralizar
 		lineas (imagenDisparidadH, hLines, ver[0].x, 20, 5);
-		
+
 		// Rodear la regi�n de inter�s en el mapa de disparidad reducido
-		cvRectangle(mapaDisparidadReducido, cvPoint(0, MIN(ver[0].y, ver[1].y)), cvPoint(mapaDisparidadReducido->width, MAX(ver[0].y, ver[1].y)), CV_RGB(255,255,255));	
+		cvRectangle(mapaDisparidadReducido, cvPoint(0, MIN(ver[0].y, ver[1].y)), cvPoint(mapaDisparidadReducido->width, MAX(ver[0].y, ver[1].y)), CV_RGB(255,255,255));
 		cvShowImage ("Mapa disparidad reducido", mapaDisparidadReducido);
 	}
-	
+
 //	cvThreshold(imagenDisparidadH, imagenDisparidadH, 5, 255, CV_THRESH_BINARY);			// Umbralizar
 //	lineasH2(imagenDisparidadH, hLines, pendpos, pendneg);
 /*******************************************************************************/
@@ -1389,7 +1456,7 @@ cvNamedWindow("Debug", CV_WINDOW_AUTOSIZE);
 clock_t stop = clock();
 printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 
-	cvShowImage ("Mapa disparidad", mapaDisparidad);	
+	cvShowImage ("Mapa disparidad", mapaDisparidad);
 
 
 	delete vLines;
@@ -1398,7 +1465,7 @@ printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 	cvClearSeq(diagonal);
 	cvClearSeq(pendpos);
 	cvClearSeq(pendneg);
-	
+
 	cvReleaseMemStorage (&storageD);
 	cvReleaseMemStorage (&storageMP);
 	cvReleaseMemStorage (&storageMN);
