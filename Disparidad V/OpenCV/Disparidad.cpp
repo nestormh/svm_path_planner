@@ -376,7 +376,7 @@ void correlacion (IplImage *left, IplImage *right, int d, IplImage *mapa){
  			 *auxR,			// Imagen derecha con signo
 			 *min,
 			 *mask;			
-	CvMat *kernel;			// Kernel de convoluci�n
+//	CvMat *kernel;			// Kernel de convoluci�n
 
 	corr = cvCreateImage(cvGetSize(left), IPL_DEPTH_16S, 1);
 	auxU = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
@@ -413,11 +413,8 @@ void correlacion (IplImage *left, IplImage *right, int d, IplImage *mapa){
 
 //		cvFilter2D(auxS, corr, kernel, cvPoint(-1, -1));	// Convoluci�n (en los bordes rellena para cubrir el kernel)
 
-		sumNeigh(auxS, corr, 4);
+		sumNeigh(auxS, corr, 4);							// Suma de vecinos
 
-//		cvShowImage ("Debug", auxS);
-
-//		cvShowImage ("Debug2", corr);
 /*Construir mapa de disparidad */	
 		if (i != d-1) {										
 			cvSetImageROI(corr,cvRect(i, 0, auxL->width - i, auxL->height));
@@ -442,7 +439,6 @@ void correlacion (IplImage *left, IplImage *right, int d, IplImage *mapa){
 		}
 	}
 
-
 	cvResetImageROI(left);
 	cvResetImageROI(right);
 
@@ -454,7 +450,7 @@ void correlacion (IplImage *left, IplImage *right, int d, IplImage *mapa){
 	cvReleaseImage (&mask);
 	cvReleaseImage (&min);
 
-	cvReleaseMat (&kernel);
+//	cvReleaseMat (&kernel);
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
@@ -475,7 +471,8 @@ void crearImagen (IplImage *mapa, IplImage *imagen){
 			cvSetImageROI(mask, cvRect(0, i, mapa->width, 1));
 			cvCmpS(mapa, j, mask, CV_CMP_EQ);							// Ver cuantos pixeles tienen el valor de disparidad actual
 			count = cvCountNonZero(mask);								// Acumularlos
-			cvSet2D(imagen, i, j, cvScalar(count));						// Rellenar con la cuenta el pixel de la imagen de disparidad
+//			cvSet2D(imagen, i, j, cvScalar(count));						// Rellenar con la cuenta el pixel de la imagen de disparidad
+			((uchar *)(imagen->imageData + i*imagen->widthStep))[j]=count;
 		}
 	}
 	cvResetImageROI(mapa);	
@@ -501,7 +498,8 @@ void crearImagenH (IplImage *mapa, IplImage *imagen){
 			cvSetImageROI(mask, cvRect(i, 0, 1, mapa->height));
 			cvCmpS(mapa, j, mask, CV_CMP_EQ);							// Ver cuantos pixeles tienen el valor de disparidad actual
 			count = cvCountNonZero(mask);								// Acumularlos
-			cvSet2D(imagen, j, i, cvScalar(count));						// Rellenar con la cuenta el pixel de la imagen de disparidad
+//			cvSet2D(imagen, j, i, cvScalar(count));						// Rellenar con la cuenta el pixel de la imagen de disparidad
+			((uchar *)(imagen->imageData + j*imagen->widthStep))[i]=count;
 		}
 	}
 	cvResetImageROI(mapa);	
@@ -527,7 +525,9 @@ void crearImagenH (IplImage *mapa, IplImage *imagen, int center){
 		cvCmpS(mapa, center, mask, CV_CMP_EQ);							// Ver cuantos pixeles tienen el valor de disparidad actual
 		count = cvCountNonZero(mask);								// Acumularlos
 			
-		cvSet2D(imagen, center, i, cvScalar(count));						// Rellenar con la cuenta el pixel de la imagen de disparidad
+//		cvSet2D(imagen, center, i, cvScalar(count));						// Rellenar con la cuenta el pixel de la imagen de disparidad
+		((uchar *)(imagen->imageData + center*imagen->widthStep))[i]=count;
+
 	}
 	cvResetImageROI(mapa);	
 	
@@ -1382,8 +1382,8 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 	izquierda->origin = left->origin;
 	derecha->origin = right->origin;	
 
-cvShowImage ("Izquierda", izquierda);	
-cvShowImage ("Derecha", derecha);	
+cvShowImage ("Izquierda", izquierda);
+cvShowImage ("Derecha", derecha);
 
 cvNamedWindow("Debug", CV_WINDOW_AUTOSIZE);
 cvNamedWindow("Debug2", CV_WINDOW_AUTOSIZE);
@@ -1398,7 +1398,7 @@ clock_t start = clock();
 	ternarizacion (derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
 
 // Opci�n 2 de preprocesado
-//preprocesado (izquierda, derecha, adjusts.filtro);
+	preprocesado (izquierda, derecha, adjusts.filtro);
 
 //cvShowImage ("Izquierda", izquierda);
 //cvShowImage ("Derecha", derecha);
@@ -1508,7 +1508,7 @@ int main (int argc, char* argv[]){
 	CvCapture *videoIzq = 0;
 	CvCapture *videoDer = 0;
 
-	source = 0;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
+	source = 4;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
 
 	switch (source) {
 		case 1:
@@ -1689,8 +1689,8 @@ int main (int argc, char* argv[]){
 		disparity (izquierda, derecha, ajustes);
 		
 		
-cvShowImage ("Izquierda", izquierda);	
-cvShowImage ("Derecha", derecha);	
+cvShowImage ("Izquierda", izquierda);
+cvShowImage ("Derecha", derecha);
 
 
 		if ((source == 4) || (source == 0)){					// La propia funci�n de captura se encarga de la memoria
