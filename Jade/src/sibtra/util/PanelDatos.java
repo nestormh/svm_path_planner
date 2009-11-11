@@ -3,6 +3,7 @@ package sibtra.util;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -73,11 +74,13 @@ public class PanelDatos extends JPanel {
 	 * de ningún panel.
 	 * @param lda etiqueta
 	 */
-	public void quitaLabel(LabelDato lda) {
+	public void quitaLabel(LabelDatoFormato lda) {
 		vecLabels.removeElement(lda);
-		for(LabelDato la: vecLabels) {
-			if(la.copiaResumen==lda)
-				la.borradaCopiaResumen();
+		for(LabelDato la: vecLabels)
+			if (la instanceof LabelDatoFormato) {
+				LabelDatoFormato ldf=(LabelDatoFormato)la;
+			if(ldf.copiaResumen==lda)
+				ldf.borradaCopiaResumen();
 		}
 			
 	}
@@ -97,31 +100,45 @@ public class PanelDatos extends JPanel {
 	 * @param lda etiqueta a añadir
 	 * @param Titulo titulo adjunto
 	 * @param panAñadir panel donde añadir la etiqueta
+	 
+	public void añadeAPanel(LabelDato lda,String Titulo, JPanel panAñadir) {
+		añadeLabel(lda);
+		lda.setHorizontalAlignment(JLabel.CENTER);
+		lda.setFont(fuenteLabel);
+		añadeAPanel((JComponent)lda, Titulo, false, panAñadir);		
+	}
+	*/
+	/**
+	 * Funcion para añadir etiqueta con todas las configuraciones por defecto
+	 * @param lda etiqueta a añadir
+	 * @param Titulo titulo adjunto
+	 * @param panAñadir panel donde añadir la etiqueta
 	 */
 	public void añadeAPanel(LabelDato lda,String Titulo, JPanel panAñadir) {
 		añadeLabel(lda);
 		lda.setHorizontalAlignment(JLabel.CENTER);
 		lda.setFont(fuenteLabel);
     	// ponemos popups
-    	lda.addMouseListener(new MouseAdapter() {
-    		public void mousePressed(MouseEvent me)
-    		{
-    			muestraPopUp(me);
-    		}
+		if(lda instanceof LabelDatoFormato)
+			lda.addMouseListener(new MouseAdapter() {
+				public void mousePressed(MouseEvent me)
+				{
+					muestraPopUp(me);
+				}
 
-    		public void mouseReleased(MouseEvent me)
-    		{
-    			muestraPopUp(me);
-    		}
-    	});
+				public void mouseReleased(MouseEvent me)
+				{
+					muestraPopUp(me);
+				}
+			});
 
 		añadeAPanel((JComponent)lda, Titulo, false, panAñadir);		
 	}
 	
 	protected void muestraPopUp(MouseEvent me) {
-		final LabelDato lda;
+		final LabelDatoFormato lda;
 		if(panelResumen!=null && me.isPopupTrigger()) {
-			lda=(LabelDato)me.getSource();
+			lda=(LabelDatoFormato)me.getSource();
 			JPopupMenu popup = new JPopupMenu();
 			if(!lda.esCopiaParaResumen()) {
 				//está en un panel normal
@@ -256,9 +273,10 @@ public class PanelDatos extends JPanel {
 	 * Por ahora es quitar las @link {@link LabelDato} de {@link #panelResumen} */
 	public void destruir() {
 		for(LabelDato lda: vecLabels)
-			if(lda.esCopiaParaResumen()) {
-				panelResumen.remove(lda);
-			}
+			if(lda instanceof LabelDatoFormato)
+				if(((LabelDatoFormato)lda).esCopiaParaResumen())
+					panelResumen.remove((LabelDatoFormato)lda);
+
 	}
 	
 	@Override

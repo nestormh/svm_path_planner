@@ -278,6 +278,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 								indIni=0; indFin=-1; esEstandar=false; esTexto=false;
 								continue;
 							}
+							//TODO da errores de String index out of range: -1
 							String menTexto=new String(buff,indIni,(indFin-indIni+1));
 							if(menTexto.charAt(0)=='$') {
 								log(INFO,"Recibida NMEA:"+menTexto);

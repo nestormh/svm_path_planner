@@ -22,6 +22,9 @@ public class LabelDatoFormato extends LabelDato {
 	/** clase del objeto sobre el que invocar el método */
 	Class	clase;
 	
+	protected LabelDatoFormato copiaResumen=null;
+
+	
 	/**
 	 * Crea etiqueta con texto inicial
 	 * @param clase clase cuyo método vamos a invocar
@@ -33,7 +36,7 @@ public class LabelDatoFormato extends LabelDato {
 		this(clase,nomMetodo,formato);
 		setText(textoInicial);
 	}
-
+	
 	/**
 	 * Crea etiqueta con texto inicial aplicandoles el formato a valor inicial por defecto (0)
 	 * @param clase clase cuyo método vamos a invocar
@@ -71,6 +74,13 @@ public class LabelDatoFormato extends LabelDato {
 		}
 	}
 	
+	public LabelDatoFormato(LabelDatoFormato actual) {
+		super("######");
+		clase=actual.clase;
+		formato=actual.formato;
+		metodo=actual.metodo;
+	}
+
 	/**
 	 * Actuliza la etiqueta invocando al método correspondiente del objeto pasado.
 	 * Se comprueba que le objetosea de la clase correcta
@@ -102,5 +112,25 @@ public class LabelDatoFormato extends LabelDato {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	/** crea otro LabelDato con la mismas características que el actual */
+	public LabelDato copiaParaResumen() {
+		copiaResumen=new LabelDatoFormato(this);
+		copiaResumen.copiaResumen=copiaResumen; //apunta a si mismo para indicar que esta en resumen
+		copiaResumen.setEnabled(isEnabled());
+		return copiaResumen;
+	}
+	
+	public void borradaCopiaResumen() {
+		copiaResumen=null;
+	}
+	
+	public boolean tieneCopiaParaResumen() {
+		return copiaResumen!=null;
+	}
+	
+	public boolean esCopiaParaResumen() {
+		return copiaResumen==this;
 	}
 }
