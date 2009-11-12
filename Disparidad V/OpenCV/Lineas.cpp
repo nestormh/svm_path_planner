@@ -84,16 +84,16 @@ void Lineas::Insert(CvPoint *item, int pos) {
 			if ((item[0].x == aux[0].x) && (item[0].y == aux[0].y) 
 				&& (item[1].x == aux[1].x) && (item[1].y == aux[1].y)) { 
 				insert = false;				// Si está no se repite
-				printf ("No se inserta (repetida)\n");				
+//				printf ("No se inserta (repetida)\n");
 			} else if (direction) {		// Verticales
 				
-				printf ("--- Insert(vertical) ---\n");
+//				printf ("--- Insert(vertical) ---\n");
 				
 				if ((item[0].y >= aux[0].y) && (item[1].y <= aux[1].y)) {		// La nueva está contenida en una existente			
 					insert = false;
-					printf ("No se inserta (contenida vertical)\n");
+//					printf ("No se inserta (contenida vertical)\n");
 				} else if ((item[0].y <= aux[0].y) && (item[1].y >= aux[1].y)) { 	// La nueva contiene a una existente -> se deja la mayor
-					printf("Modificada vertical \n");
+//					printf("Modificada vertical \n");
 					aux[0] = item[0];
 					aux[1] = item[1];
 					insert = false;
@@ -101,14 +101,14 @@ void Lineas::Insert(CvPoint *item, int pos) {
 							> MAX (abs(MAX(MAX(aux[0].y, aux[1].y), MAX(item[0].y, item[1].y)) - MIN(MAX(aux[0].y, aux[1].y), MAX(item[0].y, item[1].y))),
 							abs(MAX(MIN(aux[0].y, aux[1].y), MIN(item[0].y, item[1].y)) - MIN(MIN(aux[0].y, aux[1].y), MIN(item[0].y, item[1].y))))){
 					insert = false;
-					printf ("No se inserta superpuesta vertical\n");
+//					printf ("No se inserta superpuesta vertical\n");
 				}
 			} else {						// Horizontales
 				if ((item[0].x >= aux[0].x) && (item[1].x <= aux[1].x)) {
 					insert = false;
-					printf ("No se inserta (contenida horizontal)\n");
+//					printf ("No se inserta (contenida horizontal)\n");
 				} else if ((item[0].x <= aux[0].x) && (item[1].x >= aux[1].x)) {
-					printf("Modificada horizontal\n");
+//					printf("Modificada horizontal\n");
 					aux[0] = item[0];
 					aux[1] = item[1];
 					insert = false;
@@ -116,7 +116,7 @@ void Lineas::Insert(CvPoint *item, int pos) {
 							> MAX (abs(MAX(MAX(aux[0].x, aux[1].x), MAX(item[0].x, item[1].x)) - MIN(MAX(aux[0].x, aux[1].x), MAX(item[0].x, item[1].x))),
 							abs(MAX(MIN(aux[0].x, aux[1].x), MIN(item[0].x, item[1].x)) - MIN(MIN(aux[0].x, aux[1].x), MIN(item[0].x, item[1].x))))){
 					insert = false;
-					printf ("No se inserta superpuesta horizontal\n");
+//					printf ("No se inserta superpuesta horizontal\n");
 				}
 			} 	
 
@@ -149,7 +149,7 @@ void Lineas::Insert(CvPoint *item, int pos, int ventana) {
 		direction = false;		// Horizontal
 	}	
 	
-	printf ("Insertando [(%d, %d) (%d, %d)]-> ", item[0].x, item[0].y, item[1].x, item[1].y);
+//	printf ("Insertando [(%d, %d) (%d, %d)]-> ", item[0].x, item[0].y, item[1].x, item[1].y);
 	
 	insert = true;
 	lado = round(ventana / 2);
@@ -166,7 +166,7 @@ void Lineas::Insert(CvPoint *item, int pos, int ventana) {
 		index[n] = pos;
 		n++;	
 		cvSeqPush(lines[pos], item);
-		printf ("Sin modificar\n");
+//		printf ("Sin modificar\n");
 	} else {
 		if (direction) {
 			item[0].x = i;
@@ -175,7 +175,7 @@ void Lineas::Insert(CvPoint *item, int pos, int ventana) {
 			item[0].y = i;
 			item[1].y = i;
 		}
-		printf ("[(%d, %d) (%d, %d)]\n", item[0].x, item[0].y, item[1].x, item[1].y);
+//		printf ("[(%d, %d) (%d, %d)]\n", item[0].x, item[0].y, item[1].x, item[1].y);
 		this->Insert(item, i);
 		
 //		j = 0;
@@ -237,7 +237,7 @@ void Lineas::InsertGreedy(CvPoint *item, int pos, int ventana) {
 //		n++;	
 //		cvSeqPush(lines[pos], item);
 
-		printf ("Queda Igual\n");
+//		printf ("Queda Igual\n");
 		this->Insert(item, pos, ventana);		// Se invoca a insert con ventana para que haga las comprobaciones para descartar al insertar
 
 	} else {
@@ -366,4 +366,17 @@ void Lineas::DrawLines(IplImage* imagen, CvScalar color) {
 			j++;
 		}while (j < lines[index[i]]->total);
 	}
+}
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void Lineas::Clean() {
+	this->n = 0;
+	for (int i = 0; i < max; i++)
+		cvClearSeq (lines[i]);
 }

@@ -5,6 +5,7 @@
 #include <time.h>
 #include <math.h>
 #include "Lineas.h"
+#include "Obstaculos.h"
 //#include "..\..\CapturaImagen\CapturaImagen\CapturaVLC.h"
 
 #define MAXD 70				// Disparidad máxima
@@ -166,88 +167,6 @@ void preprocesado (IplImage *left, IplImage *right, int filterSize){
 	
 }
 
-
-/*-----------------------------------------------------------------------------------------------------------------
-		NOMBRE:
-	   FUNCI�N: Ternariza una imagen realizando previamente un filtrado para eliminar el n�mero de bordes.
-	PAR�METROS:
-	  DEVUELVE:
------------------------------------------------------------------------------------------------------------------*/
-void ternarizar (IplImage *left, IplImage *right, int filterSize, int sobelSize, int th){
-	IplImage *mask,				// M�scara
-			 *temp,				// Imagen ternarizada temporal
-			 *auxSobel,
-			 *auxThreshold,
-			 *aux;				
-	IplImage *b;
-	CvScalar mean;
-	double threshold;
-
-	cvSmooth(left, left, CV_BLUR, filterSize, filterSize);			// Filtrar para eliminar bordes superfluos
-	cvSmooth(right, right, CV_BLUR, filterSize, filterSize);
-
-	mask = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
-	temp = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
-	aux = cvCreateImage(cvGetSize(left), IPL_DEPTH_8U, 1);
-	auxSobel = cvCreateImage(cvGetSize(left), IPL_DEPTH_16S, 1);
-	auxThreshold = cvCreateImage(cvGetSize(left), IPL_DEPTH_32F, 1);
-	b = cvCreateImage(cvGetSize(right), IPL_DEPTH_32F, 1);
-
-	/* Ternarizaci�n de imagen izquierda*/
-	cvNamedWindow("Preprocesado", CV_WINDOW_AUTOSIZE);
-			
-	cvSobel(left, auxSobel, 1, 1, sobelSize);			// Filtrado de Sobel de bordes verticales
-	
-	/* C�lculo automatizado del umbral */
-	cvSetZero(b);										
-	cvConvertScale(auxSobel, auxThreshold, 1, 0);		// Pasar a punto flotante
-	cvSquareAcc(auxThreshold, b);						// Elevar al cuadrado
-	mean = cvAvg(b);									// Hallar la media
-	threshold = sqrt(4 * (double)mean.val[0]);
-	
-	cvSet (temp, cvScalar(127));						// Inicializar imagen ternarizada
-
-	cvSetZero (aux);
-	cvCmpS(auxSobel,  - (threshold / th), mask, CV_CMP_LT);			// Construir m�scara para valores por debajo del umbral
-	cvCopy(aux, temp, mask);							// Aplicar m�scara
-
-	cvSet (aux, cvScalar(255));
-	cvCmpS(auxSobel,  threshold / th, mask, CV_CMP_GT);			// Construir m�scara para valores por encima del umbral
-	cvCopy(aux, temp, mask);							// Aplicar m�scara
-
-	cvCopy(temp, left);
-cvShowImage("Preprocesado", left);
-
-
-	/* Ternarizaci�n de imagen derecha*/
-	cvSobel(right, auxSobel, 1, 1, 3);						// Filtrado de Sobel de bordes verticales
-	
-	/* C�lculo automatizado del umbral */
-	cvSetZero(b);											
-	cvConvertScale(auxSobel, auxThreshold, 1, 0);			// Pasar a punto flotante
-	cvSquareAcc(auxThreshold, b);
-	mean = cvAvg(b);
-	threshold = sqrt(4 * (double)mean.val[0]);
-
-	cvSet (temp, cvScalar(128));									// Inicializar imagen ternarizada
-
-	cvSetZero (aux);
-	cvCmpS(auxSobel, - (threshold / th), mask, CV_CMP_LT);			// Construir la m�scara para valores por debajo del umbral
-	cvCopy(aux, temp, mask);										// Aplicar m�scara
-
-	cvSet (aux, cvScalar(255));
-	cvCmpS(auxSobel,  + (threshold / th), mask, CV_CMP_GT);			// Construir m�scara para valores por encima del umbral
-	cvCopy(aux, temp, mask);										// Aplicar m�scara
-
-	cvCopy(temp, right);
-
-	cvReleaseImage (&auxSobel);								// Liberar memoria
-	cvReleaseImage (&auxThreshold);
-	cvReleaseImage (&b);
-	cvReleaseImage (&mask);
-	cvReleaseImage (&aux);
-	cvReleaseImage (&temp);
-}
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -898,6 +817,7 @@ void lineas(IplImage *src, Lineas *horizontal, int y, int min, int gap){
 	horizontal->DrawLines(color_dst, CV_RGB(255,255,0));
 	cvShowImage ("Imagen disparidad H", color_dst);
 	
+	cvReleaseImage(&color_dst);
 	free (line);	
 }
 
@@ -1097,6 +1017,7 @@ void marcObstacle (IplImage *sourceImage, CvSeq *vertical, CvSeq *horizontal ,Cv
 	   FUNCI�N:
 	PAR�METROS: 
 	  DEVUELVE: void
+	COMENTARIO: Se usa la versión con ventana
 -----------------------------------------------------------------------------------------------------------------*/
 void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal){
 	IplImage* color_dst;
@@ -1179,93 +1100,58 @@ void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal)
 	PAR�METROS: 
 	  DEVUELVE: void
 -----------------------------------------------------------------------------------------------------------------*/
-void marcObstacle2 (IplImage *sourceImage, Lineas *vertical, Lineas *horizontal, int ventana){
-	IplImage* color_dst;
+void marcObstacle2 (Lineas *vertical, Lineas *horizontal, Obstaculos * obs, int ventana){
 	int nVer,
 	    *index,
 	    i, j, k;
 	
-	CvFont font;
-	double hScale,
-		   vScale;
-	int lineWidth, lado; 
-	CvScalar rectColor;
-	char auxText[255];
+	int lado;
 
 	CvSeq *hLines;
 	CvPoint *hor, 
 		    *ver;	
 	
-	printf ("Verticales:\n");
-	vertical->Print();
-	printf ("Horizontales:\n");
-	horizontal->Print();
-	
-	lado = round(ventana / 2);
-		
-	/* Configurar la fuente para el texto en im�genes */
-	hScale = 0.5;
-	vScale = 0.5;
-	lineWidth = 0;
-	cvInitFont (&font, CV_FONT_HERSHEY_SIMPLEX|CV_FONT_ITALIC, hScale, vScale, lineWidth);
+//	Obstaculos *obs = new Obstaculos;
+	int u, v;
 
-	// Para mostrar el rect�ngulo
-	color_dst = cvCloneImage (sourceImage);
-	color_dst->origin = sourceImage->origin;
+//	printf ("Verticales:\n");
+//	vertical->Print();
+//	printf ("Horizontales:\n");
+//	horizontal->Print();
+
+	lado = round(ventana / 2);
 
 	nVer = vertical->GetN();
 	index = vertical->GetIndex();
-	
+
 	for (i= 0; i < nVer; i ++){		// Dibujar rect�ngulos (detectar obst�culos)
 		ver = (CvPoint *) cvGetSeqElem(vertical->GetLine(index[i]), 0);
 		//printf ("Vertical: (%d %d) (%d %d)\n", ver[0].x, ver[0].y, ver[1].x, ver[1].y);
-		
+
 		k = index[i] + lado;
 		if (k >= horizontal->GetMax())		// Evitar salirse del vector por arriba
 			k = horizontal->GetMax() - 1;
-		
+
 		do {
 			hLines = horizontal->GetLine(k);
 			k--;
-		} while ((hLines->total == 0) && (k >= 0) && (k >= index[i] - lado)); 
+		} while ((hLines->total == 0) && (k >= 0) && (k >= index[i] - lado));
 
 		j = 0;
 		while (j < hLines->total) {
 			hor = (CvPoint *) cvGetSeqElem(hLines, j);
-	
-			//printf ("Horizontal: (%d %d) (%d %d)\n", hor[0].x, hor[0].y, hor[1].x, hor[1].y);
 
-			if (ver[0].x > 46)
-				rectColor = CV_RGB(255,0,0);
-			else if (ver[0].x > 23)
-				rectColor = CV_RGB(255,255,0);
-			else
-				rectColor = CV_RGB(0,255,0);
-				
-//rectColor = CV_RGB(255,0,0);			// Resaltado para artículo
+			u = MIN(hor[0].x, hor[1].x);
+			v = MIN(ver[0].y, ver[1].y);
+			obs->Insert(ver[0].x, u, v, MAX(hor[0].x, hor[1].x) - u, MAX(ver[0].y, ver[1].y) - v);
 
-			cvRectangle(color_dst, cvPoint(MIN(hor[0].x, hor[1].x), MIN(ver[0].y, ver[1].y)), cvPoint(MAX(hor[0].x, hor[1].x), MAX(ver[0].y, ver[1].y)), rectColor);
-//printf("Rectángulo: %d %d %d %d\n", MIN(hor[0].x, hor[1].x), MIN(ver[0].y, ver[1].y), MAX(hor[0].x, hor[1].x), MAX(ver[0].y, ver[1].y));
-
-//if (ver[0].x < 46)					// Resaltado para artículo
-//	rectColor = CV_RGB(0,0,0);
-//else
-//	rectColor = CV_RGB(255,255,255);
-			sprintf(auxText, "%.2f m",(float)(0.545*425/ver[0].x));
-			cvPutText (color_dst, auxText, cvPoint(MIN(hor[0].x, hor[1].x), MAX(ver[0].y, ver[1].y) - 1), &font, rectColor);
-
-			cvShowImage( "Obstaculos", color_dst );
-			printf ("Posible obstaculo a %f m (disparidad %d)\n", (float)(0.545*425/ver[0].x), ver[0].x);
-			
 			j++;
 		}
-		
-			
+
+
 	}
 
-	cvShowImage( "Obstaculos", color_dst );
-
-	cvReleaseImage(&color_dst);
+//	return (obs);
 }
 
 
@@ -1337,7 +1223,7 @@ void crearRDM (IplImage *rdm, IplImage *dm, CvPoint *line, int ventana){
 				parameter adjusts -> Ajustes para los algoritmos que componen la disparidad.
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
-void disparity (IplImage *left, IplImage* right, parameter adjusts){
+void disparity (IplImage *left, IplImage* right, Lineas *vLines, Lineas *hLines, parameter adjusts){
 	IplImage *izquierda,		// Imagen izquierda en escala de grises
 			 *derecha,			// Imagen derecha en escala de grises
 			 *mapaDisparidad,	// Mapa de disparidad
@@ -1351,14 +1237,15 @@ void disparity (IplImage *left, IplImage* right, parameter adjusts){
 		  *pendpos,
 		  *pendneg; 
 
-	Lineas *vLines,
-		   *hLines;
+//	Lineas *vLines,
+//		   *hLines;
 	int nVer, 
 		*index, 
 		i;
+//	Obstaculos *result;
 	
-	hLines = new Lineas(MAXD);
-	vLines = new Lineas(MAXD);
+//	hLines = new Lineas(MAXD);
+//	vLines = new Lineas(MAXD);
 
 	CvMemStorage *storageD,
 				 *storageMP,
@@ -1389,16 +1276,14 @@ cvNamedWindow("Debug", CV_WINDOW_AUTOSIZE);
 cvNamedWindow("Debug2", CV_WINDOW_AUTOSIZE);
 
 	
-clock_t start = clock();
 
 	iguala1D(derecha, izquierda);						// Igualar brillo y contraste de ambas im�genes
 
-//Opci�n 1 de 
 	ternarizacion (izquierda, adjusts.filtro, adjusts.sobel, adjusts.umbral);
 	ternarizacion (derecha, adjusts.filtro, adjusts.sobel, adjusts.umbral);
 
-// Opci�n 2 de preprocesado
 	preprocesado (izquierda, derecha, adjusts.filtro);
+
 
 //cvShowImage ("Izquierda", izquierda);
 //cvShowImage ("Derecha", derecha);
@@ -1451,17 +1336,14 @@ clock_t start = clock();
 //	lineasH2(imagenDisparidadH, hLines, pendpos, pendneg);
 /*******************************************************************************/
 
-	marcObstacle2 (left, vLines, hLines, 5);
-
-clock_t stop = clock();
-printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
+	//marcObstacle2 (vLines, hLines, result, 5);
 
 	cvShowImage ("Mapa disparidad", mapaDisparidad);
 
 
-	delete vLines;
-	delete hLines;
-	
+//	delete vLines;
+//	delete hLines;
+
 	cvClearSeq(diagonal);
 	cvClearSeq(pendpos);
 	cvClearSeq(pendneg);
@@ -1478,15 +1360,56 @@ printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 	cvReleaseImage(&izquierda);
 	cvReleaseImage(&derecha);
 
-	//cvWaitKey(1);
+//	return result;
 }
-
 
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
-	   FUNCI�N:
-	PAR�METROS:
+	   FUNCIÓN:
+	PARÁMETROS: CvSeq *hist -> Secuancia histórica
+				Obstaculos *nuevo -> Nuevo elemento a insertar
+				int hMax -> Historia máxima a guardar (-1 = inf)
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void insertHist (CvSeq *hist, Obstaculos *nuevo, int hMax) {
+	Obstaculos *aux;
+
+	aux = new (Obstaculos);
+
+	if ((hMax > 0) && (hist->total == hMax)) {		// Si se tienen los hMax últimos
+		cvSeqPopFront(hist, aux);					// Eliminar el más antiguo
+		printf("Extraido\n");
+		delete aux;
+	}
+	printf ("-->");
+	aux = (Obstaculos *) cvSeqPush(hist, nuevo);							// Insertar el nuevo
+}
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void printHist (CvSeq *hist) {
+	int i;
+	Obstaculos *aux;
+
+	for (i = 0; i < hist->total; i++){
+		printf ("--- t = %d ---\n", i);
+		aux = (Obstaculos *) cvGetSeqElem(hist, i);
+		aux->Print();
+	}
+
+}
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
 int main (int argc, char* argv[]){
@@ -1502,6 +1425,17 @@ int main (int argc, char* argv[]){
 	const char *prefix = "Series/estherpedroFuera";
 	
 	bool trackbar;
+
+	Lineas *vLines,
+		   *hLines;
+
+	Obstaculos *obs;
+	CvSeq *obsSeq;					// Secuencia de obstáculos a lo largo del tiempo
+	CvMemStorage* storage;			// Almacenamiento para las CvSeq
+
+	storage = cvCreateMemStorage(0);
+	obsSeq = cvCreateSeq (0, sizeof(CvSeq), sizeof(Obstaculos), storage);
+
 		
 	trackbar = false;
 
@@ -1572,6 +1506,10 @@ int main (int argc, char* argv[]){
 	cvCreateTrackbar ("Umbral Ter", "Controles", &ajustes.umbral, 10, NULL);
 	cvCreateTrackbar ("Umbral Obs", "Controles", &ajustes.umbralObstaculos, 15, NULL);
 	cvCreateTrackbar ("Porcentaje", "Controles", &ajustes.porcentaje, 10, NULL);
+
+	hLines = new Lineas(MAXD);
+	vLines = new Lineas(MAXD);
+
 
 	frameNr = 1;
 
@@ -1686,7 +1624,29 @@ int main (int argc, char* argv[]){
 
 		}
 		
-		disparity (izquierda, derecha, ajustes);
+		clock_t start = clock();
+
+
+		printf ("----------------------------\n");
+		obs = new Obstaculos();
+		printf ("----------------------------\n");
+		disparity (izquierda, derecha, vLines, hLines, ajustes);
+		marcObstacle2 (vLines, hLines, obs, 5);
+
+		vLines->Clean();					// Vaciar las listas de líneas horizontales y verticales
+		hLines->Clean();
+
+		obs->Draw(izquierda);
+
+		insertHist(obsSeq, obs, 5);
+		obs->Print();
+		obs->unlink();
+		delete obs;             /// EL PROBLEMA ESTÁ AQUI
+
+		printHist(obsSeq);
+
+		clock_t stop = clock();
+		printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
 		
 		
 cvShowImage ("Izquierda", izquierda);
@@ -1702,6 +1662,13 @@ cvShowImage ("Derecha", derecha);
 		frameNr++;
 		printf ("Frame %d\n", frameNr);
 	} while (cvWaitKey(10) == -1);
+
+	delete vLines;
+	delete hLines;
+
+	cvClearSeq (obsSeq);
+	cvReleaseMemStorage (&storage);
+
 	
 	cvReleaseCapture (&videoIzq);
 	cvReleaseCapture (&videoDer);

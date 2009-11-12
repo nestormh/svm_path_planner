@@ -34,6 +34,7 @@ public:
 	int GetMax();
 	void Print();
 	void DrawLines(IplImage* imagen, CvScalar color);
+	void Clean ();
 };
 
 
