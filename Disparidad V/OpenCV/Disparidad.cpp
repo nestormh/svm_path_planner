@@ -15,6 +15,8 @@
 #define RECT 5				// Margen que se considera aceptable para que una línea sea recta (diferencia de coordenadas)
 #define WINDOW 11			// Ancho de la ventana para considerar dos líneas paralelas como la misma
 
+#define RECORD 0			// Si está definida se activa el código de guardado a fichero.
+
 typedef struct {			// Tipo de datos para indicar los par�metros de ajuste de los diferentes algoritmos
 	int filtro,
 		sobel,
@@ -234,7 +236,7 @@ cvShowImage("Preprocesado", img);
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
-	   FUNCI�N:
+	   FUNCI�N: Implementación alternativa de la correlación en base a sumas parciales.
 	PAR�METROS: wnd -> Lado de la ventana
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
@@ -1379,10 +1381,8 @@ void insertHist (CvSeq *hist, Obstaculos *nuevo, int hMax) {
 
 	if ((hMax > 0) && (hist->total == hMax)) {		// Si se tienen los hMax últimos
 		cvSeqPopFront(hist, aux);					// Eliminar el más antiguo
-		printf("Extraido\n");
-		delete aux;
+		delete aux;									// Liberar la memoria
 	}
-	printf ("-->");
 	aux = (Obstaculos *) cvSeqPush(hist, nuevo);							// Insertar el nuevo
 }
 
@@ -1435,7 +1435,8 @@ int main (int argc, char* argv[]){
 
 	storage = cvCreateMemStorage(0);
 	obsSeq = cvCreateSeq (0, sizeof(CvSeq), sizeof(Obstaculos), storage);
-
+	FILE *outputFile;
+	char outputName[30] = "salida.dat";
 		
 	trackbar = false;
 
@@ -1507,9 +1508,16 @@ int main (int argc, char* argv[]){
 	cvCreateTrackbar ("Umbral Obs", "Controles", &ajustes.umbralObstaculos, 15, NULL);
 	cvCreateTrackbar ("Porcentaje", "Controles", &ajustes.porcentaje, 10, NULL);
 
-	hLines = new Lineas(MAXD);
+	hLines = new Lineas(MAXD);					// Inicializar estructuras para almacenar líneas en la disparidad
 	vLines = new Lineas(MAXD);
 
+#ifdef RECORD
+	outputFile = fopen( outputName, "w" );		// Abrir el fichero para guardar los obstáculos detectados
+	if( !outputFile ){
+		printf( "Error abriendo fichero (NO ABIERTO)\n" );
+		return -1;
+	}
+#endif
 
 	frameNr = 1;
 
@@ -1627,9 +1635,7 @@ int main (int argc, char* argv[]){
 		clock_t start = clock();
 
 
-		printf ("----------------------------\n");
-		obs = new Obstaculos();
-		printf ("----------------------------\n");
+		obs = new Obstaculos(frameNr);
 		disparity (izquierda, derecha, vLines, hLines, ajustes);
 		marcObstacle2 (vLines, hLines, obs, 5);
 
@@ -1638,12 +1644,22 @@ int main (int argc, char* argv[]){
 
 		obs->Draw(izquierda);
 
-		insertHist(obsSeq, obs, 5);
-		obs->Print();
-		obs->unlink();
-		delete obs;             /// EL PROBLEMA ESTÁ AQUI
+#ifdef RECORD
+		obs->Save(outputFile);
+#endif
 
-		printHist(obsSeq);
+		printf ("--------Desordenado----------\n");
+		obs->Print();
+		obs->Sort(1);
+		printf ("----------Ordenado----------\n");
+		obs->Print();
+		printf ("-----------------------------\n");
+
+		insertHist(obsSeq, obs, 10);
+		obs->Unlink();						// Desvincular las listas de obstáculos para poder liberar la memoria sin que afecte al histórico, esa memoria se libera al sacar los elementos del histórico.
+		delete obs;
+
+		//printHist(obsSeq);
 
 		clock_t stop = clock();
 		printf("%.10lf\n", (double)(stop - start)/CLOCKS_PER_SEC);
@@ -1662,6 +1678,14 @@ cvShowImage ("Derecha", derecha);
 		frameNr++;
 		printf ("Frame %d\n", frameNr);
 	} while (cvWaitKey(10) == -1);
+
+
+#ifdef RECORD
+	if( fclose(outputFile) ){
+		printf( "Error: fichero NO CERRADO\n" );
+	    return -1;
+	}
+#endif
 
 	delete vLines;
 	delete hLines;

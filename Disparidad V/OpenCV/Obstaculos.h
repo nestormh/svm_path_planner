@@ -24,17 +24,24 @@ typedef struct {			// Tipo de datos para definir un obstáculo
 
 private:
 	int n;
+
+	int frame;
 	CvSeq *list;					// Lista de obstáculos
 	CvMemStorage* storage;			// Almacenamiento para las CvSeq
 
+protected:
+	static int Compare (const void * a, const void * b, void *userdata);
 
 public:
 	Obstaculos();
+	Obstaculos(int frame);
 	void Insert(int delta, int u, int v, int width, int height);
 	void Print();
 	void Draw(IplImage* src);
 	void getObstacle(int index, obstaculo *returned);
-	void unlink();
+	void Unlink();
+	void Sort (int order);
+	void Save(FILE *filename);
 	virtual ~Obstaculos();
 };
 
