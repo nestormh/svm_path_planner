@@ -359,11 +359,16 @@ public class GPSConnectionTriumph extends GPSConnection {
 					}
 				}
 			} catch (IOException ioe) {
-				log(ERR,"\nError al recibir los datos");
+				log(ERR,"\nError al recibir los datos: "+ioe.getMessage());
+				ioe.printStackTrace();
+				indIni=0; indFin=-1; //reiniciamos el buffer
 			} catch (Exception ex) {
-				log(ERR,"\nGPSConnectionTriump Error al procesar >"+buff+"< : " + ex.getMessage());
+				String mensaje="\nGPSConnectionTriump Error al procesar buffer >"+
+				 ((indIni<indFin)?new String(buff,indIni,(indFin-indIni+1)):"") +
+				 ": "+ ex.getMessage();
+				log(ERR,mensaje);
 				ex.printStackTrace();
-				indIni=-1;
+				indIni=0; indFin=-1; //reiniciamos el buffer
 			}
 		}
 	}

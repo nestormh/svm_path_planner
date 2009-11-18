@@ -85,9 +85,9 @@ public class GPSConnection implements SerialPortEventListener {
 	protected LoggerDouble logEdadCor;
 
 	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato espacial */
-	private Object mutexDatoEspacial;
+	private Object mutexDatoEspacial=new Object();
 	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato temporal */
-	private Object mutexDatoTemporal;
+	private Object mutexDatoTemporal=new Object();
 
 	/**
 	 * Constructor por defecto no hace nada.
@@ -429,8 +429,13 @@ public class GPSConnection implements SerialPortEventListener {
 		
 		avisaListeners(seAñadeEspacial); //avisamos a todos los listeners
 		//Despertamos thread a la espera de datos
-		mutexDatoTemporal.notifyAll();
-		if(seAñadeEspacial) mutexDatoEspacial.notifyAll();
+		synchronized (mutexDatoTemporal) {
+			mutexDatoTemporal.notifyAll();
+		}
+		if(seAñadeEspacial) 
+			synchronized (mutexDatoEspacial) {
+				mutexDatoEspacial.notifyAll();
+			}
         data = new GPSData(data);//creamos nuevo punto copia del anterior
 
 	}
