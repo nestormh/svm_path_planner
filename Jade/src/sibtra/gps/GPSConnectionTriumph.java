@@ -623,6 +623,8 @@ public class GPSConnectionTriumph extends GPSConnection {
 //		
 //		EJemplo:DL02B,DLINK,1,{D,C,0000,999,0000,0000,100.00}@62
 //                VEMOS QUE FALTA LA COMA ANTES DE LA ARROBA^
+		// si recibe por 2 puertos el mensaje será
+		// DL04A,DLINK,2,{B,C,0000,001,6388,0013,100.00}{D,R,0000,999,0000,0000,100.00}@10
 
 
 		if(buff[indIni]==(byte)'D' && buff[indIni+1]==(byte)'L') {
@@ -637,14 +639,13 @@ public class GPSConnectionTriumph extends GPSConnection {
 				String cadena=new String(buff,indIni,larMen);
 				int posArroba=cadena.indexOf('@');
 				String CS=cadena.substring(posArroba+1);
-				//TODO comprobamos checksum
 				int csc=checksum8(buff, indIni, larMen-2);
-				if( csc!=Byte.valueOf(CS,16) ) {
+				if( csc!=Integer.valueOf(CS,16) ) {
 					log(WAR,"Error checksum "+csc+"!="+CS+". Ignoramos mensaje");
 					return;
 				}
-				String[] campos=cadena.substring(0, posArroba).split(",");
 				//el checksum es correcto
+				String[] campos=cadena.substring(0, posArroba).split(",");
 				if(campos.length<4) {
 					log(WAR,"DL no tiene los campos mínimos necesarios. Ignoramos");
 					return;
@@ -656,8 +657,9 @@ public class GPSConnectionTriumph extends GPSConnection {
 				int la=Integer.valueOf(campos[2]);
 				int ca=3; //campo donde empezamos la búsqueda de {
 				while(la>0) {
-					while(campos[ca].charAt(0)!='{') ca++;
-					char tipo=campos[ca++].charAt(1);
+					while(!campos[ca].contains("{")) ca++;
+					char tipo=campos[ca].charAt(campos[ca].indexOf('{')+1);
+					ca++;
 					char decoId=campos[ca++].charAt(0);
 					String stationID=campos[ca++];
 					int timeLast=Integer.valueOf(campos[ca++]);
@@ -665,10 +667,10 @@ public class GPSConnectionTriumph extends GPSConnection {
 					int numCorrup=Integer.valueOf(campos[ca++]);
 					//TODO posible problema con }
 					double quality=Double.valueOf(campos[ca].substring(0,campos[ca].lastIndexOf('}')));
-					ca++;
+//					ca++;
 					log(INFO,String.format("DL: %c %c %s %d %d %d %f"
 							,decoId, tipo, stationID, timeLast, numOK, numCorrup,quality ));
-					if(tipo=='D') { //puerto D es el del enlace
+					if(tipo=='B') { //puerto D es el del enlace
 						calidadLink=quality;
 						numOKLink=numOK;
 						//apuntamos en loggers
@@ -787,7 +789,26 @@ u1 cs(u1 const* src, int count)
 	public static void main(String[] args) {
 
 		GPSConnectionTriumph gpsC;
-				
+		
+		try {
+			gpsC=new GPSConnectionTriumph("/dev/null",115200,INFO);
+			String mensaje="DL04A,DLINK,2,{B,C,0000,001,6409,0013,100.00}{D,R,0000,999,0000,0000,100.00}@05";
+//			mensaje="DL04A,DLINK,2,{B,C,0000,001,6493,0013,100.00}{D,R,0000,999,0000,0000,100.00}@E7";
+			mensaje="DL04A,DLINK,2,{B,C,0000,001,6514,0013,100.00}{D,R,0000,999,0000,0000,100.00}@94";
+			//rellenamos el buffer
+			for(int i=0; i<mensaje.length();i++)
+				gpsC.buff[i]=(byte)(mensaje.charAt(i));
+			gpsC.indIni=0; 
+			gpsC.indFin=mensaje.length()-1;
+
+			gpsC.nuevaCadenaEstandar();
+		}  catch (Exception e) {
+			System.err.println("Problema al usar el GPS:"+e.getMessage());
+		}
+		
+		System.exit(0);
+	
+		
 		try {
 			gpsC=new GPSConnectionTriumph("/dev/ttyUSB0",115200,INFO);
 			if(gpsC.esperaCentroBase())
