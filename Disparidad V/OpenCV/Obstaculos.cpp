@@ -19,6 +19,7 @@ Obstaculos::Obstaculos() {
 
 	n = 0;
 	this->frame = 0;
+
 	this->storage = NULL;
 	this->list = NULL;
 
@@ -36,9 +37,22 @@ Obstaculos::Obstaculos(int frame) {
 
 	n = 0;
 	this->frame = frame;
+
 	this->storage = cvCreateMemStorage(0);
 	this->list = cvCreateSeq (0, sizeof(CvSeq), sizeof(obstaculo), storage);
 
+}
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+int Obstaculos::getN (){
+
+	return (this->n);
 }
 
 
@@ -59,12 +73,47 @@ void Obstaculos::Insert(int delta, int u, int v, int width, int height) {
 	nuevo->width = width;
 	nuevo->height = height;
 
+	nuevo->forward = NULL;
+	nuevo->backward = NULL;
+
+	nuevo->discard = false;
+	nuevo->added = false;
+
 	cvSeqPush(this->list, nuevo);
 
 	this->n++;
 
 }
 
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+void Obstaculos::Insert(int delta, int u, int v, int width, int height, bool discard, bool added) {
+	obstaculo *nuevo;
+
+	nuevo = new(obstaculo);
+
+	nuevo->delta = delta;
+	nuevo->u = u;
+	nuevo->v = v;
+	nuevo->width = width;
+	nuevo->height = height;
+
+	nuevo->forward = NULL;
+	nuevo->backward = NULL;
+
+	nuevo->added = added;
+	nuevo->discard = discard;
+
+	cvSeqPush(this->list, nuevo);
+
+	this->n++;
+
+}
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -142,13 +191,16 @@ void Obstaculos::Draw(IplImage* src){
 	PARÁMETROS:
 	  DEVUELVE: void
 -----------------------------------------------------------------------------------------------------------------*/
-void Obstaculos::getObstacle(int index, obstaculo *returned){
+obstaculo* Obstaculos::getObstacle(int index){
+	obstaculo *result;
 
-	if (index > this->n){
-		returned = (obstaculo *) cvGetSeqElem(this->list, index);
+
+	if (index < this->n){
+		result = (obstaculo *) cvGetSeqElem(this->list, index);
 	} else
-		returned = NULL;
+		result = NULL;
 
+	return result;
 }
 
 
@@ -246,6 +298,72 @@ int Obstaculos::Compare (const void * a, const void * b, void *userdata) {
 void Obstaculos::Sort(int order) {
 
 	cvSeqSort (this->list, Compare, (void*)&order);
+}
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+void Obstaculos::CutBackwards(){
+	int i;
+	obstaculo *aux;
+
+	for (i = 0; i < n; i++){
+		aux = (obstaculo *) cvGetSeqElem(this->list, i);
+		aux->backward = NULL;
+	}
+
+}
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+int Obstaculos::Area(obstaculo *o1, obstaculo *o2){
+	int ancho,
+		alto;
+
+	if (o1->u < o2->u) {						// O1 más a la izquierda
+		if ((o1->u + o1->width >= o2->u + o2->width))			// O2 queda dentro de O1
+			ancho = o2->width;
+		else									// Solapados (no contenido)
+			ancho = o1->u + o1->width - o2->u;
+	} else {									// O2 más a la izquierda
+		if ((o2->u + o2->width >= o1->u +o2->width))				// O1 dentro de O2
+			ancho = o1->width;
+		else									// Solapados (no contenido)
+			ancho = o2->u + o2->width - o1->u;
+	}
+
+	if (ancho < 0)								// Si esto ocurre es porque no hay solapamiento
+		ancho = 0;
+
+	if (o1->v < o2->v) {						// O1 más arriba
+		if ((o1->v + o1->height >= o2->v + o1->height))			// O2 dentro de O1
+			alto = o2->height;
+		else									// Solapados (no contenido)
+			alto = o1->v + o1->height - o2->v;
+	} else {
+		if ((o2->v + o2->height >= o1->v + o2->height))			// O1 dentro de O2
+			alto = o1->height;
+		else									// Solapados (no contenido)
+			alto = o2->v + o2->height - o1->v;
+	}
+
+	if (alto < 0)								// Si esto ocurre es porque no hay solapamiento
+		alto = 0;
+
+//	printf ("\n-----------------------------\n");
+//	printf ("o1 %d %d %d %d\n", o1->u, o1->v, o1->width, o1->height);
+//	printf ("o2 %d %d %d %d\n", o2->u, o2->v, o2->width, o2->height);
+//	printf ("ancho: %d, alto: %d\n\n", ancho, alto);
+
+	return (ancho * alto);
 }
 
 

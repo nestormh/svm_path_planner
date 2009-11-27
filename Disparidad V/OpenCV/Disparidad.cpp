@@ -15,7 +15,7 @@
 #define RECT 5				// Margen que se considera aceptable para que una línea sea recta (diferencia de coordenadas)
 #define WINDOW 11			// Ancho de la ventana para considerar dos líneas paralelas como la misma
 
-#define RECORD 0			// Si está definida se activa el código de guardado a fichero.
+//#define RECORD 0			// Si está definida se activa el código de guardado a fichero.
 
 typedef struct {			// Tipo de datos para indicar los par�metros de ajuste de los diferentes algoritmos
 	int filtro,
@@ -1375,15 +1375,103 @@ cvNamedWindow("Debug2", CV_WINDOW_AUTOSIZE);
 	  DEVUELVE:
 -----------------------------------------------------------------------------------------------------------------*/
 void insertHist (CvSeq *hist, Obstaculos *nuevo, int hMax) {
+	int i, j;
 	Obstaculos *aux;
+
+	obstaculo *obsPast,				// Obstáculo en t-1
+			  *obs;					// Obstáculo en t
+	int solape;
+
 
 	aux = new (Obstaculos);
 
 	if ((hMax > 0) && (hist->total == hMax)) {		// Si se tienen los hMax últimos
 		cvSeqPopFront(hist, aux);					// Eliminar el más antiguo
 		delete aux;									// Liberar la memoria
+
+		aux = (Obstaculos *) cvGetSeqElem(hist, hist->total - 1);
+		aux->CutBackwards();								// Romper los enlaces al instante de tiempo anterior
 	}
-	aux = (Obstaculos *) cvSeqPush(hist, nuevo);							// Insertar el nuevo
+	(Obstaculos *) cvSeqPush(hist, nuevo);							// Insertar el nuevo
+
+	aux = (Obstaculos *) cvGetSeqElem(hist, hist->total-2);
+
+	printf ("--->nuevo<------------\n");
+	nuevo->Print();
+	printf ("--->antiguo<------------\n");
+	aux->Print();
+
+	if (hist->total > 0){							// Casar con el obstáculo equivalente en la anterior
+		for (i=0; i < nuevo->getN() ; i++){
+			obs = nuevo->getObstacle(i);
+
+			if (aux->getN() > 0) {
+				j = 0;
+
+				do {
+					obsPast = aux->getObstacle(j);
+					solape = Obstaculos::Area(obsPast, obs);
+					printf ("Comparo (nuevo)%d con (antiguo)%d\n", obs->delta, obsPast->delta);
+					if ((abs(obsPast->delta - obs->delta) <= 5) && (solape)){
+						if (obsPast->forward) {							// El antiguo ya estaba enlazado
+							printf ("Ya estaba enlazado el antiguo: ");
+
+							if (solape > Obstaculos::Area(obsPast->forward, obs)){
+
+								printf ("El que había está menos solapado (%d). Solape nuevo: %d\n", Obstaculos::Area(obsPast->forward, obs), solape);
+								(obsPast->forward)->backward = NULL;	// Romper el enlace antiguo
+
+								obs->backward = obsPast;				// Hacer los enlaces nuevos
+								obsPast->forward = obs;
+							} else {
+								printf ("El que había está más solapado (no se cambia el puntero).Solape: %d\n", solape);
+							}
+
+						} else {
+							printf ("No había enlace: ");
+							printf ("Se enlazan (nuevo)%d -> (antiguo)%d. Solape: %d\n", obs->delta, obsPast->delta, solape);
+							obs->backward = obsPast;				// Hacer los enlaces nuevos
+							obsPast->forward = obs;
+						}
+					} else {
+						printf ("No se enlazan (nuevo)%d - (antiguo)%d. Solape:%d\n", obs->delta, obsPast->delta, solape);
+
+					}
+
+
+					j ++;
+				} while ((j < aux->getN()) && (abs(obsPast->delta - obs->delta) > 5));
+			}
+		}
+	}
+
+}
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE:
+-----------------------------------------------------------------------------------------------------------------*/
+void checkHist (CvSeq *hist) {
+	Obstaculos *head, *second;
+
+	if (hist->total > 1) {
+		head = (Obstaculos *) cvGetSeqElem(hist, hist->total-1);
+		second = (Obstaculos *) cvGetSeqElem(hist, hist->total-2);
+
+		if (second->getN() > head->getN()) {
+			printf ("Disminuye el No. de obstáculos.\n");
+
+		} else if (second->getN() < head->getN()) {
+			printf ("Aumenta el No. de obstáculos.\n");
+		} else{
+			printf ("Se mantiene el No. de obstáculos.\n");
+		}
+
+	}
+
 }
 
 
@@ -1435,8 +1523,11 @@ int main (int argc, char* argv[]){
 
 	storage = cvCreateMemStorage(0);
 	obsSeq = cvCreateSeq (0, sizeof(CvSeq), sizeof(Obstaculos), storage);
+
+#ifdef RECORD
 	FILE *outputFile;
 	char outputName[30] = "salida.dat";
+#endif
 		
 	trackbar = false;
 
@@ -1648,15 +1739,16 @@ int main (int argc, char* argv[]){
 		obs->Save(outputFile);
 #endif
 
-		printf ("--------Desordenado----------\n");
-		obs->Print();
-		obs->Sort(1);
-		printf ("----------Ordenado----------\n");
-		obs->Print();
-		printf ("-----------------------------\n");
+//		printf ("--------Desordenado----------\n");
+//		obs->Print();
+//		obs->Sort(1);
+//		printf ("----------Ordenado----------\n");
+//		obs->Print();
+//		printf ("-----------------------------\n");
 
-		insertHist(obsSeq, obs, 10);
-		obs->Unlink();						// Desvincular las listas de obstáculos para poder liberar la memoria sin que afecte al histórico, esa memoria se libera al sacar los elementos del histórico.
+			insertHist(obsSeq, obs, 10);		checkHist (obsSeq);
+
+			obs->Unlink();						// Desvincular las listas de obstáculos para poder liberar la memoria sin que afecte al histórico, esa memoria se libera al sacar los elementos del histórico.
 		delete obs;
 
 		//printHist(obsSeq);
