@@ -26,10 +26,10 @@ import com.bruceeckel.swing.Console;
 
 public class ConfigParam extends JApplet implements ActionListener, ChangeListener{
 	
-	int numBoidsOk = 2;
-	SpinnerNumberModel spNumBoidsOk = new SpinnerNumberModel(numBoidsOk,0,1000,1);
-	JSpinner spinnerNumBoidsOk = new JSpinner(spNumBoidsOk);	
-	JLabel numBoidsOkLabel = new JLabel("Número de boids con éxito");
+//	int numBoidsOk = 2;
+//	SpinnerNumberModel spNumBoidsOk = new SpinnerNumberModel(numBoidsOk,0,1000,1);
+//	JSpinner spinnerNumBoidsOk = new JSpinner(spNumBoidsOk);	
+//	JLabel numBoidsOkLabel = new JLabel("Número de boids con éxito");
 	double tMax = 10;
 	SpinnerNumberModel spTmax = new SpinnerNumberModel(tMax,0,1000,1);
 	JSpinner spinnerTmax = new JSpinner(spTmax);
@@ -40,10 +40,11 @@ public class ConfigParam extends JApplet implements ActionListener, ChangeListen
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
 	String[] nomParam = {"Radio Obstáculos","Radio Cohesión","Radio Separación"
 			,"Radio Alineación","Peso Cohesión","Peso Separación","Peso Alineación"
-			,"Peso Objetivo","Peso Obstáculo","Peso Lider","Velocidad Máxima","Nº Boids"};
+			,"Peso Objetivo","Peso Obstáculo","Peso Lider","Velocidad Máxima","Nº Boids","Boids Ok"};
 	double[] valorParam = {Boid.getRadioObstaculo(),Boid.getRadioCohesion(),Boid.getRadioSeparacion()
 			,Boid.getRadioAlineacion(),Boid.getPesoCohesion(),Boid.getPesoSeparacion(),Boid.getPesoAlineacion()
-			,Boid.getPesoObjetivo(),Boid.getPesoObstaculo(),Boid.getPesoLider(),Boid.getVelMax(),20};
+			,Boid.getPesoObjetivo(),Boid.getPesoObstaculo(),Boid.getPesoLider(),Boid.getVelMax(),20
+			,1};
 	
 	// Inicialización gráfica
 	public void init(){
@@ -60,9 +61,9 @@ public class ConfigParam extends JApplet implements ActionListener, ChangeListen
 		
 		// Definición del panel de parámetros de la simulación
 		JPanel panelSur = new JPanel(new FlowLayout());
-		panelSur.add(spinnerNumBoidsOk);
-		spinnerNumBoidsOk.addChangeListener(this);
-		panelSur.add(numBoidsOkLabel);
+//		panelSur.add(spinnerNumBoidsOk);
+//		spinnerNumBoidsOk.addChangeListener(this);
+//		panelSur.add(numBoidsOkLabel);
 		panelSur.add(spinnerTmax);
 		spinnerTmax.addChangeListener(this);
 		panelSur.add(tMaxLabel);
@@ -84,32 +85,47 @@ public class ConfigParam extends JApplet implements ActionListener, ChangeListen
 							nuevoPunto.put(params.elementAt(i).getNombre(),valorParam);
 							vecAux.add(nuevoPunto);	
 							valorParam = valorParam + params.elementAt(i).getValorPaso();
-						}
-					}
+						}						
+					}// Cuidado con los punteros!!!!!!!!!!!
 					else{
 						for (int j=0;j<vectorSim.size();j++){
 							double valorParam = params.elementAt(i).getValorIni();
 							while (valorParam <= params.elementAt(i).getValorFin()){
-								vectorSim.elementAt(j).put(params.elementAt(i).getNombre(),valorParam);
-								vecAux.add(vectorSim.elementAt(j));						
+								Hashtable nuevoPunto = new Hashtable();
+								for (Enumeration enu = vectorSim.elementAt(j).keys() ; enu.hasMoreElements() ;) {									
+									String nombre = (String)enu.nextElement();
+							        nuevoPunto.put(nombre,vectorSim.elementAt(j).get(nombre));							        
+								}
+								nuevoPunto.put(params.elementAt(i).getNombre(),valorParam);
+								vecAux.add(nuevoPunto);
 								valorParam = valorParam + params.elementAt(i).getValorPaso();
 							}						
 						}
-					}				
-					vectorSim = vecAux;		
+					}
+					vectorSim = vecAux;
+//					System.out.println("Tamaño vectorSim " + vectorSim.size());
+//					for(int k=0;k<vectorSim.size();k++){
+//						for (Enumeration enu = vectorSim.elementAt(k).keys() ; enu.hasMoreElements() ;) {
+//					         String nombre = (String)enu.nextElement();
+//					         System.out.println("-------");
+//							 System.out.println("Parámetro " + nombre);
+//							 System.out.println("Valor " + vectorSim.elementAt(k).get(nombre));
+//							 System.out.println("-------");
+//						}												
+//					}
+				
 				}				
 			}
-			System.out.println(vectorSim.size());
-		}
-		
+			
+		}		
 	}
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == spinnerTmax){
 			setTMax(spTmax.getNumber().doubleValue());
 		}
-		if (e.getSource() == spinnerNumBoidsOk){
-			setNumBoidsOk(spNumBoidsOk.getNumber().intValue());
-		}
+//		if (e.getSource() == spinnerNumBoidsOk){
+//			setNumBoidsOk(spNumBoidsOk.getNumber().intValue());
+//		}
 		
 	}
 	
@@ -126,13 +142,13 @@ public class ConfigParam extends JApplet implements ActionListener, ChangeListen
 		return vectorSim;
 	}
 
-	public int getNumBoidsOk() {
-		return numBoidsOk;
-	}
-
-	public void setNumBoidsOk(int numBoidsOk) {
-		this.numBoidsOk = numBoidsOk;
-	}
+//	public int getNumBoidsOk() {
+//		return numBoidsOk;
+//	}
+//
+//	public void setNumBoidsOk(int numBoidsOk) {
+//		this.numBoidsOk = numBoidsOk;
+//	}
 
 	public double getTMax() {
 		return tMax;
