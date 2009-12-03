@@ -3,6 +3,7 @@ package boids;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.QuadCurve2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +31,8 @@ public class Simulador {
 	/** Número de boids que han alcanzado el objetivo yse consideran suficientes para detener
 	 *  la simulación*/
 	int numBoidsOkDeseados;
+	/** Número de iteraciones que tarda la simulación en alcanzar la condición de éxito*/
+	int contIteraciones;
 	/** Distancia a la que se considera que se ha alcanzado el objetivo*/
 	double distOk;
 	/** Número de boids que forman la bandada*/
@@ -42,9 +45,18 @@ public class Simulador {
 	Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
 	/** Vector que contiene los puntos de diseño para la simulación por lotes*/
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
+	Vector <TipoCamino> caminos = new Vector<TipoCamino>();
 	
 	//-------------Constructores---------------------------------------------------
 	
+	public Vector<TipoCamino> getCaminos() {
+		return caminos;
+	}
+
+	public void setCaminos(Vector<TipoCamino> caminos) {
+		this.caminos = caminos;
+	}
+
 	/**Constructor por defecto*/
 	public Simulador(){
 		setTamanoBandada(20);
@@ -83,6 +95,7 @@ public class Simulador {
     	for (int i=0; i< tamanoBandada;i++){
     		getBandada().add(new Boid(new Matrix(2,1),new Matrix(2,1)));	
     	}
+    	posicionarBandada(posInicial);
 	}
 	public void crearBandada(){
 //		if (getBandada().size() > 0)
@@ -91,6 +104,7 @@ public class Simulador {
     	for (int i=0; i< tamanoBandada;i++){
     		getBandada().add(new Boid(new Matrix(2,1),new Matrix(2,1)));	
     	}
+    	posicionarBandada(posInicial);
 	}
 	
 	/**Limpia el vector de boids*/	
@@ -104,11 +118,10 @@ public class Simulador {
 	 * bandada
 	 */
 	public void posicionarBandada(Matrix puntoIni){
-		setPosInicial(puntoIni);
 		if (getBandada().size()>0){
 			for (int i=0;i<getBandada().size();i++){				
 //				double pos[] = {e.getX()+Math.random()*getTamanoBan()*2, e.getY()+Math.random()*getTamanoBan()*2};
-				double pos[] = {posInicial.get(0,0)+Math.random(), posInicial.get(1,0)+Math.random()};
+				double pos[] = {puntoIni.get(0,0)+Math.random(), puntoIni.get(1,0)+Math.random()};
 				Matrix posi = new Matrix(pos,2);
 				double vel[] = {Math.random(),Math.random()};
 				Matrix velo = new Matrix(vel,2);
@@ -120,6 +133,7 @@ public class Simulador {
 			}
 		}
 	}
+	
 	/**
 	 * Retira un boid de la bandada principal y lo inserta en la bandada de los boids que han
 	 * alcanzado el objetivo
@@ -159,6 +173,7 @@ public class Simulador {
 					}
 //					Si está lo suficientemente cerca del objetivo lo quitamos de la bandada
 					if (dist < distOk){
+						getBandada().elementAt(j).setNumIteraciones(getContIteraciones());
 						traspasarBoid(j);
 						numBoidsOk++; // Incremento el numero de boids que han llegado al objetivo
 					}
@@ -178,11 +193,14 @@ public class Simulador {
 		double tiempoIni = System.currentTimeMillis();
 		tiempoInvertido = 0;
 		setNumBoidsOk(0);
+		contIteraciones = 0;
 //			 Bucle while que realiza una simulación completa, es decir, hasta que lleguen
 			// los boids especificados o hasta que se cumpla el tiempo máximo
 		while ((tiempoInvertido < tiempoMax) && (numBoidsOk < numBoidsOkDeseados)){
 			indMinAnt =  moverBoids(indMinAnt);
 			tiempoInvertido = (System.currentTimeMillis()-tiempoIni)/1000;
+			contIteraciones++; // Llevamos la cuenta de las iteraciones del bucle principal de 
+			// la simulación
 		}
 		// Escribimos los datos en un fichero
 //		int devuelto = selectorArchivo.showSaveDialog(null);
@@ -198,10 +216,8 @@ public class Simulador {
 //    			System.err.println(ioe.getMessage());
 //    		}
 //        }        
-		System.out.println("Ya acabó el simuporlotes");
-		System.out.println(getNumBoidsOk());
 	}
-	
+
 	public  Vector<Matrix> mejoraRuta(Vector<Matrix> ruta){
 		Vector<Matrix> rutaMejor = new Vector<Matrix>();		
 		int ptoBase=0;
@@ -220,13 +236,13 @@ public class Simulador {
 				caminoOcupado = false;
 			}
 		}
-		rutaMejor.add(ruta.elementAt(ruta.size()-1));
+		rutaMejor.add(ruta.elementAt(ruta.size()-1));		
 		return rutaMejor;
 	}
 	
 	public void configurador(Hashtable designPoint,String[] nomParam){
 		for (Enumeration e = designPoint.keys() ; e.hasMoreElements() ;) {
-//	         System.out.println(e.nextElement());
+//	         System.out.println();
 	         String param = (String)e.nextElement();
 	         int indice = 0;
 	         for(int i=0;i<nomParam.length;i++){  //Buscamos coincidencia en las etiquetas
@@ -245,11 +261,11 @@ public class Simulador {
 	         case 6: Boid.setPesoAlineacion((Double)designPoint.get(nomParam[indice]));break;
 	         case 7: Boid.setPesoObjetivo((Double)designPoint.get(nomParam[indice]));break;
 	         case 8: Boid.setPesoObstaculo((Double)designPoint.get(nomParam[indice]));break;
-	         case 9: Boid.setPesoLider((Double)designPoint.get(nomParam[indice]));break;
-	         case 10: Boid.setVelMax((Double)designPoint.get(nomParam[indice]));break;
+	         case 9: Boid.setPesoLider((Double)designPoint.get(nomParam[indice]));break;	         
+	         case 10: Boid.setVelMax((Double)designPoint.get(nomParam[indice]));break;	         
 	         case 11: setTamanoBandada((Double)designPoint.get(nomParam[indice]));
-	         		  crearBandada();
-	         		  break;
+	         		  crearBandada();break;	         		  
+	         case 12:setNumBoidsOkDeseados((Double)designPoint.get(nomParam[indice]));break;	         	         		  
 	         }
 	     }
 	}
@@ -273,13 +289,22 @@ public class Simulador {
 	public void setNumBoidsOk(int numBoidsOk) {
 		this.numBoidsOk = numBoidsOk;
 	}
+	
+	public void setNumBoidsOk(double numBoidsOk) {
+		this.numBoidsOk = (int)numBoidsOk;
+	}
 
 	public Matrix getObjetivo() {
 		return objetivo;
 	}
+	
+	public int getContIteraciones() {
+		return contIteraciones;
+	}
 
 	public void setObjetivo(Matrix objetivo) {
 		this.objetivo = objetivo;
+		Boid.setObjetivo(this.objetivo.get(0,0),this.objetivo.get(1,0));
 	}
 
 	public Vector<Obstaculo> getObstaculos() {
@@ -296,6 +321,7 @@ public class Simulador {
 
 	public void setPosInicial(Matrix posInicial) {
 		this.posInicial = posInicial;
+		posicionarBandada(posInicial);
 	}
 
 	public int getTamanoBandada() {
@@ -338,7 +364,11 @@ public class Simulador {
 	public void setNumBoidsOkDeseados(int numBoidsOkDeseados) {
 		this.numBoidsOkDeseados = numBoidsOkDeseados;
 	}
-
+	
+	public void setNumBoidsOkDeseados(double numBoidsOkDeseados) {
+		this.numBoidsOkDeseados = (int)numBoidsOkDeseados;
+	}
+	
 	public double getTiempoInvertido() {
 		return tiempoInvertido;
 	}
