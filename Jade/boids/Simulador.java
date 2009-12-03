@@ -46,6 +46,9 @@ public class Simulador {
 	/** Vector que contiene los puntos de diseño para la simulación por lotes*/
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
 	Vector <TipoCamino> caminos = new Vector<TipoCamino>();
+	private int incrNuevosBoids = 10;
+	private int contNuevosBoids = incrNuevosBoids ;
+	
 	
 	//-------------Constructores---------------------------------------------------
 	
@@ -158,24 +161,36 @@ public class Simulador {
 		int indMin = 0;
 		double distMin = Double.POSITIVE_INFINITY;
 		boolean liderEncontrado = false;
-		// Iteramos sobre toda la bandada
+		contIteraciones++;
+		if(contIteraciones > contNuevosBoids){
+			for(int g=0;g<3;g++){
+				double pos[] = {posInicial.get(0,0)+Math.random(), posInicial.get(1,0)+Math.random()};
+				Matrix posi = new Matrix(pos,2);
+				double vel[] = {Math.random(),Math.random()};
+				Matrix velo = new Matrix(vel,2);
+				getBandada().add(new Boid(posi,velo));
+			}			
+			contNuevosBoids = contIteraciones + incrNuevosBoids;
+		}
+		// Iteramos sobre toda la bandada		
 		if (getBandada().size() != 0){
+			System.out.println("Tamaño actual de la bandada " + getBandada().size());
 			for (int j = 0;j<getBandada().size();j++){
 				getBandada().elementAt(j).mover(getBandada()
 						,getObstaculos(),j,Boid.getObjetivo());
 				// Buscamos al lider
 				if (getBandada().elementAt(j).isCaminoLibre()){
 					double dist = getBandada().elementAt(j).getDistObjetivo();
-					if (dist < distMin){
-						distMin = dist;
-						indMin = j;
-						liderEncontrado = true;
-					}
 //					Si está lo suficientemente cerca del objetivo lo quitamos de la bandada
 					if (dist < distOk){
 						getBandada().elementAt(j).setNumIteraciones(getContIteraciones());
 						traspasarBoid(j);
 						numBoidsOk++; // Incremento el numero de boids que han llegado al objetivo
+					}
+					if (dist < distMin){
+						distMin = dist;
+						indMin = j;
+						liderEncontrado = true;
 					}
 				}					
 			}
@@ -194,6 +209,8 @@ public class Simulador {
 		tiempoInvertido = 0;
 		setNumBoidsOk(0);
 		contIteraciones = 0;
+//		int contNuevosBoids = 20;
+//		int ind = 0;
 //			 Bucle while que realiza una simulación completa, es decir, hasta que lleguen
 			// los boids especificados o hasta que se cumpla el tiempo máximo
 		while ((tiempoInvertido < tiempoMax) && (numBoidsOk < numBoidsOkDeseados)){
@@ -201,6 +218,17 @@ public class Simulador {
 			tiempoInvertido = (System.currentTimeMillis()-tiempoIni)/1000;
 			contIteraciones++; // Llevamos la cuenta de las iteraciones del bucle principal de 
 			// la simulación
+//			bandada.add(new Boid(posInicial,new Matrix(2,1)));
+//			getBandada().remove(ind);
+//			System.out.println("tamaño de la bandada " + bandada.size());
+//			if(ind < bandada.size()){
+//				ind++;
+//			}
+//			if(contIteraciones > contNuevosBoids){
+//				
+//				contNuevosBoids = contNuevosBoids + 20;
+//			}
+			
 		}
 		// Escribimos los datos en un fichero
 //		int devuelto = selectorArchivo.showSaveDialog(null);
