@@ -38,11 +38,12 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
+
 import com.bruceeckel.swing.Console;
 
 import Jama.Matrix;
 import boids.*;
-import boids.Obstaculo;
 
 class Dibujante2 extends JPanel{
 	Vector<Boid> bandadaPintar;// = new Vector<Boid>();
@@ -100,6 +101,14 @@ class Dibujante2 extends JPanel{
 						rutaLider.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
 								bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
 					}
+//					boolean choque = false;
+//					for(int k=0;k<obstaculosPintar.size();k++){
+//						if(rutaLider.intersects(obstaculosPintar.elementAt(k).getForma())){
+//							choque = true;
+//							break;
+//						}						
+//					}
+//					System.out.println("Hay intersección? "+choque);
 					g2.draw(rutaLider);
 				}
 				else
@@ -396,27 +405,25 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
         	}        	        	
         }
         if (e.getSource() == simulacionBatch){
-        	if (getConfigurador().getVectorSim().size() > 0){
-        		System.out.println("Existe un vector de puntos de diseño de tamaño "+getConfigurador().getVectorSim().size());
-        		batch = true;
-        		simulacionBatch.setEnabled(false);
-//        		for(int i=0;i<getConfigurador().getVectorSim().size();i++){
-////        			if (play){
-//        				getSim().configurador(getConfigurador().getVectorSim().elementAt(i),
-//        						getConfigurador().getNomParam());
-//        				getSim().simuPorLotes();        			
-////        				if (pintarEscena){
-//        				this.pintor.introducirBandada(this.getSim().getBandada());
-//        				this.pintor.repaint();     
-//        				System.out.println("La hostia!!!!");
-////        				}
-////        				getSim().crearBandada(20);
-//        				getSim().posicionarBandada(getSim().getPosInicial());
-////        			}        				
-//        				System.out.println("Ya acabó el simuporlotes");
-//        				System.out.println(getSim().getNumBoidsOk());
-//        		}        		
-        	}        	
+        	if(!batch){        		
+        		if (getConfigurador().getVectorSim().size() > 0){
+            		System.out.println("Existe un vector de puntos de diseño de tamaño "+getConfigurador().getVectorSim().size());
+            		batch = true;
+            		simulacionBatch.setText("Parar simulación batch");
+            		colocarBan.setEnabled(false);
+    				colocarObs.setEnabled(false);
+    				pausa.setEnabled(false);
+//            		simulacionBatch.setEnabled(false);
+            	}
+        	}
+        	else{
+        		simulacionBatch.setText("Ejecutar simulación batch");
+        		colocarBan.setEnabled(true);
+				colocarObs.setEnabled(true);
+				pausa.setEnabled(true);
+				batch = false;
+        	}
+        	        	
         }
 	}
 	
@@ -535,7 +542,94 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 			}
 			cont = alturaPanel-15;
 		}
+		// Bucles para crear el escenario simétrico 4 caminos
+		// Definición de las constantes que situan los obstáculos
+		int x1 = anchuraPanel - 7*(anchuraPanel/8);
+		int y11 =0;
+		int y12 = alturaPanel - 5*(alturaPanel/6);
+		int y13 = alturaPanel - 4*(alturaPanel/6);
+		int y14 = alturaPanel - 2*(alturaPanel/6);
+		int y15 = alturaPanel - 1*(alturaPanel/6);
+		int x2 = anchuraPanel - 7*(anchuraPanel/10);
+		int y21 = alturaPanel - alturaPanel/7;
+		int y22 = alturaPanel - 3*(alturaPanel/7);
+		int y23 = alturaPanel - 4*(alturaPanel/7);
+		int y24 = alturaPanel - 6*(alturaPanel/7);
+		int x3 = anchuraPanel - 5*(anchuraPanel/10);
+		int y31 = alturaPanel - alturaPanel/3;
+		int y32 = alturaPanel - 2*(alturaPanel/3);
+		
+		// Bucle generador de obstáculos (eje Y)
+		boolean interruptor = true;
+		for(int i=x1; i<=anchuraPanel;i=i+anchuraPanel/8){
+			if (interruptor){ // columnas pares
+				for(int j=y22;j<y21;j=j+10){
+					double posObstaculos[] = {i,j};
+					double velObstaculos[] = {0,0};				
+					Matrix posiObs = new Matrix(posObstaculos,2);
+					Matrix velObs = new Matrix(velObstaculos,2);
+					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+				}
+				for(int j=y24;j<y23;j=j+10){
+					double posObstaculos[] = {i,j};
+					double velObstaculos[] = {0,0};				
+					Matrix posiObs = new Matrix(posObstaculos,2);
+					Matrix velObs = new Matrix(velObstaculos,2);
+					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+				}
+				interruptor = false;
+			}else{// Columnas impares
+				for(int j=y11;j<y12;j=j+10){
+					double posObstaculos[] = {i,j};
+					double velObstaculos[] = {0,0};				
+					Matrix posiObs = new Matrix(posObstaculos,2);
+					Matrix velObs = new Matrix(velObstaculos,2);
+					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+				}
+				for(int j=y13;j<y14;j=j+10){
+					double posObstaculos[] = {i,j};
+					double velObstaculos[] = {0,0};				
+					Matrix posiObs = new Matrix(posObstaculos,2);
+					Matrix velObs = new Matrix(velObstaculos,2);
+					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+				}
+				for(int j=y15;j<alturaPanel;j=j+10){
+					double posObstaculos[] = {i,j};
+					double velObstaculos[] = {0,0};				
+					Matrix posiObs = new Matrix(posObstaculos,2);
+					Matrix velObs = new Matrix(velObstaculos,2);
+					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+				}
+				interruptor = true;
+			}
+		}
+		
+		// Bucle generador de obstáculos eje X
+		int conta = 0;
+		int[][] limites = {{anchuraPanel-5*(anchuraPanel/8),anchuraPanel-4*(anchuraPanel/8)}
+		,{anchuraPanel-3*(anchuraPanel/8),anchuraPanel-2*(anchuraPanel/8)},
+		{0,0},
+		{anchuraPanel-5*(anchuraPanel/8),anchuraPanel-4*(anchuraPanel/8)},
+		{0,anchuraPanel-7*(anchuraPanel/8)}};
+		for(int i=y12;i<=alturaPanel && conta < 5;i=i+alturaPanel/6){
+			for(int j=limites[conta][0];j<limites[conta][1];j = j+10){
+				double posObstaculos[] = {j,i};
+				double velObstaculos[] = {0,0};				
+				Matrix posiObs = new Matrix(posObstaculos,2);
+				Matrix velObs = new Matrix(velObstaculos,2);
+				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+			}
+			conta++;
+		}
 		gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
+		
+		//creamos las zonas para clasificar las rutas
+		
+		// Indico la posición del objetivo y la posición inicial
+		double[] objetivo = {70,alturaPanel/2};
+		gui.getSim().setObjetivo(new Matrix(objetivo,2));
+		double[] inicial = {anchuraPanel - anchuraPanel/12,alturaPanel/2};
+		gui.getSim().setPosInicial(new Matrix(inicial,2));
 		
 		//-------------------------------------------------------------------
 		//----------------BUCLE PRINCIPAL------------------------------------
@@ -551,21 +645,62 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 			}
 			if (gui.batch){
 				gui.getSim().getBoidsOk().clear();
-				gui.getSim().setNumBoidsOkDeseados(gui.getConfigurador().getNumBoidsOk());
+//				gui.getSim().setNumBoidsOkDeseados(gui.getConfigurador().getNumBoidsOk());
 				gui.getSim().setTiempoMax(gui.getConfigurador().getTMax());
-				for(int i=0;i<gui.getConfigurador().getVectorSim().size();i++){
+				for(int i=0;i<gui.getConfigurador().getVectorSim().size() && gui.batch;i++){
 	    				gui.getSim().configurador(gui.getConfigurador().getVectorSim().elementAt(i),
 	    						gui.getConfigurador().getNomParam());
 	    				gui.getSim().crearBandada();
 	    				gui.getSim().posicionarBandada(gui.getSim().getPosInicial());	    				
 	    				gui.getSim().simuPorLotes();
-	    				gui.tiempoConsumido.setText("Tardó " + gui.getSim().getTiempoInvertido() + " seg");
+	    				gui.tiempoConsumido.setText("Tardó " + gui.getSim().getContIteraciones() + " iteraciones");
 	    				if (gui.pintarEscena){
 	    					for(int j=0;j<gui.getSim().getBoidsOk().size();j++){
 	    						gui.getSim().getBoidsOk().elementAt(j).setRutaBoid(
 	    								gui.getSim().mejoraRuta(
 	    								gui.getSim().getBoidsOk().elementAt(j).getRutaBoid()));
-	    					}	    					
+	    						gui.getSim().getBoidsOk().elementAt(j).setRutaBoid(
+	    								gui.getSim().mejoraRuta(
+	    								gui.getSim().getBoidsOk().elementAt(j).getRutaBoid()));
+	    						//El identificador del tipo de camino será el número de vertices que tiene el
+	    						//camino después de haber mejorado la ruta
+	    						int identificador = gui.getSim().getBoidsOk().elementAt(j).getRutaBoid().size();
+	    						//Compruebo si el vector de caminos está vacio
+	    						if(gui.getSim().getCaminos().size()<=0){
+	    							//Creo un tipo nuevo de camino y añado un boid al nº de boids que han tomado
+	    							//este camino
+	    							gui.getSim().getCaminos().add(new TipoCamino(identificador,1,
+	    									gui.getSim().getBoidsOk().elementAt(j).getNumIteraciones(),
+	    									gui.getSim().getBoidsOk().elementAt(j).calculaLongRuta()));
+	    						}else{
+	    							//Bucle para buscar coincidencias entre los identificadores existentes
+		    						//y el identificador de la ruta del boid actual
+		    						boolean encontrado = false;
+		    						for(int k=0;k<gui.getSim().getCaminos().size() && !encontrado;k++){
+		    							if(gui.getSim().getCaminos().elementAt(k).getIdentificador() == identificador){
+		    								encontrado = true;
+		    								gui.getSim().getCaminos().elementAt(k).addFrecuencia();
+		    								gui.getSim().getCaminos().elementAt(k).addCoste(
+		    										gui.getSim().getBoidsOk().elementAt(j).getNumIteraciones());
+		    								gui.getSim().getCaminos().elementAt(k).addLongitud(
+		    										gui.getSim().getBoidsOk().elementAt(j).calculaLongRuta());
+		    							}
+		    						}
+		    						if(!encontrado){
+		    							gui.getSim().getCaminos().add(new TipoCamino(identificador,1,		    									
+			    							gui.getSim().getBoidsOk().elementAt(j).getNumIteraciones(),
+			    							gui.getSim().getBoidsOk().elementAt(j).calculaLongRuta()));
+		    						}
+	    						}	
+	    					}
+	    					//Imprimimos en consola el resultado
+	    					for(int q=0;q<gui.getSim().getCaminos().size();q++){
+	    						System.out.println("La frec del camino tipo "+
+	    								(gui.getSim().getCaminos().elementAt(q).getIdentificador()-1) +
+	    								" es "+ gui.getSim().getCaminos().elementAt(q).getFrecuencia() + 
+	    								" ,tiene un coste de " + gui.getSim().getCaminos().elementAt(q).calculaCoste() + 
+	    								" y una longitud de " + gui.getSim().getCaminos().elementAt(q).getLongitudMedia());
+	    					}
 	    					gui.pintor.introducirBandada(gui.getSim().getBoidsOk());
 	    					gui.pintor.repaint();     	    				
 	    				}	    				
@@ -574,8 +709,12 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	    				System.out.println("Ya acabó el simuporlotes");
 	    				System.out.println(gui.getSim().getNumBoidsOk());
 	    		}
+				gui.simulacionBatch.setText("Ejecutar simulación batch");
+        		gui.colocarBan.setEnabled(true);
+				gui.colocarObs.setEnabled(true);
+				gui.pausa.setEnabled(true);
 				gui.batch = false;
-				gui.simulacionBatch.setEnabled(true);				
+//				gui.simulacionBatch.setEnabled(true);				
 			}			
 		}
 	}
