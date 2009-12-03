@@ -33,18 +33,26 @@ public class Boid implements Serializable{
 	public boolean lider = false;
 	public boolean caminoLibre = false;
 	static double radioObstaculo = 30;
-	static double radioCohesion = 100;
-	static double radioSeparacion = 100;
-	static double radioAlineacion = 30;
-	static double pesoCohesion = 0.05;
+	static double radioCohesion = 300;
+	static double radioSeparacion = 50;
+	static double radioAlineacion = 120;
+	static double pesoCohesion = 0.01;
 	static double pesoSeparacion = 10;
 	static double pesoAlineacion = 0.5;
-	static double pesoObjetivo = 0.1;
+	static double pesoObjetivo = 1;
 	static double pesoObstaculo = 300;
 	static double pesoLider = 5;
-	static double velMax = 15;
+	static double velMax = 10;
 	static double coorObjetivo[] = {800,800};
 	static Matrix objetivo = new Matrix(coorObjetivo,2);
+	/** Dependiendo del valor de esta variable el boid tendrá tendencia a esquivar un obstáculo
+	 *  hacia un lado o hacia otro. Este valor se asignará aleatoriamente al crear el objeto 
+	 *  Boid*/
+	double tendenciaRepulsion = 0;
+	/** Indica cuantas iteraciones a tardado el boid en alcanzar el objetivo*/
+	int numIteraciones;
+	/** Longitud de la ruta seguida por le boid*/
+	double longitudRuta;
 	/**Constructor donde se inicializa la posición y velocidad de cada boid,
 	 * además de el objeto gráfico que lo representará*/
 	public Boid(Matrix posicion, Matrix velocidad) {
@@ -64,6 +72,12 @@ public class Boid implements Serializable{
 		triangulo.closePath();
 		triangulo.transform(AffineTransform.getTranslateInstance(posicion.get(0,0),posicion.get(1,0)));
 		this.nuevoPuntoRuta(this.getPosicion());
+		tendenciaRepulsion = Math.random();
+//		if (aleatorio < 0.5){
+//			tendenciaRepulsion = true;			
+//		}
+//		else
+//			tendenciaRepulsion = false;
 	}
 	
 	/**Método optimizado para calcular la cohesión, alineación y separación para un boid. 
@@ -79,13 +93,16 @@ public class Boid implements Serializable{
 		boolean liderCerca = false;
 		int indLider = 0;
 		int cont = 0;
+		int contAlineacion = 0;
 		double dist = 0;
 		// Bucle que recorre toda la bandada
 		for (int i=0;i < bandada.size();i++){
 			if (i != indBoid){
 				dist = bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();
-				if (dist < radioAlineacion)
+				if (dist < radioAlineacion){
 					velMedia = velMedia.plus(bandada.elementAt(i).getVelocidad());
+					contAlineacion++;
+				}
 				// if para la alineacion
 				if (!this.isLider() && !liderCerca){
 					if (dist < radioCohesion){
@@ -94,7 +111,7 @@ public class Boid implements Serializable{
 							indLider = i;
 						}
 						else{
-							centroMasa = centroMasa.plus(bandada.elementAt(i).getPosicion());
+							centroMasa = centroMasa.plus(bandada.elementAt(i).getPosicion());							
 							cont++;
 						}
 					}
@@ -110,12 +127,18 @@ public class Boid implements Serializable{
 		// calculos para la separacion
 		separa = separa.times(pesoSeparacion);
 		// calculos para la velocidad de alineación
-		velMedia = velMedia.timesEquals(1/bandada.size()-1);
-		velMedia = velMedia.minus(this.getVelocidad());
-		velMedia = velMedia.times(pesoAlineacion);
+		if (contAlineacion != 0){
+			velMedia = velMedia.timesEquals((double)1/(double)contAlineacion);
+			velMedia = velMedia.minus(this.getVelocidad());
+			velMedia = velMedia.times(pesoAlineacion);
+		}else{
+			velMedia.set(0,0,0);
+			velMedia.set(1,0,0);
+		}
+		
 		// calculos para la cohesión
 		if (cont != 0 && liderCerca == false){
-			centroMasa = centroMasa.timesEquals(1/cont);
+			centroMasa = centroMasa.times((double)1/(double)cont);
 			velCohesion = (centroMasa.minus(this.getPosicion())).times(pesoCohesion);
 		}
 		if(liderCerca == true){
@@ -215,6 +238,7 @@ public class Boid implements Serializable{
 	public Matrix evitaObstaculo(Vector<Obstaculo> obstaculos,Boid b){
 		double pos[] = {0,0};
 		Matrix c = new Matrix(pos,2);
+		Matrix compensacion = new Matrix(2,1);
 		boolean caminoOcupado = false;
 		double dist = 0;
 		Line2D recta = 
@@ -230,6 +254,20 @@ public class Boid implements Serializable{
 			if (!caminoOcupado)// Sólo se calcula la intersección mientras el camino siga sin ocupar
 				caminoOcupado = recta.intersects(obstaculos.elementAt(i).getForma());
 		}
+		//Evitamos que la repulsion de los obstáculos sea perpendicular al obstáculo
+		if (tendenciaRepulsion>0 && tendenciaRepulsion<= 0.5){
+			compensacion.set(0,0,-c.get(1,0));
+			compensacion.set(1,0,c.get(0,0));
+		}
+		else if(tendenciaRepulsion>0.5 && tendenciaRepulsion<= 1){
+			compensacion.set(0,0,c.get(1,0));
+			compensacion.set(1,0,-c.get(0,0));
+		}
+		//Añado una componente aleatoria al peso de la compensación para intentar evitar
+		//ciclos límite
+//		compensacion.timesEquals(Math.random());
+		compensacion.timesEquals(2);
+		c = c.plus(compensacion);
 		c = c.times(pesoObstaculo);
 		setCaminoLibre(!caminoOcupado); // Si no tiene el camino ocupado por el momento es el lider
 		return c;
@@ -269,10 +307,28 @@ public class Boid implements Serializable{
 	public Vector<Matrix> getRutaBoid(){
 		return rutaBoid;
 	}
-	 public void resetRuta(){
+	public void resetRuta(){
 		 rutaBoid.clear();
-	 }
+	}
+	 
+	public double  calculaLongRuta(){
+		longitudRuta = 0;
+		for(int i=0;i<rutaBoid.size()-1;i++){
+			double dx=rutaBoid.elementAt(i+1).get(0,0)-rutaBoid.elementAt(i).get(0,0);
+			double dy=rutaBoid.elementAt(i+1).get(1,0)-rutaBoid.elementAt(i).get(1,0);
+			longitudRuta = longitudRuta + Math.sqrt(dx*dx + dy*dy);
+		}
+		return longitudRuta;
+	}
 	
+	public double getLongitudRuta() {
+		return longitudRuta;
+	}
+
+	public void setLongitudRuta(double longitudRuta) {
+		this.longitudRuta = longitudRuta;
+	}
+
 	public Matrix getPosicion() {
 		return posicion;
 	}
@@ -464,6 +520,14 @@ public class Boid implements Serializable{
 
 	public static double getRadioObstaculo() {
 		return radioObstaculo;
+	}
+	
+	public int getNumIteraciones() {
+		return numIteraciones;
+	}
+
+	public void setNumIteraciones(int numIteraciones) {
+		this.numIteraciones = numIteraciones;
 	}
 
 	public static void setRadioObstaculo(double radioObstaculo) {
