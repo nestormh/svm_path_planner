@@ -157,7 +157,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 	public boolean esperaCentroBase(int intentos) {
 		int intact=intentos;
 		long espera=5000;
-		while ((posicionDeLaBase(true)!=null) && (--intact)>0) { 
+		while ((posicionDeLaBase(true)==null) && (--intact)>0) { 
 			try {
 				Thread.sleep(espera); //esperamos
 				espera*=2; //duplicamos la espera para la siguiente vez
