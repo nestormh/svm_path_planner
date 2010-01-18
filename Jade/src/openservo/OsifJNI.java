@@ -3,6 +3,7 @@
  */
 package openservo;
 
+
 /**
  * 
  * Clase para el acceso desde Java a las funcione de la librería OSIF
@@ -15,18 +16,18 @@ public class OsifJNI {
 	 * Initialise the OSIF USB interface. Enumerates all connected OSIF devices.
 	 * @returns <0 error 1 success
 	 **/
-	public native int OSIF_init();
+	public static native int OSIF_init();
 
 	/**
 	 *De-Initialise the OSIF USB interface
 	 **/
-	public native int OSIF_deinit();
+	public static native int OSIF_deinit();
 
 	/**
 	 * Return the OSIF library version for compatibility checks
 	 * @returns an integer of the version number in  majorminor xxyy
 	 **/
-	public native int OSIF_get_libversion();
+	public static native int OSIF_get_libversion();
 
 	/**
 	 *Write data to the I2C device.
@@ -48,11 +49,11 @@ public class OsifJNI {
 	 *
 	 *@returns <0 error 1 success
 	 **/
-	public native int OSIF_write_data(int adapter, int i2c_addr, byte addr, byte[] data, int buflen, boolean issue_stop );
+	public static native int OSIF_write_data(int adapter, int i2c_addr, byte addr, byte[] data, int buflen, boolean issue_stop );
 
 
 	/** Shortcut to the above function. This will always send a stop at the end of the write **/
-	public int OSIF_write(int adapter, int i2c_addr, byte addr, byte[] data , int buflen) {
+	public static int OSIF_write(int adapter, int i2c_addr, byte addr, byte[] data , int buflen) {
 		return OSIF_write_data(adapter, i2c_addr, addr, data,buflen, true );
 	}
 
@@ -76,7 +77,7 @@ public class OsifJNI {
 	 *
 	 *@returns <0 error 1 success
 	 **/
-	public native int OSIF_writeonly(int adapter, int i2c_addr, byte[] data, int buflen, boolean issue_stop );
+	public static native int OSIF_writeonly(int adapter, int i2c_addr, byte[] data, int buflen, boolean issue_stop );
 
 	/**
 	 *Read from the I2C device at address addr
@@ -95,10 +96,10 @@ public class OsifJNI {
 	 *
 	 *@returns <0 error 1 success
 	 **/
-	public native int OSIF_read_data(int adapter, int i2c_addr, byte addr, byte[] data, int buflen, boolean issue_stop );
+	public static native int OSIF_read_data(int adapter, int i2c_addr, byte addr, byte[] data, int buflen, boolean issue_stop );
 
 	/** Shortcut to the above function with an I2C stop bit **/
-	public int OSIF_read(int adapter, int i2c_addr, byte addr, byte[] data, int buflen)
+	public static int OSIF_read(int adapter, int i2c_addr, byte addr, byte[] data, int buflen)
 	{
 		return OSIF_read_data(adapter, i2c_addr, addr, data, buflen, true);
 	}
@@ -121,7 +122,7 @@ public class OsifJNI {
 	 *
 	 *@returns <0 error 1 success
 	 **/
-	public native int OSIF_readonly(int adapter, int i2c_addr, byte[] data, int buflen, boolean issue_stop );
+	public static native int OSIF_readonly(int adapter, int i2c_addr, byte[] data, int buflen, boolean issue_stop );
 
 
 	/**
@@ -137,7 +138,7 @@ public class OsifJNI {
 	 *
 	 *@returns NULL si error, ó array de dispositivos encontrados
 	 **/
-	public native int[] OSIF_scan(int adapter);
+	public static native int[] OSIF_scan(int adapter);
 
 	/**
 	 *Probe a device at a given address to see if it will ACK
@@ -147,7 +148,7 @@ public class OsifJNI {
 	 *
 	 *@returns true if a device is found at address
 	 **/
-	public native boolean OSIF_probe(int adapter, int i2c_addr );
+	public static native boolean OSIF_probe(int adapter, int i2c_addr );
 
 	/**
 	 *Write 1 to a register in the device in one transaction.
@@ -161,14 +162,14 @@ public class OsifJNI {
 	 *
 	 *@returns <0 error 1 success
 	 **/
-	public native int OSIF_command(int adapter, int i2c_addr, byte command);
+	public static native int OSIF_command(int adapter, int i2c_addr, byte command);
 	
 	/**
 	 *Get a count of the connected OSIF adapters:
 	 *
 	 *@returns number of connected OSIF adapters
 	 **/
-	public native int OSIF_get_adapter_count();
+	public static native int OSIF_get_adapter_count();
 
 	/**
 	 *Query the connected OSIF for its name.
@@ -178,7 +179,7 @@ public class OsifJNI {
 	 *
 	 *@returns character string filled with the name
 	 **/
-	public native String OSIF_get_adapter_name(int adapter);
+	public static native String OSIF_get_adapter_name(int adapter);
 	
 	
 	/**
@@ -196,7 +197,7 @@ public class OsifJNI {
 	 * SDA
 	 * SCL
 	 **/
-	public native int OSIF_io_set_ddr(int adapter_no, int ddr, int enabled);
+	public static native int OSIF_io_set_ddr(int adapter_no, int ddr, int enabled);
 
 	/**
 	 *GPIO Control function to set pin high or low
@@ -206,19 +207,19 @@ public class OsifJNI {
 	 *@param io: a bitwise OR of the pins to set high (1) or low (0)
 	 *    eg gpio1(TX) and gpio2(RX)  00000011 or 0x03 to set those high
 	 **/
-	public native int OSIF_io_set_out(int adapter_no, int io);
+	public static native int OSIF_io_set_out(int adapter_no, int io);
 	
 	/**
 	 *GPIO Control function to read the status of all gpio pins
 	 *
 	 *@param adapter: integer of the adapter scanned. 0 indexed.
 	 **/
-	public native int OSIF_io_get_in(int adapter);
+	public static native int OSIF_io_get_in(int adapter);
 
 	/**
 	 *Shortcut functions to update one pin only
 	 **/
-	public native int OSIF_io_set_out1(int adapter_no, int gpio, int state);
+	public static native int OSIF_io_set_out1(int adapter_no, int gpio, int state);
 
 	/**
 	 *get the current pin states. THIS IS NOT suitable for asking the osif what pins
@@ -226,22 +227,132 @@ public class OsifJNI {
 	 *tabs on what pins are being set/uset
 	 *@param adapter: integer of the adapter scanned. 0 indexed.
 	 **/
-	public native int OSIF_io_get_current(int adapter);
+	public static native int OSIF_io_get_current(int adapter);
 
 	/**
 	 *Disable the I2C port in case we want to use the pins as gpios,
 	 *or if we want to reset the I2C module
 	 *@param adapter: integer of the adapter scanned. 0 indexed.
 	 **/
-	public native int OSIF_disable_i2c(int adapter);
+	public static native int OSIF_disable_i2c(int adapter);
 	
 	/**
 	 *Enable a previously disabled I2C module
 	 **/
-	public native int OSIF_enable_i2c(int adapter);
+	public static native int OSIF_enable_i2c(int adapter);
 	
 	
-	public native int OSIF_set_bitrate(int adapter_no, int bitrate_hz);
-	public native int OSIF_set_twbr(int adapter_no, int twbr, int twps);
+	public static native int OSIF_set_bitrate(int adapter_no, int bitrate_hz);
+	public static native int OSIF_set_twbr(int adapter_no, int twbr, int twps);
 
+	
+	static {
+		System.out.println("java.library.path:"
+				+System.getProperty("java.library.path"));
+       //System.loadLibrary( "openservo_OsifJNI.so" );
+		String libreria=System.getProperty("user.dir")+"/lib/openservo/openservo_OsifJNI.so";
+		System.out.println("Tratamos de cargar: "+libreria);
+	   System.load(libreria);
+    }
+
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		System.out.println("\n Comienza el programa");
+		
+		System.out.println("\n Inicializamos OSIF");
+		if(OSIF_init()<0) {
+			System.err.println("\nProbema al inicializar OSIF\n");
+			System.exit(1);
+		}
+		
+		System.out.println("\n La versión de la librería OSIF es "+OSIF_get_libversion());
+		
+		System.out.println("\n Obtenemos numero de adaptadores OSIF");
+		int numAdap;
+		if((numAdap=OSIF_get_adapter_count())<=0) {
+			System.out.println("\nNo hay adaptadores OSIF\n");
+			System.exit(0);
+		}
+		
+		System.out.println("\n Obtenemos nombre de los adaptadores OSIF");
+		for(int adp=0; adp<numAdap; adp++) {
+			String nomAdap;
+
+			if((nomAdap=OSIF_get_adapter_name(adp))==null) {
+				System.out.println("\nAdaptador "+adp+"No tiene nombre");
+			} else {
+				System.out.println("\nNombre del Adaptador "+adp+": >"+nomAdap+"<");
+			}
+			
+			int dispos[];
+			if((dispos=OSIF_scan(adp))==null) {
+				System.out.println("\nProblema al obtener dispositivoe en adaptador "+adp);
+				continue; //pasamos al siguiente adaptador
+			}
+			System.out.println("\nAdaptador "+adp+" tiene "+dispos.length+" dispositivos I2C");
+			
+			for(int ida=0; ida<dispos.length; ida++) {
+				int da=dispos[ida];
+				if(!OSIF_probe(adp, da )) {
+					System.out.println("\nEl dispositivo "+da+" NO respondió");
+					continue; //pasamos al siguiente dispositivo
+				}
+				System.out.println("\nEl dispositivo "+da+" respondió");
+				
+				//Vemos si es OpenServo
+				byte[] buffer=new byte[4];
+				if(OSIF_read(adp, da, (byte) 0x00, buffer, 1)<0) {
+					System.err.println("\n Error al leer de dispositivo "+da);
+				} else
+					if(buffer[0]==0x00) {
+						System.out.println("\nEl dispositivo "+da+" ES OpenServo");
+					} else {
+						System.out.println("\nEl dispositivo "+da+" NO es OpenServo");
+						continue; //siguiente dispositivo
+					}
+				
+				//Obtenemos más datos
+				if(OSIF_read(adp, da, (byte) 0x00, buffer, 4)<0) {
+					System.err.println("\n Error al leer de dispositivo "+da);
+				} else
+					System.out.println(String.format("\n\tTipo %d.%d  Version: %d.%d"
+							,buffer[0],buffer[1],buffer[2],buffer[3]));
+				//Timer
+				if(OSIF_read(adp, da, (byte) 0x06, buffer, 2)<0){
+					System.err.println("\n Error al leer de dispositivo "+da);
+				} else {
+					int vel=(((int)buffer[0]&0xff)<<8 + (int)buffer[1]&0xff);
+					System.out.println("\n\tTimer:"+vel);
+				}
+				//posicion
+				if(OSIF_read(adp, da, (byte) 0x08, buffer, 2)<0){
+					System.err.println("\n Error al leer de dispositivo "+da);
+				} else {
+					int pos=(((int)buffer[0]&0xff)<<8 + (int)buffer[1]&0xff);
+					System.out.println("\n\tPosicion:"+pos);
+				}
+				//velocidad
+				if(OSIF_read(adp, da, (byte) 0x0A, buffer, 2)<0){
+					System.err.println("\n Error al leer de dispositivo "+da);
+				} else {
+					int vel=(((int)buffer[0]&0xff)<<8 + (int)buffer[1]&0xff);
+					System.out.println("\n\tVelocidad:"+vel);
+				}
+				//Timer
+				if(OSIF_read(adp, da, (byte) 0x06, buffer, 2)<0){
+					System.err.println("\n Error al leer de dispositivo "+da);
+				} else {
+					int vel=(((int)buffer[0]&0xff)<<8 + (int)buffer[1]&0xff);
+					System.out.println("\n\tTimer:"+vel);
+				}
+			}
+
+		}
+		
+		System.out.println("\nCerramos la conexion a OSIF");
+		OSIF_deinit();
+	}
 }

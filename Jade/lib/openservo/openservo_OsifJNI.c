@@ -11,7 +11,7 @@
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1init
-  (JNIEnv *env, jobject obj) {
+  (JNIEnv *env, jclass clase) {
    return OSIF_init();
 }
 
@@ -21,7 +21,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1init
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1deinit
-  (JNIEnv *env, jobject obj) {
+  (JNIEnv *env, jclass clase) {
    return OSIF_deinit();
 }
 
@@ -31,7 +31,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1deinit
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1get_1libversion
-  (JNIEnv *env, jobject obj) {
+  (JNIEnv *env, jclass clase) {
 	unsigned char data[8];
 	return OSIF_get_libversion(data);
 }
@@ -42,7 +42,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1get_1libversion
  * Signature: (IIB[BIZ)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1write_1data
-  (JNIEnv *env, jobject obj, jint adapter, jint i2c_addr, jbyte addr, jbyteArray jdata, jint buflen, jboolean issue_stop) {
+  (JNIEnv *env, jclass clase, jint adapter, jint i2c_addr, jbyte addr, jbyteArray jdata, jint buflen, jboolean issue_stop) {
 	jsize TamMen=(*env)->GetArrayLength(env, jdata);
 	if (TamMen<buflen) return -1; //array demasiado pequeño
 
@@ -61,7 +61,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1write_1data
  * Signature: (II[BIZ)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1writeonly
-  (JNIEnv *env, jobject obj, jint adapter, jint i2c_addr, jbyteArray jdata, jint buflen, jboolean issue_stop){
+  (JNIEnv *env, jclass clase, jint adapter, jint i2c_addr, jbyteArray jdata, jint buflen, jboolean issue_stop){
 	jsize TamMen=(*env)->GetArrayLength(env, jdata);
 	if (TamMen<buflen) return -1; //array demasiado pequeño
 
@@ -81,7 +81,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1writeonly
  * Signature: (IIB[BIZ)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1read_1data
-  (JNIEnv *env, jobject obj, jint adapter, jint i2c_addr, jbyte addr, jbyteArray jdata, jint buflen, jboolean issue_stop) {
+  (JNIEnv *env, jclass clase, jint adapter, jint i2c_addr, jbyte addr, jbyteArray jdata, jint buflen, jboolean issue_stop) {
 	jsize TamMen=(*env)->GetArrayLength(env, jdata);
 	if (TamMen<buflen) return -1; //array demasiado pequeño
 
@@ -101,7 +101,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1read_1data
  * Signature: (II[BIZ)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1readonly
-(JNIEnv *env, jobject obj, jint adapter, jint i2c_addr, jbyteArray jdata, jint buflen, jboolean issue_stop) {
+(JNIEnv *env, jclass clase, jint adapter, jint i2c_addr, jbyteArray jdata, jint buflen, jboolean issue_stop) {
 	jsize TamMen=(*env)->GetArrayLength(env, jdata);
 	if (TamMen<buflen) return -1; //array demasiado pequeño
 
@@ -121,7 +121,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1readonly
  * Signature: (I)[I
  */
 JNIEXPORT jintArray JNICALL Java_openservo_OsifJNI_OSIF_1scan
-  (JNIEnv *env, jobject obj, jint adapter) {
+  (JNIEnv *env, jclass clase, jint adapter) {
 	int dev_count;
 	int devices[MAX_I2C_DEVICES];
 	int resultado=OSIF_scan(adapter, devices, &dev_count );
@@ -141,7 +141,7 @@ JNIEXPORT jintArray JNICALL Java_openservo_OsifJNI_OSIF_1scan
  * Signature: (II)Z
  */
 JNIEXPORT jboolean JNICALL Java_openservo_OsifJNI_OSIF_1probe
-  (JNIEnv *env, jobject obj, jint adapter, jint i2c_addr) {
+  (JNIEnv *env, jclass clase, jint adapter, jint i2c_addr) {
 	return OSIF_probe(adapter, i2c_addr );
 }
 
@@ -151,7 +151,7 @@ JNIEXPORT jboolean JNICALL Java_openservo_OsifJNI_OSIF_1probe
  * Signature: (IIB)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1command
-  (JNIEnv *env, jobject obj, jint adapter, jint i2c_addr, jbyte command) {
+  (JNIEnv *env, jclass clase, jint adapter, jint i2c_addr, jbyte command) {
 	return OSIF_command(adapter, i2c_addr, command);
 }
 
@@ -161,7 +161,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1command
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1get_1adapter_1count
-  (JNIEnv *env, jobject obj) {
+  (JNIEnv *env, jclass clase) {
 	return OSIF_get_adapter_count();
 }
 
@@ -171,7 +171,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1get_1adapter_1count
  * Signature: (I)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_openservo_OsifJNI_OSIF_1get_1adapter_1name
-  (JNIEnv *env, jobject obj, jint adapter) {
+  (JNIEnv *env, jclass clase, jint adapter) {
   	char name[80];
   	OSIF_get_adapter_name(adapter, name);
 	return (*env)->NewStringUTF(env, name);
@@ -183,7 +183,7 @@ JNIEXPORT jstring JNICALL Java_openservo_OsifJNI_OSIF_1get_1adapter_1name
  * Signature: (III)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1ddr
-  (JNIEnv *env, jobject obj, jint adapter_no, jint ddr, jint enabled) {
+  (JNIEnv *env, jclass clase, jint adapter_no, jint ddr, jint enabled) {
   	return OSIF_io_set_ddr(adapter_no, ddr, enabled);
 }
 
@@ -193,7 +193,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1ddr
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1out
-  (JNIEnv *env, jobject obj, jint adapter_no, jint io) {
+  (JNIEnv *env, jclass clase, jint adapter_no, jint io) {
   	return OSIF_io_set_out(adapter_no, io);
 }
 
@@ -203,7 +203,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1out
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1get_1in
-  (JNIEnv *env, jobject obj, jint adapter_no) {
+  (JNIEnv *env, jclass clase, jint adapter_no) {
   	return OSIF_io_get_in(adapter_no);
 }
 
@@ -213,7 +213,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1get_1in
  * Signature: (III)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1out1
-  (JNIEnv *env, jobject obj, jint adapter_no, jint gpio, jint state) {
+  (JNIEnv *env, jclass clase, jint adapter_no, jint gpio, jint state) {
 	return   	OSIF_io_set_out1( adapter_no, gpio, state);
 }
 
@@ -223,7 +223,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1out1
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1get_1current
-  (JNIEnv *env, jobject obj, jint adapter_no) {
+  (JNIEnv *env, jclass clase, jint adapter_no) {
 	return OSIF_io_get_current(adapter_no);
 }
 
@@ -233,7 +233,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1get_1current
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1disable_1i2c
-  (JNIEnv *env, jobject obj, jint adapter_no){
+  (JNIEnv *env, jclass clase, jint adapter_no){
 	return OSIF_disable_i2c(adapter_no);
 }
 
@@ -243,7 +243,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1disable_1i2c
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1enable_1i2c
-  (JNIEnv *env, jobject obj, jint adapter_no) {
+  (JNIEnv *env, jclass clase, jint adapter_no) {
 	return OSIF_enable_i2c(adapter_no);
 }
 
@@ -253,7 +253,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1enable_1i2c
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1set_1bitrate
-  (JNIEnv *env, jobject obj, jint adapter_no, jint bitrate_hz) {
+  (JNIEnv *env, jclass clase, jint adapter_no, jint bitrate_hz) {
 	return OSIF_set_bitrate(adapter_no, bitrate_hz);
 }
 
@@ -263,7 +263,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1set_1bitrate
  * Signature: (III)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1set_1twbr
-  (JNIEnv *env, jobject obj, jint adapter_no, jint twbr, jint twps) {
+  (JNIEnv *env, jclass clase, jint adapter_no, jint twbr, jint twps) {
 	return   	OSIF_set_twbr( adapter_no, twbr, twps);
 }
 

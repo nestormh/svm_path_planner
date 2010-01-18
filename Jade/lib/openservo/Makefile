@@ -1,6 +1,6 @@
 CC=gcc
 
-openservo_OsifJNI.so : openservo_OsifJNI.c Makefile
+openservo_OsifJNI.so : openservo_OsifJNI.c Makefile openservo_OsifJNI.h
 	$(CC) -Wall openservo_OsifJNI.c \
 	-o openservo_OsifJNI.so \
 	-I $(JAVA_HOME)/include/ -I $(JAVA_HOME)/include/linux/ \

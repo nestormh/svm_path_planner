@@ -13,7 +13,7 @@ extern "C" {
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1init
-  (JNIEnv *, jobject);
+  (JNIEnv *, jclass);
 
 /*
  * Class:     openservo_OsifJNI
@@ -21,7 +21,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1init
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1deinit
-  (JNIEnv *, jobject);
+  (JNIEnv *, jclass);
 
 /*
  * Class:     openservo_OsifJNI
@@ -29,7 +29,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1deinit
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1get_1libversion
-  (JNIEnv *, jobject);
+  (JNIEnv *, jclass);
 
 /*
  * Class:     openservo_OsifJNI
@@ -37,7 +37,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1get_1libversion
  * Signature: (IIB[BIZ)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1write_1data
-  (JNIEnv *, jobject, jint, jint, jbyte, jbyteArray, jint, jboolean);
+  (JNIEnv *, jclass, jint, jint, jbyte, jbyteArray, jint, jboolean);
 
 /*
  * Class:     openservo_OsifJNI
@@ -45,7 +45,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1write_1data
  * Signature: (II[BIZ)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1writeonly
-  (JNIEnv *, jobject, jint, jint, jbyteArray, jint, jboolean);
+  (JNIEnv *, jclass, jint, jint, jbyteArray, jint, jboolean);
 
 /*
  * Class:     openservo_OsifJNI
@@ -53,7 +53,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1writeonly
  * Signature: (IIB[BIZ)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1read_1data
-  (JNIEnv *, jobject, jint, jint, jbyte, jbyteArray, jint, jboolean);
+  (JNIEnv *, jclass, jint, jint, jbyte, jbyteArray, jint, jboolean);
 
 /*
  * Class:     openservo_OsifJNI
@@ -61,7 +61,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1read_1data
  * Signature: (II[BIZ)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1readonly
-  (JNIEnv *, jobject, jint, jint, jbyteArray, jint, jboolean);
+  (JNIEnv *, jclass, jint, jint, jbyteArray, jint, jboolean);
 
 /*
  * Class:     openservo_OsifJNI
@@ -69,7 +69,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1readonly
  * Signature: (I)[I
  */
 JNIEXPORT jintArray JNICALL Java_openservo_OsifJNI_OSIF_1scan
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -77,7 +77,7 @@ JNIEXPORT jintArray JNICALL Java_openservo_OsifJNI_OSIF_1scan
  * Signature: (II)Z
  */
 JNIEXPORT jboolean JNICALL Java_openservo_OsifJNI_OSIF_1probe
-  (JNIEnv *, jobject, jint, jint);
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -85,7 +85,7 @@ JNIEXPORT jboolean JNICALL Java_openservo_OsifJNI_OSIF_1probe
  * Signature: (IIB)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1command
-  (JNIEnv *, jobject, jint, jint, jbyte);
+  (JNIEnv *, jclass, jint, jint, jbyte);
 
 /*
  * Class:     openservo_OsifJNI
@@ -93,7 +93,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1command
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1get_1adapter_1count
-  (JNIEnv *, jobject);
+  (JNIEnv *, jclass);
 
 /*
  * Class:     openservo_OsifJNI
@@ -101,7 +101,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1get_1adapter_1count
  * Signature: (I)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_openservo_OsifJNI_OSIF_1get_1adapter_1name
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -109,7 +109,7 @@ JNIEXPORT jstring JNICALL Java_openservo_OsifJNI_OSIF_1get_1adapter_1name
  * Signature: (III)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1ddr
-  (JNIEnv *, jobject, jint, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -117,7 +117,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1ddr
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1out
-  (JNIEnv *, jobject, jint, jint);
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -125,7 +125,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1out
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1get_1in
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -133,7 +133,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1get_1in
  * Signature: (III)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1out1
-  (JNIEnv *, jobject, jint, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -141,7 +141,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1set_1out1
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1get_1current
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -149,7 +149,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1io_1get_1current
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1disable_1i2c
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -157,7 +157,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1disable_1i2c
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1enable_1i2c
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jclass, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -165,7 +165,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1enable_1i2c
  * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1set_1bitrate
-  (JNIEnv *, jobject, jint, jint);
+  (JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     openservo_OsifJNI
@@ -173,7 +173,7 @@ JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1set_1bitrate
  * Signature: (III)I
  */
 JNIEXPORT jint JNICALL Java_openservo_OsifJNI_OSIF_1set_1twbr
-  (JNIEnv *, jobject, jint, jint, jint);
+  (JNIEnv *, jclass, jint, jint, jint);
 
 #ifdef __cplusplus
 }
