@@ -262,21 +262,34 @@ public class OsifJNI {
 	public static void main(String[] args) {
 		System.out.println("\n Comienza el programa");
 		
-		System.out.println("\n Inicializamos OSIF");
-		if(OSIF_init()<0) {
-			System.err.println("\nProbema al inicializar OSIF\n");
-			System.exit(1);
+		int intentos=4;
+		int numAdap=0;
+		while(true) {
+			if(intentos==0) {
+				System.out.println("\nPasaron los intentos\n");
+				//System.exit(0);
+				numAdap=1;
+				OSIF_init();
+				break;
+			}
+
+			System.out.println("\n Inicializamos OSIF");
+			if(OSIF_init()<0) {
+				System.err.println("\nProbema al inicializar OSIF\n");
+				System.exit(1);
+			}
+
+			System.out.println("\n La versión de la librería OSIF es "+OSIF_get_libversion());
+
+			numAdap=OSIF_get_adapter_count();
+			System.out.println("\n Obtenemos numero de adaptadores OSIF:"+numAdap);
+			if((numAdap)>0) {
+				break;
+			}
+			intentos--;
+			OSIF_deinit();
+			try { Thread.sleep(3000); } catch (Exception e) {}
 		}
-		
-		System.out.println("\n La versión de la librería OSIF es "+OSIF_get_libversion());
-		
-		System.out.println("\n Obtenemos numero de adaptadores OSIF");
-		int numAdap;
-		if((numAdap=OSIF_get_adapter_count())<=0) {
-			System.out.println("\nNo hay adaptadores OSIF\n");
-			System.exit(0);
-		}
-		
 		System.out.println("\n Obtenemos nombre de los adaptadores OSIF");
 		for(int adp=0; adp<numAdap; adp++) {
 			String nomAdap;
@@ -307,7 +320,7 @@ public class OsifJNI {
 				if(OSIF_read(adp, da, (byte) 0x00, buffer, 1)<0) {
 					System.err.println("\n Error al leer de dispositivo "+da);
 				} else
-					if(buffer[0]==0x00) {
+					if(buffer[0]==0x01) {
 						System.out.println("\nEl dispositivo "+da+" ES OpenServo");
 					} else {
 						System.out.println("\nEl dispositivo "+da+" NO es OpenServo");

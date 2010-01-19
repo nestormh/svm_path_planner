@@ -145,6 +145,8 @@ int main ( int argc, char *argv[] ) {
         exit(1);
 #endif
     }
+    
+    printf("Numero de adaptadores OSIF = %d\n",OSIF_get_adapter_count());
 
     int devices[128];
     int dev_count=0;

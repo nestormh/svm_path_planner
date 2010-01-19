@@ -17,3 +17,6 @@ openservo_OsifJNI.so : openservo_OsifJNI.c Makefile openservo_OsifJNI.h
 	 
 #Para generar cabecera
 # javah -classpath ../../bin -jni openservo.OsifJNI
+
+clean:
+	rm *.so

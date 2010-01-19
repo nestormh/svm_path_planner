@@ -493,7 +493,9 @@ EXPORT int OSIF_scan(int adapter, int devices[], int *dev_count )
         }
         else
         {
+#ifdef DEBUG_OUT
             printf("Found device at address 0x%02x, dc %d\n", i, *dev_count);
+#endif
             devices[*dev_count] = i;
             (*dev_count)++;
 #ifdef DEBUG_OUT
@@ -592,7 +594,7 @@ EXPORT int OSIF_get_adapter_count(void)
 #ifdef DEBUG_OUT	
     printf( "OSIF_get_apapter_count: adapter count (physical) %d\n", adapter_count+1);
 #endif
-    return adapter_count;
+    return adapter_count+1;
 }
 
 /**
