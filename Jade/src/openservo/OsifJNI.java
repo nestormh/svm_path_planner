@@ -267,15 +267,12 @@ public class OsifJNI {
 		while(true) {
 			if(intentos==0) {
 				System.out.println("\nPasaron los intentos\n");
-				//System.exit(0);
-				numAdap=1;
-				OSIF_init();
-				break;
+				System.exit(0);
 			}
 
 			System.out.println("\n Inicializamos OSIF");
 			if(OSIF_init()<0) {
-				System.err.println("\nProbema al inicializar OSIF\n");
+				System.out.println("\nProbema al inicializar OSIF\n");
 				System.exit(1);
 			}
 
@@ -318,7 +315,7 @@ public class OsifJNI {
 				//Vemos si es OpenServo
 				byte[] buffer=new byte[4];
 				if(OSIF_read(adp, da, (byte) 0x00, buffer, 1)<0) {
-					System.err.println("\n Error al leer de dispositivo "+da);
+					System.out.println("\n Error al leer de dispositivo "+da);
 				} else
 					if(buffer[0]==0x01) {
 						System.out.println("\nEl dispositivo "+da+" ES OpenServo");
@@ -329,37 +326,48 @@ public class OsifJNI {
 				
 				//Obtenemos más datos
 				if(OSIF_read(adp, da, (byte) 0x00, buffer, 4)<0) {
-					System.err.println("\n Error al leer de dispositivo "+da);
+					System.out.println("\n Error al leer de dispositivo "+da);
 				} else
 					System.out.println(String.format("\n\tTipo %d.%d  Version: %d.%d"
 							,buffer[0],buffer[1],buffer[2],buffer[3]));
-				//Timer
-				if(OSIF_read(adp, da, (byte) 0x06, buffer, 2)<0){
-					System.err.println("\n Error al leer de dispositivo "+da);
-				} else {
-					int vel=(((int)buffer[0]&0xff)<<8 + (int)buffer[1]&0xff);
-					System.out.println("\n\tTimer:"+vel);
-				}
-				//posicion
-				if(OSIF_read(adp, da, (byte) 0x08, buffer, 2)<0){
-					System.err.println("\n Error al leer de dispositivo "+da);
-				} else {
-					int pos=(((int)buffer[0]&0xff)<<8 + (int)buffer[1]&0xff);
-					System.out.println("\n\tPosicion:"+pos);
-				}
-				//velocidad
-				if(OSIF_read(adp, da, (byte) 0x0A, buffer, 2)<0){
-					System.err.println("\n Error al leer de dispositivo "+da);
-				} else {
-					int vel=(((int)buffer[0]&0xff)<<8 + (int)buffer[1]&0xff);
-					System.out.println("\n\tVelocidad:"+vel);
-				}
-				//Timer
-				if(OSIF_read(adp, da, (byte) 0x06, buffer, 2)<0){
-					System.err.println("\n Error al leer de dispositivo "+da);
-				} else {
-					int vel=(((int)buffer[0]&0xff)<<8 + (int)buffer[1]&0xff);
-					System.out.println("\n\tTimer:"+vel);
+				
+				for(int veces=10; veces>0; veces--) {
+					//Timer
+					if(OSIF_read(adp, da, (byte) 0x06, buffer, 2)<0){
+						System.out.println("\n Error al leer de dispositivo "+da);
+					} else {
+//						//Volcamos en hexadecimal
+//						for (int i=0; i<buffer.length; i++)
+//						System.out.printf(" %02X",buffer[i]);
+//						System.out.printf("\n");
+
+
+						int vel=((((int)buffer[0])&0xff)<<8) + (((int)buffer[1])&0xff);
+						System.out.println("\tTimer:"+(vel));
+					}
+					//posicion
+					if(OSIF_read(adp, da, (byte) 0x08, buffer, 2)<0){
+						System.out.println("Error al leer de dispositivo "+da);
+					} else {
+
+						int pos=((((int)buffer[0])&0xff)<<8) + (((int)buffer[1])&0xff);
+						System.out.println("\tPosicion:"+pos);
+					}
+					//velocidad
+					if(OSIF_read(adp, da, (byte) 0x0A, buffer, 2)<0){
+						System.out.println("Error al leer de dispositivo "+da);
+					} else {
+						int vel=((((int)buffer[0])&0xff)<<8) + (((int)buffer[1])&0xff);
+						System.out.println("\tVelocidad:"+vel);
+					}
+					//Timer
+					if(OSIF_read(adp, da, (byte) 0x06, buffer, 2)<0){
+						System.out.println("Error al leer de dispositivo "+da);
+					} else {
+						int vel=((((int)buffer[0])&0xff)<<8) + (((int)buffer[1])&0xff);
+						System.out.println("\tTimer:"+vel);
+					}
+					try { Thread.sleep(3000); } catch (Exception e) {}					
 				}
 			}
 
