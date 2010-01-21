@@ -8,7 +8,7 @@ package openservo;
  * 
  * Clase para el acceso desde Java a las funcione de la librería OSIF
  * 
- * @author alberto
+ * @author Alberto Hamilton
  *
  */
 public class OsifJNI {
