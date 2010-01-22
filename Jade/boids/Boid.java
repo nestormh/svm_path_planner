@@ -21,6 +21,8 @@ import com.bruceeckel.swing.Console;
 import Jama.Matrix;
 
 public class Boid implements Serializable{
+	/**Vector con las componentes de aceleracion del boid*/
+	Matrix aceleracion;
 	/**Vector con las componentes de velocidad del boid*/
 	Matrix velocidad;
 	/**Vector con las componentes de posicion del boid*/
@@ -32,7 +34,8 @@ public class Boid implements Serializable{
 	Vector<Matrix> rutaBoid = new Vector<Matrix>();
 	public boolean lider = false;
 	public boolean caminoLibre = false;
-	static double radioObstaculo = 30;
+	public boolean conectado = false;
+	static double radioObstaculo = 50;
 	static double radioCohesion = 300;
 	static double radioSeparacion = 50;
 	static double radioAlineacion = 120;
@@ -40,11 +43,16 @@ public class Boid implements Serializable{
 	static double pesoSeparacion = 10;
 	static double pesoAlineacion = 0.5;
 	static double pesoObjetivo = 1;
-	static double pesoObstaculo = 300;
-	static double pesoLider = 5;
+	static double pesoObstaculo = 300;  // 300
+	static double pesoLider = 10;
 	static double velMax = 10;
+	
+	static double pesoDistOrigen = 1;
+	static double pesoAntiguo = 1;
+	
 	static double coorObjetivo[] = {800,800};
 	static Matrix objetivo = new Matrix(coorObjetivo,2);
+	static Matrix posInicial;
 	/** Dependiendo del valor de esta variable el boid tendrá tendencia a esquivar un obstáculo
 	 *  hacia un lado o hacia otro. Este valor se asignará aleatoriamente al crear el objeto 
 	 *  Boid*/
@@ -53,24 +61,45 @@ public class Boid implements Serializable{
 	int numIteraciones;
 	/** Longitud de la ruta seguida por le boid*/
 	double longitudRuta;
+	private double valoracion;
+	private double antiguo;
+	
+	public double getAntiguo() {
+		return antiguo;
+	}
+
+	public void setAntiguo(double antiguo) {
+		this.antiguo = antiguo;
+	}
+
+	public double getValoracion() {
+		return valoracion;
+	}
+
+	public void setValoracion(double valoracion) {
+		this.valoracion = valoracion;
+	}
+
 	/**Constructor donde se inicializa la posición y velocidad de cada boid,
 	 * además de el objeto gráfico que lo representará*/
-	public Boid(Matrix posicion, Matrix velocidad) {
+	public Boid(Matrix posicion, Matrix velocidad,Matrix aceleracion) {
+		this.aceleracion = aceleracion;
 		this.velocidad = velocidad;
 		this.posicion = posicion;
-		lineaDireccion.setLine(this.posicion.get(0,0),this.posicion.get(1,0),
-				this.velocidad.get(0,0),this.velocidad.get(1, 0));
+		this.posInicial = posicion;
+//		lineaDireccion.setLine(this.posicion.get(0,0),this.posicion.get(1,0),
+//				this.velocidad.get(0,0),this.velocidad.get(1, 0));
 		/**Inicialización del aspecto gráfico del cuerpo del boid*/
-		float ptosX[] = {0,-2,2};
-		float ptosY[] = {1,-1,-1};
-		triangulo = new GeneralPath(GeneralPath.WIND_NON_ZERO,ptosX.length);
-		triangulo.moveTo (ptosX[0], ptosY[0]);
-
-		for (int index = 1; index < ptosX.length; index++) {
-		 	 triangulo.lineTo(ptosX[index], ptosY[index]);
-		};
-		triangulo.closePath();
-		triangulo.transform(AffineTransform.getTranslateInstance(posicion.get(0,0),posicion.get(1,0)));
+//		float ptosX[] = {0,-2,2};
+//		float ptosY[] = {1,-1,-1};
+//		triangulo = new GeneralPath(GeneralPath.WIND_NON_ZERO,ptosX.length);
+//		triangulo.moveTo (ptosX[0], ptosY[0]);
+//
+//		for (int index = 1; index < ptosX.length; index++) {
+//		 	 triangulo.lineTo(ptosX[index], ptosY[index]);
+//		};
+//		triangulo.closePath();
+//		triangulo.transform(AffineTransform.getTranslateInstance(posicion.get(0,0),posicion.get(1,0)));
 		this.nuevoPuntoRuta(this.getPosicion());
 		tendenciaRepulsion = Math.random();
 //		if (aleatorio < 0.5){
@@ -263,11 +292,9 @@ public class Boid implements Serializable{
 			compensacion.set(0,0,c.get(1,0));
 			compensacion.set(1,0,-c.get(0,0));
 		}
-		//Añado una componente aleatoria al peso de la compensación para intentar evitar
-		//ciclos límite
-//		compensacion.timesEquals(Math.random());
-		compensacion.timesEquals(2);
+		compensacion.timesEquals(1.5);
 		c = c.plus(compensacion);
+//		c = compensacion;
 		c = c.times(pesoObstaculo);
 		setCaminoLibre(!caminoOcupado); // Si no tiene el camino ocupado por el momento es el lider
 		return c;
@@ -276,7 +303,7 @@ public class Boid implements Serializable{
 	/** Método que calcula todas las reglas para cada Boid, las suma vectorialmente
 	 * 	, calcula el desplazamiento y lo realiza*/
 	
-	public void mover(Vector<Boid> bandada,Vector<Obstaculo> obstaculos,int indBoid, Matrix obj){
+	public void calculaMover(Vector<Boid> bandada,Vector<Obstaculo> obstaculos,int indBoid, Matrix obj){
 		Matrix desp = new Matrix(2,1);
 //		Matrix despCohesion = new Matrix(2,1);
 //		Matrix despSeparacion = new Matrix(2,1);
@@ -290,14 +317,23 @@ public class Boid implements Serializable{
 		despAliCoheSep = aliCoheSep(bandada, indBoid);
 		despObjetivo = seguirObjetivo(bandada,indBoid,obj);
 		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid));
-		desp = limitaVelocidad(((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad()));
+		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad());
+//		desp = limitaVelocidad(((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad()));
+		desp = desp.timesEquals(0.01);
+		setAceleracion(desp);
 //		desp = limitaVelocidad(despCohesion.plus(despSeparacion).plus(despAlineacion).plus(despObjetivo).plus(despObstaculo).plus(this.getVelocidad()));
-		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
-		this.setVelocidad(desp);
-		this.setPosicion(this.getPosicion().plus(this.getVelocidad()));
+//		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
+//		this.setVelocidad(desp);
+		this.setVelocidad(limitaVelocidad(getAceleracion().plus(this.getVelocidad()))); 
+//		this.setPosicion(this.getPosicion().plus(this.getVelocidad()));
 //		setLineaDireccion(getPosicion().get(0,0),getPosicion().get(1,0),
 //				(getPosicion().plus(getVelocidad().times(2))).get(0,0),
 //				(getPosicion().plus(getVelocidad().times(2))).get(1,0));
+	}
+	
+	public void mover(){
+//		this.setVelocidad(limitaVelocidad(getAceleracion().plus(this.getVelocidad()))); 
+		this.setPosicion(this.getPosicion().plus(this.getVelocidad()));
 	}
 	
 	private void nuevoPuntoRuta(Matrix pto){
@@ -334,7 +370,7 @@ public class Boid implements Serializable{
 	}
 	
 	public void setPosicion(Matrix pos) {
-		this.posicion = pos;
+		this.posicion = pos;		
 		nuevoPuntoRuta(this.posicion);
 	}
 //	public void setPosicion(double x, double y) {
@@ -348,6 +384,13 @@ public class Boid implements Serializable{
 	
 	public void setVelocidad(Matrix vel) {
 		this.velocidad = vel;
+	}
+	public Matrix getAceleracion() {
+		return aceleracion;
+	}
+
+	public void setAceleracion(Matrix aceleracion) {
+		this.aceleracion = aceleracion;
 	}
 //	public void setVelocidad(double velX, double velY) {
 //		this.velocidad.set(0,0,velX);
@@ -408,6 +451,16 @@ public class Boid implements Serializable{
 		 double distancia = (objetivo.minus(this.getPosicion())).norm2();
 		return distancia;		
 	}
+	/**Calcula la distancia euclidea existente entre el Boid y la posición inicial de la bandada*/
+	public double getDistOrigen(){
+		 double distancia = (posInicial.minus(this.getPosicion())).norm2();
+		return distancia;		
+	}
+	
+	public void calculaValoracion(){
+		valoracion = (pesoDistOrigen/getDistOrigen()) + (pesoAntiguo/getAntiguo());
+//		valoracion = pesoDistOrigen/getDistOrigen();
+	}
 	
 	/*Geters de los parametros de los Boids*/
 	public static double getPesoLider() {
@@ -441,49 +494,55 @@ public class Boid implements Serializable{
 	public void setLider(boolean lider) {
 		this.lider = lider;
 	}
-	
+	public boolean isConectado() {
+		return conectado;
+	}
+
+	public void setConectado(boolean conectado) {
+		this.conectado = conectado;
+	}
 
 	
 	public static void main(String[] args) {
-		Vector<Boid> bandada = new Vector<Boid>();
-		Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
-		int tamanoBandada = 50;
-		double coorObjetivo[] = {800,800};
-		Matrix objetivo = new Matrix(coorObjetivo,2);
-		for (int j = 0;j<tamanoBandada;j++){
-			double posAux[] = {Math.random()*800,Math.random()};
-			double velAux[] = {Math.random(),Math.random()};
-			Matrix posi = new Matrix(posAux,2);
-			Matrix vel = new Matrix(velAux,2);			
-			bandada.add(new Boid(posi,vel));
-			double posObstaculos[] = {Math.random(),Math.random()*500};
-			double velObstaculos[] = {0,0};
-			Matrix posiObs = new Matrix(posObstaculos,2);
-			Matrix velObs = new Matrix(velObstaculos,2);
-			obstaculos.add(new Obstaculo(posiObs,velObs));
-		}
-		System.out.println("bandada original de " + bandada.size());
+//		Vector<Boid> bandada = new Vector<Boid>();
+//		Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
+//		int tamanoBandada = 50;
+//		double coorObjetivo[] = {800,800};
+//		Matrix objetivo = new Matrix(coorObjetivo,2);
+//		for (int j = 0;j<tamanoBandada;j++){
+//			double posAux[] = {Math.random()*800,Math.random()};
+//			double velAux[] = {Math.random(),Math.random()};
+//			Matrix posi = new Matrix(posAux,2);
+//			Matrix vel = new Matrix(velAux,2);			
+//			bandada.add(new Boid(posi,vel));
+//			double posObstaculos[] = {Math.random(),Math.random()*500};
+//			double velObstaculos[] = {0,0};
+//			Matrix posiObs = new Matrix(posObstaculos,2);
+//			Matrix velObs = new Matrix(velObstaculos,2);
+//			obstaculos.add(new Obstaculo(posiObs,velObs));
+//		}
+//		System.out.println("bandada original de " + bandada.size());
 //		double posAux[] = {Math.random(),Math.random()};
 //		double velAux[] = {Math.random(),Math.random()};
 //		Matrix posi = new Matrix(posAux,2);
 //		Matrix vel = new Matrix(velAux,2);	
-		JApplet muestraBoid = new JApplet();
-		panelMuestraBoid pintor = new panelMuestraBoid();
+//		JApplet muestraBoid = new JApplet();
+//		panelMuestraBoid pintor = new panelMuestraBoid();
 //		pintor.introducirBoid(new Boid(posi,vel));
-		pintor.introducirBandada(bandada);
-		muestraBoid.getContentPane().add(pintor);		
-		Console.run(muestraBoid,1000,1000);
-		pintor.repaint();
-		while(true){
-			for (int j = 0;j<tamanoBandada;j++){
-				bandada.elementAt(j).mover(bandada,obstaculos,j,objetivo);
-			}
-			pintor.repaint();
-			try {
-	            Thread.sleep(20);
-	        } catch (Exception e) {
-	        }
-		}
+//		pintor.introducirBandada(bandada);
+//		muestraBoid.getContentPane().add(pintor);		
+//		Console.run(muestraBoid,1000,1000);
+//		pintor.repaint();
+//		while(true){
+//			for (int j = 0;j<tamanoBandada;j++){
+//				bandada.elementAt(j).mover(bandada,obstaculos,j,objetivo);
+//			}
+//			pintor.repaint();
+//			try {
+//	            Thread.sleep(20);
+//	        } catch (Exception e) {
+//	        }
+//		}
 	}
 
 	public boolean isCaminoLibre() {

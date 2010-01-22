@@ -32,7 +32,7 @@ public class Simulador {
 	 *  la simulación*/
 	int numBoidsOkDeseados;
 	/** Número de iteraciones que tarda la simulación en alcanzar la condición de éxito*/
-	int contIteraciones;
+	int contIteraciones = 0;
 	/** Distancia a la que se considera que se ha alcanzado el objetivo*/
 	double distOk;
 	/** Número de boids que forman la bandada*/
@@ -46,8 +46,10 @@ public class Simulador {
 	/** Vector que contiene los puntos de diseño para la simulación por lotes*/
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
 	Vector <TipoCamino> caminos = new Vector<TipoCamino>();
-	private int incrNuevosBoids = 10;
+	private int incrNuevosBoids = 4;
+	private int incrPensar = 1;
 	private int contNuevosBoids = incrNuevosBoids ;
+	private int contPensar = 0;
 	
 	
 	//-------------Constructores---------------------------------------------------
@@ -96,7 +98,7 @@ public class Simulador {
 			borrarBandada();
 		setTamanoBandada(numBoids);
     	for (int i=0; i< tamanoBandada;i++){
-    		getBandada().add(new Boid(new Matrix(2,1),new Matrix(2,1)));	
+    		getBandada().add(new Boid(new Matrix(2,1),new Matrix(2,1),new Matrix(2,1)));	
     	}
     	posicionarBandada(posInicial);
 	}
@@ -105,7 +107,7 @@ public class Simulador {
 //			borrarBandada();
 		getBandada().clear();
     	for (int i=0; i< tamanoBandada;i++){
-    		getBandada().add(new Boid(new Matrix(2,1),new Matrix(2,1)));	
+    		getBandada().add(new Boid(new Matrix(2,1),new Matrix(2,1),new Matrix(2,1)));	
     	}
     	posicionarBandada(posInicial);
 	}
@@ -129,10 +131,13 @@ public class Simulador {
 				double vel[] = {Math.random(),Math.random()};
 				Matrix velo = new Matrix(vel,2);
 				this.getBandada().elementAt(i).resetRuta();
-				this.getBandada().elementAt(i).getForma().transform(AffineTransform.getTranslateInstance(pos[0]-getBandada().elementAt(i).getPosicion().get(0,0),
-						pos[1]-getBandada().elementAt(i).getPosicion().get(1,0)));
+//				this.getBandada().elementAt(i).getForma().transform(AffineTransform.getTranslateInstance(pos[0]-getBandada().elementAt(i).getPosicion().get(0,0),
+//						pos[1]-getBandada().elementAt(i).getPosicion().get(1,0)));
 				this.getBandada().elementAt(i).setPosicion(posi);			
 				this.getBandada().elementAt(i).setVelocidad(velo);
+				double ace[] = {0,0};
+				Matrix acel = new Matrix(ace,2);
+				this.getBandada().elementAt(i).setAceleracion(acel);
 			}
 		}
 	}
@@ -158,49 +163,80 @@ public class Simulador {
 	 * el índice del lider de la iteración anterior
 	 */
 	public int moverBoids(int indMinAnt){
-		int indMin = 0;
+		int indLider = 0;
 		double distMin = Double.POSITIVE_INFINITY;
 		boolean liderEncontrado = false;
 		contIteraciones++;
+		//If para controlar la frecuancia a la que se añaden boids a la bandada
 		if(contIteraciones > contNuevosBoids){
-			for(int g=0;g<3;g++){
+			for(int g=0;g<3;g++){				
+//				double pos[] = {Math.abs(700*Math.random()),Math.abs(500*Math.random())};
+//				double pos[] = {getBandada().lastElement().getPosicion().get(0,0)+10*Math.random(),
+//						getBandada().lastElement().getPosicion().get(1,0)+10*Math.random()};
 				double pos[] = {posInicial.get(0,0)+Math.random(), posInicial.get(1,0)+Math.random()};
 				Matrix posi = new Matrix(pos,2);
 				double vel[] = {Math.random(),Math.random()};
 				Matrix velo = new Matrix(vel,2);
-				getBandada().add(new Boid(posi,velo));
+				double ace[] = {0,0};
+				Matrix acel = new Matrix(ace,2);
+				getBandada().add(new Boid(posi,velo,acel));
 			}			
 			contNuevosBoids = contIteraciones + incrNuevosBoids;
 		}
 		// Iteramos sobre toda la bandada		
 		if (getBandada().size() != 0){
-			System.out.println("Tamaño actual de la bandada " + getBandada().size());
+//			System.out.println("Tamaño actual de la bandada " + getBandada().size());
+		
 			for (int j = 0;j<getBandada().size();j++){
-				getBandada().elementAt(j).mover(getBandada()
-						,getObstaculos(),j,Boid.getObjetivo());
-				// Buscamos al lider
-				if (getBandada().elementAt(j).isCaminoLibre()){
-					double dist = getBandada().elementAt(j).getDistObjetivo();
-//					Si está lo suficientemente cerca del objetivo lo quitamos de la bandada
-					if (dist < distOk){
-						getBandada().elementAt(j).setNumIteraciones(getContIteraciones());
-						traspasarBoid(j);
-						numBoidsOk++; // Incremento el numero de boids que han llegado al objetivo
-					}
+				getBandada().elementAt(j).setConectado(false);
+				getBandada().elementAt(j).calculaValoracion();
+				getBandada().elementAt(j).setAntiguo(contIteraciones);
+				if(contIteraciones > contPensar){
+					getBandada().elementAt(j).calculaMover(getBandada()
+						,getObstaculos(),j,Boid.getObjetivo());					
+				}
+//				getBandada().elementAt(j).mover(getBandada()
+//						,getObstaculos(),j,Boid.getObjetivo());
+				getBandada().elementAt(j).mover();
+				double dist = getBandada().elementAt(j).getDistObjetivo();
+				// Deshabilitamos el liderazgo de la iteración anterior antes de retirar ningún 
+				// de la bandada por cercanía al objetivo				
+//				Si está lo suficientemente cerca del objetivo lo quitamos de la bandada
+				if (dist < distOk){
+					getBandada().elementAt(j).setNumIteraciones(getContIteraciones());
+					traspasarBoid(j);
+					numBoidsOk++; // Incremento el numero de boids que han llegado al objetivo
+				}
+				// Buscamos al lider				
+				if (getBandada().elementAt(j).isCaminoLibre()){										
 					if (dist < distMin){
 						distMin = dist;
-						indMin = j;
+						indLider = j;
 						liderEncontrado = true;
 					}
 				}					
 			}
+			if (contIteraciones > contPensar){
+				contPensar = contIteraciones + incrPensar;			
+			}
+			
 			if (indMinAnt<getBandada().size())
 				getBandada().elementAt(indMinAnt).setLider(false);
-			if (liderEncontrado && (indMin<getBandada().size())){
-				getBandada().elementAt(indMin).setLider(true);
+			if (liderEncontrado && (indLider<getBandada().size())){
+				getBandada().elementAt(indLider).setLider(true);
 			}
 		}
-		return indMin;				
+		return indLider;				
+	}
+	
+	public void moverObstaculos(){
+		if(getObstaculos().size() != 0){
+			for(int i = 1;i<getObstaculos().size();i++){
+				double velo[] = {2,0};
+				Matrix vel = new Matrix(velo,2);
+				getObstaculos().elementAt(i).mover(vel);
+			}
+		}
 	}
 
 	public void simuPorLotes(){
@@ -245,7 +281,63 @@ public class Simulador {
 //    		}
 //        }        
 	}
-
+	public Vector<Matrix> calculaRutaDinamica(int indLider){
+		Vector<Matrix> rutaDinamica = new Vector<Matrix>();
+		int boidActual = indLider;
+		int boidAux = 0;
+		int cont = 0;
+		boolean encontrado = false;
+		double valoracion = Double.NEGATIVE_INFINITY;
+		double umbralCercania = 300;
+//		System.out.println("Empezó nueva ruta");
+		rutaDinamica.add(getBandada().elementAt(indLider).getPosicion());
+		while (getBandada().elementAt(boidActual).getDistOrigen()>80 && cont < getBandada().size()){
+			cont++;
+			encontrado=false;
+			for (int i=0;i < bandada.size();i++){				
+				if (i != boidActual){// No se comprueba consigo mismo
+					if(!getBandada().elementAt(i).isConectado()){// El boid no elegido no puede estar
+						// conectado con otro
+						double dist = bandada.elementAt(boidActual).getPosicion().minus(getBandada().elementAt(i).getPosicion()).norm2();
+						if (dist < umbralCercania){// Tiene que estar lo suficientemente cerca
+							boolean caminoOcupado = false;
+							// Calculamos la recta entre ambos boids
+							Line2D recta = 
+								new Line2D.Double(getBandada().elementAt(boidActual).getPosicion().get(0,0),
+										getBandada().elementAt(boidActual).getPosicion().get(1,0),
+										getBandada().elementAt(i).getPosicion().get(0,0),
+										getBandada().elementAt(i).getPosicion().get(1,0));
+							for (int j=0;j < obstaculos.size();j++){
+								double distObs = obstaculos.elementAt(j).getPosicion().minus(
+										getBandada().elementAt(boidActual).getPosicion()).norm2();
+								if (distObs < umbralCercania){
+									if (!caminoOcupado)// Sólo se calcula la intersección mientras el camino siga sin ocupar
+										caminoOcupado = recta.intersects(obstaculos.elementAt(j).getForma());
+								}							
+							}
+							if(!caminoOcupado){
+								if(valoracion < getBandada().elementAt(i).getValoracion())
+								boidAux = i;
+								valoracion = getBandada().elementAt(i).getValoracion();
+								encontrado = true;
+//								System.out.println("encontró compañero");
+							}
+						}
+					}
+				}
+			}
+			if(encontrado){
+				getBandada().elementAt(boidAux).setConectado(true);
+				rutaDinamica.add(getBandada().elementAt(boidAux).getPosicion());
+				boidActual = boidAux;
+//				System.out.println("saltó al siguiente boid");
+			}
+			
+		}
+//		System.out.println("acabó la ruta");
+		rutaDinamica = mejoraRuta(rutaDinamica);
+		return rutaDinamica;
+	}
 	public  Vector<Matrix> mejoraRuta(Vector<Matrix> ruta){
 		Vector<Matrix> rutaMejor = new Vector<Matrix>();		
 		int ptoBase=0;
