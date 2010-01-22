@@ -48,6 +48,7 @@ import boids.*;
 class Dibujante2 extends JPanel{
 	Vector<Boid> bandadaPintar;// = new Vector<Boid>();
 	Vector<Obstaculo> obstaculosPintar;// = new Vector<Obstaculo>();
+	Vector<Matrix> rutaDinamica = null;
 	public Dibujante2(){
 		bandadaPintar = new Vector<Boid>();
 		obstaculosPintar = new Vector<Obstaculo>();
@@ -82,6 +83,10 @@ class Dibujante2 extends JPanel{
 		return obstaculosPintar;
 	}
 	
+	public void setRutaDinamica(Vector<Matrix> ruta){
+		this.rutaDinamica = ruta;
+	}
+	
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;		
 		super.paintComponent(g2);
@@ -89,18 +94,18 @@ class Dibujante2 extends JPanel{
 		// Pinto los Boids
 		if (bandadaPintar.size() > 0){		
 			for (int i=0;i<bandadaPintar.size();i++){
-				if (bandadaPintar.elementAt(i).isLider()){
-					g2.setColor(Color.green);
+//				if (bandadaPintar.elementAt(i).isLider()){
+//					g2.setColor(Color.green);
 //					g2.drawOval((int)bandadaPintar.elementAt(i).getPosicion().get(0,0)-(int)Boid.getRadioCohesion(),
 //							(int)bandadaPintar.elementAt(i).getPosicion().get(1,0)-(int)Boid.getRadioCohesion(),
 //							(int)Boid.getRadioCohesion()*2,(int)Boid.getRadioCohesion()*2);
-					GeneralPath rutaLider = new GeneralPath();
-					rutaLider.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
-							bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
-					for(int k=1;k<bandadaPintar.elementAt(i).getRutaBoid().size();k++){
-						rutaLider.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
-								bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
-					}
+//					GeneralPath rutaLider = new GeneralPath();
+//					rutaLider.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
+//							bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
+//					for(int k=1;k<bandadaPintar.elementAt(i).getRutaBoid().size();k++){
+//						rutaLider.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
+//								bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
+//					}
 //					boolean choque = false;
 //					for(int k=0;k<obstaculosPintar.size();k++){
 //						if(rutaLider.intersects(obstaculosPintar.elementAt(k).getForma())){
@@ -109,13 +114,15 @@ class Dibujante2 extends JPanel{
 //						}						
 //					}
 //					System.out.println("Hay intersección? "+choque);
-					g2.draw(rutaLider);
-				}
-				else
+//					g2.draw(rutaLider);
+//				}
+//				else
 					g2.setColor(Color.blue);
-				g2.draw(bandadaPintar.elementAt(i).getForma());
-				g2.fill(bandadaPintar.elementAt(i).getForma());
-				g2.draw(bandadaPintar.elementAt(i).getLineaDireccion());
+//				g2.draw(bandadaPintar.elementAt(i).getForma());
+//				g2.fill(bandadaPintar.elementAt(i).getForma());
+				g2.drawOval((int)bandadaPintar.elementAt(i).getPosicion().get(0,0)-2,
+						(int)bandadaPintar.elementAt(i).getPosicion().get(1,0)-2,4,4);
+//				g2.draw(bandadaPintar.elementAt(i).getLineaDireccion());
 //				GeneralPath ruta = new GeneralPath();
 //				ruta.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
 //				bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
@@ -124,13 +131,13 @@ class Dibujante2 extends JPanel{
 //				bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
 //				}
 //				g2.draw(ruta);
-				centroMasa = centroMasa.plus(bandadaPintar.elementAt(i).getPosicion());
+//				centroMasa = centroMasa.plus(bandadaPintar.elementAt(i).getPosicion());
 			}
 		}
-		// Pinto el centro de masa
-		centroMasa.timesEquals((double)1/(double)bandadaPintar.size());		
-		g2.setColor(Color.cyan);
-		g2.drawOval((int)centroMasa.get(0,0)-2,(int)centroMasa.get(1,0)-2,4,4);
+//		// Pinto el centro de masa
+//		centroMasa.timesEquals((double)1/(double)bandadaPintar.size());		
+//		g2.setColor(Color.cyan);
+//		g2.drawOval((int)centroMasa.get(0,0)-2,(int)centroMasa.get(1,0)-2,4,4);
 		
 		// Pinto los obstáculos
 		for (int i=0;i<obstaculosPintar.size();i++){
@@ -142,12 +149,35 @@ class Dibujante2 extends JPanel{
 		// Pinto el objetivo
 		g2.setColor(Color.magenta);
 		g2.drawOval((int)Boid.getObjetivo().get(0,0),(int)Boid.getObjetivo().get(1,0),5,5);
-	}	
+		// Pinto la ruta dinámica
+		if (rutaDinamica != null){
+			if (rutaDinamica.size() > 0){
+				
+				GeneralPath rutaDinamic = new GeneralPath();
+				rutaDinamic.moveTo(rutaDinamica.elementAt(0).get(0,0),
+						rutaDinamica.elementAt(0).get(1,0));
+				for(int k=1;k<rutaDinamica.size();k++){
+					rutaDinamic.lineTo(rutaDinamica.elementAt(k).get(0,0),
+							rutaDinamica.elementAt(k).get(1,0));
+				}
+//				System.out.println("Ruta dinamica de tamaño " + rutaDinamica.size());
+				g2.draw(rutaDinamic);
+			}
+		}
+	}		
 }
 
 
 public class MuestraBoids extends JApplet implements ChangeListener,ActionListener,MouseListener{
 	
+	public Vector<Matrix> rutaDinamica;
+	public Vector<Matrix> getRutaDinamica() {
+		return rutaDinamica;
+	}
+
+	public void setRutaDinamica(Vector<Matrix> rutaDinamica) {
+		this.rutaDinamica = rutaDinamica;
+	}
 	boolean batch = false;
 	private boolean objetivoEncontrado;
 	private boolean play = false;
@@ -521,27 +551,27 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		int anchuraPanel = gui.pintor.getWidth();		
 //		Bucle para crear los bordes
 		int cont = 1;
-		for (int k=0; k<2;k++){			
-			for (int i = 0;i < alturaPanel;i=i+20){
-				double posObstaculos[] = {cont,i};
-				double velObstaculos[] = {0,0};				
-				Matrix posiObs = new Matrix(posObstaculos,2);
-				Matrix velObs = new Matrix(velObstaculos,2);
-				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-			}
-			cont = anchuraPanel-10;
-		}
-		cont = 1;
-		for (int k=0; k<2;k++){			
-			for (int i = 0;i < anchuraPanel;i=i+20){
-				double posObstaculos[] = {i,cont};
-				double velObstaculos[] = {0,0};				
-				Matrix posiObs = new Matrix(posObstaculos,2);
-				Matrix velObs = new Matrix(velObstaculos,2);
-				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-			}
-			cont = alturaPanel-15;
-		}
+//		for (int k=0; k<2;k++){			
+//			for (int i = 0;i < alturaPanel;i=i+20){
+//				double posObstaculos[] = {cont,i};
+//				double velObstaculos[] = {0,0};				
+//				Matrix posiObs = new Matrix(posObstaculos,2);
+//				Matrix velObs = new Matrix(velObstaculos,2);
+//				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+//			}
+//			cont = anchuraPanel-10;
+//		}
+//		cont = 1;
+//		for (int k=0; k<2;k++){			
+//			for (int i = 0;i < anchuraPanel;i=i+20){
+//				double posObstaculos[] = {i,cont};
+//				double velObstaculos[] = {0,0};				
+//				Matrix posiObs = new Matrix(posObstaculos,2);
+//				Matrix velObs = new Matrix(velObstaculos,2);
+//				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+//			}
+//			cont = alturaPanel-15;
+//		}
 		// Bucles para crear el escenario simétrico 4 caminos
 		// Definición de las constantes que situan los obstáculos
 		int x1 = anchuraPanel - 7*(anchuraPanel/8);
@@ -561,16 +591,16 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		
 		// Bucle generador de obstáculos (eje Y)
 		boolean interruptor = true;
-		for(int i=x1; i<=anchuraPanel;i=i+anchuraPanel/8){
+		for(int i=x1; i<=anchuraPanel;i=i+anchuraPanel/3){
 			if (interruptor){ // columnas pares
-				for(int j=y22;j<y21;j=j+10){
+				for(int j=y22;j<y21;j=j+20){
 					double posObstaculos[] = {i,j};
 					double velObstaculos[] = {0,0};				
 					Matrix posiObs = new Matrix(posObstaculos,2);
 					Matrix velObs = new Matrix(velObstaculos,2);
 					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
 				}
-				for(int j=y24;j<y23;j=j+10){
+				for(int j=y24;j<y23;j=j+20){
 					double posObstaculos[] = {i,j};
 					double velObstaculos[] = {0,0};				
 					Matrix posiObs = new Matrix(posObstaculos,2);
@@ -578,49 +608,50 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
 				}
 				interruptor = false;
-			}else{// Columnas impares
-				for(int j=y11;j<y12;j=j+10){
+			}
+			else{// Columnas impares
+//				for(int j=y11;j<y12;j=j+10){
+//					double posObstaculos[] = {i,j};
+//					double velObstaculos[] = {0,0};				
+//					Matrix posiObs = new Matrix(posObstaculos,2);
+//					Matrix velObs = new Matrix(velObstaculos,2);
+//					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+//				}
+				for(int j=y13;j<y14;j=j+20){
 					double posObstaculos[] = {i,j};
 					double velObstaculos[] = {0,0};				
 					Matrix posiObs = new Matrix(posObstaculos,2);
 					Matrix velObs = new Matrix(velObstaculos,2);
 					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
 				}
-				for(int j=y13;j<y14;j=j+10){
-					double posObstaculos[] = {i,j};
-					double velObstaculos[] = {0,0};				
-					Matrix posiObs = new Matrix(posObstaculos,2);
-					Matrix velObs = new Matrix(velObstaculos,2);
-					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-				}
-				for(int j=y15;j<alturaPanel;j=j+10){
-					double posObstaculos[] = {i,j};
-					double velObstaculos[] = {0,0};				
-					Matrix posiObs = new Matrix(posObstaculos,2);
-					Matrix velObs = new Matrix(velObstaculos,2);
-					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-				}
+//				for(int j=y15;j<alturaPanel;j=j+10){
+//					double posObstaculos[] = {i,j};
+//					double velObstaculos[] = {0,0};				
+//					Matrix posiObs = new Matrix(posObstaculos,2);
+//					Matrix velObs = new Matrix(velObstaculos,2);
+//					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+//				}
 				interruptor = true;
 			}
 		}
 		
 		// Bucle generador de obstáculos eje X
-		int conta = 0;
-		int[][] limites = {{anchuraPanel-5*(anchuraPanel/8),anchuraPanel-4*(anchuraPanel/8)}
-		,{anchuraPanel-3*(anchuraPanel/8),anchuraPanel-2*(anchuraPanel/8)},
-		{0,0},
-		{anchuraPanel-5*(anchuraPanel/8),anchuraPanel-4*(anchuraPanel/8)},
-		{0,anchuraPanel-7*(anchuraPanel/8)}};
-		for(int i=y12;i<=alturaPanel && conta < 5;i=i+alturaPanel/6){
-			for(int j=limites[conta][0];j<limites[conta][1];j = j+10){
-				double posObstaculos[] = {j,i};
-				double velObstaculos[] = {0,0};				
-				Matrix posiObs = new Matrix(posObstaculos,2);
-				Matrix velObs = new Matrix(velObstaculos,2);
-				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-			}
-			conta++;
-		}
+//		int conta = 0;
+//		int[][] limites = {{anchuraPanel-5*(anchuraPanel/8),anchuraPanel-4*(anchuraPanel/8)}
+//		,{anchuraPanel-3*(anchuraPanel/8),anchuraPanel-2*(anchuraPanel/8)},
+//		{0,0},
+//		{anchuraPanel-5*(anchuraPanel/8),anchuraPanel-4*(anchuraPanel/8)},
+//		{0,anchuraPanel-7*(anchuraPanel/8)}};
+//		for(int i=y12;i<=alturaPanel && conta < 5;i=i+alturaPanel/6){
+//			for(int j=limites[conta][0];j<limites[conta][1];j = j+10){
+//				double posObstaculos[] = {j,i};
+//				double velObstaculos[] = {0,0};				
+//				Matrix posiObs = new Matrix(posObstaculos,2);
+//				Matrix velObs = new Matrix(velObstaculos,2);
+//				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
+//			}
+//			conta++;
+//		}
 		gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 		
 		//creamos las zonas para clasificar las rutas
@@ -638,7 +669,19 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		int indMinAnt = 0;
 		while (true){
 			if (gui.play){
+				gui.getSim().moverObstaculos();
 				indMinAnt = gui.getSim().moverBoids(indMinAnt);
+				int indice = 0;
+				double distObj = Double.POSITIVE_INFINITY;
+				for(int h = 0; h<gui.getSim().getBandada().size();h++){
+					double distan = gui.getSim().getBandada().elementAt(h).getDistObjetivo();
+					if(distan < distObj){
+						indice = h;
+						distObj = distan;
+					}
+				}
+				gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
+				gui.pintor.setRutaDinamica(gui.getRutaDinamica());
 //				gui.getSim().simuPorLotes();				
 				if (gui.pintarEscena)
 					gui.pintor.repaint();
@@ -653,7 +696,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	    				gui.getSim().crearBandada();
 	    				gui.getSim().posicionarBandada(gui.getSim().getPosInicial());	    				
 	    				gui.getSim().simuPorLotes();
-	    				gui.tiempoConsumido.setText("Tardó " + gui.getSim().getContIteraciones() + " iteraciones");
+	    				gui.tiempoConsumido.setText("Tardó " + gui.getSim().getContIteraciones() + " iteraciones");	    				
 	    				if (gui.pintarEscena){
 	    					for(int j=0;j<gui.getSim().getBoidsOk().size();j++){
 	    						gui.getSim().getBoidsOk().elementAt(j).setRutaBoid(
