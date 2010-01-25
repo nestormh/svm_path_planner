@@ -46,8 +46,8 @@ public class Simulador {
 	/** Vector que contiene los puntos de diseño para la simulación por lotes*/
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
 	Vector <TipoCamino> caminos = new Vector<TipoCamino>();
-	private int incrNuevosBoids = 4;
-	private int incrPensar = 1;
+	private int incrNuevosBoids = 3;
+	private int incrPensar = 2;
 	private int contNuevosBoids = incrNuevosBoids ;
 	private int contPensar = 0;
 	
@@ -235,6 +235,11 @@ public class Simulador {
 				double velo[] = {2,0};
 				Matrix vel = new Matrix(velo,2);
 				getObstaculos().elementAt(i).mover(vel);
+				if(getObstaculos().elementAt(i).getPosicion().get(0,0)>1200){
+					double pos[] = {0,getObstaculos().elementAt(i).getPosicion().get(1,0)};
+					Matrix posi = new Matrix(pos,2);
+					getObstaculos().elementAt(i).setPosicion(posi);
+				}
 			}
 		}
 	}
