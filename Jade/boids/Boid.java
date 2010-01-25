@@ -100,7 +100,7 @@ public class Boid implements Serializable{
 //		};
 //		triangulo.closePath();
 //		triangulo.transform(AffineTransform.getTranslateInstance(posicion.get(0,0),posicion.get(1,0)));
-		this.nuevoPuntoRuta(this.getPosicion());
+//		this.nuevoPuntoRuta(this.getPosicion());
 		tendenciaRepulsion = Math.random();
 //		if (aleatorio < 0.5){
 //			tendenciaRepulsion = true;			
@@ -249,6 +249,8 @@ public class Boid implements Serializable{
 			velObj = velObj.times(pesoObjetivo*10);
 		else
 			velObj = velObj.times(pesoObjetivo);
+//		velObj = limitaVelocidad(velObj);
+//		velObj = velObj.minus(this.getVelocidad());
 		return velObj;
 	}
 	
@@ -319,7 +321,7 @@ public class Boid implements Serializable{
 		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid));
 		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad());
 //		desp = limitaVelocidad(((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad()));
-		desp = desp.timesEquals(0.01);
+		desp = desp.timesEquals(0.05);
 		setAceleracion(desp);
 //		desp = limitaVelocidad(despCohesion.plus(despSeparacion).plus(despAlineacion).plus(despObjetivo).plus(despObstaculo).plus(this.getVelocidad()));
 //		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
@@ -371,7 +373,7 @@ public class Boid implements Serializable{
 	
 	public void setPosicion(Matrix pos) {
 		this.posicion = pos;		
-		nuevoPuntoRuta(this.posicion);
+//		nuevoPuntoRuta(this.posicion);
 	}
 //	public void setPosicion(double x, double y) {
 //		this.posicion.set(0,0,x);
