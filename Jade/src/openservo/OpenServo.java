@@ -451,6 +451,27 @@ public class OpenServo {
 		Kp = kp;
 	}
 
+	/** Modifica en única escritura los cuatro parámetros del PID */
+	public void setParmetrosPID(int Kp, int Ki, int Kd, int BandaMuerta) throws IOException {
+		permitirEscrituraProtegidos();
+		int dini=PID_DEADBAND;
+		byte[] buffer= new byte[PID_IGAIN_LO-dini+1];
+		int2buff(Kp,buffer,PID_PGAIN_HI-dini);
+		int2buff(Ki,buffer,PID_IGAIN_HI-dini);
+		int2buff(Kd,buffer,PID_DGAIN_HI-dini);
+		buffer[PID_DEADBAND-dini]=(byte)(BandaMuerta&0xff);
+		if(OsifJNI.OSIF_write(adaptador, id, PID_PGAIN_HI, buffer, buffer.length)<0) {
+			throw new IOException("Error al tratar de fijar parámetros PID en dispositivo "+id);
+		}		
+		prohibirEscrituraProtegidos();
+		//Todo ha ido bien, actualizamos los parámetros
+		this.Kp=Kp;
+		this.Ki=Ki;
+		this.Kd=Kd;
+		this.bandaMuerta=BandaMuerta;
+		
+	}
+	
 	/**
 	 * @return the maxPosicion
 	 */
@@ -557,6 +578,27 @@ public class OpenServo {
 		if(OsifJNI.OSIF_read(adaptador, id, PWM_CCW, buff, 1)<0)
 			throw new IOException("Error al leer PWM izda. del dispositivo "+id);
 		return (int)buff[0];
+	}
+	
+	/** Lee los valores variables en única lectura 
+	 * @return vector con: Timer, Posición, Velocidad, Intencidad, PWM Derecha, PWM Izquierda
+	 */
+	public int[] getValores() throws IOException {
+		byte dini=TIMER_HI;
+		byte dfin=PWM_CCW;
+		int len=dfin-dini+1;
+		byte buffer[]=new byte[len];
+		if(OsifJNI.OSIF_read(adaptador, id, dini, buffer, len)<0)
+			throw new IOException("Error al los valores del dispositivo "+id);
+		int[] valores={ buff2int(buffer, TIMER_HI-dini)
+				,buff2int(buffer, TIMER_HI-dini)
+				,buff2int(buffer, POSITION_HI-dini)
+				,buff2int(buffer, VELOCITY_HI-dini)
+				,buff2int(buffer, POWER_HI-dini)
+				,(int)buffer[PWM_CW-dini]
+				,(int)buffer[PWM_CCW-dini]
+				};
+		return valores;
 	}
 
 	/** Votaje @see <a href='http://www.openservo.org/APIServoGetVoltage'>get voltaje</a>*/
