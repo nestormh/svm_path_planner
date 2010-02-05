@@ -7,11 +7,13 @@ package openservo;
 /**
  * 
  * Clase para el acceso desde Java a las funcione de la librería OSIF
+ * Al no ser public solo se puede invocar desde dentro del paquete openservo.
+ * De esta manera será la clase openservo la única que interactuará con ella.
  * 
  * @author Alberto Hamilton
  *
  */
-public class OsifJNI {
+class OsifJNI {
 	/**
 	 * Initialise the OSIF USB interface. Enumerates all connected OSIF devices.
 	 * @returns <0 error 1 success

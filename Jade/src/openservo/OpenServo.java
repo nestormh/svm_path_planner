@@ -4,6 +4,7 @@
 package openservo;
 
 import java.io.IOException;
+import java.util.Vector;
 
 /**
  * @author Alberto Hamilton
@@ -141,6 +142,13 @@ public class OpenServo {
 	public static byte CURVE_MOTION_RESET=(byte)0x93;
 	/** Append a new curve  */
 	public static byte CURVE_MOTION_APPEND=(byte)0x94;
+	
+	//Campos estáticos
+	/** Para saber si el osif está inicializado */
+	private static boolean osifInicializado=false;
+	
+	/** Vector de los openservos detectados */
+	static Vector<OpenServo> vecOS=new Vector<OpenServo>();
 
 	
 	//Campos de cada instancia
@@ -183,8 +191,10 @@ public class OpenServo {
 
 	//el resto de los valores se leen y ecriben en tiempo de ejecución
 
-	/** Se trata de contactar con el OpenServo y se le piden todas las variables de configuración */
-	public OpenServo(int adap, int idI2C) throws IOException {
+	/** Se trata de contactar con el OpenServo y se le piden todas las variables de configuración
+	 * Es método privado para que sólo pueda ser invocado desde el método estático
+	 */
+	private OpenServo(int adap, int idI2C) throws IOException {
 		adaptador=adap;
 		id=idI2C;
 		//vemos si dispositivo vivo
@@ -205,6 +215,27 @@ public class OpenServo {
 
 		leeConfiguracion();
 		
+	}
+	
+	/** @return si el open servo responde */
+	public boolean estaVivo() {
+		//vemos si dispositivo vivo
+		if(!OsifJNI.OSIF_probe(adaptador, id )) {
+			System.err.println("\nEl dispositivo "+id+" NO respondió");
+			return false;
+		}	
+		//Vemos si es OpenServo
+		byte[] buffer=new byte[4];
+		if(OsifJNI.OSIF_read(adaptador, id, (byte) 0x00, buffer, 1)<0) {
+			System.err.println("\n Error al leer de dispositivo "+id);
+			return false;
+		}
+		if(buffer[0]!=0x01) {
+			System.err.println("\nEl dispositivo "+id+" NO es OpenServo");
+			return false;
+		}
+
+		return true;
 	}
 	
 	private int buff2int(byte[] buff,int pos) {
@@ -320,7 +351,7 @@ public class OpenServo {
 	/**
 	 * @return the adaptador
 	 */
-	public int getAdaptador() throws IOException{
+	public int getAdaptador() {
 		return adaptador;
 	}
 
@@ -384,7 +415,7 @@ public class OpenServo {
 	/**
 	 * @return the id
 	 */
-	public int getId() throws IOException {
+	public int getId() {
 		return id;
 	}
 
@@ -628,8 +659,125 @@ public class OpenServo {
 	}
 	
 	
+	// Métodos estáticos de factoría
 	
+	/** Inicializa el OSIF, busca los openServos en todos los adaptadores y los devuelve en vector 
+	 * @return vector de los openservos encontrados
+	 */
+	public static Vector<OpenServo> servosEncontrados() {
+		actualizaVectorServos();
+		return vecOS;
+	}
+	
+	/** Vuelve a escanear los adaptadores y disposivo, quita los que ya no están y pone los que faltan */
+	private static void actualizaVectorServos() {
+		
+		if(osifInicializado)
+			OsifJNI.OSIF_deinit();
+		OpenServo osa=null;
+		int intentos=4;
+		int numAdap=0;
+		while(true) {
+			if(intentos==0) {
+				System.out.println("\nPasaron los intentos\n");
+				return;
+			}
 
+			System.out.println("\n Inicializamos OSIF");
+			if(OsifJNI.OSIF_init()<0) {
+				System.out.println("\nProbema al inicializar OSIF\n");
+				osifInicializado=false;
+				vecOS.removeAllElements(); //no hay ninguón OS disponible
+				return;
+			}
+			osifInicializado=true;
+			System.out.println("\n La versión de la librería OSIF es "+OsifJNI.OSIF_get_libversion());
 
+			numAdap=OsifJNI.OSIF_get_adapter_count();
+			System.out.println("\n Obtenemos numero de adaptadores OSIF:"+numAdap);
+			if((numAdap)>0) {
+				break;
+			}
+			intentos--;
+			OsifJNI.OSIF_deinit();
+			try { Thread.sleep(3000); } catch (Exception e) {}
+		}
+		
+		//OSIF inicializado correctamente revisamos los OS ya apuntados quitando los que ya no están
+		for(OpenServo opsa: vecOS) {
+			if(!opsa.estaVivo())
+				vecOS.remove(opsa); //si no está vivo lo borramos
+		}
+		
+		//recorremos todos los dispositivos y añadimos los nuevos
+		System.out.println("\n Obtenemos nombre de los adaptadores OSIF");
+		for(int adp=0; adp<numAdap; adp++) {
+			String nomAdap;
+
+			if((nomAdap=OsifJNI.OSIF_get_adapter_name(adp))==null) {
+				System.out.println("\nAdaptador "+adp+"No tiene nombre");
+			} else {
+				System.out.println("\nNombre del Adaptador "+adp+": >"+nomAdap+"<");
+			}
+
+			int dispos[];
+			if((dispos=OsifJNI.OSIF_scan(adp))==null) {
+				System.out.println("\nProblema al obtener dispositivoe en adaptador "+adp);
+				continue; //pasamos al siguiente adaptador
+			}
+			System.out.println("\nAdaptador "+adp+" tiene "+dispos.length+" dispositivos I2C");
+
+			for(int ida=0; ida<dispos.length; ida++) {
+				int da=dispos[ida];
+				if(!OsifJNI.OSIF_probe(adp, da )) {
+					System.out.println("\nEl dispositivo "+da+" NO respondió");
+					continue; //pasamos al siguiente dispositivo
+				}
+				System.out.println("\nEl dispositivo "+da+" respondió");
+
+				//Vemos si es OpenServo
+				byte[] buffer=new byte[1];
+				if(OsifJNI.OSIF_read(adp, da, (byte) 0x00, buffer, 1)<0) {
+					System.out.println("\n Error al leer de dispositivo "+da);
+				} else {
+					if(buffer[0]!=0x01) {
+						System.out.println("\nEl dispositivo "+da+" NO es OpenServo");
+						continue; //siguiente dispositivo
+					}
+					System.out.println("\nEl dispositivo "+da+" ES OpenServo");
+					//vemos si ya lo tenemos
+					boolean esta=false;
+					for(OpenServo opsa: vecOS) {
+						if ((opsa.getAdaptador()==adp) && (opsa.getId()==da)) {
+							esta=true;
+							break;
+						}
+					}
+					if (esta) {
+						System.out.println("El OpenServo("+adp+","+da+") ya estaba apuntado");
+						continue; //pasamos al siguiente dispositivo
+					}
+					try {
+						osa=new OpenServo(adp,da);
+					} catch (Exception e) {
+						System.err.println("No fue posible construir OpenServo("+adp+","+da+"):"
+								+e.getMessage());
+						continue;
+					}
+					vecOS.add(osa);
+				}
+			}
+		}
+	}
+
+	/** @return primer open servo encontrado con ese id, si no está devuelve null
+	 *  No se actualiza la lista, para actulizar llamar a {@link #servosEncontrados()}*/
+	public static OpenServo openservoPorId(int idBuscado) {
+		for(OpenServo opsa: vecOS)
+			if (opsa.getId()==idBuscado) 
+				return opsa;
+		//si no hay coincidencia
+		return null;
+	}
 
 }
