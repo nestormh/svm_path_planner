@@ -1,13 +1,22 @@
 package sibtra.shm;
 
-public class prueba {
+public class prueba extends Thread{
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Apéndice de método generado automáticamente
 
-	}
+		public static void main(String[] args) {
+			
+			
+		
+			ShmInterface.safeGet();
+		
+			while(true) {
+				int dist = ShmInterface.getAcoRightDist();		
+				System.out.println ( System.currentTimeMillis()+": Distancia " + dist);
+
+				try{ Thread.sleep(1000); } catch (Exception e) {}
+			}
+			
+		}
+		
 
 }

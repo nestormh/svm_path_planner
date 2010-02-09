@@ -1,0 +1,16 @@
+#Definición de las variables compartidas
+
+#Permisos		C       Java
+
+#Aplicacion ACO
+int AcoRoadOrientation	rw	rw
+int AcoLeftDist		rw	rw
+int AcoRightDist	rw	rw
+int AcoHorizon		rw	rw
+int AcoEdges		rw	rw
+int AcoSearchAreas	rw	rw
+int AcoAlive		rw	rw
+
+#Aplicación GPS
+float GpsOrientation	rw	rw
+
