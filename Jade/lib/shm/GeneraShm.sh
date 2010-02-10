@@ -97,6 +97,9 @@ echo "
 	
 	static {
 		System.load(System.getProperty(\"user.dir\")+\"/lib/shm/sibtra_shm_ShmInterface.so\");
+		//Nos conectamos a la  memoria compartida en cuanto se carga la clase
+	    safeGet();
+		
 	}
 }
 "
