@@ -5,6 +5,7 @@ package sibtra.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * Clase para todas aquellas etiquetas cuyo valor se actualiza invocando 
@@ -17,6 +18,9 @@ public class LabelDatoFormato extends LabelDato {
 
 	/** metodo que invocar */
 	Method 	metodo;
+	/** el método es estatico de la clase */
+	boolean metodoEstatico;
+	
 	/** formato a aplicar */
 	String 	formato;
 	/** clase del objeto sobre el que invocar el método */
@@ -51,6 +55,7 @@ public class LabelDatoFormato extends LabelDato {
 			throw new IllegalArgumentException("La clase pasada ha de ser != de null");
 		try {
 			this.metodo=clase.getMethod(nomMetodo,(Class[])null);
+			metodoEstatico=Modifier.isStatic(metodo.getModifiers());
 		} catch (SecurityException e) {
 			throw new IllegalArgumentException("El metodo "+nomMetodo
 					+ " no se puede invocar por razones de seguridad");
@@ -91,13 +96,16 @@ public class LabelDatoFormato extends LabelDato {
 		setEnabled(hayCambio);
 		if(hayCambio) {
 			try {
-				if (objeto.getClass()!=clase) {
+				if (!metodoEstatico && objeto.getClass()!=clase) {
 					//TODO problemas en panel GPS Triump
 //					throw new IllegalArgumentException("El objeto pasado no es de la clase "
 //							+clase.getCanonicalName());
 					return;
 				}
-				setText(String.format(formato, metodo.invoke(objeto, (Object[])null)));
+				if(metodoEstatico)
+					setText(String.format(formato, metodo.invoke(null, (Object[])null)));
+				else
+					setText(String.format(formato, metodo.invoke(objeto, (Object[])null)));
 			} catch (IllegalArgumentException e) {
 				// TODO Bloque catch generado automáticamente
 				setEnabled(false);
