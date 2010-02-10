@@ -1,4 +1,5 @@
 CC=gcc
+JAVA_HOME=/usr/lib/jvm/java-6-sun
 
 sibtra_lms_ManejaTelegramasJNI.so : sibtra_lms_ManejaTelegramasJNI.c Makefile
 	$(CC) -Wall sibtra_lms_ManejaTelegramasJNI.c \

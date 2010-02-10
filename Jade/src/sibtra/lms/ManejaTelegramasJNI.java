@@ -62,7 +62,7 @@ public class ManejaTelegramasJNI extends ManejaTelegramas {
 		System.out.println("java.library.path:"
 				+System.getProperty("java.library.path"));
        //System.loadLibrary( "sibtra_ManejaTelegramasJNI" );
-		String libreria=System.getProperty("user.dir")+"/lib/sibtra_lms_ManejaTelegramasJNI.so";
+		String libreria=System.getProperty("user.dir")+"/lib/lms/sibtra_lms_ManejaTelegramasJNI.so";
 		System.out.println("Tratamos de cargar: "+libreria);
 	   System.load(libreria);
     }
