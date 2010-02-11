@@ -62,6 +62,18 @@ int Obstaculos::getN (){
 	PARÁMETROS:
 	  DEVUELVE: void
 -----------------------------------------------------------------------------------------------------------------*/
+int Obstaculos::getFrame (){
+
+	return (this->frame);
+}
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
 void Obstaculos::Insert(int delta, int u, int v, int width, int height) {
 	obstaculo *nuevo;
 
@@ -114,6 +126,39 @@ void Obstaculos::Insert(int delta, int u, int v, int width, int height, bool dis
 	this->n++;
 
 }
+
+
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+obstaculo *Obstaculos::Insert(obstaculo *obs, bool discard, bool added) {
+	obstaculo *nuevo;
+
+	nuevo = new(obstaculo);
+
+	nuevo->delta = obs->delta;
+	nuevo->u = obs->u;
+	nuevo->v = obs->v;
+	nuevo->width = obs->width;
+	nuevo->height = obs->height;
+
+	nuevo->forward = NULL;
+	nuevo->backward = NULL;
+
+	nuevo->added = added;
+	nuevo->discard = discard;
+
+	cvSeqPush(this->list, nuevo);
+
+	this->n++;
+
+	return(nuevo);
+}
+
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:
@@ -173,6 +218,12 @@ void Obstaculos::Draw(IplImage* src){
 		else
 			rectColor = CV_RGB(0,255,0);
 
+		if (aux->added)
+			rectColor = CV_RGB(255,255,255);
+
+		if (aux->discard)
+			rectColor = CV_RGB(0,0, 0);
+
 		cvRectangle(color_dst, cvPoint(aux->u, aux->v), cvPoint(aux->u + aux->width, aux->v + aux->height), rectColor);
 
 		sprintf(auxText, "%.2f m",(float)(0.545*425/aux->delta));
@@ -230,11 +281,25 @@ void Obstaculos::Unlink(){
 void Obstaculos::Save(FILE *filename) {
 	int i;
 	obstaculo *aux;
+	double x, z, dx, dy, x1, x2;
 
 	fprintf (filename, "%d %d\n", this->frame, this->n);
 	for (i = 0; i < n; i++){
 		aux = (obstaculo *) cvGetSeqElem(this->list, i);
-		fprintf (filename, "%d %d %d %d %d\n", aux->delta, aux->u, aux->v, aux->width, aux->height);
+		//fprintf (filename, "%d %d %d %d %d\n", aux->delta, aux->u, aux->v, aux->width, aux->height);
+
+
+		z = 425 * 0.545 / aux->delta;
+		x = 0.545 / 2 - z *  (aux->u + aux->width/2 - 160) / 425; 	// Coordenada X del punto medio
+//		x1 = 0.545 / 2 - z *  (aux->u - 160) / 425; 	// Coordenada X del punto medio
+//		x2 = 0.545 / 2 - z *  (aux->u + aux->width - 160) / 425; 	// Coordenada X del punto medio
+
+//		printf ("----->%f %f<----------\n", x1, x2);
+//		dx = z *  aux->width / 425; 	// Coordenada X del punto medio
+//		dy = dx * aux->height / aux->width;
+
+		if (!aux->discard)
+			fprintf (filename, "%f %f %d %d\n", z, -x, aux->width, aux->height);
 	}
 }
 
@@ -324,7 +389,7 @@ void Obstaculos::CutBackwards(){
 	PARÁMETROS:
 	  DEVUELVE: void
 -----------------------------------------------------------------------------------------------------------------*/
-int Obstaculos::Area(obstaculo *o1, obstaculo *o2){
+int Obstaculos::Overlap(obstaculo *o1, obstaculo *o2){
 	int ancho,
 		alto;
 
@@ -366,6 +431,17 @@ int Obstaculos::Area(obstaculo *o1, obstaculo *o2){
 	return (ancho * alto);
 }
 
+
+/*-----------------------------------------------------------------------------------------------------------------
+		NOMBRE:
+	   FUNCIÓN:
+	PARÁMETROS:
+	  DEVUELVE: void
+-----------------------------------------------------------------------------------------------------------------*/
+int Obstaculos::Area(obstaculo *o) {
+
+	return (o->width * o->height);
+}
 
 /*-----------------------------------------------------------------------------------------------------------------
 		NOMBRE:

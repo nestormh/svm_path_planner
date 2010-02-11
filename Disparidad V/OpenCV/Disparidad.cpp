@@ -6,6 +6,7 @@
 #include <math.h>
 #include "Lineas.h"
 #include "Obstaculos.h"
+#include "Ssc.h"
 //#include "..\..\CapturaImagen\CapturaImagen\CapturaVLC.h"
 
 #define MAXD 70				// Disparidad máxima
@@ -16,6 +17,8 @@
 #define WINDOW 11			// Ancho de la ventana para considerar dos líneas paralelas como la misma
 
 //#define RECORD 0			// Si está definida se activa el código de guardado a fichero.
+
+#define MOVE 0
 
 typedef struct {			// Tipo de datos para indicar los par�metros de ajuste de los diferentes algoritmos
 	int filtro,
@@ -1392,6 +1395,22 @@ void insertHist (CvSeq *hist, Obstaculos *nuevo, int hMax) {
 		aux = (Obstaculos *) cvGetSeqElem(hist, hist->total - 1);
 		aux->CutBackwards();								// Romper los enlaces al instante de tiempo anterior
 	}
+
+//----------------------------------------------------------------------
+
+	for (i=0; i < nuevo->getN() ; i++){
+		obs = nuevo->getObstacle(i);
+		for (j=0; j < nuevo->getN() ; j++){
+			obsPast = nuevo->getObstacle(j);
+			if ((obs != obsPast) && (Obstaculos::Overlap(obs, obsPast) >= 0.8 * Obstaculos::Area(obs))){
+				obs->discard = true;
+			}
+		}
+	}
+
+//----------------------------------------------------------------------
+
+
 	(Obstaculos *) cvSeqPush(hist, nuevo);							// Insertar el nuevo
 
 	aux = (Obstaculos *) cvGetSeqElem(hist, hist->total-2);
@@ -1410,16 +1429,30 @@ void insertHist (CvSeq *hist, Obstaculos *nuevo, int hMax) {
 
 				do {
 					obsPast = aux->getObstacle(j);
-					solape = Obstaculos::Area(obsPast, obs);
+					solape = Obstaculos::Overlap(obsPast, obs);
 					printf ("Comparo (nuevo)%d con (antiguo)%d\n", obs->delta, obsPast->delta);
+
 					if ((abs(obsPast->delta - obs->delta) <= 5) && (solape)){
-						if (obsPast->forward) {							// El antiguo ya estaba enlazado
-							printf ("Ya estaba enlazado el antiguo: ");
+						if (obsPast->forward) {						// El antiguo ya estaba enlazado
+							printf ("Ya había un enlace ");
 
-							if (solape > Obstaculos::Area(obsPast->forward, obs)){
-
-								printf ("El que había está menos solapado (%d). Solape nuevo: %d\n", Obstaculos::Area(obsPast->forward, obs), solape);
+							if (solape > Obstaculos::Overlap(obsPast->forward, obs)){
+								printf(" en el antiguo: ");
+								printf ("El que había está menos solapado (%d). Solape nuevo: %d\n", Obstaculos::Overlap(obsPast->forward, obs), solape);
 								(obsPast->forward)->backward = NULL;	// Romper el enlace antiguo
+
+								obs->backward = obsPast;				// Hacer los enlaces nuevos
+								obsPast->forward = obs;
+							} else {
+								printf ("El que había está más solapado (no se cambia el puntero).Solape: %d\n", solape);
+							}
+
+						} else if (obs->backward) { 		// el nuevo se enlazó en una iteración anterior
+
+							if (solape > Obstaculos::Overlap(obs->backward, obs)){
+								printf ("en una iteración anterior: ");
+								printf ("El que había está menos solapado (%d). Solape nuevo: %d\n", Obstaculos::Overlap(obs->backward, obs), solape);
+								(obs->backward)->forward = NULL;	// Romper el enlace antiguo
 
 								obs->backward = obsPast;				// Hacer los enlaces nuevos
 								obsPast->forward = obs;
@@ -1440,7 +1473,8 @@ void insertHist (CvSeq *hist, Obstaculos *nuevo, int hMax) {
 
 
 					j ++;
-				} while ((j < aux->getN()) && (abs(obsPast->delta - obs->delta) > 5));
+				//} while ((j < aux->getN()) && (abs(obsPast->delta - obs->delta) > 5));
+				} while (j < aux->getN());
 			}
 		}
 	}
@@ -1456,19 +1490,76 @@ void insertHist (CvSeq *hist, Obstaculos *nuevo, int hMax) {
 -----------------------------------------------------------------------------------------------------------------*/
 void checkHist (CvSeq *hist) {
 	Obstaculos *head, *second;
+	int evolucion,
+		links,
+		i;
+	obstaculo *obs,
+			*aux,
+			*insertado;
+
 
 	if (hist->total > 1) {
 		head = (Obstaculos *) cvGetSeqElem(hist, hist->total-1);
 		second = (Obstaculos *) cvGetSeqElem(hist, hist->total-2);
 
-		if (second->getN() > head->getN()) {
-			printf ("Disminuye el No. de obstáculos.\n");
+//printf ("Head: %d Second: %d\n", head->getFrame(), second->getFrame());
 
-		} else if (second->getN() < head->getN()) {
+		evolucion = second->getN() - head->getN();
+
+		if (evolucion > 0) {
+			printf ("Disminuye el No. de obstáculos.\n");
+		} else if (evolucion < 0) {
 			printf ("Aumenta el No. de obstáculos.\n");
 		} else{
 			printf ("Se mantiene el No. de obstáculos.\n");
 		}
+
+
+// Comprobar si los obstáculos del anterior están enlazados
+		i = 0;
+		while (i < second->getN()) {
+			obs = second->getObstacle(i);
+			if (!obs->forward) {
+				printf ("Desaparece el obstáculo: [%d, %d, %d]", obs->delta, obs->u, obs->v);
+				//if ((320 - (obs->u + obs->width) > 50) && (obs->u > 50)){
+				if (abs(obs->u - 160 ) < 50){
+					printf ("--> Demasiado centrada para desaparecer (añado)");
+
+					links = 0;
+					aux = obs;
+					while (aux->backward) {
+						aux = aux->backward;
+						if ((!aux->added) && (!aux->discard))
+							links++;
+					}
+
+					printf (" %d enlaces hacia atrás", links);
+					if (links) {
+						insertado = head->Insert(obs, false, true);
+						obs->forward = insertado;
+						insertado->backward = obs;
+					}
+				}
+			}
+			printf ("\n");
+			i++;
+		}
+
+// Comprobar si los obstáculos del nuevo están enlazados "hacia atrás"
+		i = 0;
+		while (i < head->getN()) {
+			obs = head->getObstacle(i);
+			if (!obs->backward) {
+				printf ("Aparece el obstáculo: [%d, %d, %d]", obs->delta, obs->u, obs->v);
+				if ((320 - (obs->u + obs->width) > 50) && (obs->u > 50)){
+					printf ("--> Aparece de la nada");
+					obs->discard = true;
+				}
+			}
+			printf ("\n");
+			i++;
+		}
+
 
 	}
 
@@ -1510,7 +1601,7 @@ int main (int argc, char* argv[]){
 	parameter ajustes;
 	int frameNr;
 	char filename[30];
-	const char *prefix = "Series/estherpedroFuera";
+	const char *prefix = "Stepped/jesusYeray4";
 	
 	bool trackbar;
 
@@ -1521,6 +1612,12 @@ int main (int argc, char* argv[]){
 	CvSeq *obsSeq;					// Secuencia de obstáculos a lo largo del tiempo
 	CvMemStorage* storage;			// Almacenamiento para las CvSeq
 
+#ifdef MOVE
+	Ssc serial(0);
+	int pos = 128;
+	int sign = 1;
+#endif
+
 	storage = cvCreateMemStorage(0);
 	obsSeq = cvCreateSeq (0, sizeof(CvSeq), sizeof(Obstaculos), storage);
 
@@ -1528,13 +1625,14 @@ int main (int argc, char* argv[]){
 	FILE *outputFile;
 	char outputName[30] = "salida.dat";
 #endif
-		
+
+
 	trackbar = false;
 
 	CvCapture *videoIzq = 0;
 	CvCapture *videoDer = 0;
 
-	source = 4;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
+	source = 3;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
 
 	switch (source) {
 		case 1:
@@ -1655,6 +1753,16 @@ int main (int argc, char* argv[]){
 			}		*/	
 			case 1:
 			case 2: {		// V�deo
+				#ifdef MOVE
+					serial.move(0, pos);
+					if (pos >= 178)
+						sign = -1;
+					else if (pos <= 128)
+						sign = 1;
+
+					pos = pos + sign * 10;
+				#endif
+
 				if (!cvGrabFrame(videoIzq)){
 					printf ("Error leyendo v�deo izquierdo\n");
 					exit (-1);
@@ -1673,6 +1781,16 @@ int main (int argc, char* argv[]){
 				break;
 			}
 			case 3: {		// Tiempo real con captura de secuencia de im�genes
+				#ifdef MOVE
+					serial.move(0, pos);
+					if (pos >= 178)
+						sign = -1;
+					else if (pos <= 128)
+						sign = 1;
+
+					pos = pos + sign * 10;
+				#endif
+
 				cvGrabFrame(videoIzq);
 				cvGrabFrame(videoDer);
 
@@ -1691,6 +1809,14 @@ int main (int argc, char* argv[]){
 			}
 
 			case 4: {
+				#ifdef MOVE
+					if (pos >= 178)
+						sign = -1;
+					else if (pos <= 128)
+						sign = 1;
+					pos = pos + sign * 10;
+				#endif
+
 				sprintf(filename, "%s_left_%d.bmp", prefix, frameNr); 
 				izquierda = cvLoadImage(filename);
 
@@ -1733,8 +1859,6 @@ int main (int argc, char* argv[]){
 		vLines->Clean();					// Vaciar las listas de líneas horizontales y verticales
 		hLines->Clean();
 
-		obs->Draw(izquierda);
-
 #ifdef RECORD
 		obs->Save(outputFile);
 #endif
@@ -1750,6 +1874,9 @@ int main (int argc, char* argv[]){
 
 			obs->Unlink();						// Desvincular las listas de obstáculos para poder liberar la memoria sin que afecte al histórico, esa memoria se libera al sacar los elementos del histórico.
 		delete obs;
+
+		obs = (Obstaculos *) cvGetSeqElem(obsSeq, obsSeq->total-1);
+		obs->Draw(izquierda);
 
 		//printHist(obsSeq);
 

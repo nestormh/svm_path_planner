@@ -47,8 +47,10 @@ public:
 	Obstaculos(int frame);
 	int getN ();
 	int getDelta();
+	int getFrame();
 	void Insert(int delta, int u, int v, int width, int height);
 	void Insert(int delta, int u, int v, int width, int height, bool discard, bool added);
+	obstaculo *Insert(obstaculo *obs, bool discard, bool added);
 	void Print();
 	void Draw(IplImage* src);
 	obstaculo* getObstacle(int index);
@@ -56,7 +58,8 @@ public:
 	void Sort (int order);
 	void CutBackwards();
 	void Save(FILE *filename);
-	static int Area(obstaculo *o1, obstaculo *o2);
+	static int Overlap(obstaculo *o1, obstaculo *o2);
+	static int Area(obstaculo *o);
 	virtual ~Obstaculos();
 };
 
