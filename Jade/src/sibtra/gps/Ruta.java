@@ -251,6 +251,27 @@ public class Ruta implements Serializable {
 		}
 	}
 
+	/** Elimina el punto de la ruta indicado corrigiendo el águlo del pto anterior
+	 * @param ind indice del punto a quitar
+	 */
+	public void remove(int ind) {
+		if(ind<0 || ind>=puntos.size())
+			throw new IllegalArgumentException("Indice de punto a quitar ("+ind+") inválido");
+		puntos.remove(ind);
+		//corregimos angulo del anterior
+		if(ind==0)
+			return; //no hay que corregir ningún ángulo
+		GPSData anterior=puntos.get(ind-1);
+		if(ind==puntos.size()) {
+			//se quitó el último
+			anterior.setAge(0);
+			return;
+		}
+		GPSData siguiente=puntos.get(ind);
+		anterior.setAngulo(anterior.calculaAnguloGPS(siguiente));
+
+	}
+	
 	/** @return último punto de la ruta, null si no hay ninguno */
 	public GPSData getUltimoPto() {
 		if(puntos.size()==0)

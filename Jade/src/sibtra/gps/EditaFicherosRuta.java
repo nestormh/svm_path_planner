@@ -26,6 +26,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -39,8 +40,8 @@ import javax.swing.event.ChangeListener;
 @SuppressWarnings("serial")
 public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionListener, ChangeListener, MouseListener {
 
-	private Ruta rutaEspacial=null, rutaTemporal=null;
-	private Trayectoria traEspacial=null, traTemporal=null;
+	private Ruta rutaEspacial=null, rutaTemporal=null, rutaActual=null;
+	private Trayectoria traEspacial=null, traTemporal=null, traActual=null;
 	private PanelExaminaRuta per;
 	
 	/** Barra de menu ventana principal */
@@ -139,13 +140,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 					ois.close();
 					traEspacial=new Trayectoria(rutaEspacial);
 					traTemporal=new Trayectoria(rutaTemporal);
-					if (jcbTemporal.isSelected()) {
-						per.setRuta(rutaTemporal);
-						pmr.setRuta(rutaTemporal);
-					} else {
-						per.setRuta(rutaEspacial);
-						pmr.setRuta(rutaEspacial);
-					}
+					eligeRuta();
 					jlNomF.setText("Fichero: "+file.getName());
 				} catch (IOException ioe) {
 					System.err.println("Error al abrir el fichero " + file.getName());
@@ -157,6 +152,20 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			return;
 		}
 	}
+	
+	/** Elige ruta activa según {@link #jcbTemporal} */
+	private void eligeRuta() {
+		if (jcbTemporal.isSelected()) {
+			per.setRuta(rutaTemporal);
+			pmr.setRuta(rutaTemporal);
+			rutaActual=rutaTemporal;
+		} else {
+			per.setRuta(rutaEspacial);
+			pmr.setRuta(rutaEspacial);
+			rutaActual=rutaEspacial;
+		}
+		traActual=new Trayectoria(rutaActual);
+	}
 
     /** Metodo para terminar la ejecución */
     protected void Terminar() {
@@ -166,16 +175,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 
 	public void itemStateChanged(ItemEvent e) {
 		if(e.getSource()==jcbTemporal)
-			if(e.getStateChange()==ItemEvent.SELECTED) {
-				per.setRuta(rutaTemporal);
-				pmr.setRuta(rutaTemporal);
-				rutaTemporal.getDesviacionM();
-			} else {
-				per.setRuta(rutaEspacial);
-				pmr.setRuta(rutaEspacial);
-				rutaEspacial.getDesviacionM();
-			}
-		if(e.getSource()==jcbMarcarDM)
+			eligeRuta();
+		if(e.getSource()==jcbMarcarDM);
+		
 			if(e.getStateChange()==ItemEvent.SELECTED) {
 				pmr.setMarcados(per.ruta.indiceConsideradosDM);
 				pmr.actualiza();
@@ -205,17 +207,11 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	
 	/** 
 	 * Si es pulsación 1 seleccionamos punto más cercano para representar
-	 * Si es 2 mostramos menu del punto
+	 * Si es 3 mostramos menu del punto
 	 * @param e
 	 */
 	public void mousePressed(MouseEvent even) {
-		Ruta ra;
-		Trayectoria tra;
-		if (jcbTemporal.isSelected() && rutaTemporal!=null) {
-			ra=rutaTemporal; tra=traTemporal; 
-		} else if (!jcbTemporal.isSelected() && rutaEspacial!=null) {
-			ra=rutaEspacial; tra=traEspacial;
-		} else
+		if(rutaActual==null)
 			return; //no hay ruta
 		//Buscamos índice del punto más cercano de la ruta correspondiente
 		Point2D.Double pto=pmr.pixel2Point(even.getX(), even.getY());
@@ -224,9 +220,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				+"  ("+pto.getX()+","+pto.getY()+")  "
 		);
 		//indice y distancia del más cercano usando la trayectoria
-		tra.situaCoche(pto.getX(),pto.getY());
-		double distMin=tra.distanciaAlMasCercano();
-		int indMin=tra.indiceMasCercano();
+		traActual.situaCoche(pto.getX(),pto.getY());
+		double distMin=traActual.distanciaAlMasCercano();
+		int indMin=traActual.indiceMasCercano();
 		double escala=pmr.getEscala();
 		System.out.println(getClass().getName()+": Punto más cercano a "+distMin
 				+" indice:"+indMin+ " escala:"+escala+ " veintaba:"+escala/10);
@@ -240,6 +236,11 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			//fijamos el indice correspondiente
 			per.jsDato.setValue(indMin);			
 		}
+		if(even.getButton()==MouseEvent.BUTTON3)  {
+			System.out.println("Mostramos el menu de punto");
+			mostrarMenu(indMin, even);			
+		}
+
 
 	}
 	public void mouseReleased(MouseEvent e) {
@@ -256,5 +257,19 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		
 	}
 
+	private void mostrarMenu(final int ipto, MouseEvent me) {
+		JPopupMenu popup = new JPopupMenu();
+		JMenuItem item = new JMenuItem("Borrar Punto");
+		popup.add(item);
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e)
+			{
+				rutaActual.remove(ipto);
+				eligeRuta();
+			}
+		});
+		popup.show(me.getComponent(), me.getX(), me.getY());
+
+	}
 
 }
