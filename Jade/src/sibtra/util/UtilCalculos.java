@@ -170,6 +170,12 @@ public class UtilCalculos {
 		return largoVector(d);
 	}
 
+	/** @return distancia ecuclídea entre (x1,y1) y (x2,y2)	 */
+	public static double distanciaPuntos(double x1, double y1, double x2, double y2) {
+		double[] d={x1-x2, y1-y2};
+		return largoVector(d);
+	}
+
 	/** @return largo euclídeo del vector */
 	public static double largoVector(double[] d) {
 		return Math.sqrt(d[0]*d[0]+d[1]*d[1]);

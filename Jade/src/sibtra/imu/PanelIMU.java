@@ -9,6 +9,7 @@ package sibtra.imu;
  * @author alberto
  *
  */
+@SuppressWarnings("serial")
 public class PanelIMU extends PanelMuestraAngulosIMU {
 	
 	ConexionSerialIMU conSerIMU;

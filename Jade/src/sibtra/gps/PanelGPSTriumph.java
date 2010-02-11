@@ -21,6 +21,7 @@ import sibtra.util.LabelDatoFormato;
  * @author alberto
  *
  */
+@SuppressWarnings("serial")
 public class PanelGPSTriumph extends PanelMuestraGPSData {
 	
 	GPSConnectionTriumph gpsCT;
@@ -70,7 +71,6 @@ public class PanelGPSTriumph extends PanelMuestraGPSData {
 			super("Grabar Posición");
 		}
 
-		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			int devuelto = fc.showSaveDialog(PanelGPSTriumph.this);
 			if (devuelto == JFileChooser.APPROVE_OPTION) {
