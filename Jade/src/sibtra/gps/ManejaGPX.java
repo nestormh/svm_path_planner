@@ -35,6 +35,7 @@ public class ManejaGPX {
 		doc.addContent(root);
 		root.setAttribute("version", "1.1");
 		root.setAttribute("creator", "ManejaGPX");
+		root.setAttribute("schemaLocation","http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd",xsiNS);
 		root.addNamespaceDeclaration(xsiNS);
 		root.addNamespaceDeclaration(verNS);
 		
@@ -60,7 +61,7 @@ public class ManejaGPX {
 		for(int i=0; i<ra.getNumPuntos(); i++) {
 			GPSData pa=ra.getPunto(i);
 			Element trkpt=puntoATrkpt(pa);
-			trk.addContent(trkpt);
+			trkseg.addContent(trkpt);
 		}
 		
 		
@@ -103,8 +104,8 @@ public class ManejaGPX {
 			rutaEspacial=(Ruta)ois.readObject();
 			rutaTemporal=(Ruta)ois.readObject();
 			ois.close();
-			//salvaAGPX(null, new File("/tmp/prueba.gpx"));
-			salvaAGPX(rutaEspacial, new File("/dev/stdout"));
+			salvaAGPX(rutaEspacial, new File("/tmp/prueba.gpx"));
+			//salvaAGPX(rutaEspacial, new File("/dev/stdout"));
 		} catch (IOException ioe) {
 			System.err.println("Error al abrir el fichero " +FicheroRuta);
 			System.err.println(ioe.getMessage());
