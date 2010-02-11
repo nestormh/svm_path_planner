@@ -77,6 +77,20 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	protected static final int pixelEscala=100;
 	
 	/**
+	 * @return the jPanelGrafico
+	 */
+	public JPanel getJPanelGrafico() {
+		return JPanelGrafico;
+	}
+
+	/** @return el valor de la escala solicitiada o NaN si no hay escala valida */
+	public double getEscala() {
+		if(jcbEscalas.isEnabled())
+			return escalasD[jcbEscalas.getSelectedIndex()];
+		else
+			return Double.NaN;
+	}
+	/**
 	 * Convierte punto en el mundo real a punto en la pantalla. 
 	 * EN VERTICAL EL EJE X hacia la izquierda el eje Y. 
 	 * @param pt punto del mundo real
@@ -94,7 +108,7 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	 * @param y coordenada Y del punto
 	 * @return punto en pantalla
 	 */
-	protected Point2D.Double point2Pixel(double x, double y) {
+	public Point2D.Double point2Pixel(double x, double y) {
 		return new Point2D.Double(
 				(esqSI.getY()-y)*JPanelGrafico.getWidth()/(esqSI.getY()-esqID.getY())
 				,
@@ -103,12 +117,12 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	}
 
 	/** @see #point2Pixel(double, double) */
-	protected Point2D point2Pixel(double[] ds) {
+	public Point2D point2Pixel(double[] ds) {
 		return point2Pixel(ds[0], ds[1]);
 	}
 
 	/** @see #point2Pixel(double, double) */
-	protected Point2D.Double pixel2Point(Point2D px) {
+	public Point2D.Double pixel2Point(Point2D px) {
 		return pixel2Point(px.getX(), px.getY());
 	}
 	
@@ -118,7 +132,7 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	 * @param y coordenada y del pixel
 	 * @return punto en el mundo real
 	 */
-	protected Point2D.Double pixel2Point(double x, double y) {
+	public Point2D.Double pixel2Point(double x, double y) {
 		return new Point2D.Double(
 				(JPanelGrafico.getHeight()-y)*(esqSI.getX()-esqID.getX())/JPanelGrafico.getHeight() + esqID.getX()
 				,
@@ -305,7 +319,7 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	public void mouseClicked(MouseEvent even) {
 		if(even.getButton()!=MouseEvent.BUTTON1 || even.getClickCount()!=2)
 			return;
-		System.out.println("Clickeado Boton "+even.getButton()
+		System.out.println(getClass().getName()+": Clickeado Boton "+even.getButton()
 				+" en posición: ("+even.getX()+","+even.getY()+") "
 				+even.getClickCount()+" veces");
 		restaurar=true;
@@ -313,14 +327,18 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 	}
 	
     /**
-     * Almacena donde se pulsa el botón 1 en {@link #evenPulsa}
+     * Almacena donde se pulsa el botón 1 en {@link #evenPulsa} si hay Shift o Control
      */
 	public void mousePressed(MouseEvent even) {
 		evenPulsa=null;
-		if(even.getButton()==MouseEvent.BUTTON1) {
+		if(even.getButton()==MouseEvent.BUTTON1 
+				&& ( ((even.getModifiersEx()&MouseEvent.SHIFT_DOWN_MASK)!=0)
+						|| ((even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0) 
+				)
+		) {
 			//no necesitamos distinguir si hubo o no SHFIT
 			Point2D.Double ptPulsa=pixel2Point(even.getX(),even.getY());
-			System.out.println("Pulsado Boton "+even.getButton()
+			System.out.println(getClass().getName()+": Pulsado Boton "+even.getButton()
 					+" en posición: ("+even.getX()+","+even.getY()+")"
 					+"  ("+ptPulsa.getX()+","+ptPulsa.getY()+")  "
 					+" distancia: "+ptPulsa.distance(new Point2D.Double(0,0))
@@ -345,10 +363,10 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 		if(even.getButton()==MouseEvent.BUTTON1)
 			if ((even.getModifiersEx()&MouseEvent.SHIFT_DOWN_MASK)!=0) {
 				//Si hay shift ponemos esquinas en recuadro marcado
-				System.out.println("Soltado Boton "+even.getButton()
+				System.out.println(getClass().getName()+": Soltado Boton "+even.getButton()
 						+" en posición: ("+even.getX()+","+even.getY()+")");
 				if(evenPulsa!=null) {
-					System.out.println("Soltado Boton "+even.getButton()
+					System.out.println(getClass().getName()+" Soltado Boton "+even.getButton()
 							+" con Shift en posición: ("+even.getX()+","+even.getY()+")");
 					//Creamos rectángulo si está suficientemente lejos
 					if(even.getX()-evenPulsa.getX()>50 
@@ -361,15 +379,15 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 						escalado=false;
 //						jcbEscalas.setEnabled(false);
 						JPanelGrafico.repaint();
-						System.out.println("Puntos:  SI ("+ esqSI.getX()+ ","+esqSI.getY() +") "
+						System.out.println(getClass().getName()+" Puntos:  SI ("+ esqSI.getX()+ ","+esqSI.getY() +") "
 								+"  ID ("+esqID.getX()+","+esqID.getY()+")"
 								+"   ("+JPanelGrafico.getWidth()+","+JPanelGrafico.getHeight()+")"
 						);
 					}
 				}
-			} else {
+			} else if ((even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0) {
 				//soltado boton 1 sin Shift, queremos desplazar el centro
-				System.out.println("Soltado Boton "+even.getButton()
+				System.out.println(getClass().getName()+" Soltado Boton "+even.getButton()
 						+" SIN Shift en posición: ("+even.getX()+","+even.getY()+")");
 				if(evenPulsa!=null) {
 					Point2D.Double ptoPulsado=pixel2Point( new Point2D.Double(evenPulsa.getX(),evenPulsa.getY()) );
@@ -378,7 +396,7 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 					centro[0]+=-ptoSoltado.getX()+ptoPulsado.getX();
 					centro[1]+=-ptoSoltado.getY()+ptoPulsado.getY();
 				} else {
-					System.out.println("Se pulsó con algún modificador, evenPulsa==null ");
+					System.out.println(getClass().getName()+" Se pulsó con algún modificador, evenPulsa==null ");
 				}
 				restaurar=true;
 				JPanelGrafico.repaint();

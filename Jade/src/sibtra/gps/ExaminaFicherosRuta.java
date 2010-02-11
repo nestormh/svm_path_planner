@@ -3,7 +3,6 @@
  */
 package sibtra.gps;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -139,7 +138,7 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 
 
 	public void stateChanged(ChangeEvent arg0) {
-		GPSData npto=per.ruta.getPunto((Integer)per.jsDato.getValue()-1);
+		GPSData npto=per.ruta.getPunto((Integer)per.jsDato.getValue());
 		pmr.nuevoPunto(npto);
 	}
 

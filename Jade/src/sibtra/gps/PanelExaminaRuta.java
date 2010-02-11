@@ -4,7 +4,6 @@
 package sibtra.gps;
 
 import java.awt.BorderLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -18,16 +17,17 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 
 /**
  * {@link JPanel} para examinar el contenido de una ruta.
+ * El ínidice del punto seleccionado va de 0 a NumPuntos -1
  * @author alberto
  *
  */
+@SuppressWarnings("serial")
 public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeListener {
 	
 	private PanelMuestraGPSData PanelPto;
@@ -76,7 +76,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jbAnterior.addActionListener(this);
 			jpInf.add(jbAnterior);
 			
-			spm=new SpinnerNumberModel(1,1,100000,1);
+			spm=new SpinnerNumberModel(0,0,100000,1);
 			jsDato=new JSpinner(spm);
 			jsDato.setSize(150, jsDato.getHeight());
 			jsDato.addChangeListener(this);
@@ -123,9 +123,9 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jsDato.setEnabled(true);
 			jbSiguiente.setEnabled(true);
 			jbUltimo.setEnabled(true);
-			spm.setMaximum(ruta.getNumPuntos());
-			jlDeMaximo.setText(String.format(" de %d ", ruta.getNumPuntos()));
-			spm.setValue(1);
+			spm.setMaximum(ruta.getNumPuntos()-1);
+			jlDeMaximo.setText(String.format(" de %d ", ruta.getNumPuntos()-1));
+			spm.setValue(0);
 			actualizaDM();
 		}
 	}
@@ -135,12 +135,12 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 	 */
 	public void actionPerformed(ActionEvent ae) {
 		if(ae.getSource()==jbPrimero) {
-			jsDato.setValue(1);
+			jsDato.setValue(0);
 		} else if(ae.getSource()==jbUltimo) {
-			jsDato.setValue(ruta.getNumPuntos());
-		} else if (ae.getSource()==jbAnterior && (Integer)jsDato.getValue()>1) {
+			jsDato.setValue(ruta.getNumPuntos()-1);
+		} else if (ae.getSource()==jbAnterior && (Integer)jsDato.getValue()>0) {
 			jsDato.setValue((Integer)jsDato.getValue()-1);
-		} else if (ae.getSource()==jbSiguiente && (Integer)jsDato.getValue()<ruta.getNumPuntos()) {
+		} else if (ae.getSource()==jbSiguiente && (Integer)jsDato.getValue()<(ruta.getNumPuntos()-1)) {
 			jsDato.setValue((Integer)jsDato.getValue()+1);
 		}
 	}
@@ -150,7 +150,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 	 */
 	public void stateChanged(ChangeEvent ce) {
 		if(ce.getSource()==jsDato) {
-			GPSData npto=ruta.getPunto((Integer)jsDato.getValue()-1);
+			GPSData npto=ruta.getPunto((Integer)jsDato.getValue());
 			PanelPto.actualizaPunto(npto);
 			System.out.println(npto.getCadenaNMEA());
 			
