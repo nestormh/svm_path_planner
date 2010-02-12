@@ -3,6 +3,7 @@
  */
 package sibtra.gps;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -16,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -27,6 +29,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -41,7 +45,7 @@ import javax.swing.event.ChangeListener;
 public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionListener, ChangeListener, MouseListener {
 
 	private Ruta rutaEspacial=null, rutaTemporal=null, rutaActual=null;
-	private Trayectoria traEspacial=null, traTemporal=null, traActual=null;
+	private Trayectoria traActual=null;
 	private PanelExaminaRuta per;
 	
 	/** Barra de menu ventana principal */
@@ -65,11 +69,40 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		fc=new JFileChooser(new File("./Rutas"));
 		JPanel cp=(JPanel)getContentPane();
 		cp.setLayout(new BoxLayout(cp,BoxLayout.PAGE_AXIS));
+		
+		{
+			JPanel jpSur=new JPanel();
+			jlNomF=new JLabel("Fichero: ");
+			jpSur.add(jlNomF);
+
+			jcbTemporal=new JCheckBox("Mostrar Temporal");
+			jcbTemporal.addItemListener(this);
+			jpSur.add(jcbTemporal);
+
+			jcbMarcarDM=new JCheckBox("Marcar usados DM");
+			jcbMarcarDM.addItemListener(this);
+			jpSur.add(jcbMarcarDM);
+	        jpSur.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+			cp.add(jpSur);
+		}
+
+		
 		pmr=new PanelMuestraRuta(null);
-		cp.add(pmr);
 		pmr.getJPanelGrafico().addMouseListener(this); //para recibir el ratón
 		per=new PanelExaminaRuta();
-		cp.add(per);
+
+		
+		//split panel en el centro de la ventana principal
+        JSplitPane splitPanel=new JSplitPane(JSplitPane.VERTICAL_SPLIT
+//        		,false  //si al mover la barra componentes se refrescan continuamente
+        		,true  //si al mover la barra componentes se refrescan continuamente
+        		,pmr
+        		,new JScrollPane(per)
+        );
+        cp.add(splitPanel);
+        splitPanel.setOneTouchExpandable(true);
+        splitPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
         //barra de menu
         barraMenu=new JMenuBar();
@@ -89,21 +122,6 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         menuArchivo.add(miSalir);
         //lo añadimos al menu al final
 
-		{
-			JPanel jpSur=new JPanel();
-			jlNomF=new JLabel("Fichero: ");
-			jpSur.add(jlNomF);
-
-			jcbTemporal=new JCheckBox("Mostrar Temporal");
-			jcbTemporal.addItemListener(this);
-			jpSur.add(jcbTemporal);
-
-			jcbMarcarDM=new JCheckBox("Marcar usados DM");
-			jcbMarcarDM.addItemListener(this);
-			jpSur.add(jcbMarcarDM);
-
-			cp.add(jpSur);
-		}
 		
 		per.jsDato.addChangeListener(this);
 		
@@ -138,8 +156,6 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 					rutaEspacial=(Ruta)ois.readObject();
 					rutaTemporal=(Ruta)ois.readObject();
 					ois.close();
-					traEspacial=new Trayectoria(rutaEspacial);
-					traTemporal=new Trayectoria(rutaTemporal);
 					eligeRuta();
 					jlNomF.setText("Fichero: "+file.getName());
 				} catch (IOException ioe) {
@@ -265,6 +281,24 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			public void actionPerformed(ActionEvent e)
 			{
 				rutaActual.remove(ipto);
+				eligeRuta();
+			}
+		});
+		item = new JMenuItem("Borrar Hasta Principio");
+		popup.add(item);
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e)
+			{
+				rutaActual.removeToBegin(ipto);
+				eligeRuta();
+			}
+		});
+		item = new JMenuItem("Borrar Hasta Final");
+		popup.add(item);
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e)
+			{
+				rutaActual.removeToEnd(ipto);
 				eligeRuta();
 			}
 		});

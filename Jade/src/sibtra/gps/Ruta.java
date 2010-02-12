@@ -256,7 +256,7 @@ public class Ruta implements Serializable {
 	 */
 	public void remove(int ind) {
 		if(ind<0 || ind>=puntos.size())
-			throw new IllegalArgumentException("Indice de punto a quitar ("+ind+") inválido");
+			throw new IllegalArgumentException("Indice de punto a quitar ("+ind+") fuera de rango");
 		puntos.remove(ind);
 		//corregimos angulo del anterior
 		if(ind==0)
@@ -264,12 +264,47 @@ public class Ruta implements Serializable {
 		GPSData anterior=puntos.get(ind-1);
 		if(ind==puntos.size()) {
 			//se quitó el último
-			anterior.setAge(0);
+			if(puntos.size()>1)
+				//el nuevo último copia el ángulo del anterior
+				anterior.setAngulo(puntos.get(ind-2).getAngulo());
+			else
+				//solo queda un punto, angulo es 0
+				anterior.setAngulo(0);
 			return;
 		}
 		GPSData siguiente=puntos.get(ind);
 		anterior.setAngulo(anterior.calculaAnguloGPS(siguiente));
 
+	}
+	
+	/** Elimina desde el principio hata en indice indicado inclusive
+	 * @param ind indice del punto hasta donde quitar
+	 */
+	public void removeToBegin(int ind) {
+		if(ind<0 || ind>=puntos.size())
+			throw new IllegalArgumentException("Indice de punto a quitar ("+ind+") fuera de rango");
+		//quitamos anteriores hasta el índice indicado
+		for(int i=0; i<=ind; i++)
+			puntos.remove(0);
+		//necesario corregir angulo si sólo quedó un punto
+		if(puntos.size()==1)
+			puntos.get(0).setAngulo(0);
+	}
+	
+	/** Elimina desde el indice indicado inclusive hasta el final
+	 * @param ind indice del punto hasta donde quitar
+	 */
+	public void removeToEnd(int ind) {
+		if(ind<0 || ind>=puntos.size())
+			throw new IllegalArgumentException("Indice de punto a quitar ("+ind+") fuera de rango");
+		//quitamos desde índice hasta el final
+		while(puntos.size()>ind)
+			puntos.remove(ind);
+		//necesario corregir angulo
+		if(puntos.size()==1)
+			puntos.get(0).setAngulo(0);
+		else if(puntos.size()>1)
+			puntos.get(ind-1).setAngulo(puntos.get(ind-2).getAngulo());
 	}
 	
 	/** @return último punto de la ruta, null si no hay ninguno */
