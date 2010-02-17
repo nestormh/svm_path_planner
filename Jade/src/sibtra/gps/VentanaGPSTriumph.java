@@ -67,7 +67,7 @@ public class VentanaGPSTriumph extends JFrame {
 		try {
 			GPSConnectionTriumph gpsT=new GPSConnectionTriumph(puertos[0]);
 			System.out.println("Esperamos por la posición de la base");
-			if(gpsT.esperaCentroBase(20)) {
+			if(gpsT.esperaCentroBase()) {
 				System.out.println("Base en "+gpsT.posicionDeLaBase());
 				gpsT.fijaCentro(gpsT.posicionDeLaBase());
 			} else

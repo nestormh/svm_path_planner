@@ -102,7 +102,7 @@ public class VentanasMonitoriza extends Ventanas {
 			try {
 				conexionGPS = new GPSConnectionTriumph(args[0]);
 				System.out.println("Esperamos por la posición de la base");
-				if(conexionGPS.esperaCentroBase(20)) {
+				if(conexionGPS.esperaCentroBase()) {
 					conexionGPS.fijaCentro(conexionGPS.posicionDeLaBase());
 					System.out.println("Base en "+conexionGPS.posicionDeLaBase());
 				} else

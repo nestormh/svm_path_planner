@@ -159,6 +159,8 @@ public class GPSConnectionTriumph extends GPSConnection {
 		long espera=5000;
 		while ((posicionDeLaBase(true)==null) && (--intact)>0) { 
 			try {
+				System.out.println("Esperando base "+espera/1000+" segundos "
+						+" Faltan "+ intact+ " iteraciones");
 				Thread.sleep(espera); //esperamos
 				espera*=2; //duplicamos la espera para la siguiente vez
 			} catch (Exception e) {};
@@ -166,9 +168,9 @@ public class GPSConnectionTriumph extends GPSConnection {
 		return ultimaPosicionBase!=null;
 	}
 	
-	/** invoca {@link #esperaCentroBase(int)} con 10 intentos */
+	/** invoca {@link #esperaCentroBase(int)} con 5 intentos */
 	public boolean esperaCentroBase() {
-		return esperaCentroBase(10);
+		return esperaCentroBase(5);
 	}
 	
 	/** Manda úlimo comando de envío periódico en {@link #comandoEnvioPeriodico},
