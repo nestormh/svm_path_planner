@@ -1,0 +1,4 @@
+ancho entrada = 60
+ancho salida = 60
+xinicio = 40
+yinicio = 20
