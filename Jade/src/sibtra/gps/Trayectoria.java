@@ -147,7 +147,7 @@ public class Trayectoria implements Serializable {
 	
 	/** Constructor a partir de una ruta. Sencillamente ponemos los puntos de la ruta. 
 	 * Se usa 3.0 metros para considerar si es cerrada
-	 * @para ruta de donde tomar los puntos 
+	 * @param ruta de donde tomar los puntos 
 	 * @param nuevaDistMax distancia máxima que se quiere que exista entre los puntos
 	 */
 	public Trayectoria(Ruta ruta, double nuevaDistMax) {
@@ -393,7 +393,6 @@ public class Trayectoria implements Serializable {
 
 	/**
 	 * Indice del punto más cercano de ruta al punto
-	 * @param ruta array con los puntos de la tractoria
 	 * @param pos punto a buscar
 	 * @return Índice de la ruta en el que se encuentra el punto de la 
 	 * ruta más cercano al punto pos
@@ -406,8 +405,6 @@ public class Trayectoria implements Serializable {
 	 * Método optimizado de búsqueda del punto más cercano utilizando 
 	 * la información del último punto más cercano. Si en el parámetro indMinAnt se pasa
 	 * un número negativo realiza una búsqueda exaustiva
-	 * @param ruta array con los puntos de la tractoria
-	 * @param esCerrada si la ruta debe considerarse cerrada
 	 * @param posX Coordenada x del punto
 	 * @param posY Coordenada y del punto
 	 * @param indMinAnt indice donde estaba el mínimo en la iteración anterior
@@ -448,8 +445,6 @@ public class Trayectoria implements Serializable {
 	 * Método optimizado de búsqueda del punto más cercano utilizando 
 	 * la información del último punto más cercano. Se busca entorno a ese.
 	 * Si en el parámetro indMinAnt se pasa un número negativo realiza una búsqueda exaustiva
-	 * @param ruta array con los puntos de la tractoria
-	 * @param esCerrada si la ruta debe considerarse cerrada
 	 * @param pos punto a buscar
 	 * @param indMinAnt indice donde estaba el mínimo en la iteración anterior. Si es negativo no se tiene en cuenta
 	 * @return Índice de la ruta en el que se encuentra el punto de la 

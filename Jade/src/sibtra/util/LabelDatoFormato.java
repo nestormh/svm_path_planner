@@ -33,7 +33,7 @@ public class LabelDatoFormato extends LabelDato {
 	 * Crea etiqueta con texto inicial
 	 * @param clase clase cuyo método vamos a invocar
 	 * @param nomMetodo nombre del metodo a invocar en cada actulización
-	 * @param formato formato de {@link String.format} que se utilizara en cada actulización
+	 * @param formato formato de {@link String#format(String, Object[])} que se utilizara en cada actulización
 	 * @param textoInicial
 	 */
 	public LabelDatoFormato(Class clase, String nomMetodo, String formato, String textoInicial) {
@@ -45,7 +45,7 @@ public class LabelDatoFormato extends LabelDato {
 	 * Crea etiqueta con texto inicial aplicandoles el formato a valor inicial por defecto (0)
 	 * @param clase clase cuyo método vamos a invocar
 	 * @param nomMetodo nombre del metodo a invocar en cada actulización
-	 * @param formato formato de {@link String.format} que se utilizara en cada actulización
+	 * @param formato formato de {@link String#format(String, Object[])} que se utilizara en cada actulización
 	 */
 	public LabelDatoFormato(Class clase, String nomMetodo, String formato) {
 		super("######");

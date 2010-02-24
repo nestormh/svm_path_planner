@@ -90,7 +90,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 	 * Método para decidir la consigna de velocidad para cada instante.
 	 * Se tiene en cuenta el error en la orientación y el error lateral para reducir la 
 	 * consigna de velocidad. 
-	 * @return
+	 * @return la consigna calculada
 	 */
 	public double getConsignaVelocidad() {
 		if(ventanaMonitoriza==null)

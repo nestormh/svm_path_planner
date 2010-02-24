@@ -867,9 +867,7 @@ public class GPSData implements Serializable, Cloneable {
         return retorno;
     }
 
-    /**
-     * @return
-     */
+    /** @return latitud en formato texto */
     public String getLatitudText() {
         return double2sexagesimal(latitud);
     }

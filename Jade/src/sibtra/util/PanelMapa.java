@@ -143,7 +143,6 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 
     /**
      * Constructor 
-     * @param rupas Ruta pasada.
      */
 	public PanelMapa() {
 		esqID=new Point2D.Double();

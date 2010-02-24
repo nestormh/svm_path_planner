@@ -16,26 +16,26 @@ import sibtra.util.UtilCalculos;
  */
 public class FuturoObstaculo {
 	
-	/** Águlo de la dirección en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Águlo de la dirección en la última invocación de {@link #tiempoAObstaculo(double)} */
 	double alfaAct;
-	/** Velocidad en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Velocidad en la última invocación de {@link #tiempoAObstaculo(double)} */
 	double velMSAct;
-	/** Radio de curvatura calculado en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Radio de curvatura calculado en la última invocación de {@link #tiempoAObstaculo(double)} */
 	double radioCur;
 	
-	/** Velocidad angular calculada en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Velocidad angular calculada en la última invocación de {@link #tiempoAObstaculo(double)} */
 	double velAngular;
-	/** Radio interior calculado en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Radio interior calculado en la última invocación de {@link #tiempoAObstaculo(double)} */
 	double radioInterior;
-	/** Signo de {@link #alfaAct} en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Signo de {@link #alfaAct} en la última invocación de {@link #tiempoAObstaculo(double)} */
 	double signoAlfa;
-	/** Radio de exterior calculado en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Radio de exterior calculado en la última invocación de {@link #tiempoAObstaculo(double)} */
 	double radioExterior;
-	/** Ángulo del punto interior calculado en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Ángulo del punto interior calculado en la última invocación de {@link #tiempoAObstaculo(double)} */
 	double anguloInterior;
-	/** Índice del barrido del punto de tiempo mínimo calculado en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Índice del barrido del punto de tiempo mínimo calculado en la última invocación de {@link #tiempoAObstaculo(double)} */
 	int indMin;
-	/** Barrido que se usó en la última invocación de {@link #tiempoAObstaculo(double, double, BarridoAngular)} */
+	/** Barrido que se usó en la última invocación de {@link #tiempoAObstaculo(double)} */
 	BarridoAngular bAct;
 	double distanciaLibre;
 
@@ -44,11 +44,10 @@ public class FuturoObstaculo {
 	}
 	
 	/**
-	 * Calcula tiempo a siguiente obstáculo. 
+	 * Calcula distancia a siguiente obstáculo. 
 	 * @param alfa Águlo de la dirección
-	 * @param velMS velocidad en metros por segundo
 	 * @param barr barrido obtenido del RF
-	 * @return los segundos hasta siguiente obstáculo. Será infinito si no se encuentra 
+	 * @return los metros hasta siguiente obstáculo. Será infinito si no se encuentra 
 	 */
 	public double distanciaAObstaculo(double alfa, BarridoAngular barr) {
 		//copiamos los valores pasados

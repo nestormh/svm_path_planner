@@ -60,7 +60,7 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 	/**
 	 * Inicialización del puerto serie. 
 	 * @param NombrePuerto
-	 * @return
+	 * @return si se inicializó bien
 	 */
 	public boolean ConectaPuerto(String NombrePuerto) {
 		return ConectaPuerto(NombrePuerto,5);
@@ -71,7 +71,7 @@ public class ConexionSerialIMU implements SerialPortEventListener {
 	 * Inicialización del puerto serie. 
 	 * @param NombrePuerto
 	 * @param frecuencia
-	 * @return
+	 * @return si se inicializó bien
 	 */
 	public boolean ConectaPuerto(String NombrePuerto, double frecuencia) {
 		buf=new byte[MaxLen]; // creamos del tamaño máximo de telegrama

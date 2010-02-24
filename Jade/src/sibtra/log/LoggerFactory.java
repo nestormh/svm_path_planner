@@ -179,7 +179,6 @@ public class LoggerFactory {
 	/** Devuelve un {@link LoggerLong} y lo apunta
 	 * @param este objeto de referencia del logger
 	 * @param nombreVariable nombre del logger
-	 * @param muestrasSg numero de muestas esperadas
 	 * @return logger creado
 	 */
 	public static LoggerLong nuevoLoggerLong(Object este,String nombreVariable) {

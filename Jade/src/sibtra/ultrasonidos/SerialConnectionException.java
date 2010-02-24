@@ -40,7 +40,7 @@ public class SerialConnectionException extends Exception {
      * Constructs a <code>SerialConnectionException</code>
      * with the specified detail message.
      *
-     * @param   s   the detail message.
+     * @param   str   the detail message.
      */
     public SerialConnectionException(String str) {
         super(str);

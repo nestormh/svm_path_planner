@@ -39,8 +39,8 @@ public class VentanaIMU extends JFrame {
 		}
 
 		/**
-		 * Costructor crea el {@link PanelCarro} y el thread de actualización
-		 * @param cc carro del que leer los datos
+		 * Costructor crea el {@link PanelIMU} y el thread de actualización
+		 * @param csi conexión a la IMU
 		 */
 		public VentanaIMU(ConexionSerialIMU csi) {
 			super("Angulos IMU");

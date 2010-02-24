@@ -43,7 +43,7 @@ public class ControlPredictivo {
     Coche carroOriginal=null;
     /**
      * Objeto que se copiará del carro original más actualizado en cada llamada
-     * a {@link #calculaPrediccion(double, double, double) }
+     * a {@link #calculaPrediccion(double, double) }
      */
     Coche carroSim=null;
     /**
@@ -89,8 +89,8 @@ public class ControlPredictivo {
      * 
      * @param carroOri Puntero al modelo actualzado del vehículo. No se modificará 
      * en esta clase
-     * @param horPred Horizonte de predicción
-     * @param horCont Horizonte de control
+     * @param horPrediccion Horizonte de predicción
+     * @param horControl Horizonte de control
      * @param landa Peso 
      */
     public ControlPredictivo(Coche carroOri,Trayectoria ruta,int horPrediccion,int horControl,double landa,double Ts){
@@ -228,7 +228,6 @@ public class ControlPredictivo {
     /**
      * Calcula la evolución del modelo del vehículo tantos pasos hacia delante como
      * horizonte de predicción se haya definido
-     * @param carroSim Clase que modela el vehículo
      * @param comando Consigna para la orientación del volante
      * @param velocidad Velocidad lineal del vehículo
      * @return Vector de errores futuros entre las orientaciones alcanzas por 

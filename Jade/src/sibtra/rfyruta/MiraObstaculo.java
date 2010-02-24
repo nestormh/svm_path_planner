@@ -104,8 +104,7 @@ public class MiraObstaculo {
 	/**
 	 * Constructor necesita conocer la ruta que se va a seguir.
 	 * A partir de ella generará los bordes de la carretera
-	 * @param trayectoria en coordenadas locales.
-	 * @param si la trayectoria es cerrada o no.
+	 * @param tra en coordenadas locales.
 	 * @param debug si queremos activar mensajes de depuracion
 	 */
 	public MiraObstaculo(Trayectoria tra, boolean debug) {
@@ -211,7 +210,7 @@ public class MiraObstaculo {
 	
 	/** 
 	 * Se debe invocar cuando la posición del coche a cambiado mucho desde la última invocación
-	 * a {@link #masCercano(double[], double, BarridoAngular)}.
+	 * a  {@link #masCercano(double, BarridoAngular)}.
 	 * Se pone {@link #indiceCoche} a valor -1 para que la búsqueda del punto más cercano
 	 * se haga en toda la ruta.
 	 */
@@ -222,7 +221,6 @@ public class MiraObstaculo {
 	/**
 	 * En un momento dado nos dice a que distancia se encuentra el obstaculo más cercano
 	 * La posición del coche debe estar establecida en la trayectoria {@link #tray}.
-	 * @param posicionLocal Posición en coordenadas locales donde nos encontramos
 	 * @param yawA rumbo actual del vehiculo hacia el norte (EN RADIANES)
 	 * @param barrAct último barrido angular
 	 * @return Distancia libre en el camino. 

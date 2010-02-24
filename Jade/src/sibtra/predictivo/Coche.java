@@ -76,7 +76,7 @@ public class Coche implements Cloneable {
     /**
      * Constructor por defecto. Asigna a las matrices del espacio 
      * de los estados el valor definido por defecto. También inicializa 
-     * la longitud del vehículo a {@link Parametros.batalla} 
+     * la longitud del vehículo a {@link Parametros#batalla} 
      */
     public Coche(){
     
@@ -266,7 +266,7 @@ public class Coche implements Cloneable {
     
     /**
      * Calcula la evolución del vehículo en un instante de muestreo
-     * @param volante Orientación del volante
+     * @param consignaVolante Orientación del volante
      * @param velocidad Velocidad lineal del vehículo
      * @param Ts Periodo de muestreo
      */

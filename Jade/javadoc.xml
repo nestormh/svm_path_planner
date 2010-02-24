@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="javadoc">
     <target name="javadoc">
-        <javadoc access="private" author="true" classpath="lib/jade/jade.jar:lib/jade/iiop.jar:lib/jade/http.jar:/usr/share/java/RXTXcomm.jar:/usr/share/java/jama.jar:lib/jade/commons-codec/commons-codec-1.3.jar:lib/jade/jadeTools.jar" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="sibtra,sibtra.lms,sibtra.rfyruta,sibtra.imu,sibtra.util,sibtra.gps" source="1.5" sourcepath="src" splitindex="true" use="true" version="true"/>
+        <javadoc access="private" author="true" classpath="lib/jdom/jdom.jar:lib/joystick/Joystick.jar:/usr/share/java/RXTXcomm.jar:lib/jade/commons-codec/commons-codec-1.3.jar:lib/jade/jadeTools.jar:lib/jade/jade.jar:lib/jade/http.jar:/usr/share/java/jama.jar:lib/jade/iiop.jar" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="sibtra.lms,sibtra.controlcarro,sibtra.rfyruta,sibtra.imu,sibtra.rfycarro,sibtra.ui,sibtra.util,sibtra.gps,sibtra.agentes,openservo,sibtra.ultrasonidos,sibtra.ui.modulos,sibtra.aco,sibtra.ui.defs,sibtra,sibtra.shm,sibtra.predictivo,sibtra.log" source="1.5" sourcepath="src" splitindex="true" use="true" version="true"/>
     </target>
 </project>

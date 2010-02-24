@@ -53,7 +53,7 @@ public class EligeSerial implements ActionListener {
 	/** Botón de cancelar */
 	private JButton jbCancelar;
 
-	/** Refencia a thread que llama a {@link #getPuertos()} y que debe esperar {@link Thread.sleep()} 
+	/** Refencia a thread que llama a {@link #getPuertos()} y que debe esperar {@link Thread#sleep(long)} 
 	 * hasta que el usuario asigne.
 	 */
 	private Thread threadPrincipal=null;
@@ -143,7 +143,7 @@ public class EligeSerial implements ActionListener {
 	 * Espera a que el usuario haga la selección o cancele.
 	 * En caso de cancelar o que no sea posible la selección (puertos<títulos) devuelve NULL.
 	 * Si sólo hay un puerto para 1 titulo se asigna sin preguntar al usuario
-	 * @return
+	 * @return nombres de los puertos seleccionados
 	 */
 	public String[] getPuertos() {
 		while(!hayAsignacion) {

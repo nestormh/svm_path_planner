@@ -75,8 +75,7 @@ public class Ventanas  implements ActionListener  {
 
 	/**
 	 * Despues del constructor y de añadir todo lo que se quiera hay que invocar 
-	 *   a  para que se termine la preparación y se muestren.
-	 * @param Nombre que se le quiere dar a la ventana (no tendrá decoración :-( 
+	 *   a {@link #muestraVentanas()} para que se termine la preparación y se muestren.
 	 */
     public Ventanas() {
         
@@ -358,7 +357,7 @@ public class Ventanas  implements ActionListener  {
 
 	
     /** Para el componente actual, y sus descendientes recursivamente, 
-     * mira a ver si el {@link PanelDatos} y le invoca {@link PanelDatos.destruir()}  */
+     * mira a ver si es {@link PanelDatos} y le invoca su método destruir()  */
     private void invocaDestruir(Component ca) {
     	if(ca instanceof Container) {
     		if(ca instanceof PanelDatos) {

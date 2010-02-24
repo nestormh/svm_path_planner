@@ -39,9 +39,9 @@ public class PanelMiraObstaculoSubjetivo extends PanelMuestraBarrido {
 
 
 	/**
-     * Dado punto del mundo real lo pasa pixeles el coordenadas del RF.
-     * @param ds
-     * @return 
+     * Dado punto del mundo real lo pasa pixeles en coordenadas del RF.
+     * @param ds punto del mundo real
+     * @return  punto representado los pixeles correspondientes
      */
     private Point2D.Double pointReal2pixel(double[] ds) {
 		return pointReal2pixel(ds[0],ds[1]);

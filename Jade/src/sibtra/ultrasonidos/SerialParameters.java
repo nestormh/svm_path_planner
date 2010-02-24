@@ -174,7 +174,7 @@ public class SerialParameters {
 
     /**
     Sets flow control for writing.
-    @param flowControlIn New flow control for writing type.
+    @param flowControlOut New flow control for writing type.
     */
     public void setFlowControlOut(int flowControlOut) {
 	this.flowControlOut = flowControlOut;
@@ -182,7 +182,7 @@ public class SerialParameters {
 
     /**
     Sets flow control for writing.
-    @param flowControlIn New flow control for writing type.
+    @param flowControlOut New flow control for writing type.
     */
     public void setFlowControlOut(String flowControlOut) {
 	this.flowControlOut = stringToFlow(flowControlOut);

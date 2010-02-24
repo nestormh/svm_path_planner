@@ -108,7 +108,6 @@ public class ManejaLMS {
 	
 	/**
 	 * Se encarga de verificar la comunicació con el RF y ponerla 500Kba 
-	 * @return si fue posible fijar y confirmar el paso
 	 */
 	void configura500K() throws LMSException {
 		configura500K(4);
@@ -117,9 +116,8 @@ public class ManejaLMS {
 	/**
 	 * Se encarga de verificar la comunicació con el RF y ponerla 500Kba
 	 * @param maxIntentos numero de intentos en para cada mensaje enviado 
-	 * @return si fue posible fijar y confirmar el paso
 	 */
-	void configura500K(int maxIntenos) throws LMSException {
+	void configura500K(int maxIntentos) throws LMSException {
 		if(manTel==null) {
 			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
 			return;
@@ -130,10 +128,10 @@ public class ManejaLMS {
 		byte[] MenPasoA25={0x20, 0x25}; //aprovechamos para ir parando envío continuo
 		byte[] Men500k={0x20, 0x48};
 		System.out.println("Tratamos de configurar a 500Kb");
-		for(int ia=1; ia<=maxIntenos; ia++) {
+		for(int ia=1; ia<=maxIntentos; ia++) {
 			manTel.setBaudrate(38400);
 			boolean rOK=false;
-			for(int i=1; !rOK && i<=maxIntenos; i++) {
+			for(int i=1; !rOK && i<=maxIntentos; i++) {
 				try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
 				manTel.purgaBufferEntrada();
 				manTel.EnviaMensaje(MenPasoA25);
@@ -147,7 +145,7 @@ public class ManejaLMS {
 			System.err.println("No se recibió bien el mensaje a 38400. pasamos a 9600");
 			manTel.setBaudrate(9600);
 			rOK=false;
-			for(int i=1; !rOK && i<=maxIntenos; i++) {
+			for(int i=1; !rOK && i<=maxIntentos; i++) {
 				try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
 				manTel.purgaBufferEntrada();
 				manTel.EnviaMensaje(MenPasoA25,1000); //mas timeout ya que es 9600
@@ -159,7 +157,7 @@ public class ManejaLMS {
 			}
 			System.err.println("Esta a 9600, trataremos de pasarlo a 500K");
 			rOK=false;
-			for(int i=1; !rOK && i<=maxIntenos; i++) {
+			for(int i=1; !rOK && i<=maxIntentos; i++) {
 				try { Thread.sleep(milisPreviosEnvio); } catch (InterruptedException e) {}
 				manTel.purgaBufferEntrada();
 				manTel.EnviaMensaje(Men500k,1000); //mas timeout ya que es 9600

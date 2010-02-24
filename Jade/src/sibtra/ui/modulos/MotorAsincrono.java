@@ -157,7 +157,7 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 	}
 
 
-	/** activamos el {@link #thCiclico} */
+	/** activamos los threads */
 	public void actuar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
@@ -172,7 +172,7 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 		thIMU.activar();
 	}
 
-	/** suspendemos el {@link #thCiclico} y paramos PID de {@link ControlCarro } */
+	/** suspendemos los threads y paramos PID de {@link ControlCarro } */
 	public void parar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
@@ -197,7 +197,7 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 		return NOMBRE;
 	}
 
-	/** Suspendemos el {@link #thCiclico}, quitamos panel, liberamos la trayectoria */
+	/** terminamos los threads, quitamos panel, liberamos la trayectoria */
 	public void terminar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");

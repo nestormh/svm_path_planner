@@ -126,8 +126,8 @@ public class PanelFuturoObstaculo extends PanelMuestraBarrido {
 	}
 	
 	/**
-	 * Acatualiza la presentación con los datos en {@link #MI}.
-	 * Se debe invocar cuando {@link #MI} realiza un nuevo cálculo. 
+	 * Actualiza la presentación con los datos en panel.
+	 * Se debe invocar cuando se realiza un nuevo cálculo. 
 	 */
 	public void actualiza() {
 		panelInformacion.actualizaDatos(futObs);

@@ -83,9 +83,9 @@ public class GPSConnectionTriumph extends GPSConnection {
 
 	private GPSData ultimaPosicionBase;
 	
-	public static int ERR=0;
-	public static int WAR=5;
-	public static int INFO=15;
+	public final static int ERR=0;
+	public final static int WAR=5;
+	public final static int INFO=15;
 	
 	protected void log(int nivel,String msg) {
 		if(nivel==0) {
@@ -99,7 +99,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 	/**
 	 * Constructor por defecto no hace nada.
 	 * Para usar el puerto hay que invocar a {@link #setParameters(SerialParameters)} 
-	 * y luego {@link #openConnection()}
+	 * y luego {@link #openConnection(SerialParameters)}
 	 */
 	public GPSConnectionTriumph() {
 		super();
@@ -109,7 +109,6 @@ public class GPSConnectionTriumph extends GPSConnection {
 	 * Crea conexión a Triumph en puerto serial y 115200 baudios.
 	 * Configura el envío periódico.
 	 * @param portName nombre puerto donde encontrar al GPS
-	 * @param baudio velocidad de la comunicacion en baudios
 	 */
 	public GPSConnectionTriumph(String portName) throws SerialConnectionException {
 		this(portName,115200);
@@ -118,7 +117,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 	 * Crea conexión a Triumph en puerto serial y baudios indicados.
 	 * Configura el envío periódico.
 	 * @param portName nombre puerto donde encontrar al GPS
-	 * @param baudio velocidad de la comunicacion en baudios
+	 * @param baudios velocidad de la comunicacion en baudios
 	 */
 	public GPSConnectionTriumph(String portName, int baudios) throws SerialConnectionException {
 		this(portName,baudios,ERR);
@@ -128,7 +127,7 @@ public class GPSConnectionTriumph extends GPSConnection {
 	 * Crea conexión a Triumph en puerto serial y baudios indicados.
 	 * Configura el envío periódico.
 	 * @param portName nombre puerto donde encontrar al GPS
-	 * @param baudio velocidad de la comunicacion en baudios
+	 * @param baudios velocidad de la comunicacion en baudios
 	 * @param nivelLog nivel para los mensajes de depuración ({@value #INFO}, {@value #WAR} ó {@value #ERR})
 	 */
 	public GPSConnectionTriumph(String portName, int baudios, int nivelLog) throws SerialConnectionException {

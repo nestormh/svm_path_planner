@@ -330,8 +330,8 @@ public class Ruta implements Serializable {
 	}
 
 	/**
-	 * @param i
-	 * @return
+	 * @param i indice del punto
+	 * @return el punto correspondiente
 	 */
 	public GPSData getPunto(int i) {
 		if(i>=puntos.size() || i<0)

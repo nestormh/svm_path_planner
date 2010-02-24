@@ -45,7 +45,7 @@ public class Logger {
 	/**
 	 * Asignamos los campos 
 	 * @param nombre nombre de la varialbe
-	 * @param clase clase a la que pertenece la variable
+	 * @param objeto objeto al que pertenece la variable
 	 * @param muestrasSg Estimación del numero de muestras por segundo
 	 * @param t0 nuestro instante inicial
 	 */
@@ -61,7 +61,7 @@ public class Logger {
 	/**
 	 * Asignamos los campos 
 	 * @param nombre nombre de la varialbe
-	 * @param clase clase a la que pertenece la variable
+	 * @param objeto objeto al que pertenece la variable
 	 */
 	Logger(Object objeto, String nombre,long t0) {
 		this(objeto,nombre,t0,20);
@@ -125,7 +125,7 @@ public class Logger {
 		return descripcion;
 	}
 	
-	/** @retun el nombre de la clase del objeto */
+	/** @return el nombre de la clase del objeto */
 	public String getNombreClase() {
 		String no=objeto.getClass().getName();
 		return no.substring(no.lastIndexOf(".")+1);

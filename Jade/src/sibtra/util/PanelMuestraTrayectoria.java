@@ -55,7 +55,6 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	
     /**
      * Constructor 
-     * @param rupas Ruta pasada.
      */
 	public PanelMuestraTrayectoria() {
 		super();
@@ -221,9 +220,9 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 	}
 
 	/**
-	 * Pinta los puntos del array como aspas
+	 * Pinta los puntos de la trayectoria (que estén dentro del recuadro visto) como aspas
 	 * @param g donde pintar
-	 * @param v puntos a pintar (x,y)
+	 * @param tra trayectoria a pintar
 	 */
 	protected void puntosTrayectoria(Graphics2D g, Trayectoria tra) {
 		//pintamos los puntos que están dentro del recuadro
@@ -340,7 +339,7 @@ public class PanelMuestraTrayectoria extends PanelMapa {
 		return perimetro;
 	}
 	
-	/** @return Ídem que {@link #pathTrayectoria(Trayectoria, int, int, boolean)} usando todo el array.	 */
+	/** @return Ídem que {@link #pathTrayectoria(Trayectoria, int, int)} usando todo el array.	 */
 	protected GeneralPath pathTrayectoria(Trayectoria tr) {
 		if(tr==null)
 			return null;

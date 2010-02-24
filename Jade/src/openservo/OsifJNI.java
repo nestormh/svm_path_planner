@@ -16,7 +16,7 @@ package openservo;
 class OsifJNI {
 	/**
 	 * Initialise the OSIF USB interface. Enumerates all connected OSIF devices.
-	 * @returns <0 error 1 success
+	 * @return <0 error 1 success
 	 **/
 	public static native int OSIF_init();
 
@@ -27,7 +27,7 @@ class OsifJNI {
 
 	/**
 	 * Return the OSIF library version for compatibility checks
-	 * @returns an integer of the version number in  majorminor xxyy
+	 * @return an integer of the version number in  majorminor xxyy
 	 **/
 	public static native int OSIF_get_libversion();
 
@@ -42,14 +42,14 @@ class OsifJNI {
 	 *to write in the addr register and start writing from +1
 	 *offset in data.
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
-	 *@param i2c_addr: integer address of the device.
-	 *@param addr: the register address in the device to read
-	 *@param data: passed in buffer to be written
-	 *@param buflen: number of bytes to read. Current hardware limit is 64 bytes
-	 *@param issue_stop: issue the stop bit at the end of the transaction?
+	 *@param adapter integer of the adapter scanned. 0 indexed.
+	 *@param i2c_addr integer address of the device.
+	 *@param addr the register address in the device to read
+	 *@param data passed in buffer to be written
+	 *@param buflen number of bytes to read. Current hardware limit is 64 bytes
+	 *@param issue_stop issue the stop bit at the end of the transaction?
 	 *
-	 *@returns <0 error 1 success
+	 *@return <0 error 1 success
 	 **/
 	public static native int OSIF_write_data(int adapter, int i2c_addr, byte addr, byte[] data, int buflen, boolean issue_stop );
 
@@ -69,15 +69,14 @@ class OsifJNI {
 	 *you should either use OSIF_write or put the register selection
 	 *byte at element 0 in your data string
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
-	 *@param i2c_addr: integer address of the device.
-	 *@param addr: the register address in the device to read
-	 *@param data: passed in buffer to be filled
-	 *@param buflen: number of bytes to read. Current hardware limit is 64 bytes
-	 *@param issue_stop: do we want to send the I2C stop signal after the
+	 *@param adapter integer of the adapter scanned. 0 indexed.
+	 *@param i2c_addr integer address of the device.
+	 *@param data passed in buffer to be filled
+	 *@param buflen number of bytes to read. Current hardware limit is 64 bytes
+	 *@param issue_stop do we want to send the I2C stop signal after the
 	 *			transaction? issue_stop will switch off the request
 	 *
-	 *@returns <0 error 1 success
+	 *@return <0 error 1 success
 	 **/
 	public static native int OSIF_writeonly(int adapter, int i2c_addr, byte[] data, int buflen, boolean issue_stop );
 
@@ -89,14 +88,14 @@ class OsifJNI {
 	 *This function will do a write before a read
 	 *with a restart.
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
-	 *@param i2c_addr: integer address of the device.
-	 *@param addr: the register address in the device to read
-	 *@param data: passed in buffer to be filled
-	 *@param buflen: number of bytes to read. read in small chunks. 64 bytes is a realistic figure
-	 *@param issue_stop: issue the stop bit at the end of the transaction?
+	 *@param adapter integer of the adapter scanned. 0 indexed.
+	 *@param i2c_addr integer address of the device.
+	 *@param addr the register address in the device to read
+	 *@param data passed in buffer to be filled
+	 *@param buflen number of bytes to read. read in small chunks. 64 bytes is a realistic figure
+	 *@param issue_stop issue the stop bit at the end of the transaction?
 	 *
-	 *@returns <0 error 1 success
+	 *@return <0 error 1 success
 	 **/
 	public static native int OSIF_read_data(int adapter, int i2c_addr, byte addr, byte[] data, int buflen, boolean issue_stop );
 
@@ -117,12 +116,12 @@ class OsifJNI {
 	 *by using OSIF_write, or alternatively be
 	 *sure your device supports this method of communication
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
-	 *@param i2c_addr: integer address of the device.
-	 *@param data: passed in buffer to be filled
-	 *@param issue_stop: issue the stop bit at the end of the transaction?
+	 *@param adapter integer of the adapter scanned. 0 indexed.
+	 *@param i2c_addr integer address of the device.
+	 *@param data passed in buffer to be filled
+	 *@param issue_stop issue the stop bit at the end of the transaction?
 	 *
-	 *@returns <0 error 1 success
+	 *@return <0 error 1 success
 	 **/
 	public static native int OSIF_readonly(int adapter, int i2c_addr, byte[] data, int buflen, boolean issue_stop );
 
@@ -135,20 +134,19 @@ class OsifJNI {
 	 *Note not all devices work like this, and can send some devices into an unknown
 	 *state. BE CAREFUL.
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
-	 *@param devices: *devices with 1d array of devices on bus and *dev_count with number found
+	 *@param adapter integer of the adapter scanned. 0 indexed.
 	 *
-	 *@returns NULL si error, ó array de dispositivos encontrados
+	 *@return NULL si error, ó array de dispositivos encontrados
 	 **/
 	public static native int[] OSIF_scan(int adapter);
 
 	/**
 	 *Probe a device at a given address to see if it will ACK
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
-	 *@param i2c_addr: integer address of the device.
+	 *@param adapter integer of the adapter scanned. 0 indexed.
+	 *@param i2c_addr integer address of the device.
 	 *
-	 *@returns true if a device is found at address
+	 *@return true if a device is found at address
 	 **/
 	public static native boolean OSIF_probe(int adapter, int i2c_addr );
 
@@ -158,18 +156,18 @@ class OsifJNI {
 	 *devices that will trigger a function from a write to
 	 *a register.
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
-	 *@param i2c_addr: integer address of the device.
-	 *@param command: the register to write to.
+	 *@param adapter integer of the adapter scanned. 0 indexed.
+	 *@param i2c_addr integer address of the device.
+	 *@param command the register to write to.
 	 *
-	 *@returns <0 error 1 success
+	 *@return <0 error 1 success
 	 **/
 	public static native int OSIF_command(int adapter, int i2c_addr, byte command);
 	
 	/**
 	 *Get a count of the connected OSIF adapters:
 	 *
-	 *@returns number of connected OSIF adapters
+	 *@return number of connected OSIF adapters
 	 **/
 	public static native int OSIF_get_adapter_count();
 
@@ -177,9 +175,9 @@ class OsifJNI {
 	 *Query the connected OSIF for its name.
 	 *May also be used for firmware version.
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
+	 *@param adapter integer of the adapter scanned. 0 indexed.
 	 *
-	 *@returns character string filled with the name
+	 *@return character string filled with the name
 	 **/
 	public static native String OSIF_get_adapter_name(int adapter);
 	
@@ -188,10 +186,10 @@ class OsifJNI {
 	 *GPIO Control function to set the direction of the pins, and is enabled
 	 *    If you set the I2C pins (SDA SCL) as outputs, you will disable the
 	 *    i2c module. Be warned!
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
-	 *@param ddr: a bitwise OR of the pins to set as input(0) or output(1)
+	 *@param adapter_no integer of the adapter scanned. 0 indexed.
+	 *@param ddr a bitwise OR of the pins to set as input(0) or output(1)
 	 *    eg gpio1(TX) and gpio2(RX)  00000011 or 0x03
-	 *@param enabled: a bitwise OR to enable the pin (1) for future writes. Can be used as a mask
+	 *@param enabled a bitwise OR to enable the pin (1) for future writes. Can be used as a mask
 	 * TX line
 	 * RX line
 	 * MISO
@@ -205,8 +203,8 @@ class OsifJNI {
 	 *GPIO Control function to set pin high or low
 	 *    (only works if ddr set to output)
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
-	 *@param io: a bitwise OR of the pins to set high (1) or low (0)
+	 *@param adapter_no integer of the adapter scanned. 0 indexed.
+	 *@param io a bitwise OR of the pins to set high (1) or low (0)
 	 *    eg gpio1(TX) and gpio2(RX)  00000011 or 0x03 to set those high
 	 **/
 	public static native int OSIF_io_set_out(int adapter_no, int io);
@@ -214,7 +212,7 @@ class OsifJNI {
 	/**
 	 *GPIO Control function to read the status of all gpio pins
 	 *
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
+	 *@param adapter integer of the adapter scanned. 0 indexed.
 	 **/
 	public static native int OSIF_io_get_in(int adapter);
 
@@ -227,14 +225,14 @@ class OsifJNI {
 	 *get the current pin states. THIS IS NOT suitable for asking the osif what pins
 	 *are set when this lib loaded, OSIF doesn't know that. It is this lib that keeps
 	 *tabs on what pins are being set/uset
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
+	 *@param adapter integer of the adapter scanned. 0 indexed.
 	 **/
 	public static native int OSIF_io_get_current(int adapter);
 
 	/**
 	 *Disable the I2C port in case we want to use the pins as gpios,
 	 *or if we want to reset the I2C module
-	 *@param adapter: integer of the adapter scanned. 0 indexed.
+	 *@param adapter integer of the adapter scanned. 0 indexed.
 	 **/
 	public static native int OSIF_disable_i2c(int adapter);
 	

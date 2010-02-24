@@ -31,7 +31,7 @@ import sibtra.util.UtilCalculos;
  * El control de velocidad se realiza en esta clase. Para ello hay que combinar la 
  * fuerza aplicada al motor (avance) y el freno.
  * 
- * @autor jonay
+ * @author jonay
  */
 public class ControlCarro implements SerialPortEventListener {
 
@@ -139,7 +139,7 @@ public class ControlCarro implements SerialPortEventListener {
 
         
 	/** Valor de la última consigna para el volante enviada.
-	 * Se envía al PIC descomponiéndola en {@link #ConsignaVolanteHigh} y {@link #ConsignaVolanteLow} 
+	 * Se envía al PIC descomponiéndola en la parte alta y la baja 
 	 */
 	private int ConsignaVolante = 32767;
 	/* Comandos enviados hacia el coche para el microcontrolador */
@@ -993,29 +993,17 @@ public class ControlCarro implements SerialPortEventListener {
 	public double getConsignaAvanceKH() {
 		return consignaVel/PULSOS_METRO*3600.0/1000.0;
 	}
-	/**
-	 * Velocidad actual en el vehiculo en Cuentas Segundo
-	 * 
-	 * @return
-	 */
+	/** @return Velocidad actual en el vehiculo en Cuentas Segundo */
 	public double getVelocidadCS() {
 		return velocidadCS;
 	}
 
-	/**
-	 * Velocidad actual en el vehiculo en Metros Segundo
-	 * 
-	 * @return
-	 */
+	/** @return Velocidad actual en el vehiculo en Metros Segundo */
 	public double getVelocidadMS() {
 		return velocidadMS;
 	}
 
-	/**
-	 * Velocidad actual en el vehiculo en Kilometros Hora
-	 * 
-	 * @return
-	 */
+	/** @return Velocidad actual en el vehiculo en Kilometros Hora */
 	public double getVelocidadKH() {
 		return velocidadMS * 3600 / 1000;
 	}
@@ -1024,12 +1012,9 @@ public class ControlCarro implements SerialPortEventListener {
 	/**
 	 * Fija los parametros del controlador PID de la velocidad
 	 * 
-	 * @param kp
-	 *            Constante proporcional
-	 * @param kd
-	 *            Constante derivativa
-	 * @param ki
-	 *            Constante integral
+	 * @param kp Constante proporcional
+	 * @param kd Constante derivativa
+	 * @param ki Constante integral
 	 */
 	public void setKVel(double kp, double kd, double ki) {
 		kPAvance = kp;

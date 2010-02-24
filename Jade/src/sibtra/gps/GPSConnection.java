@@ -92,7 +92,7 @@ public class GPSConnection implements SerialPortEventListener {
 	/**
 	 * Constructor por defecto no hace nada.
 	 * Para usar el puerto hay que invocar a {@link #setParameters(SerialParameters)} 
-	 * y luego {@link #openConnection()}
+	 * y luego {@link #openConnection(SerialParameters)}
 	 */
 	public GPSConnection() {
 		//lastPaquete = System.currentTimeMillis();
@@ -114,7 +114,7 @@ public class GPSConnection implements SerialPortEventListener {
 	 * Si se quieren especificar otros parámetros se debe utilizar
 	 * el {@link #GPSConnection() constructor por defecto}.
 	 * @param portName nombre puerto donde encontrar al GPS
-	 * @param baudio velocidad de la comunicacion en baudios
+	 * @param baudios velocidad de la comunicacion en baudios
 	 */
 	public GPSConnection(String portName, int baudios) throws SerialConnectionException {
 		openConnection(new SerialParameters(portName, baudios, 0, 0, 8, 1, 0));
