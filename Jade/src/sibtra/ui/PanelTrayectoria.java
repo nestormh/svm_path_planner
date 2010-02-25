@@ -4,7 +4,6 @@
 package sibtra.ui;
 
 import java.awt.event.ActionEvent;
-import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
@@ -13,8 +12,7 @@ import javax.swing.JOptionPane;
 
 import sibtra.gps.PanelExaminaTrayectoria;
 import sibtra.gps.Trayectoria;
-import sibtra.ui.defs.SeleccionRuta;
-import sibtra.ui.defs.UsuarioTrayectoria;
+import sibtra.ui.defs.SeleccionTrayectoriaInicial;
 import sibtra.util.ClasesEnPaquete;
 import sibtra.util.PanelFlow;
 
@@ -25,14 +23,12 @@ import sibtra.util.PanelFlow;
 @SuppressWarnings("serial")
 public class PanelTrayectoria extends PanelExaminaTrayectoria {
 
-	/** Para apuntar todos los obetos que han pedido trayectoria y poder avisarlos si hay cambio */
-	Vector<UsuarioTrayectoria> usanTr=new Vector<UsuarioTrayectoria>(10);  //espacio para unos 10 modulos
 	private VentanasMonitoriza ventanaMonitorizar;
 	private PanelFlow panelInferior;
 	private AccionCambiarTrayectoria accCambiaTrayectoria;
 	private Class[] arrClasSelecRuta;
 	private String[] arrNomClasMotor;
-	private SeleccionRuta obSelRuta=null;
+	private SeleccionTrayectoriaInicial obSelRuta=null;
 	Trayectoria trayectoriaActual=null;
 	private AccionCambiarModulo accCambiaModulo;
 
@@ -41,7 +37,7 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 		ventanaMonitorizar=monitoriza;
 		
 		//buscamos los modulos SeleccionaRuta y sus nombres
-		arrClasSelecRuta=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.SeleccionRuta", "sibtra.ui.modulos"
+		arrClasSelecRuta=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.SeleccionTrayectoriaInicial", "sibtra.ui.modulos"
 				,ventanaMonitorizar.panSelModulos.cargadorClases);
 		arrNomClasMotor=ClasesEnPaquete.nombreClases(arrClasSelecRuta);
 
@@ -140,7 +136,7 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 		}
 		//instanciamos el modulo selecctor elegido
 		try {
-			obSelRuta=(SeleccionRuta)((Class<SeleccionRuta>)arrClasSelecRuta[modSel]).newInstance();
+			obSelRuta=(SeleccionTrayectoriaInicial)((Class<SeleccionTrayectoriaInicial>)arrClasSelecRuta[modSel]).newInstance();
 		} catch (InstantiationException e) {
 			System.err.println(getClass().getName()+": No podemos instanciar objeto de la clase "+arrClasSelecRuta[modSel].getName());
 			e.printStackTrace();
@@ -160,24 +156,13 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 
 	}
 	
-	Trayectoria getTrayectoria(UsuarioTrayectoria objUsaTr) {
-		//Lo apuntamos
-		usanTr.add(objUsaTr);
+	Trayectoria getTrayectoria() {
 		return trayectoriaActual;
-	}
-
-	void liberaTrayectoria(UsuarioTrayectoria objUsaTr) {
-		if(!usanTr.remove(objUsaTr))
-			System.err.println(getClass().getName()+": se intenta borrar objeto no apuntado: ("
-					+objUsaTr.getClass().getName()+")="+objUsaTr);
 	}
 	
 	void setNuevaTrayectoria(Trayectoria tr) {
 		trayectoriaActual=tr;
 		setTrayectoria(tr);
-		//avisamos a todos los apuntados
-		for(UsuarioTrayectoria uta: usanTr)
-			uta.nuevaTrayectoria(tr);
 		actualiza();
 	}
 

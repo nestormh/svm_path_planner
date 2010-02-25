@@ -5,13 +5,13 @@ package sibtra.ui.modulos;
 
 import sibtra.gps.Trayectoria;
 import sibtra.ui.VentanasMonitoriza;
-import sibtra.ui.defs.SeleccionRuta;
+import sibtra.ui.defs.SeleccionTrayectoriaInicial;
 
 /**
  * @author alberto
  *
  */
-public class EligeDestino implements SeleccionRuta {
+public class EligeDestino implements SeleccionTrayectoriaInicial {
 
 	String NOMBRE="Elige Destino";
 	String DESCRIPCION="Crea trayectoria seleccionando el destino";

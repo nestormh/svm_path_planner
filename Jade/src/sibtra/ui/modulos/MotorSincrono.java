@@ -4,18 +4,12 @@
 package sibtra.ui.modulos;
 
 import sibtra.controlcarro.ControlCarro;
-import sibtra.gps.GPSData;
-import sibtra.gps.Trayectoria;
 import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerFactory;
-import sibtra.log.LoggerInt;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
-import sibtra.ui.defs.CalculoDireccion;
-import sibtra.ui.defs.CalculoVelocidad;
-import sibtra.ui.defs.DetectaObstaculos;
+import sibtra.ui.defs.ModificadorTrayectoria;
 import sibtra.ui.defs.Motor;
-import sibtra.ui.defs.UsuarioTrayectoria;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
@@ -27,52 +21,32 @@ import sibtra.util.UtilCalculos;
  * @author alberto
  *
  */
-public class MotorSincrono implements Motor, UsuarioTrayectoria {
+public class MotorSincrono extends MotorTipico implements Motor {
 	
-	protected String NOMBRE="Motor Sincrono";
+	protected String NOMBRE="Motor Síncrono";
 	protected String DESCRIPCION="Ejecuta las acciones de control con un periodo fijo";
-	protected VentanasMonitoriza ventanaMonitoriza=null;
-	Trayectoria trayActual=null;
-	protected CalculoDireccion calculadorDireccion=null;
-	protected CalculoVelocidad calculadorVelocidad=null;
-	protected DetectaObstaculos[] detectoresObstaculos=null;
 	protected PanelSincrono panel;
+	protected int periodoMuestreoMili=200;
 	protected ThreadSupendible thCiclico;
-	protected Coche modCoche;
 
-	//Parámetros
-	protected int periodoMuestreoMili = 200;
-	protected double cotaAngulo=Math.toRadians(30);
-	protected double umbralMinimaVelocidad=0.2;
 	protected double pendienteFrenado=1.0;
 	protected double margenColision=3.0;
-	protected double maximoIncrementoVelocidad=0.1;
 	
-	//Variables 
-	protected double consignaVelocidad;
-	protected double consignaVolante;
 	protected double consignaVelocidadRecibida;
 	protected double consignaVolanteRecibida;
 	protected double distanciaMinima;
 	//loggers
 	protected LoggerArrayDoubles loger;
-	protected LoggerInt logerMasCercano;
 	
-	public MotorSincrono() {}
+	public MotorSincrono() {super();}
 	
 	
 	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonito) {
-		if(ventanaMonitoriza!=null) {
-			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
-		}
-		ventanaMonitoriza=ventMonito;
+		super.setVentanaMonitoriza(ventMonito);
 		
 		panel=new PanelSincrono();
 		ventanaMonitoriza.añadePanel(panel, getNombre(),false,false);
-		
-        //inicializamos modelo del coche
-        modCoche = new Coche();
-		
+				
 		thCiclico=new ThreadSupendible() {
 			private long tSig;
 
@@ -96,70 +70,75 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 		loger=LoggerFactory.nuevoLoggerArrayDoubles(this, "MotorSincrono",100/periodoMuestreoMili);
 		loger.setDescripcion("[consignaVolanteRecibida,consignaVolanteAplicada,consignaVelocidadRecibida"
 				 +", consignaVelocidadLimitadaRampa, consignaVelocidadAplicada,distanciaMinimaDetectores]");
-		logerMasCercano=LoggerFactory.nuevoLoggerInt(this, "IndiceMasCercano", 1000/periodoMuestreoMili);
 
 		return true;
 	}
 
-	/** activamos el {@link #thCiclico} */
+	/** Suspendemos el {@link #thCiclico}, quitamos panel, liberamos la trayectoria */
+	public void terminar() {
+		super.terminar();
+		thCiclico.terminar();
+		ventanaMonitoriza.quitaPanel(panel);
+		LoggerFactory.borraLogger(loger);
+	}
+
+	/** activamos {@link #thCiclico} */
 	public void actuar() {
-		if(ventanaMonitoriza==null)
-			throw new IllegalStateException("Aun no inicializado");
-        //Solo podemos actuar si está todo inicializado
-        if(calculadorDireccion==null || calculadorVelocidad==null || detectoresObstaculos==null)
-        	throw new IllegalStateException("Faltan modulos por inicializar");
-        //vemos si hay trayectoria y la apuntamos
-        if(ventanaMonitoriza.hayTrayectoria())
-        	trayActual=ventanaMonitoriza.getTrayectoriaSeleccionada(this);
+		super.actuar();
 		thCiclico.activar();
 	}
 
 	/** suspendemos el {@link #thCiclico} y paramos PID de {@link ControlCarro } */
 	public void parar() {
-		if(ventanaMonitoriza==null)
-			throw new IllegalStateException("Aun no inicializado");
+		super.parar();
 		thCiclico.suspender();
 		//paramos el PID de control carro
 		ventanaMonitoriza.conexionCarro.stopControlVel();
 	}
 
-	/* (sin Javadoc)
-	 * @see sibtra.ui.modulos.Modulo#getDescripcion()
-	 */
-	public String getDescripcion() {
-		return DESCRIPCION;
+	protected void accionPeriodica() {
+		super.accionPeriodica();
+	
+	    //Direccion =============================================================
+	    double consignaVolanteAnterior=consignaVolante;
+	    consignaVolante=consignaVolanteRecibida=calculadorDireccion.getConsignaDireccion();
+	    consignaVolante=UtilCalculos.limita(consignaVolante, -cotaAngulo, cotaAngulo);
+	
+	    double velocidadActual = ventanaMonitoriza.conexionCarro.getVelocidadMS();
+	    //Cuando está casi parado no tocamos el volante
+	    if (velocidadActual >= umbralMinimaVelocidad)
+	    	ventanaMonitoriza.conexionCarro.setAnguloVolante(consignaVolante);
+	
+	    // Velocidad =============================================================
+		//Guardamos valor para la siguiente iteracion
+		double consignaVelAnterior=consignaVelocidad;
+		
+	    consignaVelocidad=consignaVelocidadRecibida=calculadorVelocidad.getConsignaVelocidad();
+	    
+	    //vemos la minima distancia de los detectores
+	    distanciaMinima=Double.MAX_VALUE;
+	    for(int i=0; i<detectoresObstaculos.length; i++)
+	    	distanciaMinima=Math.min(distanciaMinima, detectoresObstaculos[i].getDistanciaLibre());
+	    
+	    double velRampa=(distanciaMinima-margenColision)*pendienteFrenado;
+	    double consignaVelocidadRampa=consignaVelocidad=Math.min(consignaVelocidad, velRampa);
+	    
+	    double incrementoConsigna=consignaVelocidad-consignaVelAnterior;
+	    if(incrementoConsigna>maximoIncrementoVelocidad)
+	    	consignaVelocidad=consignaVelAnterior+maximoIncrementoVelocidad;
+		ventanaMonitoriza.conexionCarro.setConsignaAvanceMS(consignaVelocidad);
+		
+		//Hacemos evolucionar el modelo del coche
+	    modCoche.calculaEvolucion(consignaVolante, velocidadActual, (double)periodoMuestreoMili / 1000.0);
+	
+	
+		panel.actualizaDatos(MotorSincrono.this);  //actualizamos las etiquetas
+		
+		loger.add(consignaVolanteRecibida,consignaVolante,consignaVelocidadRecibida
+				, consignaVelocidadRampa, consignaVelocidad,distanciaMinima);
+		
 	}
 
-	/* (sin Javadoc)
-	 * @see sibtra.ui.modulos.Modulo#getNombre()
-	 */
-	public String getNombre() {
-		return NOMBRE;
-	}
-
-	/** Suspendemos el {@link #thCiclico}, quitamos panel, liberamos la trayectoria */
-	public void terminar() {
-		if(ventanaMonitoriza==null)
-			throw new IllegalStateException("Aun no inicializado");
-		thCiclico.terminar();
-		ventanaMonitoriza.quitaPanel(panel);
-		if(trayActual!=null)  //si hemos cogido una trayectoria la liberamos
-			ventanaMonitoriza.liberaTrayectoria(this);
-		LoggerFactory.borraLogger(loger);
-		LoggerFactory.borraLogger(logerMasCercano);
-	}
-
-	public void setCalculadorDireccion(CalculoDireccion calDir) {
-		calculadorDireccion=calDir;
-	}
-
-	public void setCalculadorVelocidad(CalculoVelocidad calVel) {
-		calculadorVelocidad=calVel;
-	}
-
-	public void setDetectaObstaculos(DetectaObstaculos[] dectObs) {
-		detectoresObstaculos=dectObs;
-	}
 	
 	@SuppressWarnings("serial")
 	protected class PanelSincrono extends PanelFlow {
@@ -183,110 +162,13 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 		}
 	}
 
-	protected void accionPeriodica() {
-		actualizaModeloCoche();
-        if(trayActual!=null) {
-        	//para actulizar en indice del más cercano
-        	trayActual.situaCoche(modCoche.getX(), modCoche.getY());
-        	logerMasCercano.add(trayActual.indiceMasCercano());
-        }
-        	
-
-        //Direccion =============================================================
-        double consignaVolanteAnterior=consignaVolante;
-        consignaVolante=consignaVolanteRecibida=calculadorDireccion.getConsignaDireccion();
-        consignaVolante=UtilCalculos.limita(consignaVolante, -cotaAngulo, cotaAngulo);
-
-        double velocidadActual = ventanaMonitoriza.conexionCarro.getVelocidadMS();
-        //Cuando está casi parado no tocamos el volante
-        if (velocidadActual >= umbralMinimaVelocidad)
-        	ventanaMonitoriza.conexionCarro.setAnguloVolante(consignaVolante);
-
-        // Velocidad =============================================================
-    	//Guardamos valor para la siguiente iteracion
-    	double consignaVelAnterior=consignaVelocidad;
-    	
-        consignaVelocidad=consignaVelocidadRecibida=calculadorVelocidad.getConsignaVelocidad();
-        
-        //vemos la minima distancia de los detectores
-        distanciaMinima=Double.MAX_VALUE;
-        for(int i=0; i<detectoresObstaculos.length; i++)
-        	distanciaMinima=Math.min(distanciaMinima, detectoresObstaculos[i].getDistanciaLibre());
-        
-        double velRampa=(distanciaMinima-margenColision)*pendienteFrenado;
-        double consignaVelocidadRampa=consignaVelocidad=Math.min(consignaVelocidad, velRampa);
-        
-        double incrementoConsigna=consignaVelocidad-consignaVelAnterior;
-        if(incrementoConsigna>maximoIncrementoVelocidad)
-        	consignaVelocidad=consignaVelAnterior+maximoIncrementoVelocidad;
-    	ventanaMonitoriza.conexionCarro.setConsignaAvanceMS(consignaVelocidad);
-    	
-    	//Hacemos evolucionar el modelo del coche
-        modCoche.calculaEvolucion(consignaVolante, velocidadActual, (double)periodoMuestreoMili / 1000.0);
-
-
-    	panel.actualizaDatos(MotorSincrono.this);  //actualizamos las etiquetas
-    	
-    	loger.add(consignaVolanteRecibida,consignaVolante,consignaVelocidadRecibida
-    			, consignaVelocidadRampa, consignaVelocidad,distanciaMinima);
-		
-	}
 	
-	protected void actualizaModeloCoche() {
-        //Actulizamos el modelo del coche =======================================
-        GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();
-        if(pa==null) {
-        	System.err.println("Modulo "+NOMBRE+":No tenemos punto GPS con que hacer los cáclulos");
-        	//se usa los valores de la evolución
-        } else {
-        	//sacamos los datos del GPS
-        	double x=pa.getXLocal();
-        	double y=pa.getYLocal();
-        	double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
-        	double angVolante=ventanaMonitoriza.conexionCarro.getAnguloVolante();
-        	//TODO Realimentar posición del volante y la velocidad del coche.
-        	modCoche.setPostura(x, y, angAct, angVolante);
-        }
-
-	}
-	
-	/** @return modelo del coche que actuliza este motor */
-	public Coche getModeloCoche() {
-		if(ventanaMonitoriza==null)
-			throw new IllegalStateException("Aun no inicializado");
-		return modCoche;
-	}
-
-	public double getCotaAngulo() {
-		return cotaAngulo;
-	}
-
-	public void setCotaAngulo(double cotaAngulo) {
-		this.cotaAngulo = cotaAngulo;
-	}
-
-	public double getCotaAnguloGrados() {
-		return Math.toDegrees(cotaAngulo);
-	}
-
-	public void setCotaAnguloGrados(double cotaAngulo) {
-		this.cotaAngulo = Math.toRadians(cotaAngulo);
-	}
-
 	public double getMargenColision() {
 		return margenColision;
 	}
 
 	public void setMargenColision(double margenColision) {
 		this.margenColision = margenColision;
-	}
-
-	public double getMaximoIncrementoVelocidad() {
-		return maximoIncrementoVelocidad;
-	}
-
-	public void setMaximoIncrementoVelocidad(double maximoIncrementoVelocidad) {
-		this.maximoIncrementoVelocidad = maximoIncrementoVelocidad;
 	}
 
 	public double getPendienteFrenado() {
@@ -305,22 +187,6 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 		this.periodoMuestreoMili = periodoMuestreoMili;
 	}
 
-	public double getUmbralMinimaVelocidad() {
-		return umbralMinimaVelocidad;
-	}
-
-	public void setUmbralMinimaVelocidad(double umbralMinimaVelocidad) {
-		this.umbralMinimaVelocidad = umbralMinimaVelocidad;
-	}
-
-
-	/**
-	 * @return the consignaVelocidad
-	 */
-	public double getConsignaVelocidad() {
-		return consignaVelocidad;
-	}
-
 
 	/**
 	 * @return the consignaVelocidadRecibida
@@ -329,13 +195,6 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 		return consignaVelocidadRecibida;
 	}
 
-
-	/**
-	 * @return the consignaVolante
-	 */
-	public double getConsignaVolanteGrados() {
-		return Math.toDegrees(consignaVolante);
-	}
 
 	/**
 	 * @return the consignaVolante
@@ -350,12 +209,6 @@ public class MotorSincrono implements Motor, UsuarioTrayectoria {
 	 */
 	public double getDistanciaMinima() {
 		return distanciaMinima;
-	}
-
-
-	/** apuntamos la nueva trayectoria */
-	public void nuevaTrayectoria(Trayectoria tra) {
-		trayActual=tra;
 	}
 
 }

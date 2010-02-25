@@ -12,14 +12,14 @@ import sibtra.gps.GPSData;
 import sibtra.gps.Ruta;
 import sibtra.gps.Trayectoria;
 import sibtra.ui.VentanasMonitoriza;
-import sibtra.ui.defs.SeleccionRuta;
+import sibtra.ui.defs.SeleccionTrayectoriaInicial;
 
 /**
  * Moudulo para cargar ruta de fichero.
  * @author alberto
  *
  */
-public class CargaRutaFichero implements SeleccionRuta {
+public class CargaRutaFichero implements SeleccionTrayectoriaInicial {
 	
 	String NOMBRE="Carga Ruta";
 	String DESCRIPCION="Carga ruta de un fichero de ruta";

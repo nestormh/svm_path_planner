@@ -26,7 +26,6 @@ import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.lms.PanelRF;
 import sibtra.ui.defs.Motor;
-import sibtra.ui.defs.UsuarioTrayectoria;
 import sibtra.util.EligeSerial;
 import sibtra.util.ThreadSupendible;
 
@@ -230,10 +229,10 @@ public class VentanasMonitoriza extends Ventanas {
 	 * @param objUsaTr necesario conocer el objeto que solicita la ruta para avisarle cuando hay cambio 
 	 * @return la ruta que se va a seguir  
 	 */
-	public Trayectoria getTrayectoriaSeleccionada(UsuarioTrayectoria objUsaTr) {
+	public Trayectoria getTrayectoriaSeleccionada() {
 		if(panelTrayectoria==null)
 			panelTrayectoria=new PanelTrayectoria(this);
-		return panelTrayectoria.getTrayectoria(objUsaTr);
+		return panelTrayectoria.getTrayectoria();
 	}
 	
 	/** Por si un módulo quiere cambiar la trayectoria actual */
@@ -241,14 +240,6 @@ public class VentanasMonitoriza extends Ventanas {
 		panelTrayectoria.setNuevaTrayectoria(tr);
 	}
 	
-	/** Indica que no va ha necesitar más la trayectoria. 
-	 * Se invocará cuando un módulo vaya a destruirse. 
-	 */
-	public void liberaTrayectoria(UsuarioTrayectoria objUsaTr) {
-		if(panelTrayectoria==null)
-			throw new IllegalStateException("Se trata de liberar trayectoria no solicitada");
-		panelTrayectoria.liberaTrayectoria(objUsaTr);
-	}
 	
 	/** @return si hay alguna trayectoria definida (si algún módulo la ha pedido)*/
 	public boolean hayTrayectoria() {

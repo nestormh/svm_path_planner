@@ -3,10 +3,15 @@
  */
 package sibtra.ui.defs;
 
+import sibtra.ui.PanelEligeModulos;
 import sibtra.ui.VentanasMonitoriza;
 
 /**
- * Interfaz base del resto de módulos
+ * Interfaz base del resto de módulos. 
+ * <br>
+ * Con estos métodos el {@link PanelEligeModulos} podrá obtener el nombre y descripción 
+ * para mostrar en los menús para que el usuario pueda elegirlos
+ * 
  * @author alberto
  *
  */

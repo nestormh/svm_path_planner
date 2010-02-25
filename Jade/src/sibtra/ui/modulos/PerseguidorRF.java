@@ -17,6 +17,7 @@ import sibtra.lms.PanelMuestraBarrido;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.CalculoDireccion;
 import sibtra.ui.defs.CalculoVelocidad;
+import sibtra.ui.defs.Motor;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
@@ -115,6 +116,9 @@ public class PerseguidorRF implements CalculoDireccion, CalculoVelocidad {
 		return true;
 	}
 
+	/** No hacemos nada con motor porque no necesitamos trayectoria */
+	public void setMotor(Motor mtr) { }
+	
 	public void terminar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");

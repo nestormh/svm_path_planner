@@ -6,6 +6,7 @@ package sibtra.ui.modulos;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.CalculoDireccion;
 import sibtra.ui.defs.CalculoVelocidad;
+import sibtra.ui.defs.Motor;
 import sibtra.util.ManejaJoystick;
 import sibtra.util.PanelJoystick;
 import sibtra.util.ThreadSupendible;
@@ -54,6 +55,9 @@ public class NavegaJoystick implements CalculoDireccion, CalculoVelocidad {
 		thCiclico.activar();
 		return true; //inicialización correcta
 	}
+	
+	/** No hacemos nada con motor porque no necesitamos trayectoria */
+	public void setMotor(Motor mtr) { }
 
 	/** @return directamente la velocidad que me da {@link ManejaJoystick} */
 	public double getConsignaVelocidad() {

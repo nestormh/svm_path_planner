@@ -11,7 +11,8 @@ import sibtra.predictivo.ControlPredictivo;
 import sibtra.predictivo.PanelMuestraPredictivo;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.CalculoDireccion;
-import sibtra.ui.defs.UsuarioTrayectoria;
+import sibtra.ui.defs.Motor;
+import sibtra.ui.defs.SubModuloUsaTrayectoria;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 
@@ -19,7 +20,7 @@ import sibtra.util.PanelFlow;
  * @author alberto
  *
  */
-public class DireccionPredictiva implements CalculoDireccion, UsuarioTrayectoria {
+public class DireccionPredictiva implements CalculoDireccion, SubModuloUsaTrayectoria {
 	
 	String NOMBRE="Direccion Predictiva";
 	String DESCRIPCION="Calcula sólo la dirección usando control predictivo";
@@ -32,6 +33,7 @@ public class DireccionPredictiva implements CalculoDireccion, UsuarioTrayectoria
 	// Variables ===========================================================
 	private double consigna;
 	private PanelFlow panelPropio;
+	private Motor motor;
 	
 	public DireccionPredictiva() {}
 
@@ -43,15 +45,7 @@ public class DireccionPredictiva implements CalculoDireccion, UsuarioTrayectoria
 		if(ventanaMonitoriza!=null)
 			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		ventanaMonitoriza=ventMonitoriza;
-		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada(this);
-		if(Tr==null) {
-			JOptionPane.showMessageDialog(ventanaMonitoriza.ventanaPrincipal,
-				    "El módulo "+NOMBRE+" necesita ruta para continuar.",
-				    "Sin ruta",
-				    JOptionPane.ERROR_MESSAGE);
-			ventanaMonitoriza=null;
-			return false;
-		}
+		motor.apuntaNecesitaTrayectoria(this);
 
 		modCoche=ventanaMonitoriza.getMotor().getModeloCoche();
         //Inicializamos modelos predictivos
@@ -108,9 +102,24 @@ public class DireccionPredictiva implements CalculoDireccion, UsuarioTrayectoria
 	
 	/** Cambiamos la trayectoria en {@link #controlPredictivo} y en {@link #panelPredictivo} */
 	public void nuevaTrayectoria(Trayectoria tr) {
-		controlPredictivo.setRuta(tr);
-		panelPredictivo.setTrayectoria(tr);
+		if(tr==null)
+			throw new IllegalArgumentException("La trayectoria no pude ser null");
+		Tr=tr;
+		controlPredictivo.setRuta(Tr);
+		panelPredictivo.setTrayectoria(Tr);
 		panelPredictivo.actualiza();
+	}
+
+
+	public void setMotor(Motor mtr) {
+		motor=mtr;
+	}
+
+	/** Apuntamos la trayectoria inicial */
+	public void setTrayectoriaInicial(Trayectoria tra) {
+		if(tra==null)
+			throw new IllegalArgumentException("La trayectoria no pude ser null");
+		Tr=tra;
 	}
 
 }

@@ -9,14 +9,9 @@ import sibtra.gps.Trayectoria;
 import sibtra.imu.AngulosIMU;
 import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerFactory;
-import sibtra.log.LoggerInt;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
-import sibtra.ui.defs.CalculoDireccion;
-import sibtra.ui.defs.CalculoVelocidad;
-import sibtra.ui.defs.DetectaObstaculos;
-import sibtra.ui.defs.Motor;
-import sibtra.ui.defs.UsuarioTrayectoria;
+import sibtra.ui.defs.ModificadorTrayectoria;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
@@ -24,32 +19,28 @@ import sibtra.util.ThreadSupendible;
 import sibtra.util.UtilCalculos;
 
 /**
+ * Implementa un motor asíncrono que actualiza el modelo del coche en cuanto le llega la información de alguna de las
+ * tres fuentes disponibles:
+ * <dl>
+ *   <dt>GPS <dd>Fija inmediatamente la posición (x,y) del coche. Debería tener en cueneta la precisión del GPS
+ *   <dt>IMU <dd>Fija directamente la orientación del coche
+ *   <dt>Coche<dd>Conocida la velocidad y la orientación de las ruedas hace evolucionar el modelo de la bicicleta
+ *</dl>
+ *TODO Decidir cuando se pide una trayectoria acualizada al {@link ModificadorTrayectoria} (si está definido) 
  * @author alberto
  *
  */
-public class MotorAsincrono implements Motor, UsuarioTrayectoria {
+public class MotorAsincrono extends MotorTipico {
 	
 	protected String NOMBRE="Motor Asincrono";
 	protected String DESCRIPCION="Actualiza modelo del coche cada vez que se recibe un nuevo dato";
-	protected VentanasMonitoriza ventanaMonitoriza=null;
-	Trayectoria trayActual=null;
-	protected CalculoDireccion calculadorDireccion=null;
-	protected CalculoVelocidad calculadorVelocidad=null;
-	protected DetectaObstaculos[] detectoresObstaculos=null;
 	protected PanelAsincrono panel;
-	protected Coche modCoche;
 
 	//Parámetros
-//	protected int periodoMuestreoMili = 200;
-	protected double cotaAngulo=Math.toRadians(30);
-	protected double umbralMinimaVelocidad=0.2;
 	protected double pendienteFrenado=1.0;
 	protected double margenColision=3.0;
-	protected double maximoIncrementoVelocidad=0.1;
 	
 	//Variables 
-	protected double consignaVelocidad;
-	protected double consignaVolante;
 	protected double consignaVelocidadRecibida;
 	protected double consignaVolanteRecibida;
 	protected double distanciaMinima;
@@ -61,24 +52,18 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 	
 	//loggers
 	protected LoggerArrayDoubles loger;
-	protected LoggerInt logerMasCercano;
 
 	public MotorAsincrono() {
-		
+		super();
 	}
 	
 	
 	public boolean setVentanaMonitoriza(VentanasMonitoriza ventMonito) {
-		if(ventanaMonitoriza!=null) {
-			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
-		}
-		ventanaMonitoriza=ventMonito;
+		super.setVentanaMonitoriza(ventMonito);
 		
 		panel=new PanelAsincrono();
 		ventanaMonitoriza.añadePanel(panel, getNombre(),false,false);
 		
-        //inicializamos modelo del coche
-        modCoche = new Coche();
 		
         //Tenemos que crear un tread por dispositivo de datos
         //Coche
@@ -124,7 +109,6 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 		loger=LoggerFactory.nuevoLoggerArrayDoubles(this, "MotorAsincrono");
 		loger.setDescripcion("[consignaVolanteRecibida,consignaVolanteAplicada,consignaVelocidadRecibida"
 				 +", consignaVelocidadLimitadaRampa, consignaVelocidadAplicada,distanciaMinimaDetectores]");
-		logerMasCercano=LoggerFactory.nuevoLoggerInt(this, "IndiceMasCercano");
 
 		return true;
 	}
@@ -159,14 +143,7 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 
 	/** activamos los threads */
 	public void actuar() {
-		if(ventanaMonitoriza==null)
-			throw new IllegalStateException("Aun no inicializado");
-        //Solo podemos actuar si está todo inicializado
-        if(calculadorDireccion==null || calculadorVelocidad==null || detectoresObstaculos==null)
-        	throw new IllegalStateException("Faltan modulos por inicializar");
-        //vemos si hay trayectoria y la apuntamos
-        if(ventanaMonitoriza.hayTrayectoria())
-        	trayActual=ventanaMonitoriza.getTrayectoriaSeleccionada(this);
+		super.actuar();
 		thCoche.activar();
 		thGPS.activar();
 		thIMU.activar();
@@ -174,8 +151,7 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 
 	/** suspendemos los threads y paramos PID de {@link ControlCarro } */
 	public void parar() {
-		if(ventanaMonitoriza==null)
-			throw new IllegalStateException("Aun no inicializado");
+		super.parar();
 		thCoche.suspender();
 		thGPS.suspender();
 		thIMU.suspender();
@@ -183,46 +159,16 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 		ventanaMonitoriza.conexionCarro.stopControlVel();
 	}
 
-	/* (sin Javadoc)
-	 * @see sibtra.ui.modulos.Modulo#getDescripcion()
-	 */
-	public String getDescripcion() {
-		return DESCRIPCION;
-	}
-
-	/* (sin Javadoc)
-	 * @see sibtra.ui.modulos.Modulo#getNombre()
-	 */
-	public String getNombre() {
-		return NOMBRE;
-	}
-
 	/** terminamos los threads, quitamos panel, liberamos la trayectoria */
 	public void terminar() {
-		if(ventanaMonitoriza==null)
-			throw new IllegalStateException("Aun no inicializado");
+		super.terminar();
 		thCoche.terminar();
 		thGPS.terminar();
 		thIMU.terminar();
 		ventanaMonitoriza.quitaPanel(panel);
-		if(trayActual!=null)  //si hemos cogido una trayectoria la liberamos
-			ventanaMonitoriza.liberaTrayectoria(this);
 		LoggerFactory.borraLogger(loger);
-		LoggerFactory.borraLogger(logerMasCercano);
 	}
 
-	public void setCalculadorDireccion(CalculoDireccion calDir) {
-		calculadorDireccion=calDir;
-	}
-
-	public void setCalculadorVelocidad(CalculoVelocidad calVel) {
-		calculadorVelocidad=calVel;
-	}
-
-	public void setDetectaObstaculos(DetectaObstaculos[] dectObs) {
-		detectoresObstaculos=dectObs;
-	}
-	
 	@SuppressWarnings("serial")
 	protected class PanelAsincrono extends PanelFlow {
 		public PanelAsincrono() {
@@ -322,14 +268,6 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 		this.margenColision = margenColision;
 	}
 
-	public double getMaximoIncrementoVelocidad() {
-		return maximoIncrementoVelocidad;
-	}
-
-	public void setMaximoIncrementoVelocidad(double maximoIncrementoVelocidad) {
-		this.maximoIncrementoVelocidad = maximoIncrementoVelocidad;
-	}
-
 	public double getPendienteFrenado() {
 		return pendienteFrenado;
 	}
@@ -337,15 +275,6 @@ public class MotorAsincrono implements Motor, UsuarioTrayectoria {
 	public void setPendienteFrenado(double pendienteFrenado) {
 		this.pendienteFrenado = pendienteFrenado;
 	}
-
-	public double getUmbralMinimaVelocidad() {
-		return umbralMinimaVelocidad;
-	}
-
-	public void setUmbralMinimaVelocidad(double umbralMinimaVelocidad) {
-		this.umbralMinimaVelocidad = umbralMinimaVelocidad;
-	}
-
 
 	/**
 	 * @return the consignaVelocidad

@@ -19,9 +19,6 @@ import sibtra.util.UtilCalculos;
  */
 public class MotorPerrito extends MotorSincrono implements Motor {
 
-	protected String NOMBRE="Motor Perrito";
-	protected String DESCRIPCION="Sigue al objeto más cercano";
-	
 	double distMax=0.3;
 	double velAcercamiento=2.0;
 	private BarridoAngular ba=null;
