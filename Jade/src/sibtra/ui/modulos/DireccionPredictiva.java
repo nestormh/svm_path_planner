@@ -3,8 +3,6 @@
  */
 package sibtra.ui.modulos;
 
-import javax.swing.JOptionPane;
-
 import sibtra.gps.Trayectoria;
 import sibtra.predictivo.Coche;
 import sibtra.predictivo.ControlPredictivo;
@@ -24,16 +22,16 @@ public class DireccionPredictiva implements CalculoDireccion, SubModuloUsaTrayec
 	
 	String NOMBRE="Direccion Predictiva";
 	String DESCRIPCION="Calcula sólo la dirección usando control predictivo";
-	private VentanasMonitoriza ventanaMonitoriza;
-	private Trayectoria Tr;
+	private VentanasMonitoriza ventanaMonitoriza=null;
+	private Trayectoria Tr=null;
 	private ControlPredictivo controlPredictivo;
-	private Coche modCoche;
+	private Coche modCoche=null;
 	private PanelMuestraPredictivo panelPredictivo;
 	private int periodoMuestreoMili=200;
 	// Variables ===========================================================
 	private double consigna;
 	private PanelFlow panelPropio;
-	private Motor motor;
+	private Motor motor=null;
 	
 	public DireccionPredictiva() {}
 
@@ -45,9 +43,13 @@ public class DireccionPredictiva implements CalculoDireccion, SubModuloUsaTrayec
 		if(ventanaMonitoriza!=null)
 			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		ventanaMonitoriza=ventMonitoriza;
+		//Debemos tener el motor ya
+		if(motor==null)
+			throw new IllegalStateException("Se debe haber fijado el motor antes de fijar VentanaMonitoriza");
+			
 		motor.apuntaNecesitaTrayectoria(this);
 
-		modCoche=ventanaMonitoriza.getMotor().getModeloCoche();
+		modCoche=motor.getModeloCoche();
         //Inicializamos modelos predictivos
         controlPredictivo = new ControlPredictivo(modCoche, Tr, 13, 4, 2.0
         		, (double) periodoMuestreoMili / 1000);
@@ -68,6 +70,8 @@ public class DireccionPredictiva implements CalculoDireccion, SubModuloUsaTrayec
 	public double getConsignaDireccion() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
+		if(Tr==null)
+			throw new IllegalStateException("La trayectoria es null");
         consigna = controlPredictivo.calculaComando();       
         panelPredictivo.actualiza();
         panelPropio.actualizaDatos(this);
@@ -93,7 +97,6 @@ public class DireccionPredictiva implements CalculoDireccion, SubModuloUsaTrayec
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		ventanaMonitoriza.quitaPanel(panelPredictivo);
-		ventanaMonitoriza.liberaTrayectoria(this);
 	}
 	
 	public double getConsignaGrados() {
@@ -101,7 +104,7 @@ public class DireccionPredictiva implements CalculoDireccion, SubModuloUsaTrayec
 	}
 	
 	/** Cambiamos la trayectoria en {@link #controlPredictivo} y en {@link #panelPredictivo} */
-	public void nuevaTrayectoria(Trayectoria tr) {
+	private void nuevaTrayectoria(Trayectoria tr) {
 		if(tr==null)
 			throw new IllegalArgumentException("La trayectoria no pude ser null");
 		Tr=tr;
@@ -115,11 +118,12 @@ public class DireccionPredictiva implements CalculoDireccion, SubModuloUsaTrayec
 		motor=mtr;
 	}
 
+	public void setTrayectoriaModificada(Trayectoria tr) {
+		nuevaTrayectoria(tr);
+	}
 	/** Apuntamos la trayectoria inicial */
 	public void setTrayectoriaInicial(Trayectoria tra) {
-		if(tra==null)
-			throw new IllegalArgumentException("La trayectoria no pude ser null");
-		Tr=tra;
+		nuevaTrayectoria(tra);
 	}
 
 }

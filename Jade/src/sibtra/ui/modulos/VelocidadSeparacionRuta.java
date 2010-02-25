@@ -11,7 +11,8 @@ import sibtra.log.LoggerFactory;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.CalculoVelocidad;
-import sibtra.ui.defs.UsuarioTrayectoria;
+import sibtra.ui.defs.Motor;
+import sibtra.ui.defs.SubModuloUsaTrayectoria;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
@@ -20,12 +21,13 @@ import sibtra.util.SpinnerDouble;
  * @author alberto
  *
  */
-public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayectoria {
+public class VelocidadSeparacionRuta implements CalculoVelocidad, SubModuloUsaTrayectoria {
 	
 	String NOMBRE="Velocidad Ruta";
 	String DESCRIPCION="Velocidad según ruta, se minora con la distancia lateral y error de orientación";
-	private VentanasMonitoriza ventanaMonitoriza;
-	private Trayectoria Tr;
+	private VentanasMonitoriza ventanaMonitoriza=null;
+	private Motor motor=null;
+	private Trayectoria Tr=null;
 	private PanelFlow panelDatos;
 	// Parametros ======================================================
 	private double gananciaLateral=1;
@@ -50,18 +52,13 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 		if(ventanaMonitoriza!=null)
 			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		ventanaMonitoriza=ventMonitoriza;
-		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada(this);
-		if(Tr==null) {
-			JOptionPane.showMessageDialog(ventanaMonitoriza.ventanaPrincipal,
-				    "El módulo "+NOMBRE+" necesita ruta para continuar.",
-				    "Sin ruta",
-				    JOptionPane.ERROR_MESSAGE);
-			ventanaMonitoriza=null;
-			return false;
-		}
+		//Debemos tener el motor ya
+		if(motor==null)
+			throw new IllegalStateException("Se debe haber fijado el motor antes de fijar VentanaMonitoriza");
+		motor.apuntaNecesitaTrayectoria(this);
 		
 		//obtenemos modelo del coche
-		modCoche=ventanaMonitoriza.getMotor().getModeloCoche();
+		modCoche=motor.getModeloCoche();
 		
 		//Definimos panel y ponemos ajuste para los parámetros y etiquetas con las variables
 		panelDatos=new PanelFlow();
@@ -95,6 +92,8 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 	public double getConsignaVelocidad() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
+		if(Tr==null)
+			throw new IllegalStateException("La trayectoria es null");
 		consigna = 0;
 		//obtenemos posicion y orientación del modelo del coche.
         double angAct = modCoche.getYaw();
@@ -148,7 +147,6 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		ventanaMonitoriza.quitaPanel(panelDatos);
-		ventanaMonitoriza.liberaTrayectoria(this);
 		LoggerFactory.borraLogger(log);
 
 	}
@@ -210,8 +208,17 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, UsuarioTrayect
 	}
 
 	/** apuntamos la nueva trayectoria */
-	public void nuevaTrayectoria(Trayectoria tra) {
+	private void nuevaTrayectoria(Trayectoria tra) {
 		Tr=tra;
 	}
 
+	public void setMotor(Motor mtr) {
+		motor=mtr;
+	}
+	public void setTrayectoriaInicial(Trayectoria tra) {
+		nuevaTrayectoria(tra);
+	}
+	public void setTrayectoriaModificada(Trayectoria tra) {
+		nuevaTrayectoria(tra);
+	}
 }

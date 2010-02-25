@@ -12,13 +12,10 @@ import sibtra.ui.defs.CalculoDireccion;
 import sibtra.ui.defs.CalculoVelocidad;
 import sibtra.ui.defs.DetectaObstaculos;
 import sibtra.ui.defs.ModificadorTrayectoria;
-import sibtra.ui.defs.SubModulo;
 import sibtra.ui.defs.SubModuloUsaTrayectoria;
 
 public abstract class MotorTipico {
 
-	protected String NOMBRE = "Motor Tipico";
-	protected String DESCRIPCION = "Base para un motor típico";
 	protected VentanasMonitoriza ventanaMonitoriza = null;
 
 	/** Apunta los módulos que necesitan trayectoria, y se han apuntado 
@@ -83,12 +80,16 @@ public abstract class MotorTipico {
 	    if(calculadorDireccion==null || calculadorVelocidad==null || detectoresObstaculos==null)
 	    	throw new IllegalStateException("Faltan modulos por inicializar");
 	    //vemos si hay modulos que necesitan la trayectoria
-	    if(necesitanTrIni.size()>0) {
+	    if(necesitanTrIni.size()>0 || modificadorTr!=null) {
 	    	//obtenos la trayectoria inicial seleccinonada por usuario
 	    	trayInicial=ventanaMonitoriza.getTrayectoriaSeleccionada();
+	    	trayActual=trayInicial;
 	    	for(SubModuloUsaTrayectoria mut:necesitanTrIni)
 	    		//se la comunicamos a los módulos
 	    		mut.setTrayectoriaInicial(trayInicial);
+	    	//y al modificador si lo hay
+		    if(modificadorTr!=null)
+		    	modificadorTr.setTrayectoriaInicial(trayInicial);
 	    }
 	}
 
@@ -106,11 +107,11 @@ public abstract class MotorTipico {
 	}
 
 	public String getDescripcion() {
-		return DESCRIPCION;
+		return "Base para un motor típico";
 	}
 
 	public String getNombre() {
-		return NOMBRE;
+		return  "Motor Tipico";
 	}
 
 	/** Los {@link SubModuloUsaTrayectoria} se apuntan en el motor para recibir la trayectoria inicial al 
@@ -121,6 +122,11 @@ public abstract class MotorTipico {
 	 */
 	public void apuntaNecesitaTrayectoria(SubModuloUsaTrayectoria smutr) {
 		necesitanTrIni.add(smutr);
+		if(trayInicial==null) {
+	    	//obtenos la trayectoria inicial seleccinonada por usuario
+			//Lo hacemos aquí para que no esperar a la primera acción
+	    	trayInicial=ventanaMonitoriza.getTrayectoriaSeleccionada();
+		}
 	}
 
 	/** Devolvemos la {@link #trayActual}.
@@ -145,13 +151,18 @@ public abstract class MotorTipico {
 	
 	public void setModificadorTrayectoria(ModificadorTrayectoria modifTr) {
 		modificadorTr=modifTr;
+		if(trayInicial==null) {
+	    	//obtenos la trayectoria inicial seleccinonada por usuario
+			//Lo hacemos aquí para que no esperar a la primera acción
+	    	trayInicial=ventanaMonitoriza.getTrayectoriaSeleccionada();
+		}
 	}
 
 	protected void actualizaModeloCoche() {
         //Actulizamos el modelo del coche =======================================
         GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();
         if(pa==null) {
-        	System.err.println("Modulo "+NOMBRE+":No tenemos punto GPS con que hacer los cáclulos");
+        	System.err.println("Modulo "+getNombre()+":No tenemos punto GPS con que hacer los cáclulos");
         	//se usa los valores de la evolución
         } else {
         	//sacamos los datos del GPS
@@ -170,7 +181,10 @@ public abstract class MotorTipico {
 		actualizaModeloCoche();
 		if(modificadorTr!=null) {
 			Trayectoria nuevaTr=modificadorTr.getTrayectoriaActual();
-			if(nuevaTr!=null)  {//TODO habría que avisar a los submódulos
+			if(nuevaTr!=null)  {
+				trayActual=nuevaTr;
+				for(SubModuloUsaTrayectoria sut: necesitanTrIni)
+					sut.setTrayectoriaModificada(trayActual);
 			}
 		}
 	    if(trayActual!=null) {

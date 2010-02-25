@@ -19,6 +19,8 @@ import sibtra.util.UtilCalculos;
  */
 public class MotorPerrito extends MotorSincrono implements Motor {
 
+	public String getNombre() {return "Motor Perrito";}
+	public String getDescripcion() {return "Prueba implementación perrito";}
 	double distMax=0.3;
 	double velAcercamiento=2.0;
 	private BarridoAngular ba=null;
@@ -47,7 +49,7 @@ public class MotorPerrito extends MotorSincrono implements Motor {
 		        }
 			}
 		};
-		thCiclico.setName(NOMBRE);
+		thCiclico.setName(getNombre());
 		return true;
 	}
 	
@@ -118,20 +120,6 @@ public class MotorPerrito extends MotorSincrono implements Motor {
 		anguloDistRF[0] = ba.getAngulo(indMinDist);
 		anguloDistRF[1] = ba.getDistancia(indMinDist);
 		return anguloDistRF;
-	}
-
-	/* (sin Javadoc)
-	 * @see sibtra.ui.modulos.Modulo#getDescripcion()
-	 */
-	public String getDescripcion() {
-		return DESCRIPCION;
-	}
-
-	/* (sin Javadoc)
-	 * @see sibtra.ui.modulos.Modulo#getNombre()
-	 */
-	public String getNombre() {
-		return NOMBRE;
 	}
 
 	public double getDistMax() {

@@ -101,7 +101,7 @@ public class VentanasMonitoriza extends Ventanas {
 			try {
 				conexionGPS = new GPSConnectionTriumph(args[0]);
 				System.out.println("Esperamos por la posición de la base");
-				if(conexionGPS.esperaCentroBase()) {
+				if(conexionGPS.esperaCentroBase(1)) {
 					conexionGPS.fijaCentro(conexionGPS.posicionDeLaBase());
 					System.out.println("Base en "+conexionGPS.posicionDeLaBase());
 				} else
@@ -223,11 +223,10 @@ public class VentanasMonitoriza extends Ventanas {
 		this(puertosPorDefecto);
 	}
 	
-	/** Los {@link UsuarioTrayectoria} (calculadores, motores, etc.) solicitan la ruta a través de 
+	/** Los {@link Motor} (y otros)  solicitan la ruta a través de 
 	 * este método.
 	 * La primera vez se abre el {@link #panelTrayectoria}.
-	 * @param objUsaTr necesario conocer el objeto que solicita la ruta para avisarle cuando hay cambio 
-	 * @return la ruta que se va a seguir  
+	 * @return la trayectoria inicial que se va a seguir  
 	 */
 	public Trayectoria getTrayectoriaSeleccionada() {
 		if(panelTrayectoria==null)
@@ -282,12 +281,12 @@ public class VentanasMonitoriza extends Ventanas {
 		return desviacionMagnetica;
 	}
 	
-	/** Metodo que deben usar los otros módulos para llegar al módulo motor
-	 * @return el motor seleccionado o null si no hay ninguno.
-	 */
-    public Motor getMotor() {
-    	return panSelModulos.obMotor;
-    }
+//	/** Metodo que deben usar los otros módulos para llegar al módulo motor
+//	 * @return el motor seleccionado o null si no hay ninguno.
+//	 */
+//    public Motor getMotor() {
+//    	return panSelModulos.obMotor;
+//    }
     
     class AccionGrabarRuta extends AbstractAction {
     	public AccionGrabarRuta(){

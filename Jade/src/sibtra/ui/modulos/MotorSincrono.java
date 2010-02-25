@@ -6,9 +6,7 @@ package sibtra.ui.modulos;
 import sibtra.controlcarro.ControlCarro;
 import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerFactory;
-import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
-import sibtra.ui.defs.ModificadorTrayectoria;
 import sibtra.ui.defs.Motor;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
@@ -23,8 +21,8 @@ import sibtra.util.UtilCalculos;
  */
 public class MotorSincrono extends MotorTipico implements Motor {
 	
-	protected String NOMBRE="Motor Síncrono";
-	protected String DESCRIPCION="Ejecuta las acciones de control con un periodo fijo";
+	public String getNombre() { return "Motor Síncrono"; }
+	public String getDescripcion() { return "Ejecuta las acciones de control con un periodo fijo"; }
 	protected PanelSincrono panel;
 	protected int periodoMuestreoMili=200;
 	protected ThreadSupendible thCiclico;
@@ -65,7 +63,7 @@ public class MotorSincrono extends MotorTipico implements Motor {
 
 			}
 		};
-		thCiclico.setName(NOMBRE);
+		thCiclico.setName(getNombre());
 		//creamos loggers del módulo
 		loger=LoggerFactory.nuevoLoggerArrayDoubles(this, "MotorSincrono",100/periodoMuestreoMili);
 		loger.setDescripcion("[consignaVolanteRecibida,consignaVolanteAplicada,consignaVelocidadRecibida"

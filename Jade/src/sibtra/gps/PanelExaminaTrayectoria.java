@@ -63,7 +63,7 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 			jbPrimero.setEnabled(false);
 			jpInfGen.add(jbPrimero);
 			
-			spm=new SpinnerNumberModel(1,1,100000,1);
+			spm=new SpinnerNumberModel(0,0,100000,1);
 			spm.addChangeListener(this);
 			jsDato=new JSpinner(spm);
 			jsDato.setSize(150, jsDato.getHeight());
@@ -111,8 +111,8 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 		jlInfoPtoAct.setEnabled(hayPtos);
 		jlDeMaximo.setEnabled(hayTra);
 		if(hayPtos) {
-			spm.setMaximum(tray.length()+1);
-			spm.setValue(1);
+			spm.setMaximum(tray.length()-1);
+			spm.setValue(0);
 		}
 		if(hayTra) {
 			jlInfoTray.setText(String.format(cadenaInfoTray
@@ -128,9 +128,9 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 	public void actionPerformed(ActionEvent ae) {
 		super.actionPerformed(ae);
 		if(ae.getSource()==jbPrimero) {
-			spm.setValue(1);
+			spm.setValue(0);
 		} else if(ae.getSource()==jbUltimo) {
-			spm.setValue(tray.length());
+			spm.setValue(tray.length()-1);
 		} 
 	}
 
@@ -139,7 +139,7 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 	 */
 	public void stateChanged(ChangeEvent ce) {
 		if(ce.getSource()==spm) {
-			int indSel=(Integer)spm.getValue()-1;
+			int indSel=(Integer)spm.getValue();
 			jlInfoPtoAct.setText(String.format(cadenaInfoPto
 					, tray.x[indSel] 
 					, tray.y[indSel] 

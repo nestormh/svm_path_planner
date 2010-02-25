@@ -3,19 +3,19 @@
  */
 package sibtra.ui.modulos;
 
-import java.awt.GridLayout;
-
 import sibtra.gps.GPSData;
 import sibtra.gps.Ruta;
+import sibtra.gps.Trayectoria;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.CalculoDireccion;
 import sibtra.ui.defs.CalculoVelocidad;
 import sibtra.ui.defs.DetectaObstaculos;
+import sibtra.ui.defs.ModificadorTrayectoria;
 import sibtra.ui.defs.Motor;
+import sibtra.ui.defs.SubModuloUsaTrayectoria;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.ManejaJoystick;
-import sibtra.util.PanelDatos;
 import sibtra.util.PanelFlow;
 import sibtra.util.PanelJoystick;
 import sibtra.util.SpinnerDouble;
@@ -24,8 +24,9 @@ import sibtra.util.ThreadSupendible;
 import sibtra.util.UtilCalculos;
 
 /**
- * Motor derivado de {@link MotorSincrono} para usar directamente el valor de avanza obtenido del
- * joystick. Implementa @link {@link Motor} y @link {@link CalculoVelocidad}.
+ * Motor similar a {@link MotorSincrono} para usar directamente el valor de avanza obtenido del
+ * joystick.
+ * <strong>No adaptado al nuevo esquema</strong>
  * 
  * @author alberto
  *
@@ -33,7 +34,7 @@ import sibtra.util.UtilCalculos;
 public class MotorAvanzaJoystick implements Motor, CalculoVelocidad, CalculoDireccion {
 	
 	final static String NOMBRE="Avanza Joystick";
-	final static String DESCRIPCION="Motor sincrono que usa el avanza obtenido del joystick";
+	final static String DESCRIPCION="INVALIDO Motor sincrono que usa el avanza obtenido del joystick";
 	private VentanasMonitoriza ventanaMonitoriza=null;
 	Ruta rutaActual=null;
 	private CalculoDireccion calculadorDireccion=null;
@@ -336,6 +337,30 @@ public class MotorAvanzaJoystick implements Motor, CalculoVelocidad, CalculoDire
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
 		return manJoy.getAlfa();
+	}
+
+
+	public void apuntaNecesitaTrayectoria(SubModuloUsaTrayectoria smutr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public Trayectoria getTrayectoriaActual() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public void setModificadorTrayectoria(ModificadorTrayectoria modifTr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void setMotor(Motor mtr) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -20,6 +20,7 @@ import javax.swing.KeyStroke;
 import sibtra.ui.defs.CalculoDireccion;
 import sibtra.ui.defs.CalculoVelocidad;
 import sibtra.ui.defs.DetectaObstaculos;
+import sibtra.ui.defs.ModificadorTrayectoria;
 import sibtra.ui.defs.Modulo;
 import sibtra.ui.defs.Motor;
 import sibtra.util.CargadorDeModulos;
@@ -38,9 +39,11 @@ public class PanelEligeModulos extends JPanel {
 	private Class[] arrClasDir;
 	private Class[] arrClasVel;
 	private Class[] arrClasDectObs;
+	private Class[] arrClasModifTr;
 	private JComboBox jcombDireccion;
 	private JComboBox jcombVelocidad;
 	private JList jcombDetecObstaculos;
+	private JComboBox jcombModificador;
 	private VentanasMonitoriza ventanaMonitoriza;
 	AccionCrear accionCrear;
 	AccionActivar accionActivar;
@@ -51,6 +54,7 @@ public class PanelEligeModulos extends JPanel {
 	public CalculoDireccion obDireccion;
 	public CalculoVelocidad obVelocidad;
 	public DetectaObstaculos[] obsDetec;
+	public ModificadorTrayectoria obModifTr;
 	ClassLoader cargadorClases;
 	private DefaultListModel modeloLista;
 
@@ -77,6 +81,10 @@ public class PanelEligeModulos extends JPanel {
 		modeloLista=new DefaultListModel();
 		jcombDetecObstaculos=new JList(modeloLista);
 		add(jcombDetecObstaculos);
+		
+		add(new JLabel("Modificador Trayectoria",JLabel.TRAILING));
+		jcombModificador=new JComboBox();
+		add(jcombModificador);
 		
 		refrescaModulos();
 		
@@ -158,7 +166,18 @@ public class PanelEligeModulos extends JPanel {
 			indicesSeleccionados[i]=jcombDetecObstaculos.getSelectedIndex();
 		}
 		jcombDetecObstaculos.setSelectedIndices(indicesSeleccionados);
-	}
+
+		arrClasModifTr=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.ModificadorTrayectoria", "sibtra.ui.modulos",cargadorClases);
+		String[] arrNomClasModif=ClasesEnPaquete.nombreClases(arrClasModifTr);
+		Object modificadorSeleccinado=jcombVelocidad.getSelectedItem();
+		jcombModificador.removeAllItems();
+		jcombModificador.addItem("NINGUNO"); //es posible no seleccinoar ninguno
+		for(String sa: arrNomClasModif)
+			jcombModificador.addItem(sa);
+		if(modificadorSeleccinado!=null)
+			jcombModificador.setSelectedItem(modificadorSeleccinado);
+			
+}
 	
 	class AccionCrear extends AbstractAction {
 		
@@ -197,7 +216,7 @@ public class PanelEligeModulos extends JPanel {
 				
 				//Tipo Velocidad
 				int indVel=jcombVelocidad.getSelectedIndex();
-				if(indVel<0 || indVel>=arrClasDir.length) {
+				if(indVel<0 || indVel>=arrClasVel.length) {
 					System.err.println(getClass().getName()+": indice para Velocidad fuera de rango");
 					return;
 				}
@@ -234,6 +253,40 @@ public class PanelEligeModulos extends JPanel {
 					}
 				}
 								
+				//Tipo Modificador
+				int indModif=jcombModificador.getSelectedIndex();
+				if(indModif==0) {
+					//se selecciono NINGUNO
+					obModifTr=null;
+				} else {
+					indModif--; //el indice está desplazado por la inclusión de NINGUNO			
+					if(indModif<0 || indModif>=arrClasModifTr.length) {
+						System.err.println(getClass().getName()+": indice para Modificador fuera de rango");
+						return;
+					}
+					if(arrClasModifTr[indModif].equals(arrClasMotor[indMot])) {
+						System.out.println(getClass().getName()+": clase de motor y modificador son la misma");
+						obModifTr=(ModificadorTrayectoria)obMotor;
+					} else if(arrClasModifTr[indModif].equals(arrClasDir[indDir])) {
+						System.out.println(getClass().getName()+": clase de direccion y modificador son la misma");
+						obModifTr=(ModificadorTrayectoria)obDireccion;
+					} else {
+						//vemos si el alguno de lo detectores de obstáculos
+						boolean esDetector=false;
+						for(int ind=0; !esDetector && ind<decSel.length; ind++) {
+							if(arrClasModifTr[indModif].equals(arrClasDectObs[ind])) {
+								System.out.println(getClass().getName()+": clase de direccion y modificador son la misma");
+								obModifTr=(ModificadorTrayectoria)obsDetec[ind];
+								esDetector=true;
+							}
+						}
+						if(!esDetector) {
+							//clases distintas, tenemos que crear objeto
+							Class<ModificadorTrayectoria> clasModif=arrClasModifTr[indModif];				
+							obModifTr=(ModificadorTrayectoria)clasModif.newInstance();
+						}
+					}
+				}
 			} catch (Exception excep) {
 				System.err.println(getClass().getName()+": problemas en el proceso de creacion "+excep.getMessage());
 				excep.printStackTrace();
@@ -242,25 +295,31 @@ public class PanelEligeModulos extends JPanel {
 			// si alguna inicialización falla, terminamos los módulos inicializados y salimos
 			if(!obMotor.setVentanaMonitoriza(ventanaMonitoriza)) {
 				avisaFalloMoudulo(obMotor);
+				obModifTr=null;
 				obsDetec=null;
 				obVelocidad=null;
 				obDireccion=null;
 				obMotor=null;
 				return;
 			}
+			//antes de setVentanaMonitoriza le indicamos el motor
+			obDireccion.setMotor(obMotor);
 			if(!obDireccion.setVentanaMonitoriza(ventanaMonitoriza)) {
 				avisaFalloMoudulo(obDireccion);
 				obMotor.terminar();
+				obModifTr=null;
 				obsDetec=null;
 				obVelocidad=null;
 				obDireccion=null;
 				obMotor=null;
 				return;
 			}
+			obVelocidad.setMotor(obMotor);
 			if(!obVelocidad.setVentanaMonitoriza(ventanaMonitoriza)) {
 				avisaFalloMoudulo(obVelocidad);
 				obDireccion.terminar();
 				obMotor.terminar();
+				obModifTr=null;
 				obsDetec=null;
 				obVelocidad=null;
 				obDireccion=null;
@@ -268,6 +327,7 @@ public class PanelEligeModulos extends JPanel {
 				return;
 			}
 			for(int i=0; i<obsDetec.length;i++) {
+				obsDetec[i].setMotor(obMotor);
 				if(!obsDetec[i].setVentanaMonitoriza(ventanaMonitoriza))
 				{
 					avisaFalloMoudulo(obsDetec[i]);
@@ -276,6 +336,25 @@ public class PanelEligeModulos extends JPanel {
 					obVelocidad.terminar();
 					obDireccion.terminar();
 					obMotor.terminar();
+					obModifTr=null;
+					obsDetec=null;
+					obVelocidad=null;
+					obDireccion=null;
+					obMotor=null;
+					return;
+				}
+			}
+			if(obModifTr!=null) {
+				obModifTr.setMotor(obMotor);
+				if(!obModifTr.setVentanaMonitoriza(ventanaMonitoriza))
+				{
+					avisaFalloMoudulo(obModifTr);
+					for(int j=0;j<obsDetec.length;j++)
+						obsDetec[j].terminar();
+					obVelocidad.terminar();
+					obDireccion.terminar();
+					obMotor.terminar();
+					obModifTr=null;
 					obsDetec=null;
 					obVelocidad=null;
 					obDireccion=null;
@@ -287,6 +366,7 @@ public class PanelEligeModulos extends JPanel {
 			obMotor.setCalculadorDireccion(obDireccion);
 			obMotor.setCalculadorVelocidad(obVelocidad);
 			obMotor.setDetectaObstaculos(obsDetec);
+			obMotor.setModificadorTrayectoria(obModifTr); //no importa que sea null
 
 			//terminamos cambiando las habilitaciones
 			this.setEnabled(false);
@@ -368,11 +448,13 @@ public class PanelEligeModulos extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			//Le decimos a todos los modulos que terminen
 			obMotor.parar();
+			if(obModifTr!=null) obModifTr.terminar();
 			for(DetectaObstaculos doa: obsDetec)
 				doa.terminar();
 			obVelocidad.terminar();
 			obDireccion.terminar();
 			obMotor.terminar();
+			obModifTr=null;
 			obsDetec=null;
 			obVelocidad=null;
 			obDireccion=null;

@@ -28,11 +28,14 @@ import sibtra.ui.VentanasMonitoriza;
  * Si alguno de los submódulos necesita la trayectoria para sus cálculos deberá pedriselo al motor a través de 
  * {@link #apuntaNecesitaTrayectoria(SubModuloUsaTrayectoria)}, con ello el motor sabra que hay módulos que la necesitan
  * y los apuntará en una lista. 
- * Cada vez que comienze a {@link #actuar()} el motor deberá pedir la trayectori inicial a {@link VentanasMonitoriza},
- * que puede haber cambiado desde al ultima actulización, y se la indica a los submódulos 
+ * Cada vez que comienze a {@link #actuar()} el motor deberá pedir la trayectoria inicial a {@link VentanasMonitoriza},
+ * que puede haber cambiado desde al ultima actuación, y se la indica a los submódulos 
  * con {@link SubModuloUsaTrayectoria#setTrayectoriaInicial(Trayectoria)}.
- * Los submódulos si necesitan una trayectoria más actualizada, en cada iteración se la podrán pedr al motor 
- * mediante {@link #getTrayectoriaActual()}.
+ * <br>
+ * Los submódulos que necesitan una trayectoria serán avisados,
+ * invocando {@link SubModuloUsaTrayectoria#setTrayectoriaModificada(Trayectoria)},
+ * si la trayectoria se modifica con respecto a la última fijada. Esto ocurrirá, tipicamente, porque 
+ * {@link ModificadorTrayectoria} ha devuelto alto !=null al invocar {@link ModificadorTrayectoria#getTrayectoriaActual()} 
  * <br>
  * También el motor debe tener un modelo de coche ({@link Coche}) que actualizá con los datos recibidos de los sensores.
  * <br>

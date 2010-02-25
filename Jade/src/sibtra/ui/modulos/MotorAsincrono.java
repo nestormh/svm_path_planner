@@ -12,6 +12,7 @@ import sibtra.log.LoggerFactory;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.ModificadorTrayectoria;
+import sibtra.ui.defs.Motor;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
@@ -30,10 +31,10 @@ import sibtra.util.UtilCalculos;
  * @author alberto
  *
  */
-public class MotorAsincrono extends MotorTipico {
+public class MotorAsincrono extends MotorTipico implements Motor {
 	
-	protected String NOMBRE="Motor Asincrono";
-	protected String DESCRIPCION="Actualiza modelo del coche cada vez que se recibe un nuevo dato";
+	public String getNombre() { return "Motor Asincrono";}
+	public String getDescripcion() { return "Actualiza modelo del coche cada vez que se recibe un nuevo dato";}
 	protected PanelAsincrono panel;
 
 	//Parámetros
@@ -80,7 +81,7 @@ public class MotorAsincrono extends MotorTipico {
 				actuaEnCarro();
 			}
 		};
-		thCoche.setName(NOMBRE+"Coche");
+		thCoche.setName(getNombre()+"Coche");
 		//GPS
 		thGPS=new ThreadSupendible() {
 			private GPSData datoAnterior=null;
@@ -92,7 +93,7 @@ public class MotorAsincrono extends MotorTipico {
 				setPosicionCarro(datoAnterior);
 			}
 		};
-		thGPS.setName(NOMBRE+"GPS");
+		thGPS.setName(getNombre()+"GPS");
 		//IMU
 		thIMU=new ThreadSupendible() {
 			private AngulosIMU angAnterior=null;
@@ -103,7 +104,7 @@ public class MotorAsincrono extends MotorTipico {
 				setYawCarro(Math.toRadians(angAnterior.getYaw()) + ventanaMonitoriza.getDesviacionMagnetica());
 			}
 		};
-		thIMU.setName(NOMBRE+"IMU");
+		thIMU.setName(getNombre()+"IMU");
 		
 		//creamos loggers del módulo
 		loger=LoggerFactory.nuevoLoggerArrayDoubles(this, "MotorAsincrono");

@@ -13,14 +13,15 @@ import sibtra.rfyruta.PanelMiraObstaculo;
 import sibtra.rfyruta.PanelMiraObstaculoSubjetivo;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.DetectaObstaculos;
-import sibtra.ui.defs.UsuarioTrayectoria;
+import sibtra.ui.defs.Motor;
+import sibtra.ui.defs.SubModuloUsaTrayectoria;
 import sibtra.util.ThreadSupendible;
 
 /**
  * @author alberto
  *
  */
-public class RFyRuta implements DetectaObstaculos, UsuarioTrayectoria {
+public class RFyRuta implements DetectaObstaculos, SubModuloUsaTrayectoria {
 
 	static final String NOMBRE="RF y Ruta";
 	static final String DESCRIPCION="Detecta obstaculos basandose en el RF y la Ruta";
@@ -31,7 +32,8 @@ public class RFyRuta implements DetectaObstaculos, UsuarioTrayectoria {
 	private PanelMiraObstaculoSubjetivo panelMiraObsSub;
 	private ThreadSupendible thActulizacion;
 	private double distanciaLibre;
-	private Trayectoria Tr;
+	private Trayectoria Tr=null;
+	private Motor motor=null;
 
 	public RFyRuta() {};
 	/* (sin Javadoc)
@@ -42,18 +44,12 @@ public class RFyRuta implements DetectaObstaculos, UsuarioTrayectoria {
 			throw new IllegalStateException("Modulo ya inicializado, no se puede volver a inicializar");
 		}
 		ventanaMonitoriza=ventMonitoriza;
-		Tr=ventanaMonitoriza.getTrayectoriaSeleccionada(this);
-		if(Tr==null) {
-			JOptionPane.showMessageDialog(ventanaMonitoriza.ventanaPrincipal,
-				    "El módulo "+NOMBRE+" necesita ruta para continuar.",
-				    "Sin ruta",
-				    JOptionPane.ERROR_MESSAGE);
-			ventanaMonitoriza=null;
-			return false;
-
-		}
+		//Debemos tener el motor ya
+		if(motor==null)
+			throw new IllegalStateException("Se debe haber fijado el motor antes de fijar VentanaMonitoriza");
+			
+		motor.apuntaNecesitaTrayectoria(this);
 		miraObstaculo=new MiraObstaculo(Tr);
-		
 		//creamos los paneles y los añadimos
 		panelMiraObs=new PanelMiraObstaculo(miraObstaculo);
 		ventanaMonitoriza.añadePanel(panelMiraObs, NOMBRE, true, false);
@@ -113,14 +109,23 @@ public class RFyRuta implements DetectaObstaculos, UsuarioTrayectoria {
 		thActulizacion.terminar();
 		ventanaMonitoriza.quitaPanel(panelMiraObs);
 		ventanaMonitoriza.quitaPanel(panelMiraObsSub);
-		ventanaMonitoriza.liberaTrayectoria(this);
 	}
 	
 	/** Indicamos el cambio a {@link #miraObstaculo} */
-	public void nuevaTrayectoria(Trayectoria tra) {
+	private void nuevaTrayectoria(Trayectoria tra) {
 		miraObstaculo.nuevaTrayectoria(tra);
 		panelMiraObs.setTrayectoria(tra);
 		panelMiraObs.actualiza();
+		Tr=tra;
+	}
+	public void setMotor(Motor mtr) {
+		motor=mtr;
+	}
+	public void setTrayectoriaInicial(Trayectoria tra) {
+		nuevaTrayectoria(tra);
+	}
+	public void setTrayectoriaModificada(Trayectoria tra) {
+		nuevaTrayectoria(tra);
 	}
 
 }

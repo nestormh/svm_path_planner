@@ -8,6 +8,7 @@ import sibtra.rfycarro.FuturoObstaculo;
 import sibtra.rfycarro.PanelFuturoObstaculo;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.DetectaObstaculos;
+import sibtra.ui.defs.Motor;
 import sibtra.util.ThreadSupendible;
 
 /**
@@ -90,5 +91,8 @@ public class RFyCarro implements DetectaObstaculos {
 		thActulizacion.terminar();
 		ventanaMonitoriza.quitaPanel(panelFutObstaculo);
 	}
+	
+	/** No hacemos nada con motor porque no necesitamos trayectoria */
+	public void setMotor(Motor mtr) { }
 
 }
