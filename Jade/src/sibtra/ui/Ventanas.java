@@ -52,7 +52,7 @@ public class Ventanas  implements ActionListener  {
 	/** Menu de acciones */
 	JMenu menuAcciones;
 	/** Boton de salir del menu de archivo */
-	private JMenuItem miSalir;
+	protected JMenuItem miSalir;
 	
 	/** Panel de solapas derecho */
 	JTabbedPane tbPanelDecho;
@@ -61,7 +61,7 @@ public class Ventanas  implements ActionListener  {
 	JTabbedPane tbPanelIzdo;
 
 	/** Panel de los loggers */
-	private PanelLoggers pmLog;
+	protected PanelLoggers pmLog;
 	
 	/** Panel de la parte baja de la ventana principal */
 	JPanel jpSur;
@@ -69,9 +69,9 @@ public class Ventanas  implements ActionListener  {
 	/** Panel central de la ventana pequeña. Tiene @link {@link BoxLayout} */
 	JPanel panelCentralPeque;
 	
-	private JMenu menuAyuda;
-	private JMenuItem jmiAcercaDe;
-	private JPanel panelResumen;
+	protected JMenu menuAyuda;
+	protected JMenuItem jmiAcercaDe;
+	protected JPanel panelResumen;
 
 	/**
 	 * Despues del constructor y de añadir todo lo que se quiera hay que invocar 

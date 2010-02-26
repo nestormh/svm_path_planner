@@ -25,11 +25,67 @@ import sibtra.imu.PanelIMU;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
 import sibtra.lms.PanelRF;
+import sibtra.ui.defs.CalculoDireccion;
+import sibtra.ui.defs.CalculoVelocidad;
+import sibtra.ui.defs.DetectaObstaculos;
+import sibtra.ui.defs.ModificadorTrayectoria;
+import sibtra.ui.defs.Modulo;
 import sibtra.ui.defs.Motor;
+import sibtra.ui.defs.SeleccionTrayectoriaInicial;
 import sibtra.util.EligeSerial;
+import sibtra.util.LabelDatoFormato;
 import sibtra.util.ThreadSupendible;
 
 /**
+ * Es la aplicación principal del control de Verdino.
+ * <br><br>
+ * Establece comunicación con el hardware, abre una ventana principal para el monitor grande 
+ * y una pequeña para el monitor táctil.
+ * En ventana principal se crean paneles para el hardware gestinado:
+ * <ul>
+ *   <li>GPS: en {@link #conexionGPS} y crea un panel {@link #panelGPS}.
+ *   <li>IMU: en {@link #conexionIMU} y crea el panel {@link #panelIMU}
+ *   <li>Carro: en {@link #conexionCarro} y crea el panel {@link #panelRF}
+ *   <li>RF: en {@link #conexionRF} y crea panel {@link #panelRF}
+ * </ul>
+ * Otros paneles iniciales son:
+ * <ul>
+ *   <li>{@link #panelGrabar}: que permite grabar una ruta y salvarla en fichero.
+ *   <li>{@link Ventanas#pmLog}: para la gestión de los loggers definidos.
+ *   <li> {@link Ventanas#panelResumen}: en el que el usuario puede situar los {@link LabelDatoFormato} que más le interes
+ *   <li>{@link #panSelModulos} (del tipo {@link PanelEligeModulos}): Desde donde se gestionan los módulos a utilizar en la ejecución.
+ * </ul>
+ * Los módulos que es necesario definir para la ejecución son los siguientes:
+ * <ul>
+ *   <li>Módulo motor: Que debe crear el hilo principal y realiza la actuación sobre el hardware a través de las conexiones
+ *   abiertas en {@link VentanasMonitoriza}. ({@link Motor})
+ *   <li>Módulo de calculo de la dirección: define la consigna angular inicial para el volente ( {@link CalculoDireccion})
+ *   <li>Módulo de cálculo de la velocidad: define la consigna inicial de velocidad del carro ( {@link CalculoVelocidad})
+ *   <li>Módulos de detección de obstáculos: devuelven la distacia libre según su sistema de detección. Se pueden seleccionar
+ *   varios ( {@link DetectaObstaculos}).
+ *   <li>Módulo modificador de trayectoria: pueden introducir modificaciones temporales a la trayectoria inicial que 
+ *   está siguiendo el vehículo. Puede no seleccionarse ninguno ( {@link ModificadorTrayectoria}).
+ *</ul>
+ *
+ *Estos módulos, una vez seleccionados, se han de crear y posteriormente activar el funcinamiento del motor.
+ *Los módulos que lo deseen pueden añadir paneles a la ventana principal invocando los métodos 
+ *{@link Ventanas#añadePanel(JPanel, String) añadePanel}.
+ *<br><br>
+ *Si alguno de los módulos necesita una trayectoria para su funcinamiento se la pide a su correspondietn motor. 
+ *Este, a su vez, se la pide a {@link VentanasMonitoriza}, que abrirá el {@link PanelTrayectoria}. Éste es el encardado de 
+ *ofrecer la elección del módulo {@link SeleccionTrayectoriaInicial} que determianará la trayectoria inicial a seguir.
+ *
+ * <br><br>
+ * Cuando está detenida la actuación del motor es posible destruir los módulos creados antes de seleccionar y crear
+ * unos distintos. Con la tecla "Refresca Modulos" del {@link PanelEligeModulos} se recargan las clases del 
+ * paquete sibtra.ui.modulos con los cual las modificaciones realizadas en las clases hasta ese momento se tendrán en 
+ * cuenta. Esto permite la corrección de módulos sin necesidad de salir de la aplicación ;-)
+ * <br><br>
+ * Se hace la gestión de la Z de emergencia. Se puede conocer su estado a través de {@link #isZPulsada()}. Si es
+ * pulsada se detiene la actuación del motor.
+ * <br><br>
+ * TODO Gesitón de la desviación magnética basada en la localización: ULL, Iter, etc.
+ * 
  * @author alberto
  *
  */
