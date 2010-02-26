@@ -3,8 +3,6 @@
  */
 package sibtra.ui.modulos;
 
-import javax.swing.JOptionPane;
-
 import sibtra.gps.GPSData;
 import sibtra.gps.Trayectoria;
 import sibtra.lms.BarridoAngular;
@@ -49,7 +47,7 @@ public class RFyRuta implements DetectaObstaculos, SubModuloUsaTrayectoria {
 			throw new IllegalStateException("Se debe haber fijado el motor antes de fijar VentanaMonitoriza");
 			
 		motor.apuntaNecesitaTrayectoria(this);
-		miraObstaculo=new MiraObstaculo(Tr);
+		miraObstaculo=new MiraObstaculo();
 		//creamos los paneles y los añadimos
 		panelMiraObs=new PanelMiraObstaculo(miraObstaculo);
 		ventanaMonitoriza.añadePanel(panelMiraObs, NOMBRE, true, false);

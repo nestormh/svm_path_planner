@@ -415,7 +415,6 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 								|| Math.abs(even.getY()-evenPos.getY())>50) {
 							nuevaPos=pixel2Point(evenPos.getX(),evenPos.getY());
 							posAngulo=pixel2Point(even.getX(),even.getY());
-							MI.nuevaPosicion();
 						}
 						//Aunque no haya nueva posición, hacemos nuevo barrido
 						double[] npos={nuevaPos.getX(),nuevaPos.getY()};

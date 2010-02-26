@@ -10,6 +10,12 @@ import sibtra.util.UtilCalculos;
 /**
  * Clase para combinar el seguimiento de la ruta con el RF.
  * Proviene de transcribir el código de octave en RangeFinder/branches/RFyGPS/
+ * <br>
+ * Cuando la trayectoria pasada en {@link #nuevaTrayectoria(Trayectoria)} es
+ * null, devolverá NaN al invocar {@link #masCercano(double, BarridoAngular)}
+ * <br>
+ * La gestión del índice de la ruta donde está el coche se gestiona en la {@link Trayectoria}.
+ * 
  * @author alberto
  */
 public class MiraObstaculo {
@@ -22,7 +28,7 @@ public class MiraObstaculo {
 	double anchoCamino=1.2;
 
 	/** de donde provienen los puntos */
-	Trayectoria tray;
+	Trayectoria tray=null;
 
 	/** Trayectoria */
 	//TODO eliminar Tr y hacerlo todo con tray
@@ -100,7 +106,11 @@ public class MiraObstaculo {
 	/** Se activa cuando esta fuera del camino */
 	boolean estaFuera=true;
 
-
+	/** Constructor vacío */
+	public MiraObstaculo() {
+		
+	}
+	
 	/**
 	 * Constructor necesita conocer la ruta que se va a seguir.
 	 * A partir de ella generará los bordes de la carretera
@@ -119,16 +129,17 @@ public class MiraObstaculo {
 	
 	/** Establece tra como nueva {@link #tray} y crea los bordes */
 	public void nuevaTrayectoria(Trayectoria tra) {
-		if(tra==null || tra.length()<2)
-			throw (new IllegalArgumentException("Trayectoria no tienen las dimensiones mínimas"));
 		tray=tra;
+		if(tray==null)
+			return; //nos quedamos en estado de trayectoria desconocida
+		if(tray.length()<2)
+			throw (new IllegalArgumentException("Trayectoria no tienen las dimensiones mínimas"));
 		Tr=new double[tray.length()][2];
 		for(int i=0;i<tray.length();i++) {
 			Tr[i][0]=tray.x[i];
 			Tr[i][1]=tray.y[i];
 		}
 		construyeCamino(Tr, anchoCamino);
-		indiceCoche=0;		
 	}
 
 	
@@ -208,29 +219,24 @@ public class MiraObstaculo {
 		}		
 	}
 	
-	/** 
-	 * Se debe invocar cuando la posición del coche a cambiado mucho desde la última invocación
-	 * a  {@link #masCercano(double, BarridoAngular)}.
-	 * Se pone {@link #indiceCoche} a valor -1 para que la búsqueda del punto más cercano
-	 * se haga en toda la ruta.
-	 */
-	public void nuevaPosicion() {
-		indiceCoche=-1;
-	}
-	
 	/**
-	 * En un momento dado nos dice a que distancia se encuentra el obstaculo más cercano
+	 * En un momento dado nos dice a que distancia sobre el camino se encuentra el obstaculo más cercano
 	 * La posición del coche debe estar establecida en la trayectoria {@link #tray}.
+	 * <br>
+	 * Si {@link #tray} está a null devuelve NaN.
 	 * @param yawA rumbo actual del vehiculo hacia el norte (EN RADIANES)
 	 * @param barrAct último barrido angular
-	 * @return Distancia libre en el camino. 
+	 * @return Distancia libre en el camino. Si hay algún problema devueve NaN.
 	 */
 	public double masCercano(double yawA, BarridoAngular barrAct) {
+		distanciaLineal=Double.NaN; //por si fallan las primeras comprobaciones
+		distanciaCamino=Double.NaN; //por si fallan las primeras comprobaciones
+		if(tray==null)
+			return Double.NaN;
 		//TODO cambiar para que sólo prescindir de Tr
 		barr=barrAct;
 		double[] posicionLocal=posActual=tray.getPosicionCoche();
 		Yaw=yawA; //si está ya en radianes, si no tendríamos que hacerer el cambio.
-		distanciaLineal=Double.NaN; //por si fallan las primeras comprobaciones
 
 		//Inicializamos todas las variables del algoritmo
 		ColIzda=false; //colisión por la izda.
@@ -259,7 +265,7 @@ public class MiraObstaculo {
 			if(indiceCoche==0 && !tray.esCerrada()) {
 				//No hay opción al anterior
 				log("Cochoe está antes del primer punto");
-				return distanciaLineal; //NaN
+				return Double.NaN;
 			} else {
 				indiceCoche=(indiceCoche+Tr.length-1)%Tr.length; //anterior generalizado
 				if (!dentroSegmento(posicionLocal, indiceCoche)) {
@@ -267,7 +273,7 @@ public class MiraObstaculo {
 						System.err.println("No está tampoco en segmento anterior a pesar de distacia < camino");
 					//esta fuera del camino
 					estaFuera=true;
-					return distanciaLineal; //NaN					
+					return Double.NaN; //NaN					
 				}
 			}
 		estaFuera=false;
@@ -282,7 +288,7 @@ public class MiraObstaculo {
 		double difDir=UtilCalculos.anguloVectores(vCamino, v);
 		if(Math.abs(difDir)>(PI_2)) {
 			System.out.println("Estamos yendo hacia atrás");
-			return distanciaLineal; //salimos 
+			return Double.NaN; //salimos 
 		}
 
 		//Tenemos que buscar que punto del borde derecho e izquierdo comienza el barrido
@@ -358,7 +364,7 @@ public class MiraObstaculo {
 		
 		if(!encontradoInicioD && !encontradoInicioI) {
 			System.err.println("No se ha encontrado ningún inicio !!!");
-			return distanciaLineal; //NaN
+			return Double.NaN; //NaN
 		}
 		
 		//procedemos a recorrer los puntos para ver si hay algo dentro
@@ -569,7 +575,7 @@ public class MiraObstaculo {
 	 * @param i cuadrilátero i-ésimo del camino
 	 * @return si está dentro
 	 */
-	public boolean dentroSegmento(double[] pto,int i) {
+	private boolean dentroSegmento(double[] pto,int i) {
 		if(i<0)
 			throw new IllegalArgumentException("Pasado indice negativo");
 		if(i>=Tr.length)
@@ -640,7 +646,7 @@ public class MiraObstaculo {
 //	}	
 	
 	
-	public double largoTramo(int iini, int ifin) {
+	private double largoTramo(int iini, int ifin) {
 		if(iini<0 || iini>=Tr.length)
 			throw new IllegalArgumentException("Inidice inicial fuera de rango válido "+iini);
 		if(ifin<0 || ifin>=Tr.length)
