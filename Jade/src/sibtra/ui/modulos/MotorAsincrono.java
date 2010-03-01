@@ -11,8 +11,6 @@ import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerFactory;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
-import sibtra.ui.defs.ModificadorTrayectoria;
-import sibtra.ui.defs.Motor;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
@@ -27,11 +25,11 @@ import sibtra.util.UtilCalculos;
  *   <dt>IMU <dd>Fija directamente la orientación del coche
  *   <dt>Coche<dd>Conocida la velocidad y la orientación de las ruedas hace evolucionar el modelo de la bicicleta
  *</dl>
- *TODO Decidir cuando se pide una trayectoria acualizada al {@link ModificadorTrayectoria} (si está definido) 
+ *
  * @author alberto
  *
  */
-public class MotorAsincrono extends MotorTipico implements Motor {
+public class MotorAsincrono extends MotorTipico {
 	
 	public String getNombre() { return "Motor Asincrono";}
 	public String getDescripcion() { return "Actualiza modelo del coche cada vez que se recibe un nuevo dato";}

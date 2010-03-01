@@ -12,9 +12,16 @@ import sibtra.ui.defs.CalculoDireccion;
 import sibtra.ui.defs.CalculoVelocidad;
 import sibtra.ui.defs.DetectaObstaculos;
 import sibtra.ui.defs.ModificadorTrayectoria;
+import sibtra.ui.defs.Motor;
 import sibtra.ui.defs.SubModuloUsaTrayectoria;
 
-public abstract class MotorTipico {
+/**
+ * Recogemos las cosas comunes de varios motores.
+ * 
+ * @author alberto
+ *
+ */
+public abstract class MotorTipico implements Motor {
 
 	protected VentanasMonitoriza ventanaMonitoriza = null;
 
@@ -30,6 +37,11 @@ public abstract class MotorTipico {
 	/** La úlima que nos ha devuelto el {@link #modificadorTr}, si lo tenemos,
 	 * Caso contrario coincidirá con {@link #trayActual} */
 	protected Trayectoria trayActual = null;
+	/** Se depositará la trayectoria enviada por {@link ModificadorTrayectoria} a través
+	 * {@link #nuevaTrayectoria(Trayectoria)}.
+	 * Será la nueva {@link #trayActual} cuando comience una nueva iteración del calculo, 
+	 * de esta manera se solventa el la característica asíncrona de la invocación a {@link #nuevaTrayectoria(Trayectoria)}*/
+	protected Trayectoria trayNueva = null;
 	protected CalculoDireccion calculadorDireccion = null;
 	protected CalculoVelocidad calculadorVelocidad = null;
 	protected DetectaObstaculos[] detectoresObstaculos = null;
@@ -83,13 +95,15 @@ public abstract class MotorTipico {
 	    if(necesitanTrIni.size()>0 || modificadorTr!=null) {
 	    	//obtenos la trayectoria inicial seleccinonada por usuario
 	    	trayInicial=ventanaMonitoriza.getTrayectoriaSeleccionada();
-	    	trayActual=trayInicial;
+	    	trayActual=trayNueva=trayInicial;
 	    	for(SubModuloUsaTrayectoria mut:necesitanTrIni)
 	    		//se la comunicamos a los módulos
 	    		mut.setTrayectoriaInicial(trayInicial);
 	    	//y al modificador si lo hay
-		    if(modificadorTr!=null)
+		    if(modificadorTr!=null) {
 		    	modificadorTr.setTrayectoriaInicial(trayInicial);
+		    	modificadorTr.actuar(); //avisamos arranque a modificador
+		    }
 	    }
 	}
 
@@ -97,6 +111,8 @@ public abstract class MotorTipico {
 	public void parar() {
 		if(ventanaMonitoriza==null)
 			throw new IllegalStateException("Aun no inicializado");
+		if(modificadorTr!=null)
+			modificadorTr.parar(); //avisamos parada al modificador
 	}
 
 	/** comprobamos que estemos inicializados */
@@ -126,6 +142,7 @@ public abstract class MotorTipico {
 	    	//obtenos la trayectoria inicial seleccinonada por usuario
 			//Lo hacemos aquí para que no esperar a la primera acción
 	    	trayInicial=ventanaMonitoriza.getTrayectoriaSeleccionada();
+	    	trayActual=trayInicial=trayNueva; //aunque se pedirán otraves en actúa
 		}
 	}
 
@@ -175,24 +192,14 @@ public abstract class MotorTipico {
         }
 
 	}
-
-	/** Actuliza el modelo del coche, pide trayectoria modificada y busca índice del más cercano. */
-	protected void accionPeriodica() {
-		actualizaModeloCoche();
-		if(modificadorTr!=null) {
-			Trayectoria nuevaTr=modificadorTr.getTrayectoriaActual();
-			if(nuevaTr!=null)  {
-				trayActual=nuevaTr;
-				for(SubModuloUsaTrayectoria sut: necesitanTrIni)
-					sut.setTrayectoriaModificada(trayActual);
-			}
-		}
-	    if(trayActual!=null) {
-	    	//para actulizar en indice del más cercano
-	    	trayActual.situaCoche(modCoche.getX(), modCoche.getY());
-	    	logerMasCercano.add(trayActual.indiceMasCercano());
-	    }
+	
+	/** Avisamos a todos los que se han apuntado en {@link #apuntaNecesitaTrayectoria(SubModuloUsaTrayectoria)} */
+	public void nuevaTrayectoria(Trayectoria nuTr) {
+		trayNueva=nuTr;
+		for(SubModuloUsaTrayectoria sut: necesitanTrIni)
+			sut.setTrayectoriaModificada(trayNueva);		
 	}
+
 
 	/** @return modelo del coche que actuliza este motor */
 	public Coche getModeloCoche() {

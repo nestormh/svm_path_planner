@@ -363,4 +363,10 @@ public class MotorAvanzaJoystick implements Motor, CalculoVelocidad, CalculoDire
 		
 	}
 
+
+	public void nuevaTrayectoria(Trayectoria nuevaTr) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

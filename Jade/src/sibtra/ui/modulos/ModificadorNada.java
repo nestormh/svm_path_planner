@@ -16,13 +16,6 @@ import sibtra.ui.defs.Motor;
  */
 public class ModificadorNada implements ModificadorTrayectoria {
 
-	/** Devuelve siempre null para indicar que no hay modificación
-	 * @see sibtra.ui.defs.ModificadorTrayectoria#getTrayectoriaActual()
-	 */
-	public Trayectoria getTrayectoriaActual() {
-		return null;
-	}
-
 	/** No la recogemos porque no la vamos a modificar
 	 * @see sibtra.ui.defs.ModificadorTrayectoria#setTrayectoriaInicial(sibtra.gps.Trayectoria)
 	 */
@@ -50,6 +43,16 @@ public class ModificadorNada implements ModificadorTrayectoria {
 
 	/** No hacemos nada */
 	public void terminar() {
+	}
+
+	public void actuar() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void parar() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

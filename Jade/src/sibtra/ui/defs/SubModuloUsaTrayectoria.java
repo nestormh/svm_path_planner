@@ -12,9 +12,11 @@ import sibtra.gps.Trayectoria;
  * Cada vez que varíe la trayectoria inicial, tipicamente al comenzar una nueva actuación, serán 
  * avisados mediante {@link #setTrayectoriaInicial(Trayectoria)}.
  * <br>
- * Cada vez que varíe la trayectoria diruante la ejecución, tipicamente porque el {@link ModificadorTrayectoria} he hecho
+ * Cada vez que varíe la trayectoria durante la ejecución, porque el {@link ModificadorTrayectoria} he hecho
  * cambios,
  * serán avisados mediante {@link #setTrayectoriaModificada(Trayectoria)}.
+ * Esta llamada será asíncrona y <strong> es posible que conicida con la que le está realizando el {@link Motor}</strong>.
+ * Por ello el módulo debe gestionar convenientemente la concurrencia (usando si es necesario métodos syncroniced).
  * 
  * @author alberto
  *

@@ -7,6 +7,9 @@ import sibtra.controlcarro.ControlCarro;
 import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerFactory;
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.ui.defs.CalculoDireccion;
+import sibtra.ui.defs.CalculoVelocidad;
+import sibtra.ui.defs.DetectaObstaculos;
 import sibtra.ui.defs.Motor;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
@@ -16,10 +19,29 @@ import sibtra.util.ThreadSupendible;
 import sibtra.util.UtilCalculos;
 
 /**
+ * Implentan un bluce de actuacón en un periodo fijo. El comportamitno se implementa en {@link #accionPeriodica()}
+ * en el cual se dan los siguientes pasos::
+ * <ol>
+ * <li>Actuliza el modelo del coche
+ * <li>Copiar {@link MotorTipico#trayActual} desde {@link MotorTipico#trayNueva} por si se ha invocado 
+ * {@link Motor#nuevaTrayectoria(sibtra.gps.Trayectoria)}.
+ * <li>Pedir al {@link CalculoDireccion} la consigana para el volante
+ * <li>Pedir al {@link CalculoVelocidad} la consigna para la dirección
+ * <li>Pedir a los {@link DetectaObstaculos} la distancia libre 
+ * <li>Calcular las consigna finales y aplicarlas al carro
+ * <li>Hacer evolucionar le modelo del carro. (aunque éste se actualiza en punto 1 :-( 
+ * </ol>
+ * <br>
+ * La consigna de volante finalmente aplicada consiste en limitarla según {@link MotorTipico#cotaAngulo}
+ * <br>
+ * Para la consigna de velocidad se tiene en cuenta el obstáculo más cercano detectado por si 
+ * hay que parar. Si no es cuestión de obstáculos, siempre se aplica al menos la {@link MotorTipico#umbralMinimaVelocidad}
+ * para que el carro pueda avanzar y corregir su dirección. 
+
  * @author alberto
  *
  */
-public class MotorSincrono extends MotorTipico implements Motor {
+public class MotorSincrono extends MotorTipico {
 	
 	public String getNombre() { return "Motor Síncrono"; }
 	public String getDescripcion() { return "Ejecuta las acciones de control con un periodo fijo"; }
@@ -93,9 +115,17 @@ public class MotorSincrono extends MotorTipico implements Motor {
 		//paramos el PID de control carro
 		ventanaMonitoriza.conexionCarro.stopControlVel();
 	}
-
+	
+	/** Implementa lógica del motor usada en cada iteración */
 	protected void accionPeriodica() {
-		super.accionPeriodica();
+		/**  y busca índice del más cercano. */
+		actualizaModeloCoche();
+		trayActual=trayNueva; //por si ha cambiado
+		if(trayActual!=null) {
+			//para actulizar en indice del más cercano
+			trayActual.situaCoche(modCoche.getX(), modCoche.getY());
+			logerMasCercano.add(trayActual.indiceMasCercano());
+		}
 	
 	    //Direccion =============================================================
 	    double consignaVolanteAnterior=consignaVolante;
