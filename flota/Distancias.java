@@ -27,6 +27,7 @@ Hashtable hashVehiculos = new Hashtable();
 	OntModel m = ModelFactory.createOntologyModel( OntModelSpec.OWL_MEM, null );
 static String assertLimpiezaPosiciones = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#Accion) (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual) (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarPosicionesAntiguas) ))";
 static String assertLimpiezaTramos = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#Accion) (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual) (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarTramosAntiguos) ))";
+static String assertLimpiezaRutas = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#Accion) (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual) (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarRutas) ))";
 
 	static String assertLimpiezaEstados = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#Accion) (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual) (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarEstado) ))";
 static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#Accion) (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual) (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarVelocidadesAntiguas) ))";
@@ -42,26 +43,18 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 	
 	public Distancias() throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException, 
     FileNotFoundException
-	{ definicionesTramos();
-	  transformaHechosJess();
-	   transformaReglasJess();
-	   arreglarReglas("reglasverdino.clp", "reglasarregladas.clp");
-	   cargarHechosReglas();
+	{ //definicionesTramos();
+	  //transformaHechosJess();
+	   //transformaReglasJess();
+	   //arreglarReglas("reglasverdino.clp", "reglasarregladas.clp");
+	   //cargarHechosReglas();
     //	calculaRuta();
 	}
 	
 	public Distancias(String origen, String destino) throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException, 
     FileNotFoundException
 	{   // hacemos copias locales
-	  System.out.println("LEYENDO VERDINO");
-        m.getDocumentManager().addAltEntry( "http://www.isaatc.ull.es/Verdino.owl","file:verdino.owl" );
-		m.getDocumentManager().addAltEntry( "http://swrl.stanford.edu/ontologies/3.3/swrla.owl",
-                                          "file:swrla.owl.xml" );
-		m.getDocumentManager().addAltEntry( "http://sqwrl.stanford.edu/ontologies/built-ins/3.4/sqwrl.owl",
-                                          "file:sqwrl.owl.xml" );							
-		m.getDocumentManager().addAltEntry( "http://protege.stanford.edu/plugins/owl/protege",
-                                          "file:protege.owl" );							
-		m.read( "http://www.isaatc.ull.es/Verdino.owl" );
+	    cargaEspaciosDeNombres();
 		definicionesTramos();
 		transformaHechosJess();
 		transformaReglasJess();
@@ -71,7 +64,7 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 		leerTramosDeOntologia();  
 	// leer los vehiculos de la ontologia y crear los objetos.  
 	   leerVehiculos();
-		Vector ruta = calculaRuta(prefijo + origen, prefijo + destino);
+		Vector ruta = calculaRuta(origen, destino);
 	 // en caso de quererlo asignar a un vehiculo
 	 // fijarRutaVehiculo(id, ruta);
 	// poner el sistema en marcha
@@ -79,15 +72,31 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 	}
 	
 
+	public void cargaEspaciosDeNombres()
+	{System.out.println("LEYENDO VERDINO");
+        m.getDocumentManager().addAltEntry( "http://www.isaatc.ull.es/Verdino.owl","file:verdino.owl" );
+		m.getDocumentManager().addAltEntry( "http://swrl.stanford.edu/ontologies/3.3/swrla.owl",
+                                          "file:swrla.owl.xml" );
+		m.getDocumentManager().addAltEntry( "http://sqwrl.stanford.edu/ontologies/built-ins/3.4/sqwrl.owl",
+                                          "file:sqwrl.owl.xml" );							
+		m.getDocumentManager().addAltEntry( "http://protege.stanford.edu/plugins/owl/protege",
+                                          "file:protege.owl" );							
+		m.read( "http://www.isaatc.ull.es/Verdino.owl" );
+	}
 	
+	public void limpiaRutas() throws JessException
+	{engine.executeCommand(assertLimpiezaRutas);
+	 engine.run();
+	}
 	
 	public void fijarRutaVehiculo(String idVehiculo, String[] ruta)
 	{// poner el prefijo
+	 String[] rut = new String[ruta.length];
 	 for (int i=0; i < ruta.length; i++)
-	 {ruta[i] = prefijo + ruta[i];
+	 {rut[i] = prefijo + ruta[i];
 	 }
 	 Vehiculo actual = (Vehiculo) hashVehiculos.get(idVehiculo);
-	 actual.fijaRuta(ruta);
+	 actual.fijaRuta(rut);
 	}
 	
 	
@@ -113,6 +122,19 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 	 assertsTramos(vector);
 	}
 	 
+public void tramosAEngineRutas() throws JessException
+	{ System.out.println("tramos a engineRutas");
+	engineRutas = new Rete();
+	 engineRutas.reset();
+	 engineRutas.clear();
+	 engineRutas.executeCommand("(batch factsdistancias.clp)");
+	 engineRutas.executeCommand("(batch distancias.clp)");
+	// Vector vector = calculaVectorTramosDeOntologia();
+	// assertsTramos(vector);
+	}
+		
+	
+	 
 	public Vector calculaVectorTramosDeOntologia() throws JessException
    { System.out.println("calculaVectorTramosDeOntologia");
 		Vector tramos = new Vector();
@@ -126,7 +148,7 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 			 Token t = (Token) result2.next();
              Fact f = (Fact) t.fact(1);
 			String id = f.getSlotValue("subject").stringValue(engine.getGlobalContext());
-            System.out.println("TRAMO = " + id);
+            //System.out.println("TRAMO = " + id);
 			Tramo actual = new Tramo(id);
 			actual.fijaLongitud(dimeLongitudTramo(id));
 			actual.fijaVectorNombresSucesores(dimeSucesoresTramo(id));
@@ -134,6 +156,12 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 		 	}
 		return tramos;
 		}    
+		
+		public String quitaPrefijo(String principio)
+		{int longitudPrefijo = prefijo.length();
+		 String solucion = principio.substring(longitudPrefijo);
+		 return solucion;
+		}
 	 	 	 	 
 	public void leerVehiculos() throws JessException
 	{System.out.println("leer vehiculo");
@@ -159,14 +187,52 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 	   }	  
 	  vehiculo.fijaPosicionVehiculo(posicion);
 	   }
-	   	System.out.println(engine.executeCommand(assertLimpiezaPosiciones));
+	   	engine.executeCommand(assertLimpiezaPosiciones);
 		inicializacionFicticia();  //método a quitar en situaciones reales
 	}
 	
+	public void inicializaVehiculos(String[] idVehiculos) throws JessException
+	{for (int i=0; i<idVehiculos.length; i++)
+	 {String id = prefijo + idVehiculos[i];
+	  String a1 = "(assert (triple (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type) (subject   http://www.isaatc.ull.es/Verdino.owl#" + idVehiculos[i] +")   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)))";
+      engine.executeCommand(a1);
+	  String posicion = prefijo + "PosicionVehiculo_" + idVehiculos[i];
+	  String a2 = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo) (subject   http://www.isaatc.ull.es/Verdino.owl#" + idVehiculos[i] +")   (object    http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo_" + idVehiculos[i] + ")))";
+      engine.executeCommand(a2);
+	  Vehiculo vehiculo = new Vehiculo(id);
+	  hashVehiculos.put(id, vehiculo);
+	  vehiculo.fijaPosicionVehiculo(posicion);
+	 }
+	 engine.executeCommand(assertLimpiezaPosiciones);
+	}
+	
+	public void asignaRuta(String idVehiculo, String[] ruta) throws JessException
+	{ String idVehiculos = prefijo + idVehiculo;
+	  Vehiculo v1 = (Vehiculo) hashVehiculos.get(idVehiculos);
+	  UUID idOne = UUID.randomUUID();
+      //System.out.println("ID=" + idOne);
+	String stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tieneRuta) (subject ";
+	 stringAssert = stringAssert + idVehiculos +  ") (object " + prefijo +  idOne +" ) ) ) "; 
+	   engine.executeCommand(stringAssert);
+	 fijarRutaVehiculo(idVehiculos, ruta);
+	for (int i=0; i<ruta.length; i++)
+	 {stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden) (subject ";
+	 stringAssert = stringAssert + prefijo + idOne +  ") (object " + prefijo +  "TramoOrden1_" + idOne + ") ) ) "; 
+	   engine.executeCommand(stringAssert);
+	   stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tieneOrden) (subject ";
+	 stringAssert = stringAssert + prefijo + "TramoOrden1_" + idOne +  ") (object " + (i+1) + ") ) ) "; 
+	 	   engine.executeCommand(stringAssert);
+	  stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tieneTramo) (subject ";
+	 stringAssert = stringAssert + prefijo + "TramoOrden1_" + idOne +  ") (object "  + prefijo +  ruta[i] + ") ) ) "; 
+	//System.out.println(ruta[i]);
+	   engine.executeCommand(stringAssert);
+	 }
+    
+	}
 	
 	public void inicializacionFicticia() throws JessException
 	{System.out.println("INICIALIZACION FICTICIA-----------------");
-	 System.out.println(engine.executeCommand(assertLimpiezaPosiciones));
+	engine.executeCommand(assertLimpiezaPosiciones);
 	 String id = prefijo + "Verdino";
 	 Vehiculo v1 = (Vehiculo) hashVehiculos.get(id);
 	 v1.fijaVelocidad(10);
@@ -174,7 +240,7 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 	 v1.fijaLongitudEnTramo(620);
 	 System.out.println("INICIALIZACION FICTICIA" + v1);
 	 String[] ruta1 = {"Tramo10", "Tramo12", "Tramo15", "Tramo19"};
-  String stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tieneRuta) (subject ";
+     String stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tieneRuta) (subject ";
 	 stringAssert = stringAssert + id +  ") (object " + prefijo +  "Ruta1) ) ) "; 
 	   engine.executeCommand(stringAssert);
 	 fijarRutaVehiculo(id, ruta1);
@@ -216,7 +282,7 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 	 stringAssert = stringAssert + prefijo + "TramoOrden1_" + i +  ") (object " + (i+1) + ") ) ) "; 
 	 	   engine.executeCommand(stringAssert);
 	  stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tieneTramo) (subject ";
-	 stringAssert = stringAssert + prefijo + "TramoOrden1_" + i +  ") (object "  + ruta1[i] + ") ) ) "; 
+	 stringAssert = stringAssert + prefijo + "TramoOrden1_" + i +  ") (object "  + prefijo + ruta1[i] + ") ) ) "; 
 	   engine.executeCommand(stringAssert);
 	 }
      for (int i=0; i<ruta2.length; i++)
@@ -227,7 +293,7 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 	 stringAssert = stringAssert + prefijo + "TramoOrden2_" + i +  ") (object " + (i+1) + ") ) ) "; 
 	 	   engine.executeCommand(stringAssert);
 	  stringAssert = "(assert (triple (predicate " + prefijo + "tieneTramo) (subject ";
-	 stringAssert = stringAssert + prefijo + "TramoOrden2_" + i +  ") (object "  +  ruta2[i] + ") ) ) "; 
+	 stringAssert = stringAssert + prefijo + "TramoOrden2_" + i +  ") (object "  + prefijo +  ruta2[i] + ") ) ) "; 
 	   engine.executeCommand(stringAssert);
 	 }
 	  for (int i=0; i<ruta3.length; i++)
@@ -238,7 +304,7 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 	 stringAssert = stringAssert + prefijo + "TramoOrden3_" + i +  ") (object " + (i+1) + ") ) ) "; 
 	  	   engine.executeCommand(stringAssert);
 	  stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tieneTramo) (subject ";
-	 stringAssert = stringAssert + prefijo + "TramoOrden3_" + i +  ") (object "  +  ruta3[i] + ") ) ) "; 
+	 stringAssert = stringAssert + prefijo + "TramoOrden3_" + i +  ") (object "  + prefijo +  ruta3[i] + ") ) ) "; 
 	   engine.executeCommand(stringAssert);
 	 }
     }
@@ -268,7 +334,7 @@ static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www
 	
 	public double dimeLongitudTramo(String tramo) throws JessException
 	{ // buscar longitud tramo actual en ontologia			
-System.out.println("dime longitud en tramo");
+//System.out.println("dime longitud en tramo");
  ValueVector vector = new ValueVector();
  vector.add(new Value("http://www.isaatc.ull.es/Verdino.owl#tieneLongitud", RU.ATOM));
 		vector.add(new Value(tramo,RU.ATOM));
@@ -537,13 +603,17 @@ p1 = new Prioridades("Tramo12", "Tramo11");
 	
 	
 	public Vector calculaRuta(String origen, String destino) throws JessException, java.io.IOException
-	{System.out.println("calcula ruta");	
-	String comandoleer = "(compDist Final" + origen + " Principio" + destino + ")";
-		System.out.println(engineRutas.executeCommand(comandoleer));
+	{String origenP = prefijo + origen;
+	 String destinoP = prefijo + destino;
+	 System.out.println("calcula ruta");	
+	String comandoleer = "(compDist Final" + origenP + " Principio" + destinoP + ")";
+		engineRutas.executeCommand(comandoleer);
 		engineRutas.executeCommand("(batch consultasVerdino.clp)");
 	    Value ruta = engineRutas.fetch("RUTA");
-		ValueVector v = ruta.listValue(engineRutas.getGlobalContext());
 		Vector tramosRuta = new Vector();
+		try {
+		ValueVector v = ruta.listValue(engineRutas.getGlobalContext());
+		
 		String principio1 = "Principio";
 			String finales1 = "Final";
 		// la primera
@@ -551,16 +621,17 @@ p1 = new Prioridades("Tramo12", "Tramo11");
 		int indice1 = nodo1.indexOf(finales1);
 		nodo1 = nodo1.substring(indice1 + finales1.length(),nodo1.length()).trim();
 		tramosRuta.addElement(nodo1);
-		System.out.println(nodo1);
+		//System.out.println(nodo1);
          for (int k=0; k<v.size(); k++)
 		 {nodo1 = v.get(k).stringValue(engineRutas.getGlobalContext());
 		  indice1 = nodo1.indexOf(principio1);
 		  if(indice1 > -1)
 		  {nodo1 = nodo1.substring(indice1 + principio1.length(),nodo1.length()).trim();
-		   System.out.println(nodo1);
+		   //System.out.println(nodo1);
 		   tramosRuta.addElement(nodo1);
 		  }
 		 }
+		 } catch (java.lang.NullPointerException e) {}
    	    return tramosRuta;
 	}
 	
@@ -586,13 +657,13 @@ p1 = new Prioridades("Tramo12", "Tramo11");
 	  double longitud = tramoj.dimeLongitud();
 	  String id = tramoj.dimeId();
 	  String assertsPropios = "(assert (Dist (t1 Principio" + id + ") (t2 Final" + id + ") (miles " + longitud + ")))";
-	  System.out.println(engineRutas.executeCommand(assertsPropios));
+	  engineRutas.executeCommand(assertsPropios);
       
 	  Vector conexiones = tramoj.dimeVectorNombreSucesores();
 	  for (int j = 0; j < conexiones.size(); j++)
 	  {String idconectado = (String)conexiones.elementAt(j);
 	    String assertsCruzados = "(assert (Dist (t1 Final" + id + ") (t2 Principio" + idconectado + ") (miles 0.0000000000001)))";
-		System.out.println(engineRutas.executeCommand(assertsCruzados));
+		engineRutas.executeCommand(assertsCruzados);
 	   }
 	 }
 	}
@@ -652,7 +723,7 @@ public void meterVectorEnOntologia (Vector vector, Vector prioridades, Vector op
 
 
 public Vector dimeSucesoresTramo(String tramo) throws JessException
-	 {System.out.println("dime sucesdores tramos");
+	 {//System.out.println("dime sucesdores tramos");
 	 Vector sucesores = new Vector();
 	  Individual individuo = m.getIndividual(tramo);
 	  ObjectProperty tieneSucesores = m.getObjectProperty(prefijo + "tieneSucesor");
@@ -664,6 +735,83 @@ public Vector dimeSucesoresTramo(String tramo) throws JessException
 	  return sucesores;
 	 }
 	
+	
+	public void finalizaInicializacion() throws JessException
+{System.out.println(System.currentTimeMillis());  
+for (int u=0; u<70; u++)
+	{engine.run();
+	}
+System.out.println(System.currentTimeMillis());
+	}
+	
+		public void finalizaInicializacionReducida() throws JessException
+{System.out.println("R" + System.currentTimeMillis());  
+for (int u=0; u<10; u++)
+	{engine.run();
+	}
+System.out.println("R" + System.currentTimeMillis());
+	}
+		
+public String[] dimeEstados (String[] idVehiculos, String[] tramos, double[] longitudesEnTramos, double[] velocidades) throws JessException
+{   Vector vectorVehiculos = new Vector();
+	 for (Enumeration e = hashVehiculos.elements() ; e.hasMoreElements() ;) 
+	{vectorVehiculos.addElement(e.nextElement());
+     }
+	 int sizeVector = vectorVehiculos.size();
+	 System.out.println(":::: Hay " + sizeVector + " vehiculos !!!" );
+	 
+	 	engine.executeCommand(assertLimpiezaVelocidades);
+	   engine.executeCommand(assertLimpiezaPosiciones);
+	engine.run();
+	engine.executeCommand(assertLimpiezaEstados);
+	engine.run();
+	for (int i=0; i<idVehiculos.length; i++)
+	 {String idActual = prefijo + idVehiculos[i];
+	  Vehiculo actual = (Vehiculo) (hashVehiculos.get(idActual));
+	  //System.out.println(idActual);
+	  double nuevaPosicion = longitudesEnTramos[i];
+	      String stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#tieneVelocidad) (subject ";
+	 stringAssert = stringAssert + idActual + ") (object " + velocidades[i] +") ) ) ";
+	  engine.executeCommand(stringAssert);
+	  stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud) (subject ";
+	 stringAssert = stringAssert + actual.dimePosicionVehiculo() + ") (object " + longitudesEnTramos[i] + ") ) ) ";
+	 //System.out.println(actual.dimePosicionVehiculo());
+	  engine.executeCommand(stringAssert);
+      stringAssert = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo) (subject ";
+	 stringAssert = stringAssert + actual.dimePosicionVehiculo() + ") (object " + prefijo + tramos[i] + ") ) )";
+	  engine.executeCommand(stringAssert);	
+	 } 
+	engine.run();
+	String[] estados = new String[tramos.length];
+	for (int i=0; i<idVehiculos.length ; i++)
+	{estados[i]="Normal";
+	 	String identificador = prefijo + idVehiculos[i];
+	 // assert posicion
+	 ValueVector vector2 = new ValueVector();
+		vector2.add(new Value("http://www.isaatc.ull.es/Verdino.owl#tieneEstado", RU.ATOM));
+		vector2.add(new Value(identificador,RU.ATOM));
+        Iterator result2 =
+            engine.runQuery("buscaObjetosConSujeto", vector2);
+        String estado = " ";
+		while (result2.hasNext()) {
+			 Token t = (Token) result2.next();
+             Fact f = (Fact) t.fact(1);
+			estado = f.getSlotValue("object").stringValue(engine.getGlobalContext());
+			if(estado.equals("http://www.isaatc.ull.es/Verdino.owl#EnEspera"))
+			{//actual.fijaEstado("EnEspera");
+			 estados[i]="EnEspera";
+			  	
+			}
+		}	  
+	}
+		// quitar los hechos de espera
+engine.executeCommand(assertLimpiezaTramos);
+	engine.run();
+	
+	
+ return estados;
+}
+		
 	public void funcionamiento() throws JessException, java.io.IOException
 	{System.out.println("funcionamiento");
 	 Vector vectorVehiculos = new Vector();

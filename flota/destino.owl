@@ -11,32 +11,53 @@
     xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:swrla="http://swrl.stanford.edu/ontologies/3.3/swrla.owl#" > 
-  <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Rule-4">
-    <swrl:head rdf:nodeID="A0"/>
-    <swrl:body rdf:nodeID="A1"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Imp"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A2">
-    <rdf:first rdf:nodeID="A3"/>
-    <rdf:rest rdf:nodeID="A4"/>
+  <rdf:Description rdf:nodeID="A0">
+    <rdf:first rdf:nodeID="A1"/>
+    <rdf:rest rdf:nodeID="A2"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A3">
+    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaX"/>
+    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A4">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
+    <rdf:rest rdf:nodeID="A5"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A1">
+    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Rule-4">
+    <swrl:head rdf:nodeID="A6"/>
+    <swrl:body rdf:nodeID="A7"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Imp"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo_34">
     <estaEnLongitud rdf:datatype="http://www.w3.org/2001/XMLSchema#float">50.0</estaEnLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A5">
-    <rdf:first rdf:nodeID="A6"/>
-    <rdf:rest rdf:nodeID="A7"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
   <rdf:Description rdf:nodeID="A8">
-    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">300</rdf:first>
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneLongitud"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A9">
+    <rdf:rest rdf:nodeID="A10"/>
+    <rdf:first rdf:nodeID="A11"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Variable_5">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A12">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:nodeID="A13"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo11">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo21"/>
@@ -51,20 +72,26 @@
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo12"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Oposicion"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A14">
+    <rdf:first rdf:nodeID="A15"/>
+    <rdf:rest rdf:nodeID="A16"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo21">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo4"/>
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo3"/>
     <tieneLongitud>200.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A9">
-    <rdf:rest rdf:nodeID="A10"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#k"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  <rdf:Description rdf:nodeID="A17">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A11">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
-    <rdf:rest rdf:nodeID="A12"/>
+  <rdf:Description rdf:nodeID="A18">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">0</rdf:first>
     <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Prioridad2">
@@ -72,10 +99,10 @@
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo10"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A13">
-    <swrl:arguments rdf:nodeID="A14"/>
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
+  <rdf:Description rdf:nodeID="A19">
+    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaY"/>
+    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
@@ -83,15 +110,21 @@
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A4">
-    <rdf:first rdf:nodeID="A15"/>
-    <rdf:rest rdf:nodeID="A16"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  <rdf:Description rdf:nodeID="A20">
+    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A17">
-    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneRuta"/>
-    <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</owl:maxCardinality>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  <rdf:Description rdf:nodeID="A21">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A22">
+    <rdf:first rdf:nodeID="A23"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl">
     <owl:imports rdf:resource="http://sqwrl.stanford.edu/ontologies/built-ins/3.4/sqwrl.owl"/>
@@ -100,13 +133,19 @@
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Vehiculo">
     <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-    <rdfs:subClassOf rdf:nodeID="A17"/>
+    <rdfs:subClassOf rdf:nodeID="A24"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A7">
-    <rdf:first rdf:nodeID="A18"/>
-    <rdf:rest rdf:nodeID="A19"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  <rdf:Description rdf:nodeID="A11">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A5">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo12">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo15"/>
@@ -120,10 +159,11 @@
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#e">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A20">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
-    <rdf:rest rdf:nodeID="A8"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  <rdf:Description rdf:nodeID="A25">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#f"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#h"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneVelocidad"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaFinal">
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
@@ -131,19 +171,29 @@
     <rdfs:range rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A16">
+    <rdf:rest rdf:nodeID="A26"/>
+    <rdf:first rdf:nodeID="A27"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A28">
+    <rdf:rest rdf:nodeID="A18"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Prioridad1">
     <tieneTramoSecundario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo7"/>
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo9"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A21">
-    <rdf:rest rdf:nodeID="A11"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#TramoOrden_16">
     <tieneOrden rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</tieneOrden>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#TramoOrden"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A29">
+    <rdf:rest rdf:nodeID="A30"/>
+    <rdf:first rdf:nodeID="A17"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#TramoPintable">
     <rdfs:subClassOf rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
@@ -160,52 +210,72 @@
     <tienePosicionVehiculo rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo_2"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A14">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
-    <rdf:rest rdf:nodeID="A22"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_23">
     <tieneCoordenadaY rdf:datatype="http://www.w3.org/2001/XMLSchema#int">300</tieneCoordenadaY>
     <tieneCoordenadaX rdf:datatype="http://www.w3.org/2001/XMLSchema#int">300</tieneCoordenadaX>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A16">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:nodeID="A23"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  <rdf:Description rdf:nodeID="A31">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaInicial"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A32">
+    <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</owl:cardinality>
+    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneOrden"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Variable_3">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A24">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#EnEspera"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneEstado"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  <rdf:Description rdf:nodeID="A33">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">50</rdf:first>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A10">
+    <rdf:rest rdf:nodeID="A34"/>
+    <rdf:first rdf:nodeID="A35"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_33">
     <tieneCoordenadaX rdf:datatype="http://www.w3.org/2001/XMLSchema#int">30</tieneCoordenadaX>
     <tieneCoordenadaY rdf:datatype="http://www.w3.org/2001/XMLSchema#int">300</tieneCoordenadaY>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A25">
-    <rdf:rest rdf:nodeID="A26"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
+  <rdf:Description rdf:nodeID="A36">
+    <rdf:rest rdf:nodeID="A37"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
     <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A38">
+    <rdf:rest rdf:nodeID="A39"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A40">
+    <rdf:rest rdf:nodeID="A12"/>
+    <rdf:first rdf:nodeID="A25"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#f">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A41">
+    <rdf:rest rdf:nodeID="A42"/>
+    <rdf:first rdf:nodeID="A43"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A44">
+    <rdf:first rdf:nodeID="A8"/>
+    <rdf:rest rdf:nodeID="A45"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo23">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo21"/>
     <tieneLongitud>20.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A27">
-    <swrl:arguments rdf:nodeID="A21"/>
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Prioridad4">
     <tieneTramoSecundario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo23"/>
@@ -227,19 +297,30 @@
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A46">
+    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramo"/>
+    <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</owl:cardinality>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_22">
     <tieneCoordenadaY rdf:datatype="http://www.w3.org/2001/XMLSchema#int">100</tieneCoordenadaY>
     <tieneCoordenadaX rdf:datatype="http://www.w3.org/2001/XMLSchema#int">100</tieneCoordenadaX>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A23">
-    <swrl:arguments rdf:nodeID="A28"/>
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#greaterThan"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A29">
-    <rdf:first rdf:nodeID="A30"/>
+  <rdf:Description rdf:nodeID="A47">
     <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A48">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaFinal"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A2">
+    <rdf:first rdf:nodeID="A48"/>
+    <rdf:rest rdf:nodeID="A49"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Ruta_15">
@@ -253,23 +334,38 @@
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A31">
-    <rdf:first rdf:nodeID="A32"/>
-    <rdf:rest rdf:nodeID="A5"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  <rdf:Description rdf:nodeID="A50">
+    <rdf:rest rdf:nodeID="A33"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#k"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Variable_2">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A37">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#i"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_32">
     <tieneCoordenadaY rdf:datatype="http://www.w3.org/2001/XMLSchema#int">500</tieneCoordenadaY>
     <tieneCoordenadaX rdf:datatype="http://www.w3.org/2001/XMLSchema#int">200</tieneCoordenadaX>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A39">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_31">
     <tieneCoordenadaY rdf:datatype="http://www.w3.org/2001/XMLSchema#int">100</tieneCoordenadaY>
     <tieneCoordenadaX rdf:datatype="http://www.w3.org/2001/XMLSchema#int">100</tieneCoordenadaX>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A51">
+    <rdf:first rdf:nodeID="A52"/>
+    <rdf:rest rdf:nodeID="A53"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo10">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo21"/>
@@ -282,52 +378,68 @@
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo12"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Oposicion"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A3">
-    <swrl:arguments rdf:nodeID="A25"/>
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#g">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A33">
-    <rdf:rest rdf:nodeID="A34"/>
-    <rdf:first rdf:nodeID="A27"/>
+  <rdf:Description rdf:nodeID="A30">
+    <rdf:first rdf:nodeID="A21"/>
+    <rdf:rest rdf:nodeID="A44"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A45">
+    <rdf:first rdf:nodeID="A54"/>
+    <rdf:rest rdf:nodeID="A55"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A56">
+    <rdf:first rdf:nodeID="A57"/>
+    <rdf:rest rdf:nodeID="A41"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo24">
     <tieneLongitud>30.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A35">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  <rdf:Description rdf:nodeID="A58">
+    <swrl:arguments rdf:nodeID="A59"/>
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Prioridad3">
     <tieneTramoSecundario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo23"/>
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo10"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A36">
-    <rdf:rest rdf:nodeID="A37"/>
-    <rdf:first rdf:nodeID="A38"/>
+  <rdf:Description rdf:nodeID="A60">
+    <rdf:rest rdf:nodeID="A61"/>
+    <rdf:first rdf:nodeID="A62"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#y">
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+  <rdf:Description rdf:nodeID="A63">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneLongitud"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A39">
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
-    <swrl:arguments rdf:nodeID="A9"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A40">
+  <rdf:Description rdf:nodeID="A64">
     <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#h"/>
     <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
     <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramo"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#y">
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A65">
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A54">
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
+    <swrl:arguments rdf:nodeID="A66"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tieneTramo">
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#TramoOrden"/>
@@ -335,54 +447,66 @@
     <rdfs:range rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A67">
+    <rdf:rest rdf:nodeID="A68"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Vecindad">
     <rdfs:subClassOf rdf:resource="http://www.isaatc.ull.es/Verdino.owl#RelacionEntreTramos"/>
     <owl:disjointWith rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
     <owl:disjointWith rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Oposicion"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A41">
-    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden"/>
-    <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</owl:minCardinality>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A28">
-    <rdf:rest rdf:nodeID="A42"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_25">
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo">
     <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-    <rdfs:subClassOf rdf:nodeID="A43"/>
+    <rdfs:subClassOf rdf:nodeID="A69"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A44">
-    <swrl:arguments rdf:nodeID="A45"/>
+  <rdf:Description rdf:nodeID="A52">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A59">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
+    <rdf:rest rdf:nodeID="A70"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A71">
+    <swrl:arguments rdf:nodeID="A72"/>
     <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A73">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo0">
     <tieneLongitud>1.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A38">
+  <rdf:Description rdf:nodeID="A62">
     <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario"/>
     <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#o"/>
     <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#m"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A46">
-    <rdf:first rdf:nodeID="A47"/>
-    <rdf:rest rdf:nodeID="A48"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Prioridad6">
     <tieneTramoSecundario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo24"/>
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo21"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A42">
+    <rdf:first rdf:nodeID="A74"/>
+    <rdf:rest rdf:nodeID="A75"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo15">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo19"/>
@@ -390,41 +514,82 @@
     <tieneLongitud>150.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A43">
-    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
-    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneLongitud"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#h">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A34">
+    <rdf:rest rdf:nodeID="A76"/>
+    <rdf:first rdf:nodeID="A77"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Ruta_12">
     <tieneTramoOrden rdf:resource="http://www.isaatc.ull.es/Verdino.owl#TramoOrden_14"/>
     <tieneTramoOrden rdf:resource="http://www.isaatc.ull.es/Verdino.owl#TramoOrden_13"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Ruta"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A78">
+    <rdf:rest rdf:nodeID="A79"/>
+    <rdf:first rdf:nodeID="A80"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A81">
+    <rdf:first rdf:nodeID="A58"/>
+    <rdf:rest rdf:nodeID="A82"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A83">
+    <swrl:arguments rdf:nodeID="A84"/>
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A85">
+    <rdf:first rdf:nodeID="A86"/>
+    <rdf:rest rdf:nodeID="A51"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A66">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
+    <rdf:rest rdf:nodeID="A38"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A87">
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A68">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
+    <rdf:rest rdf:nodeID="A47"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A88">
+    <rdf:rest rdf:nodeID="A89"/>
+    <rdf:first rdf:nodeID="A65"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A55">
+    <rdf:first rdf:nodeID="A90"/>
+    <rdf:rest rdf:nodeID="A91"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A70">
+    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">300</rdf:first>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
   <rdf:Description rdf:nodeID="A49">
-    <rdf:rest rdf:nodeID="A50"/>
-    <rdf:first rdf:nodeID="A51"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A52">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
     <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A53">
-    <rdf:rest rdf:nodeID="A54"/>
-    <rdf:first rdf:nodeID="A39"/>
+    <rdf:first rdf:nodeID="A31"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A42">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">0</rdf:first>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#x">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A92">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">50</rdf:first>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
@@ -432,14 +597,19 @@
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#RelacionEntreTramos"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A48">
-    <rdf:first rdf:nodeID="A55"/>
-    <rdf:rest rdf:nodeID="A56"/>
+  <rdf:Description rdf:nodeID="A93">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
+    <rdf:rest rdf:nodeID="A92"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A94">
+    <rdf:rest rdf:nodeID="A95"/>
+    <rdf:first rdf:nodeID="A96"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A37">
-    <rdf:first rdf:nodeID="A57"/>
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+  <rdf:Description rdf:nodeID="A97">
+    <rdf:first rdf:nodeID="A98"/>
+    <rdf:rest rdf:nodeID="A85"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#i">
@@ -457,27 +627,64 @@
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo16"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A58">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  <rdf:Description rdf:nodeID="A43">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
+    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A51">
+  <rdf:Description rdf:nodeID="A61">
+    <rdf:first rdf:nodeID="A99"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A77">
     <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden"/>
     <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
     <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#h"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A26">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
-    <rdf:rest rdf:nodeID="A52"/>
+  <rdf:Description rdf:nodeID="A100">
+    <rdf:first rdf:nodeID="A101"/>
+    <rdf:rest rdf:nodeID="A81"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A102">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">0</rdf:first>
     <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A19">
-    <rdf:first rdf:nodeID="A59"/>
-    <rdf:rest rdf:nodeID="A60"/>
+  <rdf:Description rdf:nodeID="A103">
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#EnEspera"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneEstado"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A104">
+    <rdf:rest rdf:nodeID="A56"/>
+    <rdf:first rdf:nodeID="A105"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A91">
+    <rdf:first rdf:nodeID="A106"/>
+    <rdf:rest rdf:nodeID="A107"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A108">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#f"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A109">
+    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A110">
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#f"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tieneRuta">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
@@ -485,22 +692,22 @@
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A61">
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#f"/>
+  <rdf:Description rdf:nodeID="A98">
     <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A62">
-    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#TramoPintable"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Rule-2">
-    <swrl:body rdf:nodeID="A31"/>
+    <swrl:body rdf:nodeID="A111"/>
     <swrla:isRuleEnabled rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</swrla:isRuleEnabled>
-    <swrl:head rdf:nodeID="A63"/>
+    <swrl:head rdf:nodeID="A112"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Imp"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A101">
+    <swrl:arguments rdf:nodeID="A113"/>
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo">
     <rdfs:range rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
@@ -508,41 +715,82 @@
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A57">
+  <rdf:Description rdf:nodeID="A99">
     <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#o"/>
     <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
     <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A15">
-    <swrl:arguments rdf:nodeID="A20"/>
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#j">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A114">
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Rule-1">
-    <swrl:head rdf:nodeID="A64"/>
-    <swrl:body rdf:nodeID="A65"/>
+    <swrl:head rdf:nodeID="A22"/>
+    <swrl:body rdf:nodeID="A0"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Imp"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A56">
-    <rdf:first rdf:nodeID="A66"/>
-    <rdf:rest rdf:nodeID="A67"/>
+  <rdf:Description rdf:nodeID="A111">
+    <rdf:first rdf:nodeID="A20"/>
+    <rdf:rest rdf:nodeID="A97"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A68">
-    <rdf:rest rdf:nodeID="A69"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#k"/>
+  <rdf:Description rdf:nodeID="A115">
+    <owl:someValuesFrom rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
+    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A79">
+    <rdf:first rdf:nodeID="A116"/>
+    <rdf:rest rdf:nodeID="A29"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A117">
+    <swrl:arguments rdf:nodeID="A28"/>
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#greaterThan"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A118">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#h"/>
+    <rdf:rest rdf:nodeID="A102"/>
     <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A27">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
+    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo13">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo14"/>
     <tieneLongitud>350.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A70">
+  <rdf:Description rdf:nodeID="A119">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#f"/>
+    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A107">
+    <rdf:first rdf:nodeID="A110"/>
+    <rdf:rest rdf:nodeID="A9"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A105">
+    <swrl:arguments rdf:nodeID="A67"/>
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A120">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">50</rdf:first>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A121">
     <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneOrden"/>
     <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#h"/>
     <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#i"/>
@@ -552,38 +800,64 @@
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Rule-3">
-    <swrl:body rdf:nodeID="A71"/>
-    <swrl:head rdf:nodeID="A29"/>
+    <swrl:body rdf:nodeID="A78"/>
+    <swrl:head rdf:nodeID="A122"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Imp"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A86">
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A113">
+    <rdf:rest rdf:nodeID="A4"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_26">
     <tieneCoordenadaY rdf:datatype="http://www.w3.org/2001/XMLSchema#int">500</tieneCoordenadaY>
     <tieneCoordenadaX rdf:datatype="http://www.w3.org/2001/XMLSchema#int">300</tieneCoordenadaX>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A7">
+    <rdf:rest rdf:nodeID="A88"/>
+    <rdf:first rdf:nodeID="A109"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#k">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A123">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#o"/>
+    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Oposicion"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Prioridad7">
     <tieneTramoSecundario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo22"/>
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo21"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A72">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#o"/>
-    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Oposicion"/>
+  <rdf:Description rdf:nodeID="A80">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A73">
-    <rdf:first rdf:nodeID="A74"/>
-    <rdf:rest rdf:nodeID="A75"/>
+  <rdf:Description rdf:nodeID="A124">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#EnEspera"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneEstado"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A75">
+    <rdf:rest rdf:nodeID="A125"/>
+    <rdf:first rdf:nodeID="A114"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A76">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneRuta"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  <rdf:Description rdf:nodeID="A26">
+    <rdf:rest rdf:nodeID="A94"/>
+    <rdf:first rdf:nodeID="A73"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
@@ -591,26 +865,36 @@
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#RelacionEntreTramos"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A126">
+    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario"/>
+    <owl:someValuesFrom rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A82">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:nodeID="A117"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A13">
+    <swrl:arguments rdf:nodeID="A118"/>
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#greaterThan"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A35">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneRuta"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo14">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo15"/>
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo11"/>
     <tieneLongitud>350.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A77">
-    <rdf:first rdf:nodeID="A78"/>
-    <rdf:rest rdf:nodeID="A79"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A80">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A81">
-    <swrl:arguments rdf:nodeID="A68"/>
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
+  <rdf:Description rdf:nodeID="A127">
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#equal"/>
+    <swrl:arguments rdf:nodeID="A128"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaInicial">
@@ -619,16 +903,10 @@
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A82">
-    <rdf:first rdf:nodeID="A83"/>
-    <rdf:rest rdf:nodeID="A84"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A85">
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  <rdf:Description rdf:nodeID="A69">
+    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneLongitud"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria_8">
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
@@ -639,31 +917,16 @@
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A86">
-    <rdf:first rdf:nodeID="A87"/>
-    <rdf:rest rdf:nodeID="A88"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A89">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
+  <rdf:Description rdf:nodeID="A129">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#EnEspera"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneEstado"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A90">
-    <rdf:first rdf:nodeID="A35"/>
-    <rdf:rest rdf:nodeID="A91"/>
+  <rdf:Description rdf:nodeID="A130">
+    <rdf:first rdf:nodeID="A131"/>
+    <rdf:rest rdf:nodeID="A132"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A92">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A87">
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#equal"/>
-    <swrl:arguments rdf:nodeID="A93"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo4">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo9"/>
@@ -671,43 +934,35 @@
     <tieneLongitud>490.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A125">
+    <rdf:first rdf:nodeID="A119"/>
+    <rdf:rest rdf:nodeID="A133"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Verdino">
     <tienePosicionVehiculo rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo_34"/>
     <tieneAceleracion rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</tieneAceleracion>
     <tieneVelocidad rdf:datatype="http://www.w3.org/2001/XMLSchema#float">10.0</tieneVelocidad>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A94">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A64">
-    <rdf:first rdf:nodeID="A62"/>
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A95">
+  <rdf:Description rdf:nodeID="A90">
     <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
-    <swrl:arguments rdf:nodeID="A96"/>
+    <swrl:arguments rdf:nodeID="A134"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A97">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneLongitud"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
+  <rdf:Description rdf:nodeID="A135">
+    <rdf:first rdf:nodeID="A127"/>
+    <rdf:rest rdf:nodeID="A136"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A98">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  <rdf:Description rdf:nodeID="A137">
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
+    <swrl:arguments rdf:nodeID="A50"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A79">
-    <rdf:first rdf:nodeID="A99"/>
-    <rdf:rest rdf:nodeID="A100"/>
+  <rdf:Description rdf:nodeID="A138">
+    <rdf:first rdf:nodeID="A83"/>
+    <rdf:rest rdf:nodeID="A139"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_29">
@@ -715,30 +970,21 @@
     <tieneCoordenadaX rdf:datatype="http://www.w3.org/2001/XMLSchema#int">300</tieneCoordenadaX>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A101">
-    <rdf:rest rdf:nodeID="A102"/>
-    <rdf:first rdf:nodeID="A103"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A104">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">0</rdf:first>
+  <rdf:Description rdf:nodeID="A128">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#n"/>
+    <rdf:rest rdf:nodeID="A140"/>
     <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A105">
-    <rdf:rest rdf:nodeID="A92"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  <rdf:Description rdf:nodeID="A96">
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A106">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
-    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A107">
-    <rdf:first rdf:nodeID="A108"/>
-    <rdf:rest rdf:nodeID="A109"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  <rdf:Description rdf:nodeID="A141">
+    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden"/>
+    <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</owl:minCardinality>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#m">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
@@ -747,40 +993,40 @@
     <tieneLongitud>290.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A112">
+    <rdf:first rdf:nodeID="A124"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A132">
+    <rdf:first rdf:nodeID="A142"/>
+    <rdf:rest rdf:nodeID="A143"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A133">
+    <rdf:first rdf:nodeID="A108"/>
+    <rdf:rest rdf:nodeID="A144"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo19">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo20"/>
     <tieneLongitud>350.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A93">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#n"/>
-    <rdf:rest rdf:nodeID="A110"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A110">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</rdf:first>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A111">
-    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A112">
-    <rdf:rest rdf:nodeID="A73"/>
-    <rdf:first rdf:nodeID="A85"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A113">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#i"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A114">
+  <rdf:Description rdf:nodeID="A106">
     <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
     <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#f"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A139">
+    <rdf:rest rdf:nodeID="A40"/>
+    <rdf:first rdf:nodeID="A137"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A145">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#i"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria">
     <owl:disjointWith rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vecindad"/>
@@ -788,46 +1034,35 @@
     <rdfs:subClassOf rdf:resource="http://www.isaatc.ull.es/Verdino.owl#RelacionEntreTramos"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A100">
-    <rdf:rest rdf:nodeID="A115"/>
-    <rdf:first rdf:nodeID="A116"/>
+  <rdf:Description rdf:nodeID="A146">
+    <rdf:first rdf:nodeID="A63"/>
+    <rdf:rest rdf:nodeID="A138"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A66">
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A117">
-    <rdf:rest rdf:nodeID="A118"/>
-    <rdf:first rdf:nodeID="A98"/>
+  <rdf:Description rdf:nodeID="A122">
+    <rdf:first rdf:nodeID="A103"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A119">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#h"/>
-    <rdf:rest rdf:nodeID="A104"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  <rdf:Description rdf:nodeID="A95">
+    <rdf:rest rdf:nodeID="A100"/>
+    <rdf:first rdf:nodeID="A147"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Oposicion7">
     <tieneTramoSecundario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo17"/>
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo15"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Oposicion"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A32">
-    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A50">
-    <rdf:first rdf:nodeID="A70"/>
-    <rdf:rest rdf:nodeID="A120"/>
+  <rdf:Description rdf:nodeID="A144">
+    <rdf:first rdf:nodeID="A87"/>
+    <rdf:rest rdf:nodeID="A148"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A121">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
-    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+  <rdf:Description rdf:nodeID="A76">
+    <rdf:first rdf:nodeID="A121"/>
+    <rdf:rest rdf:nodeID="A149"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaX">
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
@@ -835,21 +1070,25 @@
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A108">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
+  <rdf:Description rdf:nodeID="A140">
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</rdf:first>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A122">
-    <owl:someValuesFrom rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
-    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  <rdf:Description rdf:nodeID="A84">
+    <rdf:rest rdf:nodeID="A36"/>
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#k"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo2">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo23"/>
     <tieneLongitud>200.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A57">
+    <swrl:arguments rdf:nodeID="A93"/>
+    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo18">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo12"/>
@@ -859,63 +1098,49 @@
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#n">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A109">
-    <rdf:first rdf:nodeID="A123"/>
-    <rdf:rest rdf:nodeID="A124"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A125">
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#e"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A126">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#k"/>
-    <rdf:rest rdf:nodeID="A113"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A127">
-    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A83">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaFinal"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+  <rdf:Description rdf:nodeID="A150">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
     <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A99">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#k"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneOrden"/>
+  <rdf:Description rdf:nodeID="A151">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneLongitud"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#EnEspera">
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Estado"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A55">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#f"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
+  <rdf:Description rdf:nodeID="A152">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#i"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A153">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#k"/>
+    <rdf:rest rdf:nodeID="A145"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica">
     <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-    <rdfs:subClassOf rdf:nodeID="A128"/>
-    <rdfs:subClassOf rdf:nodeID="A129"/>
+    <rdfs:subClassOf rdf:nodeID="A3"/>
+    <rdfs:subClassOf rdf:nodeID="A19"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A130">
-    <swrl:arguments rdf:nodeID="A119"/>
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#greaterThan"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
+  <rdf:Description rdf:nodeID="A147">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A96">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
-    <rdf:rest rdf:nodeID="A131"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  <rdf:Description rdf:nodeID="A142">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#k"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneOrden"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaY">
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica"/>
@@ -923,60 +1148,34 @@
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A132">
-    <rdf:rest rdf:nodeID="A101"/>
-    <rdf:first rdf:nodeID="A80"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A65">
-    <rdf:first rdf:nodeID="A111"/>
-    <rdf:rest rdf:nodeID="A82"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A120">
-    <rdf:first rdf:nodeID="A40"/>
-    <rdf:rest rdf:nodeID="A77"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A133">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaInicial"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A124">
-    <rdf:first rdf:nodeID="A134"/>
-    <rdf:rest rdf:nodeID="A135"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A136">
-    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario"/>
-    <owl:someValuesFrom rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A123">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneLongitud"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Oposicion">
     <rdfs:subClassOf rdf:resource="http://www.isaatc.ull.es/Verdino.owl#RelacionEntreTramos"/>
     <owl:disjointWith rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
     <owl:disjointWith rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vecindad"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
   </rdf:Description>
+  <rdf:Description rdf:nodeID="A149">
+    <rdf:first rdf:nodeID="A64"/>
+    <rdf:rest rdf:nodeID="A130"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Ruta">
-    <rdfs:subClassOf rdf:nodeID="A41"/>
+    <rdfs:subClassOf rdf:nodeID="A141"/>
     <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A74">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#o">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A91">
-    <rdf:rest rdf:nodeID="A46"/>
-    <rdf:first rdf:nodeID="A125"/>
+  <rdf:Description rdf:nodeID="A6">
+    <rdf:first rdf:nodeID="A129"/>
+    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo1">
@@ -991,48 +1190,37 @@
     <tieneLongitud>390.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A1">
-    <rdf:rest rdf:nodeID="A112"/>
-    <rdf:first rdf:nodeID="A127"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  <rdf:Description rdf:nodeID="A134">
+    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
+    <rdf:rest rdf:nodeID="A120"/>
+    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A45">
-    <rdf:rest rdf:nodeID="A126"/>
+  <rdf:Description rdf:nodeID="A72">
+    <rdf:rest rdf:nodeID="A153"/>
     <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#n"/>
     <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="A53">
+    <rdf:rest rdf:nodeID="A104"/>
+    <rdf:first rdf:nodeID="A151"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A78">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A47">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#f"/>
-    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A118">
-    <rdf:rest rdf:nodeID="A49"/>
-    <rdf:first rdf:nodeID="A76"/>
+  <rdf:Description rdf:nodeID="A89">
+    <rdf:first rdf:nodeID="A150"/>
+    <rdf:rest rdf:nodeID="A14"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A131">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">50</rdf:first>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A137">
-    <rdf:first rdf:nodeID="A97"/>
-    <rdf:rest rdf:nodeID="A138"/>
+  <rdf:Description rdf:nodeID="A148">
+    <rdf:rest rdf:nodeID="A146"/>
+    <rdf:first rdf:nodeID="A152"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A84">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:nodeID="A133"/>
+  <rdf:Description rdf:nodeID="A154">
+    <rdf:rest rdf:nodeID="A135"/>
+    <rdf:first rdf:nodeID="A71"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo_10">
@@ -1044,83 +1232,30 @@
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo15"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Oposicion"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A135">
-    <rdf:first rdf:nodeID="A95"/>
-    <rdf:rest rdf:nodeID="A139"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A18">
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
+  <rdf:Description rdf:nodeID="A131">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#c">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A75">
-    <rdf:first rdf:nodeID="A94"/>
-    <rdf:rest rdf:nodeID="A140"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A12">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A141">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:nodeID="A130"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A63">
-    <rdf:first rdf:nodeID="A24"/>
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A103">
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo8">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo10"/>
     <tieneLongitud>200.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A128">
-    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaX"/>
-    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A30">
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#EnEspera"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneEstado"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A138">
-    <rdf:first rdf:nodeID="A81"/>
-    <rdf:rest rdf:nodeID="A53"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A142">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#f"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#h"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneVelocidad"/>
+  <rdf:Description rdf:nodeID="A15">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Prioridad0">
     <tieneTramoSecundario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo25"/>
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo21"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A6">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Oposicion6">
     <tieneTramoSecundario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo18"/>
@@ -1129,17 +1264,6 @@
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#b">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A140">
-    <rdf:rest rdf:nodeID="A132"/>
-    <rdf:first rdf:nodeID="A121"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A143">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#EnEspera"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneEstado"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo9">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo8"/>
@@ -1151,9 +1275,9 @@
     <tieneLongitud>290.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A129">
-    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaY"/>
-    <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  <rdf:Description rdf:nodeID="A24">
+    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneRuta"/>
+    <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</owl:maxCardinality>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionVehiculo_12">
@@ -1164,11 +1288,6 @@
     <rdfs:range rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Estado"/>
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A71">
-    <rdf:rest rdf:nodeID="A144"/>
-    <rdf:first rdf:nodeID="A145"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tieneOrden">
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
@@ -1182,45 +1301,20 @@
     <tieneVelocidad rdf:datatype="http://www.w3.org/2001/XMLSchema#float">1.0</tieneVelocidad>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A22">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">50</rdf:first>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#TramoOrden_13">
     <tieneOrden rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</tieneOrden>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#TramoOrden"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A54">
-    <rdf:rest rdf:nodeID="A141"/>
-    <rdf:first rdf:nodeID="A142"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A146">
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
-    <rdf:rest rdf:nodeID="A105"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A147">
-    <rdf:rest rdf:nodeID="A90"/>
-    <rdf:first rdf:nodeID="A106"/>
+  <rdf:Description rdf:nodeID="A143">
+    <rdf:rest rdf:nodeID="A154"/>
+    <rdf:first rdf:nodeID="A155"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#RelacionEntreTramos">
     <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-    <rdfs:subClassOf rdf:nodeID="A136"/>
-    <rdfs:subClassOf rdf:nodeID="A122"/>
+    <rdfs:subClassOf rdf:nodeID="A126"/>
+    <rdfs:subClassOf rdf:nodeID="A115"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A60">
-    <rdf:rest rdf:nodeID="A33"/>
-    <rdf:first rdf:nodeID="A148"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A67">
-    <rdf:rest rdf:nodeID="A137"/>
-    <rdf:first rdf:nodeID="A149"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#a">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
@@ -1233,24 +1327,8 @@
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo16"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Oposicion"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A150">
-    <rdf:first rdf:nodeID="A61"/>
-    <rdf:rest rdf:nodeID="A117"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Variable_7">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A116">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramo"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#m"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A0">
-    <rdf:first rdf:nodeID="A143"/>
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tieneSucesor">
     <rdfs:range rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
@@ -1258,10 +1336,11 @@
     <owl:inverseOf rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePredecesor"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A145">
+  <rdf:Description rdf:nodeID="A116">
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo"/>
     <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
-    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#tieneVelocidad">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
@@ -1269,26 +1348,10 @@
     <rdfs:domain rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A151">
-    <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</owl:cardinality>
-    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneOrden"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A69">
-    <rdf:rest rdf:nodeID="A152"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo6">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo7"/>
     <tieneLongitud>250.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A153">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#d"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#b"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_30">
     <tieneCoordenadaY rdf:datatype="http://www.w3.org/2001/XMLSchema#int">300</tieneCoordenadaY>
@@ -1304,12 +1367,6 @@
     <owl:inverseOf rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneSucesor"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A59">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#z"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo5">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo6"/>
     <tieneLongitud>290.0</tieneLongitud>
@@ -1321,103 +1378,46 @@
     <tieneAceleracion rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</tieneAceleracion>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Vehiculo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A154">
-    <rdf:rest rdf:nodeID="A107"/>
-    <rdf:first rdf:nodeID="A89"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A10">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int">50</rdf:first>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Tramo20">
     <tieneSucesor rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo16"/>
     <tieneLongitud>350.0</tieneLongitud>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A134">
-    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
-    <swrl:arguments rdf:nodeID="A146"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#BuiltinAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A88">
-    <rdf:first rdf:nodeID="A72"/>
-    <rdf:rest rdf:nodeID="A36"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
+  <rdf:Description rdf:nodeID="A155">
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#j"/>
+    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramo"/>
+    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#m"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#TramoOrden_14">
     <tieneOrden rdf:datatype="http://www.w3.org/2001/XMLSchema#int">2</tieneOrden>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#TramoOrden"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A149">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#g"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#i"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A148">
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneLongitud"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#a"/>
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A34">
-    <rdf:first rdf:nodeID="A13"/>
-    <rdf:rest rdf:nodeID="A147"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Variable_6">
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#Variable"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A139">
-    <rdf:first rdf:nodeID="A114"/>
-    <rdf:rest rdf:nodeID="A150"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Oposicion4">
     <tieneTramoSecundario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo19"/>
     <tieneTramoPrioritario rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Tramo15"/>
     <rdf:type rdf:resource="http://www.isaatc.ull.es/Verdino.owl#Oposicion"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A115">
-    <rdf:rest rdf:nodeID="A86"/>
-    <rdf:first rdf:nodeID="A44"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#Estado">
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A144">
-    <rdf:first rdf:nodeID="A58"/>
-    <rdf:rest rdf:nodeID="A154"/>
+  <rdf:Description rdf:nodeID="A136">
+    <rdf:first rdf:nodeID="A123"/>
+    <rdf:rest rdf:nodeID="A60"/>
     <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A102">
-    <rdf:rest rdf:nodeID="A2"/>
-    <rdf:first rdf:nodeID="A153"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#AtomList"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A152">
-    <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-    <rdf:first rdf:resource="http://www.isaatc.ull.es/Verdino.owl#i"/>
-    <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"/>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.isaatc.ull.es/Verdino.owl#TramoOrden">
-    <rdfs:subClassOf rdf:nodeID="A151"/>
-    <rdfs:subClassOf rdf:nodeID="A155"/>
+    <rdfs:subClassOf rdf:nodeID="A32"/>
+    <rdfs:subClassOf rdf:nodeID="A46"/>
     <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Class"/>
   </rdf:Description>
-  <rdf:Description rdf:nodeID="A74">
-    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#c"/>
-    <swrl:argument2 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#y"/>
-    <swrl:propertyPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#estaEnTramo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#IndividualPropertyAtom"/>
-  </rdf:Description>
-  <rdf:Description rdf:nodeID="A155">
-    <owl:onProperty rdf:resource="http://www.isaatc.ull.es/Verdino.owl#tieneTramo"/>
-    <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</owl:cardinality>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#Restriction"/>
+  <rdf:Description rdf:nodeID="A23">
+    <swrl:classPredicate rdf:resource="http://www.isaatc.ull.es/Verdino.owl#TramoPintable"/>
+    <swrl:argument1 rdf:resource="http://www.isaatc.ull.es/Verdino.owl#x"/>
+    <rdf:type rdf:resource="http://www.w3.org/2003/11/swrl#ClassAtom"/>
   </rdf:Description>
 </rdf:RDF>

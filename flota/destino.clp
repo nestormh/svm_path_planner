@@ -1264,15 +1264,15 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   http://www.isaatc.ull.es/Verdino.owl#Rule-4)
+    (subject   #N65551)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   http://www.isaatc.ull.es/Verdino.owl#Rule-4)
-   (object    http://www.w3.org/2003/11/swrl#Imp)
+   (subject   #N65551)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -1286,9 +1286,97 @@
 )
 (assert
   (triple
+   (predicate http://www.w3.org/2002/07/owl#onProperty)
+   (subject   #N65564)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaX)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
+   (subject   #N65564)
+   (object    http://www.w3.org/2001/XMLSchema#int)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   #N65564)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (object    http://www.w3.org/2002/07/owl#Restriction)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N65577)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N65577)
+   (object    http://www.isaatc.ull.es/Verdino.owl#d)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N65577)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N65590)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
+   (subject   #N65590)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Tramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N65590)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N65590)
+   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   http://www.isaatc.ull.es/Verdino.owl#Rule-4)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   http://www.isaatc.ull.es/Verdino.owl#Rule-4)
+   (object    http://www.w3.org/2003/11/swrl#Imp)
   )
 )
   
@@ -1320,15 +1408,39 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65588)
+    (subject   #N65627)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N65627)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N65627)
+   (object    http://www.isaatc.ull.es/Verdino.owl#a)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N65627)
+   (object    http://www.isaatc.ull.es/Verdino.owl#y)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65588)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (subject   #N65627)
+   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
   )
 )
   
@@ -1336,31 +1448,15 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65601)
+    (subject   #N65643)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N65601)
-   (object    300)
-  )
-)  
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N65601)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65601)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+   (subject   #N65643)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -1377,6 +1473,30 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Variable_5)
    (object    http://www.w3.org/2003/11/swrl#Variable)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N65663)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N65663)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N65663)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -1464,6 +1584,22 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N65709)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N65709)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Tramo21)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -1504,23 +1640,39 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65671)
+    (subject   #N65738)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N65671)
-   (object    http://www.isaatc.ull.es/Verdino.owl#k)
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N65738)
+   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N65738)
+   (object    http://www.isaatc.ull.es/Verdino.owl#y)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N65738)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65671)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+   (subject   #N65738)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -1528,22 +1680,30 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65684)
+    (subject   #N65754)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N65684)
-   (object    http://www.isaatc.ull.es/Verdino.owl#a)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N65754)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
   )
 )
   
 (assert
   (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N65754)
+   (object    0)
+  )
+)  
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65684)
+   (subject   #N65754)
    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
@@ -1584,23 +1744,31 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65710)
+    (subject   #N65781)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N65710)
-   (object    http://www.w3.org/2003/11/swrlb#lessThanOrEqual)
+   (predicate http://www.w3.org/2002/07/owl#onProperty)
+   (subject   #N65781)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaY)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
+   (subject   #N65781)
+   (object    http://www.w3.org/2001/XMLSchema#int)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65710)
-   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
+   (subject   #N65781)
+   (object    http://www.w3.org/2002/07/owl#Restriction)
   )
 )
   
@@ -1648,15 +1816,31 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65739)
+    (subject   #N65810)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
+   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
+   (subject   #N65810)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N65810)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65739)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (subject   #N65810)
+   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
   )
 )
   
@@ -1664,31 +1848,63 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65752)
+    (subject   #N65823)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2002/07/owl#onProperty)
-   (subject   #N65752)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N65823)
+   (object    http://www.isaatc.ull.es/Verdino.owl#c)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/2002/07/owl#maxCardinality)
-   (subject   #N65752)
-   (object    1)
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N65823)
+   (object    http://www.isaatc.ull.es/Verdino.owl#z)
   )
-)  
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N65823)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
+  )
+)
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65752)
-   (object    http://www.w3.org/2002/07/owl#Restriction)
+   (subject   #N65823)
+   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N65839)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N65839)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N65839)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -1752,15 +1968,71 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65792)
+    (subject   #N65878)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N65878)
+   (object    http://www.isaatc.ull.es/Verdino.owl#g)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N65878)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N65878)
+   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65792)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (subject   #N65878)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N65894)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N65894)
+   (object    http://www.isaatc.ull.es/Verdino.owl#z)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N65894)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N65894)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -1840,23 +2112,39 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65835)
+    (subject   #N65937)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N65835)
-   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N65937)
+   (object    http://www.isaatc.ull.es/Verdino.owl#f)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N65937)
+   (object    http://www.isaatc.ull.es/Verdino.owl#h)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N65937)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneVelocidad)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65835)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+   (subject   #N65937)
+   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
   )
 )
   
@@ -1904,6 +2192,46 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N65969)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N65969)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N65982)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N65982)
+   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N65982)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Prioridad1)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -1936,30 +2264,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65877)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N65877)
-   (object    http://www.isaatc.ull.es/Verdino.owl#b)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65877)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#TramoOrden_16)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -1977,6 +2281,22 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#TramoOrden_16)
    (object    http://www.isaatc.ull.es/Verdino.owl#TramoOrden)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66019)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66019)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -2080,30 +2400,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65942)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N65942)
-   (object    http://www.isaatc.ull.es/Verdino.owl#b)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65942)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_23)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -2136,23 +2432,71 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65970)
+    (subject   #N66088)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N65970)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N66088)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaInicial)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N66088)
+   (object    http://www.isaatc.ull.es/Verdino.owl#z)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N66088)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65970)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (subject   #N66088)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66104)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#cardinality)
+   (subject   #N66104)
+   (object    1)
+  )
+)  
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#onProperty)
+   (subject   #N66104)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66104)
+   (object    http://www.w3.org/2002/07/owl#Restriction)
   )
 )
   
@@ -2176,39 +2520,47 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N65990)
+    (subject   #N66125)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N65990)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N66125)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N65990)
-   (object    http://www.isaatc.ull.es/Verdino.owl#EnEspera)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66125)
+   (object    50)
   )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N65990)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
-  )
-)
+)  
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N65990)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+   (subject   #N66125)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66139)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66139)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -2248,23 +2600,63 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66021)
+    (subject   #N66167)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N66021)
-   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+   (subject   #N66167)
+   (object    http://www.isaatc.ull.es/Verdino.owl#j)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66021)
+   (subject   #N66167)
    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66180)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66180)
+   (object    http://www.isaatc.ull.es/Verdino.owl#a)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66180)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66193)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66193)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -2281,6 +2673,38 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#f)
    (object    http://www.w3.org/2003/11/swrl#Variable)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66213)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66213)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66226)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66226)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -2313,30 +2737,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Tramo23)
    (object    http://www.isaatc.ull.es/Verdino.owl#Tramo)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66054)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N66054)
-   (object    http://www.w3.org/2003/11/swrlb#subtract)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66054)
-   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
   
@@ -2472,6 +2872,38 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66305)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#onProperty)
+   (subject   #N66305)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#cardinality)
+   (subject   #N66305)
+   (object    1)
+  )
+)  
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66305)
+   (object    http://www.w3.org/2002/07/owl#Restriction)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_22)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -2504,23 +2936,31 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66135)
+    (subject   #N66334)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N66135)
-   (object    http://www.w3.org/2003/11/swrlb#greaterThan)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N66334)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66334)
+   (object    http://www.isaatc.ull.es/Verdino.owl#z)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66135)
-   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
+   (subject   #N66334)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -2528,22 +2968,54 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66148)
+    (subject   #N66347)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N66148)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N66347)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaFinal)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N66347)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N66347)
+   (object    http://www.isaatc.ull.es/Verdino.owl#y)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66148)
+   (subject   #N66347)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66363)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66363)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -2624,15 +3096,23 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66190)
+    (subject   #N66405)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66405)
+   (object    http://www.isaatc.ull.es/Verdino.owl#k)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66190)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (subject   #N66405)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -2649,6 +3129,38 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Variable_2)
    (object    http://www.w3.org/2003/11/swrl#Variable)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66425)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N66425)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66425)
+   (object    http://www.isaatc.ull.es/Verdino.owl#i)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66425)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -2688,6 +3200,38 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66453)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66453)
+   (object    http://www.isaatc.ull.es/Verdino.owl#z)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N66453)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66453)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_31)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -2713,6 +3257,22 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_31)
    (object    http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66481)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66481)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -2792,30 +3352,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66269)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N66269)
-   (object    http://www.w3.org/2003/11/swrlb#subtract)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66269)
-   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#g)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -2832,14 +3368,46 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66289)
+    (subject   #N66530)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66289)
+   (subject   #N66530)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66543)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66543)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66556)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66556)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -2872,39 +3440,23 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66312)
+    (subject   #N66579)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N66312)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N66312)
-   (object    http://www.isaatc.ull.es/Verdino.owl#y)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N66312)
-   (object    http://www.isaatc.ull.es/Verdino.owl#d)
+   (predicate http://www.w3.org/2003/11/swrl#builtin)
+   (subject   #N66579)
+   (object    http://www.w3.org/2003/11/swrlb#lessThanOrEqual)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66312)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+   (subject   #N66579)
+   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
   
@@ -2944,15 +3496,95 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66341)
+    (subject   #N66605)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66341)
+   (subject   #N66605)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66618)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N66618)
+   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N66618)
+   (object    http://www.isaatc.ull.es/Verdino.owl#j)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N66618)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66618)
+   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66634)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N66634)
+   (object    http://www.isaatc.ull.es/Verdino.owl#h)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N66634)
+   (object    http://www.isaatc.ull.es/Verdino.owl#y)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N66634)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66634)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -2976,23 +3608,39 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66361)
+    (subject   #N66657)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N66361)
-   (object    http://www.w3.org/2003/11/swrlb#lessThanOrEqual)
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N66657)
+   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N66657)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N66657)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66361)
-   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
+   (subject   #N66657)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -3000,39 +3648,23 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66374)
+    (subject   #N66673)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N66374)
-   (object    http://www.isaatc.ull.es/Verdino.owl#h)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N66374)
-   (object    http://www.isaatc.ull.es/Verdino.owl#y)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N66374)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramo)
+   (predicate http://www.w3.org/2003/11/swrl#builtin)
+   (subject   #N66673)
+   (object    http://www.w3.org/2003/11/swrlb#subtract)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66374)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+   (subject   #N66673)
+   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
   
@@ -3080,6 +3712,30 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66702)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66702)
+   (object    http://www.isaatc.ull.es/Verdino.owl#b)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66702)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Vecindad)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -3113,62 +3769,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Vecindad)
    (object    http://www.w3.org/2002/07/owl#Class)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66422)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#onProperty)
-   (subject   #N66422)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#minCardinality)
-   (subject   #N66422)
-   (object    1)
-  )
-)  
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66422)
-   (object    http://www.w3.org/2002/07/owl#Restriction)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66436)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N66436)
-   (object    http://www.isaatc.ull.es/Verdino.owl#e)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66436)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -3216,14 +3816,78 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66469)
+    (subject   #N66751)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N66751)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N66751)
+   (object    http://www.isaatc.ull.es/Verdino.owl#z)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N66751)
+   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66751)
+   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66767)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66767)
+   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66767)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66780)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N66469)
+   (subject   #N66780)
    (object    http://www.w3.org/2003/11/swrlb#subtract)
   )
 )
@@ -3231,8 +3895,48 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66469)
+   (subject   #N66780)
    (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66793)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N66793)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N66793)
+   (object    http://www.isaatc.ull.es/Verdino.owl#b)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N66793)
+   (object    http://www.isaatc.ull.es/Verdino.owl#a)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66793)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -3264,14 +3968,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66492)
+    (subject   #N66819)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N66492)
+   (subject   #N66819)
    (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario)
   )
 )
@@ -3279,7 +3983,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N66492)
+   (subject   #N66819)
    (object    http://www.isaatc.ull.es/Verdino.owl#o)
   )
 )
@@ -3287,7 +3991,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N66492)
+   (subject   #N66819)
    (object    http://www.isaatc.ull.es/Verdino.owl#m)
   )
 )
@@ -3295,24 +3999,8 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66492)
+   (subject   #N66819)
    (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66508)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66508)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -3345,6 +4033,22 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Prioridad6)
    (object    http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66848)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66848)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -3392,38 +4096,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66550)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
-   (subject   #N66550)
-   (object    http://www.w3.org/2001/XMLSchema#float)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#onProperty)
-   (subject   #N66550)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66550)
-   (object    http://www.w3.org/2002/07/owl#Restriction)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#h)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -3433,6 +4105,22 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#h)
    (object    http://www.w3.org/2003/11/swrl#Variable)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66884)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66884)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -3472,14 +4160,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66583)
+    (subject   #N66910)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66583)
+   (subject   #N66910)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -3488,30 +4176,78 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66596)
+    (subject   #N66923)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N66596)
-   (object    http://www.isaatc.ull.es/Verdino.owl#z)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66923)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
+  
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N66596)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66936)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#builtin)
+   (subject   #N66936)
+   (object    http://www.w3.org/2003/11/swrlb#subtract)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66596)
+   (subject   #N66936)
+   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66949)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66949)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66962)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66962)
+   (object    http://www.isaatc.ull.es/Verdino.owl#b)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66962)
    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
@@ -3520,14 +4256,78 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66609)
+    (subject   #N66975)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N66975)
+   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N66975)
+   (object    http://www.isaatc.ull.es/Verdino.owl#g)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N66975)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66975)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N66991)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N66991)
+   (object    http://www.isaatc.ull.es/Verdino.owl#a)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N66991)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67004)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66609)
+   (subject   #N67004)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -3536,31 +4336,71 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66622)
+    (subject   #N67017)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N66622)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67017)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67030)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N66622)
-   (object    0)
+   (subject   #N67030)
+   (object    300)
   )
 )  
   
 (assert
   (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N67030)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66622)
+   (subject   #N67030)
    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67044)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N67044)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67044)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -3577,6 +4417,38 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#x)
    (object    http://www.w3.org/2003/11/swrl#Variable)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67064)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N67064)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N67064)
+   (object    50)
+  )
+)  
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67064)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -3624,14 +4496,38 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66659)
+    (subject   #N67094)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N67094)
+   (object    http://www.isaatc.ull.es/Verdino.owl#b)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67094)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67107)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66659)
+   (subject   #N67107)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -3640,22 +4536,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66672)
+    (subject   #N67120)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N66672)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66672)
+   (subject   #N67120)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -3760,39 +4648,31 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66724)
+    (subject   #N67172)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N66724)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
-  )
-)
-  
-(assert
-  (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N66724)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+   (subject   #N67172)
+   (object    http://www.isaatc.ull.es/Verdino.owl#d)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N66724)
-   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
+   (subject   #N67172)
+   (object    http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66724)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+   (subject   #N67172)
+   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
   )
 )
   
@@ -3800,14 +4680,38 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66740)
+    (subject   #N67185)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N67185)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67185)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67198)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N66740)
+   (subject   #N67198)
    (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden)
   )
 )
@@ -3815,7 +4719,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N66740)
+   (subject   #N67198)
    (object    http://www.isaatc.ull.es/Verdino.owl#d)
   )
 )
@@ -3823,7 +4727,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N66740)
+   (subject   #N67198)
    (object    http://www.isaatc.ull.es/Verdino.owl#h)
   )
 )
@@ -3831,7 +4735,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66740)
+   (subject   #N67198)
    (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
@@ -3840,22 +4744,46 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66756)
+    (subject   #N67214)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N66756)
-   (object    http://www.isaatc.ull.es/Verdino.owl#d)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67214)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67227)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N67227)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
   )
 )
   
 (assert
   (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N67227)
+   (object    0)
+  )
+)  
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66756)
+   (subject   #N67227)
    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
@@ -3864,15 +4792,183 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66769)
+    (subject   #N67241)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N67241)
+   (object    http://www.isaatc.ull.es/Verdino.owl#EnEspera)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N67241)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67241)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67241)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67257)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66769)
+   (subject   #N67257)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67270)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67270)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67283)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N67283)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N67283)
+   (object    http://www.isaatc.ull.es/Verdino.owl#g)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67283)
+   (object    http://www.isaatc.ull.es/Verdino.owl#f)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67283)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67299)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
+   (subject   #N67299)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67299)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67299)
+   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67312)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N67312)
+   (object    http://www.isaatc.ull.es/Verdino.owl#g)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67312)
+   (object    http://www.isaatc.ull.es/Verdino.owl#f)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N67312)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67312)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -3920,62 +5016,30 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66798)
+    (subject   #N67344)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N66798)
-   (object    http://www.isaatc.ull.es/Verdino.owl#g)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N66798)
-   (object    http://www.isaatc.ull.es/Verdino.owl#f)
-  )
-)
-  
-(assert
-  (triple
    (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N66798)
+   (subject   #N67344)
    (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66798)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66814)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N66814)
-   (object    http://www.isaatc.ull.es/Verdino.owl#TramoPintable)
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N67344)
+   (object    http://www.isaatc.ull.es/Verdino.owl#c)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N66814)
+   (subject   #N67344)
    (object    http://www.isaatc.ull.es/Verdino.owl#x)
   )
 )
@@ -3983,8 +5047,8 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66814)
-   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
+   (subject   #N67344)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -4009,6 +5073,30 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Rule-2)
    (object    http://www.w3.org/2003/11/swrl#Imp)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67377)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#builtin)
+   (subject   #N67377)
+   (object    http://www.w3.org/2003/11/swrlb#subtract)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67377)
+   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
   
@@ -4056,14 +5144,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66860)
+    (subject   #N67406)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N66860)
+   (subject   #N67406)
    (object    http://www.isaatc.ull.es/Verdino.owl#o)
   )
 )
@@ -4071,7 +5159,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N66860)
+   (subject   #N67406)
    (object    http://www.isaatc.ull.es/Verdino.owl#e)
   )
 )
@@ -4079,7 +5167,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N66860)
+   (subject   #N67406)
    (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario)
   )
 )
@@ -4087,32 +5175,8 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66860)
+   (subject   #N67406)
    (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66876)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N66876)
-   (object    http://www.w3.org/2003/11/swrlb#lessThanOrEqual)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66876)
-   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
   
@@ -4136,6 +5200,46 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67429)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N67429)
+   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67429)
+   (object    http://www.isaatc.ull.es/Verdino.owl#d)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N67429)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67429)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Rule-1)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -4152,14 +5256,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66909)
+    (subject   #N67458)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66909)
+   (subject   #N67458)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -4168,23 +5272,127 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66922)
+    (subject   #N67471)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N66922)
-   (object    http://www.isaatc.ull.es/Verdino.owl#k)
+   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
+   (subject   #N67471)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Tramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#onProperty)
+   (subject   #N67471)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66922)
+   (subject   #N67471)
+   (object    http://www.w3.org/2002/07/owl#Restriction)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67484)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67484)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67497)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#builtin)
+   (subject   #N67497)
+   (object    http://www.w3.org/2003/11/swrlb#greaterThan)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67497)
+   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67510)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N67510)
+   (object    http://www.isaatc.ull.es/Verdino.owl#h)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67510)
    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67523)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67523)
+   (object    http://www.isaatc.ull.es/Verdino.owl#a)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
+   (subject   #N67523)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67523)
+   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
   )
 )
   
@@ -4224,14 +5432,118 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N66948)
+    (subject   #N67549)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67549)
+   (object    http://www.isaatc.ull.es/Verdino.owl#f)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
+   (subject   #N67549)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67549)
+   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67562)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67562)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67575)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#builtin)
+   (subject   #N67575)
+   (object    http://www.w3.org/2003/11/swrlb#subtract)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67575)
+   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67588)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N67588)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N67588)
+   (object    50)
+  )
+)  
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67588)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67602)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N66948)
+   (subject   #N67602)
    (object    http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
   )
 )
@@ -4239,7 +5551,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N66948)
+   (subject   #N67602)
    (object    http://www.isaatc.ull.es/Verdino.owl#h)
   )
 )
@@ -4247,7 +5559,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N66948)
+   (subject   #N67602)
    (object    http://www.isaatc.ull.es/Verdino.owl#i)
   )
 )
@@ -4255,7 +5567,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N66948)
+   (subject   #N67602)
    (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
   )
 )
@@ -4296,6 +5608,70 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67638)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N67638)
+   (object    http://www.isaatc.ull.es/Verdino.owl#y)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67638)
+   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N67638)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67638)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67654)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N67654)
+   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67654)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#PosicionGrafica_26)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -4328,6 +5704,22 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67682)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67682)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#k)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -4337,6 +5729,38 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#k)
    (object    http://www.w3.org/2003/11/swrl#Variable)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67702)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67702)
+   (object    http://www.isaatc.ull.es/Verdino.owl#o)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
+   (subject   #N67702)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Oposicion)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67702)
+   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
   )
 )
   
@@ -4376,30 +5800,30 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67019)
+    (subject   #N67728)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67019)
-   (object    http://www.isaatc.ull.es/Verdino.owl#o)
+   (subject   #N67728)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N67019)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Oposicion)
+   (subject   #N67728)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67019)
+   (subject   #N67728)
    (object    http://www.w3.org/2003/11/swrl#ClassAtom)
   )
 )
@@ -4408,14 +5832,54 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67032)
+    (subject   #N67741)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67741)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N67741)
+   (object    http://www.isaatc.ull.es/Verdino.owl#EnEspera)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N67741)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67741)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67757)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67032)
+   (subject   #N67757)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -4424,39 +5888,15 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67045)
+    (subject   #N67770)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67045)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67045)
-   (object    http://www.isaatc.ull.es/Verdino.owl#d)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67045)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
-  )
-)
-  
-(assert
-  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67045)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+   (subject   #N67770)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -4504,6 +5944,126 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67799)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#onProperty)
+   (subject   #N67799)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
+   (subject   #N67799)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Tramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67799)
+   (object    http://www.w3.org/2002/07/owl#Restriction)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67812)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N67812)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67812)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67825)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#builtin)
+   (subject   #N67825)
+   (object    http://www.w3.org/2003/11/swrlb#greaterThan)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67825)
+   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67838)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N67838)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N67838)
+   (object    http://www.isaatc.ull.es/Verdino.owl#d)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N67838)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67838)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Tramo14)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -4544,78 +6104,22 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67093)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67093)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67106)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67106)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67106)
-   (object    http://www.isaatc.ull.es/Verdino.owl#b)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67106)
-   (object    http://www.isaatc.ull.es/Verdino.owl#a)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67106)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67122)
+    (subject   #N67870)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N67122)
-   (object    http://www.w3.org/2003/11/swrlb#subtract)
+   (subject   #N67870)
+   (object    http://www.w3.org/2003/11/swrlb#equal)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67122)
+   (subject   #N67870)
    (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
@@ -4664,55 +6168,31 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67151)
+    (subject   #N67899)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67151)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67164)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67164)
-   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
+   (subject   #N67899)
+   (object    http://www.w3.org/2001/XMLSchema#float)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67164)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67164)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
+   (predicate http://www.w3.org/2002/07/owl#onProperty)
+   (subject   #N67899)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67164)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+   (subject   #N67899)
+   (object    http://www.w3.org/2002/07/owl#Restriction)
   )
 )
   
@@ -4776,54 +6256,38 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67203)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67203)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67216)
+    (subject   #N67935)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67216)
-   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+   (subject   #N67935)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67216)
-   (object    http://www.isaatc.ull.es/Verdino.owl#y)
+   (subject   #N67935)
+   (object    http://www.isaatc.ull.es/Verdino.owl#EnEspera)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67216)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+   (subject   #N67935)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67216)
+   (subject   #N67935)
    (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
@@ -4832,71 +6296,15 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67232)
+    (subject   #N67951)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67232)
+   (subject   #N67951)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67245)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N67245)
-   (object    http://www.isaatc.ull.es/Verdino.owl#z)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N67245)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67245)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67258)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N67258)
-   (object    http://www.w3.org/2003/11/swrlb#equal)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67258)
-   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
   
@@ -4944,6 +6352,22 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N67980)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N67980)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Verdino)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -4984,78 +6408,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67305)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67305)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67305)
-   (object    http://www.isaatc.ull.es/Verdino.owl#c)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67305)
-   (object    http://www.isaatc.ull.es/Verdino.owl#z)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67305)
-   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67321)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N67321)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67321)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67334)
+    (subject   #N68011)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N67334)
+   (subject   #N68011)
    (object    http://www.w3.org/2003/11/swrlb#lessThanOrEqual)
   )
 )
@@ -5063,7 +6423,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67334)
+   (subject   #N68011)
    (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
@@ -5072,39 +6432,15 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67347)
+    (subject   #N68024)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67347)
-   (object    http://www.isaatc.ull.es/Verdino.owl#e)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67347)
-   (object    http://www.isaatc.ull.es/Verdino.owl#j)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67347)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
-  )
-)
-  
-(assert
-  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67347)
-   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
+   (subject   #N68024)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -5112,39 +6448,23 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67363)
+    (subject   #N68037)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67363)
-   (object    http://www.isaatc.ull.es/Verdino.owl#g)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67363)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67363)
-   (object    http://www.isaatc.ull.es/Verdino.owl#e)
+   (predicate http://www.w3.org/2003/11/swrl#builtin)
+   (subject   #N68037)
+   (object    http://www.w3.org/2003/11/swrlb#lessThanOrEqual)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67363)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+   (subject   #N68037)
+   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
   
@@ -5152,14 +6472,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67379)
+    (subject   #N68050)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67379)
+   (subject   #N68050)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -5200,15 +6520,23 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67407)
+    (subject   #N68078)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N68078)
+   (object    http://www.isaatc.ull.es/Verdino.owl#n)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67407)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (subject   #N68078)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -5216,103 +6544,71 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67420)
+    (subject   #N68091)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N67420)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N68091)
+   (object    http://www.isaatc.ull.es/Verdino.owl#y)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N67420)
-   (object    0)
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N68091)
+   (object    http://www.isaatc.ull.es/Verdino.owl#b)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N68091)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68091)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68107)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#onProperty)
+   (subject   #N68107)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2002/07/owl#minCardinality)
+   (subject   #N68107)
+   (object    1)
   )
 )  
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67420)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67434)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N67434)
-   (object    http://www.isaatc.ull.es/Verdino.owl#a)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67434)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67447)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67447)
-   (object    http://www.isaatc.ull.es/Verdino.owl#d)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N67447)
-   (object    http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67447)
-   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67460)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67460)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (subject   #N68107)
+   (object    http://www.w3.org/2002/07/owl#Restriction)
   )
 )
   
@@ -5360,6 +6656,62 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68138)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N68138)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68138)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68151)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68151)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68164)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68164)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Tramo19)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -5392,86 +6744,30 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67503)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N67503)
-   (object    http://www.isaatc.ull.es/Verdino.owl#n)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67503)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67516)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N67516)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N67516)
-   (object    1)
-  )
-)  
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67516)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67530)
+    (subject   #N68190)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N67530)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Tramo)
+   (subject   #N68190)
+   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67530)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+   (subject   #N68190)
+   (object    http://www.isaatc.ull.es/Verdino.owl#f)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67530)
+   (subject   #N68190)
    (object    http://www.w3.org/2003/11/swrl#ClassAtom)
   )
 )
@@ -5480,14 +6776,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67543)
+    (subject   #N68203)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67543)
+   (subject   #N68203)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -5496,14 +6792,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67556)
+    (subject   #N68216)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N67556)
+   (subject   #N68216)
    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
   )
 )
@@ -5511,7 +6807,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N67556)
+   (subject   #N68216)
    (object    http://www.isaatc.ull.es/Verdino.owl#i)
   )
 )
@@ -5519,40 +6815,8 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67556)
+   (subject   #N68216)
    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67569)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N67569)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67569)
-   (object    http://www.isaatc.ull.es/Verdino.owl#f)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67569)
-   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
   )
 )
   
@@ -5600,14 +6864,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67598)
+    (subject   #N68245)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67598)
+   (subject   #N68245)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -5616,54 +6880,22 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67611)
+    (subject   #N68258)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67611)
-   (object    http://www.isaatc.ull.es/Verdino.owl#e)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67611)
-   (object    http://www.isaatc.ull.es/Verdino.owl#g)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67611)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N68258)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67611)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67627)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67627)
+   (subject   #N68258)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -5672,23 +6904,15 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67640)
+    (subject   #N68271)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N67640)
-   (object    http://www.isaatc.ull.es/Verdino.owl#h)
-  )
-)
-  
-(assert
-  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67640)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+   (subject   #N68271)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -5728,46 +6952,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67666)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N67666)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67666)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67666)
-   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67679)
+    (subject   #N68297)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67679)
+   (subject   #N68297)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -5776,31 +6968,15 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67692)
+    (subject   #N68310)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67692)
-   (object    http://www.isaatc.ull.es/Verdino.owl#a)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N67692)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
-  )
-)
-  
-(assert
-  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67692)
-   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
+   (subject   #N68310)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -5848,39 +7024,31 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67721)
+    (subject   #N68339)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67721)
-   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N68339)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67721)
-   (object    http://www.isaatc.ull.es/Verdino.owl#z)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N68339)
+   (object    1)
   )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67721)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-  )
-)
+)  
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67721)
-   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
+   (subject   #N68339)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -5888,31 +7056,23 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67737)
+    (subject   #N68353)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
-   (subject   #N67737)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Tramo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#onProperty)
-   (subject   #N67737)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario)
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N68353)
+   (object    http://www.isaatc.ull.es/Verdino.owl#k)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67737)
-   (object    http://www.w3.org/2002/07/owl#Restriction)
+   (subject   #N68353)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -5945,6 +7105,30 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Tramo2)
    (object    http://www.isaatc.ull.es/Verdino.owl#Tramo)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68379)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#builtin)
+   (subject   #N68379)
+   (object    http://www.w3.org/2003/11/swrlb#lessThanOrEqual)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68379)
+   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
   )
 )
   
@@ -6000,54 +7184,38 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67783)
+    (subject   #N68412)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67783)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67796)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67796)
-   (object    http://www.isaatc.ull.es/Verdino.owl#e)
-  )
-)
-  
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67796)
-   (object    http://www.isaatc.ull.es/Verdino.owl#d)
+   (subject   #N68412)
+   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N68412)
+   (object    http://www.isaatc.ull.es/Verdino.owl#y)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67796)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario)
+   (subject   #N68412)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67796)
+   (subject   #N68412)
    (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
@@ -6056,86 +7224,30 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67812)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N67812)
-   (object    http://www.isaatc.ull.es/Verdino.owl#k)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67812)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67825)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N67825)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67825)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67825)
-   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67838)
+    (subject   #N68428)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67838)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaFinal)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67838)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
+   (subject   #N68428)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67838)
+   (subject   #N68428)
+   (object    http://www.isaatc.ull.es/Verdino.owl#a)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N68428)
    (object    http://www.isaatc.ull.es/Verdino.owl#y)
   )
 )
@@ -6143,47 +7255,7 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67838)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67854)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67854)
-   (object    http://www.isaatc.ull.es/Verdino.owl#j)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67854)
-   (object    http://www.isaatc.ull.es/Verdino.owl#k)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67854)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67854)
+   (subject   #N68428)
    (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
   )
 )
@@ -6208,39 +7280,63 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67877)
+    (subject   #N68451)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67877)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67877)
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N68451)
    (object    http://www.isaatc.ull.es/Verdino.owl#g)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67877)
-   (object    http://www.isaatc.ull.es/Verdino.owl#f)
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N68451)
+   (object    http://www.isaatc.ull.es/Verdino.owl#i)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N68451)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67877)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+   (subject   #N68451)
+   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68467)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N68467)
+   (object    http://www.isaatc.ull.es/Verdino.owl#k)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68467)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -6272,38 +7368,30 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67909)
+    (subject   #N68496)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N67909)
-   (object    http://www.w3.org/2003/11/swrlb#greaterThan)
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N68496)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67909)
-   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N68496)
+   (object    http://www.isaatc.ull.es/Verdino.owl#d)
   )
 )
   
-  
 (assert
   (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67922)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N67922)
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N68496)
    (object    http://www.isaatc.ull.es/Verdino.owl#b)
   )
 )
@@ -6311,8 +7399,48 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67922)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+   (subject   #N68496)
+   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68512)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N68512)
+   (object    http://www.isaatc.ull.es/Verdino.owl#j)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N68512)
+   (object    http://www.isaatc.ull.es/Verdino.owl#k)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N68512)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68512)
+   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
   )
 )
   
@@ -6360,182 +7488,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67951)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67951)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67964)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67964)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67977)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67977)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N67990)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N67990)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionGraficaInicial)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N67990)
-   (object    http://www.isaatc.ull.es/Verdino.owl#z)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N67990)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N67990)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68006)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68006)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68019)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#onProperty)
-   (subject   #N68019)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
-   (subject   #N68019)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Tramo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68019)
-   (object    http://www.w3.org/2002/07/owl#Restriction)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68032)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68032)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68032)
-   (object    http://www.isaatc.ull.es/Verdino.owl#a)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68032)
-   (object    http://www.isaatc.ull.es/Verdino.owl#y)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68032)
-   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Oposicion)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -6576,6 +7528,22 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68560)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68560)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Ruta)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -6600,6 +7568,46 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68586)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N68586)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoSecundario)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N68586)
+   (object    http://www.isaatc.ull.es/Verdino.owl#y)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N68586)
+   (object    http://www.isaatc.ull.es/Verdino.owl#d)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68586)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#o)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -6616,14 +7624,22 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68084)
+    (subject   #N68609)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
+   (subject   #N68609)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68084)
+   (subject   #N68609)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -6712,15 +7728,23 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68129)
+    (subject   #N68654)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
+   (subject   #N68654)
+   (object    http://www.isaatc.ull.es/Verdino.owl#b)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68129)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (subject   #N68654)
+   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -6728,14 +7752,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68142)
+    (subject   #N68667)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N68142)
+   (subject   #N68667)
    (object    http://www.isaatc.ull.es/Verdino.owl#n)
   )
 )
@@ -6743,8 +7767,24 @@
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68142)
+   (subject   #N68667)
    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
+  )
+)
+  
+  
+(assert
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject   #N68680)
+    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
+  )
+)
+(assert
+  (triple
+   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+   (subject   #N68680)
+   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -6768,86 +7808,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68162)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68162)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68162)
-   (object    http://www.isaatc.ull.es/Verdino.owl#d)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68162)
-   (object    http://www.isaatc.ull.es/Verdino.owl#j)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68162)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68178)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68178)
-   (object    http://www.isaatc.ull.es/Verdino.owl#f)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N68178)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68178)
-   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68191)
+    (subject   #N68700)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68191)
+   (subject   #N68700)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -6856,46 +7824,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68204)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N68204)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N68204)
-   (object    50)
-  )
-)  
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68204)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68218)
+    (subject   #N68713)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68218)
+   (subject   #N68713)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -6904,22 +7840,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68231)
+    (subject   #N68726)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N68231)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68231)
+   (subject   #N68726)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -6984,54 +7912,38 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68268)
+    (subject   #N68763)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68268)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68281)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68281)
-   (object    http://www.isaatc.ull.es/Verdino.owl#y)
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N68763)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68281)
-   (object    http://www.isaatc.ull.es/Verdino.owl#c)
+   (subject   #N68763)
+   (object    http://www.isaatc.ull.es/Verdino.owl#d)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68281)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N68763)
+   (object    http://www.isaatc.ull.es/Verdino.owl#j)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68281)
+   (subject   #N68763)
    (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
@@ -7049,142 +7961,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#c)
    (object    http://www.w3.org/2003/11/swrl#Variable)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68304)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68304)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68317)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N68317)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N68317)
-   (object    http://www.isaatc.ull.es/Verdino.owl#z)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68317)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68330)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N68330)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68330)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68343)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N68343)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68343)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68356)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68356)
-   (object    http://www.isaatc.ull.es/Verdino.owl#y)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68356)
-   (object    http://www.isaatc.ull.es/Verdino.owl#b)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68356)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68356)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -7224,126 +8000,38 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68385)
+    (subject   #N68799)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#onProperty)
-   (subject   #N68385)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaX)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
-   (subject   #N68385)
-   (object    http://www.w3.org/2001/XMLSchema#int)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68385)
-   (object    http://www.w3.org/2002/07/owl#Restriction)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68398)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68398)
-   (object    http://www.isaatc.ull.es/Verdino.owl#EnEspera)
-  )
-)
-  
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68398)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
+   (subject   #N68799)
+   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68398)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68398)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68414)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68414)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68427)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68427)
-   (object    http://www.isaatc.ull.es/Verdino.owl#f)
+   (subject   #N68799)
+   (object    http://www.isaatc.ull.es/Verdino.owl#c)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68427)
-   (object    http://www.isaatc.ull.es/Verdino.owl#h)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68427)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneVelocidad)
+   (subject   #N68799)
+   (object    http://www.isaatc.ull.es/Verdino.owl#z)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68427)
+   (subject   #N68799)
    (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
   )
 )
@@ -7377,46 +8065,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Prioridad0)
    (object    http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68456)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68456)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68456)
-   (object    http://www.isaatc.ull.es/Verdino.owl#c)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68456)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68456)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -7465,62 +8113,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#b)
    (object    http://www.w3.org/2003/11/swrl#Variable)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68492)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68492)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68505)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68505)
-   (object    http://www.isaatc.ull.es/Verdino.owl#x)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68505)
-   (object    http://www.isaatc.ull.es/Verdino.owl#EnEspera)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68505)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68505)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -7592,30 +8184,30 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68547)
+    (subject   #N68874)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/2002/07/owl#onProperty)
-   (subject   #N68547)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneCoordenadaY)
+   (subject   #N68874)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/2002/07/owl#someValuesFrom)
-   (subject   #N68547)
-   (object    http://www.w3.org/2001/XMLSchema#int)
+   (predicate http://www.w3.org/2002/07/owl#maxCardinality)
+   (subject   #N68874)
+   (object    1)
   )
-)
+)  
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68547)
+   (subject   #N68874)
    (object    http://www.w3.org/2002/07/owl#Restriction)
   )
 )
@@ -7673,22 +8265,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
    (object    http://www.w3.org/2002/07/owl#ObjectProperty)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68584)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68584)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -7776,38 +8352,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68631)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N68631)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N68631)
-   (object    50)
-  )
-)  
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68631)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#TramoOrden_13)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -7832,54 +8376,14 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68656)
+    (subject   #N68957)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68656)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68669)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N68669)
-   (object    http://www.isaatc.ull.es/Verdino.owl#b)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68669)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68682)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68682)
+   (subject   #N68957)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
@@ -7905,38 +8409,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#RelacionEntreTramos)
    (object    http://www.w3.org/2002/07/owl#Class)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68711)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68711)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68724)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68724)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -8008,22 +8480,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68764)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68764)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Variable_7)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -8033,70 +8489,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Variable_7)
    (object    http://www.w3.org/2003/11/swrl#Variable)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68784)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68784)
-   (object    http://www.isaatc.ull.es/Verdino.owl#j)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68784)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68784)
-   (object    http://www.isaatc.ull.es/Verdino.owl#m)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68784)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68800)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N68800)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68800)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -8144,31 +8536,39 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68829)
+    (subject   #N69036)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N69036)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
+  )
+)
+  
+(assert
+  (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68829)
+   (subject   #N69036)
    (object    http://www.isaatc.ull.es/Verdino.owl#x)
   )
 )
   
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
-   (subject   #N68829)
-   (object    http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N69036)
+   (object    http://www.isaatc.ull.es/Verdino.owl#c)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68829)
-   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
+   (subject   #N69036)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -8216,62 +8616,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68858)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#cardinality)
-   (subject   #N68858)
-   (object    1)
-  )
-)  
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#onProperty)
-   (subject   #N68858)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68858)
-   (object    http://www.w3.org/2002/07/owl#Restriction)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68872)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N68872)
-   (object    http://www.isaatc.ull.es/Verdino.owl#j)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68872)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Tramo6)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -8297,46 +8641,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Tramo6)
    (object    http://www.isaatc.ull.es/Verdino.owl#Tramo)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68898)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68898)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68898)
-   (object    http://www.isaatc.ull.es/Verdino.owl#d)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68898)
-   (object    http://www.isaatc.ull.es/Verdino.owl#b)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68898)
-   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
   )
 )
   
@@ -8432,46 +8736,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68952)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N68952)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N68952)
-   (object    http://www.isaatc.ull.es/Verdino.owl#z)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N68952)
-   (object    http://www.isaatc.ull.es/Verdino.owl#c)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68952)
-   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Tramo5)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -8544,54 +8808,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N68999)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N68999)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69012)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N69012)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N69012)
-   (object    50)
-  )
-)  
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69012)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Tramo20)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -8624,39 +8840,39 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69039)
+    (subject   #N69163)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
-   (predicate http://www.w3.org/2003/11/swrl#builtin)
-   (subject   #N69039)
-   (object    http://www.w3.org/2003/11/swrlb#subtract)
+   (predicate http://www.w3.org/2003/11/swrl#argument1)
+   (subject   #N69163)
+   (object    http://www.isaatc.ull.es/Verdino.owl#j)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
+   (subject   #N69163)
+   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramo)
+  )
+)
+  
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#argument2)
+   (subject   #N69163)
+   (object    http://www.isaatc.ull.es/Verdino.owl#m)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69039)
-   (object    http://www.w3.org/2003/11/swrl#BuiltinAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69052)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69052)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
+   (subject   #N69163)
+   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
   )
 )
   
@@ -8688,102 +8904,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69076)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N69076)
-   (object    http://www.isaatc.ull.es/Verdino.owl#g)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N69076)
-   (object    http://www.isaatc.ull.es/Verdino.owl#i)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N69076)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69076)
-   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69092)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N69092)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N69092)
-   (object    http://www.isaatc.ull.es/Verdino.owl#a)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N69092)
-   (object    http://www.isaatc.ull.es/Verdino.owl#y)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69092)
-   (object    http://www.w3.org/2003/11/swrl#DatavaluedPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69108)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69108)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Variable_6)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -8793,22 +8913,6 @@
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
    (subject   http://www.isaatc.ull.es/Verdino.owl#Variable_6)
    (object    http://www.w3.org/2003/11/swrl#Variable)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69128)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69128)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
   )
 )
   
@@ -8848,22 +8952,6 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69154)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69154)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject   http://www.isaatc.ull.es/Verdino.owl#Estado)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
@@ -8880,63 +8968,15 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69174)
+    (subject   #N69217)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69174)
+   (subject   #N69217)
    (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69187)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69187)
-   (object    http://www.w3.org/2003/11/swrl#AtomList)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69200)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#rest)
-   (subject   #N69200)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#nil)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#first)
-   (subject   #N69200)
-   (object    http://www.isaatc.ull.es/Verdino.owl#i)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69200)
-   (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#List)
   )
 )
   
@@ -8968,71 +9008,31 @@
 (assert
   (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69229)
+    (subject   #N69246)
     (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
   )
 )
+(assert
+  (triple
+   (predicate http://www.w3.org/2003/11/swrl#classPredicate)
+   (subject   #N69246)
+   (object    http://www.isaatc.ull.es/Verdino.owl#TramoPintable)
+  )
+)
+  
 (assert
   (triple
    (predicate http://www.w3.org/2003/11/swrl#argument1)
-   (subject   #N69229)
-   (object    http://www.isaatc.ull.es/Verdino.owl#c)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#argument2)
-   (subject   #N69229)
-   (object    http://www.isaatc.ull.es/Verdino.owl#y)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2003/11/swrl#propertyPredicate)
-   (subject   #N69229)
-   (object    http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+   (subject   #N69246)
+   (object    http://www.isaatc.ull.es/Verdino.owl#x)
   )
 )
   
 (assert
   (triple
    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69229)
-   (object    http://www.w3.org/2003/11/swrl#IndividualPropertyAtom)
-  )
-)
-  
-  
-(assert
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject   #N69245)
-    (object    http://www.w3.org/1999/02/22-rdf-syntax-ns#Description)
-  )
-)
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#onProperty)
-   (subject   #N69245)
-   (object    http://www.isaatc.ull.es/Verdino.owl#tieneTramo)
-  )
-)
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/2002/07/owl#cardinality)
-   (subject   #N69245)
-   (object    1)
-  )
-)  
-  
-(assert
-  (triple
-   (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-   (subject   #N69245)
-   (object    http://www.w3.org/2002/07/owl#Restriction)
+   (subject   #N69246)
+   (object    http://www.w3.org/2003/11/swrl#ClassAtom)
   )
 )
   

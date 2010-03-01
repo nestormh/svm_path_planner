@@ -54,7 +54,7 @@
  
   
 =>  
-(printout t "Activada limpiar tramos:" crlf)
+;(printout t "Activada limpiar tramos:" crlf)
   (retract ?posicionvieja2)
 ;  (retract ?fact)
 )
@@ -161,3 +161,48 @@
 =>;(printout t "Activada limpiar  assert estado:" crlf)
   (retract ?fact)
 )
+
+
+
+(defrule zlimpiarRuta
+ 
+   ?fact <-(triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#Accion)
+    (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual)
+    (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarRutas)
+    )
+               
+  ?posicionvieja <- (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
+    (subject    ?x)
+    (object   ?y)
+  )
+ 
+  
+=> ;(printout t "Activada limpiar ruta:" ?x crlf)
+  (retract ?posicionvieja)
+)
+
+
+(defrule limpiarAssertRutas
+ 
+   ?fact <-(triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#Accion)
+    (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual)
+    (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarRutas)
+    )
+               
+ (not (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
+    (subject    ?x)
+    (object   ?y)
+  )
+ )
+ 
+ 
+=>;(printout t "Activada limpiar  rutas:" crlf)
+  (retract ?fact)
+)
+
+
+
