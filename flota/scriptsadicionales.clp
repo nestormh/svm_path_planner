@@ -113,7 +113,7 @@
   ?posicionvieja <- (triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
     (subject    ?x)
-    (object   http://www.isaatc.ull.es/Verdino.owl#EnEspera)
+    (object   ?y)
   )
  
   
@@ -133,7 +133,7 @@
  (not (triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
     (subject    ?x)
-    (object   http://www.isaatc.ull.es/Verdino.owl#EnEspera)
+    (object   ?y)
   )
  )
  

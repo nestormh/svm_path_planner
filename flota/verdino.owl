@@ -20,20 +20,21 @@
   <owl:Class rdf:ID="PosicionVehiculo"/>
   <owl:Class rdf:ID="Vecindad">
     <owl:disjointWith>
-      <owl:Class rdf:ID="Oposicion"/>
+      <owl:Class rdf:ID="InterseccionPrioritaria"/>
     </owl:disjointWith>
     <owl:disjointWith>
-      <owl:Class rdf:ID="InterseccionPrioritaria"/>
+      <owl:Class rdf:ID="Oposicion"/>
     </owl:disjointWith>
     <rdfs:subClassOf>
       <owl:Class rdf:ID="RelacionEntreTramos"/>
     </rdfs:subClassOf>
   </owl:Class>
   <owl:Class rdf:about="#RelacionEntreTramos">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
     <rdfs:subClassOf>
       <owl:Restriction>
         <owl:onProperty>
-          <owl:FunctionalProperty rdf:ID="tieneTramoSecundario"/>
+          <owl:ObjectProperty rdf:ID="tieneTramoPrioritario"/>
         </owl:onProperty>
         <owl:someValuesFrom>
           <owl:Class rdf:ID="Tramo"/>
@@ -42,282 +43,273 @@
     </rdfs:subClassOf>
     <rdfs:subClassOf>
       <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="tieneTramoSecundario"/>
+        </owl:onProperty>
         <owl:someValuesFrom>
           <owl:Class rdf:about="#Tramo"/>
         </owl:someValuesFrom>
-        <owl:onProperty>
-          <owl:FunctionalProperty rdf:ID="tieneTramoPrioritario"/>
-        </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
-    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
   </owl:Class>
   <owl:Class rdf:about="#Oposicion">
-    <owl:disjointWith rdf:resource="#Vecindad"/>
     <owl:disjointWith>
       <owl:Class rdf:about="#InterseccionPrioritaria"/>
     </owl:disjointWith>
+    <owl:disjointWith rdf:resource="#Vecindad"/>
     <rdfs:subClassOf rdf:resource="#RelacionEntreTramos"/>
   </owl:Class>
   <owl:Class rdf:about="#InterseccionPrioritaria">
     <rdfs:subClassOf rdf:resource="#RelacionEntreTramos"/>
-    <owl:disjointWith rdf:resource="#Oposicion"/>
     <owl:disjointWith rdf:resource="#Vecindad"/>
+    <owl:disjointWith rdf:resource="#Oposicion"/>
   </owl:Class>
   <owl:Class rdf:about="#Tramo">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
     <rdfs:subClassOf>
       <owl:Restriction>
-        <owl:onProperty>
-          <owl:DatatypeProperty rdf:ID="tieneLongitud"/>
-        </owl:onProperty>
         <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="tieneLongitud"/>
+        </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
-    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
   </owl:Class>
   <owl:Class rdf:ID="TramoPintable">
     <rdfs:subClassOf rdf:resource="#Tramo"/>
   </owl:Class>
   <owl:Class rdf:ID="Ruta">
-    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
     <rdfs:subClassOf>
       <owl:Restriction>
-        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
-        >1</owl:minCardinality>
         <owl:onProperty>
           <owl:ObjectProperty rdf:ID="tieneTramoOrden"/>
         </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
       </owl:Restriction>
     </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
   </owl:Class>
   <owl:Class rdf:ID="Vehiculo">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
     <rdfs:subClassOf>
       <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="tieneRuta"/>
+        </owl:onProperty>
         <owl:maxCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >1</owl:maxCardinality>
-        <owl:onProperty>
-          <owl:ObjectProperty rdf:ID="tieneRuta"/>
-        </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
-    <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
   </owl:Class>
   <owl:Class rdf:ID="TramoOrden">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="tieneOrden"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="tieneTramo"/>
+        </owl:onProperty>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
     <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
-    <rdfs:subClassOf>
-      <owl:Restriction>
-        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
-        >1</owl:cardinality>
-        <owl:onProperty>
-          <owl:ObjectProperty rdf:ID="tieneTramo"/>
-        </owl:onProperty>
-      </owl:Restriction>
-    </rdfs:subClassOf>
-    <rdfs:subClassOf>
-      <owl:Restriction>
-        <owl:onProperty>
-          <owl:DatatypeProperty rdf:ID="tieneOrden"/>
-        </owl:onProperty>
-        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
-        >1</owl:cardinality>
-      </owl:Restriction>
-    </rdfs:subClassOf>
   </owl:Class>
   <owl:Class rdf:ID="PosicionGrafica">
-    <rdfs:subClassOf>
-      <owl:Restriction>
-        <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-        <owl:onProperty>
-          <owl:FunctionalProperty rdf:ID="tieneCoordenadaY"/>
-        </owl:onProperty>
-      </owl:Restriction>
-    </rdfs:subClassOf>
-    <rdfs:subClassOf>
-      <owl:Restriction>
-        <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-        <owl:onProperty>
-          <owl:FunctionalProperty rdf:ID="tieneCoordenadaX"/>
-        </owl:onProperty>
-      </owl:Restriction>
-    </rdfs:subClassOf>
     <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="tieneCoordenadaX"/>
+        </owl:onProperty>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="tieneCoordenadaY"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
   </owl:Class>
+  <owl:ObjectProperty rdf:about="#tieneTramoOrden">
+    <rdfs:domain rdf:resource="#Ruta"/>
+    <rdfs:range rdf:resource="#TramoOrden"/>
+  </owl:ObjectProperty>
   <owl:ObjectProperty rdf:ID="tienePredecesor">
     <owl:inverseOf>
       <owl:ObjectProperty rdf:ID="tieneSucesor"/>
     </owl:inverseOf>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:about="#tieneTramoOrden">
-    <rdfs:domain rdf:resource="#Ruta"/>
-    <rdfs:range rdf:resource="#TramoOrden"/>
+  <owl:ObjectProperty rdf:about="#tieneTramoPrioritario">
+    <rdfs:domain rdf:resource="#RelacionEntreTramos"/>
+    <rdfs:range rdf:resource="#Tramo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="tienePosicionVehiculo">
+    <rdfs:domain rdf:resource="#Vehiculo"/>
+    <rdfs:range rdf:resource="#PosicionVehiculo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="tienePosicionGraficaInicial">
+    <rdfs:domain rdf:resource="#Tramo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdfs:range rdf:resource="#PosicionGrafica"/>
   </owl:ObjectProperty>
   <owl:ObjectProperty rdf:about="#tieneSucesor">
     <owl:inverseOf rdf:resource="#tienePredecesor"/>
     <rdfs:domain rdf:resource="#Tramo"/>
     <rdfs:range rdf:resource="#Tramo"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:about="#tieneRuta">
-    <rdfs:domain rdf:resource="#Vehiculo"/>
-    <rdfs:range rdf:resource="#Ruta"/>
+  <owl:ObjectProperty rdf:ID="tienePosicionGraficaFinal">
+    <rdfs:range rdf:resource="#PosicionGrafica"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdfs:domain rdf:resource="#Tramo"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:about="#tieneTramo">
+  <owl:ObjectProperty rdf:about="#tieneTramoSecundario">
+    <rdfs:domain rdf:resource="#RelacionEntreTramos"/>
     <rdfs:range rdf:resource="#Tramo"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-    <rdfs:domain rdf:resource="#TramoOrden"/>
   </owl:ObjectProperty>
   <owl:ObjectProperty rdf:ID="tieneEstado">
     <rdfs:domain rdf:resource="#Vehiculo"/>
     <rdfs:range rdf:resource="#Estado"/>
   </owl:ObjectProperty>
-  <owl:DatatypeProperty rdf:about="#tieneLongitud">
-    <rdfs:domain rdf:resource="#Tramo"/>
+  <owl:ObjectProperty rdf:ID="estaEnTramo">
+    <rdfs:domain rdf:resource="#PosicionVehiculo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdfs:range rdf:resource="#Tramo"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="#tieneCoordenadaY">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdfs:domain rdf:resource="#PosicionGrafica"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="#tieneCoordenadaX">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdfs:domain rdf:resource="#PosicionGrafica"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="estaEnLongitud">
+    <rdfs:domain rdf:resource="#PosicionVehiculo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="tieneAceleracion">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:domain rdf:resource="#Vehiculo"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="tieneVelocidad">
+    <rdfs:domain rdf:resource="#Vehiculo"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:about="#tieneOrden">
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+  <owl:FunctionalProperty rdf:about="#tieneLongitud">
+    <rdfs:domain rdf:resource="#Tramo"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#tieneRuta">
+    <rdfs:domain rdf:resource="#Vehiculo"/>
+    <rdfs:range rdf:resource="#Ruta"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#tieneTramo">
+    <rdfs:range rdf:resource="#Tramo"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+    <rdfs:domain rdf:resource="#TramoOrden"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#tieneOrden">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
     <rdfs:domain rdf:resource="#TramoOrden"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-  </owl:DatatypeProperty>
-  <owl:FunctionalProperty rdf:about="#tieneTramoPrioritario">
-    <rdfs:domain rdf:resource="#RelacionEntreTramos"/>
-    <rdfs:range rdf:resource="#Tramo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:ID="tienePosicionVehiculo">
-    <rdfs:domain rdf:resource="#Vehiculo"/>
-    <rdfs:range rdf:resource="#PosicionVehiculo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:about="#tieneCoordenadaY">
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
-    <rdfs:domain rdf:resource="#PosicionGrafica"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:ID="tienePosicionGraficaInicial">
-    <rdfs:domain rdf:resource="#Tramo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
-    <rdfs:range rdf:resource="#PosicionGrafica"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:about="#tieneCoordenadaX">
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
-    <rdfs:domain rdf:resource="#PosicionGrafica"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:ID="tienePosicionGraficaFinal">
-    <rdfs:range rdf:resource="#PosicionGrafica"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
-    <rdfs:domain rdf:resource="#Tramo"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:ID="estaEnLongitud">
-    <rdfs:domain rdf:resource="#PosicionVehiculo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:about="#tieneTramoSecundario">
-    <rdfs:domain rdf:resource="#RelacionEntreTramos"/>
-    <rdfs:range rdf:resource="#Tramo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:ID="tieneAceleracion">
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
-    <rdfs:domain rdf:resource="#Vehiculo"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:ID="tieneVelocidad">
-    <rdfs:domain rdf:resource="#Vehiculo"/>
-    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#DatatypeProperty"/>
-  </owl:FunctionalProperty>
-  <owl:FunctionalProperty rdf:ID="estaEnTramo">
-    <rdfs:domain rdf:resource="#PosicionVehiculo"/>
-    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
-    <rdfs:range rdf:resource="#Tramo"/>
   </owl:FunctionalProperty>
   <swrl:Imp rdf:ID="Rule-4">
     <swrl:body>
       <swrl:AtomList>
-        <rdf:first>
-          <swrl:ClassAtom>
-            <swrl:argument1>
-              <swrl:Variable rdf:ID="x"/>
-            </swrl:argument1>
-            <swrl:classPredicate rdf:resource="#Vehiculo"/>
-          </swrl:ClassAtom>
-        </rdf:first>
         <rdf:rest>
           <swrl:AtomList>
-            <rdf:first>
-              <swrl:IndividualPropertyAtom>
-                <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
-                <swrl:argument1 rdf:resource="#x"/>
-                <swrl:argument2>
-                  <swrl:Variable rdf:ID="c"/>
-                </swrl:argument2>
-              </swrl:IndividualPropertyAtom>
-            </rdf:first>
             <rdf:rest>
               <swrl:AtomList>
+                <rdf:first>
+                  <swrl:IndividualPropertyAtom>
+                    <swrl:propertyPredicate rdf:resource="#estaEnTramo"/>
+                    <swrl:argument2>
+                      <swrl:Variable rdf:ID="y"/>
+                    </swrl:argument2>
+                    <swrl:argument1>
+                      <swrl:Variable rdf:ID="c"/>
+                    </swrl:argument1>
+                  </swrl:IndividualPropertyAtom>
+                </rdf:first>
                 <rdf:rest>
                   <swrl:AtomList>
                     <rdf:rest>
                       <swrl:AtomList>
-                        <rdf:first>
-                          <swrl:ClassAtom>
-                            <swrl:classPredicate rdf:resource="#Vehiculo"/>
-                            <swrl:argument1>
-                              <swrl:Variable rdf:ID="a"/>
-                            </swrl:argument1>
-                          </swrl:ClassAtom>
-                        </rdf:first>
                         <rdf:rest>
                           <swrl:AtomList>
-                            <rdf:first>
-                              <swrl:IndividualPropertyAtom>
-                                <swrl:argument1 rdf:resource="#a"/>
-                                <swrl:argument2>
-                                  <swrl:Variable rdf:ID="b"/>
-                                </swrl:argument2>
-                                <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
-                              </swrl:IndividualPropertyAtom>
-                            </rdf:first>
                             <rdf:rest>
                               <swrl:AtomList>
                                 <rdf:first>
                                   <swrl:IndividualPropertyAtom>
                                     <swrl:propertyPredicate rdf:resource="#estaEnTramo"/>
-                                    <swrl:argument1 rdf:resource="#b"/>
-                                    <swrl:argument2>
-                                      <swrl:Variable rdf:ID="y"/>
-                                    </swrl:argument2>
+                                    <swrl:argument1>
+                                      <swrl:Variable rdf:ID="b"/>
+                                    </swrl:argument1>
+                                    <swrl:argument2 rdf:resource="#y"/>
                                   </swrl:IndividualPropertyAtom>
                                 </rdf:first>
                                 <rdf:rest>
                                   <swrl:AtomList>
-                                    <rdf:first>
-                                      <swrl:DatavaluedPropertyAtom>
-                                        <swrl:argument1 rdf:resource="#b"/>
-                                        <swrl:argument2>
-                                          <swrl:Variable rdf:ID="d"/>
-                                        </swrl:argument2>
-                                        <swrl:propertyPredicate rdf:resource="#estaEnLongitud"/>
-                                      </swrl:DatavaluedPropertyAtom>
-                                    </rdf:first>
                                     <rdf:rest>
                                       <swrl:AtomList>
+                                        <rdf:first>
+                                          <swrl:BuiltinAtom>
+                                            <swrl:arguments>
+                                              <rdf:List>
+                                                <rdf:first>
+                                                  <swrl:Variable rdf:ID="e"/>
+                                                </rdf:first>
+                                                <rdf:rest>
+                                                  <rdf:List>
+                                                    <rdf:first>
+                                                      <swrl:Variable rdf:ID="d"/>
+                                                    </rdf:first>
+                                                    <rdf:rest>
+                                                      <rdf:List>
+                                                        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                                                        <rdf:first>
+                                                          <swrl:Variable rdf:ID="z"/>
+                                                        </rdf:first>
+                                                      </rdf:List>
+                                                    </rdf:rest>
+                                                  </rdf:List>
+                                                </rdf:rest>
+                                              </rdf:List>
+                                            </swrl:arguments>
+                                            <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
+                                          </swrl:BuiltinAtom>
+                                        </rdf:first>
                                         <rdf:rest>
                                           <swrl:AtomList>
                                             <rdf:rest>
                                               <swrl:AtomList>
                                                 <rdf:first>
                                                   <swrl:BuiltinAtom>
-                                                    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#greaterThan"/>
                                                     <swrl:arguments>
                                                       <rdf:List>
-                                                        <rdf:first>
-                                                          <swrl:Variable rdf:ID="e"/>
-                                                        </rdf:first>
+                                                        <rdf:first rdf:resource="#e"/>
                                                         <rdf:rest>
                                                           <rdf:List>
                                                             <rdf:first
@@ -329,6 +321,7 @@
                                                         </rdf:rest>
                                                       </rdf:List>
                                                     </swrl:arguments>
+                                                    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#greaterThan"/>
                                                   </swrl:BuiltinAtom>
                                                 </rdf:first>
                                                 <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
@@ -336,78 +329,85 @@
                                             </rdf:rest>
                                             <rdf:first>
                                               <swrl:BuiltinAtom>
-                                                <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
                                                 <swrl:arguments>
                                                   <rdf:List>
+                                                    <rdf:first rdf:resource="#e"/>
                                                     <rdf:rest>
                                                       <rdf:List>
-                                                        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                                         <rdf:first
                                                          rdf:datatype=
                                                         "http://www.w3.org/2001/XMLSchema#int"
                                                         >300</rdf:first>
+                                                        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                                       </rdf:List>
                                                     </rdf:rest>
-                                                    <rdf:first rdf:resource="#e"/>
                                                   </rdf:List>
                                                 </swrl:arguments>
+                                                <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
                                               </swrl:BuiltinAtom>
                                             </rdf:first>
                                           </swrl:AtomList>
                                         </rdf:rest>
-                                        <rdf:first>
-                                          <swrl:BuiltinAtom>
-                                            <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
-                                            <swrl:arguments>
-                                              <rdf:List>
-                                                <rdf:first rdf:resource="#e"/>
-                                                <rdf:rest>
-                                                  <rdf:List>
-                                                    <rdf:rest>
-                                                      <rdf:List>
-                                                        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-                                                        <rdf:first>
-                                                          <swrl:Variable rdf:ID="z"/>
-                                                        </rdf:first>
-                                                      </rdf:List>
-                                                    </rdf:rest>
-                                                    <rdf:first rdf:resource="#d"/>
-                                                  </rdf:List>
-                                                </rdf:rest>
-                                              </rdf:List>
-                                            </swrl:arguments>
-                                          </swrl:BuiltinAtom>
-                                        </rdf:first>
                                       </swrl:AtomList>
                                     </rdf:rest>
+                                    <rdf:first>
+                                      <swrl:DatavaluedPropertyAtom>
+                                        <swrl:argument1 rdf:resource="#b"/>
+                                        <swrl:argument2 rdf:resource="#d"/>
+                                        <swrl:propertyPredicate rdf:resource="#estaEnLongitud"/>
+                                      </swrl:DatavaluedPropertyAtom>
+                                    </rdf:first>
                                   </swrl:AtomList>
                                 </rdf:rest>
                               </swrl:AtomList>
                             </rdf:rest>
+                            <rdf:first>
+                              <swrl:IndividualPropertyAtom>
+                                <swrl:argument1>
+                                  <swrl:Variable rdf:ID="a"/>
+                                </swrl:argument1>
+                                <swrl:argument2 rdf:resource="#b"/>
+                                <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
+                              </swrl:IndividualPropertyAtom>
+                            </rdf:first>
                           </swrl:AtomList>
                         </rdf:rest>
+                        <rdf:first>
+                          <swrl:ClassAtom>
+                            <swrl:classPredicate rdf:resource="#Vehiculo"/>
+                            <swrl:argument1 rdf:resource="#a"/>
+                          </swrl:ClassAtom>
+                        </rdf:first>
                       </swrl:AtomList>
                     </rdf:rest>
                     <rdf:first>
                       <swrl:DatavaluedPropertyAtom>
+                        <swrl:propertyPredicate rdf:resource="#estaEnLongitud"/>
                         <swrl:argument2 rdf:resource="#z"/>
                         <swrl:argument1 rdf:resource="#c"/>
-                        <swrl:propertyPredicate rdf:resource="#estaEnLongitud"/>
                       </swrl:DatavaluedPropertyAtom>
                     </rdf:first>
                   </swrl:AtomList>
                 </rdf:rest>
-                <rdf:first>
-                  <swrl:IndividualPropertyAtom>
-                    <swrl:propertyPredicate rdf:resource="#estaEnTramo"/>
-                    <swrl:argument2 rdf:resource="#y"/>
-                    <swrl:argument1 rdf:resource="#c"/>
-                  </swrl:IndividualPropertyAtom>
-                </rdf:first>
               </swrl:AtomList>
             </rdf:rest>
+            <rdf:first>
+              <swrl:IndividualPropertyAtom>
+                <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
+                <swrl:argument2 rdf:resource="#c"/>
+                <swrl:argument1>
+                  <swrl:Variable rdf:ID="x"/>
+                </swrl:argument1>
+              </swrl:IndividualPropertyAtom>
+            </rdf:first>
           </swrl:AtomList>
         </rdf:rest>
+        <rdf:first>
+          <swrl:ClassAtom>
+            <swrl:argument1 rdf:resource="#x"/>
+            <swrl:classPredicate rdf:resource="#Vehiculo"/>
+          </swrl:ClassAtom>
+        </rdf:first>
       </swrl:AtomList>
     </swrl:body>
     <swrl:head>
@@ -416,10 +416,10 @@
         <rdf:first>
           <swrl:IndividualPropertyAtom>
             <swrl:propertyPredicate rdf:resource="#tieneEstado"/>
-            <swrl:argument2>
-              <Estado rdf:ID="EnEspera"/>
-            </swrl:argument2>
             <swrl:argument1 rdf:resource="#x"/>
+            <swrl:argument2>
+              <Estado rdf:ID="EsperaDistancia"/>
+            </swrl:argument2>
           </swrl:IndividualPropertyAtom>
         </rdf:first>
       </swrl:AtomList>
@@ -457,15 +457,15 @@
   </PosicionGrafica>
   <Ruta rdf:ID="Ruta_15">
     <tieneTramoOrden>
-      <TramoOrden rdf:ID="TramoOrden_16">
-        <tieneOrden rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
-        >1</tieneOrden>
-      </TramoOrden>
-    </tieneTramoOrden>
-    <tieneTramoOrden>
       <TramoOrden rdf:ID="TramoOrden_17">
         <tieneOrden rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >2</tieneOrden>
+      </TramoOrden>
+    </tieneTramoOrden>
+    <tieneTramoOrden>
+      <TramoOrden rdf:ID="TramoOrden_16">
+        <tieneOrden rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</tieneOrden>
       </TramoOrden>
     </tieneTramoOrden>
   </Ruta>
@@ -485,73 +485,67 @@
   <PosicionGrafica rdf:ID="PosicionGrafica_25"/>
   <Ruta rdf:ID="Ruta_12">
     <tieneTramoOrden>
-      <TramoOrden rdf:ID="TramoOrden_13">
-        <tieneOrden rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
-        >1</tieneOrden>
-      </TramoOrden>
-    </tieneTramoOrden>
-    <tieneTramoOrden>
       <TramoOrden rdf:ID="TramoOrden_14">
         <tieneOrden rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >2</tieneOrden>
+      </TramoOrden>
+    </tieneTramoOrden>
+    <tieneTramoOrden>
+      <TramoOrden rdf:ID="TramoOrden_13">
+        <tieneOrden rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</tieneOrden>
       </TramoOrden>
     </tieneTramoOrden>
   </Ruta>
   <swrl:Imp rdf:ID="Rule-2">
     <swrl:head>
       <swrl:AtomList>
-        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
         <rdf:first>
           <swrl:IndividualPropertyAtom>
+            <swrl:argument2>
+              <Estado rdf:ID="EsperaInterseccionPrioritaria"/>
+            </swrl:argument2>
             <swrl:propertyPredicate rdf:resource="#tieneEstado"/>
-            <swrl:argument2 rdf:resource="#EnEspera"/>
             <swrl:argument1 rdf:resource="#x"/>
           </swrl:IndividualPropertyAtom>
         </rdf:first>
+        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
       </swrl:AtomList>
     </swrl:head>
     <swrla:isRuleEnabled rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
     >true</swrla:isRuleEnabled>
     <swrl:body>
       <swrl:AtomList>
+        <rdf:first>
+          <swrl:ClassAtom>
+            <swrl:classPredicate rdf:resource="#Vehiculo"/>
+            <swrl:argument1 rdf:resource="#x"/>
+          </swrl:ClassAtom>
+        </rdf:first>
         <rdf:rest>
           <swrl:AtomList>
             <rdf:rest>
               <swrl:AtomList>
+                <rdf:first>
+                  <swrl:IndividualPropertyAtom>
+                    <swrl:argument2 rdf:resource="#y"/>
+                    <swrl:argument1 rdf:resource="#c"/>
+                    <swrl:propertyPredicate rdf:resource="#estaEnTramo"/>
+                  </swrl:IndividualPropertyAtom>
+                </rdf:first>
                 <rdf:rest>
                   <swrl:AtomList>
                     <rdf:rest>
                       <swrl:AtomList>
                         <rdf:first>
                           <swrl:DatavaluedPropertyAtom>
-                            <swrl:argument1 rdf:resource="#y"/>
                             <swrl:argument2 rdf:resource="#a"/>
+                            <swrl:argument1 rdf:resource="#y"/>
                             <swrl:propertyPredicate rdf:resource="#tieneLongitud"/>
                           </swrl:DatavaluedPropertyAtom>
                         </rdf:first>
                         <rdf:rest>
                           <swrl:AtomList>
-                            <rdf:first>
-                              <swrl:BuiltinAtom>
-                                <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
-                                <swrl:arguments>
-                                  <rdf:List>
-                                    <rdf:first rdf:resource="#b"/>
-                                    <rdf:rest>
-                                      <rdf:List>
-                                        <rdf:rest>
-                                          <rdf:List>
-                                            <rdf:first rdf:resource="#z"/>
-                                            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-                                          </rdf:List>
-                                        </rdf:rest>
-                                        <rdf:first rdf:resource="#a"/>
-                                      </rdf:List>
-                                    </rdf:rest>
-                                  </rdf:List>
-                                </swrl:arguments>
-                              </swrl:BuiltinAtom>
-                            </rdf:first>
                             <rdf:rest>
                               <swrl:AtomList>
                                 <rdf:rest>
@@ -584,26 +578,50 @@
                                                             <rdf:first>
                                                               <swrl:DatavaluedPropertyAtom>
     <swrl:propertyPredicate rdf:resource="#estaEnLongitud"/>
-    <swrl:argument2>
-      <swrl:Variable rdf:ID="i"/>
-    </swrl:argument2>
     <swrl:argument1>
       <swrl:Variable rdf:ID="g"/>
-    </swrl:argument1>                                         </swrl:DatavaluedPropertyAtom>
+    </swrl:argument1>
+    <swrl:argument2>
+      <swrl:Variable rdf:ID="i"/>
+    </swrl:argument2>                                         </swrl:DatavaluedPropertyAtom>
                                                             </rdf:first>
                                                             <rdf:rest>
                                                               <swrl:AtomList>
     <rdf:rest>
       <swrl:AtomList>
+        <rdf:first>
+          <swrl:BuiltinAtom>
+            <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
+            <swrl:arguments>
+              <rdf:List>
+                <rdf:rest>
+                  <rdf:List>
+                    <rdf:rest>
+                      <rdf:List>
+                        <rdf:first rdf:resource="#i"/>
+                        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                      </rdf:List>
+                    </rdf:rest>
+                    <rdf:first>
+                      <swrl:Variable rdf:ID="j"/>
+                    </rdf:first>
+                  </rdf:List>
+                </rdf:rest>
+                <rdf:first>
+                  <swrl:Variable rdf:ID="k"/>
+                </rdf:first>
+              </rdf:List>
+            </swrl:arguments>
+          </swrl:BuiltinAtom>
+        </rdf:first>
         <rdf:rest>
           <swrl:AtomList>
             <rdf:first>
               <swrl:BuiltinAtom>
+                <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
                 <swrl:arguments>
                   <rdf:List>
-                    <rdf:first>
-                      <swrl:Variable rdf:ID="k"/>
-                    </rdf:first>
+                    <rdf:first rdf:resource="#k"/>
                     <rdf:rest>
                       <rdf:List>
                         <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
@@ -613,22 +631,10 @@
                     </rdf:rest>
                   </rdf:List>
                 </swrl:arguments>
-                <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
               </swrl:BuiltinAtom>
             </rdf:first>
             <rdf:rest>
               <swrl:AtomList>
-                <rdf:first>
-                  <swrl:DatavaluedPropertyAtom>
-                    <swrl:propertyPredicate rdf:resource="#tieneVelocidad"/>
-                    <swrl:argument2>
-                      <swrl:Variable rdf:ID="h"/>
-                    </swrl:argument2>
-                    <swrl:argument1>
-                      <swrl:Variable rdf:ID="f"/>
-                    </swrl:argument1>
-                  </swrl:DatavaluedPropertyAtom>
-                </rdf:first>
                 <rdf:rest>
                   <swrl:AtomList>
                     <rdf:first>
@@ -638,12 +644,14 @@
                           <rdf:List>
                             <rdf:rest>
                               <rdf:List>
+                                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                 <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
                                 >0</rdf:first>
-                                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                               </rdf:List>
                             </rdf:rest>
-                            <rdf:first rdf:resource="#h"/>
+                            <rdf:first>
+                              <swrl:Variable rdf:ID="h"/>
+                            </rdf:first>
                           </rdf:List>
                         </swrl:arguments>
                       </swrl:BuiltinAtom>
@@ -651,40 +659,26 @@
                     <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                   </swrl:AtomList>
                 </rdf:rest>
+                <rdf:first>
+                  <swrl:DatavaluedPropertyAtom>
+                    <swrl:argument2 rdf:resource="#h"/>
+                    <swrl:argument1>
+                      <swrl:Variable rdf:ID="f"/>
+                    </swrl:argument1>
+                    <swrl:propertyPredicate rdf:resource="#tieneVelocidad"/>
+                  </swrl:DatavaluedPropertyAtom>
+                </rdf:first>
               </swrl:AtomList>
             </rdf:rest>
           </swrl:AtomList>
         </rdf:rest>
-        <rdf:first>
-          <swrl:BuiltinAtom>
-            <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
-            <swrl:arguments>
-              <rdf:List>
-                <rdf:first rdf:resource="#k"/>
-                <rdf:rest>
-                  <rdf:List>
-                    <rdf:first>
-                      <swrl:Variable rdf:ID="j"/>
-                    </rdf:first>
-                    <rdf:rest>
-                      <rdf:List>
-                        <rdf:first rdf:resource="#i"/>
-                        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-                      </rdf:List>
-                    </rdf:rest>
-                  </rdf:List>
-                </rdf:rest>
-              </rdf:List>
-            </swrl:arguments>
-          </swrl:BuiltinAtom>
-        </rdf:first>
       </swrl:AtomList>
     </rdf:rest>
     <rdf:first>
       <swrl:DatavaluedPropertyAtom>
         <swrl:propertyPredicate rdf:resource="#tieneLongitud"/>
-        <swrl:argument2 rdf:resource="#j"/>
         <swrl:argument1 rdf:resource="#e"/>
+        <swrl:argument2 rdf:resource="#j"/>
       </swrl:DatavaluedPropertyAtom>
     </rdf:first>                                              </swrl:AtomList>
                                                             </rdf:rest>
@@ -692,26 +686,26 @@
                                                         </rdf:rest>
                                                         <rdf:first>
                                                           <swrl:IndividualPropertyAtom>
+                                                            <swrl:argument2 rdf:resource="#e"/>
                                                             <swrl:propertyPredicate rdf:resource="#estaEnTramo"/>
                                                             <swrl:argument1 rdf:resource="#g"/>
-                                                            <swrl:argument2 rdf:resource="#e"/>
                                                           </swrl:IndividualPropertyAtom>
                                                         </rdf:first>
                                                       </swrl:AtomList>
                                                     </rdf:rest>
                                                     <rdf:first>
                                                       <swrl:IndividualPropertyAtom>
+                                                        <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
                                                         <swrl:argument1 rdf:resource="#f"/>
                                                         <swrl:argument2 rdf:resource="#g"/>
-                                                        <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
                                                       </swrl:IndividualPropertyAtom>
                                                     </rdf:first>
                                                   </swrl:AtomList>
                                                 </rdf:rest>
                                                 <rdf:first>
                                                   <swrl:ClassAtom>
-                                                    <swrl:classPredicate rdf:resource="#Vehiculo"/>
                                                     <swrl:argument1 rdf:resource="#f"/>
+                                                    <swrl:classPredicate rdf:resource="#Vehiculo"/>
                                                   </swrl:ClassAtom>
                                                 </rdf:first>
                                               </swrl:AtomList>
@@ -720,9 +714,9 @@
                                         </rdf:rest>
                                         <rdf:first>
                                           <swrl:IndividualPropertyAtom>
-                                            <swrl:argument1 rdf:resource="#d"/>
-                                            <swrl:argument2 rdf:resource="#y"/>
                                             <swrl:propertyPredicate rdf:resource="#tieneTramoSecundario"/>
+                                            <swrl:argument2 rdf:resource="#y"/>
+                                            <swrl:argument1 rdf:resource="#d"/>
                                           </swrl:IndividualPropertyAtom>
                                         </rdf:first>
                                       </swrl:AtomList>
@@ -731,24 +725,45 @@
                                 </rdf:rest>
                                 <rdf:first>
                                   <swrl:BuiltinAtom>
-                                    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
                                     <swrl:arguments>
                                       <rdf:List>
                                         <rdf:rest>
                                           <rdf:List>
+                                            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                             <rdf:first rdf:datatype=
                                             "http://www.w3.org/2001/XMLSchema#int"
                                             >50</rdf:first>
-                                            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                           </rdf:List>
                                         </rdf:rest>
                                         <rdf:first rdf:resource="#b"/>
                                       </rdf:List>
                                     </swrl:arguments>
+                                    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#lessThanOrEqual"/>
                                   </swrl:BuiltinAtom>
                                 </rdf:first>
                               </swrl:AtomList>
                             </rdf:rest>
+                            <rdf:first>
+                              <swrl:BuiltinAtom>
+                                <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
+                                <swrl:arguments>
+                                  <rdf:List>
+                                    <rdf:rest>
+                                      <rdf:List>
+                                        <rdf:rest>
+                                          <rdf:List>
+                                            <rdf:first rdf:resource="#z"/>
+                                            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                                          </rdf:List>
+                                        </rdf:rest>
+                                        <rdf:first rdf:resource="#a"/>
+                                      </rdf:List>
+                                    </rdf:rest>
+                                    <rdf:first rdf:resource="#b"/>
+                                  </rdf:List>
+                                </swrl:arguments>
+                              </swrl:BuiltinAtom>
+                            </rdf:first>
                           </swrl:AtomList>
                         </rdf:rest>
                       </swrl:AtomList>
@@ -762,50 +777,31 @@
                     </rdf:first>
                   </swrl:AtomList>
                 </rdf:rest>
-                <rdf:first>
-                  <swrl:IndividualPropertyAtom>
-                    <swrl:propertyPredicate rdf:resource="#estaEnTramo"/>
-                    <swrl:argument1 rdf:resource="#c"/>
-                    <swrl:argument2 rdf:resource="#y"/>
-                  </swrl:IndividualPropertyAtom>
-                </rdf:first>
               </swrl:AtomList>
             </rdf:rest>
             <rdf:first>
               <swrl:IndividualPropertyAtom>
-                <swrl:argument1 rdf:resource="#x"/>
-                <swrl:argument2 rdf:resource="#c"/>
                 <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
+                <swrl:argument2 rdf:resource="#c"/>
+                <swrl:argument1 rdf:resource="#x"/>
               </swrl:IndividualPropertyAtom>
             </rdf:first>
           </swrl:AtomList>
         </rdf:rest>
-        <rdf:first>
-          <swrl:ClassAtom>
-            <swrl:argument1 rdf:resource="#x"/>
-            <swrl:classPredicate rdf:resource="#Vehiculo"/>
-          </swrl:ClassAtom>
-        </rdf:first>
       </swrl:AtomList>
     </swrl:body>
   </swrl:Imp>
   <swrl:Imp rdf:ID="Rule-1">
     <swrl:body>
       <swrl:AtomList>
+        <rdf:first>
+          <swrl:ClassAtom>
+            <swrl:classPredicate rdf:resource="#Tramo"/>
+            <swrl:argument1 rdf:resource="#x"/>
+          </swrl:ClassAtom>
+        </rdf:first>
         <rdf:rest>
           <swrl:AtomList>
-            <rdf:rest>
-              <swrl:AtomList>
-                <rdf:first>
-                  <swrl:IndividualPropertyAtom>
-                    <swrl:argument1 rdf:resource="#x"/>
-                    <swrl:argument2 rdf:resource="#z"/>
-                    <swrl:propertyPredicate rdf:resource="#tienePosicionGraficaInicial"/>
-                  </swrl:IndividualPropertyAtom>
-                </rdf:first>
-                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
-              </swrl:AtomList>
-            </rdf:rest>
             <rdf:first>
               <swrl:IndividualPropertyAtom>
                 <swrl:argument2 rdf:resource="#y"/>
@@ -813,64 +809,73 @@
                 <swrl:propertyPredicate rdf:resource="#tienePosicionGraficaFinal"/>
               </swrl:IndividualPropertyAtom>
             </rdf:first>
+            <rdf:rest>
+              <swrl:AtomList>
+                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                <rdf:first>
+                  <swrl:IndividualPropertyAtom>
+                    <swrl:argument1 rdf:resource="#x"/>
+                    <swrl:argument2 rdf:resource="#z"/>
+                    <swrl:propertyPredicate rdf:resource="#tienePosicionGraficaInicial"/>
+                  </swrl:IndividualPropertyAtom>
+                </rdf:first>
+              </swrl:AtomList>
+            </rdf:rest>
           </swrl:AtomList>
         </rdf:rest>
-        <rdf:first>
-          <swrl:ClassAtom>
-            <swrl:argument1 rdf:resource="#x"/>
-            <swrl:classPredicate rdf:resource="#Tramo"/>
-          </swrl:ClassAtom>
-        </rdf:first>
       </swrl:AtomList>
     </swrl:body>
     <swrl:head>
       <swrl:AtomList>
-        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
         <rdf:first>
           <swrl:ClassAtom>
             <swrl:argument1 rdf:resource="#x"/>
             <swrl:classPredicate rdf:resource="#TramoPintable"/>
           </swrl:ClassAtom>
         </rdf:first>
+        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
       </swrl:AtomList>
     </swrl:head>
   </swrl:Imp>
   <swrl:Imp rdf:ID="Rule-3">
     <swrl:head>
       <swrl:AtomList>
-        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
         <rdf:first>
           <swrl:IndividualPropertyAtom>
             <swrl:argument1 rdf:resource="#x"/>
+            <swrl:argument2>
+              <Estado rdf:ID="EsperaOposicion"/>
+            </swrl:argument2>
             <swrl:propertyPredicate rdf:resource="#tieneEstado"/>
-            <swrl:argument2 rdf:resource="#EnEspera"/>
           </swrl:IndividualPropertyAtom>
         </rdf:first>
+        <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
       </swrl:AtomList>
     </swrl:head>
     <swrl:body>
       <swrl:AtomList>
-        <rdf:first>
-          <swrl:ClassAtom>
-            <swrl:classPredicate rdf:resource="#Vehiculo"/>
-            <swrl:argument1 rdf:resource="#x"/>
-          </swrl:ClassAtom>
-        </rdf:first>
         <rdf:rest>
           <swrl:AtomList>
             <rdf:rest>
               <swrl:AtomList>
                 <rdf:first>
                   <swrl:IndividualPropertyAtom>
+                    <swrl:argument1 rdf:resource="#c"/>
                     <swrl:propertyPredicate rdf:resource="#estaEnTramo"/>
                     <swrl:argument2 rdf:resource="#y"/>
-                    <swrl:argument1 rdf:resource="#c"/>
                   </swrl:IndividualPropertyAtom>
                 </rdf:first>
                 <rdf:rest>
                   <swrl:AtomList>
                     <rdf:rest>
                       <swrl:AtomList>
+                        <rdf:first>
+                          <swrl:DatavaluedPropertyAtom>
+                            <swrl:argument2 rdf:resource="#a"/>
+                            <swrl:argument1 rdf:resource="#y"/>
+                            <swrl:propertyPredicate rdf:resource="#tieneLongitud"/>
+                          </swrl:DatavaluedPropertyAtom>
+                        </rdf:first>
                         <rdf:rest>
                           <swrl:AtomList>
                             <rdf:rest>
@@ -879,102 +884,98 @@
                                   <swrl:AtomList>
                                     <rdf:rest>
                                       <swrl:AtomList>
+                                        <rdf:first>
+                                          <swrl:IndividualPropertyAtom>
+                                            <swrl:argument2 rdf:resource="#g"/>
+                                            <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
+                                            <swrl:argument1 rdf:resource="#f"/>
+                                          </swrl:IndividualPropertyAtom>
+                                        </rdf:first>
                                         <rdf:rest>
                                           <swrl:AtomList>
-                                            <rdf:first>
-                                              <swrl:IndividualPropertyAtom>
-                                                <swrl:argument2 rdf:resource="#e"/>
-                                                <swrl:propertyPredicate rdf:resource="#estaEnTramo"/>
-                                                <swrl:argument1 rdf:resource="#g"/>
-                                              </swrl:IndividualPropertyAtom>
-                                            </rdf:first>
                                             <rdf:rest>
                                               <swrl:AtomList>
                                                 <rdf:first>
                                                   <swrl:IndividualPropertyAtom>
                                                     <swrl:propertyPredicate rdf:resource="#tieneRuta"/>
-                                                    <swrl:argument2 rdf:resource="#d"/>
                                                     <swrl:argument1 rdf:resource="#x"/>
+                                                    <swrl:argument2 rdf:resource="#d"/>
                                                   </swrl:IndividualPropertyAtom>
                                                 </rdf:first>
                                                 <rdf:rest>
                                                   <swrl:AtomList>
-                                                    <rdf:first>
-                                                      <swrl:IndividualPropertyAtom>
-                                                        <swrl:argument2 rdf:resource="#h"/>
-                                                        <swrl:argument1 rdf:resource="#d"/>
-                                                        <swrl:propertyPredicate rdf:resource="#tieneTramoOrden"/>
-                                                      </swrl:IndividualPropertyAtom>
-                                                    </rdf:first>
                                                     <rdf:rest>
                                                       <swrl:AtomList>
+                                                        <rdf:first>
+                                                          <swrl:DatavaluedPropertyAtom>
+                                                            <swrl:argument2 rdf:resource="#i"/>
+                                                            <swrl:argument1 rdf:resource="#h"/>
+                                                            <swrl:propertyPredicate rdf:resource="#tieneOrden"/>
+                                                          </swrl:DatavaluedPropertyAtom>
+                                                        </rdf:first>
                                                         <rdf:rest>
                                                           <swrl:AtomList>
                                                             <rdf:rest>
                                                               <swrl:AtomList>
     <rdf:rest>
       <swrl:AtomList>
+        <rdf:first>
+          <swrl:DatavaluedPropertyAtom>
+            <swrl:argument1 rdf:resource="#j"/>
+            <swrl:argument2 rdf:resource="#k"/>
+            <swrl:propertyPredicate rdf:resource="#tieneOrden"/>
+          </swrl:DatavaluedPropertyAtom>
+        </rdf:first>
         <rdf:rest>
           <swrl:AtomList>
-            <rdf:first>
-              <swrl:IndividualPropertyAtom>
-                <swrl:argument2>
-                  <swrl:Variable rdf:ID="m"/>
-                </swrl:argument2>
-                <swrl:propertyPredicate rdf:resource="#tieneTramo"/>
-                <swrl:argument1 rdf:resource="#j"/>
-              </swrl:IndividualPropertyAtom>
-            </rdf:first>
             <rdf:rest>
               <swrl:AtomList>
-                <rdf:first>
-                  <swrl:BuiltinAtom>
-                    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
-                    <swrl:arguments>
-                      <rdf:List>
-                        <rdf:first>
-                          <swrl:Variable rdf:ID="n"/>
-                        </rdf:first>
-                        <rdf:rest>
+                <rdf:rest>
+                  <swrl:AtomList>
+                    <rdf:first>
+                      <swrl:BuiltinAtom>
+                        <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#equal"/>
+                        <swrl:arguments>
                           <rdf:List>
                             <rdf:rest>
                               <rdf:List>
-                                <rdf:first rdf:resource="#i"/>
+                                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+                                >1</rdf:first>
                                 <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                               </rdf:List>
                             </rdf:rest>
-                            <rdf:first rdf:resource="#k"/>
+                            <rdf:first>
+                              <swrl:Variable rdf:ID="n"/>
+                            </rdf:first>
                           </rdf:List>
-                        </rdf:rest>
-                      </rdf:List>
-                    </swrl:arguments>
-                  </swrl:BuiltinAtom>
-                </rdf:first>
-                <rdf:rest>
-                  <swrl:AtomList>
+                        </swrl:arguments>
+                      </swrl:BuiltinAtom>
+                    </rdf:first>
                     <rdf:rest>
                       <swrl:AtomList>
                         <rdf:rest>
                           <swrl:AtomList>
                             <rdf:first>
                               <swrl:IndividualPropertyAtom>
-                                <swrl:argument2 rdf:resource="#m"/>
+                                <swrl:propertyPredicate rdf:resource="#tieneTramoPrioritario"/>
                                 <swrl:argument1>
                                   <swrl:Variable rdf:ID="o"/>
                                 </swrl:argument1>
-                                <swrl:propertyPredicate rdf:resource="#tieneTramoPrioritario"/>
+                                <swrl:argument2>
+                                  <swrl:Variable rdf:ID="m"/>
+                                </swrl:argument2>
                               </swrl:IndividualPropertyAtom>
                             </rdf:first>
                             <rdf:rest>
                               <swrl:AtomList>
-                                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                 <rdf:first>
                                   <swrl:IndividualPropertyAtom>
                                     <swrl:propertyPredicate rdf:resource="#tieneTramoSecundario"/>
-                                    <swrl:argument2 rdf:resource="#e"/>
                                     <swrl:argument1 rdf:resource="#o"/>
+                                    <swrl:argument2 rdf:resource="#e"/>
                                   </swrl:IndividualPropertyAtom>
                                 </rdf:first>
+                                <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                               </swrl:AtomList>
                             </rdf:rest>
                           </swrl:AtomList>
@@ -987,36 +988,40 @@
                         </rdf:first>
                       </swrl:AtomList>
                     </rdf:rest>
-                    <rdf:first>
-                      <swrl:BuiltinAtom>
-                        <swrl:arguments>
+                  </swrl:AtomList>
+                </rdf:rest>
+                <rdf:first>
+                  <swrl:BuiltinAtom>
+                    <swrl:arguments>
+                      <rdf:List>
+                        <rdf:first rdf:resource="#n"/>
+                        <rdf:rest>
                           <rdf:List>
+                            <rdf:first rdf:resource="#k"/>
                             <rdf:rest>
                               <rdf:List>
-                                <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
-                                >1</rdf:first>
+                                <rdf:first rdf:resource="#i"/>
                                 <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                               </rdf:List>
                             </rdf:rest>
-                            <rdf:first rdf:resource="#n"/>
                           </rdf:List>
-                        </swrl:arguments>
-                        <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#equal"/>
-                      </swrl:BuiltinAtom>
-                    </rdf:first>
-                  </swrl:AtomList>
-                </rdf:rest>
+                        </rdf:rest>
+                      </rdf:List>
+                    </swrl:arguments>
+                    <swrl:builtin rdf:resource="http://www.w3.org/2003/11/swrlb#subtract"/>
+                  </swrl:BuiltinAtom>
+                </rdf:first>
               </swrl:AtomList>
             </rdf:rest>
+            <rdf:first>
+              <swrl:IndividualPropertyAtom>
+                <swrl:propertyPredicate rdf:resource="#tieneTramo"/>
+                <swrl:argument2 rdf:resource="#m"/>
+                <swrl:argument1 rdf:resource="#j"/>
+              </swrl:IndividualPropertyAtom>
+            </rdf:first>
           </swrl:AtomList>
         </rdf:rest>
-        <rdf:first>
-          <swrl:DatavaluedPropertyAtom>
-            <swrl:propertyPredicate rdf:resource="#tieneOrden"/>
-            <swrl:argument2 rdf:resource="#k"/>
-            <swrl:argument1 rdf:resource="#j"/>
-          </swrl:DatavaluedPropertyAtom>
-        </rdf:first>
       </swrl:AtomList>
     </rdf:rest>
     <rdf:first>
@@ -1029,34 +1034,34 @@
                                                             </rdf:rest>
                                                             <rdf:first>
                                                               <swrl:IndividualPropertyAtom>
-    <swrl:propertyPredicate rdf:resource="#tieneTramo"/>
     <swrl:argument2 rdf:resource="#y"/>
-    <swrl:argument1 rdf:resource="#h"/>                       </swrl:IndividualPropertyAtom>
+    <swrl:argument1 rdf:resource="#h"/>
+    <swrl:propertyPredicate rdf:resource="#tieneTramo"/>      </swrl:IndividualPropertyAtom>
                                                             </rdf:first>
                                                           </swrl:AtomList>
                                                         </rdf:rest>
-                                                        <rdf:first>
-                                                          <swrl:DatavaluedPropertyAtom>
-                                                            <swrl:argument2 rdf:resource="#i"/>
-                                                            <swrl:argument1 rdf:resource="#h"/>
-                                                            <swrl:propertyPredicate rdf:resource="#tieneOrden"/>
-                                                          </swrl:DatavaluedPropertyAtom>
-                                                        </rdf:first>
                                                       </swrl:AtomList>
                                                     </rdf:rest>
+                                                    <rdf:first>
+                                                      <swrl:IndividualPropertyAtom>
+                                                        <swrl:argument2 rdf:resource="#h"/>
+                                                        <swrl:propertyPredicate rdf:resource="#tieneTramoOrden"/>
+                                                        <swrl:argument1 rdf:resource="#d"/>
+                                                      </swrl:IndividualPropertyAtom>
+                                                    </rdf:first>
                                                   </swrl:AtomList>
                                                 </rdf:rest>
                                               </swrl:AtomList>
                                             </rdf:rest>
+                                            <rdf:first>
+                                              <swrl:IndividualPropertyAtom>
+                                                <swrl:propertyPredicate rdf:resource="#estaEnTramo"/>
+                                                <swrl:argument2 rdf:resource="#e"/>
+                                                <swrl:argument1 rdf:resource="#g"/>
+                                              </swrl:IndividualPropertyAtom>
+                                            </rdf:first>
                                           </swrl:AtomList>
                                         </rdf:rest>
-                                        <rdf:first>
-                                          <swrl:IndividualPropertyAtom>
-                                            <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
-                                            <swrl:argument1 rdf:resource="#f"/>
-                                            <swrl:argument2 rdf:resource="#g"/>
-                                          </swrl:IndividualPropertyAtom>
-                                        </rdf:first>
                                       </swrl:AtomList>
                                     </rdf:rest>
                                     <rdf:first>
@@ -1073,10 +1078,10 @@
                                       <rdf:List>
                                         <rdf:rest>
                                           <rdf:List>
+                                            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                             <rdf:first rdf:datatype=
                                             "http://www.w3.org/2001/XMLSchema#int"
                                             >50</rdf:first>
-                                            <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                           </rdf:List>
                                         </rdf:rest>
                                         <rdf:first rdf:resource="#b"/>
@@ -1093,13 +1098,13 @@
                                   <rdf:List>
                                     <rdf:rest>
                                       <rdf:List>
-                                        <rdf:first rdf:resource="#a"/>
                                         <rdf:rest>
                                           <rdf:List>
                                             <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
                                             <rdf:first rdf:resource="#z"/>
                                           </rdf:List>
                                         </rdf:rest>
+                                        <rdf:first rdf:resource="#a"/>
                                       </rdf:List>
                                     </rdf:rest>
                                     <rdf:first rdf:resource="#b"/>
@@ -1110,13 +1115,6 @@
                             </rdf:first>
                           </swrl:AtomList>
                         </rdf:rest>
-                        <rdf:first>
-                          <swrl:DatavaluedPropertyAtom>
-                            <swrl:argument1 rdf:resource="#y"/>
-                            <swrl:argument2 rdf:resource="#a"/>
-                            <swrl:propertyPredicate rdf:resource="#tieneLongitud"/>
-                          </swrl:DatavaluedPropertyAtom>
-                        </rdf:first>
                       </swrl:AtomList>
                     </rdf:rest>
                     <rdf:first>
@@ -1132,13 +1130,19 @@
             </rdf:rest>
             <rdf:first>
               <swrl:IndividualPropertyAtom>
-                <swrl:argument2 rdf:resource="#c"/>
-                <swrl:argument1 rdf:resource="#x"/>
                 <swrl:propertyPredicate rdf:resource="#tienePosicionVehiculo"/>
+                <swrl:argument1 rdf:resource="#x"/>
+                <swrl:argument2 rdf:resource="#c"/>
               </swrl:IndividualPropertyAtom>
             </rdf:first>
           </swrl:AtomList>
         </rdf:rest>
+        <rdf:first>
+          <swrl:ClassAtom>
+            <swrl:classPredicate rdf:resource="#Vehiculo"/>
+            <swrl:argument1 rdf:resource="#x"/>
+          </swrl:ClassAtom>
+        </rdf:first>
       </swrl:AtomList>
     </swrl:body>
   </swrl:Imp>
@@ -1167,6 +1171,7 @@
     <tieneCoordenadaY rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
     >500</tieneCoordenadaY>
   </PosicionGrafica>
+  <Estado rdf:ID="EnEspera"/>
   <Vehiculo rdf:ID="Verdino3">
     <tieneVelocidad rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
     >1.0</tieneVelocidad>

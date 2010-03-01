@@ -797,10 +797,11 @@ public String[] dimeEstados (String[] idVehiculos, String[] tramos, double[] lon
 			 Token t = (Token) result2.next();
              Fact f = (Fact) t.fact(1);
 			estado = f.getSlotValue("object").stringValue(engine.getGlobalContext());
-			if(estado.equals("http://www.isaatc.ull.es/Verdino.owl#EnEspera"))
-			{//actual.fijaEstado("EnEspera");
-			 estados[i]="EnEspera";
-			  	
+			
+			
+			if(!(estado.equals("http://www.isaatc.ull.es/Verdino.owl#Normal")))
+			{//actual.fijaEstado("EsperaInterseccionPrioritaria");
+			 estados[i]=quitaPrefijo(estado);
 			}
 		}	  
 	}

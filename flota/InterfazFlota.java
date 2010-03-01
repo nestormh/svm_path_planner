@@ -190,8 +190,26 @@ estados = interfaz.dimeEstados(vehiculos, tramosActuales, longitudesEnTramos, ve
 	 for (int i=0; i< estados.length; i++)
 	 {System.out.println(vehiculos[i] + "," + estados[i]);
 	 }
+	 
+
+String[] tramosActuales2 = {"Tramo4", "Tramo4"}; 
+String[][] rutas3 = {{"Tramo4", "Tramo5"}, {"Tramo4", "Tramo5"}};
+	 double[] longitudesEnTramos3= {200, 160};
+	interfaz.asignaRutasVehiculos(vehiculos,rutas3);
+estados = interfaz.dimeEstados(vehiculos, tramosActuales2, longitudesEnTramos3, velocidades);
+	 for (int i=0; i< estados.length; i++)
+	 {System.out.println(vehiculos[i] + "," + estados[i]);
 	 }
+	 
+	 String[] tramosActuales4 = {"Tramo7", "Tramo9"}; 
+String[][] rutas4 = {{"Tramo7", "Tramo8"}, {"Tramo9", "Tramo8"}};
+	 double[] longitudesEnTramos4= {245, 245};
+	interfaz.asignaRutasVehiculos(vehiculos,rutas4);
+estados = interfaz.dimeEstados(vehiculos, tramosActuales4, longitudesEnTramos4, velocidades);
+	 for (int i=0; i< estados.length; i++)
+	 {System.out.println(vehiculos[i] + "," + estados[i]);
+	 }
+	 
 
-
-
+	 }
 }
