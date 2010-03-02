@@ -68,29 +68,40 @@ public Conflicto[] dimeEstados (String[] idVehiculos, String[] tramosActuales, d
 public String[] calculaRuta(String origen, String destino) 
 {String[] strings = new String[0];
  try {
- if(origen.equals(destino))
- {strings = new String[1];
-  strings[0]=destino;
-  System.out.println(strings[0]);
- }
- else
- {
+ //if(origen.equals(destino))
+// {strings = new String[1];
+ // strings[0]=destino;
+ // System.out.println(strings[0]);
+ //}
+ //else
+ //{
 Vector vector = distancias.calculaRuta(origen, destino);
   strings = new String[vector.size()];
  for (int i=0; i< vector.size(); i++)
  {strings[i] = distancias.quitaPrefijo((String)vector.elementAt(i));
-  System.out.println(strings[i]);
+  //System.out.println(strings[i]);
  }
- }
+ //}
  } catch (Exception e) {e.printStackTrace();}
  return strings; 
 }
 
 public static void main(String[] args) throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException
 {InterfazFlota interfaz = new InterfazFlota();
-System.out.println("definiciones tramos");
+
+// longitudes en unidades de medida de los tramos
+// para no tener un tramo0, creo el primero extra, aunque no se usen
 	double[] longitudes = {1, 260, 200, 290, 490, 290, 250, 290, 200, 250, 740, 402, 402, 350, 350, 150, 150, 390, 390, 350, 350, 200, 20, 20, 30};
 	 int numeroTramos = longitudes.length;
+// nombre de los tramos. pueden ser escogidos de forma arbitraria (en cualquier formato)
+// aquí se han tomado como "Tramo1", "Tramo2", etc... pero no es necesario	 
+	 String[] nombreTramos = new String[numeroTramos];
+	 for (int j= 0; j< numeroTramos; j++)
+	 {nombreTramos[j] = "Tramo" + (j);
+	 }	 
+// conexiones entre tramos a nivel topológico
+// conexiones[predecesor][sucesor]
+// si =1 hay conexión (en realidad distinto de 0)	 
 	 int[][] conexiones = new int[numeroTramos][numeroTramos];
 	 for(int i = 0; i < numeroTramos; i++)
 	 {for(int j = 0; j < numeroTramos; j++)
@@ -129,57 +140,53 @@ System.out.println("definiciones tramos");
 	 conexiones[16][13]=1;
 	 conexiones[16][11]=1; 
 	  conexiones[16][22]=1; 
-	 String[] nombreTramos = new String[numeroTramos];
-	 for (int j= 0; j< numeroTramos; j++)
-	 {nombreTramos[j] = "Tramo" + (j);
-	 }	 
-		
-	Vector vectorPrioridades = new Vector();
-		Prioridades p1 = new Prioridades("Tramo21", "Tramo25");
-		Prioridades p2 = new Prioridades("Tramo9", "Tramo7");
-		Prioridades p3 = new Prioridades("Tramo10", "Tramo11");
-		Prioridades p4 = new Prioridades("Tramo10", "Tramo23");
-		Prioridades p5 = new Prioridades("Tramo10", "Tramo23");
-	Prioridades p6 = new Prioridades("Tramo16", "Tramo14");
-	Prioridades p7 = new Prioridades("Tramo21", "Tramo24");
-	Prioridades p8 = new Prioridades("Tramo21", "Tramo22");
-	
-		vectorPrioridades.addElement(p1);
-		vectorPrioridades.addElement(p2);
-		vectorPrioridades.addElement(p3);
-		vectorPrioridades.addElement(p4);
-		vectorPrioridades.addElement(p5);
-		vectorPrioridades.addElement(p6);	
-		vectorPrioridades.addElement(p7);
-		vectorPrioridades.addElement(p8);
-	Vector vectorOposiciones = new Vector();
-p1 = new Prioridades("Tramo12", "Tramo11");
-		 p2 = new Prioridades("Tramo12", "Tramo16");
-		 p3 = new Prioridades("Tramo16", "Tramo15");
-		 p4 = new Prioridades("Tramo16", "Tramo12");
-		p5 = new Prioridades("Tramo15", "Tramo19");
-		p6 = new Prioridades("Tramo15", "Tramo20");
-		p7 = new Prioridades("Tramo15", "Tramo18");
-		p8 = new Prioridades("Tramo15", "Tramo17");
-		vectorOposiciones.addElement(p1);
-		vectorOposiciones.addElement(p2);
-		vectorOposiciones.addElement(p3);
-		vectorOposiciones.addElement(p4);
-		vectorOposiciones.addElement(p5);
-		vectorOposiciones.addElement(p6);
-		vectorOposiciones.addElement(p7);
-		vectorOposiciones.addElement(p8);
-	
-
-	 interfaz.inicializacionTramos (nombreTramos, longitudes, conexiones, vectorPrioridades, vectorOposiciones);
-     interfaz.calculaRuta("Tramo4", "Tramo3");
 	 
+// prioridades de tipo tramo sobre tramo
+// Prioridades ("TramoPrioritario", "TramoSecundario");
+// se deben meter en un vector		
+	Vector vectorPrioridades = new Vector();
+		vectorPrioridades.addElement(new Prioridades("Tramo21", "Tramo25"));
+		vectorPrioridades.addElement(new Prioridades("Tramo9", "Tramo7"));
+		vectorPrioridades.addElement(new Prioridades("Tramo10", "Tramo11"));
+		vectorPrioridades.addElement(new Prioridades("Tramo10", "Tramo23"));
+		vectorPrioridades.addElement(new Prioridades("Tramo10", "Tramo23"));
+		vectorPrioridades.addElement(new Prioridades("Tramo16", "Tramo14"));	
+		vectorPrioridades.addElement(new Prioridades("Tramo21", "Tramo24"));
+		vectorPrioridades.addElement(new Prioridades("Tramo21", "Tramo22"));
+		
+// prioridades de tipo oposición sobre tramos
+// son conmutativas, por lo que no hace falta definir la inversa
+// Ej. no se puede invadir el Tramo12 si el Tramo11 está ocupado			
+	Vector vectorOposiciones = new Vector();
+		vectorOposiciones.addElement(new Prioridades("Tramo12", "Tramo11"));
+		vectorOposiciones.addElement(new Prioridades("Tramo12", "Tramo16"));
+		vectorOposiciones.addElement(new Prioridades("Tramo16", "Tramo15"));
+		vectorOposiciones.addElement(new Prioridades("Tramo16", "Tramo12"));
+		vectorOposiciones.addElement(new Prioridades("Tramo15", "Tramo19"));
+		vectorOposiciones.addElement(new Prioridades("Tramo15", "Tramo20"));
+		vectorOposiciones.addElement(new Prioridades("Tramo15", "Tramo18"));
+		vectorOposiciones.addElement(new Prioridades("Tramo15", "Tramo17"));
+	
+// inicialización
+	 interfaz.inicializacionTramos (nombreTramos, longitudes, conexiones, vectorPrioridades, vectorOposiciones);
+// ejemplo de cálculo de ruta
+// OJO. NO FUNCIONA EN EL CASO DE QUE EL DESTINO ESTÉ MÁS ADELANTE EN EL MISMO TRAMO. ES UN CASO PARTICULAR. 
+	 String[] rutaCalculada = interfaz.calculaRuta("Tramo4", "Tramo4");
+		for (int i=0; i< rutaCalculada.length; i++)
+		{System.out.println(rutaCalculada[i]);
+		}	
+
+// inicialización vehículos y de sus rutas (por orden)
+// ejemplo: Primero voy por el tramo 10, y después deseo ir al 12-
+// Necesario para prioridades del tipo oposición (tengo que saber cuál es el próximo tramo a visitar 
+// y ver si hay algún problema
 	 String[] vehiculos = {"Verdino22", "VerdinoEspecial"};
 	String[][] rutas = {{"Tramo10", "Tramo12"}, {"Tramo11", "Tramo21"}};
 	interfaz.inicializacionVehiculos(vehiculos);
 	interfaz.asignaRutasVehiculos(vehiculos,rutas);
 
-	
+// Ejemplo de detección de conflictos
+// tipos EsperaDistancia (dos coches en el mismo tramo) EsperaInterseccionPrioritaria y EsperaOposicion
 	 String[] tramosActuales = {"Tramo10", "Tramo11"}; 
 	 double[] longitudesEnTramos= {720, 240};
 	 double[] velocidades = {10,10};
