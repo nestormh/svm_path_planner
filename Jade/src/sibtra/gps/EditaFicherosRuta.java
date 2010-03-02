@@ -4,6 +4,8 @@
 package sibtra.gps;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -16,14 +18,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -31,9 +31,15 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
+
+import sibtra.util.PanelMuestraVariasTrayectorias;
 
 /**
  * Permite la edición de ficheros de ruta
@@ -44,8 +50,24 @@ import javax.swing.event.ChangeListener;
 @SuppressWarnings("serial")
 public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionListener, ChangeListener, MouseListener {
 
-	private Ruta rutaEspacial=null, rutaTemporal=null, rutaActual=null;
-	private Trayectoria traActual=null;
+	class DatosRuta {
+		Ruta rt;
+		String nombre;
+		int indice;
+		//Resto de detalles lo sacamos del  PanelMuestraVariasTrayectorias
+		public DatosRuta(Ruta ruta, String nom, int ind) {
+			rt=ruta;
+			nombre=nom;
+			indice=ind;
+		}
+	}
+	
+	protected Vector<DatosRuta> vecDRutas=new Vector<DatosRuta>();
+//	private Ruta rutaEspacial=null, rutaTemporal=null, rutaActual=null;
+//	private Trayectoria traActual=null;
+
+	protected int indRutaActual=-1; //ninguna seleccionada
+	
 	private PanelExaminaRuta per;
 	
 	/** Barra de menu ventana principal */
@@ -58,51 +80,60 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	private JMenuItem miAbrir;
 
 	private JFileChooser fc;
-	private JLabel jlNomF;
-	private JCheckBox jcbTemporal;
-	private PanelMuestraRuta pmr;
-	private JCheckBox jcbMarcarDM;
+	private PanelMuestraVariasTrayectorias pmvt;
+
+	private ModeloTablaRutas modeloTR;
 	
 	public EditaFicherosRuta(String titulo) {
 		
 		super(titulo);
 		fc=new JFileChooser(new File("./Rutas"));
-		JPanel cp=(JPanel)getContentPane();
+//		JPanel cp=(JPanel)getContentPane();
+		JPanel cp=new JPanel();
 		cp.setLayout(new BoxLayout(cp,BoxLayout.PAGE_AXIS));
+		cp.setBorder(BorderFactory.createMatteBorder(3, 3, 3, 3, Color.YELLOW));
 		
-		{
-			JPanel jpSur=new JPanel();
-			jlNomF=new JLabel("Fichero: ");
-			jpSur.add(jlNomF);
-
-			jcbTemporal=new JCheckBox("Mostrar Temporal");
-			jcbTemporal.addItemListener(this);
-			jpSur.add(jcbTemporal);
-
-			jcbMarcarDM=new JCheckBox("Marcar usados DM");
-			jcbMarcarDM.addItemListener(this);
-			jpSur.add(jcbMarcarDM);
-	        jpSur.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-			cp.add(jpSur);
-		}
-
 		
-		pmr=new PanelMuestraRuta(null);
-		pmr.getJPanelGrafico().addMouseListener(this); //para recibir el ratón
+		pmvt=new PanelMuestraVariasTrayectorias();
+		pmvt.getJPanelGrafico().addMouseListener(this); //para recibir el ratón
+//		pmr.setPreferredSize(new Dimension(Integer.MAX_VALUE,Integer.MAX_VALUE));
+//		pmr.setMinimumSize(new Dimension(Integer.MAX_VALUE,Integer.MAX_VALUE));
+		
+		//Bajo el mapa solapas con rutas mostradas y punto
+		JTabbedPane panSolapas=new JTabbedPane(JTabbedPane.TOP,JTabbedPane.WRAP_TAB_LAYOUT);
+		//Solapa con tabla con datos de las rutas
+		modeloTR=new ModeloTablaRutas();
+		JTable tablaRutas=new JTable(modeloTR);
+		tablaRutas.setPreferredScrollableViewportSize(new Dimension(500, 70));
+		tablaRutas.setColumnSelectionAllowed(false);
+		tablaRutas.setRowSelectionAllowed(true);
+		tablaRutas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        //fijamos tamaños preferidos
+        for(int i=0; i<modeloTR.getColumnCount();i++)
+        	tablaRutas.getColumnModel().getColumn(i).setPreferredWidth(
+        			modeloTR.getLargoColumna(i)	        			
+        	);
+
+		panSolapas.addTab("Rutas", new JScrollPane(tablaRutas));
+
+		//Panel con datos de los puntos
 		per=new PanelExaminaRuta();
+		panSolapas.addTab("Punto",new JScrollPane(per));		
 
 		
 		//split panel en el centro de la ventana principal
         JSplitPane splitPanel=new JSplitPane(JSplitPane.VERTICAL_SPLIT
 //        		,false  //si al mover la barra componentes se refrescan continuamente
         		,true  //si al mover la barra componentes se refrescan continuamente
-        		,pmr
-        		,new JScrollPane(per)
+        		,pmvt
+        		,panSolapas
         );
-        cp.add(splitPanel);
         splitPanel.setOneTouchExpandable(true);
-        splitPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        splitPanel.setBorder(BorderFactory.createMatteBorder(3, 3, 3, 3, Color.GREEN));
+//		splitPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE,Integer.MAX_VALUE));
+//		splitPanel.setMinimumSize(new Dimension(Integer.MAX_VALUE,Integer.MAX_VALUE));
+        splitPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        cp.add(splitPanel);
 
         //barra de menu
         barraMenu=new JMenuBar();
@@ -125,19 +156,13 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		
 		per.jsDato.addChangeListener(this);
 		
+		setContentPane(cp);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(0, 384, 1024, 742);
 		pack();
 		setVisible(true);
-		setBounds(0, 384, 1024, 742);
 	}
 
-	public Ruta getRutaTemporal(){
-		return rutaTemporal;
-	}
-
-	public Ruta getRutaEspacial(){
-		return rutaEspacial;
-	}
 
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource()==miSalir) {
@@ -151,38 +176,39 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			int devuelto=fc.showOpenDialog(this);
 			if(devuelto==JFileChooser.APPROVE_OPTION) {
 				File file=fc.getSelectedFile();
-				try {
-					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-					rutaEspacial=(Ruta)ois.readObject();
-					rutaTemporal=(Ruta)ois.readObject();
-					ois.close();
-					eligeRuta();
-					jlNomF.setText("Fichero: "+file.getName());
-				} catch (IOException ioe) {
-					System.err.println("Error al abrir el fichero " + file.getName());
-					System.err.println(ioe.getMessage());
-				} catch (ClassNotFoundException cnfe) {
-					System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
-				}
+				cargaFichero(file);
 			}
 			return;
 		}
 	}
-	
-	/** Elige ruta activa según {@link #jcbTemporal} */
-	private void eligeRuta() {
-		if (jcbTemporal.isSelected()) {
-			per.setRuta(rutaTemporal);
-			pmr.setRuta(rutaTemporal);
-			rutaActual=rutaTemporal;
-		} else {
-			per.setRuta(rutaEspacial);
-			pmr.setRuta(rutaEspacial);
-			rutaActual=rutaEspacial;
-		}
-		traActual=new Trayectoria(rutaActual);
-	}
 
+
+	/**
+	 * @param file Fichero a cargar
+	 */
+	protected void cargaFichero(File file) {
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+			Ruta ruta=(Ruta)ois.readObject();
+			vecDRutas.add(new DatosRuta(ruta,file.getName()+"_Espacial"
+					,pmvt.añadeTrayectoria(new Trayectoria(ruta) ) )
+			);
+
+			ruta=(Ruta)ois.readObject();
+			vecDRutas.add(new DatosRuta(ruta,file.getName()+"_Temporal"
+					,pmvt.añadeTrayectoria(new Trayectoria(ruta) ) )
+			);
+			ois.close();
+			
+		} catch (IOException ioe) {
+			System.err.println("Error al abrir el fichero " + file.getName());
+			System.err.println(ioe.getMessage());
+		} catch (ClassNotFoundException cnfe) {
+			System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
+		}
+		modeloTR.actualiza();
+	}
+	
     /** Metodo para terminar la ejecución */
     protected void Terminar() {
     	System.out.println("Terminamos ...");
@@ -190,30 +216,18 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	}
 
 	public void itemStateChanged(ItemEvent e) {
-		if(e.getSource()==jcbTemporal)
-			eligeRuta();
-		if(e.getSource()==jcbMarcarDM);
-		
-			if(e.getStateChange()==ItemEvent.SELECTED) {
-				pmr.setMarcados(per.ruta.indiceConsideradosDM);
-				pmr.actualiza();
-			} else { 
-				pmr.setMarcados(null);
-				pmr.actualiza();
-			}
 	}
 	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		new EditaFicherosRuta("Examina Fich Ruta");
-	}
-
-
+	/** Para gestionar los cambios en el punto seleccionado en el {@link #per} */
 	public void stateChanged(ChangeEvent arg0) {
-		GPSData npto=per.ruta.getPunto((Integer)per.jsDato.getValue());
-		pmr.nuevoPunto(npto);
+		GPSData ultPto=per.ruta.getPunto((Integer)per.jsDato.getValue());
+		double x=ultPto.getXLocal();
+		double y=ultPto.getYLocal();
+		double yaw=ultPto.getAngulo();
+		if(ultPto.getAngulosIMU()!=null)
+			yaw=Math.toRadians(ultPto.getAngulosIMU().getYaw());
+		pmvt.situaCoche(x, y, yaw);
+		pmvt.actualiza();
 	}
 	
 	public void mouseClicked(MouseEvent e) {
@@ -224,22 +238,23 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	/** 
 	 * Si es pulsación 1 seleccionamos punto más cercano para representar
 	 * Si es 3 mostramos menu del punto
-	 * @param e
+	 * @param even evento
 	 */
 	public void mousePressed(MouseEvent even) {
-		if(rutaActual==null)
+		if(indRutaActual<0)
 			return; //no hay ruta
 		//Buscamos índice del punto más cercano de la ruta correspondiente
-		Point2D.Double pto=pmr.pixel2Point(even.getX(), even.getY());
+		Point2D.Double pto=pmvt.pixel2Point(even.getX(), even.getY());
 		System.out.println(getClass().getName()+": Pulsado Boton "+even.getButton()
 				+" en posición: ("+even.getX()+","+even.getY()+")"
 				+"  ("+pto.getX()+","+pto.getY()+")  "
 		);
 		//indice y distancia del más cercano usando la trayectoria
+		Trayectoria traActual=pmvt.getTrayectoria(vecDRutas.get(indRutaActual).indice);
 		traActual.situaCoche(pto.getX(),pto.getY());
 		double distMin=traActual.distanciaAlMasCercano();
 		int indMin=traActual.indiceMasCercano();
-		double escala=pmr.getEscala();
+		double escala=pmvt.getEscala();
 		System.out.println(getClass().getName()+": Punto más cercano a "+distMin
 				+" indice:"+indMin+ " escala:"+escala+ " veintaba:"+escala/10);
 		if(!Double.isNaN(escala)) {
@@ -280,8 +295,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				rutaActual.remove(ipto);
-				eligeRuta();
+				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
+				dtRtAct.rt.remove(ipto);
+				pmvt.setTrayectoria(dtRtAct.indice, new Trayectoria(dtRtAct.rt));
+				pmvt.actualiza();
 			}
 		});
 		item = new JMenuItem("Borrar Hasta Principio");
@@ -289,8 +306,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				rutaActual.removeToBegin(ipto);
-				eligeRuta();
+				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
+				dtRtAct.rt.removeToBegin(ipto);
+				pmvt.setTrayectoria(dtRtAct.indice, new Trayectoria(dtRtAct.rt));
+				pmvt.actualiza();
 			}
 		});
 		item = new JMenuItem("Borrar Hasta Final");
@@ -298,12 +317,183 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				rutaActual.removeToEnd(ipto);
-				eligeRuta();
+				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
+				dtRtAct.rt.removeToEnd(ipto);
+				pmvt.setTrayectoria(dtRtAct.indice, new Trayectoria(dtRtAct.rt));
+				pmvt.actualiza();
 			}
 		});
 		popup.show(me.getComponent(), me.getX(), me.getY());
 
 	}
+
+	/**
+	 * @param row
+	 */
+	protected void cambiaRutaActual(int row) {
+		indRutaActual=row;
+		per.setRuta(vecDRutas.get(indRutaActual).rt);
+	}
+
+	final static int COL_ACT=0;
+	final static int COL_NOM=1;
+	final static int COL_TAM=2;
+	final static int COL_VISTA=3;
+	final static int COL_COLOR=4;
+	final static int COL_PUNTOS=5;
+	final static int COL_RUMBO=6;
+
+	class ModeloTablaRutas extends AbstractTableModel {
+    	String[] nombColumnas=new String[7];
+    	
+    	public ModeloTablaRutas() {
+			super();
+			//rellenamos los Titulos
+			nombColumnas[COL_ACT]="Act";
+			nombColumnas[COL_NOM]="Nombre";
+			nombColumnas[COL_TAM]="Tamaño";
+			nombColumnas[COL_VISTA]="Ver";
+			nombColumnas[COL_COLOR]="Color";
+			nombColumnas[COL_PUNTOS]="Puntos";
+			nombColumnas[COL_RUMBO]="Rumbo";
+    	}
+    			
+
+		public int getColumnCount() {
+			return nombColumnas.length;
+		}
+
+		public int getRowCount() {
+			return vecDRutas.size();
+		}
+
+		public boolean isCellEditable(int row, int col) { 
+        	return (col==COL_VISTA) || (col==COL_PUNTOS)
+        	|| (col==COL_RUMBO) || (col==COL_ACT);  
+        }
+
+
+		public String getColumnName(int col) {
+            return nombColumnas[col];
+        }
+		public Object getValueAt(int row, int col) {
+			//sacamos datos de vecRutas
+			if(vecDRutas==null || vecDRutas.size()<=row)
+				return null;
+			DatosRuta dra=vecDRutas.get(row);
+			switch(col) {
+			case COL_NOM:
+				return dra.nombre;
+			case COL_TAM:
+				return dra.rt.getNumPuntos();
+			case COL_COLOR:
+				return pmvt.getColor(dra.indice);
+			case COL_PUNTOS:
+				return pmvt.isPuntos(dra.indice);
+			case COL_RUMBO:
+				return pmvt.isRumbo(dra.indice);
+			case COL_VISTA:
+				return pmvt.isMostrado(dra.indice);
+			case COL_ACT:
+				return row==indRutaActual;
+			default:
+				return null;			
+			}
+		}
+        public void setValueAt(Object value, int row, int col) {
+			DatosRuta dra=vecDRutas.get(row);
+        	switch (col) {
+        	case COL_PUNTOS:
+        		pmvt.setPuntos(dra.indice, (Boolean)value);
+        		break;
+        	case COL_VISTA:
+        		//solo desactivamos ni no es la actual
+        		if((Boolean)value || row!=indRutaActual)
+        			pmvt.setMostrado(dra.indice, (Boolean)value);
+        		break;
+        	case COL_RUMBO:
+        		pmvt.setRumbo(dra.indice, (Boolean)value);
+        		break;
+        	case COL_ACT:
+        		if(row!=indRutaActual) { //solo cambiamos al pinchar en otra fila
+        			int oldAct=indRutaActual;
+        			//La ruta actual siempre debe estar visible
+        			pmvt.setMostrado(dra.indice, true);
+        			fireTableCellUpdated(row, COL_VISTA); //para que se muestre marca
+        			if(oldAct>=0) //desmarcamos el anterior
+        				fireTableCellUpdated(oldAct, COL_ACT);
+        			cambiaRutaActual(row);
+        			break;
+        		}
+        	default:
+        		return;
+        	}
+            fireTableCellUpdated(row, col);
+            pmvt.actualiza();
+        }
+
+        public Class getColumnClass(int col) {
+        	switch (col) {
+        	case COL_PUNTOS:
+        	case COL_RUMBO:
+        	case COL_VISTA:
+        	case COL_ACT:
+        		return Boolean.class;
+        	case COL_TAM:
+        		return Integer.class;
+        	case COL_NOM:
+        	case COL_COLOR:
+        	default:
+        		return String.class;
+        	}
+        }
+        
+        /** @return el largo maximo de los elementos que aparecen en la comulna. 
+         * Se computa del maximo texto a sacar y el titulo
+         */
+    	public int getLargoColumna(int col) {
+    		int largo=nombColumnas[col].length();
+    		int lact=0;
+        	// Sacamos los datos de vecLA
+        	if(vecDRutas==null)
+        		return 0;
+        	switch (col) {
+        	case COL_PUNTOS:
+        	case COL_RUMBO:
+        	case COL_VISTA:
+        		break;
+        	case COL_NOM:
+        		for(int i=0; i<vecDRutas.size();i++)
+        			if((lact=vecDRutas.get(i).nombre.length())>largo)
+        				largo=lact;
+        		break;
+        	case COL_COLOR:
+        		for(int i=0; i<vecDRutas.size();i++)
+        			if((lact=pmvt.getColor(vecDRutas.get(i).indice).toString().length())>largo)
+        				largo=lact;
+        		break;
+        	case COL_TAM:
+        		largo=Math.max(largo,(" "+Integer.MAX_VALUE).length());
+        		break;
+        	}
+    		return largo*10;
+    	}
+		public void actualiza() {
+			fireTableDataChanged();
+		}
+
+	}
+
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		EditaFicherosRuta efr=new EditaFicherosRuta("Examina Fich Ruta");
+		efr.cargaFichero(new File("Rutas/Universidad/Tramos_EntradaLargaSalida"));
+		efr.cargaFichero(new File("Rutas/Universidad/Tramos_NaveSalida"));
+		
+	}
+
 
 }
