@@ -9,6 +9,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.GeneralPath;
@@ -89,6 +91,17 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 			return escalasD[jcbEscalas.getSelectedIndex()];
 		else
 			return Double.NaN;
+	}
+	
+	/** Fija una escala mayor o igual de la indicada (o la máxima considerada) */
+	public void setEscala(double escDes) {
+		int iUsar=escalasD.length-1;
+		for (int i=0; i<escalasD.length; i++)
+			if(escDes<=escalasD[i]) {
+				iUsar=i;
+				break; //no seguimos buscando
+			}
+		jcbEscalas.setSelectedIndex(iUsar);		
 	}
 	/**
 	 * Convierte punto en el mundo real a punto en la pantalla. 
@@ -264,6 +277,30 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 		JPanelGrafico.addMouseListener(this);
 		JPanelGrafico.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		
+		//para cuando se rezisa
+		JPanelGrafico.addComponentListener(new ComponentListener() {
+
+			public void componentHidden(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			public void componentMoved(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			public void componentResized(ComponentEvent e) {
+				restaurar=true;
+				JPanelGrafico.repaint();
+			}
+
+			public void componentShown(ComponentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 		add(JPanelGrafico);
 		
 		{

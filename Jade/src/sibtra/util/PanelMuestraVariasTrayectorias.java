@@ -481,5 +481,20 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 		trays.remove(i);
 	}
 
+	public void setSeguirCoche(boolean val) {
+		jcbSeguirCoche.setSelected(val);
+	}
 
+	public boolean isSeguirCoche() {
+		return jcbSeguirCoche.isSelected();
+	}
+	
+	public void setMostrarCoche(boolean val) {
+		jcbMostrarCoche.setSelected(val);
+	}
+	
+	public boolean isMostrarCoche() {
+		return jcbMostrarCoche.isSelected();
+	}
+	
 }

@@ -20,10 +20,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Vector;
 
+import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -35,9 +40,12 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 
 import sibtra.util.PanelMuestraVariasTrayectorias;
 
@@ -96,6 +104,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		
 		pmvt=new PanelMuestraVariasTrayectorias();
 		pmvt.getJPanelGrafico().addMouseListener(this); //para recibir el ratón
+		pmvt.setSeguirCoche(false);
+		pmvt.setMostrarCoche(false);
+		pmvt.setEscala(50);
 //		pmr.setPreferredSize(new Dimension(Integer.MAX_VALUE,Integer.MAX_VALUE));
 //		pmr.setMinimumSize(new Dimension(Integer.MAX_VALUE,Integer.MAX_VALUE));
 		
@@ -108,6 +119,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		tablaRutas.setColumnSelectionAllowed(false);
 		tablaRutas.setRowSelectionAllowed(true);
 		tablaRutas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		//para representación y edición del color
+		tablaRutas.setDefaultRenderer(Color.class, new ColorRenderer(true));
+		tablaRutas.setDefaultEditor(Color.class, new ColorEditor());
+
         //fijamos tamaños preferidos
         for(int i=0; i<modeloTR.getColumnCount();i++)
         	tablaRutas.getColumnModel().getColumn(i).setPreferredWidth(
@@ -367,11 +382,6 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			return vecDRutas.size();
 		}
 
-		public boolean isCellEditable(int row, int col) { 
-        	return (col==COL_VISTA) || (col==COL_PUNTOS)
-        	|| (col==COL_RUMBO) || (col==COL_ACT);  
-        }
-
 
 		public String getColumnName(int col) {
             return nombColumnas[col];
@@ -400,6 +410,12 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				return null;			
 			}
 		}
+		
+		public boolean isCellEditable(int row, int col) { 
+        	return (col==COL_VISTA) || (col==COL_PUNTOS)
+        	|| (col==COL_RUMBO) || (col==COL_ACT) || (col==COL_COLOR);  
+        }
+
         public void setValueAt(Object value, int row, int col) {
 			DatosRuta dra=vecDRutas.get(row);
         	switch (col) {
@@ -425,6 +441,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         			cambiaRutaActual(row);
         			break;
         		}
+        	case COL_COLOR:
+        		pmvt.setColor(dra.indice, (Color)value);
+        		break;
         	default:
         		return;
         	}
@@ -441,8 +460,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         		return Boolean.class;
         	case COL_TAM:
         		return Integer.class;
-        	case COL_NOM:
         	case COL_COLOR:
+        		return Color.class;
+        	case COL_NOM:
         	default:
         		return String.class;
         	}
@@ -483,7 +503,113 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		}
 
 	}
+	
+	/** Sacado de los ejemplo de JTable de Swing 
+	 * @see http://java.sun.com/docs/books/tutorial/uiswing/examples/components/index.html#TableDialogEditDemo
+	 */
+	public class ColorRenderer extends JLabel implements TableCellRenderer {
+		Border unselectedBorder = null;
+		Border selectedBorder = null;
+		boolean isBordered = true;
 
+		public ColorRenderer(boolean isBordered) {
+			this.isBordered = isBordered;
+			setOpaque(true); //MUST do this for background to show up.
+		}
+
+		public Component getTableCellRendererComponent(
+				JTable table, Object color,
+				boolean isSelected, boolean hasFocus,
+				int row, int column) {
+			Color newColor = (Color)color;
+			setBackground(newColor);
+			if (isBordered) {
+				if (isSelected) {
+					if (selectedBorder == null) {
+						selectedBorder = BorderFactory.createMatteBorder(2,5,2,5,
+								table.getSelectionBackground());
+					}
+					setBorder(selectedBorder);
+				} else {
+					if (unselectedBorder == null) {
+						unselectedBorder = BorderFactory.createMatteBorder(2,5,2,5,
+								table.getBackground());
+					}
+					setBorder(unselectedBorder);
+				}
+			}
+			setToolTipText("RGB value: " + newColor.getRed() + ", "
+					+ newColor.getGreen() + ", "
+					+ newColor.getBlue());
+			return this;
+		}
+	}
+
+	/** Sacado de los ejemplo de JTable de Swing 
+	 * @see http://java.sun.com/docs/books/tutorial/uiswing/examples/components/index.html#TableDialogEditDemo
+	 */
+	public class ColorEditor extends AbstractCellEditor implements TableCellEditor,	ActionListener {
+		Color currentColor;
+		JButton button;
+		JColorChooser colorChooser;
+		JDialog dialog;
+		protected static final String EDIT = "edit";
+
+		public ColorEditor() {
+			//Set up the editor (from the table's point of view),
+			//which is a button.
+			//This button brings up the color chooser dialog,
+			//which is the editor from the user's point of view.
+			button = new JButton();
+			button.setActionCommand(EDIT);
+			button.addActionListener(this);
+			button.setBorderPainted(false);
+
+			//Set up the dialog that the button brings up.
+			colorChooser = new JColorChooser();
+			dialog = JColorChooser.createDialog(button,
+					"Pick a Color",
+					true,  //modal
+					colorChooser,
+					this,  //OK button handler
+					null); //no CANCEL button handler
+		}
+
+		/**
+		 * Handles events from the editor button and from
+		 * the dialog's OK button.
+		 */
+		public void actionPerformed(ActionEvent e) {
+			if (EDIT.equals(e.getActionCommand())) {
+				//The user has clicked the cell, so
+				//bring up the dialog.
+				button.setBackground(currentColor);
+				colorChooser.setColor(currentColor);
+				dialog.setVisible(true);
+
+				//Make the renderer reappear.
+				fireEditingStopped();
+
+			} else { //User pressed dialog's "OK" button.
+				currentColor = colorChooser.getColor();
+			}
+		}
+
+		//Implement the one CellEditor method that AbstractCellEditor doesn't.
+		public Object getCellEditorValue() {
+			return currentColor;
+		}
+
+		//Implement the one method defined by TableCellEditor.
+		public Component getTableCellEditorComponent(JTable table,
+				Object value,
+				boolean isSelected,
+				int row,
+				int column) {
+			currentColor = (Color)value;
+			return button;
+		}
+	}
 	
 	/**
 	 * @param args
