@@ -26,7 +26,7 @@ public class Ruta implements Serializable {
 	private static final long serialVersionUID = 3L;
 
 	/** contendrá los puntos de la ruta */
-	Vector<GPSData> puntos;
+	Vector<GPSData> puntos=null;
 
 	/** Punto mas cercano al centro de la ruta */
 	GPSData centro = null;
@@ -61,6 +61,30 @@ public class Ruta implements Serializable {
 	double dmMax;
 	/** Desviación estandar de la desviación magnética media */
 	double desEstDM;
+
+	/** Constructor de copia*/
+	public Ruta(Ruta ruta) {
+		if(ruta.puntos!=null) {
+			puntos=new Vector<GPSData>(ruta.puntos.size());
+			for(GPSData pta: ruta.puntos)
+				puntos.add(new GPSData(pta));
+		}
+		if(ruta.centro!=null)
+			centro=new GPSData(ruta.centro);
+		tamMaximo=ruta.tamMaximo;
+		esEspacial=ruta.esEspacial;
+		minDistOperativa=ruta.minDistOperativa;
+		if(ruta.T!=null)
+			T=ruta.T.copy();
+		desviacionM=ruta.desviacionM;
+		umbralDesviacion=ruta.umbralDesviacion;
+		if(ruta.indiceConsideradosDM!=null)
+			indiceConsideradosDM=new Vector<Integer>(ruta.indiceConsideradosDM);
+		if(ruta.dmI!=null)
+			dmI=new Vector<Double>(ruta.dmI);
+		dmMax=ruta.dmMax;
+		desEstDM=ruta.desEstDM;
+	}
 
 	/** @return distancia cartesiana entre los dos puntos calculanda usando las coordenadas locales */
 	public static double distEntrePuntos(GPSData ptoA,GPSData ptoB){
@@ -111,6 +135,8 @@ public class Ruta implements Serializable {
 		tamMaximo=tamañoMaximo;
 		this.esEspacial=esEspacial;
 	}
+
+
 
 	/**
 	 * Actualiza el {@link #centro} y la matriz de rotación {@link #T} que definen sistema de
@@ -307,6 +333,24 @@ public class Ruta implements Serializable {
 			puntos.get(ind-1).setAngulo(puntos.get(ind-2).getAngulo());
 	}
 	
+
+	/** Divide la ruta actual desde al punto indicado.
+	 * La ruta actual se recorta y de devuelve la ruta nueva
+	 * con el resto de puntos
+	 */
+	public Ruta divideFrom(int ind) {
+		if(ind<0 || ind>=puntos.size())
+			throw new IllegalArgumentException("Indice de punto para dividir ("+ind+") fuera de rango");
+		//obtenemos ruta copia de la actual
+		Ruta resto=new Ruta(this);
+		//le quitamos todos los puntos anteriores
+		resto.removeToBegin(ind>0?(ind-1):ind);
+		//a esta le quitamos los puntos hasta el final
+		removeToEnd(ind);
+		return resto;
+	}
+
+	
 	/** @return último punto de la ruta, null si no hay ninguno */
 	public GPSData getUltimoPto() {
 		if(puntos.size()==0)
@@ -455,4 +499,5 @@ public class Ruta implements Serializable {
 	public static void main(String[] args) {
 
 	}
+
 }

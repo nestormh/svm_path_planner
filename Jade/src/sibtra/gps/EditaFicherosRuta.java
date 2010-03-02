@@ -232,6 +232,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
 		}
 		modeloTR.actualiza();
+		pmvt.actualiza();
 	}
 	
     /** Metodo para terminar la ejecución */
@@ -371,6 +372,29 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			}
 		});
 		
+		//Dividir ruta en dos a partir de este punto
+		item = new JMenuItem("Patir desde aquí");
+		popup.add(item);
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e)
+			{
+				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
+				Ruta segunda=dtRtAct.rt.divideFrom(ipto);
+				//para que se actualice el número de puntos
+				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(dtRtAct.rt));
+				
+				añadeRuta(segunda, dtRtAct.nombre+"_B");
+				//ponemos puntos y rumbo como la seleccionada
+				int indNueva=vecDRutas.size()-1;
+				pmvt.setPuntos(indNueva, pmvt.isPuntos(indRutaActual));
+				pmvt.setRumbo(indNueva, pmvt.isRumbo(indRutaActual));
+				modeloTR.fireTableRowsInserted(indNueva, indNueva);
+				
+				pmvt.actualiza();
+			}
+		});
+		
 		popup.show(me.getComponent(), me.getX(), me.getY());
 
 	}
@@ -454,7 +478,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			DatosRuta dra=vecDRutas.get(row);
         	switch (col) {
         	case COL_PUNTOS:
-        		pmvt.setPuntos(indRutaActual, (Boolean)value);
+        		pmvt.setPuntos(row, (Boolean)value);
         		break;
         	case COL_VISTA:
         		//solo desactivamos ni no es la actual
@@ -462,7 +486,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         			pmvt.setMostrado(row, (Boolean)value);
         		break;
         	case COL_RUMBO:
-        		pmvt.setRumbo(indRutaActual, (Boolean)value);
+        		pmvt.setRumbo(row, (Boolean)value);
         		break;
         	case COL_ACT:
         		if(row!=indRutaActual) { //solo cambiamos al pinchar en otra fila
@@ -476,7 +500,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         		}
     			break;
         	case COL_COLOR:
-        		pmvt.setColor(indRutaActual, (Color)value);
+        		pmvt.setColor(row, (Color)value);
         		break;
         	case COL_NOM:
         		dra.nombre=(String)value;
