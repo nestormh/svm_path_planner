@@ -244,22 +244,34 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 		}
 	}
 
-	/** Los límites que necesitamos son los de la ruta a representar */
+	/** Los límites que necesitamos son los de la ruta a representar.
+	 * Sólo tenemos en cuenta las trayectorias que se están mostrando
+	 */
 	protected double[] limites() {
-		double axis[]=super.limites();
-		for(ParamTra ptAct: trays) {
-			axis[0]=UtilCalculos.minimo(axis[0],ptAct.trayec.x);
-			axis[1]=UtilCalculos.maximo(axis[1],ptAct.trayec.x);
-			axis[2]=UtilCalculos.minimo(axis[2],ptAct.trayec.y);
-			axis[3]=UtilCalculos.maximo(axis[3],ptAct.trayec.y);
-		}
+		//double axis[]=super.limites();
+		//no tomamos en cuenta los limites del padre
+		double axis[]={Double.MAX_VALUE,Double.MIN_VALUE,
+				Double.MAX_VALUE,Double.MIN_VALUE};
+		boolean algunoMostrado=false;
+		for(ParamTra ptAct: trays)
+			if(ptAct.mostrar){
+				algunoMostrado=true;
+				axis[0]=UtilCalculos.minimo(axis[0],ptAct.trayec.x);
+				axis[1]=UtilCalculos.maximo(axis[1],ptAct.trayec.x);
+				axis[2]=UtilCalculos.minimo(axis[2],ptAct.trayec.y);
+				axis[3]=UtilCalculos.maximo(axis[3],ptAct.trayec.y);
+			}
 		if(!Double.isNaN(posXCoche)) {
+			algunoMostrado=true;
 			if(posXCoche<axis[0]) axis[0]=posXCoche;
 			if(posXCoche>axis[1]) axis[1]=posXCoche;
 			if(posYCoche<axis[2]) axis[2]=posYCoche;
 			if(posYCoche>axis[3]) axis[3]=posYCoche;
 
 		}
+		if(!algunoMostrado)
+			//si no hay ninguna mostrada ni hay coche, usamos los del padre
+			axis=super.limites();
 		return axis;
 	}
 

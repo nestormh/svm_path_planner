@@ -90,6 +90,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	private PanelMuestraVariasTrayectorias pmvt;
 
 	private ModeloTablaRutas modeloTR;
+	private JTable tablaRutas;
 	
 	public EditaFicherosRuta(String titulo) {
 		
@@ -98,7 +99,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 //		JPanel cp=(JPanel)getContentPane();
 		JPanel cp=new JPanel();
 		cp.setLayout(new BoxLayout(cp,BoxLayout.PAGE_AXIS));
-		cp.setBorder(BorderFactory.createMatteBorder(3, 3, 3, 3, Color.YELLOW));
+//		cp.setBorder(BorderFactory.createMatteBorder(3, 3, 3, 3, Color.YELLOW));
 		
 		
 		pmvt=new PanelMuestraVariasTrayectorias();
@@ -113,7 +114,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		JTabbedPane panSolapas=new JTabbedPane(JTabbedPane.TOP,JTabbedPane.WRAP_TAB_LAYOUT);
 		//Solapa con tabla con datos de las rutas
 		modeloTR=new ModeloTablaRutas();
-		JTable tablaRutas=new JTable(modeloTR);
+		tablaRutas=new JTable(modeloTR);
 		tablaRutas.setPreferredScrollableViewportSize(new Dimension(500, 70));
 		tablaRutas.setColumnSelectionAllowed(false);
 		tablaRutas.setRowSelectionAllowed(true);
@@ -122,11 +123,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		tablaRutas.setDefaultRenderer(Color.class, new ColorRenderer(true));
 		tablaRutas.setDefaultEditor(Color.class, new ColorEditor());
 
-        //fijamos tamaños preferidos
-        for(int i=0; i<modeloTR.getColumnCount();i++)
-        	tablaRutas.getColumnModel().getColumn(i).setPreferredWidth(
-        			modeloTR.getLargoColumna(i)	        			
-        	);
+        ajustaAnchos();
 
 		panSolapas.addTab("Rutas", new JScrollPane(tablaRutas));
 
@@ -143,7 +140,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         		,panSolapas
         );
         splitPanel.setOneTouchExpandable(true);
-        splitPanel.setBorder(BorderFactory.createMatteBorder(3, 3, 3, 3, Color.GREEN));
+//        splitPanel.setBorder(BorderFactory.createMatteBorder(3, 3, 3, 3, Color.GREEN));
 //		splitPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE,Integer.MAX_VALUE));
 //		splitPanel.setMinimumSize(new Dimension(Integer.MAX_VALUE,Integer.MAX_VALUE));
         splitPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -178,6 +175,19 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	}
 
 
+	/**
+	 * @param tablaRutas
+	 */
+	private void ajustaAnchos() {
+		//fijamos tamaños preferidos
+        for(int i=0; i<modeloTR.getColumnCount();i++)
+        	tablaRutas.getColumnModel().getColumn(i).setPreferredWidth(
+        			modeloTR.getLargoColumna(i)	        			
+        	);
+        tablaRutas.repaint();
+	}
+
+
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource()==miSalir) {
 			Terminar();
@@ -200,6 +210,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		if(pmvt.añadeTrayectoria(new Trayectoria(ruta))!=vecDRutas.size() )
 			throw new IllegalStateException("Trayectoria no tendrá el mismo índice en el panel");
 		vecDRutas.add( new DatosRuta(ruta,nombre) );
+		ajustaAnchos();
 	}
 	
 	/**
@@ -325,6 +336,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			{
 				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
 				dtRtAct.rt.remove(ipto);
+				//para que se actualice el número de puntos
+				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
 				pmvt.setTrayectoria(indRutaActual, new Trayectoria(dtRtAct.rt));
 				pmvt.actualiza();
 			}
@@ -337,6 +350,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			{
 				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
 				dtRtAct.rt.removeToBegin(ipto);
+				//para que se actualice el número de puntos
+				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
 				pmvt.setTrayectoria(indRutaActual, new Trayectoria(dtRtAct.rt));
 				pmvt.actualiza();
 			}
@@ -349,6 +364,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			{
 				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
 				dtRtAct.rt.removeToEnd(ipto);
+				//para que se actualice el número de puntos
+				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
 				pmvt.setTrayectoria(indRutaActual, new Trayectoria(dtRtAct.rt));
 				pmvt.actualiza();
 			}
@@ -429,7 +446,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		
 		public boolean isCellEditable(int row, int col) { 
         	return (col==COL_VISTA) || (col==COL_PUNTOS)
-        	|| (col==COL_RUMBO) || (col==COL_ACT) || (col==COL_COLOR);  
+        	|| (col==COL_RUMBO) || (col==COL_ACT) || (col==COL_COLOR)
+        	|| (col==COL_NOM);  
         }
 
         public void setValueAt(Object value, int row, int col) {
@@ -460,6 +478,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         	case COL_COLOR:
         		pmvt.setColor(indRutaActual, (Color)value);
         		break;
+        	case COL_NOM:
+        		dra.nombre=(String)value;
         	default:
         		return;
         	}
@@ -500,8 +520,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         		break;
         	case COL_NOM:
         		for(int i=0; i<vecDRutas.size();i++)
-        			if((lact=vecDRutas.get(i).nombre.length())>largo)
-        				largo=lact;
+        			largo=Math.max(largo, vecDRutas.get(i).nombre.length());
         		break;
         	case COL_COLOR:
         		break;
