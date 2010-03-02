@@ -32,8 +32,17 @@
   
   
   
+  
 (defrule rule-1
       
+        
+          
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject    ?x)
+    (object   http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
+  )
+        
         
           
             
@@ -54,25 +63,33 @@
                           
                             
                               
-                                
-                                  
   (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
-    (subject    ?b)
-    (object   ?y)
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
+    (subject    ?a)
+    (object   ?b)
   )
-                                
+                            
+                            
+                              
                                 
                                   
                                     
                                       
+  (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
+    (subject    ?b)
+    (object   ?d)
+  )
+                                    
+                                    
+                                      
                                         
                                           
- 	  (bind ?e (- ?d ?z))
+                                            
+                                              
+ 	  (test (<= ?e 300))  
   
-                                        
-                                        
-                                          
+                                            
                                             
                                               
                                                 
@@ -83,34 +100,26 @@
                                                 
                                               
                                             
-                                            
-                                              
- 	  (test (<= ?e 300))  
-  
-                                            
                                           
+                                        
+                                        
+                                          
+ 	  (bind ?e (- ?d ?z))
+  
                                         
                                       
                                     
-                                    
-                                      
-  (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-    (subject    ?b)
-    (object   ?d)
-  )
-                                    
                                   
                                 
-                              
-                            
-                            
-                              
+                                
+                                  
   (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
-    (subject    ?a)
-    (object   ?b)
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+    (subject    ?b)
+    (object   ?y)
   )
+                                
+                              
                             
                           
                         
@@ -146,14 +155,6 @@
             
           
         
-        
-          
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject    ?x)
-    (object   http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
-  )
-        
       
     
   =>  
@@ -161,13 +162,25 @@
   
       
         
-        
           
   (triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneEstado)
     (subject    ?x)
     (object   http://www.isaatc.ull.es/Verdino.owl#EsperaDistancia)
   )
+        
+        
+          
+            
+              
+  (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneDistanciaAConflicto)
+    (subject    ?x)
+    (object   ?e)
+  )
+            
+            
+          
         
       
     
@@ -214,6 +227,14 @@
                   
                     
                       
+  (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
+    (subject    ?c)
+    (object   ?z)
+  )
+                    
+                    
+                      
                         
                           
   (triple
@@ -226,16 +247,18 @@
                           
                             
                               
+ 	  (bind ?b (- ?a ?z))
+  
+                            
+                            
+                              
                                 
                                   
-                                    
-                                      
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject    ?d)
-    (object   http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria)
-  )
-                                    
+ 	  (test (<= ?b 50))  
+  
+                                
+                                
+                                  
                                     
                                       
                                         
@@ -268,20 +291,26 @@
                                                               
     
       
-        
-          
- 	  (bind ?k (- ?j ?i))
-  
-        
+  (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
+    (subject    ?e)
+    (object   ?j)
+  )
+    
+    
+      
         
           
             
               
- 	  (test (<= ?k 50))  
-  
-            
-            
-              
+                
+                  
+  (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneVelocidad)
+    (subject    ?f)
+    (object   ?h)
+  )
+                
                 
                   
                     
@@ -292,28 +321,22 @@
                     
                   
                 
-                
-                  
-  (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneVelocidad)
-    (subject    ?f)
-    (object   ?h)
-  )
-                
               
+            
+            
+              
+ 	  (test (<= ?k 50))  
+  
             
           
         
+        
+          
+ 	  (bind ?k (- ?j ?i))
+  
+        
       
-    
-    
-      
-  (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
-    (subject    ?e)
-    (object   ?j)
-  )
-                                                  
+                                                   
                                                             
                                                           
                                                         
@@ -359,31 +382,21 @@
                                         
                                       
                                     
+                                    
+                                      
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject    ?d)
+    (object   http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria)
+  )
+                                    
                                   
                                 
-                                
-                                  
- 	  (test (<= ?b 50))  
-  
-                                
                               
-                            
-                            
-                              
- 	  (bind ?b (- ?a ?z))
-  
                             
                           
                         
                       
-                    
-                    
-                      
-  (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-    (subject    ?c)
-    (object   ?z)
-  )
                     
                   
                 
@@ -413,6 +426,18 @@
     (object   http://www.isaatc.ull.es/Verdino.owl#EsperaInterseccionPrioritaria)
   )
         
+        
+          
+            
+              
+  (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneDistanciaAConflicto)
+    (subject    ?x)
+    (object   ?b)
+  )
+            
+            
+          
         
       
     
@@ -484,14 +509,14 @@
               
                 
                   
+                    
+                      
   (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
     (subject    ?c)
-    (object   ?y)
+    (object   ?z)
   )
-                
-                
-                  
+                    
                     
                       
                         
@@ -504,6 +529,11 @@
                         
                         
                           
+                            
+                              
+ 	  (bind ?b (- ?a ?z))
+  
+                            
                             
                               
                                 
@@ -522,14 +552,14 @@
                                           
                                             
                                               
-                                                
-                                                  
   (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
-    (subject    ?x)
-    (object   ?d)
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+    (subject    ?g)
+    (object   ?e)
   )
-                                                
+                                            
+                                            
+                                              
                                                 
                                                   
                                                     
@@ -550,16 +580,13 @@
       
         
           
-  (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
-    (subject    ?j)
-    (object   ?k)
-  )
-        
-        
-          
             
               
+                
+                  
+ 	  (bind ?n (- ?k ?i))
+  
+                
                 
                   
                     
@@ -569,6 +596,14 @@
                     
                     
                       
+                        
+                          
+  (triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject    ?o)
+    (object   http://www.isaatc.ull.es/Verdino.owl#Oposicion)
+  )
+                        
                         
                           
                             
@@ -594,22 +629,9 @@
                             
                           
                         
-                        
-                          
-  (triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject    ?o)
-    (object   http://www.isaatc.ull.es/Verdino.owl#Oposicion)
-  )
-                        
                       
                     
                   
-                
-                
-                  
- 	  (bind ?n (- ?k ?i))
-  
                 
               
             
@@ -622,6 +644,14 @@
   )
             
           
+        
+        
+          
+  (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
+    (subject    ?j)
+    (object   ?k)
+  )
         
       
     
@@ -656,15 +686,15 @@
                                                     
                                                   
                                                 
-                                              
-                                            
-                                            
-                                              
+                                                
+                                                  
   (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
-    (subject    ?g)
-    (object   ?e)
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
+    (subject    ?x)
+    (object   ?d)
   )
+                                                
+                                              
                                             
                                           
                                         
@@ -687,24 +717,19 @@
                                 
                               
                             
-                            
-                              
- 	  (bind ?b (- ?a ?z))
-  
-                            
                           
                         
                       
                     
-                    
-                      
-  (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-    (subject    ?c)
-    (object   ?z)
-  )
-                    
                   
+                
+                
+                  
+  (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+    (subject    ?c)
+    (object   ?y)
+  )
                 
               
             
@@ -740,6 +765,18 @@
     (object   http://www.isaatc.ull.es/Verdino.owl#EsperaOposicion)
   )
         
+        
+          
+            
+              
+  (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneDistanciaAConflicto)
+    (subject    ?x)
+    (object   ?b)
+  )
+            
+            
+          
         
       
     

@@ -204,5 +204,46 @@
   (retract ?fact)
 )
 
+;------------------------------------
+
+(defrule zlimpiarDistanciasConflictos
+ 
+   ?fact <-(triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#Accion)
+    (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual)
+    (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarDistanciasConflictos)
+    )
+               
+  ?posicionvieja <- (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneDistanciaAConflicto)
+    (subject    ?x)
+    (object   ?y)
+  )
+ 
+  
+=> ;(printout t "Activada limpiar conflicto:" ?x crlf)
+  (retract ?posicionvieja)
+)
+
+
+(defrule limpiarAssertDistanciasConflictos
+ 
+   ?fact <-(triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#Accion)
+    (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual)
+    (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarDistanciasConflictos)
+    )
+               
+ (not (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneDistanciaAConflicto)
+    (subject    ?x)
+    (object   ?y)
+  )
+ )
+ 
+ 
+=>;(printout t "Activada limpiar  rutas:" crlf)
+  (retract ?fact)
+)
 
 

@@ -32,6 +32,7 @@
 
 
 
+
 (defrule rule-1
 
 
@@ -115,16 +116,16 @@
 
 (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject    ?a)
-    (object   http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
-  )
-;?a)
-(triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject    ?x)
     (object   http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
   )
 ;?x)
+(triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject    ?a)
+    (object   http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
+  )
+;?a)
 (triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
     (subject    ?a)
@@ -141,25 +142,25 @@
     (object   ?y)
   )
 (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
+    (subject    ?b)
+    (object   ?d)
+  )
+(triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
     (subject    ?b)
     (object   ?y)
   )
 (triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-    (subject    ?b)
-    (object   ?d)
-  )
-(triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
     (subject    ?c)
     (object   ?z)
   )
-(test (>  (- ?d ?z) 0))
 (test (<=  (- ?d ?z) 300))
+(test (>  (- ?d ?z) 0))
 =>
+(bind ?e (- ?d ?z))
 (assert
-
 
 
 
@@ -169,6 +170,19 @@
 (subject    ?x)
 (object   http://www.isaatc.ull.es/Verdino.owl#EsperaDistancia)
 )
+
+
+
+
+
+(triple
+(predicate http://www.isaatc.ull.es/Verdino.owl#tieneDistanciaAConflicto)
+(subject    ?x)
+(object   ?e)
+)
+
+
+
 
 
 
@@ -335,16 +349,16 @@
 ;?x)
 (triple
     (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
-    (subject    ?d)
-    (object   http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria)
-  )
-;?d)
-(triple
-    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
     (subject    ?f)
     (object   http://www.isaatc.ull.es/Verdino.owl#Vehiculo)
   )
 ;?f)
+(triple
+    (predicate http://www.w3.org/1999/02/22-rdf-syntax-ns#type)
+    (subject    ?d)
+    (object   http://www.isaatc.ull.es/Verdino.owl#InterseccionPrioritaria)
+  )
+;?d)
 (triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario)
     (subject    ?d)
@@ -376,6 +390,11 @@
     (object   ?y)
   )
 (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
+    (subject    ?c)
+    (object   ?z)
+  )
+(triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
     (subject    ?y)
     (object   ?a)
@@ -395,15 +414,12 @@
     (subject    ?g)
     (object   ?e)
   )
-(triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
-    (subject    ?c)
-    (object   ?z)
-  )
-(test (<=  (- ?j ?i) 50))
-(test (> ?h 0))
 (test (<=  (- ?a ?z) 50))
+(test (> ?h 0))
+(test (<=  (- ?j ?i) 50))
 =>
+(bind ?b (- ?a ?z))
+(bind ?k (- ?j ?i))
 (assert
 
 
@@ -414,6 +430,18 @@
 (subject    ?x)
 (object   http://www.isaatc.ull.es/Verdino.owl#EsperaInterseccionPrioritaria)
 )
+
+
+
+
+
+(triple
+(predicate http://www.isaatc.ull.es/Verdino.owl#tieneDistanciaAConflicto)
+(subject    ?x)
+(object   ?b)
+)
+
+
 
 
 
@@ -661,11 +689,6 @@
     (object   ?g)
   )
 (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
-    (subject    ?x)
-    (object   ?d)
-  )
-(triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneTramoPrioritario)
     (subject    ?o)
     (object   ?m)
@@ -676,14 +699,19 @@
     (object   ?e)
   )
 (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneRuta)
+    (subject    ?x)
+    (object   ?d)
+  )
+(triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tienePosicionVehiculo)
     (subject    ?x)
     (object   ?c)
   )
 (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
     (subject    ?c)
-    (object   ?y)
+    (object   ?z)
   )
 (triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneLongitud)
@@ -691,19 +719,24 @@
     (object   ?a)
   )
 (triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
+    (subject    ?g)
+    (object   ?e)
+  )
+(triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
     (subject    ?h)
     (object   ?i)
   )
 (triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
-    (subject    ?j)
-    (object   ?k)
-  )
-(triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneTramo)
     (subject    ?j)
     (object   ?m)
+  )
+(triple
+    (predicate http://www.isaatc.ull.es/Verdino.owl#tieneOrden)
+    (subject    ?j)
+    (object   ?k)
   )
 (triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#tieneTramoOrden)
@@ -722,17 +755,14 @@
   )
 (triple
     (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnTramo)
-    (subject    ?g)
-    (object   ?e)
-  )
-(triple
-    (predicate http://www.isaatc.ull.es/Verdino.owl#estaEnLongitud)
     (subject    ?c)
-    (object   ?z)
+    (object   ?y)
   )
 (test (=  (- ?k ?i) 1 ))
 (test (<=  (- ?a ?z) 50))
 =>
+(bind ?b (- ?a ?z))
+(bind ?n (- ?k ?i))
 (assert
 
 
@@ -743,6 +773,18 @@
 (subject    ?x)
 (object   http://www.isaatc.ull.es/Verdino.owl#EsperaOposicion)
 )
+
+
+
+
+
+(triple
+(predicate http://www.isaatc.ull.es/Verdino.owl#tieneDistanciaAConflicto)
+(subject    ?x)
+(object   ?b)
+)
+
+
 
 
 

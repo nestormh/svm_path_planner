@@ -19,6 +19,7 @@ import javax.xml.transform.stream.StreamSource;
 
 public class Distancias {
 
+
 Rete engine = new Rete();
 Rete engineRutas = new Rete();
 Hashtable hashVehiculos = new Hashtable();
@@ -31,6 +32,7 @@ static String assertLimpiezaRutas = "(assert (triple (predicate http://www.isaat
 
 	static String assertLimpiezaEstados = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#Accion) (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual) (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarEstado) ))";
 static String assertLimpiezaVelocidades = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#Accion) (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual) (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarVelocidadesAntiguas) ))";
+static String assertLimpiezaDistanciasConflictos = "(assert (triple (predicate http://www.isaatc.ull.es/Verdino.owl#Accion) (subject   http://www.isaatc.ull.es/Verdino.owl#AccionActual) (object   http://www.isaatc.ull.es/Verdino.owl#LimpiarDistanciasConflictos) ))";
 
 	
     public static void main(String[] argv) throws JessException ,  java.io.IOException,TransformerException, TransformerConfigurationException, 
@@ -363,6 +365,7 @@ public void tramosAEngineRutas() throws JessException
 	  Vector vectorBinded = new Vector();
 	  Vector vectorTriples = new Vector();
 	  Vector vectorTriplesSencillos = new Vector();
+	  Vector vectorBindConsecuentes = new Vector();
 	  boolean antecedentes = true;
 	  while(true)
 	 {linea = data.readLine();
@@ -371,14 +374,18 @@ public void tramosAEngineRutas() throws JessException
 	  }
 	  String lineaTrimeada = linea.trim();
 	  if (lineaTrimeada.startsWith("(defrule"))
-	  {antecedentes = true;
+	  {vectorBindConsecuentes.removeAllElements();
+	   antecedentes = true;
 	  }
 	  if (lineaTrimeada.startsWith("(test ") || lineaTrimeada.startsWith("(bind ") || lineaTrimeada.startsWith("=>"))
 	  {if (lineaTrimeada.startsWith("(test "))
 	   {vector.addElement(lineaTrimeada);
 	   }
 	   if (lineaTrimeada.startsWith("(bind "))
-	   {int indice = lineaTrimeada.indexOf("?");
+	   {String bindCompleto = lineaTrimeada;
+	    System.out.println("Colocando bind en vector=" + bindCompleto);
+	    vectorBindConsecuentes.addElement(bindCompleto);
+	    int indice = lineaTrimeada.indexOf("?");
 	    lineaTrimeada = lineaTrimeada.substring(indice, lineaTrimeada.length());
 		indice = lineaTrimeada.indexOf(" ");
 		String variable1 = lineaTrimeada.substring(0, indice);
@@ -389,6 +396,7 @@ public void tramosAEngineRutas() throws JessException
 	   if (lineaTrimeada.startsWith("=>"))
 	   {antecedentes = false;
 	    Vector vectorVariables = new Vector();
+		
 	    for (int i=0; i<vectorTriplesSencillos.size(); i++)
 		{ficheroSalida.println(vectorTriplesSencillos.elementAt(i));
 		 String triples = (String)(vectorTriplesSencillos.elementAt(i));
@@ -425,6 +433,12 @@ public void tramosAEngineRutas() throws JessException
 		 ficheroSalida.println(inicial);
 		}
 		ficheroSalida.println ("=>");
+		for (int i=0; i<vectorBindConsecuentes.size(); i++)
+		{System.out.println("Sacando bind en vector=" + (String) vectorBindConsecuentes.elementAt(i));
+	    
+		 ficheroSalida.println(vectorBindConsecuentes.elementAt(i));
+		}
+		
 		vectorBind.removeAllElements();
 		vectorBinded.removeAllElements();
 		vector.removeAllElements();
@@ -752,13 +766,13 @@ for (int u=0; u<10; u++)
 System.out.println("R" + System.currentTimeMillis());
 	}
 		
-public String[] dimeEstados (String[] idVehiculos, String[] tramos, double[] longitudesEnTramos, double[] velocidades) throws JessException
+public Conflicto[] dimeEstados (String[] idVehiculos, String[] tramos, double[] longitudesEnTramos, double[] velocidades) throws JessException
 {   Vector vectorVehiculos = new Vector();
 	 for (Enumeration e = hashVehiculos.elements() ; e.hasMoreElements() ;) 
 	{vectorVehiculos.addElement(e.nextElement());
      }
 	 int sizeVector = vectorVehiculos.size();
-	 System.out.println(":::: Hay " + sizeVector + " vehiculos !!!" );
+	// System.out.println(":::: Hay " + sizeVector + " vehiculos !!!" );
 	 
 	 	engine.executeCommand(assertLimpiezaVelocidades);
 	   engine.executeCommand(assertLimpiezaPosiciones);
@@ -782,10 +796,11 @@ public String[] dimeEstados (String[] idVehiculos, String[] tramos, double[] lon
 	  engine.executeCommand(stringAssert);	
 	 } 
 	engine.run();
-	String[] estados = new String[tramos.length];
+	Conflicto[] estados = new Conflicto[tramos.length];
 	for (int i=0; i<idVehiculos.length ; i++)
-	{estados[i]="Normal";
-	 	String identificador = prefijo + idVehiculos[i];
+	{estados[i] = new Conflicto();
+	 estados[i].fijaTipo("Normal");
+	String identificador = prefijo + idVehiculos[i];
 	 // assert posicion
 	 ValueVector vector2 = new ValueVector();
 		vector2.add(new Value("http://www.isaatc.ull.es/Verdino.owl#tieneEstado", RU.ATOM));
@@ -801,12 +816,30 @@ public String[] dimeEstados (String[] idVehiculos, String[] tramos, double[] lon
 			
 			if(!(estado.equals("http://www.isaatc.ull.es/Verdino.owl#Normal")))
 			{//actual.fijaEstado("EsperaInterseccionPrioritaria");
-			 estados[i]=quitaPrefijo(estado);
+			 estados[i].fijaTipo(quitaPrefijo(estado));
+			 
+				ValueVector vector3 = new ValueVector();
+				vector3.add(new Value("http://www.isaatc.ull.es/Verdino.owl#tieneDistanciaAConflicto", RU.ATOM));
+				vector3.add(new Value(identificador,RU.ATOM));
+				Iterator result3 =
+				engine.runQuery("buscaObjetosConSujeto", vector3);
+				String estado3 = " ";
+				while (result3.hasNext()) {
+					Token t3 = (Token) result3.next();
+					Fact f3 = (Fact) t3.fact(1);
+					estado3 = f3.getSlotValue("object").stringValue(engine.getGlobalContext());
+					//	System.out.println(estado3);
+						estados[i].fijaDistancia((double) Double.parseDouble(estado3));
+				}	  
+			 
+			 
+			 
 			}
 		}	  
 	}
 		// quitar los hechos de espera
 engine.executeCommand(assertLimpiezaTramos);
+	engine.executeCommand(assertLimpiezaDistanciasConflictos);
 	engine.run();
 	
 	
@@ -831,7 +864,7 @@ engine.executeCommand(assertLimpiezaTramos);
 	 visualizacion.fijaLongitudes(longitudes);
 	 	 visualizacion.fijaVehiculos(hashVehiculos);
 	int sizeVector = vectorVehiculos.size();
-  System.out.println(":::: Hay " + sizeVector + " vehiculos !!!" );
+  //System.out.println(":::: Hay " + sizeVector + " vehiculos !!!" );
   int instante = 1;
   //fin de inicialización
 for (int u=0; u<70; u++)
@@ -938,6 +971,7 @@ for (int u=0; u<70; u++)
 	}
 		// quitar los hechos de espera
 	System.out.println(engine.executeCommand(assertLimpiezaTramos));
+		System.out.println(engine.executeCommand(assertLimpiezaDistanciasConflictos));
 	engine.run();
   }  // fin del while
 	}	
