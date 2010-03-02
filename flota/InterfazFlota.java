@@ -1,17 +1,26 @@
-import java.util.*;
-import jess.*;
-import javax.xml.transform.Transformer;
+import java.util.Vector;
+
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
+import jess.JessException;
+
+/**
+ * Clase se comunicación con el sistema inteligente de gestión de flota.
+ * 
+ * @author evelio
+ */
 public class InterfazFlota {
 
 public Distancias distancias;
 
-
+/**
+ * Constructor vació que carga la ontología.
+ * @throws JessException
+ * @throws java.io.IOException
+ * @throws TransformerException
+ * @throws TransformerConfigurationException
+ */
 public InterfazFlota() throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException
 {distancias = new Distancias();
 distancias.cargaEspaciosDeNombres();
@@ -22,7 +31,23 @@ distancias.cargaEspaciosDeNombres();
 		//distancias.cargarHechosReglas();
 }
 
-public void inicializacionTramos (String[] tramos, double[] longitudes, int[][] conexiones, Vector vectorPrioridades, Vector vectorOposiciones) throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException
+/**
+ * Método en que se le indican al sistema los tramos, interconexiones y prioridades
+ * @param tramos contendrá los nombres de los tramos
+ * @param longitudes contendrá la longitud (en metros) de cada uno de los tramos
+ * @param conexiones para indicar las conexiones. Deberá tener tantas filas y columnas como tramos. 
+ * Cada fila representa el tramo inicial y cada columna el tramo siguiente. 
+ * Por ejemplo si hay un 1 en conexiones[7][3] indica el que tramo 3 está a continuación del 7 
+ * @param vectorPrioridades vector con las {@link Prioridades} en cruces de un tramo respecto a otro
+ * @param vectorOposiciones vector con las {@link Prioridades} en oposición de un tramo respecto a otro
+ * @throws JessException
+ * @throws java.io.IOException
+ * @throws TransformerException
+ * @throws TransformerConfigurationException
+ */
+public void inicializacionTramos (String[] tramos, double[] longitudes, int[][] conexiones
+		, Vector<Prioridades> vectorPrioridades, Vector<Prioridades> vectorOposiciones) 
+throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException
 {Vector vector = distancias.procesaTramos(longitudes, conexiones, tramos);
  	distancias.meterVectorEnOntologia(vector, vectorPrioridades, vectorOposiciones);
 	distancias.transformaHechosJess();
@@ -32,11 +57,21 @@ public void inicializacionTramos (String[] tramos, double[] longitudes, int[][] 
 	distancias.leerTramosDeOntologia();  
 }
 
-// si al final no se cogen de la ontolog�a...
+// si al final no se cogen de la ontolog�a...
+/**
+ * Indica los vehículos que están presentes
+ * @param idVehiculos array con los nombres de los vehículos 
+ */
 public void inicializacionVehiculos(String[] idVehiculos) throws JessException
 {distancias.inicializaVehiculos(idVehiculos);
 }
 
+/**
+ * NO SE PARA QUE ES
+ * @param idVehiculos
+ * @param rutas
+ * @throws JessException
+ */
 public void asignaRutasVehiculos(String[] idVehiculos, String[][] rutas) throws JessException
 {distancias.limpiaRutas();
  for (int i=0; i< idVehiculos.length; i++)
@@ -45,17 +80,39 @@ public void asignaRutasVehiculos(String[] idVehiculos, String[][] rutas) throws 
  distancias.finalizaInicializacion();
 }
 
+/**
+ * NO SE PARA QUE ES
+ * @param vehiculo
+ * @param ruta
+ * @throws JessException
+ */
 //no usar de manera aislada
 public void asignaRuta(String vehiculo, String[] ruta) throws JessException
 {distancias.asignaRuta(vehiculo, ruta);
  //distancias.finalizaInicializacionReducida();
 }
 
+/** 
+ * Se pasa la posición y velocidad de todos los vehículo y devuelve en que estado deben ponerse.
+ * @param idVehiculos identificación de los vehículos sobre los que se pregunta
+ * @param tramosActuales tramos en que se encuentra el vehículo correspondiente
+ * @param longitudesEnTramos posición en el tramo en que se encuetra el vehículo correspondiente
+ * @param velocidades velocidad del vehículo correspondiente
+ * @return array con el estado en que debe ponerse el vehículo correspondiente
+ * @throws JessException
+ */
 public String[] dimeEstados (String[] idVehiculos, String[] tramosActuales, double[] longitudesEnTramos, double[] velocidades) throws JessException
 {return distancias.dimeEstados(idVehiculos, tramosActuales, longitudesEnTramos, velocidades);
 }
 
-
+/**
+ * Calcula la ruta más corta para ir de origen a destino
+ * @param origen nombre del tramo origen
+ * @param destino nombre del tramo destino
+ * @return array con la suceción de tramos que se debe seguir (icluyendo origen y destino??)
+ * @throws JessException
+ * @throws java.io.IOException
+ */
 public String[] calculaRuta(String origen, String destino) throws JessException, java.io.IOException
 {String[] strings = new String[0];
  if(origen.equals(destino))
@@ -123,7 +180,7 @@ System.out.println("definiciones tramos");
 	 {nombreTramos[j] = "Tramo" + (j);
 	 }	 
 		
-	Vector vectorPrioridades = new Vector();
+	Vector<Prioridades> vectorPrioridades = new Vector<Prioridades>();
 		Prioridades p1 = new Prioridades("Tramo21", "Tramo25");
 		Prioridades p2 = new Prioridades("Tramo9", "Tramo7");
 		Prioridades p3 = new Prioridades("Tramo10", "Tramo11");
@@ -141,7 +198,7 @@ System.out.println("definiciones tramos");
 		vectorPrioridades.addElement(p6);	
 		vectorPrioridades.addElement(p7);
 		vectorPrioridades.addElement(p8);
-	Vector vectorOposiciones = new Vector();
+	Vector<Prioridades> vectorOposiciones = new Vector<Prioridades>();
 p1 = new Prioridades("Tramo12", "Tramo11");
 		 p2 = new Prioridades("Tramo12", "Tramo16");
 		 p3 = new Prioridades("Tramo16", "Tramo15");
