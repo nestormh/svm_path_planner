@@ -1,4 +1,4 @@
-; Mon Mar 01 22:23:16 GMT 2010
+; Tue Mar 02 12:23:59 GMT 2010
 ; 
 ;+ (version "3.4.1")
 ;+ (build "Build 537")
@@ -6,11 +6,11 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[verdino_ProjectKB_Class10041]
-		[verdino_ProjectKB_Class10042]
-		[verdino_ProjectKB_Class10043]
-		[verdino_ProjectKB_Class10044]
-		[verdino_ProjectKB_Class10045]))
+		[verdino_ProjectKB_Class10057]
+		[verdino_ProjectKB_Class10058]
+		[verdino_ProjectKB_Class10059]
+		[verdino_ProjectKB_Class10060]
+		[verdino_ProjectKB_Class10061]))
 
 ([CLSES_TAB] of  Widget
 
@@ -1132,9 +1132,9 @@
 ([KB_325529_Class0] of  Map
 
 	(entries
-		[verdino_ProjectKB_Class10046]
-		[verdino_ProjectKB_Class10047]
-		[verdino_ProjectKB_Class10048]))
+		[verdino_ProjectKB_Class10062]
+		[verdino_ProjectKB_Class10063]
+		[verdino_ProjectKB_Class10064]))
 
 ([KB_325529_Class4] of  String
 
@@ -6053,46 +6053,46 @@
 	(property_list [XY_Instance_725])
 	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
 
-([verdino_ProjectKB_Class10041] of  String
+([verdino_ProjectKB_Class10057] of  String
 
 	(name ":INSTANCE-ANNOTATION")
 	(string_value "%3AANNOTATION-TEXT"))
 
-([verdino_ProjectKB_Class10042] of  String
+([verdino_ProjectKB_Class10058] of  String
 
 	(name "http://www.w3.org/2002/07/owl#Class")
 	(string_value "%3ANAME"))
 
-([verdino_ProjectKB_Class10043] of  String
+([verdino_ProjectKB_Class10059] of  String
 
 	(name ":PAL-CONSTRAINT")
 	(string_value "%3APAL-NAME"))
 
-([verdino_ProjectKB_Class10044] of  String
+([verdino_ProjectKB_Class10060] of  String
 
 	(name ":META-CLASS")
 	(string_value "%3ANAME"))
 
-([verdino_ProjectKB_Class10045] of  String
+([verdino_ProjectKB_Class10061] of  String
 
 	(name "http://www.w3.org/2002/07/owl#Thing")
 	(string_value "%3ANAME"))
 
-([verdino_ProjectKB_Class10046] of  Map_Entry
+([verdino_ProjectKB_Class10062] of  Map_Entry
 
 	(key "add_name_on_instance_form")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([verdino_ProjectKB_Class10047] of  Map_Entry
+([verdino_ProjectKB_Class10063] of  Map_Entry
 
 	(key "change_tracking_active")
 	(key_class "java.lang.String")
 	(value "false")
 	(value_class "java.lang.String"))
 
-([verdino_ProjectKB_Class10048] of  Map_Entry
+([verdino_ProjectKB_Class10064] of  Map_Entry
 
 	(key "suppress_instance_counting")
 	(key_class "java.lang.String")
