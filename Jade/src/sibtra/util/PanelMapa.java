@@ -13,6 +13,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -32,7 +34,8 @@ import javax.swing.SwingUtilities;
  * @author alberto
  */
 @SuppressWarnings("serial")
-public class PanelMapa extends JPanel implements MouseListener, ActionListener {
+public class PanelMapa extends JPanel implements MouseListener, ActionListener
+	, MouseWheelListener {
 	
 	/** Tamaño (en pixeles) de los ejes a pintar en el panel */
 	protected static final int TamEjes = 50;
@@ -275,6 +278,7 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 //		JPanelGrafico.setMaximumSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
 		JPanelGrafico.setBackground(Color.BLACK);
 		JPanelGrafico.addMouseListener(this);
+		JPanelGrafico.addMouseWheelListener(this);
 		JPanelGrafico.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		
 		//para cuando se rezisa
@@ -353,13 +357,13 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
      * Doble click del boton 1 vuelve a la presentación normal
      */
 	public void mouseClicked(MouseEvent even) {
-		if(even.getButton()!=MouseEvent.BUTTON1 || even.getClickCount()!=2)
-			return;
-		System.out.println(getClass().getName()+": Clickeado Boton "+even.getButton()
-				+" en posición: ("+even.getX()+","+even.getY()+") "
-				+even.getClickCount()+" veces");
-		restaurar=true;
-		JPanelGrafico.repaint();
+		if(even.getButton()==MouseEvent.BUTTON1 && even.getClickCount()==2) {
+			System.out.println(getClass().getName()+": Clickeado Boton "+even.getButton()
+					+" en posición: ("+even.getX()+","+even.getY()+") "
+					+even.getClickCount()+" veces");
+			restaurar=true;
+			JPanelGrafico.repaint();
+		}
 	}
 	
     /**
@@ -498,6 +502,16 @@ public class PanelMapa extends JPanel implements MouseListener, ActionListener {
 				repaint();						
 			}
 		});
+	}
+
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		int indAct=jcbEscalas.getSelectedIndex();
+		if((e.getWheelRotation()==1) && indAct<(escalasD.length-1)) {
+			jcbEscalas.setSelectedIndex(indAct+1);
+		}
+		if((e.getWheelRotation()==-1) && indAct>0) {
+			jcbEscalas.setSelectedIndex(indAct-1);
+		}		
 	}
 	
 }
