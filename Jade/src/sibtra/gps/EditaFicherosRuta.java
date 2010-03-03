@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
+import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -69,8 +70,6 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	JMenu menuArchivo;
 	/** Boton de salir del menu de archivo */
 	private JMenuItem miSalir;
-	/** Boton de abrir ruta de archivo */
-	private JMenuItem miAbrir;
 
 	private JFileChooser fc;
 	private PanelMuestraVariasTrayectorias pmvt;
@@ -139,10 +138,14 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         menuArchivo=new JMenu("Fichero");
         barraMenu.add(menuArchivo);
 
-        miAbrir=new JMenuItem("Abrir Ruta");
-        miAbrir.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_O,KeyEvent.CTRL_MASK));
-        miAbrir.addActionListener(this);
-        menuArchivo.add(miAbrir);
+        menuArchivo.add(new AccionCargarRuta())
+          .setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_O,KeyEvent.CTRL_MASK));
+
+        menuArchivo.add(new AccionCargarTramos())
+        .setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_T,KeyEvent.CTRL_MASK));
+
+        menuArchivo.add(new AccionSalvarTramos())
+        .setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_S,KeyEvent.CTRL_MASK));
 
         miSalir=new JMenuItem("Salir");
         miSalir.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_Q,KeyEvent.CTRL_MASK));
@@ -182,14 +185,6 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 //		if(e.getSource()==jmiAcercaDe) {
 //		JOptionPane.showMessageDialog(ventanaPrincipal, "VERDINO: ISAATC ULL");
 //		}
-		if(e.getSource()==miAbrir) {
-			int devuelto=fc.showOpenDialog(this);
-			if(devuelto==JFileChooser.APPROVE_OPTION) {
-				File file=fc.getSelectedFile();
-				cargaFichero(file);
-			}
-			return;
-		}
 	}
 
 	private void añadeRuta(Ruta ruta, String nombre ){
@@ -519,6 +514,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         		break;
         	case COL_NOM:
         		tramos.setNombre(row,(String)value);
+        		break;
         	case COL_SIGUIENTE:
 				if(indRutaActual<0)
 					return; //no hay trayectoria seleccionada no se asigna nada
@@ -694,6 +690,68 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			return button;
 		}
 	}
+	
+	/** Acción para la carga de los ficheros de tramos */
+	class AccionCargarTramos extends AbstractAction {
+
+		public AccionCargarTramos() {
+			super("Abrir Fichero Tramos");
+		}
+		
+		public void actionPerformed(ActionEvent ae) {
+			int devuelto=fc.showOpenDialog(EditaFicherosRuta.this);
+			if(devuelto==JFileChooser.APPROVE_OPTION) {
+				File file=fc.getSelectedFile();
+				Tramos nuevoTramos=Tramos.cargaTramos(file);
+				//reemplazamos los tramos existentes
+				if(nuevoTramos!=null) {
+					//Borramos los tramos anteriores del panel gráfico
+					for(int i=tramos.size()-1; i>=0; i--)
+						pmvt.borraTrayectoria(i);
+					tramos=nuevoTramos;
+					//añadimos los nuevos tramos al panel gráfico
+					for(int i=0; i<tramos.size();i++)
+						pmvt.añadeTrayectoria(new Trayectoria(tramos.getRuta(i)));
+					pmvt.actualiza();
+					//se han cambiado todos los datos
+					modeloTR.fireTableDataChanged();
+				}
+			}
+		}
+	}
+
+	/** Acción para salvar los ficheros de tramos */
+	class AccionSalvarTramos extends AbstractAction {
+
+		public AccionSalvarTramos() {
+			super("Salvar Fichero Tramos");
+		}
+		
+		public void actionPerformed(ActionEvent ae) {
+			int devuelto=fc.showSaveDialog(EditaFicherosRuta.this);
+			if(devuelto==JFileChooser.APPROVE_OPTION) {
+				File file=fc.getSelectedFile();
+				Tramos.salvaTramos(tramos, file.getAbsolutePath());
+			}
+		}
+	}
+
+	/** Acción para la carga de los ficheros de rutas */
+	class AccionCargarRuta extends AbstractAction {
+
+		public AccionCargarRuta() {
+			super("Abrir Fichero Ruta");
+		}
+		
+		public void actionPerformed(ActionEvent ae) {
+			int devuelto=fc.showOpenDialog(EditaFicherosRuta.this);
+			if(devuelto==JFileChooser.APPROVE_OPTION) {
+				File file=fc.getSelectedFile();
+				cargaFichero(file);
+			}
+		}
+	}
+
 	
 	/**
 	 * @param args

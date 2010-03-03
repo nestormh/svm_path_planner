@@ -3,6 +3,14 @@
  */
 package sibtra.gps;
 
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Vector;
 
 /**
@@ -12,10 +20,22 @@ import java.util.Vector;
  * @author alberto
  *
  */
-public class Tramos {
+public class Tramos implements Serializable {
 	
+	/**
+	 * Número de serie. IMPORTANTE porque vamos a salvarlo en fichero directamente.
+	 * Si cambiamos estructura del objeto tenemos que cambiar el número de serie y ver 
+	 * como se cargan versiones anteriores.
+	 * Para saber si es necesario cambiar el número ver 
+	 *  http://java.sun.com/j2se/1.5.0/docs/guide/serialization/spec/version.html#9419
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/** Representación de los datos de cada uno de los tramos */
-	private class DatosTramo {
+	private class DatosTramo implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+
 		Ruta rt=null;
 		String nombre=null;
 		/** Deberá haber un elemento por cada una de las trayectorias en {@link EditaFicherosRuta#vecTramos}
@@ -41,6 +61,19 @@ public class Tramos {
 				prio.add(false);
 				opo.add(false);
 			}
+		}
+		
+		public String toString() {
+			String siguientes="Sig:";
+			String prioridad="Prio:";
+			String oposicion="Opo:";
+			for(int i=0; i<sig.size(); i++) {
+				if(sig.get(i)) siguientes+=" "+i;
+				if(prio.get(i)) prioridad+=" "+i;
+				if(opo.get(i)) oposicion+=" "+i;
+			}
+			return String.format("[%s| %s| %s| %s | %s ]"
+					, nombre, rt.toString(), siguientes, prioridad, oposicion);
 		}
 	}
 
@@ -146,4 +179,54 @@ public class Tramos {
 		}			
 	}
 
+	public String toString() {
+		String resultado="Tramos: "+vecTramos.size()+"\n";
+		for(DatosTramo dta: vecTramos)
+			resultado+=dta.toString()+"\n";
+		return resultado;
+	}
+	
+	/**
+	 * @param file Fichero a cargar
+	 * @return los tramos cargados. null si ha habido algún problema.
+	 */
+	public static Tramos cargaTramos(File file) {
+		Tramos tramos=null;
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+			tramos=(Tramos)ois.readObject();
+			ois.close();
+		} catch (IOException ioe) {
+			System.err.println("Error al abrir el fichero " + file.getName());
+			System.err.println(ioe.getMessage());
+			tramos=null;
+		} catch (ClassNotFoundException cnfe) {
+			System.err.println("Objeto leído inválido: " + cnfe.getMessage());
+			tramos=null;
+		}
+//		System.out.println("Tramos cargados: "+tramos);
+		return tramos;
+	}
+	
+	/**
+	 * Salva los tramos 
+	 * en formato binario en el fichero indicado.
+	 * @param tramos tramos a salvar
+	 * @param fichero path del fichero
+	 */
+	public static boolean salvaTramos(Tramos tramos, String fichero) {
+		try {
+//			System.out.println("Salvando Tramos: "+tramos);
+			File file = new File(fichero);
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
+			oos.writeObject(tramos);
+			oos.close();
+			return true;
+		} catch (IOException ioe) {
+			System.err.println("Error al escribir en el fichero " + fichero);
+			System.err.println(ioe.getMessage());
+			return false;
+		}
+	}
+	
 }
