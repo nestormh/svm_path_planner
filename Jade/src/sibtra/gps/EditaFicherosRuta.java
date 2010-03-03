@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.Vector;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
@@ -58,41 +57,7 @@ import sibtra.util.PanelMuestraVariasTrayectorias;
 @SuppressWarnings("serial")
 public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionListener, ChangeListener, MouseListener {
 
-	class DatosRuta {
-		Ruta rt=null;
-		String nombre=null;
-		/** Deberá haber un elemento por cada una de las trayectorias en {@link EditaFicherosRuta#vecDRutas}
-		 * Si está en true indica que la trayectoria correspondiente es siguiente de esta
-		 */
-		Vector<Boolean> sig=new Vector<Boolean>();
-		/** Deberá haber un elemento por cada una de las trayectorias en {@link EditaFicherosRuta#vecDRutas}
-		 * Si está en true indica que esta trayectoria tiene prioridad respeto a la correspondiente
-		 */
-		Vector<Boolean> prio=new Vector<Boolean>();
-		/** Deberá haber un elemento por cada una de las trayectorias en {@link EditaFicherosRuta#vecDRutas}
-		 * Si está en true indica que esta trayectoria tiene prioridad en oposición respeto a la correspondiente
-		 */
-		Vector<Boolean> opo=new Vector<Boolean>();
-		//el indice debe coincidir con el del PannelMuestraVariasTrayectorias
-		//Resto de detalles lo sacamos del  PanelMuestraVariasTrayectorias
-		public DatosRuta(Ruta ruta, String nom) {
-			rt=ruta;
-			nombre=nom;
-			//inicializamos vectores booleanos todos a false
-			for(int i=0; i<vecDRutas.size(); i++) {
-				sig.add(false);
-				prio.add(false);
-				opo.add(false);
-			}
-		}
-	}
-	
-	protected Vector<DatosRuta> vecDRutas=new Vector<DatosRuta>();
-
-	/** Centro que se está utilizando. Se tomará el de la primera ruta cargada
-	 * a partir de ese momento las siguientes rutas cargadas se les cambia el centro
-	 */
-	protected GPSData centro=null;
+	protected Tramos tramos=new Tramos();
 	
 	protected int indRutaActual=-1; //ninguna seleccionada
 	
@@ -228,21 +193,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	}
 
 	private void añadeRuta(Ruta ruta, String nombre ){
-		if(centro==null)
-			centro=ruta.getCentro();
-		else {
-			ruta.actualizaSistemaLocal(centro);
-			ruta.actualizaCoordenadasLocales();
-		}
-		if(pmvt.añadeTrayectoria(new Trayectoria(ruta))!=vecDRutas.size() )
+		tramos.añadeTramo(ruta, nombre);
+		if(pmvt.añadeTrayectoria(new Trayectoria(ruta))!=(tramos.size()-1) )
 			throw new IllegalStateException("Trayectoria no tendrá el mismo índice en el panel");
-		vecDRutas.add( new DatosRuta(ruta,nombre) );
-		//añadimos un componenete al vector booleano de todos
-		for(DatosRuta dra: vecDRutas) {
-			dra.sig.add(false);
-			dra.prio.add(false);
-			dra.opo.add(false);
-		}
 		ajustaAnchos();
 	}
 	
@@ -250,16 +203,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	 * @param indice a borrar, normalmente será {@link #indRutaActual}
 	 */
 	private void borraTrayectoria(int ind) {
-		if(ind<0 || ind>=vecDRutas.size())
-			throw new IllegalArgumentException("Indice de trayectoria a borrar ("+ind+") fuera de rango");
+		tramos.borraTramo(ind);
 		pmvt.borraTrayectoria(ind);
-		vecDRutas.remove(ind);
-		//borramos compoenente correspondiente en los vectores booleanos
-		for(DatosRuta dra: vecDRutas) {
-			dra.sig.remove(ind);
-			dra.prio.remove(ind);
-			dra.opo.remove(ind);
-		}		
 	}
 	
 	/**
@@ -385,11 +330,11 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
-				dtRtAct.rt.remove(ipto);
+				Ruta ra=tramos.getRuta(indRutaActual);
+				ra.remove(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(dtRtAct.rt));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra));
 				pmvt.actualiza();
 			}
 		});
@@ -399,11 +344,11 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
-				dtRtAct.rt.removeToBegin(ipto);
+				Ruta ra=tramos.getRuta(indRutaActual);
+				ra.removeToBegin(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(dtRtAct.rt));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra));
 				pmvt.actualiza();
 			}
 		});
@@ -413,11 +358,11 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
-				dtRtAct.rt.removeToEnd(ipto);
+				Ruta ra=tramos.getRuta(indRutaActual);
+				ra.removeToEnd(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(dtRtAct.rt));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra));
 				pmvt.actualiza();
 			}
 		});
@@ -428,15 +373,15 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				DatosRuta dtRtAct=vecDRutas.get(indRutaActual);
-				Ruta segunda=dtRtAct.rt.divideFrom(ipto);
+				Ruta ra=tramos.getRuta(indRutaActual);
+				Ruta segunda=ra.divideFrom(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(dtRtAct.rt));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra));
 				
-				añadeRuta(segunda, dtRtAct.nombre+"_B");
+				añadeRuta(segunda, tramos.getNombre(indRutaActual)+"_B");
 				//ponemos puntos y rumbo como la seleccionada
-				int indNueva=vecDRutas.size()-1;
+				int indNueva=tramos.size()-1;
 				pmvt.setPuntos(indNueva, pmvt.isPuntos(indRutaActual));
 				pmvt.setRumbo(indNueva, pmvt.isRumbo(indRutaActual));
 				modeloTR.fireTableRowsInserted(indNueva, indNueva);
@@ -454,7 +399,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	 */
 	protected void cambiaRutaActual(int row) {
 		indRutaActual=row;
-		per.setRuta(vecDRutas.get(indRutaActual).rt);
+		per.setRuta(tramos.getRuta(indRutaActual));
 	}
 
 	final static int COL_ACT=0;
@@ -493,7 +438,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		}
 
 		public int getRowCount() {
-			return vecDRutas.size();
+			return tramos.size();
 		}
 
 
@@ -503,14 +448,13 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		
 		public Object getValueAt(int row, int col) {
 			//sacamos datos de vecRutas
-			if(vecDRutas==null || vecDRutas.size()<=row)
+			if( tramos.size()<=row)
 				return null;
-			DatosRuta dra=vecDRutas.get(row);
 			switch(col) {
 			case COL_NOM:
-				return dra.nombre;
+				return tramos.getNombre(row);
 			case COL_TAM:
-				return dra.rt.getNumPuntos();
+				return tramos.getRuta(row).getNumPuntos();
 			case COL_COLOR:
 				return pmvt.getColor(row);
 			case COL_PUNTOS:
@@ -525,17 +469,17 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				if(indRutaActual<0)
 					return false; //no hay trayectoria seleccionada
 				else
-					return vecDRutas.get(indRutaActual).sig.get(row);
+					return tramos.isSiguiente(indRutaActual,row);
 			case COL_PRIO:
 				if(indRutaActual<0)
 					return false; //no hay trayectoria seleccionada
 				else
-					return vecDRutas.get(indRutaActual).prio.get(row);
+					return tramos.isPrioritatio(indRutaActual,row);
 			case COL_OPO:
 				if(indRutaActual<0)
 					return false; //no hay trayectoria seleccionada
 				else
-					return vecDRutas.get(indRutaActual).opo.get(row);
+					return tramos.isPrioritarioOposicion(indRutaActual,row);
 			default:
 				return null;			
 			}
@@ -546,7 +490,6 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         }
 
         public void setValueAt(Object value, int row, int col) {
-			DatosRuta dra=vecDRutas.get(row);
         	switch (col) {
         	case COL_PUNTOS:
         		pmvt.setPuntos(row, (Boolean)value);
@@ -575,24 +518,24 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         		pmvt.setColor(row, (Color)value);
         		break;
         	case COL_NOM:
-        		dra.nombre=(String)value;
+        		tramos.setNombre(row,(String)value);
         	case COL_SIGUIENTE:
 				if(indRutaActual<0)
 					return; //no hay trayectoria seleccionada no se asigna nada
 				else
-					vecDRutas.get(indRutaActual).sig.set(row,(Boolean)value);
+					tramos.setSiguiente(indRutaActual,row,(Boolean)value);
 				break;
         	case COL_PRIO:
 				if(indRutaActual<0)
 					return; //no hay trayectoria seleccionada no se asigna nada
 				else
-					vecDRutas.get(indRutaActual).prio.set(row,(Boolean)value);
+					tramos.setPrioritario(indRutaActual,row,(Boolean)value);
 				break;
         	case COL_OPO:
 				if(indRutaActual<0)
 					return; //no hay trayectoria seleccionada no se asigna nada
 				else
-					vecDRutas.get(indRutaActual).opo.set(row,(Boolean)value);
+					tramos.setPrioritarioOposicion(indRutaActual,row,(Boolean)value);
 				break;
         	default:
         		return;
@@ -626,17 +569,14 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
          */
     	public int getLargoColumna(int col) {
     		int largo=nombColumnas[col].length();
-    		int lact=0;
-        	// Sacamos los datos de vecLA
-        	if(vecDRutas==null)
-        		return 0;
         	switch (col) {
         	case COL_NOM:
-        		for(int i=0; i<vecDRutas.size();i++)
-        			largo=Math.max(largo, vecDRutas.get(i).nombre.length());
+        		for(int i=0; i<tramos.size();i++)
+        			largo=Math.max(largo, tramos.getNombre(i).length());
         		break;
         	case COL_TAM:
-        		largo=Math.max(largo,(" "+Integer.MAX_VALUE).length());
+        		for(int i=0; i<tramos.size();i++)
+        			largo=Math.max(largo,(" "+tramos.getRuta(i).getNumPuntos()).length());
         		break;
         	}
     		return largo*10;
