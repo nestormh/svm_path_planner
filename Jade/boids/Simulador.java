@@ -1,22 +1,19 @@
 package boids;
 
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
-import java.awt.geom.QuadCurve2D;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.swing.JFileChooser;
 
+import predictivo.Coche;
+
 import Jama.Matrix;
 
 public class Simulador {
+	Coche modCoche = new Coche();
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Simulaciones"));
 	/** Coordenadas a partir de las cuales se situa la bandada*/
 	Matrix posInicial = new Matrix(2,1);
@@ -28,7 +25,7 @@ public class Simulador {
 	double tiempoInvertido;
 	/** Número de boids que han alcanzado el objetivo*/
 	int numBoidsOk;
-	/** Número de boids que han alcanzado el objetivo yse consideran suficientes para detener
+	/** Número de boids que han alcanzado el objetivo y se consideran suficientes para detener
 	 *  la simulación*/
 	int numBoidsOkDeseados;
 	/** Número de iteraciones que tarda la simulación en alcanzar la condición de éxito*/
@@ -46,7 +43,7 @@ public class Simulador {
 	/** Vector que contiene los puntos de diseño para la simulación por lotes*/
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
 	Vector <TipoCamino> caminos = new Vector<TipoCamino>();
-	private int incrNuevosBoids = 3;
+	private int incrNuevosBoids = 5;
 	private int incrPensar = 2;
 	private int contNuevosBoids = incrNuevosBoids ;
 	private int contPensar = 0;
@@ -167,9 +164,12 @@ public class Simulador {
 		double distMin = Double.POSITIVE_INFINITY;
 		boolean liderEncontrado = false;
 		contIteraciones++;
+		modCoche.calculaEvolucion(0,1,0.2);
+		posInicial.set(0,0,modCoche.getX());
+		posInicial.set(1,0,modCoche.getY());
 		//If para controlar la frecuancia a la que se añaden boids a la bandada
 		if(contIteraciones > contNuevosBoids){
-			for(int g=0;g<3;g++){				
+			for(int g=0;g<2;g++){				
 //				double pos[] = {Math.abs(700*Math.random()),Math.abs(500*Math.random())};
 //				double pos[] = {getBandada().lastElement().getPosicion().get(0,0)+10*Math.random(),
 //						getBandada().lastElement().getPosicion().get(1,0)+10*Math.random()};
@@ -207,14 +207,17 @@ public class Simulador {
 					traspasarBoid(j);
 					numBoidsOk++; // Incremento el numero de boids que han llegado al objetivo
 				}
-				// Buscamos al lider				
-				if (getBandada().elementAt(j).isCaminoLibre()){										
-					if (dist < distMin){
-						distMin = dist;
-						indLider = j;
-						liderEncontrado = true;
+				// Buscamos al lider
+				if(j < getBandada().size()){
+					if (getBandada().elementAt(j).isCaminoLibre()){										
+						if (dist < distMin){
+							distMin = dist;
+							indLider = j;
+							liderEncontrado = true;
+						}
 					}
-				}					
+				}
+									
 			}
 			if (contIteraciones > contPensar){
 				contPensar = contIteraciones + incrPensar;			
@@ -231,15 +234,34 @@ public class Simulador {
 	
 	public void moverObstaculos(){
 		if(getObstaculos().size() != 0){
-			for(int i = 1;i<getObstaculos().size();i++){
-				double velo[] = {2,0};
-				Matrix vel = new Matrix(velo,2);
-				getObstaculos().elementAt(i).mover(vel);
+			for(int i = 0;i<getObstaculos().size();i++){
+				if(i<getObstaculos().size()/2){
+					double velo[] = {0,2};
+					Matrix vel = new Matrix(velo,2);
+					getObstaculos().elementAt(i).mover(vel);
+					if(getObstaculos().elementAt(i).getPosicion().get(1,0)>1000){
+						double pos[] = {getObstaculos().elementAt(i).getPosicion().get(0,0),0};
+						Matrix posi = new Matrix(pos,2);
+						getObstaculos().elementAt(i).setPosicion(posi);
+					}
+				}else{
+					double velo[] = {0,-2};
+					Matrix vel = new Matrix(velo,2);
+					getObstaculos().elementAt(i).mover(vel);
+					if(getObstaculos().elementAt(i).getPosicion().get(1,0)<0){
+						double pos[] = {getObstaculos().elementAt(i).getPosicion().get(0,0),1000};
+						Matrix posi = new Matrix(pos,2);
+						getObstaculos().elementAt(i).setPosicion(posi);
+					}
+				}
+//				double velo[] = {2,0};
+//				Matrix vel = new Matrix(velo,2);
+//				getObstaculos().elementAt(i).mover(vel);
 				if(getObstaculos().elementAt(i).getPosicion().get(0,0)>1200){
 					double pos[] = {0,getObstaculos().elementAt(i).getPosicion().get(1,0)};
 					Matrix posi = new Matrix(pos,2);
 					getObstaculos().elementAt(i).setPosicion(posi);
-				}
+				}				
 			}
 		}
 	}
@@ -293,7 +315,7 @@ public class Simulador {
 		int cont = 0;
 		boolean encontrado = false;
 		double valoracion = Double.NEGATIVE_INFINITY;
-		double umbralCercania = 300;
+		double umbralCercania = 300; // 300
 //		System.out.println("Empezó nueva ruta");
 		rutaDinamica.add(getBandada().elementAt(indLider).getPosicion());
 		while (getBandada().elementAt(boidActual).getDistOrigen()>80 && cont < getBandada().size()){
@@ -333,6 +355,8 @@ public class Simulador {
 			}
 			if(encontrado){
 				getBandada().elementAt(boidAux).setConectado(true);
+				getBandada().elementAt(boidAux).setExperiencia(1);
+//				System.out.println("La valoracion es : " + valoracion);
 				rutaDinamica.add(getBandada().elementAt(boidAux).getPosicion());
 				boidActual = boidAux;
 //				System.out.println("saltó al siguiente boid");
@@ -446,6 +470,7 @@ public class Simulador {
 
 	public void setPosInicial(Matrix posInicial) {
 		this.posInicial = posInicial;
+		this.modCoche.setPostura(posInicial.get(0,0),posInicial.get(1,0),3*Math.PI/4);
 		posicionarBandada(posInicial);
 	}
 
