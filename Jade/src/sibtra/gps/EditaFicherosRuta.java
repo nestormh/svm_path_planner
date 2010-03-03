@@ -88,9 +88,12 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	}
 	
 	protected Vector<DatosRuta> vecDRutas=new Vector<DatosRuta>();
-//	private Ruta rutaEspacial=null, rutaTemporal=null, rutaActual=null;
-//	private Trayectoria traActual=null;
 
+	/** Centro que se está utilizando. Se tomará el de la primera ruta cargada
+	 * a partir de ese momento las siguientes rutas cargadas se les cambia el centro
+	 */
+	protected GPSData centro=null;
+	
 	protected int indRutaActual=-1; //ninguna seleccionada
 	
 	private PanelExaminaRuta per;
@@ -225,6 +228,12 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	}
 
 	private void añadeRuta(Ruta ruta, String nombre ){
+		if(centro==null)
+			centro=ruta.getCentro();
+		else {
+			ruta.actualizaSistemaLocal(centro);
+			ruta.actualizaCoordenadasLocales();
+		}
 		if(pmvt.añadeTrayectoria(new Trayectoria(ruta))!=vecDRutas.size() )
 			throw new IllegalStateException("Trayectoria no tendrá el mismo índice en el panel");
 		vecDRutas.add( new DatosRuta(ruta,nombre) );
