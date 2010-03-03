@@ -59,13 +59,31 @@ import sibtra.util.PanelMuestraVariasTrayectorias;
 public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionListener, ChangeListener, MouseListener {
 
 	class DatosRuta {
-		Ruta rt;
-		String nombre;
+		Ruta rt=null;
+		String nombre=null;
+		/** Deberá haber un elemento por cada una de las trayectorias en {@link EditaFicherosRuta#vecDRutas}
+		 * Si está en true indica que la trayectoria correspondiente es siguiente de esta
+		 */
+		Vector<Boolean> sig=new Vector<Boolean>();
+		/** Deberá haber un elemento por cada una de las trayectorias en {@link EditaFicherosRuta#vecDRutas}
+		 * Si está en true indica que esta trayectoria tiene prioridad respeto a la correspondiente
+		 */
+		Vector<Boolean> prio=new Vector<Boolean>();
+		/** Deberá haber un elemento por cada una de las trayectorias en {@link EditaFicherosRuta#vecDRutas}
+		 * Si está en true indica que esta trayectoria tiene prioridad en oposición respeto a la correspondiente
+		 */
+		Vector<Boolean> opo=new Vector<Boolean>();
 		//el indice debe coincidir con el del PannelMuestraVariasTrayectorias
 		//Resto de detalles lo sacamos del  PanelMuestraVariasTrayectorias
 		public DatosRuta(Ruta ruta, String nom) {
 			rt=ruta;
 			nombre=nom;
+			//inicializamos vectores booleanos todos a false
+			for(int i=0; i<vecDRutas.size(); i++) {
+				sig.add(false);
+				prio.add(false);
+				opo.add(false);
+			}
 		}
 	}
 	
@@ -210,7 +228,29 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		if(pmvt.añadeTrayectoria(new Trayectoria(ruta))!=vecDRutas.size() )
 			throw new IllegalStateException("Trayectoria no tendrá el mismo índice en el panel");
 		vecDRutas.add( new DatosRuta(ruta,nombre) );
+		//añadimos un componenete al vector booleano de todos
+		for(DatosRuta dra: vecDRutas) {
+			dra.sig.add(false);
+			dra.prio.add(false);
+			dra.opo.add(false);
+		}
 		ajustaAnchos();
+	}
+	
+	/** Accinones (no gráficas) a tomar al borrar una trayectoria
+	 * @param indice a borrar, normalmente será {@link #indRutaActual}
+	 */
+	private void borraTrayectoria(int ind) {
+		if(ind<0 || ind>=vecDRutas.size())
+			throw new IllegalArgumentException("Indice de trayectoria a borrar ("+ind+") fuera de rango");
+		pmvt.borraTrayectoria(ind);
+		vecDRutas.remove(ind);
+		//borramos compoenente correspondiente en los vectores booleanos
+		for(DatosRuta dra: vecDRutas) {
+			dra.sig.remove(ind);
+			dra.prio.remove(ind);
+			dra.opo.remove(ind);
+		}		
 	}
 	
 	/**
@@ -322,9 +362,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		item.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				pmvt.borraTrayectoria(indRutaActual);
-				vecDRutas.remove(indRutaActual);
+				borraTrayectoria(indRutaActual);
 				modeloTR.fireTableRowsDeleted(indRutaActual, indRutaActual);
+				//Cambio en las columnas de relaciones
+				modeloTR.fireTableDataChanged(); //TODO optimizar para usar sólo las columnas
 				pmvt.actualiza();
 				indRutaActual=-1;
 			}
@@ -408,15 +449,19 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	}
 
 	final static int COL_ACT=0;
-	final static int COL_NOM=1;
-	final static int COL_TAM=2;
-	final static int COL_VISTA=3;
-	final static int COL_COLOR=4;
-	final static int COL_PUNTOS=5;
-	final static int COL_RUMBO=6;
+	final static int COL_VISTA=1;
+	final static int COL_COLOR=2;
+	final static int COL_PUNTOS=3;
+	final static int COL_RUMBO=4;
+	final static int COL_NOM=5;
+	final static int COL_TAM=6;
+	final static int COL_SIGUIENTE=7;
+	final static int COL_PRIO=8;
+	final static int COL_OPO=9;
+	
 
 	class ModeloTablaRutas extends AbstractTableModel {
-    	String[] nombColumnas=new String[7];
+    	String[] nombColumnas=new String[10];
     	
     	public ModeloTablaRutas() {
 			super();
@@ -428,6 +473,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			nombColumnas[COL_COLOR]="Color";
 			nombColumnas[COL_PUNTOS]="Puntos";
 			nombColumnas[COL_RUMBO]="Rumbo";
+			nombColumnas[COL_SIGUIENTE]="Sig.";
+			nombColumnas[COL_PRIO]="Prio";
+			nombColumnas[COL_OPO]="Opo";
     	}
     			
 
@@ -443,6 +491,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		public String getColumnName(int col) {
             return nombColumnas[col];
         }
+		
 		public Object getValueAt(int row, int col) {
 			//sacamos datos de vecRutas
 			if(vecDRutas==null || vecDRutas.size()<=row)
@@ -463,15 +512,28 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				return pmvt.isMostrado(row);
 			case COL_ACT:
 				return row==indRutaActual;
+			case COL_SIGUIENTE:
+				if(indRutaActual<0)
+					return false; //no hay trayectoria seleccionada
+				else
+					return vecDRutas.get(indRutaActual).sig.get(row);
+			case COL_PRIO:
+				if(indRutaActual<0)
+					return false; //no hay trayectoria seleccionada
+				else
+					return vecDRutas.get(indRutaActual).prio.get(row);
+			case COL_OPO:
+				if(indRutaActual<0)
+					return false; //no hay trayectoria seleccionada
+				else
+					return vecDRutas.get(indRutaActual).opo.get(row);
 			default:
 				return null;			
 			}
 		}
 		
 		public boolean isCellEditable(int row, int col) { 
-        	return (col==COL_VISTA) || (col==COL_PUNTOS)
-        	|| (col==COL_RUMBO) || (col==COL_ACT) || (col==COL_COLOR)
-        	|| (col==COL_NOM);  
+        	return (col!=COL_TAM);  
         }
 
         public void setValueAt(Object value, int row, int col) {
@@ -497,6 +559,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         			if(oldAct>=0) //desmarcamos el anterior
         				fireTableCellUpdated(oldAct, COL_ACT);
         			cambiaRutaActual(row);
+        			fireTableDataChanged(); //TODO cambian las columnas de sig, prio y opo
         		}
     			break;
         	case COL_COLOR:
@@ -504,6 +567,24 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         		break;
         	case COL_NOM:
         		dra.nombre=(String)value;
+        	case COL_SIGUIENTE:
+				if(indRutaActual<0)
+					return; //no hay trayectoria seleccionada no se asigna nada
+				else
+					vecDRutas.get(indRutaActual).sig.set(row,(Boolean)value);
+				break;
+        	case COL_PRIO:
+				if(indRutaActual<0)
+					return; //no hay trayectoria seleccionada no se asigna nada
+				else
+					vecDRutas.get(indRutaActual).prio.set(row,(Boolean)value);
+				break;
+        	case COL_OPO:
+				if(indRutaActual<0)
+					return; //no hay trayectoria seleccionada no se asigna nada
+				else
+					vecDRutas.get(indRutaActual).opo.set(row,(Boolean)value);
+				break;
         	default:
         		return;
         	}
@@ -517,6 +598,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         	case COL_RUMBO:
         	case COL_VISTA:
         	case COL_ACT:
+        	case COL_SIGUIENTE:
+        	case COL_PRIO:
+        	case COL_OPO:
         		return Boolean.class;
         	case COL_TAM:
         		return Integer.class;
@@ -538,15 +622,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         	if(vecDRutas==null)
         		return 0;
         	switch (col) {
-        	case COL_PUNTOS:
-        	case COL_RUMBO:
-        	case COL_VISTA:
-        		break;
         	case COL_NOM:
         		for(int i=0; i<vecDRutas.size();i++)
         			largo=Math.max(largo, vecDRutas.get(i).nombre.length());
-        		break;
-        	case COL_COLOR:
         		break;
         	case COL_TAM:
         		largo=Math.max(largo,(" "+Integer.MAX_VALUE).length());
@@ -554,7 +632,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         	}
     		return largo*10;
     	}
-		public void actualiza() {
+
+    	public void actualiza() {
 			fireTableDataChanged();
 		}
 
