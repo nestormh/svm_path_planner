@@ -24,12 +24,15 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 	
 	public Stroke strokeLinea=new BasicStroke();
 	public Stroke strokeGruesa=new BasicStroke(2.0f);
+	public Stroke strokeMuyGruesa=new BasicStroke(4.0f);
 	
 	/** Tamaño en pixeles del aspa que marca cada punto */ 
 	protected static final int tamCruz = 2;
 	
 	/** Longitud del vector que marca el rumbo en cada punto */
 	private static final double tamRumbo = 50;
+	/** Distancia a la que tiene que encontrarse el coche de una trayectoria para que se marque el punto más cercano */
+	private static final double HUMBRAL_MAS_CERCANO = 2;
 
 	protected class ParamTra {
 		Trayectoria trayec=null;
@@ -113,19 +116,6 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 				}
 			} else {
 				puntosTrayectoria(g,traAct);
-				//pintamos mas grueso el más cercano al coche
-				g.setStroke(strokeLinea);
-				int i=traAct.indiceMasCercano(posXCoche, posYCoche);
-				if(traAct.x[i]<=esqSI.getX() && traAct.x[i]>=esqID.getX()
-						&& traAct.y[i]<=esqSI.getY() && traAct.y[i]>=esqID.getY() ) {
-					//esta dentro del recuadro
-					Point2D px=point2Pixel(traAct.x[i],traAct.y[i]);
-					int x=(int)px.getX(), y=(int)px.getY();
-					g.drawLine(x-tamCruz, y-tamCruz
-							, x+tamCruz, y+tamCruz);
-					g.drawLine(x-tamCruz, y+tamCruz
-							, x+tamCruz, y-tamCruz);
-				}				
 			}
 			//Marcamos puntos si se a asignado vector de índice
 			if(ptAct.macrados!=null && ptAct.macrados.size()>0) {
@@ -162,6 +152,24 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 					}
 				}
 
+			}
+			//Si el coche está situado y no se va a mostrar marcamos el más cercano de la trayectoria
+			if(!Double.isNaN(posXCoche) && !jcbMostrarCoche.isSelected()) {
+				//pintamos mas grueso el más cercano al coche
+				g.setStroke(strokeMuyGruesa);
+				traAct.situaCoche(posXCoche, posYCoche);
+				int i=traAct.indiceMasCercano();
+				if( traAct.distanciaAlMasCercano()<HUMBRAL_MAS_CERCANO &&
+						traAct.x[i]<=esqSI.getX() && traAct.x[i]>=esqID.getX()
+						&& traAct.y[i]<=esqSI.getY() && traAct.y[i]>=esqID.getY() ) {
+					//esta dentro del recuadro
+					Point2D px=point2Pixel(traAct.x[i],traAct.y[i]);
+					int x=(int)px.getX(), y=(int)px.getY();
+					g.drawLine(x-tamCruz, y-tamCruz
+							, x+tamCruz, y+tamCruz);
+					g.drawLine(x-tamCruz, y+tamCruz
+							, x+tamCruz, y-tamCruz);
+				}
 			}
 		}
 

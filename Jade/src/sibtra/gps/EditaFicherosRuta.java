@@ -144,9 +144,13 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         menuArchivo.add(new AccionCargarTramos())
         .setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_T,KeyEvent.CTRL_MASK));
 
+        menuArchivo.addSeparator();
+        
         menuArchivo.add(new AccionSalvarTramos())
         .setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_S,KeyEvent.CTRL_MASK));
 
+        menuArchivo.addSeparator();
+        
         miSalir=new JMenuItem("Salir");
         miSalir.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_Q,KeyEvent.CTRL_MASK));
         miSalir.addActionListener(this);
@@ -189,7 +193,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 
 	private void añadeRuta(Ruta ruta, String nombre ){
 		tramos.añadeTramo(ruta, nombre);
-		if(pmvt.añadeTrayectoria(new Trayectoria(ruta))!=(tramos.size()-1) )
+		if(pmvt.añadeTrayectoria(new Trayectoria(ruta,Double.MAX_VALUE,-1))!=(tramos.size()-1) )
 			throw new IllegalStateException("Trayectoria no tendrá el mismo índice en el panel");
 		ajustaAnchos();
 	}
@@ -305,20 +309,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 
 	private void mostrarMenu(final int ipto, MouseEvent me) {
 		JPopupMenu popup = new JPopupMenu();
-		
-		JMenuItem item = new JMenuItem("Borrar Trayectoria");
-		popup.add(item);
-		item.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e)
-			{
-				borraTrayectoria(indRutaActual);
-				modeloTR.fireTableRowsDeleted(indRutaActual, indRutaActual);
-				//Cambio en las columnas de relaciones
-				modeloTR.fireTableDataChanged(); //TODO optimizar para usar sólo las columnas
-				pmvt.actualiza();
-				indRutaActual=-1;
-			}
-		});
+		JMenuItem item=null;
 		
 		item = new JMenuItem("Borrar Punto");
 		popup.add(item);
@@ -329,8 +320,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				ra.remove(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
 				pmvt.actualiza();
+				per.setRuta(ra, true);
+				per.repaint();
 			}
 		});
 		
@@ -343,8 +336,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				ra.removeToBegin(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
 				pmvt.actualiza();
+				per.setRuta(ra, true);
+				per.repaint();
 			}
 		});
 		
@@ -357,8 +352,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				ra.removeToEnd(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
 				pmvt.actualiza();
+				per.setRuta(ra, true);
+				per.repaint();
 			}
 		});
 		
@@ -372,7 +369,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				Ruta segunda=ra.divideFrom(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
 				
 				añadeRuta(segunda, tramos.getNombre(indRutaActual)+"_B");
 				//ponemos puntos y rumbo como la seleccionada
@@ -382,6 +379,25 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				modeloTR.fireTableRowsInserted(indNueva, indNueva);
 				
 				pmvt.actualiza();
+				per.setRuta(ra, true);
+				per.repaint();
+			}
+		});
+		
+		popup.addSeparator();
+		
+		item = new JMenuItem("Borrar Trayectoria");
+		popup.add(item);
+		item.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e)
+			{
+				borraTrayectoria(indRutaActual);
+				modeloTR.fireTableRowsDeleted(indRutaActual, indRutaActual);
+				//Cambio en las columnas de relaciones
+				modeloTR.fireTableDataChanged(); //TODO optimizar para usar sólo las columnas
+				pmvt.actualiza();
+				indRutaActual=-1;
+				per.setRuta(null); //no hay ruta seleccionada
 			}
 		});
 		
@@ -711,7 +727,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 					tramos=nuevoTramos;
 					//añadimos los nuevos tramos al panel gráfico
 					for(int i=0; i<tramos.size();i++)
-						pmvt.añadeTrayectoria(new Trayectoria(tramos.getRuta(i)));
+						pmvt.añadeTrayectoria(new Trayectoria(tramos.getRuta(i),Double.MAX_VALUE,-1));
 					pmvt.actualiza();
 					//se han cambiado todos los datos
 					modeloTR.fireTableDataChanged();
@@ -758,8 +774,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	 */
 	public static void main(String[] args) {
 		EditaFicherosRuta efr=new EditaFicherosRuta("Examina Fich Ruta");
-		efr.cargaFichero(new File("Rutas/Universidad/Tramos_EntradaLargaSalida"));
-		efr.cargaFichero(new File("Rutas/Universidad/Tramos_NaveSalida"));
+//		efr.cargaFichero(new File("Rutas/Universidad/Tramos_EntradaLargaSalida"));
+//		efr.cargaFichero(new File("Rutas/Universidad/Tramos_NaveSalida"));
 		
 	}
 

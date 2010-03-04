@@ -35,8 +35,6 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 	Ruta ruta;
 
 	private JButton jbPrimero;
-	private JButton jbAnterior;
-	private JButton jbSiguiente;
 	private JButton jbUltimo;
 
 	JSpinner jsDato;
@@ -70,12 +68,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jbPrimero.setToolTipText("Primero");
 			jbPrimero.addActionListener(this);
 			jpInf.add(jbPrimero);
-			
-			jbAnterior=new JButton("<");
-			jbAnterior.setToolTipText("Anterior");
-			jbAnterior.addActionListener(this);
-			jpInf.add(jbAnterior);
-			
+						
 			spm=new SpinnerNumberModel(0,0,100000,1);
 			jsDato=new JSpinner(spm);
 			jsDato.setSize(150, jsDato.getHeight());
@@ -84,12 +77,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			
 			jlDeMaximo=new JLabel(" de ???? ");
 			jpInf.add(jlDeMaximo);
-			
-			jbSiguiente=new JButton(">");
-			jbSiguiente.setToolTipText("Siguiente");
-			jbSiguiente.addActionListener(this);
-			jpInf.add(jbSiguiente);
-			
+						
 			jbUltimo=new JButton(">>");
 			jbUltimo.setToolTipText("Ultimo");
 			jbUltimo.addActionListener(this);
@@ -108,24 +96,36 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 		setRuta(ra);
 	}
 	
+	/** Cambia la ruta presentada como {@link #setRuta(Ruta, boolean)} pero sin mantener posición */ 
 	public void setRuta(Ruta ra) {
+		setRuta(ra,false); //por defecto no se mantiene la posición
+	}
+	
+	/** Cambia la ruta presentada
+	 * @param ra nueva ruta a presentar
+	 * @param mantienePosicion si se trata de dejar el mismo índice para el punto seleccinado. 
+	 * Útil si es la misma ruta a la que se ha quitado un punto
+	 */
+	public void setRuta(Ruta ra, boolean mantienePosicion) {
 		ruta=ra;
 		if(ruta==null || ruta.getNumPuntos()==0) {
 			jbPrimero.setEnabled(false);
-			jbAnterior.setEnabled(false);
 			jsDato.setEnabled(false);
-			jbSiguiente.setEnabled(false);
 			jbUltimo.setEnabled(false);
 			jlDesviaM.setEnabled(false);
 		} else {
 			jbPrimero.setEnabled(true);
-			jbAnterior.setEnabled(true);
 			jsDato.setEnabled(true);
-			jbSiguiente.setEnabled(true);
 			jbUltimo.setEnabled(true);
-			spm.setMaximum(ruta.getNumPuntos()-1);
-			jlDeMaximo.setText(String.format(" de %d ", ruta.getNumPuntos()-1));
-			spm.setValue(0);
+			int indMax=ruta.getNumPuntos()-1;
+			jlDeMaximo.setText(String.format(" de %d ", indMax));
+			if(!mantienePosicion)
+				spm.setValue(0); //nos ponemos al principio
+			else //dejamos como está salvo que estemos fuera de rango.
+				if((Integer)spm.getValue()>indMax)
+					spm.setValue(indMax);
+			spm.setMaximum(indMax);
+			
 			actualizaDM();
 		}
 	}
@@ -138,10 +138,6 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jsDato.setValue(0);
 		} else if(ae.getSource()==jbUltimo) {
 			jsDato.setValue(ruta.getNumPuntos()-1);
-		} else if (ae.getSource()==jbAnterior && (Integer)jsDato.getValue()>0) {
-			jsDato.setValue((Integer)jsDato.getValue()-1);
-		} else if (ae.getSource()==jbSiguiente && (Integer)jsDato.getValue()<(ruta.getNumPuntos()-1)) {
-			jsDato.setValue((Integer)jsDato.getValue()+1);
 		}
 	}
 
@@ -152,7 +148,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 		if(ce.getSource()==jsDato) {
 			GPSData npto=ruta.getPunto((Integer)jsDato.getValue());
 			PanelPto.actualizaPunto(npto);
-			System.out.println(npto.getCadenaNMEA());
+//			System.out.println(npto.getCadenaNMEA());
 			
 		}
 		if(ce.getSource()==spUmbral) {
