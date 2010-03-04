@@ -61,7 +61,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 		
 		add(PanelPto,BorderLayout.CENTER);
 		
-		{ //controles parte inferior
+		{ //controles parte Alta
 			JPanel jpInf=new JPanel();
 			
 			jbPrimero=new JButton("<<");
@@ -91,7 +91,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			JSpinner jspUmbral=new JSpinner(spUmbral);
 			jpInf.add(jspUmbral);
 			
-			add(jpInf,BorderLayout.PAGE_END);
+			add(jpInf,BorderLayout.PAGE_START);
 		}
 		setRuta(ra);
 	}
@@ -156,6 +156,18 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 		}
 	}
 
+	/** Fija el índice del punto seleccionado */
+	public void setIndice(int ind) {
+		if(ind<0 || ind>=ruta.getNumPuntos())
+			throw new IllegalArgumentException("Indice a fijar ("+ind+") fuera de rango");
+		jsDato.setValue(ind);
+	}
+
+	/** @return el indice del punto seleccionado */
+	public int getIndice() {
+		return (Integer)jsDato.getValue();
+	}
+	
 	/** Para actializar la etiqueta con la desviación magnética */
 	private void actualizaDM() {
 		if(ruta==null) return;

@@ -321,9 +321,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
 				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
-				pmvt.actualiza();
 				per.setRuta(ra, true);
 				per.repaint();
+				pmvt.actualiza();
 			}
 		});
 		
@@ -337,9 +337,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
 				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
-				pmvt.actualiza();
 				per.setRuta(ra, true);
+				per.setIndice(0); //el primero
 				per.repaint();
+				pmvt.actualiza();
 			}
 		});
 		
@@ -353,9 +354,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
 				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
-				pmvt.actualiza();
 				per.setRuta(ra, true);
+				per.setIndice(ra.getNumPuntos()-1); //el último
 				per.repaint();
+				pmvt.actualiza();
 			}
 		});
 		
@@ -377,10 +379,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				pmvt.setPuntos(indNueva, pmvt.isPuntos(indRutaActual));
 				pmvt.setRumbo(indNueva, pmvt.isRumbo(indRutaActual));
 				modeloTR.fireTableRowsInserted(indNueva, indNueva);
-				
-				pmvt.actualiza();
 				per.setRuta(ra, true);
-				per.repaint();
+				per.setIndice(ra.getNumPuntos()-1); //el último				
+				per.repaint();				
+				pmvt.actualiza();
 			}
 		});
 		
