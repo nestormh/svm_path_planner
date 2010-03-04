@@ -411,8 +411,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	 * @param row
 	 */
 	protected void cambiaRutaActual(int row) {
+		//antes de cambiar queremos usar en íncide del más cercano
 		indRutaActual=row;
 		per.setRuta(tramos.getRuta(indRutaActual));
+		per.setIndice(pmvt.getTrayectoria(row).indiceMasCercano());
 	}
 
 	final static int COL_ACT=0;
@@ -425,24 +427,29 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	final static int COL_SIGUIENTE=7;
 	final static int COL_PRIO=8;
 	final static int COL_OPO=9;
+	final static int COL_SUB=10;
+	final static int COL_BAJ=11;
 	
 
 	class ModeloTablaRutas extends AbstractTableModel {
-    	String[] nombColumnas=new String[10];
+    	String[] nombColumnas=new String[12];
     	
     	public ModeloTablaRutas() {
 			super();
 			//rellenamos los Titulos
 			nombColumnas[COL_ACT]="Act";
 			nombColumnas[COL_NOM]="Nombre";
-			nombColumnas[COL_TAM]="Tamaño";
+			nombColumnas[COL_TAM]="Tam";
 			nombColumnas[COL_VISTA]="Ver";
 			nombColumnas[COL_COLOR]="Color";
-			nombColumnas[COL_PUNTOS]="Puntos";
-			nombColumnas[COL_RUMBO]="Rumbo";
+			nombColumnas[COL_PUNTOS]="Pto";
+			nombColumnas[COL_RUMBO]="Rum";
 			nombColumnas[COL_SIGUIENTE]="Sig.";
 			nombColumnas[COL_PRIO]="Prio";
 			nombColumnas[COL_OPO]="Opo";
+			nombColumnas[COL_SUB]="Sub";
+			nombColumnas[COL_BAJ]="Baj";
+			
     	}
     			
 
@@ -493,6 +500,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 					return false; //no hay trayectoria seleccionada
 				else
 					return tramos.isPrioritarioOposicion(indRutaActual,row);
+			case COL_SUB:
+			case COL_BAJ:
+				return false; //Nunca se marcan, por eso devolvemos false
 			default:
 				return null;			
 			}
@@ -551,6 +561,22 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				else
 					tramos.setPrioritarioOposicion(indRutaActual,row,(Boolean)value);
 				break;
+        	case COL_SUB: //tenemos que subir la fila actual (si es posible)
+        		if((Boolean)value && row>0) {
+        			pmvt.subirTrayectoria(row);
+        			tramos.subir(row);
+        			modeloTR.fireTableRowsUpdated(row-1, row);
+        			//el pmvt no cambia.
+        		}
+        		break;
+        	case COL_BAJ: //tenemos que bajar la fila actual (si es posible)
+        		if((Boolean)value && row<(tramos.size()-1)) {
+        			pmvt.bajarTrayectoria(row);
+        			tramos.bajar(row);
+        			modeloTR.fireTableRowsUpdated(row, row+1);
+        			//el pmvt no cambia.
+        		}
+        		break;
         	default:
         		return;
         	}
@@ -567,6 +593,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         	case COL_SIGUIENTE:
         	case COL_PRIO:
         	case COL_OPO:
+        	case COL_SUB:
+        	case COL_BAJ:
         		return Boolean.class;
         	case COL_TAM:
         		return Integer.class;

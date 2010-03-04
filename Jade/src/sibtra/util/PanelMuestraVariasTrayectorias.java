@@ -516,5 +516,28 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 	public boolean isMostrarCoche() {
 		return jcbMostrarCoche.isSelected();
 	}
+
+	/** Hace que el tramo indicado pase a una posición anterior */
+	public void subirTrayectoria(int i) {
+		if(i<0 || i>=trays.size())
+			throw new IllegalArgumentException("Índice fuera de rango");
+		if(i==0)
+			return; //no hacemos nada
+		ParamTra dta=trays.get(i);
+		trays.set(i,trays.get(i-1));
+		trays.set(i-1, dta);
+	}
 	
+	/** Hace que el tramo indicado pase a una posición posterior */
+	public void bajarTrayectoria(int i) {
+		if(i<0 || i>=trays.size())
+			throw new IllegalArgumentException("Índice fuera de rango");
+		if(i==(trays.size()-1))
+			return; //no hacemos nada
+		ParamTra dta=trays.get(i);
+		trays.set(i,trays.get(i+1));
+		trays.set(i+1, dta);
+	}
+	
+
 }

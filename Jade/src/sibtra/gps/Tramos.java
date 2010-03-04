@@ -179,6 +179,29 @@ public class Tramos implements Serializable {
 		}			
 	}
 
+	/** Hace que el tramo indicado pase a una posición anterior */
+	public void subir(int i) {
+		if(i<0 || i>=vecTramos.size())
+			throw new IllegalArgumentException("Índice fuera de rango");
+		if(i==0)
+			return; //no hacemos nada
+		DatosTramo dta=vecTramos.get(i);
+		vecTramos.set(i,vecTramos.get(i-1));
+		vecTramos.set(i-1, dta);
+	}
+	
+	/** Hace que el tramo indicado pase a una posición posterior */
+	public void bajar(int i) {
+		if(i<0 || i>=vecTramos.size())
+			throw new IllegalArgumentException("Índice fuera de rango");
+		if(i==(vecTramos.size()-1))
+			return; //no hacemos nada
+		DatosTramo dta=vecTramos.get(i);
+		vecTramos.set(i,vecTramos.get(i+1));
+		vecTramos.set(i+1, dta);
+	}
+	
+	
 	public String toString() {
 		String resultado="Tramos: "+vecTramos.size()+"\n";
 		for(DatosTramo dta: vecTramos)
