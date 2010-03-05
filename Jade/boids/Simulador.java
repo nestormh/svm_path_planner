@@ -9,11 +9,30 @@ import java.util.Vector;
 import javax.swing.JFileChooser;
 
 import predictivo.Coche;
+import predictivo.UtilCalculos;
 
 import Jama.Matrix;
 
 public class Simulador {
+	double tiempoAnt;
+	public double getTiempoAnt() {
+		return tiempoAnt;
+	}
+
+	public void setTiempoAnt(double tiempoAnt) {
+		this.tiempoAnt = tiempoAnt;
+	}
+
+	Vector<Matrix> rutaDinamica = new Vector<Matrix>();
 	Coche modCoche = new Coche();
+	public Coche getModCoche() {
+		return modCoche;
+	}
+
+	public void setModCoche(Coche modCoche) {
+		this.modCoche = modCoche;
+	}
+
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Simulaciones"));
 	/** Coordenadas a partir de las cuales se situa la bandada*/
 	Matrix posInicial = new Matrix(2,1);
@@ -43,10 +62,11 @@ public class Simulador {
 	/** Vector que contiene los puntos de diseño para la simulación por lotes*/
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
 	Vector <TipoCamino> caminos = new Vector<TipoCamino>();
-	private int incrNuevosBoids = 5;
+	private int incrNuevosBoids = 3;
 	private int incrPensar = 2;
 	private int contNuevosBoids = incrNuevosBoids ;
 	private int contPensar = 0;
+	private double comando = 0;
 	
 	
 	//-------------Constructores---------------------------------------------------
@@ -155,6 +175,40 @@ public class Simulador {
 	//-----------Fin de los métodos para manejar la bandada-----------------
 	
 	//-----------Métodos para la simulación---------------------------------
+	
+	public double calculaComandoVolante(){
+		double comando = 0;
+		double cotaAngulo=Math.toRadians(10);
+		Matrix ultimoPunto = new Matrix(2,1);
+		if (rutaDinamica.size() == 0){
+			System.out.println("La ruta dinámica está vacia");
+		}else{
+			ultimoPunto.set(0,0, rutaDinamica.elementAt(rutaDinamica.size()-1).get(0,0));
+			ultimoPunto.set(1,0, rutaDinamica.elementAt(rutaDinamica.size()-1).get(1,0));
+//			ultimoPunto.set(0,0, rutaDinamica.lastElement().get(0,0));
+//			ultimoPunto.set(1,0, rutaDinamica.lastElement().get(1,0));
+//			ultimoPunto.set(0,0, 0);
+//			ultimoPunto.set(1,0, 0);
+		}
+		Matrix vector = ultimoPunto.minus(posInicial);
+//		double difAngular = UtilCalculos.normalizaAngulo(Math.atan2(vector.get(1,0),vector.get(0,0)));
+		double AngAlPunto = Math.atan2(vector.get(1,0),vector.get(0,0));
+		double difAngular = UtilCalculos.normalizaAngulo(AngAlPunto - modCoche.getYaw());
+		comando = UtilCalculos.limita(difAngular,-cotaAngulo,cotaAngulo);
+//		System.out.println("el comando es " + comando);
+		System.out.println("La orient del coche "+modCoche.getYaw()+"La difAng es "+difAngular+" y el comando es "+comando);
+		return comando;
+	}
+	public void moverPtoInicial(double tiempoActual,double Ts){
+
+		if(Math.abs(tiempoActual-tiempoAnt) > 500){
+			comando  = calculaComandoVolante();
+			setTiempoAnt(tiempoActual);
+		}
+			modCoche.calculaEvolucion(comando,5,Ts/500);
+			posInicial.set(0,0,modCoche.getX());
+			posInicial.set(1,0,modCoche.getY());		
+	}
 	/**
 	 * Calcula el desplazamiento y mueve cada uno de los Boids de la bandada. Se le pasa
 	 * el índice del lider de la iteración anterior
@@ -164,9 +218,6 @@ public class Simulador {
 		double distMin = Double.POSITIVE_INFINITY;
 		boolean liderEncontrado = false;
 		contIteraciones++;
-		modCoche.calculaEvolucion(0,1,0.2);
-		posInicial.set(0,0,modCoche.getX());
-		posInicial.set(1,0,modCoche.getY());
 		//If para controlar la frecuancia a la que se añaden boids a la bandada
 		if(contIteraciones > contNuevosBoids){
 			for(int g=0;g<2;g++){				
@@ -236,7 +287,7 @@ public class Simulador {
 		if(getObstaculos().size() != 0){
 			for(int i = 0;i<getObstaculos().size();i++){
 				if(i<getObstaculos().size()/2){
-					double velo[] = {0,2};
+					double velo[] = {0,1};
 					Matrix vel = new Matrix(velo,2);
 					getObstaculos().elementAt(i).mover(vel);
 					if(getObstaculos().elementAt(i).getPosicion().get(1,0)>1000){
@@ -245,7 +296,7 @@ public class Simulador {
 						getObstaculos().elementAt(i).setPosicion(posi);
 					}
 				}else{
-					double velo[] = {0,-2};
+					double velo[] = {0,-1};
 					Matrix vel = new Matrix(velo,2);
 					getObstaculos().elementAt(i).mover(vel);
 					if(getObstaculos().elementAt(i).getPosicion().get(1,0)<0){
@@ -308,8 +359,8 @@ public class Simulador {
 //    		}
 //        }        
 	}
-	public Vector<Matrix> calculaRutaDinamica(int indLider){
-		Vector<Matrix> rutaDinamica = new Vector<Matrix>();
+	public Vector<Matrix> calculaRutaDinamica(int indLider){	
+		rutaDinamica.clear();
 		int boidActual = indLider;
 		int boidAux = 0;
 		int cont = 0;
@@ -364,7 +415,7 @@ public class Simulador {
 			
 		}
 //		System.out.println("acabó la ruta");
-		rutaDinamica = mejoraRuta(rutaDinamica);
+//		rutaDinamica = mejoraRuta(rutaDinamica);
 		return rutaDinamica;
 	}
 	public  Vector<Matrix> mejoraRuta(Vector<Matrix> ruta){
@@ -470,7 +521,7 @@ public class Simulador {
 
 	public void setPosInicial(Matrix posInicial) {
 		this.posInicial = posInicial;
-		this.modCoche.setPostura(posInicial.get(0,0),posInicial.get(1,0),3*Math.PI/4);
+		this.modCoche.setPostura(posInicial.get(0,0),posInicial.get(1,0),Math.PI);
 		posicionarBandada(posInicial);
 	}
 

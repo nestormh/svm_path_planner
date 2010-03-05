@@ -40,12 +40,12 @@ public class Boid implements Serializable{
 	static double radioSeparacion = 50;
 	static double radioAlineacion = 120;
 	static double pesoCohesion = 0.01;
-	static double pesoSeparacion = 10;
-	static double pesoAlineacion = 0.5;
-	static double pesoObjetivo = 1;
-	static double pesoObstaculo = 300;  // 300
-	static double pesoLider = 10;
-	static double velMax = 10;
+	static double pesoSeparacion = 0.5; // 10
+	static double pesoAlineacion = 5; //0.5
+	static double pesoObjetivo = 7;  //1
+	static double pesoObstaculo = 2.6;  // 300
+	static double pesoLider = 0.1; //10
+	static double velMax = 50; //10
 	
 	static double pesoDistOrigen = 1;
 	static double pesoAntiguo = 1;
@@ -62,6 +62,7 @@ public class Boid implements Serializable{
 	/** Longitud de la ruta seguida por le boid*/
 	double longitudRuta;
 	private double valoracion;
+	private double experiencia;	
 	private double antiguo;
 	
 	public double getAntiguo() {
@@ -78,6 +79,14 @@ public class Boid implements Serializable{
 
 	public void setValoracion(double valoracion) {
 		this.valoracion = valoracion;
+	}
+	
+	public double getExperiencia() {
+		return experiencia;
+	}
+
+	public void setExperiencia(double experiencia) {
+		this.experiencia = this.experiencia + experiencia ;
 	}
 
 	/**Constructor donde se inicializa la posición y velocidad de cada boid,
@@ -150,21 +159,23 @@ public class Boid implements Serializable{
 					// Los boids más cercanos tienen que producir más repulsión
 					if (dist != 0)
 						separa = separa.times(1/(dist)*(dist));
+//					separa = separa.times(1/(dist)*(dist));
 				}// if para la separacion
 			} // if (i != indBoid) para todas las reglas
 		} // for principal
 		// calculos para la separacion
 		separa = separa.times(pesoSeparacion);
+		separa = separa.minus(this.getVelocidad());
 		// calculos para la velocidad de alineación
 		if (contAlineacion != 0){
 			velMedia = velMedia.timesEquals((double)1/(double)contAlineacion);
 			velMedia = velMedia.minus(this.getVelocidad());
 			velMedia = velMedia.times(pesoAlineacion);
+			velMedia = velMedia.minus(this.getVelocidad());
 		}else{
 			velMedia.set(0,0,0);
 			velMedia.set(1,0,0);
-		}
-		
+		}		
 		// calculos para la cohesión
 		if (cont != 0 && liderCerca == false){
 			centroMasa = centroMasa.times((double)1/(double)cont);
@@ -173,6 +184,7 @@ public class Boid implements Serializable{
 		if(liderCerca == true){
 			velCohesion = (bandada.elementAt(indLider).getPosicion().minus(this.getPosicion())).times(pesoLider);
 		}
+		velCohesion = velCohesion.minus(this.getVelocidad());
 		velResultante = (velMedia.plus(velCohesion)).plus(separa);
 		return velResultante;
 	}
@@ -249,8 +261,8 @@ public class Boid implements Serializable{
 			velObj = velObj.times(pesoObjetivo*10);
 		else
 			velObj = velObj.times(pesoObjetivo);
-//		velObj = limitaVelocidad(velObj);
-//		velObj = velObj.minus(this.getVelocidad());
+		velObj = limitaVelocidad(velObj);
+		velObj = velObj.minus(this.getVelocidad());
 		return velObj;
 	}
 	
@@ -280,24 +292,28 @@ public class Boid implements Serializable{
 			if (dist < radioObstaculo ){
 				c = c.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
 				if (dist != 0)
-					c = c.times(1/(dist)*(dist));				
+					c = c.times(1/(dist)*(dist));
+				
 			}
 			if (!caminoOcupado)// Sólo se calcula la intersección mientras el camino siga sin ocupar
 				caminoOcupado = recta.intersects(obstaculos.elementAt(i).getForma());
 		}
 		//Evitamos que la repulsion de los obstáculos sea perpendicular al obstáculo
-		if (tendenciaRepulsion>0 && tendenciaRepulsion<= 0.5){
+		if (tendenciaRepulsion>0 && tendenciaRepulsion<= 0.4){
 			compensacion.set(0,0,-c.get(1,0));
 			compensacion.set(1,0,c.get(0,0));
 		}
-		else if(tendenciaRepulsion>0.5 && tendenciaRepulsion<= 1){
+		else if(tendenciaRepulsion>0.4 && tendenciaRepulsion<= 0.8){
 			compensacion.set(0,0,c.get(1,0));
 			compensacion.set(1,0,-c.get(0,0));
 		}
-		compensacion.timesEquals(1.5);
+		
+//		compensacion.timesEquals(1);
 		c = c.plus(compensacion);
 //		c = compensacion;
 		c = c.times(pesoObstaculo);
+//		c = limitaVelocidad(c);
+		c = c.minus(this.getVelocidad());
 		setCaminoLibre(!caminoOcupado); // Si no tiene el camino ocupado por el momento es el lider
 		return c;
 	}
@@ -321,7 +337,7 @@ public class Boid implements Serializable{
 		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid));
 		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad());
 //		desp = limitaVelocidad(((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad()));
-		desp = desp.timesEquals(0.05);
+		desp = desp.timesEquals(0.05); // Simula la masa del boid
 		setAceleracion(desp);
 //		desp = limitaVelocidad(despCohesion.plus(despSeparacion).plus(despAlineacion).plus(despObjetivo).plus(despObstaculo).plus(this.getVelocidad()));
 //		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
@@ -460,7 +476,7 @@ public class Boid implements Serializable{
 	}
 	
 	public void calculaValoracion(){
-		valoracion = (pesoDistOrigen/getDistOrigen()) + (pesoAntiguo/getAntiguo());
+		valoracion = (pesoDistOrigen/getDistOrigen()) + (pesoAntiguo/getAntiguo() + getExperiencia());
 //		valoracion = pesoDistOrigen/getDistOrigen();
 	}
 	

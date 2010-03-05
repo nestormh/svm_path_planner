@@ -18,7 +18,7 @@ public class Obstaculo implements Serializable{
 	/**Forma geométrica con la que se pintará el obstáculo*/
 //	GeneralPath triangulo;
 	Rectangle2D cuadrado;
-	
+	double lado = 20;
 	/**
 	 * Constructor general
 	 * @param posicion del obstáculo
@@ -28,9 +28,9 @@ public class Obstaculo implements Serializable{
 		this.velocidad = velocidad;
 		this.posicion = posicion;
 		/**Inicialización del aspecto gráfico del cuerpo del boid*/
-		float ptosX[] = {5,0,10};
-		float ptosY[] = {0,5,5};
-		cuadrado = new Rectangle2D.Double(posicion.get(0,0),posicion.get(1,0),20,20);
+//		float ptosX[] = {5,0,10};
+//		float ptosY[] = {0,5,5};
+		cuadrado = new Rectangle2D.Double(posicion.get(0,0),posicion.get(1,0),lado,lado);
 //		triangulo = new GeneralPath(GeneralPath.WIND_NON_ZERO,ptosX.length);
 //		triangulo.moveTo (ptosX[0], ptosY[0]);
 //
@@ -51,7 +51,7 @@ public class Obstaculo implements Serializable{
 		return posicion;
 	}
 	public void setPosicion(Matrix pos) {
-		cuadrado.setRect(pos.get(0,0),pos.get(1,0),20,20);
+		cuadrado.setRect(pos.get(0,0),pos.get(1,0),lado,lado);
 		this.posicion = pos;		
 	}
 	public Matrix getVelocidad(){
