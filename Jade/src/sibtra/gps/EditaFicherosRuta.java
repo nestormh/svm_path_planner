@@ -48,6 +48,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import sibtra.util.PanelMuestraVariasTrayectorias;
+import sun.text.normalizer.IntTrie;
 
 /**
  * Permite la edición de ficheros de ruta
@@ -260,35 +261,59 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	 * @param even evento
 	 */
 	public void mousePressed(MouseEvent even) {
-		if(indRutaActual<0)
-			return; //no hay ruta
 		//Buscamos índice del punto más cercano de la ruta correspondiente
 		Point2D.Double pto=pmvt.pixel2Point(even.getX(), even.getY());
 		System.out.println(getClass().getName()+": Pulsado Boton "+even.getButton()
 				+" en posición: ("+even.getX()+","+even.getY()+")"
 				+"  ("+pto.getX()+","+pto.getY()+")  "
 		);
-		//indice y distancia del más cercano usando la trayectoria
-		Trayectoria traActual=pmvt.getTrayectoria(indRutaActual);
-		traActual.situaCoche(pto.getX(),pto.getY());
-		double distMin=traActual.distanciaAlMasCercano();
-		int indMin=traActual.indiceMasCercano();
+		int indSel=-1;
 		double escala=pmvt.getEscala();
-		System.out.println(getClass().getName()+": Punto más cercano a "+distMin
-				+" indice:"+indMin+ " escala:"+escala+ " veintaba:"+escala/10);
-		if(!Double.isNaN(escala)) {
-			if(distMin>(escala/10))
-				return; //pulsación muy lejana
-		} else if (distMin>2)
-			return; //si fuera de escala la distancia debe ser <2
-
+		if(indRutaActual>=0) {
+			//hay ruta actual, tratamos de ver si está cerca de la ruta actual
+			//indice y distancia del más cercano usando la trayectoria
+			Trayectoria traActual=pmvt.getTrayectoria(indRutaActual);
+			traActual.situaCoche(pto.getX(),pto.getY());
+			double distMin=traActual.distanciaAlMasCercano();
+			System.out.println(getClass().getName()+": Punto más cercano a "+distMin
+					 +" escala:"+escala+ " relacion :"+(escala/distMin));
+			if( ( !Double.isNaN(escala) && (distMin<=(escala/100)) )
+					|| (distMin<2) ) {
+				indSel=traActual.indiceMasCercano();
+			}
+		}
+		if(indSel<0) { //pulsación lejos de la trayectoria seleccionada
+			//buscamos la trayectoria más cercana
+			double distTrMin=Double.MAX_VALUE;
+			int indTraMin=-1;
+			for(int i=0; i<tramos.size(); i++) {
+				Trayectoria traActual=pmvt.getTrayectoria(i);
+				traActual.situaCoche(pto.getX(),pto.getY());
+				double distMin=traActual.distanciaAlMasCercano();
+//				System.out.println(getClass().getName()+": Punto más cercano a "+distMin
+//						+" indice:"+indMin+ " escala:"+escala+ " veintaba:"+escala/10);
+				if( distMin<distTrMin 
+						&& ( ( !Double.isNaN(escala) && (distMin<=(escala/100)) )
+						|| (distMin<2) )
+						) {
+					indSel=traActual.indiceMasCercano();
+					indTraMin=i;
+					distTrMin=distMin;
+				}				
+			}
+			if(indSel>=0) { 
+				//se encontró trayectoria cercana, será la nueva seleccionada
+				cambiaRutaActual(indTraMin);
+			} else //no se encontró trayectoria cercana
+				return;
+		}
 		if(even.getButton()==MouseEvent.BUTTON1)  {
 			//fijamos el indice correspondiente
-			per.jsDato.setValue(indMin);			
+			per.jsDato.setValue(indSel);			
 		}
 		if(even.getButton()==MouseEvent.BUTTON3)  {
 			System.out.println("Mostramos el menu de punto");
-			mostrarMenu(indMin, even);			
+			mostrarMenu(indSel, even);			
 		}
 
 
@@ -411,11 +436,23 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	 * @param row
 	 */
 	protected void cambiaRutaActual(int row) {
+		int oldAct=indRutaActual;
+		//La ruta actual siempre debe estar visible
+		pmvt.setMostrado(row, true);
+		pmvt.setDestacado(row, true);
+		modeloTR.fireTableCellUpdated(row, COL_VISTA); //para que se muestre marca
+		if(oldAct>=0) { //desmarcamos el anterior
+			pmvt.setDestacado(oldAct, false);
+			modeloTR.fireTableCellUpdated(oldAct, COL_ACT);
+		}
+		
+		modeloTR.fireTableDataChanged(); //TODO cambian las columnas de sig, prio y opo
 		//antes de cambiar queremos usar en íncide del más cercano
 		indRutaActual=row;
 		per.setRuta(tramos.getRuta(indRutaActual));
 		if(pmvt.getTrayectoria(row).hayPosicionCoche())
 			per.setIndice(pmvt.getTrayectoria(row).indiceMasCercano());
+		pmvt.actualiza();
 	}
 
 	final static int COL_ACT=0;
@@ -528,18 +565,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         		break;
         	case COL_ACT:
         		if(row!=indRutaActual) { //solo cambiamos al pinchar en otra fila
-        			int oldAct=indRutaActual;
-        			//La ruta actual siempre debe estar visible
-        			pmvt.setMostrado(row, true);
-        			pmvt.setDestacado(row, true);
-        			fireTableCellUpdated(row, COL_VISTA); //para que se muestre marca
-        			if(oldAct>=0) { //desmarcamos el anterior
-        				pmvt.setDestacado(oldAct, false);
-        				fireTableCellUpdated(oldAct, COL_ACT);
-        			}
-        			
         			cambiaRutaActual(row);
-        			fireTableDataChanged(); //TODO cambian las columnas de sig, prio y opo
         		}
     			break;
         	case COL_COLOR:
