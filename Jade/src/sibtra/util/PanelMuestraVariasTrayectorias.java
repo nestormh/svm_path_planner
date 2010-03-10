@@ -51,9 +51,11 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 	/** Vector de trayectorias representadas */
 	protected Vector<ParamTra> trays=new Vector<ParamTra>();
 
-	public static Color[] colores={Color.BLUE, Color.CYAN, Color.DARK_GRAY, Color.GRAY
+	public static Color[] colores={Color.BLUE, Color.CYAN, Color.DARK_GRAY
+//		, Color.GRAY //Demasiado oscuro
 			,Color.GREEN, Color.LIGHT_GRAY, Color.MAGENTA, Color.ORANGE, Color.PINK
-			,Color.RED, Color.YELLOW, Color.WHITE};
+			,Color.RED
+			, Color.YELLOW, Color.WHITE};
 
 	protected int indiceColor=0;
 

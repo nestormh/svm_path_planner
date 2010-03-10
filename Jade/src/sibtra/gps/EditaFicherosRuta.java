@@ -3,9 +3,12 @@
  */
 package sibtra.gps;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -13,7 +16,9 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -88,7 +93,62 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 //		cp.setBorder(BorderFactory.createMatteBorder(3, 3, 3, 3, Color.YELLOW));
 		
 		
-		pmvt=new PanelMuestraVariasTrayectorias();
+		pmvt=new PanelMuestraVariasTrayectorias() {
+			
+			BasicStroke strokeGruesaDiscontinua=new BasicStroke(2.0f
+					,BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 1.0f
+					,new float[] {20f,5f,20f,5f  ,5f,5f ,5f,5f ,5f,5f ,5f,5f ,5f,5f ,5f,5f}
+			,0f);
+
+			protected void cosasAPintar(Graphics g0) {
+				super.cosasAPintar(g0);
+				Graphics2D g=(Graphics2D)g0;
+//				if(indRutaActual<0) return; //no añadimos nada
+				//marcamos siguientes de la ruta actual
+				g.setStroke(strokeGruesaDiscontinua);
+				for(int indIni=0; indIni<tramos.size();indIni++)
+					for(int isig=0; isig<tramos.size(); isig++) {
+						if(tramos.isSiguiente(indIni, isig)) {
+							g.setColor(Color.GREEN);
+							//punto inicial, ultimo del actual
+							GPSData ptoIni=tramos.getRuta(indIni).getUltimoPto();
+							Point2D.Double pxIni=point2Pixel(ptoIni.getXLocal(), ptoIni.getYLocal());
+							//punto final, primero del siguiente
+							GPSData ptoFin=tramos.getRuta(isig).getPunto(0);
+							Point2D.Double pxFin=point2Pixel(ptoFin.getXLocal(), ptoFin.getYLocal());
+							double vx=pxFin.x-pxIni.x;
+							double vy=pxFin.y-pxIni.y;
+							//es siguiente, lo marcamos
+							g.draw(new QuadCurve2D.Double(
+									pxIni.x,pxIni.y
+									,pxFin.x+4*vx+4*vy,pxFin.y+4*vy-4*vx
+									,pxFin.x, pxFin.y
+							));
+						}
+						if(tramos.isPrioritatio(indIni, isig)) {
+							//tiene prioridad
+							g.setColor(Color.RED);
+							//punto inicial, ultimo del actual
+							Ruta ra=tramos.getRuta(indIni);
+							GPSData ptoIni=ra.getPunto(ra.getNumPuntos()-3>0?ra.getNumPuntos()-3:0);
+							Point2D.Double pxIni=point2Pixel(ptoIni.getXLocal(), ptoIni.getYLocal());
+							//punto final, primero del siguiente
+							ra=tramos.getRuta(isig);
+							GPSData ptoFin=ra.getPunto(ra.getNumPuntos()-3>0?ra.getNumPuntos()-3:0);
+							Point2D.Double pxFin=point2Pixel(ptoFin.getXLocal(), ptoFin.getYLocal());
+							double vx=pxFin.x-pxIni.x;
+							double vy=pxFin.y-pxIni.y;
+							//es siguiente, lo marcamos
+							g.draw(new QuadCurve2D.Double(
+									pxIni.x,pxIni.y
+									,pxFin.x+4*vy,pxFin.y-4*vx
+									,pxFin.x, pxFin.y
+							));
+//							g.draw(new Line2D.Double(pxIni.x,pxIni.y,pxFin.x, pxFin.y));
+						}
+					}
+			}
+		};
 		pmvt.getJPanelGrafico().addMouseListener(this); //para recibir el ratón
 		pmvt.setSeguirCoche(false);
 		pmvt.setMostrarCoche(false);
