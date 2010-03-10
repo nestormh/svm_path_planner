@@ -414,7 +414,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		//antes de cambiar queremos usar en íncide del más cercano
 		indRutaActual=row;
 		per.setRuta(tramos.getRuta(indRutaActual));
-		per.setIndice(pmvt.getTrayectoria(row).indiceMasCercano());
+		if(pmvt.getTrayectoria(row).hayPosicionCoche())
+			per.setIndice(pmvt.getTrayectoria(row).indiceMasCercano());
 	}
 
 	final static int COL_ACT=0;
@@ -530,9 +531,13 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         			int oldAct=indRutaActual;
         			//La ruta actual siempre debe estar visible
         			pmvt.setMostrado(row, true);
+        			pmvt.setDestacado(row, true);
         			fireTableCellUpdated(row, COL_VISTA); //para que se muestre marca
-        			if(oldAct>=0) //desmarcamos el anterior
+        			if(oldAct>=0) { //desmarcamos el anterior
+        				pmvt.setDestacado(oldAct, false);
         				fireTableCellUpdated(oldAct, COL_ACT);
+        			}
+        			
         			cambiaRutaActual(row);
         			fireTableDataChanged(); //TODO cambian las columnas de sig, prio y opo
         		}

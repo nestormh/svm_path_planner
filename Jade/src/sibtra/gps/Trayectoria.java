@@ -502,6 +502,11 @@ public class Trayectoria implements Serializable {
 		return indiceUltimoCercano;
 	}
 	
+	/** @return si hay fijada posición de coche */
+	public boolean hayPosicionCoche() {
+		return indiceUltimoCercano>=0 && ultimaPosCoche!=null;
+	}
+	
 	/** @return la distancia entre la ultima posición establecida del coche con {@link #situaCoche(double[])} y
 	 * el punto más cercano de la trayectoria
 	 */

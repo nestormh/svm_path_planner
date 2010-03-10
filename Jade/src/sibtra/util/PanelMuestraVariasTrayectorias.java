@@ -39,6 +39,7 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 		boolean mostrar=true;
 		boolean puntos=false;
 		boolean rumbo=false;
+		boolean destacado=false;
 		Color color=Color.YELLOW;
 		Vector<Integer> macrados=null;
 		
@@ -107,7 +108,10 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 			Trayectoria traAct=ptAct.trayec;
 			if(traAct.getLargo()==0 || !ptAct.mostrar)
 				continue; //no tenemos que mostrarla
-			g.setStroke(strokeLinea);
+			if(ptAct.destacado)
+				g.setStroke(strokeMuyGruesa);
+			else
+				g.setStroke(strokeLinea);
 			g.setColor(ptAct.color);
 			if(!ptAct.puntos) {
 				GeneralPath gptr=pathTrayectoria(traAct);
@@ -456,6 +460,18 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 		if(i<0 || i>=trays.size())
 			throw new IllegalArgumentException("Indice de trayectoria ("+i+")fuera de rango");
 		return trays.get(i).rumbo;
+	}
+	/** Cambia el parámetro correspondiente a la trayectoria i-ésima. No actualiza el panel */
+	public void setDestacado(int i, boolean valor) {
+		if(i<0 || i>=trays.size())
+			throw new IllegalArgumentException("Indice de trayectoria ("+i+")fuera de rango");
+		trays.get(i).destacado=valor;
+	}
+
+	public boolean isDestacado(int i){
+		if(i<0 || i>=trays.size())
+			throw new IllegalArgumentException("Indice de trayectoria ("+i+")fuera de rango");
+		return trays.get(i).destacado;
 	}
 	/** Cambia el parámetro correspondiente a la trayectoria i-ésima. No actualiza el panel */
 	public void setColor(int i, Color col) {
