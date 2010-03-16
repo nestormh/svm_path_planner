@@ -16,6 +16,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
@@ -53,7 +54,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import sibtra.util.PanelMuestraVariasTrayectorias;
-import sun.text.normalizer.IntTrie;
 
 /**
  * Permite la edición de ficheros de ruta
@@ -108,6 +108,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				g.setStroke(strokeGruesaDiscontinua);
 				for(int indIni=0; indIni<tramos.size();indIni++)
 					for(int isig=0; isig<tramos.size(); isig++) {
+						//Indicamos tramo Siguiente
 						if(tramos.isSiguiente(indIni, isig)) {
 							g.setColor(Color.GREEN);
 							//punto inicial, ultimo del actual
@@ -125,6 +126,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 									,pxFin.x, pxFin.y
 							));
 						}
+						//Indicamos tramos prioritario
 						if(tramos.isPrioritatio(indIni, isig)) {
 							//tiene prioridad
 							g.setColor(Color.RED);
@@ -145,6 +147,27 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 									,pxFin.x, pxFin.y
 							));
 //							g.draw(new Line2D.Double(pxIni.x,pxIni.y,pxFin.x, pxFin.y));
+						}
+						//Indicamos tramos prioritario en oposicion
+						if(tramos.isPrioritarioOposicion(indIni, isig)) {
+							//tiene prioridad en oposicion
+							//marcamos entre puntos centrales de ambos tramos
+							g.setColor(Color.RED);
+							//punto inicial, el punto medio de la ruta actual
+							Ruta ra=tramos.getRuta(indIni);
+							GPSData ptoIni=ra.getPunto(ra.getNumPuntos()/2);
+							Point2D.Double pxIni=point2Pixel(ptoIni.getXLocal(), ptoIni.getYLocal());
+							//punto final, el medio de la otra ruta
+							ra=tramos.getRuta(isig);
+							GPSData ptoFin=ra.getPunto(ra.getNumPuntos()/2);
+							Point2D.Double pxFin=point2Pixel(ptoFin.getXLocal(), ptoFin.getYLocal());
+							GeneralPath gp=new GeneralPath();
+							gp.moveTo(pxIni.x, pxIni.y);
+							double tamVec=200.0/(Double.isNaN(getEscala())?1:getEscala());
+							gp.lineTo(pxIni.x+tamVec*Math.sin(ptoIni.getAngulo()), pxIni.y-tamVec*Math.cos(ptoIni.getAngulo()));
+							gp.lineTo(pxFin.x+tamVec*Math.sin(ptoFin.getAngulo()), pxFin.y-tamVec*Math.cos(ptoFin.getAngulo()));							
+							gp.lineTo(pxFin.x, pxFin.y);
+							g.draw(gp);
 						}
 					}
 			}
@@ -317,10 +340,14 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	
 	/** 
 	 * Si es pulsación 1 seleccionamos punto más cercano para representar
-	 * Si es 3 mostramos menu del punto
+	 * Si es 3 mostramos menu del punto.
+	 * Sólo si no hay modificadores.
 	 * @param even evento
 	 */
 	public void mousePressed(MouseEvent even) {
+		if( ((even.getModifiersEx()&MouseEvent.SHIFT_DOWN_MASK)!=0)
+			|| ((even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0) ) // si hay algún modificador pulsado
+			return;
 		//Buscamos índice del punto más cercano de la ruta correspondiente
 		Point2D.Double pto=pmvt.pixel2Point(even.getX(), even.getY());
 		System.out.println(getClass().getName()+": Pulsado Boton "+even.getButton()
