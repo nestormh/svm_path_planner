@@ -1,3 +1,5 @@
+package sibtra.flota;
+
 public class VehiculoPintable
 {
 public VehiculoPintable(int xinicio,  int yinicio)

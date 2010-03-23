@@ -1,3 +1,5 @@
+package sibtra.flota;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
@@ -28,15 +30,16 @@ gbc.anchor = GridBagConstraints.NORTHWEST;
 
 }
 
-String buffered = "12071394445.jpg";
+String buffered = "lib/flota/12071394445.jpg";
 BufferedImage image; 
 public Visualizacion () throws IOException
 {JFrame frame = new JFrame();
- frame.setTitle("VERDINO: Gestión de flota");
+ frame.setTitle("VERDINO: Gestiï¿½n de flota");
  image = ImageIO.read(new File(buffered));
  frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
- java.net.URL imgURL = getClass().getResource("12071394445.jpg");
- ImageIcon icon = new ImageIcon(imgURL, "Fondo");
+// java.net.URL imgURL = getClass().getResource("12071394445.jpg");
+// ImageIcon icon = new ImageIcon(imgURL, "Fondo");
+  ImageIcon icon = new ImageIcon(buffered, "Fondo");
  JLabel label = new JLabel(icon);
   JPanel backgroundPanel = new JPanel(new GridBagLayout());
  backgroundPanel.add(label,gbc);

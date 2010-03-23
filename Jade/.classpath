@@ -27,5 +27,13 @@
 			<attribute name="javadoc_location" value="http://www.jdom.org/docs/apidocs/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/flota/icu4j-3.4.4.jar"/>
+	<classpathentry kind="lib" path="lib/flota/iri-0.7.jar"/>
+	<classpathentry kind="lib" path="lib/flota/jena-2.6.2.jar"/>
+	<classpathentry kind="lib" path="lib/flota/jess.jar"/>
+	<classpathentry kind="lib" path="lib/flota/log4j-1.2.13.jar"/>
+	<classpathentry kind="lib" path="lib/flota/slf4j-api-1.5.10.jar"/>
+	<classpathentry kind="lib" path="lib/flota/slf4j-log4j12-1.5.6.jar"/>
+	<classpathentry kind="lib" path="lib/flota/xercesImpl-2.7.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

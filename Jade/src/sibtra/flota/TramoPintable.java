@@ -1,3 +1,5 @@
+package sibtra.flota;
+
 public class TramoPintable
 {
 public TramoPintable(int xinicio,  int yinicio, int xfinal, int yfinal, double longitud)

@@ -1,3 +1,5 @@
+package sibtra.flota;
+
 import java.util.Vector;
 
 public class Tramo {

@@ -4,7 +4,7 @@
   <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns">
   <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema">
   <!ENTITY xsd "http://www.w3.org/2000/10/XMLSchema">
-  <!ENTITY definicionesprevias SYSTEM "definicionespreviasXSL.txt">
+  <!ENTITY definicionesprevias SYSTEM "../clps/definicionespreviasXSL.txt">
   <!ENTITY nbsp "&#160;">
 ]>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd="http://www.w3.org/2000/10/XMLSchema#">
@@ -68,7 +68,7 @@
 ;(run)
 ;(run)
 ;(run)
-(save-facts owlfacts.txt)
+(save-facts tmp/owlfacts.txt)
 </xsl:template>
   <xsl:template match="rdf:RDF"><xsl:apply-templates/></xsl:template>
   

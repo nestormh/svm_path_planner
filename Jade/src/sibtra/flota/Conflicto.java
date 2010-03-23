@@ -1,3 +1,5 @@
+package sibtra.flota;
+
 public class Conflicto {
 
 String tipo;

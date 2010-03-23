@@ -1,3 +1,5 @@
+package sibtra.flota;
+
 
 
 import jess.*;
@@ -60,9 +62,9 @@ static String assertLimpiezaDistanciasConflictos = "(assert (triple (predicate h
 		definicionesTramos();
 		transformaHechosJess();
 		transformaReglasJess();
-		arreglarReglas("reglasverdino.clp", "reglasarregladas.clp");
+		arreglarReglas("tmp/reglasverdino.clp", "tmp/reglasarregladas.clp");
 		cargarHechosReglas();
-	// assert tramos (leerlos de ontologias) y preparar la ontología del cálculo de rutas
+	// assert tramos (leerlos de ontologias) y preparar la ontologï¿½a del cï¿½lculo de rutas
 		leerTramosDeOntologia();  
 	// leer los vehiculos de la ontologia y crear los objetos.  
 	   leerVehiculos();
@@ -76,13 +78,13 @@ static String assertLimpiezaDistanciasConflictos = "(assert (triple (predicate h
 
 	public void cargaEspaciosDeNombres()
 	{System.out.println("LEYENDO VERDINO");
-        m.getDocumentManager().addAltEntry( "http://www.isaatc.ull.es/Verdino.owl","file:verdino.owl" );
+        m.getDocumentManager().addAltEntry( "http://www.isaatc.ull.es/Verdino.owl","file:lib/flota/xmls/verdino.owl" );
 		m.getDocumentManager().addAltEntry( "http://swrl.stanford.edu/ontologies/3.3/swrla.owl",
-                                          "file:swrla.owl.xml" );
+                                          "file:lib/flota/xmls/swrla.owl.xml" );
 		m.getDocumentManager().addAltEntry( "http://sqwrl.stanford.edu/ontologies/built-ins/3.4/sqwrl.owl",
-                                          "file:sqwrl.owl.xml" );							
+                                          "file:lib/flota/xmls/sqwrl.owl.xml" );							
 		m.getDocumentManager().addAltEntry( "http://protege.stanford.edu/plugins/owl/protege",
-                                          "file:protege.owl" );							
+                                          "file:lib/flota/xmls/protege.owl" );							
 		m.read( "http://www.isaatc.ull.es/Verdino.owl" );
 	}
 	
@@ -118,8 +120,8 @@ static String assertLimpiezaDistanciasConflictos = "(assert (triple (predicate h
 	engineRutas = new Rete();
 	 engineRutas.reset();
 	 engineRutas.clear();
-	 engineRutas.executeCommand("(batch factsdistancias.clp)");
-	 engineRutas.executeCommand("(batch distancias.clp)");
+	 engineRutas.executeCommand("(batch lib/flota/clps/factsdistancias.clp)");
+	 engineRutas.executeCommand("(batch lib/flota/clps/distancias.clp)");
 	 Vector vector = calculaVectorTramosDeOntologia();
 	 assertsTramos(vector);
 	}
@@ -129,8 +131,8 @@ public void tramosAEngineRutas() throws JessException
 	engineRutas = new Rete();
 	 engineRutas.reset();
 	 engineRutas.clear();
-	 engineRutas.executeCommand("(batch factsdistancias.clp)");
-	 engineRutas.executeCommand("(batch distancias.clp)");
+	 engineRutas.executeCommand("(batch lib/flota/clps/factsdistancias.clp)");
+	 engineRutas.executeCommand("(batch lib/flota/clps/distancias.clp)");
 	// Vector vector = calculaVectorTramosDeOntologia();
 	// assertsTramos(vector);
 	}
@@ -190,7 +192,7 @@ public void tramosAEngineRutas() throws JessException
 	  vehiculo.fijaPosicionVehiculo(posicion);
 	   }
 	   	engine.executeCommand(assertLimpiezaPosiciones);
-		inicializacionFicticia();  //método a quitar en situaciones reales
+		inicializacionFicticia();  //mï¿½todo a quitar en situaciones reales
 	}
 	
 	public void inicializaVehiculos(String[] idVehiculos) throws JessException
@@ -312,21 +314,21 @@ public void tramosAEngineRutas() throws JessException
     }
 	
 	
-	//método a cambiar cuando funcione el GPS... en realidad, la clase vehiculo
+	//mï¿½todo a cambiar cuando funcione el GPS... en realidad, la clase vehiculo
 	public double dimeVelocidadVehiculo (String id) throws JessException
 	{System.out.println("dimevelocidadvehiculo");
 	Vehiculo actual = (Vehiculo) hashVehiculos.get(id);
 	 return actual.dimeVelocidad();
 	}
 	
-		//método a cambiar cuando funcione el GPS
+		//mï¿½todo a cambiar cuando funcione el GPS
 	public String dimeTramoVehiculo(String id) throws JessException
 	{System.out.println("dime tramo vehiculo");
 	Vehiculo actual = (Vehiculo) hashVehiculos.get(id);
 	 return actual.dimeTramo();
 	}
 	
-	//método a cambiar cuando funcione el GPS
+	//mï¿½todo a cambiar cuando funcione el GPS
 	public double dimePosicionEnTramoVehiculo(String id) throws JessException
 	{System.out.println("dime posicion en tramo");
 	Vehiculo actual = (Vehiculo) hashVehiculos.get(id);
@@ -493,19 +495,18 @@ public void tramosAEngineRutas() throws JessException
 	{System.out.println("cargar hechos reglas");
 	 engine.reset();
 	 engine.clear();
-	 engine.executeCommand("(batch destino.clp)");  // los hechos: tramos, definiciones, etc..
-	 engine.executeCommand("(batch reglasarregladas.clp)");  // las reglas
-	 engine.executeCommand("(batch consultasVerdino.clp)");  // las consultas
-     engine.executeCommand("(batch scriptsadicionales.clp)");  // script adicional
+	 engine.executeCommand("(batch tmp/destino.clp)");  // los hechos: tramos, definiciones, etc..
+	 engine.executeCommand("(batch tmp/reglasarregladas.clp)");  // las reglas
+	 engine.executeCommand("(batch lib/flota/clps/consultasVerdino.clp)");  // las consultas
+     engine.executeCommand("(batch lib/flota/clps/scriptsadicionales.clp)");  // script adicional
 	}
 	
 	public void transformaReglasJess() throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException, 
     FileNotFoundException
 	{System.out.println("Transformando reglas");
-	    String fileName = "verdino"; // an SWRL ontology
-		String xmlFileName = fileName+".owl";
-    	String xslFileName = "SWRL2Jessrevisada.xsl.xml";
-    	String outOFxslFileName = "reglasverdino"+".clp";
+		String xmlFileName = "lib/flota/xmls/verdino.owl"; // an SWRL ontology
+    	String xslFileName = "lib/flota/xmls/SWRL2Jessrevisada.xsl.xml";
+    	String outOFxslFileName = "tmp/reglasverdino.clp";
     	TransformerFactory tFactory = TransformerFactory.newInstance();
     	Transformer transformer = tFactory.newTransformer(new StreamSource(xslFileName));
     	transformer.transform(new StreamSource(xmlFileName), new StreamResult(new FileOutputStream(outOFxslFileName)));
@@ -515,9 +516,9 @@ public void tramosAEngineRutas() throws JessException
 	public void transformaHechosJess() throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException, 
     FileNotFoundException
 	{System.out.println("Transformando hechos");
-	    String fileName = "destino";
+	    String fileName = "tmp/destino";
 		String xmlFileName = fileName+".owl";
-    	String xslFileName = "OWL2Jessrevisada.xsl.xml";
+    	String xslFileName = "lib/flota/xmls/OWL2Jessrevisada.xsl.xml";
     	String outOFxslFileName = fileName+".clp";
    	   	TransformerFactory tFactory = TransformerFactory.newInstance();
     	Transformer transformer = tFactory.newTransformer(new StreamSource(xslFileName));
@@ -525,7 +526,7 @@ public void tramosAEngineRutas() throws JessException
     	}
 	
 	
-	// se supone que este método será llamado al principio y acorde con la situación real
+	// se supone que este mï¿½todo serï¿½ llamado al principio y acorde con la situaciï¿½n real
 	public void definicionesTramos() throws JessException, java.io.IOException
 	{System.out.println("definiciones tramos");
 	double[] longitudes = {1, 260, 200, 290, 490, 290, 250, 290, 200, 250, 740, 402, 402, 350, 350, 150, 150, 390, 390, 350, 350, 200, 20, 20, 30};
@@ -622,7 +623,7 @@ p1 = new Prioridades("Tramo12", "Tramo11");
 	 System.out.println("calcula ruta");	
 	String comandoleer = "(compDist Final" + origenP + " Principio" + destinoP + ")";
 		engineRutas.executeCommand(comandoleer);
-		engineRutas.executeCommand("(batch consultasVerdino.clp)");
+		engineRutas.executeCommand("(batch lib/flota/clps/consultasVerdino.clp)");
 	    Value ruta = engineRutas.fetch("RUTA");
 		Vector tramosRuta = new Vector();
 		try {
@@ -709,7 +710,7 @@ public void meterVectorEnOntologia (Vector vector, Vector prioridades, Vector op
 	   }
 	   String propiedadTP = "tieneTramoPrioritario";
 	   String propiedadTS = "tieneTramoSecundario";
-// escribir las prioridades en la ontología	   
+// escribir las prioridades en la ontologï¿½a	   
 	   for (int i= 0; i < prioridades.size(); i++)
 	   {Prioridades prioridad = (Prioridades)prioridades.elementAt(i);
 	    String nombre = "Prioridad" + i;
@@ -731,7 +732,7 @@ public void meterVectorEnOntologia (Vector vector, Vector prioridades, Vector op
 		ObjectProperty tramoSecundario = m.getObjectProperty(prefijo + propiedadTS);
 		individuo.addProperty(tramoSecundario, m.getResource(prefijo + prioridad.dimeSecundario()));
 	   }
-	   Writer out= new FileWriter("destino.owl");
+	   Writer out= new FileWriter("tmp/destino.owl");
 	   m.write(out);
 	}
 
@@ -852,7 +853,7 @@ engine.executeCommand(assertLimpiezaTramos);
 	 for (Enumeration e = hashVehiculos.elements() ; e.hasMoreElements() ;) 
 	{vectorVehiculos.addElement(e.nextElement());
      }
-	// visualización
+	// visualizaciï¿½n
 	Visualizacion visualizacion = new Visualizacion();
 	 double[] longitudes = {1, 260, 200, 290, 490, 290, 250, 290, 200, 250, 740, 402, 402, 150, 150, 150, 150, 390, 390, 350, 350, 200, 20, 20, 30};
 	 int numeroTramos = longitudes.length;
@@ -866,7 +867,7 @@ engine.executeCommand(assertLimpiezaTramos);
 	int sizeVector = vectorVehiculos.size();
   //System.out.println(":::: Hay " + sizeVector + " vehiculos !!!" );
   int instante = 1;
-  //fin de inicialización
+  //fin de inicializaciï¿½n
 for (int u=0; u<70; u++)
 {engine.run();
 }
@@ -874,7 +875,7 @@ for (int u=0; u<70; u++)
   while(true)
   {waiting(1000);
     System.out.println("--------Instante: " + instante + "----------");
-    // mostrar la posición actual
+    // mostrar la posiciï¿½n actual
 	for (int i=0; i<sizeVector ; i++)
 	{Vehiculo actual = (Vehiculo) (vectorVehiculos.elementAt(i));
 		System.out.println(":::::");
@@ -932,7 +933,7 @@ for (int u=0; u<70; u++)
 	 stringAssert = stringAssert + actual.dimeId() + ") (object " + actual.dimeVelocidad() +") ) ) ";
 	  engine.executeCommand(stringAssert);
 		}
-    }  // fin del for de cálculo de nuevas posiciones
+    }  // fin del for de cï¿½lculo de nuevas posiciones
 	for (int i=0; i<sizeVector ; i++)
 	{Vehiculo actual = (Vehiculo) (vectorVehiculos.elementAt(i));
 	 // assert posicion
