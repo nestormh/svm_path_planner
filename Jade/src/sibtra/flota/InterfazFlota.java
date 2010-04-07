@@ -1,19 +1,25 @@
 package sibtra.flota;
 
-import java.util.*;
-import jess.*;
-import javax.xml.transform.Transformer;
+import java.util.Vector;
+
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
+import jess.JessException;
+
+/**
+ * Clase se comunicación con el sistema inteligente de gestión de flota.
+ * 
+ * @author evelio
+ */
 public class InterfazFlota {
 
 public Distancias distancias;
 
 
+/**
+ * Constructor vació que carga la ontología.
+ */
 public InterfazFlota() 
 {
 try{
@@ -23,6 +29,16 @@ distancias.cargaEspaciosDeNombres();
 		
 }
 
+/**
+ * Método en que se le indican al sistema los tramos, interconexiones y prioridades
+ * @param tramos contendrá los nombres de los tramos
+ * @param longitudes contendrá la longitud (en metros) de cada uno de los tramos
+ * @param conexiones para indicar las conexiones. Deberá tener tantas filas y columnas como tramos. 
+ * Cada fila representa el tramo inicial y cada columna el tramo siguiente. 
+ * Por ejemplo si hay un 1 en conexiones[7][3] indica el que tramo 3 está a continuación del 7 
+ * @param vectorPrioridades vector con las {@link Prioridades} en cruces de un tramo respecto a otro
+ * @param vectorOposiciones vector con las {@link Prioridades} en oposición de un tramo respecto a otro
+*/
 public void inicializacionTramos (String[] tramos, double[] longitudes, int[][] conexiones, Vector vectorPrioridades, Vector vectorOposiciones) 
 {try {
  Vector vector = distancias.procesaTramos(longitudes, conexiones, tramos);
@@ -36,12 +52,22 @@ public void inicializacionTramos (String[] tramos, double[] longitudes, int[][] 
 }
 
 // si al final no se cogen de la ontolog�a...
+/**
+ * Indica los vehículos que están presentes
+ * @param idVehiculos array con los nombres de los vehículos 
+ */
 public void inicializacionVehiculos(String[] idVehiculos) 
 {try{
  distancias.inicializaVehiculos(idVehiculos);
  } catch (Exception e) {e.printStackTrace();}
 }
 
+/**
+ * NO SE PARA QUE ES
+ * @param idVehiculos
+ * @param rutas
+ * @throws JessException
+ */
 public void asignaRutasVehiculos(String[] idVehiculos, String[][] rutas) 
 {try {
  distancias.limpiaRutas();
@@ -53,6 +79,13 @@ public void asignaRutasVehiculos(String[] idVehiculos, String[][] rutas)
 }
 
 //no usar de manera aislada
+/**
+ * NO SE PARA QUE ES
+ * no usar de manera aislada
+ * @param vehiculo
+ * @param ruta
+ * @throws JessException
+ */
 public void asignaRuta(String vehiculo, String[] ruta) 
 {try{
  distancias.asignaRuta(vehiculo, ruta);
@@ -60,6 +93,14 @@ public void asignaRuta(String vehiculo, String[] ruta)
  //distancias.finalizaInicializacionReducida();
 }
 
+/** 
+ * Se pasa la posición y velocidad de todos los vehículo y devuelve en que estado deben ponerse.
+ * @param idVehiculos identificación de los vehículos sobre los que se pregunta
+ * @param tramosActuales tramos en que se encuentra el vehículo correspondiente
+ * @param longitudesEnTramos posición en el tramo en que se encuetra el vehículo correspondiente
+ * @param velocidades velocidad del vehículo correspondiente
+ * @return array con el estado de conflicto
+ */
 public Conflicto[] dimeEstados (String[] idVehiculos, String[] tramosActuales, double[] longitudesEnTramos, double[] velocidades) 
 {try{
  return distancias.dimeEstados(idVehiculos, tramosActuales, longitudesEnTramos, velocidades);
@@ -67,6 +108,14 @@ public Conflicto[] dimeEstados (String[] idVehiculos, String[] tramosActuales, d
  }
 
 
+/**
+ * Calcula la ruta más corta para ir de origen a destino
+ * @param origen nombre del tramo origen
+ * @param destino nombre del tramo destino
+ * @return array con la suceción de tramos que se debe seguir (icluyendo origen y destino??)
+ * @throws JessException
+ * @throws java.io.IOException
+ */
 public String[] calculaRuta(String origen, String destino) 
 {String[] strings = new String[0];
  try {
