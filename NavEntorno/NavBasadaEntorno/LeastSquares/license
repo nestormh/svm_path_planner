@@ -1,0 +1,11 @@
+UNIT NAME      LICENSE
+leastsquares   3-clause BSD
+spline3        3-clause BSD
+reflections    3-clause BSD
+lq             3-clause BSD
+bidiagonal     3-clause BSD
+rotations      3-clause BSD
+bdsvd          3-clause BSD
+qr             3-clause BSD
+blas           3-clause BSD
+svd            3-clause BSD
