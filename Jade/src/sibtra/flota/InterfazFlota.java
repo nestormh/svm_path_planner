@@ -107,14 +107,41 @@ public Conflicto[] dimeEstados (String[] idVehiculos, String[] tramosActuales, d
  }catch (Exception e) {e.printStackTrace(); return null;}
  }
 
+/**
+ * Calcula la ruta más corta para ir de origen a destino. Soluciona el caso cuando origen y destiono
+ * son el mismo y origen antes que destino. En ese caso devolverá solo un tramo.
+ * @param origen nombre del tramo origen
+ * @para longOrigen posición dentro del tramo origen
+ * @param destino nombre del tramo destino
+ * @param longDestino posición dentro del tramo destino
+ * @return array con la suceción de tramos que se debe seguir (icluyendo origen y destino)
+ */
+public String[] calculaRuta(String origen, double longOrigen, String destino, double longDestino){
+	String[] strings = new String[0];
+	try {
+		if(origen.equals(destino) && (longOrigen < longDestino))
+		{strings = new String[1];
+		strings[0]=destino;
+		System.out.println(strings[0]);
+		}
+		else
+		{
+			Vector vector = distancias.calculaRuta(origen, destino);
+			strings = new String[vector.size()];
+			for (int i=0; i< vector.size(); i++)
+			{strings[i] = distancias.quitaPrefijo((String)vector.elementAt(i));
+			System.out.println(strings[i]);
+			}
+		}
+	} catch (Exception e) {e.printStackTrace();}
+	return strings;
+}
 
 /**
  * Calcula la ruta más corta para ir de origen a destino
  * @param origen nombre del tramo origen
  * @param destino nombre del tramo destino
- * @return array con la suceción de tramos que se debe seguir (icluyendo origen y destino??)
- * @throws JessException
- * @throws java.io.IOException
+ * @return array con la suceción de tramos que se debe seguir (icluyendo origen y destino)
  */
 public String[] calculaRuta(String origen, String destino) 
 {String[] strings = new String[0];
