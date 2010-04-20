@@ -41,7 +41,7 @@ import sibtra.util.UtilCalculos;
  * @author alberto
  *
  */
-public class MotorSincrono extends MotorTipico {
+public class MotorSincrono extends MotorTipico implements Motor  {
 	
 	public String getNombre() { return "Motor Síncrono"; }
 	public String getDescripcion() { return "Ejecuta las acciones de control con un periodo fijo"; }

@@ -11,6 +11,7 @@ import sibtra.log.LoggerArrayDoubles;
 import sibtra.log.LoggerFactory;
 import sibtra.predictivo.Coche;
 import sibtra.ui.VentanasMonitoriza;
+import sibtra.ui.defs.Motor;
 import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
@@ -29,7 +30,7 @@ import sibtra.util.UtilCalculos;
  * @author alberto
  *
  */
-public class MotorAsincrono extends MotorTipico {
+public class MotorAsincrono extends MotorTipico implements Motor {
 	
 	public String getNombre() { return "Motor Asincrono";}
 	public String getDescripcion() { return "Actualiza modelo del coche cada vez que se recibe un nuevo dato";}
