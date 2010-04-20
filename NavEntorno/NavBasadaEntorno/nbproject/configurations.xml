@@ -88,6 +88,8 @@
                      displayName="NavBasadaEntorno"
                      projectFiles="true">
         <itemPath>AffineAndEuclidean.cpp</itemPath>
+        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.cpp</itemPath>
+        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.h</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.cpp</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.h</itemPath>
         <itemPath>CRuta.cpp</itemPath>
@@ -114,6 +116,7 @@
         <itemPath>statistics.cpp</itemPath>
         <itemPath>stdafx.cpp</itemPath>
         <itemPath>stdafx.h</itemPath>
+        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/stereo.cpp</itemPath>
         <itemPath>utils.cpp</itemPath>
         <itemPath>utils.h</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/wm.cpp</itemPath>

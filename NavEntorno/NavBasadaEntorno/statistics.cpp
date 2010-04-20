@@ -1,5 +1,6 @@
 #include "ViewMorphing.h"
 #include "ImageRegistration.h"
+#include "CMRPT_Route.h"
 #include <sqlite3.h>
 
 #define PATH_BASE "/home/neztol/doctorado/Datos/Estadisticas/"
@@ -343,5 +344,50 @@ void tests(int testNumber) {
     cvReleaseImage(&imgDBC);
     cvReleaseImage(&imgRT);
     cvReleaseImage(&imgRTC);
+}
+
+void MRTP_test() {
+    CMRPT_Route route1("/home/neztol/doctorado/Datos/MRPT_Data/malaga2009_parking_0L/", "GT_path_CAMERA_LEFT.txt");
+    CMRPT_Route route2("/home/neztol/doctorado/Datos/MRPT_Data/malaga2009_parking_2L/", "GT_path_CAMERA_LEFT.txt");
+    route2.addPoints("/home/neztol/doctorado/Datos/MRPT_Data/malaga2009_parking_6L/", "GT_path_CAMERA_LEFT.txt");
+
+    t_RoutePoint currentPoint;
+    
+    IplImage * imgRT = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 1);
+    IplImage * imgDB = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 1);
+
+    CRealMatches rm(false);
+
+    cvNamedWindow("imgRT", 1);
+    cvNamedWindow("imgDB", 1);
+
+    while (true) {
+        IplImage * imgRT_L = route1.getNext(currentPoint);        
+        IplImage * imgDB_L = route2.getNearest(currentPoint);
+
+        if (imgDB_L == NULL) {
+            cvSet(imgDB, cvScalar(0, 0, 255));
+        } else {
+            cvResize(imgDB_L, imgDB);
+        }
+
+        cvResize(imgRT_L, imgRT);        
+
+        cvShowImage("imgRT", imgRT);
+        cvShowImage("imgDB", imgDB);
+        rm.mainTest(imgRT, imgDB);
+        
+        int key = cvWaitKey(10);
+        if (key == 27)
+            exit(0);
+        if (key == 32)
+            cvWaitKey(0);
+
+        cvReleaseImage(&imgRT_L);
+        cvReleaseImage(&imgDB_L);
+    }
+
+    cvReleaseImage(&imgRT);
+    cvReleaseImage(&imgDB);
 }
 

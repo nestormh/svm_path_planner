@@ -23,6 +23,11 @@ typedef struct {
 } t_Pair;
 
 typedef struct {
+    CvPoint3D32f p1;
+    CvPoint3D32f p2;
+} t_Pair3D;
+
+typedef struct {
     CvPoint2D32f a, b, c, d;
 } t_PiecewiseTransform;
 
@@ -36,6 +41,7 @@ class CRealMatches {
 public:
     CRealMatches(bool usePrevious = false);
     CRealMatches(const CRealMatches& orig);
+    void mainTest(IplImage * img1, IplImage * img2);
     virtual ~CRealMatches();
 
     void startTest(string path, string filename, string testName);
@@ -87,6 +93,14 @@ private:
     void obstacleDetectionQuartile(IplImage * pcaResult, IplImage * maskIn);
     double normal(double x, double mean, double sdv);
     void detectObstacles(IplImage * mask);
+
+    void test3D();
+    void test3D_2();
+    void calibrateCameras();
+    CvMat * M1;
+    CvMat * M2;
+    CvMat * D1;
+    CvMat * D2;
 
     CvPoint2D32f currentPoint1;
     int currentIndex1;

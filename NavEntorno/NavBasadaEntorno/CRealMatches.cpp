@@ -13,6 +13,7 @@
 #define SIZE1 cvSize(800, 600)
 #define SIZE2 cvSize(640, 480)
 #define SIZE3 cvSize(320, 240)
+#define SIZE4 cvSize(160, 120)
 
 CRealMatches::CRealMatches(bool usePrevious) {
     currentPoint1 = cvPoint2D32f(-1, -1);
@@ -25,6 +26,11 @@ CRealMatches::CRealMatches(bool usePrevious) {
     mask1 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     mask2 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     plinear = cvCreateImage(size, IPL_DEPTH_8U, 1);
+
+    M1 = cvCreateMat(3, 3, CV_64F);
+    M2 = cvCreateMat(3, 3, CV_64F);
+    D1 = cvCreateMat(1, 5, CV_64F);
+    D2 = cvCreateMat(1, 5, CV_64F);
 
     this->usePrevious = usePrevious;
     if (usePrevious) {
@@ -42,6 +48,11 @@ CRealMatches::~CRealMatches() {
     cvReleaseImage(&mask1);
     cvReleaseImage(&mask2);
     cvReleaseImage(&plinear);
+
+    cvReleaseMat(&M1);
+    cvReleaseMat(&M2);
+    cvReleaseMat(&D1);
+    cvReleaseMat(&D2);
 
     if (usePrevious) {
         cvReleaseImage(&img1Prev);
@@ -737,6 +748,7 @@ inline void CRealMatches::mainTest() {
     //getOflow(img1, img2, points1, pairs1);
     //getOflow(img2, img1, points2, pairs2);
     oFlow(points1, pairs, img1, img2);
+    //testSurf(img1, img2);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en oFlow = " << time << endl;
 
@@ -806,7 +818,10 @@ inline void CRealMatches::mainTest() {
     //obstacleDetectionChauvenet(plinear, mask1);
     obstacleDetectionQuartile(plinear, mask1);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
-    cout << "Tiempo invertido en obstacleDetection = " << time << endl; //*/    
+    cout << "Tiempo invertido en obstacleDetection = " << time << endl; //*/
+
+    //test3D();
+    //test3D_2();
 
     /*CViewMorphing vm(cvGetSize(img1));
     vm.points1 = new CvPoint2D32f[pairs.size()];
@@ -850,6 +865,8 @@ inline void CRealMatches::mainTest() {
 
 void CRealMatches::startTest(string path, string filename, string testName) {
 
+    //calibrateCameras();
+
     string filepath = path;
     filepath += filename;
     string imgBasePath = path;
@@ -882,8 +899,8 @@ void CRealMatches::startTest(string path, string filename, string testName) {
 
     cvSetMouseCallback("Img1", onMouseTest1, this);
     cvSetMouseCallback("Img2", onMouseTest2, this);
-
-    while (ifs.good()) {
+    
+    while (ifs.good()) {        
         int dist, ang;
         ifs >> dist;
         ifs >> ang;
@@ -893,7 +910,7 @@ void CRealMatches::startTest(string path, string filename, string testName) {
         if (abs(dist) > 1) continue;
         if (abs(ang) > 10) continue;
         if ((dist < 0) && (ang < 0)) continue;
-        if ((dist > 0) && (ang > 0)) continue;        
+        if ((dist > 0) && (ang > 0)) continue;
 
         IplImage * img1L = cvLoadImage(imgBasePath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
         cvResize(img1L, img1);
@@ -1122,7 +1139,7 @@ void CRealMatches::startTest4() {
             IplImage * img2L = cvLoadImage(imgPath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
             cvResize(img2L, img2);
             //cvSmooth(img2, img2, CV_GAUSSIAN, 3);
-            cvReleaseImage(&img2L);
+            cvReleaseImage(&img2L);            
 
             clock_t myTime = clock();
             mainTest();
@@ -1137,4 +1154,11 @@ void CRealMatches::startTest4() {
 
         }
     }
+}
+
+void CRealMatches::mainTest(IplImage * img1, IplImage * img2) {
+    this->img1 = img1;
+    this->img2 = img2;
+
+    mainTest();
 }

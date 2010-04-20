@@ -7,7 +7,7 @@
 #include "CRutaDB.h"
 #include "CRealMatches.h"
 
-#define EJECUCION 9
+#define EJECUCION 13
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -822,6 +822,10 @@ int main(int argc, _TCHAR argv[]) {
         case 12: {
             CRealMatches rm(false);
             rm.startTest4();
+            break;
+        }
+        case 13: {
+            MRTP_test();
             break;
         }
         default: {
