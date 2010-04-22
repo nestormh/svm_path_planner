@@ -6,8 +6,9 @@
 #include "ImageRegistration.h"
 #include "CRutaDB.h"
 #include "CRealMatches.h"
+#include "CStatistics.h"
 
-#define EJECUCION 13
+#define EJECUCION 7
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -116,6 +117,8 @@
 #define MOEBIUS_EXP0_ILLUM3 88
 #define MOEBIUS_EXP1_ILLUM3 89
 #define MOEBIUS_EXP2_ILLUM3 90
+
+CStatistics stat;
 
 void inicio1(IplImage * img1, IplImage * img2, int method);
 
@@ -702,7 +705,7 @@ int inicio0(int inicio, int optionImg) {
         } else if (inicio == 6) {
             pruebaRutas();
         } else if (inicio == 7) {
-            statistics();
+            stat.statistics();
             exit(0);
         } else if (inicio == 8) {
             cvReleaseImage(&img1);
@@ -770,7 +773,7 @@ int inicio0(int inicio, int optionImg) {
 	return 0;
 }
 
-int main(int argc, _TCHAR argv[]) {
+int main(int argc, _TCHAR argv[]) {    
 	/*for (int i = DTO_PNG; i < ART_EXP0_ILLUM1; i++) {
 		inicio0(EJECUCION, i);
 	}//*/
@@ -784,7 +787,7 @@ int main(int argc, _TCHAR argv[]) {
 	} //*/
     switch (EJECUCION) {    
         case 7: {
-            for (int i = 0; i < argc; i++) {
+            /*for (int i = 0; i < argc; i++) {
                 cout << i << ": " << argv[i] << endl;
             }
             int size = atoi(argv[1]);
@@ -795,13 +798,14 @@ int main(int argc, _TCHAR argv[]) {
             cout << "size = " << size << endl;
             cout << "zoom = " << zoom << endl;
             cout << "b1 = " << b1 << endl;
-            cout << "b2 = " << b2 << endl;
+            cout << "b2 = " << b2 << endl;*/
 
-            statistics(size, zoom, b1, b2);
+            //stat.statistics(size, zoom, b1, b2);
+            stat.statistics(0);
             break;
         }
         case 8: {
-            tests(0);
+            stat.tests(0);
             break;
         }
         case 9: {
@@ -825,7 +829,7 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 13: {
-            MRTP_test();
+            stat.MRTP_test();
             break;
         }
         default: {

@@ -150,7 +150,3 @@ public:
 	CvPoint2D32f * points2;
 
 };
-
-void statistics(int s, int z, int b1, int b2);
-void tests(int testNumber);
-void MRTP_test();

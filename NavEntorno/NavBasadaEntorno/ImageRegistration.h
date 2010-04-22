@@ -130,7 +130,6 @@ typedef struct {
     } t_moment;
 
 void cjtosImagenes();
-void statistics();
 void pruebaSurf(IplImage * img1, IplImage * img2);
 double calcCorr(t_moment mmt1, t_moment mmt2, int method);
 double calcCCorr(IplImage * img1, IplImage * img2, t_moment mmt1, t_moment mmt2, bool show);

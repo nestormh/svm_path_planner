@@ -96,6 +96,8 @@
         <itemPath>CRuta.h</itemPath>
         <itemPath>CRutaDB.cpp</itemPath>
         <itemPath>CRutaDB.h</itemPath>
+        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.cpp</itemPath>
+        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.h</itemPath>
         <itemPath>ContourMatching.cpp</itemPath>
         <itemPath>CornerDetectionAndMatching.cpp</itemPath>
         <itemPath>Flusser.cpp</itemPath>
@@ -113,7 +115,6 @@
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/piecewiseLinear.cpp</itemPath>
         <itemPath>pruebasSurf.cpp</itemPath>
         <itemPath>resource.h</itemPath>
-        <itemPath>statistics.cpp</itemPath>
         <itemPath>stdafx.cpp</itemPath>
         <itemPath>stdafx.h</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/stereo.cpp</itemPath>

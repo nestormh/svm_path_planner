@@ -45,6 +45,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/NavBasadaEntorno.o \
 	${OBJECTDIR}/Surf/imload.o \
 	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/wm.o \
+	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.o \
 	${OBJECTDIR}/GeographicLib/Geocentric.o \
 	${OBJECTDIR}/GeographicLib/TransverseMercator.o \
 	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/stereo.o \
@@ -56,8 +57,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/CornerDetectionAndMatching.o \
 	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cvfast.o \
 	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.o \
-	${OBJECTDIR}/mser/msertest.o \
 	${OBJECTDIR}/Surf/os_mapping.o \
+	${OBJECTDIR}/mser/msertest.o \
 	${OBJECTDIR}/pruebasSurf.o \
 	${OBJECTDIR}/AffineAndEuclidean.o \
 	${OBJECTDIR}/utils.o \
@@ -71,7 +72,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/CRutaDB.o \
 	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o \
 	${OBJECTDIR}/xform.o \
-	${OBJECTDIR}/statistics.o \
 	${OBJECTDIR}/GeographicLib/TransverseMercatorExact.o \
 	${OBJECTDIR}/CRuta.o \
 	${OBJECTDIR}/GeographicLib/MGRS.o \
@@ -171,6 +171,11 @@ ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/wm.o: nbproject/
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/wm.o /home/neztol/NetBeansProjects/NavBasadaEntorno/wm.cpp
 
+${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.o /home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.cpp
+
 ${OBJECTDIR}/GeographicLib/Geocentric.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/Geocentric.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
 	${RM} $@.d
@@ -226,15 +231,15 @@ ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.o: 
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.o /home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.cpp
 
-${OBJECTDIR}/mser/msertest.o: nbproject/Makefile-${CND_CONF}.mk mser/msertest.cpp 
-	${MKDIR} -p ${OBJECTDIR}/mser
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/mser/msertest.o mser/msertest.cpp
-
 ${OBJECTDIR}/Surf/os_mapping.o: nbproject/Makefile-${CND_CONF}.mk Surf/os_mapping.cpp 
 	${MKDIR} -p ${OBJECTDIR}/Surf
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Surf/os_mapping.o Surf/os_mapping.cpp
+
+${OBJECTDIR}/mser/msertest.o: nbproject/Makefile-${CND_CONF}.mk mser/msertest.cpp 
+	${MKDIR} -p ${OBJECTDIR}/mser
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/mser/msertest.o mser/msertest.cpp
 
 ${OBJECTDIR}/pruebasSurf.o: nbproject/Makefile-${CND_CONF}.mk pruebasSurf.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -300,11 +305,6 @@ ${OBJECTDIR}/xform.o: nbproject/Makefile-${CND_CONF}.mk xform.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/xform.o xform.cpp
-
-${OBJECTDIR}/statistics.o: nbproject/Makefile-${CND_CONF}.mk statistics.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/statistics.o statistics.cpp
 
 ${OBJECTDIR}/GeographicLib/TransverseMercatorExact.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/TransverseMercatorExact.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
