@@ -616,38 +616,39 @@ p1 = new Prioridades("Tramo12", "Tramo11");
 	   {calculaRuta("Tramo6", "Tramo1");
 	   } 
 	
-	
-	public Vector calculaRuta(String origen, String destino) throws JessException, java.io.IOException
+	public Vector calculaRuta(String origen, String destino) throws
+	JessException, java.io.IOException
 	{String origenP = prefijo + origen;
-	 String destinoP = prefijo + destino;
-	 System.out.println("calcula ruta");	
-	String comandoleer = "(compDist Final" + origenP + " Principio" + destinoP + ")";
-		engineRutas.executeCommand(comandoleer);
-		engineRutas.executeCommand("(batch lib/flota/clps/consultasVerdino.clp)");
-	    Value ruta = engineRutas.fetch("RUTA");
-		Vector tramosRuta = new Vector();
-		try {
+	String destinoP = prefijo + destino;
+	engineRutas.store("RUTA", null);
+	System.out.println("calcula ruta");    
+	String comandoleer = "(compDist Final" + origenP + " Principio" +
+	destinoP + ")";
+	engineRutas.executeCommand(comandoleer);
+	engineRutas.executeCommand("(batch lib/flota/clps/consultasVerdino.clp)");
+	Value ruta = engineRutas.fetch("RUTA");
+	Vector tramosRuta = new Vector();
+	try {
 		ValueVector v = ruta.listValue(engineRutas.getGlobalContext());
-		
+
 		String principio1 = "Principio";
-			String finales1 = "Final";
+		String finales1 = "Final";
 		// la primera
 		String nodo1 = v.get(0).stringValue(engineRutas.getGlobalContext());
 		int indice1 = nodo1.indexOf(finales1);
 		nodo1 = nodo1.substring(indice1 + finales1.length(),nodo1.length()).trim();
 		tramosRuta.addElement(nodo1);
-		//System.out.println(nodo1);
-         for (int k=0; k<v.size(); k++)
-		 {nodo1 = v.get(k).stringValue(engineRutas.getGlobalContext());
-		  indice1 = nodo1.indexOf(principio1);
-		  if(indice1 > -1)
-		  {nodo1 = nodo1.substring(indice1 + principio1.length(),nodo1.length()).trim();
-		   //System.out.println(nodo1);
-		   tramosRuta.addElement(nodo1);
-		  }
-		 }
-		 } catch (java.lang.NullPointerException e) {}
-   	    return tramosRuta;
+		for (int k=0; k<v.size(); k++)
+		{nodo1 = v.get(k).stringValue(engineRutas.getGlobalContext());
+		indice1 = nodo1.indexOf(principio1);
+		if(indice1 > -1)
+		{nodo1 = nodo1.substring(indice1 +
+				principio1.length(),nodo1.length()).trim();
+		tramosRuta.addElement(nodo1);
+		}
+		}
+	} catch (java.lang.NullPointerException e) {}
+	return tramosRuta;
 	}
 	
 	public  Vector procesaTramos (double[] longitudes, int[][] conexiones, String[] nombreTramos) throws JessException

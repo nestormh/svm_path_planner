@@ -17,6 +17,16 @@ public class UtilCalculos {
 	}
 
 	/**
+	 * Devuelve la diferencia angular entre dos ángulos. Se puede utilizar para ver la direncia en rumbo
+	 * @param ang1 un ángulo (en radianes)
+	 * @param ang2 segundo ángulo (en radianes)
+	 * @return direncia normalizada y en valor absoluto
+	 */
+	public static double diferenciaAngulos(double ang1, double ang2) {
+		return Math.abs(normalizaAngulo(ang1-ang2));
+	}
+	
+	/**
 	 * Devuelve el valor acotado entre el mínimo y el máximo
 	 * @param valor original 
 	 * @param minimo valor permitido

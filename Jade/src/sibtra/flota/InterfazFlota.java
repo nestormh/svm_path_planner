@@ -38,8 +38,9 @@ distancias.cargaEspaciosDeNombres();
  * Por ejemplo si hay un 1 en conexiones[7][3] indica el que tramo 3 está a continuación del 7 
  * @param vectorPrioridades vector con las {@link Prioridades} en cruces de un tramo respecto a otro
  * @param vectorOposiciones vector con las {@link Prioridades} en oposición de un tramo respecto a otro
+ * @return si se inicializó correctamente
 */
-public void inicializacionTramos (String[] tramos, double[] longitudes, int[][] conexiones, Vector vectorPrioridades, Vector vectorOposiciones) 
+public boolean inicializacionTramos (String[] tramos, double[] longitudes, int[][] conexiones, Vector vectorPrioridades, Vector vectorOposiciones) 
 {try {
  Vector vector = distancias.procesaTramos(longitudes, conexiones, tramos);
  	distancias.meterVectorEnOntologia(vector, vectorPrioridades, vectorOposiciones);
@@ -47,8 +48,9 @@ public void inicializacionTramos (String[] tramos, double[] longitudes, int[][] 
 		distancias.transformaReglasJess();
 		distancias.arreglarReglas("tmp/reglasverdino.clp", "tmp/reglasarregladas.clp");
 		distancias.cargarHechosReglas();
-	distancias.leerTramosDeOntologia();  
-	} catch (Exception e) {e.printStackTrace();}
+	distancias.leerTramosDeOntologia();
+	} catch (Exception e) {e.printStackTrace(); return false;}
+	return true;
 }
 
 // si al final no se cogen de la ontolog�a...
@@ -249,11 +251,19 @@ public static void main(String[] args) throws JessException, java.io.IOException
 	 interfaz.inicializacionTramos (nombreTramos, longitudes, conexiones, vectorPrioridades, vectorOposiciones);
 // ejemplo de c�lculo de ruta
 // OJO. NO FUNCIONA EN EL CASO DE QUE EL DESTINO EST� M�S ADELANTE EN EL MISMO TRAMO. ES UN CASO PARTICULAR. 
-	 String[] rutaCalculada = interfaz.calculaRuta("Tramo4", "Tramo4");
+	 String[] rutaCalculada = interfaz.calculaRuta("Tramo4", "Tramo10");
 		for (int i=0; i< rutaCalculada.length; i++)
 		{System.out.println(rutaCalculada[i]);
 		}	
 
+		System.out.println("Segunda invocacion 1 5");
+		 rutaCalculada = interfaz.calculaRuta("Tramo1", "Tramo5");
+			for (int i=0; i< rutaCalculada.length; i++)
+			{System.out.println(rutaCalculada[i]);
+			}	
+
+		
+		/*
 // inicializaci�n veh�culos y de sus rutas (por orden)
 // ejemplo: Primero voy por el tramo 10, y despu�s deseo ir al 12-
 // Necesario para prioridades del tipo oposici�n (tengo que saber cu�l es el pr�ximo tramo a visitar 
@@ -306,6 +316,7 @@ estados = interfaz.dimeEstados(vehiculos, tramosActuales4, longitudesEnTramos4, 
 	 {System.out.println(vehiculos[i] + "," + estados[i].dimeTipo() + " a " + estados[i].dimeDistancia() + " unidades");
 	 }
 	 
+	 */
 
 	 }
 }

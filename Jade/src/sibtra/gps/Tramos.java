@@ -150,6 +150,12 @@ public class Tramos implements Serializable {
 		vecTramos.get(ini).opo.set(sig,valor);
 	}
 	
+	/**
+	 *  Añade nuevo tramo. Se hace que el centro de la ruta añadida sea el mismo que las anteriores
+	 *
+	 * @param ruta que corresponde al nuevo tramo
+	 * @param nombre inicial que se le da
+	 */
 	public void añadeTramo(Ruta ruta, String nombre) {
 		if(ruta==null)
 			throw new IllegalArgumentException("La ruta a añadir no pude ser null");
