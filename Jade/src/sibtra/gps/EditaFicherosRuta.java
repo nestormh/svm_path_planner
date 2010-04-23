@@ -542,26 +542,28 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		pmvt.actualiza();
 	}
 
-	final static int COL_ACT=0;
-	final static int COL_VISTA=1;
-	final static int COL_COLOR=2;
-	final static int COL_PUNTOS=3;
-	final static int COL_RUMBO=4;
-	final static int COL_NOM=5;
-	final static int COL_TAM=6;
-	final static int COL_SIGUIENTE=7;
-	final static int COL_PRIO=8;
-	final static int COL_OPO=9;
-	final static int COL_SUB=10;
-	final static int COL_BAJ=11;
+	final static int COL_IND=0;
+	final static int COL_ACT=1;
+	final static int COL_VISTA=2;
+	final static int COL_COLOR=3;
+	final static int COL_PUNTOS=4;
+	final static int COL_RUMBO=5;
+	final static int COL_NOM=6;
+	final static int COL_TAM=7;
+	final static int COL_SIGUIENTE=8;
+	final static int COL_PRIO=9;
+	final static int COL_OPO=10;
+	final static int COL_SUB=11;
+	final static int COL_BAJ=12;
 	
 
 	class ModeloTablaRutas extends AbstractTableModel {
-    	String[] nombColumnas=new String[12];
+    	String[] nombColumnas=new String[13];
     	
     	public ModeloTablaRutas() {
 			super();
 			//rellenamos los Titulos
+			nombColumnas[COL_IND]="I";
 			nombColumnas[COL_ACT]="Act";
 			nombColumnas[COL_NOM]="Nombre";
 			nombColumnas[COL_TAM]="Tam";
@@ -596,6 +598,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			if( tramos.size()<=row)
 				return null;
 			switch(col) {
+			case COL_IND:
+				return row;
 			case COL_NOM:
 				return tramos.getNombre(row);
 			case COL_TAM:
@@ -634,7 +638,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		}
 		
 		public boolean isCellEditable(int row, int col) { 
-        	return (col!=COL_TAM);  
+        	return (col!=COL_TAM) && (col!=COL_IND);  
         }
 
         public void setValueAt(Object value, int row, int col) {
@@ -715,6 +719,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         	case COL_BAJ:
         		return Boolean.class;
         	case COL_TAM:
+        	case COL_IND:
         		return Integer.class;
         	case COL_COLOR:
         		return Color.class;
@@ -921,7 +926,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		EditaFicherosRuta efr=new EditaFicherosRuta("Examina Fich Ruta");
+		EditaFicherosRuta efr=new EditaFicherosRuta("Edita Fich. Ruta");
 //		efr.cargaFichero(new File("Rutas/Universidad/Tramos_EntradaLargaSalida"));
 //		efr.cargaFichero(new File("Rutas/Universidad/Tramos_NaveSalida"));
 		
