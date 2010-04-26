@@ -227,8 +227,28 @@ public class GestionFlota {
 	 * @author jesus
 	 */
 	private Trayectoria construyeTrayectoriaCompleta(int[] indicesTramos, double largoEnInicial, double largoEnFinal) {
-		// TODO Auto-generated method stub
-		return null;
+		int longitud = 0;
+		for (int i=0;i<indicesTramos.length;i++){
+			longitud = trayectorias[indicesTramos[i]].length() + longitud;
+			System.out.println("la longitud del tramo "+indicesTramos[i]+" es " + +trayectorias[indicesTramos[i]].length());
+		}		
+		System.out.println("Hay " + indicesTramos.length+ " en la trayectoria completa");
+		System.out.println("la longitud total de la ruta completa es " + longitud);
+		double[][] puntos = new double[longitud][5]; // x,y,z,velocidad y rumbo
+		int cont = 0;
+		for (int i=0;i<indicesTramos.length;i++){
+			for(int j=0;j<trayectorias[indicesTramos[i]].length();j++){
+				puntos[cont][0] = trayectorias[indicesTramos[i]].x[j];
+				puntos[cont][1] = trayectorias[indicesTramos[i]].y[j];
+				puntos[cont][2] = trayectorias[indicesTramos[i]].z[j];
+				puntos[cont][3] = trayectorias[indicesTramos[i]].velocidad[j];
+				puntos[cont][4] = trayectorias[indicesTramos[i]].rumbo[j];
+				cont++;				
+			}			
+		}		
+		Trayectoria trayCompleta = new Trayectoria(puntos);
+		trayCompleta.nuevaDistanciaMaxima(0.01);
+		return trayCompleta;
 	}
 
 	/**
