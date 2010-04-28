@@ -500,4 +500,11 @@ public class Ruta implements Serializable {
 
 	}
 
+	/**
+	 * @return the umbralDesviacion
+	 */
+	public double getUmbralDesviacion() {
+		return umbralDesviacion;
+	}
+
 }

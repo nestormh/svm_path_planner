@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Date;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -47,6 +48,7 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 		cp.add(pmr);
 		per=new PanelExaminaRuta();
 		cp.add(per);
+		per.spUmbral.addChangeListener(this);
 
 		{
 			JPanel jpSur=new JPanel();
@@ -106,6 +108,7 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 				System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
 			}
 		}
+		System.out.println("Fecha del primer dato:"+new Date(rutaTemporal.getPunto(0).getSysTime()));
 	}
 
 	public void itemStateChanged(ItemEvent e) {
@@ -137,9 +140,24 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 	}
 
 
-	public void stateChanged(ChangeEvent arg0) {
-		GPSData npto=per.ruta.getPunto((Integer)per.jsDato.getValue());
-		pmr.nuevoPunto(npto);
+	public void stateChanged(ChangeEvent ce) {
+		if(ce.getSource()==per.jsDato) {
+			GPSData npto=per.ruta.getPunto((Integer)per.jsDato.getValue());
+			pmr.nuevoPunto(npto);
+		} else if(ce.getSource()==per.spUmbral) {
+			if(jcbMarcarDM.isSelected()) {
+				pmr.setMarcados(per.ruta.indiceConsideradosDM);
+				pmr.actualiza();
+			}
+			System.out.println(String.format("%s:%5.2f\t%5.2f\t%d\t%d\t%6.2f\t%6.2f", jlNomF.getText()
+					,Math.toDegrees(per.ruta.getDesviacionM(Math.toRadians((Double)per.spUmbral.getValue()))) //La desviación magnética
+					,Math.toDegrees(per.ruta.getUmbralDesviacion()) //el umbral utilizado
+					,per.ruta.indiceConsideradosDM.size() //considerados
+					,per.ruta.getNumPuntos() //Totales
+					,Math.toDegrees(per.ruta.desEstDM), Math.toDegrees(per.ruta.dmMax)
+					));
+		}
+
 	}
 
 

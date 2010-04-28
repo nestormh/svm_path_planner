@@ -39,13 +39,15 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 
 	JSpinner jsDato;
 
-	private SpinnerNumberModel spm;
+	private SpinnerNumberModel spmPuntoActual;
 
 	private JLabel jlDeMaximo;
 
 	private JLabel jlDesviaM;
 
-	private SpinnerNumberModel spUmbral;
+	SpinnerNumberModel spUmbral;
+
+	private JSpinner jspUmbral;
 
 	public PanelExaminaRuta() {
 		this(null);
@@ -69,8 +71,8 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jbPrimero.addActionListener(this);
 			jpInf.add(jbPrimero);
 						
-			spm=new SpinnerNumberModel(0,0,100000,1);
-			jsDato=new JSpinner(spm);
+			spmPuntoActual=new SpinnerNumberModel(0,0,100000,1);
+			jsDato=new JSpinner(spmPuntoActual);
 			jsDato.setSize(150, jsDato.getHeight());
 			jsDato.addChangeListener(this);
 			jpInf.add(jsDato);
@@ -88,8 +90,9 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jpInf.add(jlDesviaM);
 			spUmbral=new SpinnerNumberModel(10.00,0,180,0.25);
 			spUmbral.addChangeListener(this);
-			JSpinner jspUmbral=new JSpinner(spUmbral);
+			jspUmbral=new JSpinner(spUmbral);
 			jpInf.add(jspUmbral);
+			jspUmbral.setEnabled(false);
 			
 			add(jpInf,BorderLayout.PAGE_START);
 		}
@@ -113,6 +116,7 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			jsDato.setEnabled(false);
 			jbUltimo.setEnabled(false);
 			jlDesviaM.setEnabled(false);
+			jspUmbral.setEnabled(false);
 		} else {
 			jbPrimero.setEnabled(true);
 			jsDato.setEnabled(true);
@@ -120,13 +124,14 @@ public class PanelExaminaRuta extends JPanel implements ActionListener, ChangeLi
 			int indMax=ruta.getNumPuntos()-1;
 			jlDeMaximo.setText(String.format(" de %d ", indMax));
 			if(!mantienePosicion)
-				spm.setValue(0); //nos ponemos al principio
+				spmPuntoActual.setValue(0); //nos ponemos al principio
 			else //dejamos como está salvo que estemos fuera de rango.
-				if((Integer)spm.getValue()>indMax)
-					spm.setValue(indMax);
-			spm.setMaximum(indMax);
-			
+				if((Integer)spmPuntoActual.getValue()>indMax)
+					spmPuntoActual.setValue(indMax);
+			spmPuntoActual.setMaximum(indMax);
+			spUmbral.setValue(Math.toDegrees(ra.getUmbralDesviacion()));
 			actualizaDM();
+			jspUmbral.setEnabled(true);
 		}
 	}
 
