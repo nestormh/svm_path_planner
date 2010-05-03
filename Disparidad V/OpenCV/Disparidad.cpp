@@ -1632,7 +1632,7 @@ int main (int argc, char* argv[]){
 	CvCapture *videoIzq = 0;
 	CvCapture *videoDer = 0;
 
-	source = 3;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
+	source = 4;					// Origen de las im�genes 0->Fichero imagen, 1 -> Tiempo real, 2-> Fichero v�deo, 3->T.Real Capturando frames, 4-> Frames capturados
 
 	switch (source) {
 		case 1:
