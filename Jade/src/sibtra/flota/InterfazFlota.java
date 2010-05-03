@@ -29,6 +29,34 @@ distancias.cargaEspaciosDeNombres();
 		
 }
 
+/** Sustituirá todos los espacios de las cadenas por subrayados y los subrayados por 2 subrayados */
+protected String quitaEspacios(String str) {
+	if(str==null)
+		return null;
+	if(str.contains("__"))
+		throw new IllegalArgumentException("No se pueden gestionar cadenas con dos subrayados seguidos");
+	if(str.contains(" _") || str.contains("_ "))
+		throw new IllegalArgumentException("No se pueden gestionar cadenas con subrayados mezclados con espacios");
+	return str.replace("_", "__").replace(' ', '_');
+}
+
+/** aplica {@link #quitaEspacios(String)} a todas las cadenas del array */
+protected void quitaEspacios(String[] arrStr) {
+	for(int i=0; i<arrStr.length; i++)
+		arrStr[i]=quitaEspacios(arrStr[i]);
+}
+
+/** Función inversa de {@link #quitaEspacios(String)}: sustituye los dobles subrayados por subrayados simple 
+ * y los subrayados simples por espacios.*/
+protected String poneEspacios(String str) {
+	return str.replace("__", "\t").replace('_', ' ').replace('\t','_');
+}
+
+protected void poneEspacios(String[] arrStr) {
+	for(int i=0; i<arrStr.length; i++)
+		arrStr[i]=poneEspacios(arrStr[i]);	
+}
+
 /**
  * Método en que se le indican al sistema los tramos, interconexiones y prioridades
  * @param tramos contendrá los nombres de los tramos
@@ -41,7 +69,9 @@ distancias.cargaEspaciosDeNombres();
  * @return si se inicializó correctamente
 */
 public boolean inicializacionTramos (String[] tramos, double[] longitudes, int[][] conexiones, Vector vectorPrioridades, Vector vectorOposiciones) 
-{try {
+{
+	quitaEspacios(tramos);
+	try {
  Vector vector = distancias.procesaTramos(longitudes, conexiones, tramos);
  	distancias.meterVectorEnOntologia(vector, vectorPrioridades, vectorOposiciones);
 	distancias.transformaHechosJess();
@@ -59,7 +89,9 @@ public boolean inicializacionTramos (String[] tramos, double[] longitudes, int[]
  * @param idVehiculos array con los nombres de los vehículos 
  */
 public void inicializacionVehiculos(String[] idVehiculos) 
-{try{
+{
+	quitaEspacios(idVehiculos);
+	try{
  distancias.inicializaVehiculos(idVehiculos);
  } catch (Exception e) {e.printStackTrace();}
 }
@@ -71,7 +103,9 @@ public void inicializacionVehiculos(String[] idVehiculos)
  * @throws JessException
  */
 public void asignaRutasVehiculos(String[] idVehiculos, String[][] rutas) 
-{try {
+{
+	quitaEspacios(idVehiculos);
+	try {
  distancias.limpiaRutas();
  for (int i=0; i< idVehiculos.length; i++)
  {asignaRuta(idVehiculos[i], rutas[i]);
@@ -80,7 +114,6 @@ public void asignaRutasVehiculos(String[] idVehiculos, String[][] rutas)
  } catch (Exception e) {e.printStackTrace();}
 }
 
-//no usar de manera aislada
 /**
  * NO SE PARA QUE ES
  * no usar de manera aislada
@@ -88,8 +121,9 @@ public void asignaRutasVehiculos(String[] idVehiculos, String[][] rutas)
  * @param ruta
  * @throws JessException
  */
-public void asignaRuta(String vehiculo, String[] ruta) 
-{try{
+private void asignaRuta(String vehiculo, String[] ruta) 
+{
+	try{
  distancias.asignaRuta(vehiculo, ruta);
  } catch (Exception e) {e.printStackTrace();}
  //distancias.finalizaInicializacionReducida();
@@ -118,7 +152,9 @@ public Conflicto[] dimeEstados (String[] idVehiculos, String[] tramosActuales, d
  * @param longDestino posición dentro del tramo destino
  * @return array con la suceción de tramos que se debe seguir (icluyendo origen y destino)
  */
-public String[] calculaRuta(String origen, double longOrigen, String destino, double longDestino){
+public String[] calculaRuta(String nomOrigen, double longOrigen, String nomDestino, double longDestino){
+	String origen=quitaEspacios(nomOrigen);
+	String destino=quitaEspacios(nomDestino);
 	String[] strings = new String[0];
 	try {
 		if(origen.equals(destino) && (longOrigen < longDestino))
@@ -136,34 +172,20 @@ public String[] calculaRuta(String origen, double longOrigen, String destino, do
 			}
 		}
 	} catch (Exception e) {e.printStackTrace();}
+	poneEspacios(strings);
 	return strings;
 }
 
 /**
- * Calcula la ruta más corta para ir de origen a destino
+ * Calcula la ruta más corta para ir de origen a destino suponiendo vehículos al principio de cada tramo
+ * Invoca a {@link #calculaRuta(String, double, String, double)} con 
+ * longitudes igual a 0.
  * @param origen nombre del tramo origen
  * @param destino nombre del tramo destino
  * @return array con la suceción de tramos que se debe seguir (icluyendo origen y destino)
  */
-public String[] calculaRuta(String origen, String destino) 
-{String[] strings = new String[0];
- try {
- //if(origen.equals(destino))
-// {strings = new String[1];
- // strings[0]=destino;
- // System.out.println(strings[0]);
- //}
- //else
- //{
-Vector vector = distancias.calculaRuta(origen, destino);
-  strings = new String[vector.size()];
- for (int i=0; i< vector.size(); i++)
- {strings[i] = distancias.quitaPrefijo((String)vector.elementAt(i));
-  //System.out.println(strings[i]);
- }
- //}
- } catch (Exception e) {e.printStackTrace();}
- return strings; 
+public String[] calculaRuta(String origen, String destino) {
+	return calculaRuta(origen,0, destino,0);
 }
 
 public static void main(String[] args) throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException

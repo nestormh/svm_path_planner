@@ -140,7 +140,10 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 	public static void main(String[] args) {
 
 		GestionFlota gf=new GestionFlota();
-		gf.cargaTramos(new File("Rutas/Tramos/TodosLosTramos_PrioridadYOposicion.tra"));
+		String nomFich="Rutas/Tramos/TodosLosTramos_PrioridadYOposicion.tra";
+		if(args.length>0)
+			nomFich=args[0];
+		gf.cargaTramos(new File(nomFich));
 		
 		JFrame vent=new JFrame("Panel Elige Destino");
 		PanelEligeDestino ped=new PanelEligeDestino(gf) {
