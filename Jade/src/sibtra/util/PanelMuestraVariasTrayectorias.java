@@ -142,7 +142,7 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 
 			if(ptAct.rumbo) {
 				g.setStroke(strokeLinea);
-				g.setColor(Color.BLUE);
+//				g.setColor(Color.BLUE);
 				//pintamos los puntos que están dentro del recuadro
 				for(int i=0; i<traAct.length(); i++) {
 					double pa[]={traAct.x[i],traAct.y[i]};
@@ -171,10 +171,11 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 					//esta dentro del recuadro
 					Point2D px=point2Pixel(traAct.x[i],traAct.y[i]);
 					int x=(int)px.getX(), y=(int)px.getY();
-					g.drawLine(x-tamCruz, y-tamCruz
-							, x+tamCruz, y+tamCruz);
-					g.drawLine(x-tamCruz, y+tamCruz
-							, x+tamCruz, y-tamCruz);
+					g.drawRect(x-(tamCruz+2), y-(tamCruz+2), (tamCruz+2), (tamCruz+2));
+//					g.drawLine(x-tamCruz, y-tamCruz
+//							, x+tamCruz, y+tamCruz);
+//					g.drawLine(x-tamCruz, y+tamCruz
+//							, x+tamCruz, y-tamCruz);
 				}
 			}
 		}
