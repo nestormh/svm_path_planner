@@ -411,7 +411,9 @@ public class Trayectoria implements Serializable {
 	 * @return Índice de la ruta en el que se encuentra el punto de la 
 	 * ruta más cercano al punto pos
 	 */
-	public int indiceMasCercanoOptimizado(double posX,double posY,int indMinAnt){        
+	public int indiceMasCercanoOptimizado(double posX,double posY,int indMinAnt){
+		if(length()==1)
+			return 0;
 	    if(indMinAnt<0){
 	    	return indiceMasCercano(posX, posY);
 	    }

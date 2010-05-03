@@ -324,6 +324,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	/** Para gestionar los cambios en el punto seleccionado en el {@link #per} */
 	public void stateChanged(ChangeEvent arg0) {
 		GPSData ultPto=per.ruta.getPunto((Integer)per.jsDato.getValue());
+		if(ultPto==null)
+			return;
 		double x=ultPto.getXLocal();
 		double y=ultPto.getYLocal();
 		double yaw=ultPto.getAngulo();
@@ -350,10 +352,10 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			return;
 		//Buscamos índice del punto más cercano de la ruta correspondiente
 		Point2D.Double pto=pmvt.pixel2Point(even.getX(), even.getY());
-		System.out.println(getClass().getName()+": Pulsado Boton "+even.getButton()
-				+" en posición: ("+even.getX()+","+even.getY()+")"
-				+"  ("+pto.getX()+","+pto.getY()+")  "
-		);
+//		System.out.println(getClass().getName()+": Pulsado Boton "+even.getButton()
+//				+" en posición: ("+even.getX()+","+even.getY()+")"
+//				+"  ("+pto.getX()+","+pto.getY()+")  "
+//		);
 		int indSel=-1;
 		double escala=pmvt.getEscala();
 		if(indRutaActual>=0) {
@@ -362,8 +364,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			Trayectoria traActual=pmvt.getTrayectoria(indRutaActual);
 			traActual.situaCoche(pto.getX(),pto.getY());
 			double distMin=traActual.distanciaAlMasCercano();
-			System.out.println(getClass().getName()+": Punto más cercano a "+distMin
-					 +" escala:"+escala+ " relacion :"+(escala/distMin));
+//			System.out.println(getClass().getName()+": Punto más cercano a "+distMin
+//					 +" escala:"+escala+ " relacion :"+(escala/distMin));
 			if( ( !Double.isNaN(escala) && (distMin<=(escala/100)) )
 					|| (distMin<2) ) {
 				indSel=traActual.indiceMasCercano();
@@ -374,6 +376,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			double distTrMin=Double.MAX_VALUE;
 			int indTraMin=-1;
 			for(int i=0; i<tramos.size(); i++) {
+				if(!pmvt.isMostrado(i)) continue; //nos lo saltamos si no está mostrado
 				Trayectoria traActual=pmvt.getTrayectoria(i);
 				traActual.situaCoche(pto.getX(),pto.getY());
 				double distMin=traActual.distanciaAlMasCercano();
@@ -399,7 +402,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 			per.jsDato.setValue(indSel);			
 		}
 		if(even.getButton()==MouseEvent.BUTTON3)  {
-			System.out.println("Mostramos el menu de punto");
+//			System.out.println("Mostramos el menu de punto");
 			mostrarMenu(indSel, even);			
 		}
 
