@@ -215,6 +215,35 @@ public class Tramos implements Serializable {
 		return resultado;
 	}
 	
+	public String toStringDetallado()  {
+		String res=String.format("Número de tramos %d:\n", size());
+		for(int i=0;i<size();i++) {
+			res+=String.format("\n%4d)%s:\tpuntos:%10d",i,getNombre(i),getRuta(i).getNumPuntos());
+			String siguientes="";
+			String esSiguiente="";
+			String prioridadSobre="";
+			String prioridadDesde="";
+			String oposicion="";
+			for(int j=0; j<size(); j++) {
+				if(isSiguiente(i, j)) siguientes+=", "+getNombre(j)+"("+j+")";
+				if(isSiguiente(j, i)) esSiguiente+=", "+getNombre(j)+"("+j+")";
+				if(isPrioritatio(i, j)) prioridadSobre+=", "+getNombre(j)+"("+j+")";
+				if(isPrioritatio(j, i)) prioridadDesde+=", "+getNombre(j)+"("+j+")";
+				if(isPrioritarioOposicion(i, j)) oposicion+=", "+getNombre(j)+"("+j+")";
+			}
+			if(siguientes.length()>0)
+				res+="\n\tSiguientes:"+siguientes;
+			if(esSiguiente.length()>0)
+				res+="\n\tSiguiente de:"+esSiguiente;
+			if(prioridadSobre.length()>0)
+				res+="\n\tPrioridad sobre:"+prioridadSobre;
+			if(prioridadDesde.length()>0)
+				res+="\n\tPrioridad desde:"+prioridadDesde;
+			if(oposicion.length()>0)
+				res+="\n\tOposición:"+oposicion;
+		}
+		return res;
+	}
 	/**
 	 * @param file Fichero a cargar
 	 * @return los tramos cargados. null si ha habido algún problema.
@@ -257,5 +286,6 @@ public class Tramos implements Serializable {
 			return false;
 		}
 	}
+	
 	
 }

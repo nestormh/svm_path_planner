@@ -145,6 +145,8 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 			nomFich=args[0];
 		gf.cargaTramos(new File(nomFich));
 		
+		System.out.println(gf.getTramos().toStringDetallado());
+		
 		JFrame vent=new JFrame("Panel Elige Destino");
 		PanelEligeDestino ped=new PanelEligeDestino(gf) {
             /** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
