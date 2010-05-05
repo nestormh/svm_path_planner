@@ -180,6 +180,8 @@ public class GestionFlota {
 					System.out.print("Posible ruta de longitud "+largo+":");
 					for(String nt:nombTramosRuta) System.out.print(nt+",");
 					System.out.println(".");
+					System.out.println("Largo calculado a mano:"+largoRuta(nombresAIndices(nombTramosRuta)
+							, largoEnIni.get(indPosTIni), largoEnFin));
 					if(largo<largoMin) {
 						largoMin=largo;
 						nomTramosRutaMin=nombTramosRuta;
@@ -199,6 +201,15 @@ public class GestionFlota {
 		for(String nt:nomTramosRutaMin) System.out.print(nt+",");
 		System.out.println(".");
 		
+		int[] indTramosRuta = nombresAIndices(nomTramosRutaMin);
+		return indTramosRuta;
+	}
+
+	/**
+	 * @param nomTramosRutaMin array con los nombres de los tramos
+	 * @return array con los índices de los tramos correspondientes
+	 */
+	private int[] nombresAIndices(String[] nomTramosRutaMin) {
 		int[] indTramosRuta=new int[nomTramosRutaMin.length];
 		for(int i=0; i<nomTramosRutaMin.length; i++)
 			for(int j=0; j<tramos.size(); j++)
@@ -207,6 +218,25 @@ public class GestionFlota {
 					break;
 				}
 		return indTramosRuta;
+	}
+
+	/**
+	 * Devuelve largo de la ruta formada por esos tramos
+	 * @param indicesTramos indices de tramos
+	 * @param largoIni largo en tramo inicial
+	 * @param largoFin largo en tramo final
+	 * @return
+	 */
+	private double largoRuta(int[] indicesTramos, double largoIni, double largoFin) {
+		if(indicesTramos.length==1)
+			//estan en el mismo tramo
+			return (largoFin-largoIni);
+		//largos en los tramos inicial y final
+		double largo=largoFin+(trayectorias[indicesTramos[0]].getLargo()-largoIni);
+		//largo del resto de tramos
+		for(int i=1; i<(indicesTramos.length-1);i++)
+			largo+=trayectorias[indicesTramos[i]].getLargo();
+		return largo;
 	}
 	
 	/**
