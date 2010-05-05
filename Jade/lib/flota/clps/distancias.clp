@@ -51,7 +51,7 @@
     ?g <- ( Go (from ?from) (dest ?dest)(at ?dest)(miles ?miles)(route $?route))
     =>
 
-   (printout t ?from " to " ?dest ": " ?miles " miles. " ?route crlf)
+   ;(printout t ?from " to " ?dest ": " ?miles " miles. " ?route crlf)
    (retract ?g)
   (bind ?resto (implode$ $?route))
   (assert  
@@ -61,6 +61,7 @@
      (object   ?resto)
     ))
 	(store RUTA ?route)
+	(store DISTANCIA ?miles)
 )
 
 

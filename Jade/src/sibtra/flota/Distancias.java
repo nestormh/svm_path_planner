@@ -985,5 +985,13 @@ for (int u=0; u<70; u++)
         } while (t1 - t0 < n);
     }
 
-	
+	public double dimeUltimaDistancia() throws JessException, java.io.IOException
+	{Value distancia = engineRutas.fetch("DISTANCIA");
+	double v2 = 0;
+	try
+	{v2 = distancia.floatValue(engineRutas.getGlobalContext());
+	} catch (java.lang.NullPointerException e) {}
+	return v2;
+	}
+
 }

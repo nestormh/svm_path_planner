@@ -188,6 +188,24 @@ public String[] calculaRuta(String origen, String destino) {
 	return calculaRuta(origen,0, destino,0);
 }
 
+/**
+ * Devuelve el último valor de la distancia para la ruta más corta
+ * calculada en calculaRuta. No hace falta usarla inmediatamente después
+ * del {@link #calculaRuta(String, double, String, double)}.
+ * IMPORTANTE: Para ser exacto (y en algunos casos puede alterar cuál es
+ * la ruta mínima) hay que sumarle longDestino (la longitud del punto en
+ * el tramo final) y lo que queda del tramo inicial.
+ * @return
+ */
+public double dimeUltimaDistanciaCalculada () {
+	double v4 = -1;
+	try {
+		v4 = distancias.dimeUltimaDistancia();
+	} catch (Exception e) {e.printStackTrace();}
+	return v4;
+}
+
+
 public static void main(String[] args) throws JessException, java.io.IOException, TransformerException, TransformerConfigurationException
 {InterfazFlota interfaz = new InterfazFlota();
 
