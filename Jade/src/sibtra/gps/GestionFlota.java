@@ -139,51 +139,53 @@ public class GestionFlota {
 			double orientacionCoche
 			, double posXdestino, double posYdestino) {
 		
-		//Buscar el tramo y longitud a la que corresponde la posición y orientación actuales
-		int traIni=-1;
-		largoIni=0; //Posición del punto más cercano dentro del tramo inicial
-		double distMin=Double.MAX_VALUE;
-		for(int i=0; i<tramos.size(); i++) {
-			Trayectoria ta=trayectorias[i];
+		//Buscamos los posibles tramos iniciales
+		Vector<Integer> posiblesIni=new Vector<Integer>();
+		Vector<Double> largoEnIni=new Vector<Double>();
+		for(int traIni=0; traIni<tramos.size(); traIni++) {
+			Trayectoria ta=trayectorias[traIni];
 			ta.situaCoche(posXCoche,posYCoche);
-			if(ta.distanciaAlMasCercano()<distMin 
+			if(ta.distanciaAlMasCercano()<distanciaATramoAdmisible 
 					&& UtilCalculos.diferenciaAngulos(ta.rumbo[ta.indiceMasCercano()],orientacionCoche)<(Math.PI/2) ) {
-				//esta dentro de la distancia mínima y no difiere + de 90º en ángulo
-				distMin=ta.distanciaAlMasCercano();
-				traIni=i;
-				largoIni=ta.getLargo(0, ta.indiceMasCercano());
+				//esta dentro de la distacia admisible y no difiere + de 90º en ángulo
+				posiblesIni.add(traIni);
+				largoEnIni.add(ta.getLargo(0, ta.indiceMasCercano()));
 			}
 		}
 		
-		if(traIni==-1){
+		if(posiblesIni.size()==0){
 			System.err.println("Posición del coche no está próxima a ningún tramo");
 			return null;
 		}
 		
-		System.out.println("El tramo de salida es "+tramos.getNombre(traIni)+"("+traIni
-				+") en posición " + largoIni + "a distancia "+ distMin);
-		
-		//Buscar el tramo y longitud a la que corresponde el destino
+		//Buscar el tramo y longitud a la que corresponde el destino y aprovechamos para probar todas las posibilidades
 		double largoMin=Double.MAX_VALUE;
 		String[] nomTramosRutaMin=null;
-		for(int i=0; i<tramos.size(); i++) {
-			Trayectoria ta=trayectorias[i];
+		for(int indTFin=0; indTFin<tramos.size(); indTFin++) {
+			Trayectoria ta=trayectorias[indTFin];
 			ta.situaCoche(posXdestino,posYdestino);
 			if(ta.distanciaAlMasCercano()<distanciaATramoAdmisible ) {
 				//está suficientemente cerca
 				double largoEnFin=ta.getLargo(0, ta.indiceMasCercano());
-				System.out.println("Posible tramo de destino es "+tramos.getNombre(i)+"("+i
-						+") en posición " + largoEnFin + "a distancia "+ ta.distanciaAlMasCercano());
-				//Pasamos a invocar a InterfazFlota
-				String[] nombTramosRuta=interfFlota.calculaRuta(tramos.getNombre(traIni), largoIni
-						, tramos.getNombre(i),largoEnFin);
-				if(nombTramosRuta==null || nombTramosRuta.length==0)
-					continue; //La ruta no es posible
-				double largo=interfFlota.dimeUltimaDistanciaCalculada()+largoEnFin+(trayectorias[traIni].getLargo()-largoIni);
-				System.out.println("Ruta de "+traIni+" a "+i+" con largo:"+largo);
-				if(largo<largoMin) {
-					largoMin=largo;
-					nomTramosRutaMin=nombTramosRuta;
+				//probamos desde todos los posibles origenes
+				for(int indPosTIni=0; indPosTIni<posiblesIni.size();indPosTIni++) {
+					//Pasamos a invocar a InterfazFlota
+					String[] nombTramosRuta=interfFlota.calculaRuta(tramos.getNombre(posiblesIni.get(indPosTIni))
+							, largoEnIni.get(indPosTIni)
+							, tramos.getNombre(indTFin),largoEnFin);
+					if(nombTramosRuta==null || nombTramosRuta.length==0)
+						continue; //La ruta no es posible
+					double largo=interfFlota.dimeUltimaDistanciaCalculada()+largoEnFin
+					+(trayectorias[posiblesIni.get(indPosTIni)].getLargo()-largoEnIni.get(indPosTIni));
+					System.out.print("Posible ruta de longitud "+largo+":");
+					for(String nt:nombTramosRuta) System.out.print(nt+",");
+					System.out.println(".");
+					if(largo<largoMin) {
+						largoMin=largo;
+						nomTramosRutaMin=nombTramosRuta;
+						largoIni=largoEnIni.get(indPosTIni);
+						largoFin=largoEnFin;
+					}
 				}
 			}
 
