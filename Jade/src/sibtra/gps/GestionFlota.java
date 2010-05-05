@@ -19,6 +19,8 @@ import sibtra.util.UtilCalculos;
  */
 public class GestionFlota {
 
+	private static final double distanciaATramoAdmisible = 2;
+
 	InterfazFlota interfFlota=null;
 	
 	Tramos tramos=null;
@@ -149,7 +151,7 @@ public class GestionFlota {
 				//esta dentro de la distancia mínima y no difiere + de 90º en ángulo
 				distMin=ta.distanciaAlMasCercano();
 				traIni=i;
-				largoIni=ta.largo(0, ta.indiceMasCercano());
+				largoIni=ta.getLargo(0, ta.indiceMasCercano());
 			}
 		}
 		
@@ -162,39 +164,45 @@ public class GestionFlota {
 				+") en posición " + largoIni + "a distancia "+ distMin);
 		
 		//Buscar el tramo y longitud a la que corresponde el destino
-		int traFin=-1;
-		largoFin=0; //Posición del punto más cercano dentro del tramo final
-		distMin=Double.MAX_VALUE;
+		double largoMin=Double.MAX_VALUE;
+		String[] nomTramosRutaMin=null;
 		for(int i=0; i<tramos.size(); i++) {
 			Trayectoria ta=trayectorias[i];
 			ta.situaCoche(posXdestino,posYdestino);
-			if(ta.distanciaAlMasCercano()<distMin ) {
-				//esta dentro de la distancia mínima
-				distMin=ta.distanciaAlMasCercano();
-				traFin=i;
-				largoFin=ta.largo(0, ta.indiceMasCercano());
+			if(ta.distanciaAlMasCercano()<distanciaATramoAdmisible ) {
+				//está suficientemente cerca
+				double largoEnFin=ta.getLargo(0, ta.indiceMasCercano());
+				System.out.println("Posible tramo de destino es "+tramos.getNombre(i)+"("+i
+						+") en posición " + largoEnFin + "a distancia "+ ta.distanciaAlMasCercano());
+				//Pasamos a invocar a InterfazFlota
+				String[] nombTramosRuta=interfFlota.calculaRuta(tramos.getNombre(traIni), largoIni
+						, tramos.getNombre(i),largoEnFin);
+				if(nombTramosRuta==null || nombTramosRuta.length==0)
+					continue; //La ruta no es posible
+				double largo=interfFlota.dimeUltimaDistanciaCalculada()+largoEnFin+(trayectorias[traIni].getLargo()-largoIni);
+				System.out.println("Ruta de "+traIni+" a "+i+" con largo:"+largo);
+				if(largo<largoMin) {
+					largoMin=largo;
+					nomTramosRutaMin=nombTramosRuta;
+				}
 			}
+
 		}
-		if(traFin==-1){
-			System.err.println("Posición destino no está próxima a ningún tramo");
+		if(nomTramosRutaMin==null){
+			System.err.println("No se ha encontrado ruta al destino");
 			return null;
 		}
 		
-		System.out.println("El tramo de destino es "+tramos.getNombre(traFin)+"("+traFin
-				+") en posición " + largoFin + "a distancia "+ distMin);
+		System.out.print("La ruta mínima es de longitud "+largoMin+" y formada por ");
+		for(String nt:nomTramosRutaMin) System.out.print(nt+",");
+		System.out.println(".");
 		
-		//Pasamos a invocar a InterfazFlota
-		String[] nombTramosRuta=interfFlota.calculaRuta(tramos.getNombre(traIni), largoIni
-				, tramos.getNombre(traFin),largoFin);
-		if(nombTramosRuta==null || nombTramosRuta.length==0)
-			return null; //La ruta no es posible
-		int[] indTramosRuta=new int[nombTramosRuta.length];
-		for(int i=0; i<nombTramosRuta.length; i++)
+		int[] indTramosRuta=new int[nomTramosRutaMin.length];
+		for(int i=0; i<nomTramosRutaMin.length; i++)
 			for(int j=0; j<tramos.size(); j++)
-				if( nombTramosRuta[i].equals(tramos.getNombre(j)) ) {
+				if( nomTramosRutaMin[i].equals(tramos.getNombre(j)) ) {
 					indTramosRuta[i]=j;
 					break;
-					//j=tramos.size(); //para salir del bucle interior
 				}
 		return indTramosRuta;
 	}

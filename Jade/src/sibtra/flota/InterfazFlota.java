@@ -168,7 +168,7 @@ public String[] calculaRuta(String nomOrigen, double longOrigen, String nomDesti
 			strings = new String[vector.size()];
 			for (int i=0; i< vector.size(); i++)
 			{strings[i] = distancias.quitaPrefijo((String)vector.elementAt(i));
-			System.out.println(strings[i]);
+//			System.out.println(strings[i]);
 			}
 		}
 	} catch (Exception e) {e.printStackTrace();}

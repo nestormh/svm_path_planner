@@ -49,7 +49,7 @@ public class Trayectoria implements Serializable {
 	double[] ultimaPosCoche=null;
 	
 	/** Longitud de la trayectoria */
-	double largo=-1.0;
+	protected double largo=-1.0;
 	
 	public double[] x=null;
 	public double[] y=null;
@@ -458,7 +458,7 @@ public class Trayectoria implements Serializable {
 		return indiceMasCercanoOptimizado(pos[0], pos[1], indMinAnt);
 	}
 
-	/** @return longitud de la trayectoria */
+	/** @return número de puntos de la trayectoria */
 	public int length() {
 		return x.length;
 	}
@@ -522,7 +522,7 @@ public class Trayectoria implements Serializable {
 	/**
 	 * Calcula largo de la trayectoria entre indIni y punto anterior al indFin 
 	 * @return el largo de la trayectoria entre los puntos de los indices pasados */
-	public double largo(int indIni,int indFin) {
+	public double getLargo(int indIni,int indFin) {
 		if(indIni<0 || indIni>x.length || indFin<0 || indFin>x.length)
 			throw new IllegalArgumentException("Indices fuera de rango");
 		if(!esCerrada && indIni>indFin )
@@ -546,7 +546,7 @@ public class Trayectoria implements Serializable {
     	double dist = 0;
     	int i = 0;    	
     	for (i=indIni;dist<distancia && (esCerrada||i<(length()-1));i++){
-            dist += largo(i,(i+1)%length());
+            dist += getLargo(i,(i+1)%length());
     	}
     	return i+1;
 	}
@@ -556,12 +556,13 @@ public class Trayectoria implements Serializable {
 		return ultimaPosCoche;
 	}
 
+	/** @return la longitud total de la trayectoria */
 	public double getLargo() {
 		if(largo<0)
 			if(esCerrada)
-				largo=largo(0, 0);
+				largo=getLargo(0, 0);
 			else
-				largo=largo(0, length());
+				largo=getLargo(0, length());
 		return largo;
 	}
 

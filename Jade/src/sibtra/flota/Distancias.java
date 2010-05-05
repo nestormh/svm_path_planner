@@ -621,7 +621,7 @@ p1 = new Prioridades("Tramo12", "Tramo11");
 	{String origenP = prefijo + origen;
 	String destinoP = prefijo + destino;
 	engineRutas.store("RUTA", null);
-	System.out.println("calcula ruta");    
+//	System.out.println("calcula ruta");    
 	String comandoleer = "(compDist Final" + origenP + " Principio" +
 	destinoP + ")";
 	engineRutas.executeCommand(comandoleer);
