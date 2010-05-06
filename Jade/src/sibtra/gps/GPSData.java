@@ -193,6 +193,12 @@ public class GPSData implements Serializable, Cloneable {
     private double velocidadGPS = Double.NaN;
     /** Angulos leidos de la IMU. Serán null si no existe acceso a la IMU */
     private AngulosIMU angulosIMU = null;
+    
+    /** nombre por si es un punto significativo (waypoint)*/
+    private String nombre=null;
+    
+	/** Matriz de cambio de coordenadas ECEF a coordenadas locales */
+	private Matrix T = null;
 
     public AngulosIMU getAngulosIMU() {
         return angulosIMU;
@@ -268,6 +274,8 @@ public class GPSData implements Serializable, Cloneable {
         if (aCopiar.angulosIMU != null) {
             angulosIMU = new AngulosIMU(aCopiar.angulosIMU);
         }
+        nombre=aCopiar.nombre;
+        T=aCopiar.T;
         return this;
     }
 
@@ -728,6 +736,8 @@ public class GPSData implements Serializable, Cloneable {
      * Calcula y actualiza las coordenadas x,y,z (ECEF) del punto.
      */
     public GPSData calculaECEF() {
+    	if(coordECEF!=null)
+    		return this; //ya están las coordenadas
         //no aún no están las calculamos
         if (latitud == Double.NaN || longitud == Double.NaN || altura == Double.NaN) {
             throw (new IllegalArgumentException("El punto no tiene infomración suficiente para calcular ECEF (LLA)"));
@@ -744,6 +754,47 @@ public class GPSData implements Serializable, Cloneable {
         setZ(z);
 
         return this;
+    }
+    
+    /** Calcula y fija las coordenadas locales tomando como centro el punto pasado.
+     * Al punto pasado (centro) se le calculan las coordenadas ECEF y la matriz T (si no la tiene)
+     * Si el punto pasado es <code>null</code>, las coordenadas locales se ponen a <code>null</code>
+     * @param centro punto a usar como centro de las coordenadas locales
+     * @return el mimo punto (para poder encadenar métodos ;-) 
+     */
+    public GPSData calculaLocales(GPSData centro) {
+    	if(centro==null) {
+    		setCoordLocal(null);
+    		return this;
+    	}
+    		
+    	if(centro.T==null) {
+    		// Matriz de rotación en torno a un punto
+    		double v[][] = new double[3][];
+    		double lonCenRad=Math.toRadians(centro.getLongitud());
+    		double latCenRad=Math.toRadians(centro.getLatitud());
+    		v[0] = new double[] { -Math.sin(lonCenRad), Math.cos(lonCenRad), 0 };
+    		v[1] = new double[] { -Math.cos(lonCenRad) * Math.sin(latCenRad), -Math.sin(latCenRad) * Math.sin(lonCenRad), Math.cos(latCenRad) };
+    		v[2] = new double[] { Math.cos(latCenRad) * Math.cos(lonCenRad), Math.cos(latCenRad) * Math.sin(lonCenRad), Math.sin(latCenRad)};
+
+    		Matrix M1 = new Matrix(v);
+
+    		// Matriz de inversión del eje z en torno al eje x (Norte)
+    		double w[][] = new double[3][];
+    		w[0] = new double[] { 0, 1, 0 };
+    		w[1] = new double[] { -1, 0, 0 };
+    		w[2] = new double[] { 0, 0, 1 };
+    		Matrix M2 = new Matrix(w);
+
+    		centro.T = M2.times(M1); 
+    		centro.calculaECEF(); //Las necesitará para los cálculos posteriores
+    	}
+    	calculaECEF(); //por si no están ya que se necesitan
+    	Matrix res = getCoordECEF().minus(centro.getCoordECEF()); 
+		res = centro.T.times(res); //dejamos como vector columna
+		setCoordLocal(res);
+
+    	return this;
     }
 
     public void setHdgPoloM(double value) {
@@ -810,7 +861,7 @@ public class GPSData implements Serializable, Cloneable {
         this.velocidadGPS = value;
     }
 
-    public void setX(double value) {
+    private void setX(double value) {
         if (coordECEF == null) {
             coordECEF = new Matrix(3, 1, Double.NaN);
         }
@@ -824,7 +875,7 @@ public class GPSData implements Serializable, Cloneable {
         coordLocal.set(0, 0, value);
     }
 
-    public void setY(double value) {
+    private void setY(double value) {
         if (coordECEF == null) {
             coordECEF = new Matrix(3, 1, Double.NaN);
         }
@@ -838,7 +889,7 @@ public class GPSData implements Serializable, Cloneable {
         coordLocal.set(1, 0, value);
     }
 
-    public void setZ(double value) {
+    private void setZ(double value) {
         if (coordECEF == null) {
             coordECEF = new Matrix(3, 1, Double.NaN);
         }
@@ -854,6 +905,9 @@ public class GPSData implements Serializable, Cloneable {
 
     public String toString() {
         String retorno = "";
+        
+        if(nombre!=null)
+        	retorno+="'"+nombre+"' ";
 
         //retorno += String.format((Locale)null,"LLA = [% 9.6f , % 9.6f , % 8.2f]",latitud ,longitud , altura);
         retorno += String.format((Locale) null, "LLA = [%s, %s , % 8.2f]", getLatitudText(), getLongitudText(), altura);
@@ -934,4 +988,26 @@ public class GPSData implements Serializable, Cloneable {
         System.out.println("\nDiferencia en grados=" + Math.toDegrees(ang3 - ang1) + " => " + double2sexagesimal(Math.toDegrees(ang3 - ang1)));
 
     }
+
+	/**
+	 * @return the nombre
+	 */
+	public String getNombre() {
+		return nombre;
+	}
+
+	/**
+	 * @param nombre the nombre to set
+	 */
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+	/**
+	 * @return the t
+	 */
+	public Matrix getT() {
+		return T;
+	}
+
 }

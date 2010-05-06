@@ -42,9 +42,6 @@ public class Ruta implements Serializable {
 	 */
 	double minDistOperativa = 0.7;
 
-	/** Matriz de cambio de coordenadas ECEF a coordenadas locales */
-	Matrix T = null;
-
 	/** Deviación magnética calculada */
 	double desviacionM=Double.NaN;
 
@@ -74,8 +71,6 @@ public class Ruta implements Serializable {
 		tamMaximo=ruta.tamMaximo;
 		esEspacial=ruta.esEspacial;
 		minDistOperativa=ruta.minDistOperativa;
-		if(ruta.T!=null)
-			T=ruta.T.copy();
 		desviacionM=ruta.desviacionM;
 		umbralDesviacion=ruta.umbralDesviacion;
 		if(ruta.indiceConsideradosDM!=null)
@@ -139,9 +134,7 @@ public class Ruta implements Serializable {
 
 
 	/**
-	 * Actualiza el {@link #centro} y la matriz de rotación {@link #T} que definen sistema de
-	 * coordenadas locales.
-	 * Utilizaremos como centro el punto de la ruta con mejor precisión (RMS)
+	 * Actualiza el {@link #centro} y utilizando el punto de la ruta con mejor precisión (RMS)
 	 */
 	public void actualizaSistemaLocal () {
 		GPSData centro=puntos.elementAt(0);
@@ -156,66 +149,33 @@ public class Ruta implements Serializable {
 	}
 
 	/**
-	 * Crea la matriz de rotación {@link #T} y fija el {@link #centro} usando el punto pasado
+	 * Fija el {@link #centro} usando el punto pasado
 	 * @param ptoParaCentro punto que se usará como centro para definir el plano
 	 */
 	public void actualizaSistemaLocal(GPSData ptoParaCentro) {
 		if(ptoParaCentro==null) return;
-		centro=ptoParaCentro.calculaECEF();
-		// Matriz de rotación en torno a un punto
-		double v[][] = new double[3][];
-		double lonCenRad=Math.toRadians(centro.getLongitud());
-		double latCenRad=Math.toRadians(centro.getLatitud());
-		v[0] = new double[] { -Math.sin(lonCenRad), Math.cos(lonCenRad), 0 };
-		v[1] = new double[] { -Math.cos(lonCenRad) * Math.sin(latCenRad), -Math.sin(latCenRad) * Math.sin(lonCenRad), Math.cos(latCenRad) };
-		v[2] = new double[] { Math.cos(latCenRad) * Math.cos(lonCenRad), Math.cos(latCenRad) * Math.sin(lonCenRad), Math.sin(latCenRad)};
-
-		Matrix M1 = new Matrix(v);
-
-		// Matriz de inversión del eje z en torno al eje x (Norte)
-		double w[][] = new double[3][];
-		w[0] = new double[] { 0, 1, 0 };
-		w[1] = new double[] { -1, 0, 0 };
-		w[2] = new double[] { 0, 0, 1 };
-		Matrix M2 = new Matrix(w);
-
-		T = M2.times(M1); 
+		centro=ptoParaCentro;
 	}
 
 	/**
-	 * Actualiza el {@link #centro} y la matriz {@link #T} usando los de la ruta pasada
+	 * Actualiza el {@link #centro} usando el de la ruta pasada.
+	 * Si la ruta pasada es null o su centro, no se cambia nada.
 	 * @param rutaUsar ruta de la que se tomará el centro y T
 	 */
 	public void actualizaSistemaLocal(Ruta rutaUsar) {
-		if(rutaUsar==null || rutaUsar.T==null || rutaUsar.centro==null)
+		if(rutaUsar==null || rutaUsar.centro==null)
 			return;
-		T=rutaUsar.T;
 		centro=rutaUsar.centro;
 	}
 
 	/**
-	 * @return the t
-	 */
-	public Matrix getT() {
-		return T;
-	}
-
-	/**
-	 * Calcula y actualiza las coordenadas locales del punto pasado.
-	 * Hace uso de la {@link #T las matriz de traslación}.
-	 * Si no está definido el {@link #centro} o {@link #T} se inicializan a (-1,-1,-1) :-(
+	 * Calcula y actualiza las coordenadas locales del punto pasado utilizando el {@link #centro} e
+	 * invocando {@link GPSData#calculaLocales(GPSData)}.
 	 * @param pto punto a actualizar
+	 * @return el mismo punto
 	 */
 	public GPSData setCoordenadasLocales(GPSData pto) {
-		if (T == null || centro==null) {
-			pto.setCoordLocal(null);
-			return pto;
-		}
-
-		Matrix res = pto.getCoordECEF().minus(centro.getCoordECEF()); 
-		res = T.times(res); //dejamos como vector columna
-		pto.setCoordLocal(res);
-		return pto;
+		return pto.calculaLocales(centro);
 	}
 
 	/** actualiza coordenadas locales de todos los puntos de la ruta */
@@ -229,15 +189,15 @@ public class Ruta implements Serializable {
 		return puntos.size();
 	}
 
-	/** @return true si tiene sistema de coordenadas local ({@link #centro} y {@link #T}) */
-	public boolean tieneSistemaLocal() {
-		return T!=null && centro!=null;
+	/** @return true si tiene sistema {@link #centro} */
+	public boolean tieneCentro() {
+		return centro!=null;
 	}
 
 	/**
 	 * Añade punto pasado a la ruta DUPLICANDOLO. Si esta es espacial sólo si esta a {@link #minDistOperativa} de 
 	 * el último de la ruta.
-	 * Se controla que el número de puntos no supere {@link #tamMaximo}.
+	 * Se controla que el número de puntos no supere {@link #tamMaximo}, en ese caso se borra el primero.
 	 * @param nuevodata punto a añadir.
 	 * @return si se añadió (tiene sentido en los espaciales)
 	 */
@@ -390,6 +350,8 @@ public class Ruta implements Serializable {
 	public GPSData getCentro() {
 		return centro;
 	}
+	
+	/** Se indica si es espacial o temporal, si tiene centro y el tamaño */
 	public String toString() {
 		String retorno="Ruta "+(esEspacial?"ESPACIAL":"TEMPORAL")+" de "+puntos.size()+" puntos ";
 		if(centro!=null)

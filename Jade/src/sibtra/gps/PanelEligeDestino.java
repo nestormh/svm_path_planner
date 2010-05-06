@@ -3,14 +3,19 @@
  */
 package sibtra.gps;
 
+import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.io.File;
+import java.util.Vector;
 
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.Timer;
 
 import sibtra.util.PanelMuestraVariasTrayectorias;
@@ -27,12 +32,14 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 	GestionFlota gesFlota;
 	protected boolean habilitadaEleccionDestino;
 	protected double[] destino=new double[2];
+	protected boolean hayDestino=false;
 	
 	/** array con los indices de los tramos que constituyen la ruta actual. Null si no hay */
 	int[] arrIndRutaAct=null;
 	int[] arrIndRutaAnt=null;
 	int indTramoDest=0;
-	protected Timer timerActulizacion; 
+	protected Timer timerActulizacion;
+	protected JComboBox jcbDestinos=null; 
 	
 	public PanelEligeDestino(GestionFlota gFlota) {
 		super();
@@ -48,15 +55,60 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 				System.err.println("Inconguencia al añadir trayectoria");
 		}
 		actulizacionPeridodica(500); //cada 500 ms
+		
+		//Si hay destinos Combo para seleccionar
+		Vector<GPSData> vdes=gesFlota.getDestinos();
+		if(vdes!=null && vdes.size()>0) {
+			jpSur.add(new JLabel("Destino"));
+			jcbDestinos=new JComboBox();
+			jcbDestinos.addItem("-- Otro --");
+			for(GPSData pa: vdes)
+				jcbDestinos.addItem(pa.getNombre());
+			jpSur.add(jcbDestinos);
+			jcbDestinos.setSelectedIndex(0);
+			jcbDestinos.addActionListener(this);
+		}
 	}
 	
-	/** Marcamos con una cruz el destino si hay ruta */
+	/** Marcamos los destinos definidos y el destino seleccionado si hay ruta */
 	@Override
 	protected void cosasAPintar(Graphics g0) {
 		super.cosasAPintar(g0);
+		Graphics2D g=(Graphics2D)g0;
 		
-		if(arrIndRutaAct==null)
-			return;
+		Vector<GPSData> vdes=gesFlota.getDestinos();
+		if(vdes!=null && vdes.size()>0) {
+			//marcamos los posibles destinos
+			g.setStroke(strokeGruesa);
+			g.setColor(Color.WHITE);
+			for(GPSData da: vdes) {
+				da.calculaLocales(gesFlota.getCentro());
+				double pa[]={da.getXLocal(),da.getYLocal()};
+				if(pa[0]<=esqSI.getX() && pa[0]>=esqID.getX()
+						&& pa[1]<=esqSI.getY() && pa[1]>=esqID.getY() ) {
+					//esta dentro del recuadro
+					Point2D px=point2Pixel(pa);
+					int x=(int)px.getX(), y=(int)px.getY();
+					g.fillOval(x-tamCruz*2, y-tamCruz*2, tamCruz*4, tamCruz*4);
+				}
+			}
+		}
+
+		if(habilitadaEleccionDestino && jcbDestinos!=null)
+			jcbDestinos.setEnabled(true);
+		
+		if(hayDestino) {
+			//Marcamos el destino
+			g.setStroke(strokeGruesa);
+			g.setColor(Color.WHITE);
+			if(destino[0]<=esqSI.getX() && destino[0]>=esqID.getX()
+					&& destino[1]<=esqSI.getY() && destino[1]>=esqID.getY() ) {
+				//esta dentro del recuadro
+				Point2D px=point2Pixel(destino);
+				int x=(int)px.getX(), y=(int)px.getY();
+				g.fillRect(x-tamCruz*2, y-tamCruz*2, tamCruz*4, tamCruz*4);
+			}
+		}
 		
 	}
 
@@ -126,14 +178,36 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 					+even.getClickCount()+" veces");
 			if(habilitadaEleccionDestino) {
 				Point2D.Double ptPulsa=pixel2Point(even.getX(),even.getY());
+				hayDestino=true;
+				destino[0]=ptPulsa.getX(); destino[1]=ptPulsa.getY();
 				estableceRuta(gesFlota.indicesTramosADestino(posXCoche, posYCoche
 						, orientacionCoche, ptPulsa.getX(), ptPulsa.getY()));
+				if(jcbDestinos!=null) {
+					//Ponemos el destino como OTRO (que es el último)
+					jcbDestinos.setSelectedIndex(jcbDestinos.getItemCount()-1);
+				}
 				actualiza();
 			}
 		}
 	}
 
-	
+	/** Pone como destino lo elegido */
+	public void actionPerformed(ActionEvent ae) {
+		super.actionPerformed(ae);
+		if(ae.getSource()==jcbDestinos && habilitadaEleccionDestino) {
+			System.out.println("\n\nTratamos de ir a "+jcbDestinos.getSelectedItem());
+			if(jcbDestinos.getSelectedIndex()>0) {
+				int indiceDestino=jcbDestinos.getSelectedIndex()-1;
+				GPSData pd=gesFlota.getDestinos().get(indiceDestino);
+				destino[0]=pd.getXLocal();  destino[1]=pd.getYLocal();
+				hayDestino=true;
+				estableceRuta(gesFlota.indicesTramosADestino(posXCoche, posYCoche
+						, orientacionCoche, indiceDestino));
+				actualiza();
+			}
+		}
+
+	}
 	/**
 	 * @param args
 	 */
@@ -144,6 +218,9 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 		if(args.length>0)
 			nomFich=args[0];
 		gf.cargaTramos(new File(nomFich));
+		if(args.length>1) {
+			gf.addDestino(ManejaGPX.cargaPuntos(new File(args[1])));
+		}
 		
 		System.out.println(gf.getTramos().toStringDetallado());
 		
@@ -187,6 +264,8 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
                         estableceRuta(null);
                         System.out.println("Situado coche en  (" + nuevaPos.getX() +","+ nuevaPos.getY()+") con angulo "+ yaw );
                         habilitadaEleccionDestino=true;
+                        hayDestino=false;
+                        jcbDestinos.setSelectedIndex(0); //ponemos --otro--
                         actualiza();
 
                     }

@@ -396,7 +396,7 @@ public class GPSConnection implements SerialPortEventListener {
 			//Para que cante si no tiene lectura de velocidad
 			data.setVelocidad(Double.NaN);
 
-		if(!bufferEspacial.tieneSistemaLocal())  {
+		if(!bufferEspacial.tieneCentro())  {
 			System.out.println("Se actualiza local de buffer Espacial");
 			bufferEspacial.actualizaSistemaLocal(data);
 			cambiaSistemaLocalTodosLosBuffers(bufferEspacial);
@@ -415,7 +415,7 @@ public class GPSConnection implements SerialPortEventListener {
 		if(enRuta) {
 			bufferRutaEspacial.add(data);
 			bufferRutaTemporal.add(data);
-			if(!bufferRutaEspacial.tieneSistemaLocal()) {
+			if(!bufferRutaEspacial.tieneCentro()) {
 				//sistema local con primer punto de la ruta espacial
 				bufferRutaEspacial.actualizaSistemaLocal(bufferRutaEspacial.getPunto(0));
 				//todos los demás con ese sistema local

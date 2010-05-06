@@ -5,10 +5,20 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
+import javax.xml.bind.DatatypeConverter;
+
+import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.Namespace;
+import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
@@ -94,24 +104,124 @@ public class ManejaGPX {
 	}
 	
 	/**
+	 * Devuelve los waypoints que hay en fichero GPX pasado
+	 * @param fich fichero GPX pasado
+	 * @return vector con los wpt. null si no es fichero GPX o hay problemas
+	 */
+	public static Vector<GPSData> cargaPuntos(File fich) {
+		SAXBuilder builder = new SAXBuilder();
+		Document doc=null;
+		try {
+			doc = builder.build(fich);
+		}
+		catch (JDOMException e) {
+			e.printStackTrace();
+			return null;
+		}
+		catch (IOException caught) {
+			caught.printStackTrace();
+			return null;
+		}
+		
+		Element rootElement = doc.getRootElement();
+
+		List<Element> allChildElements = rootElement.getChildren();
+
+		Vector<GPSData> waypoints = new Vector<GPSData>();
+
+		Iterator<Element> goOverEach = allChildElements.iterator();
+
+		while (goOverEach.hasNext() == true) {
+			Element currentElement = goOverEach.next();
+
+			String currentElementName = currentElement.getName();
+
+			if (currentElementName.equals("wpt") == true) {
+				GPSData toAdd = parseWaypoint(currentElement);
+				waypoints.add(toAdd);
+			}
+		}
+
+		return waypoints;
+	}
+	
+	public static GPSData parseWaypoint(Element argWaypointElement) {
+		GPSData toReturn = new GPSData();
+
+		Attribute latitudeAttribute = argWaypointElement.getAttribute("lat");
+		String latitudeAsString = latitudeAttribute.getValue();
+		double latitude = Double.parseDouble(latitudeAsString);
+
+		toReturn.setLatitud(latitude);
+
+		Attribute longitudeAttribute = argWaypointElement.getAttribute("lon");
+		String longitudeAsString = longitudeAttribute.getValue();
+		double longitude = Double.parseDouble(longitudeAsString);
+
+		toReturn.setLongitud(longitude);
+
+		List<Element> allChildren = argWaypointElement.getChildren();
+		Iterator<Element> goOverEach = allChildren.iterator();
+
+		while (goOverEach.hasNext() == true) {
+			Element currentElement = goOverEach.next();
+			String currentElementName = currentElement.getName();
+
+			if (currentElementName.equals("ele")) {
+				String elevationAsString = currentElement.getTextTrim();
+				double elevation = Double.parseDouble(elevationAsString);
+
+				toReturn.setAltura(elevation);
+			}
+
+			if (currentElementName.equals("name")) {
+				String nameAsString = currentElement.getTextTrim();
+
+				toReturn.setNombre(nameAsString);
+			}
+
+			if (currentElementName.equals("time")) {
+				String timeAsString = currentElement.getTextTrim();
+				Calendar time=DatatypeConverter.parseDateTime(timeAsString);
+				toReturn.setHora(time.get(Calendar.HOUR_OF_DAY)
+						+":"+time.get(Calendar.MINUTE)
+						+":"+time.get(Calendar.SECOND)
+						);
+			}
+		}
+
+		return toReturn;
+	}
+
+	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String FicheroRuta="Rutas/Universidad/Par0525";
-		Ruta rutaEspacial=null, rutaTemporal;
-		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FicheroRuta));
-			rutaEspacial=(Ruta)ois.readObject();
-			rutaTemporal=(Ruta)ois.readObject();
-			ois.close();
-			salvaAGPX(rutaEspacial, new File("/tmp/prueba.gpx"));
-			//salvaAGPX(rutaEspacial, new File("/dev/stdout"));
-		} catch (IOException ioe) {
-			System.err.println("Error al abrir el fichero " +FicheroRuta);
-			System.err.println(ioe.getMessage());
-		} catch (ClassNotFoundException cnfe) {
-			System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
+		String FicheroGPX="Sitios/CasasIter.gpx";
+		Vector<GPSData> vectPuntos=cargaPuntos(new File(FicheroGPX));
+		
+		if(vectPuntos==null) {
+			System.err.println("Problemas al abrir o parsear fichero "+FicheroGPX);
+		} else {
+			System.out.println("Encontrados "+vectPuntos.size()+" punto:");
+			for(GPSData pa: vectPuntos)
+				System.out.println(pa);
 		}
+//		String FicheroRuta="Rutas/Universidad/Par0525";
+//		Ruta rutaEspacial=null, rutaTemporal;
+//		try {
+//			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FicheroRuta));
+//			rutaEspacial=(Ruta)ois.readObject();
+//			rutaTemporal=(Ruta)ois.readObject();
+//			ois.close();
+//			salvaAGPX(rutaEspacial, new File("/tmp/prueba.gpx"));
+//			//salvaAGPX(rutaEspacial, new File("/dev/stdout"));
+//		} catch (IOException ioe) {
+//			System.err.println("Error al abrir el fichero " +FicheroRuta);
+//			System.err.println(ioe.getMessage());
+//		} catch (ClassNotFoundException cnfe) {
+//			System.err.println("Objeto leído inválido: " + cnfe.getMessage());            
+//		}
 
 
 	}

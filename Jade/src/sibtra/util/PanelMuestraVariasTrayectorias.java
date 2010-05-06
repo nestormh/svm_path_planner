@@ -135,7 +135,7 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 							//esta dentro del recuadro
 							Point2D px=point2Pixel(pa);
 							int x=(int)px.getX(), y=(int)px.getY();
-							g.drawRect(x-tamCruz, y-tamCruz, tamCruz, tamCruz);
+							g.drawRect(x-tamCruz, y-tamCruz, tamCruz*2, tamCruz*2);
 						}
 					}
 			}

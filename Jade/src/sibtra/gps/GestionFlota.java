@@ -4,6 +4,7 @@
 package sibtra.gps;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Vector;
 
 import sibtra.flota.InterfazFlota;
@@ -19,7 +20,7 @@ import sibtra.util.UtilCalculos;
  */
 public class GestionFlota {
 
-	private static final double distanciaATramoAdmisible = 2;
+	private static final double distanciaATramoAdmisible = 4;
 
 	InterfazFlota interfFlota=null;
 	
@@ -30,6 +31,9 @@ public class GestionFlota {
 	
 	/** Punto que se usará como centro para obtener las Trayectorias */
 	GPSData centro=null;
+	
+	/** Vector con los posibles puntos destino */
+	Vector<GPSData> destinos=null;
 
 	/** Largo dentro del tramo inicial donde se encuentra el origen. 
 	 * Se calcula en {@link #indicesTramosADestino(double[], double, double[])}
@@ -206,6 +210,21 @@ public class GestionFlota {
 	}
 
 	/**
+	 * Calcula los tramos que deben segirse para ir de la posición actual al destino
+	 * @param posicion vector de coordenadas locales (x.y)
+	 * @param orientacion orientación (yaw) del vehículo en radianes
+	 * @param indDest indice del destino elegido de la lista de destinos disponibles.
+	 * @return vector con los índices de los tramos que conforman la ruta al destino
+	 */
+	public int[] indicesTramosADestino(double posXCoche, double posYCoche,
+			double orientacionCoche
+			, int indDest) {
+		if(indDest<0 || indDest>=destinos.size())
+			throw new IllegalArgumentException("Indice de destino elegido "+indDest+" fuera del rango posible");
+		return indicesTramosADestino(posXCoche, posYCoche, orientacionCoche
+				, destinos.get(indDest).getXLocal(), destinos.get(indDest).getYLocal());
+	}
+	/**
 	 * @param nomTramosRutaMin array con los nombres de los tramos
 	 * @return array con los índices de los tramos correspondientes
 	 */
@@ -319,4 +338,25 @@ public class GestionFlota {
 		return trayectorias;
 	}
 
+	/**
+	 * @return the destinos
+	 */
+	public Vector<GPSData> getDestinos() {
+		return destinos;
+	}
+	
+	/** Añade un nuevo punto a la lista de destinos */
+	public void addDestino(GPSData nDest) {
+		if(destinos==null)
+			destinos=new Vector<GPSData>();
+		destinos.add(nDest);
+	}
+
+	/** Añade todos los puntos del argumento a los destinos */
+	public void addDestino(Collection<GPSData> vdest) {
+		if(destinos==null)
+			destinos=new Vector<GPSData>();
+		destinos.addAll(vdest);
+	}
+	
 }
