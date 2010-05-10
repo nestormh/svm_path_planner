@@ -35,13 +35,7 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 	public PanelTrayectoria(VentanasMonitoriza monitoriza) {
 		super();
 		ventanaMonitorizar=monitoriza;
-		
-		//buscamos los modulos SeleccionaRuta y sus nombres
-		arrClasSelecRuta=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.SeleccionTrayectoriaInicial", "sibtra.ui.modulos"
-				,ventanaMonitorizar.panSelModulos.cargadorClases);
-		arrNomClasMotor=ClasesEnPaquete.nombreClases(arrClasSelecRuta);
-
-		
+				
 		panelInferior=new PanelFlow();
         ventanaMonitorizar.menuAcciones.addSeparator();
 		//accion de cambiar de trayectoria
@@ -104,6 +98,11 @@ public class PanelTrayectoria extends PanelExaminaTrayectoria {
 	}
 
 	protected void eligeModuloYTrayectoria() {
+		//buscamos los modulos SeleccionaRuta y sus nombres
+		arrClasSelecRuta=ClasesEnPaquete.clasesImplementan("sibtra.ui.defs.SeleccionTrayectoriaInicial", "sibtra.ui.modulos"
+				,ventanaMonitorizar.panSelModulos.cargadorClases);
+		arrNomClasMotor=ClasesEnPaquete.nombreClases(arrClasSelecRuta);
+
 		if(arrNomClasMotor.length==0) {
 			JOptionPane.showMessageDialog(ventanaMonitorizar.ventanaPrincipal,
 			    "No hay modulos selectores de ruta",
