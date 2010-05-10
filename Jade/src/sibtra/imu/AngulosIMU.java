@@ -53,21 +53,21 @@ public class AngulosIMU implements Serializable {
 	}
 
 	/**
-	 * @return the roll
+	 * @return the roll en grados
 	 */
 	public double getRoll() {
 		return roll;
 	}
 
 	/**
-	 * @return the pitch
+	 * @return the pitch en grados
 	 */
 	public double getPitch() {
 		return pitch;
 	}
 
 	/**
-	 * @return the yaw
+	 * @return the yaw en grados
 	 */
 	public double getYaw() {
 		return yaw;

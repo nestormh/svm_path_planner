@@ -116,7 +116,7 @@ public class MotorAvanzaJoystick implements Motor, CalculoVelocidad, CalculoDire
 	            	//sacamos los datos del GPS
 	            	double x=pa.getXLocal();
 	            	double y=pa.getYLocal();
-	            	double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
+	            	double angAct = ventanaMonitoriza.declinaMag.rumboVerdadero(pa.getAngulosIMU());
 	            	//TODO Realimentar posición del volante y la velocidad del coche.
 	            	modCoche.setPostura(x, y, angAct);
 	            }

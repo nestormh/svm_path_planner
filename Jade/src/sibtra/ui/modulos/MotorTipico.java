@@ -185,7 +185,7 @@ public abstract class MotorTipico implements Motor {
         	//sacamos los datos del GPS
         	double x=pa.getXLocal();
         	double y=pa.getYLocal();
-        	double angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
+        	double angAct = ventanaMonitoriza.declinaMag.rumboVerdadero(pa.getAngulosIMU());
         	double angVolante=ventanaMonitoriza.conexionCarro.getAnguloVolante();
         	//TODO Realimentar posición del volante y la velocidad del coche.
         	modCoche.setPostura(x, y, angAct, angVolante);

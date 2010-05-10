@@ -93,7 +93,7 @@ public class EligeDestino  implements SeleccionTrayectoriaInicial {
         	//sacamos los datos del GPS
         	x=pa.getXLocal();
         	y=pa.getYLocal();
-        	angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitorizar.getDesviacionMagnetica();
+        	angAct = ventanaMonitorizar.declinaMag.rumboVerdadero(pa.getAngulosIMU());
         }
         ped.situaCoche(x, y, angAct);
 		ped.habilitaEleccionDestino(true);

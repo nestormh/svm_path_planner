@@ -12,6 +12,10 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import sibtra.controlcarro.ControlCarro;
 import sibtra.controlcarro.PanelCarro;
@@ -21,6 +25,7 @@ import sibtra.gps.PanelGrabarRuta;
 import sibtra.gps.PanelMuestraRuta;
 import sibtra.gps.Trayectoria;
 import sibtra.imu.ConexionSerialIMU;
+import sibtra.imu.DeclinacionMagnetica;
 import sibtra.imu.PanelIMU;
 import sibtra.lms.LMSException;
 import sibtra.lms.ManejaLMS;
@@ -104,6 +109,8 @@ public class VentanasMonitoriza extends Ventanas {
 	public ConexionSerialIMU conexionIMU=null;  
 	public ManejaLMS conexionRF=null;	
 	
+	public DeclinacionMagnetica declinaMag=new DeclinacionMagnetica();
+	
 	PanelGPSTriumph panelGPS;
     PanelIMU panelIMU;
     PanelCarro panelCarro;
@@ -112,8 +119,6 @@ public class VentanasMonitoriza extends Ventanas {
 	PanelEligeModulos panSelModulos;
 
 	PanelTrayectoria panelTrayectoria;
-
-	private double desviacionMagnetica;
 
 	private Action actGrabarRuta;
 	private Action actPararGrabarRuta;
@@ -127,6 +132,8 @@ public class VentanasMonitoriza extends Ventanas {
 	protected boolean zPulsada=true;
 
 	private JLabel jlZeta;
+
+	private SpinnerNumberModel jspDeclinacionMagnetica;
 
     
     /** Abre la conexion a los 4 perifericos y los paneles de monitorizacion
@@ -159,6 +166,7 @@ public class VentanasMonitoriza extends Ventanas {
 				System.out.println("Esperamos por la posición de la base");
 				if(conexionGPS.esperaCentroBase(1)) {
 					conexionGPS.fijaCentro(conexionGPS.posicionDeLaBase());
+					declinaMag.setPosicion(conexionGPS.posicionDeLaBase()); //para elegir la declinacion a aplicar
 					System.out.println("Base en "+conexionGPS.posicionDeLaBase());
 				} else
 					System.err.println("NO se consiguió la posición de la base");
@@ -207,6 +215,18 @@ public class VentanasMonitoriza extends Ventanas {
 
         //Panel de la Imu
         panelIMU = new PanelIMU(conexionIMU);
+		{// spiner para la declinacion magnética
+			jspDeclinacionMagnetica=new SpinnerNumberModel(Math.toDegrees(declinaMag.getDeclinacionAplicada()),-90.00,90.00,0.01);
+			jspDeclinacionMagnetica.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					//se actualiza la declinacion magnetica pasandola a radianes
+					declinaMag.setDeclinacionAplicada(Math.toRadians(jspDeclinacionMagnetica.getNumber().doubleValue()));
+				}
+			});
+			JSpinner jspcv=new JSpinner(jspDeclinacionMagnetica);
+			panelIMU.añadeAPanel(jspcv, "Declinacion");
+		}
+
         añadePanel(panelIMU,"IMU",false,false);
         panelIMU.actulizacionPeridodica(periodoActulizacion);
         
@@ -324,18 +344,6 @@ public class VentanasMonitoriza extends Ventanas {
             new VentanasMonitoriza(puertos);
         }
     }
-
-	public void setDesviacionMagnetica(double desMag) {
-		// TODO para recibir desviacion magnetica recibida de fichero
-		desviacionMagnetica=desMag;
-	}
-
-	/**
-	 * @return the desviacionMagnetica
-	 */
-	public double getDesviacionMagnetica() {
-		return desviacionMagnetica;
-	}
 	
 //	/** Metodo que deben usar los otros módulos para llegar al módulo motor
 //	 * @return el motor seleccionado o null si no hay ninguno.

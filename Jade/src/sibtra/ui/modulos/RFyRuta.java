@@ -63,7 +63,7 @@ public class RFyRuta implements DetectaObstaculos, SubModuloUsaTrayectoria {
 				GPSData pa = ventanaMonitoriza.conexionGPS.getPuntoActualTemporal();                            
 	            double angAct=Double.NaN;
 	            if(pa!=null) {
-	            	angAct = Math.toRadians(pa.getAngulosIMU().getYaw()) + ventanaMonitoriza.getDesviacionMagnetica();
+	            	angAct = ventanaMonitoriza.declinaMag.rumboVerdadero(pa.getAngulosIMU());
 	            	Tr.situaCoche(pa.getXLocal(), pa.getYLocal());
 					//calculamos distancia a obstáculo más cercano
 					dl = miraObstaculo.masCercano(angAct, ba);

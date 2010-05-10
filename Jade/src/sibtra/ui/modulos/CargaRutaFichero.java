@@ -62,7 +62,6 @@ public class CargaRutaFichero implements SeleccionTrayectoriaInicial {
     	//tenemos ruta != null
         double desMag = rutaEspacial.getDesviacionM();
         System.out.println("Usando desviación magnética " + Math.toDegrees(desMag));
-        ventanaMonitoriza.setDesviacionMagnetica(desMag);
 
         // MOstrar coodenadas del centro del sistema local
         GPSData centroToTr = rutaEspacial.getCentro();

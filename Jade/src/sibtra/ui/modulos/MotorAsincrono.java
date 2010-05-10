@@ -100,7 +100,7 @@ public class MotorAsincrono extends MotorTipico implements Motor {
 			protected void accion() {
 				angAnterior=ventanaMonitoriza.conexionIMU.esperaNuevosDatos(angAnterior);
 				//ha llegado paquete al coche
-				setYawCarro(Math.toRadians(angAnterior.getYaw()) + ventanaMonitoriza.getDesviacionMagnetica());
+				setYawCarro(ventanaMonitoriza.declinaMag.rumboVerdadero(angAnterior));
 			}
 		};
 		thIMU.setName(getNombre()+"IMU");
