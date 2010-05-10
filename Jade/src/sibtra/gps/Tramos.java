@@ -79,6 +79,9 @@ public class Tramos implements Serializable {
 
 	private Vector<DatosTramo> vecTramos=new Vector<DatosTramo>();
 	
+	/** Nombre del fichero GPX de destinos relacionados con estos tramos */
+	private String nombFichDestinos=null;
+	
 	public int size() {
 		return vecTramos.size();
 	}
@@ -242,6 +245,8 @@ public class Tramos implements Serializable {
 			if(oposicion.length()>0)
 				res+="\n\tOposición:"+oposicion;
 		}
+		if(nombFichDestinos!=null)
+		res+="\nNombre del fichero de destinos: '"+nombFichDestinos+"'";
 		return res;
 	}
 	/**
@@ -285,6 +290,26 @@ public class Tramos implements Serializable {
 			System.err.println(ioe.getMessage());
 			return false;
 		}
+	}
+
+	/**
+	 * @return the {@link #nombFichDestinos}
+	 */
+	public String getNombFichDestinos() {
+		return nombFichDestinos;
+	}
+
+	/**
+	 * @param nombFichDestinos the {@link #nombFichDestinos} to set
+	 */
+	public void setNombFichDestinos(String nombFichDestinos) {
+		this.nombFichDestinos = nombFichDestinos;
+	}
+	
+	public GPSData getCentro() {
+		if(vecTramos.size()==0)
+			return null;
+		return vecTramos.get(0).rt.getCentro();
 	}
 	
 	

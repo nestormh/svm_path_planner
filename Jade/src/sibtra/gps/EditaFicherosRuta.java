@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -31,6 +32,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -38,6 +40,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -82,6 +85,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 
 	private ModeloTablaRutas modeloTR;
 	private JTable tablaRutas;
+
+	private JLabel jlNomFicheroDestino;
 	
 	public EditaFicherosRuta(String titulo) {
 		
@@ -200,6 +205,13 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		per=new PanelExaminaRuta();
 		panSolapas.addTab("Punto",new JScrollPane(per));		
 
+		//Panel para el fichero de destinos
+		JPanel panelFichDestino=new JPanel();
+		jlNomFicheroDestino=new JLabel("Fichero Destinos:");
+		panelFichDestino.add(jlNomFicheroDestino);
+		AccionEligeFicheroDestinos accionFicheroDestino = new AccionEligeFicheroDestinos();
+		panelFichDestino.add(new JButton(accionFicheroDestino));
+		panSolapas.addTab("Destinos", panelFichDestino);
 		
 		//split panel en el centro de la ventana principal
         JSplitPane splitPanel=new JSplitPane(JSplitPane.VERTICAL_SPLIT
@@ -234,6 +246,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
         .setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_S,KeyEvent.CTRL_MASK));
 
         menuArchivo.addSeparator();
+        
+        menuArchivo.add(accionFicheroDestino);
         
         miSalir=new JMenuItem("Salir");
         miSalir.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_Q,KeyEvent.CTRL_MASK));
@@ -291,9 +305,9 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 	}
 	
 	/**
-	 * @param file Fichero a cargar
+	 * @param file Fichero de Ruta a cargar
 	 */
-	protected void cargaFichero(File file) {
+	protected void cargaFicheroRuta(File file) {
 		try {
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
 			Ruta ruta=(Ruta)ois.readObject();
@@ -318,6 +332,51 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		System.exit(0);
 	}
 
+    /** Se ha elegido fichero de destinos */
+	protected void estableceFicheroDestino(File file) {
+		//Tratamos de cargar el fichero
+		Vector<GPSData> vdes=ManejaGPX.cargaPuntos(file);
+		if(vdes==null) {
+//			custom title, error icon
+			JOptionPane.showMessageDialog(this,
+			    "No se pudo cargar puntos del fichero"+file.getName(),
+			    "Error de lectura",
+			    JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		//Ponemos los destinos en el panel.
+		double[][] arrDest=null;
+		if(vdes!=null && vdes.size()>0) {
+			arrDest=new double[vdes.size()][2];
+			for(int i=0;i<vdes.size();i++) {
+				GPSData pa=vdes.get(i);
+				pa.calculaLocales(tramos.getCentro());
+				arrDest[i][0]=pa.getXLocal();
+				arrDest[i][1]=pa.getYLocal();
+			}
+		}
+		//añadimos los destinos al panel
+		pmvt.setDestinos(arrDest);
+		pmvt.actualiza();
+		//Buscamos el nombre relativo del fichero
+		String nomFich=null;
+		System.out.println("Path a fichero destino "+ file.getAbsolutePath()
+				+" user.dir="+System.getProperty("user.dir"));
+		if(!file.getAbsolutePath().startsWith(System.getProperty("user.dir"))) {
+			System.err.println("Path a fichero destino "+ file.getAbsolutePath()
+					+" no comienza por user.dir="+System.getProperty("user.dir"));
+			nomFich=file.getName();
+		} else { 
+			//quitamos directorio actual (y la barra) del path absoluto
+			nomFich=file.getAbsolutePath().substring(System.getProperty("user.dir").length()+1); 
+			if(tramos!=null)
+				tramos.setNombFichDestinos(nomFich);
+			System.out.println("Establecemos fichero de destinos '"+nomFich+"' en tramos");
+		}
+		jlNomFicheroDestino.setText("Nombre fichero destinos: "+nomFich);
+	}
+
+    
 	public void itemStateChanged(ItemEvent e) {
 	}
 	
@@ -871,6 +930,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		}
 		
 		public void actionPerformed(ActionEvent ae) {
+			fc.setCurrentDirectory(new File("./Rutas/Tramos"));
 			int devuelto=fc.showOpenDialog(EditaFicherosRuta.this);
 			if(devuelto==JFileChooser.APPROVE_OPTION) {
 				File file=fc.getSelectedFile();
@@ -887,6 +947,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 					pmvt.actualiza();
 					//se han cambiado todos los datos
 					modeloTR.fireTableDataChanged();
+					if(tramos.getNombFichDestinos()!=null)
+						estableceFicheroDestino(new File(tramos.getNombFichDestinos()));
 				}
 			}
 		}
@@ -900,6 +962,7 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		}
 		
 		public void actionPerformed(ActionEvent ae) {
+			fc.setCurrentDirectory(new File("./Rutas/Tramos"));
 			int devuelto=fc.showSaveDialog(EditaFicherosRuta.this);
 			if(devuelto==JFileChooser.APPROVE_OPTION) {
 				File file=fc.getSelectedFile();
@@ -916,10 +979,28 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 		}
 		
 		public void actionPerformed(ActionEvent ae) {
+			fc.setCurrentDirectory(new File("./Rutas"));
 			int devuelto=fc.showOpenDialog(EditaFicherosRuta.this);
 			if(devuelto==JFileChooser.APPROVE_OPTION) {
 				File file=fc.getSelectedFile();
-				cargaFichero(file);
+				cargaFicheroRuta(file);
+			}
+		}
+	}
+
+	/** Acción para la carga de los ficheros de rutas */
+	class AccionEligeFicheroDestinos extends AbstractAction {
+
+		public AccionEligeFicheroDestinos()  {
+			super("Elegir Fichero Destinos");
+		}
+		
+		public void actionPerformed(ActionEvent ae) {
+			fc.setCurrentDirectory(new File("./Sitios"));
+			int devuelto=fc.showOpenDialog(EditaFicherosRuta.this);
+			if(devuelto==JFileChooser.APPROVE_OPTION) {
+				File file=fc.getSelectedFile();
+				estableceFicheroDestino(file);
 			}
 		}
 	}

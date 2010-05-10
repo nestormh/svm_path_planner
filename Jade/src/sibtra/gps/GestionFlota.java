@@ -54,7 +54,8 @@ public class GestionFlota {
 	}
 	
 	/** Carga gel fichero de tramos e inicializa {@link #interfFlota}.
-	 * Usando como centro para las {@link #trayectorias} el pasado 
+	 * Usando como centro (para las {@link #trayectorias}) el pasado.
+	 * @param centro el centro a utilizar. Si es null se usa el de los tramos. 
 	 * @return si se pudo cargar e inicializar correctamente
 	 */
 	public boolean cargaTramos(File fichTramos, GPSData centro) {
@@ -63,8 +64,14 @@ public class GestionFlota {
 			return false; //no se pudieron cargar los tramos correctamente
 		}
 		tramos=nuevosTra;
-		
-		setCentro(centro); //y se crean trayectorias
+		//fijamos el centro
+		if(centro!=null)
+			setCentro(centro);
+		else
+			setCentro(tramos.getCentro());
+		//Cargamos los destinos del fichero asociado (si lo hay)
+		if(tramos.getNombFichDestinos()!=null)
+			addDestino(new File(tramos.getNombFichDestinos()));
 		
 		return inicializaTramos(tramos);
 	}
@@ -74,20 +81,11 @@ public class GestionFlota {
 	 * @return si se pudo cargar e inicializar correctamente
 	 */
 	public boolean cargaTramos(File fichTramos) {
-		Tramos nuevosTra=null;
-		if((nuevosTra=Tramos.cargaTramos(fichTramos))==null) {
-			return false; //no se pudieron cargar los tramos correctamente
-		}
-		tramos=nuevosTra;
-		
-		centro=tramos.getRuta(1).getCentro();
-		creaTrayectorias();
-
-		return inicializaTramos(tramos);
+		return cargaTramos(fichTramos,null);
 	}
-	
+
+	/** Preparamos la invocación a inicializacionTramos */
 	private boolean inicializaTramos(Tramos tramos) {
-		//Preparamos la invocación a inicializacionTramos
 		int numTramos=tramos.size();
 		String[] nomTramos=new String[numTramos];
 		double[] longitudes=new double[numTramos];
@@ -109,12 +107,17 @@ public class GestionFlota {
 		return interfFlota.inicializacionTramos(nomTramos, longitudes, conexiones, vectPrioridades, vectOposicion);
 	}
 	
-	/** Establece el nuevo {@link #centro} y por lo tanto actualiza las {@link #trayectorias} */
-	public void setCentro(GPSData centro) {
-		if(centro==null)
+	/** Establece el nuevo {@link #centro} y por lo tanto actualiza las {@link #trayectorias} y {@link #destinos} */
+	public void setCentro(GPSData nuevoCentro) {
+		if(nuevoCentro==null)
 			throw new IllegalArgumentException("El nuevo centro no puede ser null");
+		centro=nuevoCentro;
 		if(tramos!=null)
 			creaTrayectorias();
+		//actulizamos los destinos al nuevo centro
+		if(destinos!=null)
+			for(GPSData pa:destinos)
+				pa.calculaLocales(centro);
 	}
 	
 	/** Crea el vector de trayectorias a partir de las rutas de los tramos, 
@@ -357,6 +360,11 @@ public class GestionFlota {
 		if(destinos==null)
 			destinos=new Vector<GPSData>();
 		destinos.addAll(vdest);
+	}
+	
+	/** Añade los destinos cargados del fichero GPX */
+	public void addDestino(File fichGPX) {
+		addDestino(ManejaGPX.cargaPuntos(fichGPX));
 	}
 	
 }

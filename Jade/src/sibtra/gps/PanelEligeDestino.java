@@ -38,7 +38,7 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 	int[] arrIndRutaAct=null;
 	int[] arrIndRutaAnt=null;
 	int indTramoDest=0;
-	protected Timer timerActulizacion;
+	protected Timer timerActualizacion;
 	protected JComboBox jcbDestinos=null; 
 	
 	public PanelEligeDestino(GestionFlota gFlota) {
@@ -54,20 +54,30 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 			if(añadeTrayectoria(arrTr[i])!=i)
 				System.err.println("Inconguencia al añadir trayectoria");
 		}
-		actulizacionPeridodica(500); //cada 500 ms
+		actualizacionPeridodica(500); //cada 500 ms
 		
 		//Si hay destinos Combo para seleccionar
 		Vector<GPSData> vdes=gesFlota.getDestinos();
+		double[][] arrDest=null;
 		if(vdes!=null && vdes.size()>0) {
+			arrDest=new double[vdes.size()][2];
 			jpSur.add(new JLabel("Destino"));
 			jcbDestinos=new JComboBox();
 			jcbDestinos.addItem("-- Otro --");
-			for(GPSData pa: vdes)
+			for(int i=0;i<vdes.size();i++) {
+				GPSData pa=vdes.get(i);
 				jcbDestinos.addItem(pa.getNombre());
+				pa.calculaLocales(gesFlota.getCentro());
+				arrDest[i][0]=pa.getXLocal();
+				arrDest[i][1]=pa.getYLocal();
+			}
 			jpSur.add(jcbDestinos);
 			jcbDestinos.setSelectedIndex(0);
 			jcbDestinos.addActionListener(this);
+			jcbDestinos.setEnabled(false);
 		}
+		//añadimos los destinos al panel
+		setDestinos(arrDest);
 	}
 	
 	/** Marcamos los destinos definidos y el destino seleccionado si hay ruta */
@@ -75,24 +85,6 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 	protected void cosasAPintar(Graphics g0) {
 		super.cosasAPintar(g0);
 		Graphics2D g=(Graphics2D)g0;
-		
-		Vector<GPSData> vdes=gesFlota.getDestinos();
-		if(vdes!=null && vdes.size()>0) {
-			//marcamos los posibles destinos
-			g.setStroke(strokeGruesa);
-			g.setColor(Color.WHITE);
-			for(GPSData da: vdes) {
-				da.calculaLocales(gesFlota.getCentro());
-				double pa[]={da.getXLocal(),da.getYLocal()};
-				if(pa[0]<=esqSI.getX() && pa[0]>=esqID.getX()
-						&& pa[1]<=esqSI.getY() && pa[1]>=esqID.getY() ) {
-					//esta dentro del recuadro
-					Point2D px=point2Pixel(pa);
-					int x=(int)px.getX(), y=(int)px.getY();
-					g.fillOval(x-tamCruz*2, y-tamCruz*2, tamCruz*4, tamCruz*4);
-				}
-			}
-		}
 
 		if(habilitadaEleccionDestino && jcbDestinos!=null)
 			jcbDestinos.setEnabled(true);
@@ -130,8 +122,8 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 	 * En la actulización se va rotando por los tramos que forman la ruta actual
 	 * @param periodoMili periodo de actulización en milisegundos
 	 */
-	public void actulizacionPeridodica(int periodoMili) {
-		if(timerActulizacion==null) {
+	public void actualizacionPeridodica(int periodoMili) {
+		if(timerActualizacion==null) {
 			//creamos el action listener y el timer
 			ActionListener taskPerformer = new ActionListener() {
 				public void actionPerformed(ActionEvent evt) {
@@ -151,17 +143,17 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 					}
 				}
 			};
-			timerActulizacion=new Timer(periodoMili, taskPerformer);
+			timerActualizacion=new Timer(periodoMili, taskPerformer);
 		} else 
 			//basta con modificar el delay
-			timerActulizacion.setDelay(periodoMili);
-		timerActulizacion.start();
+			timerActualizacion.setDelay(periodoMili);
+		timerActualizacion.start();
 	}
 
 	/** Detiene la acutualización periodica si existe alguna */
 	public void actualizacionPeriodicaParar() {
-		if(timerActulizacion==null) return;
-		timerActulizacion.stop();
+		if(timerActualizacion==null) return;
+		timerActualizacion.stop();
 	}
 	
 
@@ -183,12 +175,13 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 				estableceRuta(gesFlota.indicesTramosADestino(posXCoche, posYCoche
 						, orientacionCoche, ptPulsa.getX(), ptPulsa.getY()));
 				if(jcbDestinos!=null) {
-					//Ponemos el destino como OTRO (que es el último)
-					jcbDestinos.setSelectedIndex(jcbDestinos.getItemCount()-1);
+					//Ponemos el destino como OTRO que es el primero
+					jcbDestinos.setSelectedIndex(0);
 				}
 				actualiza();
 			}
 		}
+		super.mouseClicked(even);
 	}
 
 	/** Pone como destino lo elegido */
@@ -208,6 +201,20 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 		}
 
 	}
+	
+	
+	
+	
+	/** Llama a {@link PanelMuestraVariasTrayectorias#situaCoche(double, double, double)} y
+	 * además Habilita la elección de destino.
+	 */
+	@Override
+	public void situaCoche(double posX, double posY, double orientacion) {
+		super.situaCoche(posX, posY, orientacion);
+		habilitadaEleccionDestino=true;
+		jcbDestinos.setEnabled(false);
+	}
+
 	/**
 	 * @param args
 	 */
@@ -218,9 +225,9 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 		if(args.length>0)
 			nomFich=args[0];
 		gf.cargaTramos(new File(nomFich));
-		if(args.length>1) {
-			gf.addDestino(ManejaGPX.cargaPuntos(new File(args[1])));
-		}
+//		if(args.length>1) {
+//			gf.addDestino(ManejaGPX.cargaPuntos(new File(args[1])));
+//		}
 		
 		System.out.println(gf.getTramos().toStringDetallado());
 		
@@ -263,7 +270,6 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
                         situaCoche(nuevaPos.getX(), nuevaPos.getY(), yaw);
                         estableceRuta(null);
                         System.out.println("Situado coche en  (" + nuevaPos.getX() +","+ nuevaPos.getY()+") con angulo "+ yaw );
-                        habilitadaEleccionDestino=true;
                         hayDestino=false;
                         jcbDestinos.setSelectedIndex(0); //ponemos --otro--
                         actualiza();

@@ -15,7 +15,7 @@ import sibtra.gps.Trayectoria;
 
 
 /**
- * Panel que usa {@link PanelMapa} para mostrar varias trayectorias la y posición del coche.
+ * Panel que usa {@link PanelMapa} para mostrar varias trayectorias, la posición del coche y detinos.
  * Por ahora es estático y no admite añadir un punto, sólo cambiar toda la trayectoria.
  * @author alberto
  */
@@ -65,6 +65,8 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 	/** orientación del coche */
 	protected double orientacionCoche;
 	
+	/** array con puntos que se van a destacar como destinos */
+	protected double[][] arrDestinos=null;
 	
 	
 	/** Para marcar si se quiere seguir el coche cuando hay cambios de posición */
@@ -72,6 +74,9 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 	
 	/** Para marcar si se quiere mostrar el coche */
 	protected JCheckBox jcbMostrarCoche;
+
+	/** Para marcar si se quiere mostrar los destinos */
+	protected JCheckBox jcbMostrarDestinos;
 		
     /**
      * Constructor 
@@ -89,6 +94,12 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 		jcba.setSelected(true);
 		
 		jcbMostrarCoche=jcba=new JCheckBox("Mostrar Coche");
+		jpSur.add(jcba);
+		jcba.setEnabled(false);
+		jcba.addActionListener(this);
+		jcba.setSelected(true);
+
+		jcbMostrarDestinos=jcba=new JCheckBox("Destinos");
 		jpSur.add(jcba);
 		jcba.setEnabled(false);
 		jcba.addActionListener(this);
@@ -179,6 +190,23 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 				}
 			}
 		}
+
+		//Mostramos los puntos destinos si están seleccionados
+		if(jcbMostrarDestinos.isSelected() && arrDestinos!=null && arrDestinos.length>0) {
+			//marcamos los posibles destinos
+			g.setStroke(strokeGruesa);
+			g.setColor(Color.WHITE);
+			for(double[] da: arrDestinos) {
+				if(da[0]<=esqSI.getX() && da[0]>=esqID.getX()
+						&& da[1]<=esqSI.getY() && da[1]>=esqID.getY() ) {
+					//esta dentro del recuadro
+					Point2D px=point2Pixel(da);
+					int x=(int)px.getX(), y=(int)px.getY();
+					g.fillOval(x-tamCruz*2, y-tamCruz*2, tamCruz*4, tamCruz*4);
+				}
+			}
+		}
+
 
 		//Mostramos el coche según corresponda
 		if(Double.isNaN(posXCoche)) {
@@ -556,6 +584,23 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 		ParamTra dta=trays.get(i);
 		trays.set(i,trays.get(i+1));
 		trays.set(i+1, dta);
+	}
+
+	/**
+	 * @return the {@link #arrDestinos}
+	 */
+	public double[][] getDestinos() {
+		return arrDestinos;
+	}
+
+	/**
+	 * @param arrDestinos the {@link #arrDestinos} to set. Cada fila debe tener 2 componentes (x,y).
+	 */
+	public void setDestinos(double[][] arrDestinos) {
+		if(arrDestinos!=null && arrDestinos.length>0 && arrDestinos[0].length!=2)
+			throw new IllegalArgumentException("El Array de destinos debe tener 2 componentes (x,y)");
+		jcbMostrarDestinos.setEnabled(arrDestinos!=null && arrDestinos.length>0);
+		this.arrDestinos = arrDestinos;
 	}
 	
 
