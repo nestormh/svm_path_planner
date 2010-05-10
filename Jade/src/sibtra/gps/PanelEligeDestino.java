@@ -41,8 +41,16 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 	protected Timer timerActualizacion;
 	protected JComboBox jcbDestinos=null; 
 	
-	public PanelEligeDestino(GestionFlota gFlota) {
+	public PanelEligeDestino() {
 		super();
+	}
+	
+	public PanelEligeDestino(GestionFlota gFlota) {
+		this();
+		setGestionFlota(gFlota);
+	}
+	
+	public void setGestionFlota(GestionFlota gFlota) {
 		if(gFlota==null)
 			throw new IllegalArgumentException("Gestion de flota no puede ser null");
 		gesFlota=gFlota;
@@ -165,20 +173,16 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 				&& ((even.getModifiersEx()&MouseEvent.SHIFT_DOWN_MASK)==0)
 				&& ((even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)==0) 
 			) {
+			Point2D.Double ptPulsa=pixel2Point(even.getX(),even.getY());
 			System.out.println(getClass().getName()+": Clickeado Boton "+even.getButton()
-					+" en posición: ("+even.getX()+","+even.getY()+") "
+					+" en posición: ("+even.getX()+","+even.getY()+") => ("+ptPulsa.getX()+","+ptPulsa.getY()+")"
 					+even.getClickCount()+" veces");
 			if(habilitadaEleccionDestino) {
-				Point2D.Double ptPulsa=pixel2Point(even.getX(),even.getY());
-				hayDestino=true;
-				destino[0]=ptPulsa.getX(); destino[1]=ptPulsa.getY();
-				estableceRuta(gesFlota.indicesTramosADestino(posXCoche, posYCoche
-						, orientacionCoche, ptPulsa.getX(), ptPulsa.getY()));
+				destinoElegido(ptPulsa.getX(),ptPulsa.getY());
 				if(jcbDestinos!=null) {
 					//Ponemos el destino como OTRO que es el primero
 					jcbDestinos.setSelectedIndex(0);
 				}
-				actualiza();
 			}
 		}
 		super.mouseClicked(even);
@@ -192,29 +196,45 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 			if(jcbDestinos.getSelectedIndex()>0) {
 				int indiceDestino=jcbDestinos.getSelectedIndex()-1;
 				GPSData pd=gesFlota.getDestinos().get(indiceDestino);
-				destino[0]=pd.getXLocal();  destino[1]=pd.getYLocal();
-				hayDestino=true;
-				estableceRuta(gesFlota.indicesTramosADestino(posXCoche, posYCoche
-						, orientacionCoche, indiceDestino));
-				actualiza();
+				destinoElegido(pd.getXLocal(),pd.getYLocal());
 			}
 		}
-
-	}
-	
-	
-	
-	
-	/** Llama a {@link PanelMuestraVariasTrayectorias#situaCoche(double, double, double)} y
-	 * además Habilita la elección de destino.
-	 */
-	@Override
-	public void situaCoche(double posX, double posY, double orientacion) {
-		super.situaCoche(posX, posY, orientacion);
-		habilitadaEleccionDestino=true;
-		jcbDestinos.setEnabled(false);
 	}
 
+	/** Se invoca cuando usuario ha elegido destion con ratón o mediante lista de destinos */
+	protected void destinoElegido(double x, double y) {
+		destino[0]=x;  destino[1]=y;
+		hayDestino=true;
+		estableceRuta(gesFlota.indicesTramosADestino(posXCoche, posYCoche
+				, orientacionCoche, x,y));
+		actualiza();
+	}
+	
+	public void habilitaEleccionDestino(boolean habilita) {
+		if(habilita) {
+			habilitadaEleccionDestino=true;
+			hayDestino=false;
+			estableceRuta(null);
+			if(jcbDestinos!=null) {
+				jcbDestinos.setSelectedIndex(0); //ponemos --otro--
+				jcbDestinos.setEnabled(true);
+			}
+		} else {
+			habilitadaEleccionDestino=false;
+			if(jcbDestinos!=null)
+				jcbDestinos.setEnabled(false);			
+		}
+        actualiza();
+	}
+	
+	/** @return el destino elegido o null si no lo hay */
+	public double[] getDestinoElegido() {
+		if(hayDestino)
+			return destino;
+		else
+			return null;
+	}
+	
 	/**
 	 * @param args
 	 */
@@ -268,12 +288,8 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
                         Point2D.Double posAngulo = pixel2Point(even.getX(), even.getY());
                         double yaw = Math.atan2(nuevaPos.getY() - posAngulo.getY(), nuevaPos.getX() - posAngulo.getX());
                         situaCoche(nuevaPos.getX(), nuevaPos.getY(), yaw);
-                        estableceRuta(null);
                         System.out.println("Situado coche en  (" + nuevaPos.getX() +","+ nuevaPos.getY()+") con angulo "+ yaw );
-                        hayDestino=false;
-                        jcbDestinos.setSelectedIndex(0); //ponemos --otro--
-                        actualiza();
-
+                        habilitaEleccionDestino(true);
                     }
                     return;
                 }
