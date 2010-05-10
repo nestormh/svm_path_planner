@@ -11,13 +11,11 @@ import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-import sibtra.gps.EditaFicherosRuta;
 import sibtra.gps.GPSData;
 import sibtra.gps.GestionFlota;
 import sibtra.gps.PanelEligeDestino;
-import sibtra.gps.Tramos;
 import sibtra.gps.Trayectoria;
 import sibtra.ui.VentanasMonitoriza;
 import sibtra.ui.defs.SeleccionTrayectoriaInicial;
@@ -55,23 +53,27 @@ public class EligeDestino  implements SeleccionTrayectoriaInicial {
 		
 		//Creamos la gestión de flota
 		gf=new GestionFlota();
-		jfc=new JFileChooser(new File("./Rutas/Trayectorias"));
-
+		jfc=new JFileChooser();
 		act=new AccionCargarTramos(); 
-		act.actionPerformed(null);
-
 		ped=new PanelEligeDestino(gf);
 		ventEligeDest=new JDialog(ventanaMonitorizar.ventanaPrincipal,"Elige Destino",true);
 		ventEligeDest.add(ped);
         //Fijamos su tamaño y posición
-        ventEligeDest.setBounds(0, 384, 1024, 742);
-		ventEligeDest.getContentPane().add(new JButton(new AbstractAction("Usar Destino Elegido") {
+        ventEligeDest.setBounds(0+20, 384+20, 1024-40, 742-40);
+        JPanel jpSur=new JPanel();
+        jpSur.add(new JButton(act));
+		jpSur.add(new JButton(new AbstractAction("Usar Destino Elegido") {
 			
 			public void actionPerformed(ActionEvent e) {
 				ventEligeDest.setVisible(false);
 			}
 			
-		}),BorderLayout.SOUTH);
+		}));
+		ventEligeDest.getContentPane().add(jpSur,BorderLayout.SOUTH);
+
+		//Cargamos los tramos iniciales
+		act.actionPerformed(null);
+
 		
 		return true;
 	}
@@ -121,12 +123,17 @@ public class EligeDestino  implements SeleccionTrayectoriaInicial {
 		}
 		
 		public void actionPerformed(ActionEvent ae) {
+			ped.habilitaEleccionDestino(true);
+			ped.setEnabled(false);
 			jfc.setCurrentDirectory(new File("./Rutas/Tramos"));
 			int devuelto=jfc.showOpenDialog(ventanaMonitorizar.ventanaPrincipal);
 			if(devuelto==JFileChooser.APPROVE_OPTION) {
 				File file=jfc.getSelectedFile();
 				gf.cargaTramos(file,ventanaMonitorizar.conexionGPS.posicionDeLaBase());
+				ped.setGestionFlota(gf);
 			}
+			ped.actualiza();
+			ped.setEnabled(true);
 		}
 	}
 

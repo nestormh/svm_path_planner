@@ -55,13 +55,17 @@ public class PanelEligeDestino extends PanelMuestraVariasTrayectorias {
 			throw new IllegalArgumentException("Gestion de flota no puede ser null");
 		gesFlota=gFlota;
 		
+		//Borramos trayectorias existentes
+		borraTrayectorias();
+		
 		//añadimos los tramos al panel
 		Trayectoria[] arrTr=gesFlota.getTrayectorias();
 		
-		for(int i=0; i<arrTr.length; i++) {
-			if(añadeTrayectoria(arrTr[i])!=i)
-				System.err.println("Inconguencia al añadir trayectoria");
-		}
+		if(arrTr!=null)
+			for(int i=0; i<arrTr.length; i++) {
+				if(añadeTrayectoria(arrTr[i])!=i)
+					System.err.println("Inconguencia al añadir trayectoria");
+			}
 		actualizacionPeridodica(500); //cada 500 ms
 		
 		//Si hay destinos Combo para seleccionar

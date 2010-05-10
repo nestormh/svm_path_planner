@@ -541,11 +541,15 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 		trays.get(i).macrados=mar;
 	}
 
-	/** Cambia el parámetro correspondiente a la trayectoria i-ésima. No actualiza el panel */
+	/** Borra la trayectoria i-ésima. No actualiza el panel */
 	public void borraTrayectoria(int i) {
 		if(i<0 || i>=trays.size())
 			throw new IllegalArgumentException("Indice de trayectoria ("+i+")fuera de rango");
 		trays.remove(i);
+	}
+	
+	public void borraTrayectorias() {
+		trays.removeAllElements();
 	}
 
 	public void setSeguirCoche(boolean val) {
