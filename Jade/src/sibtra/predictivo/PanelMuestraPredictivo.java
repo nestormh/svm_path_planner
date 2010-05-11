@@ -185,8 +185,8 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         super.cosasAPintar(g0);
         Graphics2D g = (Graphics2D) g0;
 
-        //pintamos la trayectoria predicha
-        GeneralPath gpPred = pathArrayXY(CP.prediccionPosPorFilas);
+        //pintamos la trayectoria predicha (aka Látigo Predictivo)
+        GeneralPath gpPred = pathArrayXYFilas(CP.prediccionPosPorFilas);
         if (gpPred != null) {
             g.setStroke(new BasicStroke());
             g.setColor(Color.WHITE);
@@ -295,9 +295,11 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         Ruta re;
         Trayectoria rutaPruebaRellena;
 //        String fichero = "Rutas/Parq20";
-        String fichero = "Rutas/Iter1";
+        String fichero = "Rutas/Iter/Iter1";
 //          String fichero = "Rutas/casa23";
 //        String fichero = "Rutas/Parq0121_1";
+        if(args.length>0)
+        	fichero=args[0];
         try {
             File file = new File(fichero);
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
