@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.Vector;
@@ -220,18 +221,20 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 				g.setStroke(strokeGruesa);
 				g.setPaint(Color.GRAY);
 				g.setColor(Color.GRAY);
-				double[] esqDD={posXCoche+Parametros.anchoCoche/2*Math.sin(orientacionCoche)
-						,posYCoche-Parametros.anchoCoche/2*Math.cos(orientacionCoche) };
-				double[] esqDI={posXCoche-Parametros.anchoCoche/2*Math.sin(orientacionCoche)
-						,posYCoche+Parametros.anchoCoche/2*Math.cos(orientacionCoche) };
-				double[] esqPD={esqDD[0]-Parametros.largoCoche*Math.cos(orientacionCoche)
-						,esqDD[1]-Parametros.largoCoche*Math.sin(orientacionCoche) };
-				double[] esqPI={esqDI[0]-Parametros.largoCoche*Math.cos(orientacionCoche)
-						,esqDI[1]-Parametros.largoCoche*Math.sin(orientacionCoche) };
-				Point2D pxDD=point2Pixel(esqDD);
-				Point2D pxDI=point2Pixel(esqDI);
-				Point2D pxPD=point2Pixel(esqPD);
-				Point2D pxPI=point2Pixel(esqPI);
+				AffineTransform at = new AffineTransform();
+				at.translate(posXCoche, posYCoche);
+				at.rotate(orientacionCoche);
+				double[] esquinas={ 0.0, -Parametros.anchoCoche/2 //esquina DD
+					,-Parametros.largoCoche, -Parametros.anchoCoche/2 //esquina PD
+					,-Parametros.largoCoche, +Parametros.anchoCoche/2 //esquina PI
+					,0.0, +Parametros.anchoCoche/2 //esquina DI
+				};
+				at.transform(esquinas, 0, esquinas, 0, 4);
+				Point2D pxDD=point2Pixel(esquinas[0],esquinas[1]);
+				Point2D pxPD=point2Pixel(esquinas[2],esquinas[3]);
+				Point2D pxPI=point2Pixel(esquinas[4],esquinas[5]);
+				Point2D pxDI=point2Pixel(esquinas[6],esquinas[7]);
+				
 				GeneralPath coche=new GeneralPath();
 				coche.moveTo((float)pxDD.getX(),(float)pxDD.getY());
 				coche.lineTo((float)pxPD.getX(),(float)pxPD.getY());
@@ -240,6 +243,25 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 				coche.closePath();
 				g.fill(coche);
 				g.draw(coche);
+				//Flecha sobre el coche
+				g.setPaint(Color.WHITE);
+				g.setColor(Color.WHITE);
+				double[] puntas={
+						0.0, 0.0
+						,-Parametros.largoCoche/2,-Parametros.anchoCoche/2
+						,-Parametros.largoCoche/2,+Parametros.anchoCoche/2
+				};
+				at.transform(puntas, 0, puntas, 0, 3);
+				Point2D pxP0=point2Pixel(puntas[0],puntas[1]);
+				Point2D pxP1=point2Pixel(puntas[2],puntas[3]);
+				Point2D pxP2=point2Pixel(puntas[4],puntas[5]);
+				GeneralPath flecha=new GeneralPath();
+				flecha.moveTo(pxP0.getX(), pxP0.getY());
+				flecha.lineTo(pxP1.getX(), pxP1.getY());
+				flecha.lineTo(pxP2.getX(), pxP2.getY());
+				flecha.closePath();
+				g.fill(flecha);
+				g.draw(flecha);
 			}
 		}
 	}
