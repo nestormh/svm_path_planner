@@ -178,10 +178,13 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
     
     /** Lo que añadimos al panel */
     protected void cosasAPintar(Graphics g0) {
-    	super.cosasAPintar(g0);
     	if(CP==null) return; //si no hay control predictivo, ¡no pintamos nada! :-)
-        //colocamos el coche en su posición actual
-        situaCoche(CP.carroOriginal.getX(), CP.carroOriginal.getY(), CP.carroOriginal.getYaw());
+        //colocamos el coche en su posición actual si ha cambiado
+    	if(CP.carroOriginal.getX()!=posXCoche
+    			|| CP.carroOriginal.getY()!=posYCoche
+    			|| CP.carroOriginal.getYaw()!=orientacionCoche
+    	)
+    		situaCoche(CP.carroOriginal.getX(), CP.carroOriginal.getY(), CP.carroOriginal.getYaw());
         super.cosasAPintar(g0);
         Graphics2D g = (Graphics2D) g0;
 
@@ -330,6 +333,7 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
         //ventana
         JFrame ventana = new JFrame("Panel Muestra Predictivo");
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//      PanelMuestraPredictivo pmp = new PanelMuestraPredictivo(controlador, re);
         PanelMuestraPredictivo pmp = new PanelMuestraPredictivo(controlador, re) {
 
             /** Evento cuando se pulsó el ratón con el SHIFT, establece la posición deseada */
@@ -337,15 +341,18 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
 
             /**
              * Sólo nos interesan pulsaciones del boton 1. 
-             * Con CONTROL para determinar posición y orientación. Sin nada para hacer zoom.
+             * Sin CONTROL ni SHIFT para determinar posición y orientación.
              * @see #mouseReleased(MouseEvent)
              */
             public void mousePressed(MouseEvent even) {
                 evenPos = null;
-                if (even.getButton() == MouseEvent.BUTTON1 && (even.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
+                if (even.getButton() == MouseEvent.BUTTON1 
+                		&& (even.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0
+                		&& (even.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == 0
+                		) {
                     //Punto del coche
                     Point2D.Double nuevaPos = pixel2Point(even.getX(), even.getY());
-                    System.out.println("Pulsado Boton 1 con CONTROL " + even.getButton() + " en posición: (" + even.getX() + "," + even.getY() + ")" + "  (" + nuevaPos.getX() + "," + nuevaPos.getY() + ")  ");
+                    System.out.println(getClass().getName()+": Pulsado Boton 1 con CONTROL " + even.getButton() + " en posición: (" + even.getX() + "," + even.getY() + ")" + "  (" + nuevaPos.getX() + "," + nuevaPos.getY() + ")  ");
                     evenPos = even;
                     return;
                 }
@@ -354,20 +361,23 @@ public class PanelMuestraPredictivo extends PanelMuestraTrayectoria implements C
             }
 
             /**
-             * Las pulsaciones del boton 1 con CONTROL para determinar posición y orientación.
+             * Las pulsaciones del boton 1 sin CONTROL ni SHIFT para determinar posición y orientación.
              * Termina el trabajo empezado en {@link #mousePressed(MouseEvent)}
              */
             public void mouseReleased(MouseEvent even) {
-                if (even.getButton() == MouseEvent.BUTTON1 && (even.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0 && evenPos != null) {
-                    System.out.println("Soltado con Control Boton " + even.getButton() + " en posición: (" + even.getX() + "," + even.getY() + ")");
+                if (even.getButton() == MouseEvent.BUTTON1 
+                		&& (even.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) == 0
+                		&& (even.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) == 0
+                		&& evenPos != null) {
+                    System.out.println(getClass().getName()+": Soltado con Control Boton " + even.getButton() + " en posición: (" + even.getX() + "," + even.getY() + ")");
                     //Creamos rectángulo si está suficientemente lejos
                     if (Math.abs(even.getX() - evenPos.getX()) > 50 || Math.abs(even.getY() - evenPos.getY()) > 50) {
                         Point2D.Double nuevaPos = pixel2Point(evenPos.getX(), evenPos.getY());
                         Point2D.Double posAngulo = pixel2Point(even.getX(), even.getY());
                         double yaw = Math.atan2(nuevaPos.getY() - posAngulo.getY(), nuevaPos.getX() - posAngulo.getX());
                         carroOri.setPostura(nuevaPos.getX(), nuevaPos.getY(), yaw, 0.0);
+                        situaCoche(nuevaPos.getX(), nuevaPos.getY(), yaw);
                         actualiza();
-
                     }
                     return;
                 }

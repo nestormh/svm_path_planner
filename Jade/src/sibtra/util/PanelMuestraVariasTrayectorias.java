@@ -30,7 +30,7 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 	protected static final int tamCruz = 2;
 	
 	/** Longitud del vector que marca el rumbo en cada punto */
-	private static final double tamRumbo = 50;
+	protected static final double tamRumbo = 50;
 	/** Distancia a la que tiene que encontrarse el coche de una trayectoria para que se marque el punto más cercano */
 	private static final double HUMBRAL_MAS_CERCANO = 2;
 
@@ -267,7 +267,7 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 	}
 
 	/**
-	 * Pinta los puntos de la trayectoria como aspas
+	 * Pinta los puntos de la trayectoria (que estén dentro del recuadro visto) como aspas
 	 * @param g donde pintar
 	 * @param tra Trayectoria a pintar
 	 */
@@ -365,6 +365,55 @@ public class PanelMuestraVariasTrayectorias extends PanelMapa {
 	/** Ídem que {@link #pathArrayXY(double[][], boolean)} con cerrada =false */
 	protected GeneralPath pathArrayXY(double[][] v) {
 		return pathArrayXY(v, false);
+	}
+	
+	/**
+	 * Genera {@link GeneralPath} con puntos en array considerado por filas
+	 * @param v array de al menos 2 filas. La primera se considera coordenada X, la segunda la Y. El número
+	 * de puntos será el número de columnas.
+	 * @param iini indice del primer punto
+	 * @param ifin indice siguiente del último punto
+	 * @param esCerrado si debemos considerrar array circular
+	 * @return {@link GeneralPath} con los puntos considerados
+	 */
+	protected GeneralPath pathArrayXYFilas(double [][] v, int iini, int ifin, boolean esCerrado) {
+		if(v==null || v.length<2 || v[0].length==0 || iini<0 || ifin>v[0].length
+				|| (!esCerrado && ifin<=iini)
+				)
+			return null;
+		int numPuntos=(iini<ifin)?(ifin-iini):(v[0].length-iini+ifin);
+		GeneralPath perimetro = 
+			new GeneralPath(GeneralPath.WIND_EVEN_ODD, numPuntos);
+
+		Point2D.Double px=point2Pixel(v[0][iini],v[1][iini]);
+		perimetro.moveTo((float)px.getX(),(float)px.getY());
+		int i=(iini+1)%v[0].length;
+		for(int cont=2; cont<=numPuntos; cont++) {
+			px=point2Pixel(v[0][i],v[1][i]);
+			//Siguientes puntos son lineas
+			perimetro.lineTo((float)px.getX(),(float)px.getY());
+			i=(i+1)%v[0].length;
+		}
+		return perimetro;
+	}
+
+	/** Ídem {@link #pathArrayXYFilas(double[][], int, int, boolean)} con esCerrado=false */
+	protected GeneralPath pathArrayXYFilas(double [][] v, int iini, int ifin) {
+		return pathArrayXYFilas(v, iini, ifin, false);
+	}
+
+	
+	/** @return Ídem que {@link #pathArrayXYFilas(double[][], int, int, boolean)} usando todo el array.	 */
+	protected GeneralPath pathArrayXYFilas(double[][] v, boolean esCerrada) {
+		if(v==null || v.length<2)
+			return null;
+		return pathArrayXYFilas(v, 0, v[0].length,esCerrada);
+		
+	}
+	
+	/** Ídem que {@link #pathArrayXYFilas(double[][], boolean)} con cerrada =false */
+	protected GeneralPath pathArrayXYFilas(double[][] v) {
+		return pathArrayXYFilas(v, false);
 	}
 	
 	/**

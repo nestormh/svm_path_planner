@@ -373,15 +373,17 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 
 				/**
 				 * Sólo nos interesan pulsaciones del boton 1. 
-				 * Con CONTROL para determinar posición y orientación. Sin nada para hacer zoom.
+				 * Sin CONTROL ni SHIFT para determinar posición y orientación. Sin nada para hacer zoom.
 				 * @see #mouseReleased(MouseEvent)
 				 */
 				public void mousePressed(MouseEvent even) {
 					evenPos=null;
-					if(even.getButton()==MouseEvent.BUTTON1 && (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0) {
+					if(even.getButton()==MouseEvent.BUTTON1 
+							&& (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)==0
+							&& (even.getModifiersEx()&MouseEvent.SHIFT_DOWN_MASK)==0 ) {
 						//Punto del coche
 						Point2D.Double nuevaPos=pixel2Point(even.getX(),even.getY());
-						System.out.println("Pulsado Boton 1 con CONTROL "+even.getButton()
+						System.out.println(getClass().getName()+": Pulsado sin CONTROL ni SHIFT "+even.getButton()
 								+" en posición: ("+even.getX()+","+even.getY()+")"
 								+"  ("+nuevaPos.getX()+","+nuevaPos.getY()+")  "
 						);
@@ -389,7 +391,7 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 						return;
 					}
 					if(even.getButton()==MouseEvent.BUTTON3) {
-						System.out.println("Pulsado Boton "+even.getButton()+" pedimos los cálculos");
+						System.out.println(getClass().getName()+": Pulsado Boton "+even.getButton()+" pedimos los cálculos");
 						MI.masCercano(MI.Yaw, MI.barr);
 
 						actualiza();
@@ -401,14 +403,15 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 				}
 
 				/**
-				 * Las pulsaciones del boton 1 con CONTROL para determinar posición y orientación.
+				 * Las pulsaciones del boton 1 sin CONTROL ni SHIFT para determinar posición y orientación.
 				 * Termina el trabajo empezado en {@link #mousePressed(MouseEvent)}
 				 */
 				public void mouseReleased(MouseEvent even) {
 					if(even.getButton()==MouseEvent.BUTTON1 
-							&& (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)!=0
+							&& (even.getModifiersEx()&MouseEvent.CTRL_DOWN_MASK)==0
+							&& (even.getModifiersEx()&MouseEvent.SHIFT_DOWN_MASK)==0
 							&& evenPos!=null) {
-						System.out.println("Soltado con Control Boton "+even.getButton()
+						System.out.println(getClass().getName()+": Soltado con Control Boton "+even.getButton()
 								+" en posición: ("+even.getX()+","+even.getY()+")");
 						//Cambiamos la posición si el movimiento es suficientemente grande
 						if(Math.abs(even.getX()-evenPos.getX())>50 
@@ -442,7 +445,7 @@ public static Ruta leeRutaEspacialDeFichero(String fichRuta) {
 					} else {
 						//Sacamos indice de pto más cercano
 						Point2D.Double pos = pixel2Point(even.getX(),even.getY());
-						System.out.println("Indice de Tr más cercano:"+MI.tray.indiceMasCercano(pos.getX(), pos.getY()));
+						System.out.println(getClass().getName()+": Indice de Tr más cercano:"+MI.tray.indiceMasCercano(pos.getX(), pos.getY()));
 					}
 					//al final llamamos al del padre
 					super.mouseReleased(even);

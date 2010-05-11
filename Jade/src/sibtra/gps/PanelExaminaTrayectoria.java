@@ -102,8 +102,8 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 	
 	public void setTrayectoria(Trayectoria nTra) {
 		super.setTrayectoria(nTra);
-		boolean hayTra=(tray!=null);
-		boolean hayPtos=hayTra && tray.length()>0;
+		boolean hayTra=(nTra!=null);
+		boolean hayPtos=hayTra && nTra.length()>0;
 		jlInfoTray.setEnabled(hayTra);
 		jbPrimero.setEnabled(hayPtos);
 		jsDato.setEnabled(hayPtos);
@@ -111,35 +111,32 @@ public class PanelExaminaTrayectoria extends PanelMuestraTrayectoria implements 
 		jlInfoPtoAct.setEnabled(hayPtos);
 		jlDeMaximo.setEnabled(hayTra);
 		if(hayPtos) {
-			spm.setMaximum(tray.length()-1);
+			spm.setMaximum(nTra.length()-1);
 			spm.setValue(0);
 		}
 		if(hayTra) {
 			jlInfoTray.setText(String.format(cadenaInfoTray
-					, tray.getLargo(), tray.esCerrada()));
-			jlDeMaximo.setText(" de "+tray.length()+" ");
+					, nTra.getLargo(), nTra.esCerrada()));
+			jlDeMaximo.setText(" de "+nTra.length()+" ");
 		}
 	}
 	
-	
-	/* (non-Javadoc)
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
+
+	/** Atiende las pulsaciones de los botones último y primero */
 	public void actionPerformed(ActionEvent ae) {
 		super.actionPerformed(ae);
 		if(ae.getSource()==jbPrimero) {
 			spm.setValue(0);
 		} else if(ae.getSource()==jbUltimo) {
-			spm.setValue(tray.length()-1);
+			spm.setValue(getTrayectoria(0).length()-1);
 		} 
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
-	 */
+	/** Atiende los cambios den {@link #spm} */
 	public void stateChanged(ChangeEvent ce) {
 		if(ce.getSource()==spm) {
 			int indSel=(Integer)spm.getValue();
+			Trayectoria tray=getTrayectoria(0);
 			jlInfoPtoAct.setText(String.format(cadenaInfoPto
 					, tray.x[indSel] 
 					, tray.y[indSel] 
