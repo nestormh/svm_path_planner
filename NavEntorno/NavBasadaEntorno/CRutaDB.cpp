@@ -385,15 +385,24 @@ void CRutaDB::getNextImage(IplImage * &imgRT, IplImage * &imgDB) {
 
     char imageName[1024];
     if (DB_VERSION == 1) {
-        sprintf(imageName, "%s/%s/Imagen%da.jpg", pathBase, dbRT, currentPoint);
+        sprintf(imageName, "%s/%s/Imagen%da.jpg", pathBase, dbRT, currentPoint);        
         imgRT = cvLoadImage(imageName, 0);
         cvNamedWindow("imgRT", 1);
         cvShowImage("imgRT", imgRT);
         imgDB = getNearestImage(latitude, longitude, height, angle);
         cvNamedWindow("imgDB", 1);
         cvShowImage("imgDB", imgDB);
-    } else {
+    } else if (DB_VERSION == 2) {
         sprintf(imageName, "%s/%s/Imagen%d_0.jpg", pathBase, dbRT, currentPoint);
+        imgRT = cvLoadImage(imageName, 0);
+        cvNamedWindow("imgRT", 1);
+        cvShowImage("imgRT", imgRT);
+        imgDB = getNearestImage(latitude, longitude, height, angle);
+        cvNamedWindow("imgDB", 1);
+        cvShowImage("imgDB", imgDB);
+    } else if (DB_VERSION == 3) {
+        sprintf(imageName, "%s/%s/Camera0/Image%d.png", pathBase, dbRT, currentPoint);
+        cout << imageName << endl;
         imgRT = cvLoadImage(imageName, 0);
         cvNamedWindow("imgRT", 1);
         cvShowImage("imgRT", imgRT);
@@ -489,8 +498,12 @@ IplImage * CRutaDB::getNearestImage(double latitude, double longitude, double he
     if (DB_VERSION == 1) {
         sprintf(imageName, "%s/%s/Imagen%da.jpg", pathBase, dbStatic, nIndex);
         imgDB = cvLoadImage(imageName, 0);                
-    } else {
+    } else if (DB_VERSION == 2) {
         sprintf(imageName, "%s/%s/Imagen%d_0.jpg", pathBase, dbStatic, nIndex);
+        imgDB = cvLoadImage(imageName, 0);
+    } else if (DB_VERSION == 3) {
+        sprintf(imageName, "%s/%s/Camera0/Image%d.png", pathBase, dbStatic, nIndex);
+        cout << imageName << endl;
         imgDB = cvLoadImage(imageName, 0);
     }
 
@@ -498,7 +511,7 @@ IplImage * CRutaDB::getNearestImage(double latitude, double longitude, double he
     cout << localLat << ", " << localLong << ", " << localAlt << endl;
 
     return imgDB;
-}
+}//*/
 
 void pruebaRutas() {
     cvDestroyWindow("Img1");

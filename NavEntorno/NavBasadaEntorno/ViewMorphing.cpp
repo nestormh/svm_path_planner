@@ -2034,7 +2034,7 @@ void CViewMorphing::pieceWiseLinear(IplImage * img1, IplImage * img2, IplImage *
         cout << "Tiempo piecewise linear = " << time << endl;
 
         myTime = clock();
-	extraeObstaculos(img1C);
+	//extraeObstaculos(img1C);
         time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo obstaculos = " << time << endl;
 
@@ -2087,8 +2087,8 @@ void CViewMorphing::extraeObstaculos(IplImage * img) {
         string pathMask = statItem->path + "." + ss.str() + ".mask.JPG";
         string pathRes = statItem->path + "." + ss.str() + ".result.JPG";
 
-        cvSaveImage(pathMask.c_str(), mask);
-        cvSaveImage(pathRes.c_str(), pcaDif);
+        //cvSaveImage(pathMask.c_str(), mask);
+        //0cvSaveImage(pathRes.c_str(), pcaDif);
 
 	cvErode(pcaDif, pcaDif, 0, 1);        
 	//cvDilate(pcaDif, pcaDif, 0, 1);

@@ -81,6 +81,10 @@
         <itemPath>GeographicLib/UTMUPS.cpp</itemPath>
         <itemPath>GeographicLib/UTMUPS.hpp</itemPath>
       </logicalFolder>
+      <logicalFolder name="f4" displayName="memcount" projectFiles="true">
+        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.cpp</itemPath>
+        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.hpp</itemPath>
+      </logicalFolder>
       <logicalFolder name="f1" displayName="mser" projectFiles="true">
         <itemPath>mser/msertest.cpp</itemPath>
       </logicalFolder>
@@ -96,6 +100,8 @@
         <itemPath>CRuta.h</itemPath>
         <itemPath>CRutaDB.cpp</itemPath>
         <itemPath>CRutaDB.h</itemPath>
+        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.cpp</itemPath>
+        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.h</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.cpp</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.h</itemPath>
         <itemPath>ContourMatching.cpp</itemPath>

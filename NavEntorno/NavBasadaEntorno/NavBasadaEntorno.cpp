@@ -8,7 +8,7 @@
 #include "CRealMatches.h"
 #include "CStatistics.h"
 
-#define EJECUCION 7
+#define EJECUCION 14
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -789,19 +789,34 @@ int main(int argc, _TCHAR argv[]) {
         case 7: {
             /*for (int i = 0; i < argc; i++) {
                 cout << i << ": " << argv[i] << endl;
+            }//*/
+            int testIdx = atoi(argv[1]);
+            int index = atoi(argv[2]);
+            int size = atoi(argv[3]);
+            int zoom = atoi(argv[4]);
+            int b1 = atoi(argv[5]);
+            int b2 = atoi(argv[6]);
+
+            cout << "TEST" << testIdx;
+            cout << ": index = " << index << ", ";
+            cout << "size = " << size << ", ";
+            cout << "zoom = " << zoom << ", ";
+            cout << "b1 = " << b1 << ", ";
+            cout << "b2 = " << b2 << endl;
+
+            try {
+                stat.statistics(testIdx, index, zoom, size, b1, b2);
+            } catch (exception &e) {
+                cout << "[EXCEPTION]: ";
+                cout << "TEST" << testIdx;
+                cout << ": index = " << index << ", ";
+                cout << "size = " << size << ", ";
+                cout << "zoom = " << zoom << ", ";
+                cout << "b1 = " << b1 << ", ";
+                cout << "b2 = " << b2 << " ::: ";
+                cout << e.what() << endl;
             }
-            int size = atoi(argv[1]);
-            int zoom = atoi(argv[2]);
-            int b1 = atoi(argv[3]);
-            int b2 = atoi(argv[4]);
-
-            cout << "size = " << size << endl;
-            cout << "zoom = " << zoom << endl;
-            cout << "b1 = " << b1 << endl;
-            cout << "b2 = " << b2 << endl;*/
-
-            //stat.statistics(size, zoom, b1, b2);
-            stat.statistics(0);
+            //stat.statistics();            
             break;
         }
         case 8: {
@@ -830,6 +845,11 @@ int main(int argc, _TCHAR argv[]) {
         }
         case 13: {
             stat.MRTP_test();
+            break;
+        }
+        case 14: {
+            CRealMatches rm(false);
+            rm.startTest5();
             break;
         }
         default: {

@@ -16,7 +16,7 @@ CC=gcc
 CCC=g++
 CXX=g++
 FC=
-AS=
+AS=as
 
 # Macros
 CND_PLATFORM=GNU-Linux-x86
@@ -34,6 +34,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/GeographicLib/DMS.o \
 	${OBJECTDIR}/NonRigidTransform.o \
 	${OBJECTDIR}/GeographicLib/UTMUPS.o \
+	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.o \
 	${OBJECTDIR}/ImageRegistration.o \
 	${OBJECTDIR}/GeographicLib/AzimuthalEquidistant.o \
 	${OBJECTDIR}/NavEntorno.o \
@@ -60,8 +61,9 @@ OBJECTFILES= \
 	${OBJECTDIR}/Surf/os_mapping.o \
 	${OBJECTDIR}/mser/msertest.o \
 	${OBJECTDIR}/pruebasSurf.o \
-	${OBJECTDIR}/AffineAndEuclidean.o \
 	${OBJECTDIR}/utils.o \
+	${OBJECTDIR}/AffineAndEuclidean.o \
+	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.o \
 	${OBJECTDIR}/GeographicLib/LocalCartesian.o \
 	${OBJECTDIR}/GeographicLib/EllipticFunction.o \
 	${OBJECTDIR}/ViewMorphing.o \
@@ -70,8 +72,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/GeographicLib/Geoid.o \
 	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/changeDetection.o \
 	${OBJECTDIR}/CRutaDB.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o \
 	${OBJECTDIR}/xform.o \
+	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o \
 	${OBJECTDIR}/GeographicLib/TransverseMercatorExact.o \
 	${OBJECTDIR}/CRuta.o \
 	${OBJECTDIR}/GeographicLib/MGRS.o \
@@ -115,6 +117,11 @@ ${OBJECTDIR}/GeographicLib/UTMUPS.o: nbproject/Makefile-${CND_CONF}.mk Geographi
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/GeographicLib/UTMUPS.o GeographicLib/UTMUPS.cpp
+
+${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.o /home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.cpp
 
 ${OBJECTDIR}/ImageRegistration.o: nbproject/Makefile-${CND_CONF}.mk ImageRegistration.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -246,15 +253,20 @@ ${OBJECTDIR}/pruebasSurf.o: nbproject/Makefile-${CND_CONF}.mk pruebasSurf.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/pruebasSurf.o pruebasSurf.cpp
 
+${OBJECTDIR}/utils.o: nbproject/Makefile-${CND_CONF}.mk utils.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/utils.o utils.cpp
+
 ${OBJECTDIR}/AffineAndEuclidean.o: nbproject/Makefile-${CND_CONF}.mk AffineAndEuclidean.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/AffineAndEuclidean.o AffineAndEuclidean.cpp
 
-${OBJECTDIR}/utils.o: nbproject/Makefile-${CND_CONF}.mk utils.cpp 
-	${MKDIR} -p ${OBJECTDIR}
+${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
 	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/utils.o utils.cpp
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.o /home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.cpp
 
 ${OBJECTDIR}/GeographicLib/LocalCartesian.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/LocalCartesian.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
@@ -296,15 +308,15 @@ ${OBJECTDIR}/CRutaDB.o: nbproject/Makefile-${CND_CONF}.mk CRutaDB.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/CRutaDB.o CRutaDB.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.cc 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.cc
-
 ${OBJECTDIR}/xform.o: nbproject/Makefile-${CND_CONF}.mk xform.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/xform.o xform.cpp
+
+${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.cc 
+	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.cc
 
 ${OBJECTDIR}/GeographicLib/TransverseMercatorExact.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/TransverseMercatorExact.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
@@ -335,7 +347,7 @@ ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/pca.o: nbproject
 .build-subprojects:
 
 # Clean Targets
-.clean-conf:
+.clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r build/Debug
 	${RM} navbasadaentorno
 

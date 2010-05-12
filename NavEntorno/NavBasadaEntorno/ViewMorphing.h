@@ -8,6 +8,8 @@
 #include "Surf/os_mapping.h"
 #include "Surf/ipoint.h"
 
+#include "memcount/memcount.hpp"
+
 #include "NavEntorno.h"
 #include "ImageRegistration.h"
 
@@ -69,9 +71,7 @@ private:
 	CvPoint2D32f * allPoints;
 	CvPoint2D32f * affinePoints;
 	CvMat * triangles;
-
-	IplImage * mask;
-	IplImage * warpedImg;
+		
 	IplImage * affine;
         IplImage * flusser;
 
@@ -148,5 +148,7 @@ public:
         int numberOfFeatures;
 	CvPoint2D32f * points1;
 	CvPoint2D32f * points2;
+        IplImage * warpedImg;
+        IplImage * mask;
 
 };

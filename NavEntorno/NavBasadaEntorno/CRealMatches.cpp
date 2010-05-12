@@ -7,6 +7,7 @@
 
 #include "CRealMatches.h"
 #include "fast/cvfast.h"
+#include "CRutaDB2.h"
 
 #define MIN_DIST 15
 
@@ -14,12 +15,14 @@
 #define SIZE2 cvSize(640, 480)
 #define SIZE3 cvSize(320, 240)
 #define SIZE4 cvSize(160, 120)
+#define SIZE5 cvSize(315, 240)
+
 
 CRealMatches::CRealMatches(bool usePrevious) {
     currentPoint1 = cvPoint2D32f(-1, -1);
     currentIndex1 = -1;
 
-    size = SIZE3;
+    size = SIZE5;
 
     img1 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     img2 = cvCreateImage(size, IPL_DEPTH_8U, 1);
@@ -789,7 +792,7 @@ inline void CRealMatches::mainTest() {
 
     myTime = clock();
     setMaskFromPoints(mask1, 1);
-    cvErode(mask1, mask1);
+    //cvErode(mask1, mask1);
     //setMaskFromPoints(mask2, 0);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en mask = " << time << endl; //*/
@@ -804,10 +807,30 @@ inline void CRealMatches::mainTest() {
     myTime = clock();
     //cvSmooth(img1, img1, CV_GAUSSIAN, 3);
     //cvSmooth(img2, img2, CV_GAUSSIAN, 3);
-    pieceWiseLinear();
+    //pieceWiseLinear();    
+    CViewMorphing wm(cvGetSize(img1));
+    IplImage * img1C = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 3);
+    IplImage * img2C = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 3);
+    cvCvtColor(img1, img1C, CV_GRAY2BGR);
+    cvCvtColor(img2, img2C, CV_GRAY2BGR);
+    wm.points1 = new CvPoint2D32f[pairs.size()];
+    wm.points2 = new CvPoint2D32f[pairs.size()];
+    wm.numberOfFeatures = pairs.size();
+    for (int i = 0; i < pairs.size(); i++) {
+        wm.points1[i] = pairs.at(i).p1;
+        wm.points2[i] = pairs.at(i).p2;
+    }    
+    wm.pieceWiseLinear(img2, img1, img1C, img2C, mask2);
+    cvReleaseImage(&img1C);
+    cvReleaseImage(&img2C);
+    cvCvtColor(wm.warpedImg, plinear, CV_BGR2GRAY);
+    cvThreshold(plinear, mask2, 0, 255, CV_THRESH_BINARY);
+    cvAnd(mask1, mask2, mask1);
+    cvNamedWindow("plinear2", 1);
+    cvShowImage("plinear2", mask1);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en pieceWise = " << time << endl; //*/
-    //wm(pairs, img1, img2);
+    //wm(pairs, img1, img2);    
 
     myTime = clock();
     calcPCA(img1, plinear, mask1);
@@ -1153,6 +1176,47 @@ void CRealMatches::startTest4() {
                 cvWaitKey(0);
 
         }
+    }
+}
+
+void CRealMatches::startTest5() {
+    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
+    IplImage * imgDB;
+    IplImage * imgRT;
+
+    //cvNamedWindow("ImgDB", 1);
+    //cvNamedWindow("ImgRT", 1);
+    int index = 400;
+    ruta.setCurrentPoint(index);
+    while (true) {
+        ruta.getNextImage(imgRT, imgDB);
+
+        if (cvCountNonZero(imgDB) == 0) {
+            cvReleaseImage(&imgDB);
+            cvReleaseImage(&imgRT);
+
+            continue;
+        }
+
+        cvCopyImage(imgRT, img1);
+        cvCopyImage(imgDB, img2);
+        //cvShowImage("ImgDB", imgDB);
+        //cvShowImage("ImgRT", imgRT);
+        clock_t myTime = clock();
+        mainTest();
+        time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo TOTAL = " << time << endl;
+        cout << "Index = " << index << endl;
+        index++;
+
+        int key = cvWaitKey(0);
+        if (key == 27)
+            exit(0);
+        if (key == 32)
+            cvWaitKey(0);
+
+        cvReleaseImage(&imgDB);
+        cvReleaseImage(&imgRT);
     }
 }
 

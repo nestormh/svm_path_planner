@@ -301,6 +301,7 @@ void CRealMatches::pieceWiseLinear() {
     cvRemap(img2, plinear, remapX, remapY, CV_INTER_CUBIC);
     cvSet(mask2, cvScalar(255));
     cvRemap(mask2, mask2, remapX, remapY, CV_WARP_FILL_OUTLIERS + CV_INTER_CUBIC);
+    //cvThreshold(img2, mask2, 0, 255, CV_THRESH_BINARY);
 
     cvReleaseMat(&A);
     cvReleaseMat(&B);

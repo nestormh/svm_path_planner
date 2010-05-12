@@ -47,7 +47,8 @@ public:
     void startTest(string path, string filename, string testName);
     void startTest2();
     void startTest3();
-    void startTest4();    
+    void startTest4();
+    void startTest5();
     void onMouse1(int event, int x, int y, int flags, void * param);
     void onMouse2(int event, int x, int y, int flags, void * param);
 private:    
