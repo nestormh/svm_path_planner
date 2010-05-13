@@ -8,7 +8,7 @@
 #include "CRealMatches.h"
 #include "CStatistics.h"
 
-#define EJECUCION 14
+#define EJECUCION 16
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -850,6 +850,16 @@ int main(int argc, _TCHAR argv[]) {
         case 14: {
             CRealMatches rm(false);
             rm.startTest5();
+            break;
+        }
+        case 15: {
+            CRealMatches rm(false);
+            rm.startTestACO();
+            break;
+        }
+        case 16: {
+            CRealMatches rm(false);
+            rm.startTestRoadDetection();
             break;
         }
         default: {

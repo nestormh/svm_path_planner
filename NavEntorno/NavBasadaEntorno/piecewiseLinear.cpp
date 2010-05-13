@@ -162,7 +162,7 @@ void CRealMatches::pieceWiseLinear() {
     cvSet(C, cvScalar(1));
     cvSet(D, cvScalar(1));
 
-    CvRect rect = cvRect(0, 0, size.width * 2, size.height * 2);
+    CvRect rect = cvRect(0, 0, size.width, size.height);
     CvMemStorage * storage = cvCreateMemStorage(0);
 
     clock_t myTime = clock();
@@ -188,6 +188,8 @@ void CRealMatches::pieceWiseLinear() {
 
     CvMat * remapX = cvCreateMat(size.height, size.width, CV_32FC1);
     CvMat * remapY = cvCreateMat(size.height, size.width, CV_32FC1);
+    cvSet(remapX, cvScalar(-1));
+    cvSet(remapY, cvScalar(-1));
 
     CvPoint2D32f myPoint;
 
@@ -300,8 +302,7 @@ void CRealMatches::pieceWiseLinear() {
 
     cvRemap(img2, plinear, remapX, remapY, CV_INTER_CUBIC);
     cvSet(mask2, cvScalar(255));
-    cvRemap(mask2, mask2, remapX, remapY, CV_WARP_FILL_OUTLIERS + CV_INTER_CUBIC);
-    //cvThreshold(img2, mask2, 0, 255, CV_THRESH_BINARY);
+    cvRemap(mask2, mask1, remapX, remapY, CV_WARP_FILL_OUTLIERS);    
 
     cvReleaseMat(&A);
     cvReleaseMat(&B);

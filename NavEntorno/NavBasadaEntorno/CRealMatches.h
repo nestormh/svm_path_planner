@@ -10,6 +10,7 @@
 
 #include "ViewMorphing.h"
 #include "ImageRegistration.h"
+#include "ACO/CAntColony.h"
 #include <sqlite3.h>
 #include <map>
 
@@ -49,6 +50,8 @@ public:
     void startTest3();
     void startTest4();
     void startTest5();
+    void startTestACO();
+    void startTestRoadDetection();
     void onMouse1(int event, int x, int y, int flags, void * param);
     void onMouse2(int event, int x, int y, int flags, void * param);
 private:    
@@ -116,6 +119,8 @@ private:
     IplImage * mask1;
     IplImage * plinear;
 
+    IplImage * interestMask;
+
     IplImage * img1Prev;
     IplImage * img2Prev;
     vector <t_Pair> pairsPrev;
@@ -124,6 +129,9 @@ private:
     vector <t_Pair> tmpPairs;
 
     bool usePrevious;
+
+    CAntColony * aco;
+    IplImage * acoImg;
 };
 
 #endif	/* _CREALMATCHES_H */

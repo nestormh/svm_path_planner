@@ -13,12 +13,12 @@ void CRealMatches::calcPCA(IplImage * img1, IplImage * img2, IplImage * mask) {
     CvMat * dataX = cvCreateMat(1, length, CV_64FC1);
     CvMat * dataY = cvCreateMat(1, length, CV_64FC1);
     CvMat * distPCA = cvCreateMat(img1->height, img1->width, CV_64FC1);
-    CvScalar xMean, yMean, xSdv, ySdv; 
+    CvScalar xMean, yMean, xSdv, ySdv;
 
     vector<CvPoint> origPos;
 
     data1 = cvGetRow(data, data1, 0);
-    data2 = cvGetRow(data, data2, 1);
+    data2 = cvGetRow(data, data2, 1);    
 
     int pos = 0;
     for (int i = 0; i < img2->width; i++) {

@@ -41,6 +41,12 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="f5" displayName="ACO" projectFiles="true">
+        <itemPath>ACO/CAntColony.cpp</itemPath>
+        <itemPath>ACO/CAntColony.h</itemPath>
+        <itemPath>ACO/aco.cpp</itemPath>
+        <itemPath>ACO/aco.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="f3" displayName="fast" projectFiles="true">
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_10.cc</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_11.cc</itemPath>
@@ -96,6 +102,8 @@
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.h</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.cpp</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.h</itemPath>
+        <itemPath>CRoadDetection.cpp</itemPath>
+        <itemPath>CRoadDetection.h</itemPath>
         <itemPath>CRuta.cpp</itemPath>
         <itemPath>CRuta.h</itemPath>
         <itemPath>CRutaDB.cpp</itemPath>

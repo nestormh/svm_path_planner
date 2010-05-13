@@ -8,6 +8,7 @@
 #include "CRealMatches.h"
 #include "fast/cvfast.h"
 #include "CRutaDB2.h"
+#include "CRoadDetection.h"
 
 #define MIN_DIST 15
 
@@ -40,6 +41,8 @@ CRealMatches::CRealMatches(bool usePrevious) {
         img1Prev = cvCreateImage(size, IPL_DEPTH_8U, 1);
         img2Prev = cvCreateImage(size, IPL_DEPTH_8U, 1);
     }
+    aco = new CAntColony(size);
+    acoImg = cvCreateImage(size, IPL_DEPTH_8U, 3);
 }
 
 CRealMatches::CRealMatches(const CRealMatches& orig) {
@@ -57,6 +60,10 @@ CRealMatches::~CRealMatches() {
     cvReleaseMat(&D1);
     cvReleaseMat(&D2);
 
+    if (interestMask != NULL) {
+        cvReleaseImage(&interestMask);
+    }
+
     if (usePrevious) {
         cvReleaseImage(&img1Prev);
         cvReleaseImage(&img2Prev);
@@ -65,6 +72,9 @@ CRealMatches::~CRealMatches() {
     points1.clear();
     points2.clear();
     pairs.clear();
+
+    delete aco;
+    cvReleaseImage(&acoImg);
 }
 
 void onMouseTest1(int event, int x, int y, int flags, void * param) {
@@ -521,7 +531,7 @@ inline void CRealMatches::testSurf(IplImage * img1, IplImage * img2) {
 // http://mirror2image.wordpress.com/2009/01/25/fast-with-surf-descriptor/
 
 inline void CRealMatches::testFast(IplImage * img, vector<CvPoint2D32f> &points) {
-    int inFASTThreshhold = 30; //80
+    int inFASTThreshhold = 10; //30; //80
     int inNpixels = 9;
     int inNonMaxSuppression = 1;
 
@@ -532,7 +542,8 @@ inline void CRealMatches::testFast(IplImage * img, vector<CvPoint2D32f> &points)
 
     points.clear();
     for (int i = 0; i < numCorners; i++) {
-        points.push_back(cvPointTo32f(corners[i]));
+        if (cvGetReal2D(mask1, corners[i].y, corners[i].x) == 255)
+            points.push_back(cvPointTo32f(corners[i]));
     }
 
     delete corners;
@@ -742,9 +753,28 @@ inline void CRealMatches::mainTest() {
     //getPoints(img1, points1);
     //getPoints(img2, points2);
     clock_t myTime = clock();
+    cvCvtColor(img2, acoImg, CV_GRAY2BGR);
+    //CvPoint * road = aco->iterate(acoImg);
+    CvPoint * road = new CvPoint[4];
+    road[0] = cvPoint(0, size.height - 70);
+    road[1] = cvPoint(184, 102);
+    road[2] = cvPoint(207, 102);
+    road[3] = cvPoint(size.width - 1, size.height - 70);
+    int npts = 4;
+    cvZero(interestMask);
+    cvFillPoly(interestMask, &road, &npts, 1, cvScalar(255));
+    road[1].x = 0;
+    road[2].x = size.width - 1;
+    cvZero(mask1);
+    cvFillPoly(mask1, &road, &npts, 1, cvScalar(255));
+    delete road;    
+    time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+    cout << "Tiempo invertido en ACO = " << time << endl;
+
+    myTime = clock();
     testFast(img1, points1);
     //testFast(img2, points2);
-    time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+    time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en fast = " << time << endl;
 
     myTime = clock();
@@ -806,9 +836,9 @@ inline void CRealMatches::mainTest() {
 
     myTime = clock();
     //cvSmooth(img1, img1, CV_GAUSSIAN, 3);
-    //cvSmooth(img2, img2, CV_GAUSSIAN, 3);
-    //pieceWiseLinear();    
-    CViewMorphing wm(cvGetSize(img1));
+    //cvSmooth(img2, img2, CV_GAUSSIAN, 3);    
+    pieceWiseLinear();
+    /*CViewMorphing wm(cvGetSize(img1));
     IplImage * img1C = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 3);
     IplImage * img2C = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 3);
     cvCvtColor(img1, img1C, CV_GRAY2BGR);
@@ -824,15 +854,22 @@ inline void CRealMatches::mainTest() {
     cvReleaseImage(&img1C);
     cvReleaseImage(&img2C);
     cvCvtColor(wm.warpedImg, plinear, CV_BGR2GRAY);
-    cvThreshold(plinear, mask2, 0, 255, CV_THRESH_BINARY);
-    cvAnd(mask1, mask2, mask1);
+    cvThreshold(plinear, mask1, 0, 255, CV_THRESH_BINARY);//*/
+    //cvAnd(mask1, mask2, mask1);
     cvNamedWindow("plinear2", 1);
-    cvShowImage("plinear2", mask1);
+    cvShowImage("plinear2", plinear);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en pieceWise = " << time << endl; //*/
     //wm(pairs, img1, img2);    
 
     myTime = clock();
+    if (interestMask != NULL) {
+        cvAnd(mask1, interestMask, mask1);
+    }
+    if (cvCountNonZero(mask1) == 0) {
+        cerr << "El área de trabajo es demasiado pequeña" << endl;
+        return;
+    }
     calcPCA(img1, plinear, mask1);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en calcPCA = " << time << endl; //*/
@@ -1183,13 +1220,31 @@ void CRealMatches::startTest5() {
     CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
     IplImage * imgDB;
     IplImage * imgRT;
+    int indexRT;
+    int indexDB;
+
+    interestMask = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    /*cvZero(interestMask);
+    //cvFillPoly(CvArr* img, CvPoint** pts, int* npts, int contours, CvScalar color, int lineType=8, int shift=0)
+    CvPoint * interest = new CvPoint[4];
+    interest[0] = cvPoint(0, size.height - 1);
+    //interest[1] = cvPoint(122, 104);
+    //interest[2] = cvPoint(207, 104);
+    interest[1] = cvPoint(0, 104);
+    interest[2] = cvPoint(size.width - 1, 104);
+    interest[3] = cvPoint(size.width - 1, size.height - 1);
+    int npts = 4;
+    cvFillPoly(interestMask, &interest, &npts, 1, cvScalar(255));
+    cvNamedWindow("Interest", 1);
+    cvShowImage("Interest", interestMask);//*/
 
     //cvNamedWindow("ImgDB", 1);
     //cvNamedWindow("ImgRT", 1);
-    int index = 400;
+    int index = 392;
     ruta.setCurrentPoint(index);
     while (true) {
         ruta.getNextImage(imgRT, imgDB);
+        index++;
 
         if (cvCountNonZero(imgDB) == 0) {
             cvReleaseImage(&imgDB);
@@ -1206,8 +1261,9 @@ void CRealMatches::startTest5() {
         mainTest();
         time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo TOTAL = " << time << endl;
-        cout << "Index = " << index << endl;
-        index++;
+        cout << "Index = " << (index - 1) << endl;
+
+        if (index == 630) exit(0);
 
         int key = cvWaitKey(0);
         if (key == 27)
@@ -1217,6 +1273,73 @@ void CRealMatches::startTest5() {
 
         cvReleaseImage(&imgDB);
         cvReleaseImage(&imgRT);
+    }
+}
+
+void CRealMatches::startTestACO() {
+    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERConObs2", "Rutas/pruebaITERBase2", "/home/neztol/doctorado/Datos/DB");
+    IplImage * imgDB;
+    IplImage * imgRT;
+    IplImage * img = cvCreateImage(size, IPL_DEPTH_8U, 3);
+    IplImage * checkResults = cvCreateImage(size, IPL_DEPTH_8U, 3);
+    cvNamedWindow("checkResults", 1);
+
+    //cvNamedWindow("ImgDB", 1);
+    //cvNamedWindow("ImgRT", 1);
+    int index = 0;
+    ruta.setCurrentPoint(index);
+    CAntColony aco(size);
+    while (true) {
+        ruta.getNextImage(imgRT, imgDB);
+        index++;
+
+        clock_t myTime = clock();
+
+        //cvCopyImage(imgRT, img1);
+        //cvCopyImage(imgDB, img2);
+        cvCvtColor(imgRT, img, CV_GRAY2BGR);
+        CvPoint * poly = aco.iterate(img);
+
+        cvZero(checkResults);
+        cvLine(checkResults, poly[0], poly[1], cvScalar(0, 255, 0), 3);
+        cvLine(checkResults, poly[2], poly[3], cvScalar(0, 255, 0), 3);
+        cvShowImage("checkResults", checkResults);
+
+        time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo TOTAL = " << time << endl;
+        cout << "Index = " << (index - 1) << endl;
+
+        int key = cvWaitKey(0);
+        if (key == 27)
+            exit(0);
+        if (key == 32)
+            cvWaitKey(0);
+
+        cvReleaseImage(&imgDB);
+        cvReleaseImage(&imgRT);
+    }
+    cvReleaseImage(&img);
+}
+
+void CRealMatches::startTestRoadDetection() {
+    CRoadDetection rd(size);
+    IplImage * maskRoad = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    int index = 0;
+    while (true) {        
+        clock_t myTime = clock();
+
+        rd.detect(index, maskRoad);
+        index++;
+
+        time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo TOTAL = " << time << endl;
+        cout << "Index = " << (index - 1) << endl;
+
+        int key = cvWaitKey(20);
+        if (key == 27)
+            exit(0);
+        if (key == 32)
+            cvWaitKey(0);
     }
 }
 
