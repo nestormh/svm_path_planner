@@ -6,6 +6,8 @@
 		<gravity>0 0 -9.8</gravity>
 		<cfm>10e-5</cfm>
 		<erp>0.3</erp>
+		<updateRate>-1</updateRate> <!-- para que simule en tiempo real -->
+
 	</physics:ode>
 	<rendering:gui>
 		<type>fltk</type>
@@ -88,43 +90,6 @@
 	<model:physical name="lince_model">
 		<xyz>0.00 0.00 0.00</xyz>
 		<rpy>0 0 0</rpy>
-		<controller:steering_position2d name="a car">
-			<wheel>
-				<joint>rear_left_wheel_hinge</joint>
-				<type>drive</type>
-				<torque>10</torque>
-			</wheel>
-			<wheel>
-				<joint>rear_right_wheel_hinge</joint>
-				<type>drive</type>
-				<torque>10</torque>
-			</wheel>
-			<wheel>
-				<joint>front_left_wheel_hinge</joint>
-				<type>steer</type>
-				<torque>0</torque>
-				<steerTorque>1</steerTorque>
-			</wheel>
-			<wheel>
-				<joint>front_right_wheel_hinge</joint>
-				<type>steer</type>
-				<torque>0</torque>
-				<steerTorque>1</steerTorque>
-			</wheel>
-			<steerPD>10 0.0</steerPD>
-			<!-- Henrik params start -->
-			<leftOdomJoint>front_left_wheel_hinge</leftOdomJoint>
-			<rightOdomJoint>front_right_wheel_hinge</rightOdomJoint>
-			<odomWheelSeparation>0.2</odomWheelSeparation>
-			<odomWheelDiameter>0.15</odomWheelDiameter>
-			<leftSteeringOdomJoint>front_left_wheel_hinge</leftSteeringOdomJoint>
-			<rightSteeringOdomJoint>front_right_wheel_hinge</rightSteeringOdomJoint>
-			<!-- Henrik params stop -->
-			<interface:position name="position_iface_0"/>
-			<!-- Henrik params start -->
-			<interface:actarray name="wheels_actarray_iface"/>
-			<!-- Henrik params stop -->
-		</controller:steering_position2d>
 		<!--
   <model:physical name="sonyvid30_model">
     <xyz>0.0 0.0 0.30</xyz>

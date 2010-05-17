@@ -8,6 +8,8 @@
   xmlns:geom="http://playerstage.sourceforge.net/gazebo/xmlschema/#geom" 
   xmlns:joint="http://playerstage.sourceforge.net/gazebo/xmlschema/#joint" 
   xmlns:visual="http://playerstage.sourceforge.net/gazebo/xmlschema/#visual" 
+  xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+  xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface" 
 >
 
 <xyz>0.0 0.0 0.0</xyz>
@@ -207,13 +209,13 @@
   <body2>chassis_body</body2>
   <body1>front_left_wheel</body1>
   <anchor>front_left_wheel</anchor>
-  <anchorOffset>0 0.005 0</anchorOffset>
+  <anchorOffset>0 0 0.005</anchorOffset>
   <axis1>0 0 1</axis1>
   <axis2>0 1 0</axis2>
-  <lowStop1>-30</lowStop1>
-  <highStop1>30</highStop1>
-  <lowStop2>0</lowStop2>
-  <highStop2>0</highStop2>
+  <lowStop2>-30</lowStop2>
+  <highStop2>30</highStop2>
+  <lowStop1>0</lowStop1>
+  <highStop1>0</highStop1>
   <erp>0.8</erp>
   <cfm>10e-5</cfm>
 </joint:hinge2>
@@ -222,35 +224,95 @@
   <body2>chassis_body</body2>
   <body1>front_right_wheel</body1>
   <anchor>front_right_wheel</anchor>
-  <anchorOffset>0 -0.005 0</anchorOffset>
+  <anchorOffset>0 0 -0.005</anchorOffset>
   <axis1>0 0 1</axis1>
   <axis2>0 1 0</axis2>
-  <lowStop1>-30</lowStop1>
-  <highStop1>30</highStop1>
-  <lowStop2>0</lowStop2>
-  <highStop2>0</highStop2>
+  <lowStop2>-30</lowStop2>
+  <highStop2>30</highStop2>
+  <lowStop1>0</lowStop1>
+  <highStop1>0</highStop1>
   <erp>0.8</erp>
   <cfm>10e-5</cfm>
 </joint:hinge2>
 
 <joint:hinge name="rear_right_wheel_hinge">
+	<body2>chassis_body</body2>
+	<body1>rear_right_wheel</body1>
+	<anchor>rear_right_wheel</anchor>
+	<anchorOffset>0 0 -0.005</anchorOffset>
+	<axis>0 1 0</axis>
+	<erp>0.8</erp>
+	<cfm>0.1</cfm>
+</joint:hinge>
+
+<joint:hinge name="rear_left_wheel_hinge">
+	<body2>chassis_body</body2>
+	<body1>rear_left_wheel</body1>
+	<anchor>rear_left_wheel</anchor>
+	<anchorOffset>0 0 0.005</anchorOffset>
+	<axis>0 1 0</axis>
+	<erp>0.8</erp>
+	<cfm>0.1</cfm>
+</joint:hinge>
+
+<!-- Ruedas delanteras sin dirección
+<joint:hinge name="front_right_wheel_hinge">
   <body2>chassis_body</body2>
-  <body1>rear_right_wheel</body1>
-  <anchor>rear_right_wheel</anchor>
+  <body1>front_right_wheel</body1>
+  <anchor>front_right_wheel</anchor>
   <anchorOffset>0 0.005 0</anchorOffset>
   <axis>0 1 0</axis>
   <erp>0.8</erp>
   <cfm>0.1</cfm>
 </joint:hinge>
 
-<joint:hinge name="rear_left_wheel_hinge">
+<joint:hinge name="front_left_wheel_hinge">
   <body2>chassis_body</body2>
-  <body1>rear_left_wheel</body1>
-  <anchor>rear_left_wheel</anchor>
+  <body1>front_left_wheel</body1>
+  <anchor>front_left_wheel</anchor>
   <anchorOffset>0 0.005 0</anchorOffset>
   <axis>0 1 0</axis>
   <erp>0.8</erp>
   <cfm>0.1</cfm>
 </joint:hinge>
+-->
+
+	<controller:steering_position2d name="controlador">
+		<wheel>
+			<joint>rear_left_wheel_hinge</joint>
+			<type>drive</type>
+			<torque>10</torque>
+		</wheel>
+		<wheel>
+			<joint>rear_right_wheel_hinge</joint>
+			<type>drive</type>
+			<torque>10</torque>
+		</wheel>
+		<wheel>
+			<joint>front_left_wheel_hinge</joint>
+			<type>steer</type>
+			<torque>0</torque>
+			<steerTorque>1</steerTorque>
+		</wheel>
+		<wheel>
+			<joint>front_right_wheel_hinge</joint>
+			<type>steer</type>
+			<torque>0</torque>
+			<steerTorque>1</steerTorque>
+		</wheel>
+		<steerPD>10 0.0</steerPD>
+		<!-- Henrik params start -->
+		<leftOdomJoint>front_left_wheel_hinge</leftOdomJoint>
+		<rightOdomJoint>front_right_wheel_hinge</rightOdomJoint>
+		<odomWheelSeparation>0.2</odomWheelSeparation>
+		<odomWheelDiameter>0.15</odomWheelDiameter>
+		<leftSteeringOdomJoint>front_left_wheel_hinge</leftSteeringOdomJoint>
+		<rightSteeringOdomJoint>front_right_wheel_hinge</rightSteeringOdomJoint>
+		<!-- Henrik params stop -->
+		<interface:position name="position_iface_0"/>
+		<!-- Henrik params start -->
+		<interface:actarray name="wheels_actarray_iface"/>
+		<!-- Henrik params stop -->
+	</controller:steering_position2d>
 
 </model:physical>
