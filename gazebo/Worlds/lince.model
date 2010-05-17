@@ -237,7 +237,7 @@
   <body2>chassis_body</body2>
   <body1>rear_right_wheel</body1>
   <anchor>rear_right_wheel</anchor>
-  <anchorOffset>0 0.05 0</anchorOffset>
+  <anchorOffset>0 0.005 0</anchorOffset>
   <axis>0 1 0</axis>
   <erp>0.8</erp>
   <cfm>0.1</cfm>
