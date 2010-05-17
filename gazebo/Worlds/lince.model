@@ -1,0 +1,256 @@
+<?xml version="1.0"?>
+
+<!-- Generic Car Model -->
+<model:physical name="default_lince_model"
+  xmlns:model="http://playerstage.sourceforge.net/gazebo/xmlschema/#model" 
+  xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor" 
+  xmlns:body="http://playerstage.sourceforge.net/gazebo/xmlschema/#body" 
+  xmlns:geom="http://playerstage.sourceforge.net/gazebo/xmlschema/#geom" 
+  xmlns:joint="http://playerstage.sourceforge.net/gazebo/xmlschema/#joint" 
+  xmlns:visual="http://playerstage.sourceforge.net/gazebo/xmlschema/#visual" 
+>
+
+<xyz>0.0 0.0 0.0</xyz>
+<rpy>0.0 0.0 0.0</rpy>
+
+<canonicalBody>chassis_body</canonicalBody>
+
+<body:box name="chassis_body">
+    <geom:box name="chassis_baixo">
+    <xyz>0 0 0.05</xyz>
+    <rpy>0 0 0</rpy>
+    <size>0.3 0.1 0.1</size>
+    <mass>1.0</mass>
+      <visual>
+        <size>0.3 0.1 0.1</size>
+        <mesh>unit_box</mesh>
+        <material>Gazebo/White</material>
+      </visual>
+    </geom:box>
+
+    <geom:box name="chassis_cima">
+    <xyz>0 0 0.125</xyz>
+    <rpy>0 0 0</rpy>
+    <size>0.5 0.15 0.05</size>
+    <mass>0.5</mass>
+      <visual>
+        <size>0.5 0.15 0.05</size>
+        <mesh>unit_box</mesh>
+        <material>Gazebo/White</material>
+      </visual>
+    </geom:box>
+
+    <geom:box name="base">
+    <xyz>0 0 0.155</xyz>
+    <rpy>0 0 0</rpy>
+    <size>0.50 0.30 0.01</size>
+    <mass>1</mass>
+      <visual>
+        <size>0.50 0.30 0.01</size>
+        <mesh>unit_box</mesh>
+        <material>Gazebo/Black</material>
+      </visual>
+    </geom:box>
+
+    <geom:box name="pc">
+    <xyz>-0.025 0.0 0.2</xyz>
+    <rpy>0 0 0</rpy>
+    <size>0.20 0.25 0.08</size>
+    <mass>1</mass>
+      <visual>
+        <size>0.20 0.25 0.08</size>
+        <mesh>unit_box</mesh>
+        <material>Gazebo/Black</material>
+      </visual>
+    </geom:box>
+
+</body:box>
+
+
+<body:cylinder name="rear_left_wheel">
+  <xyz>-0.17 -0.15 0</xyz>
+  <rpy>0 90 90</rpy>
+
+  <geom:cylinder name="rear_left_wheel_geom">
+    <size>0.075 0.075</size>
+    <mass>0.2</mass>
+    <mu1>0.2</mu1>
+
+    <visual>
+      <rpy>90 0 0</rpy>
+      <size>0.17 0.1 0.17</size>
+      <mesh>Pioneer2dx/tire.mesh</mesh>
+      <material>Gazebo/Black</material>
+    </visual>
+
+    <visual>
+      <rpy>90 0 0</rpy>
+      <size>0.073 0.05 0.073</size>
+      <mesh>Pioneer2at/wheel.mesh</mesh>
+      <material>Gazebo/Gold</material>
+    </visual>
+
+    <visual>
+      <rpy>0 0 0</rpy>
+      <xyz>0 0 0.015</xyz>
+      <size>0.04 0.04 0.08 </size>
+      <mesh>unit_cylinder</mesh>
+      <material>Gazebo/Black</material>
+    </visual>
+
+  </geom:cylinder>
+</body:cylinder>
+
+<body:cylinder name="front_left_wheel">
+  <xyz>0.17 -0.15 0</xyz>
+  <rpy>0 90 90</rpy>
+
+  <geom:cylinder name="front_left_wheel_geom">
+    <size>0.075 0.075</size>
+    <mass>0.2</mass>
+    <mu1>0.2</mu1>
+
+    <visual>
+      <rpy>-90 0 0</rpy>
+      <size>0.17 0.1 0.17</size>
+      <mesh>Pioneer2dx/tire.mesh</mesh>
+      <material>Gazebo/Black</material>
+    </visual>
+
+    <visual>
+      <rpy>-90 0 0</rpy>
+      <size>0.073 0.05 0.073</size>
+      <mesh>Pioneer2at/wheel.mesh</mesh>
+      <material>Gazebo/Gold</material>
+    </visual>
+
+    <visual>
+      <rpy>0 0 0</rpy>
+      <xyz>0 0 0.015</xyz>
+      <size>0.04 0.04 0.08 </size>
+      <mesh>unit_cylinder</mesh>
+      <material>Gazebo/Black</material>
+    </visual>
+
+  </geom:cylinder>
+</body:cylinder>
+
+<body:cylinder name="rear_right_wheel">
+  <xyz>-0.17 0.15 0</xyz>
+  <rpy>0 90 90</rpy>
+
+  <geom:cylinder name="rear_right_wheel_geom">
+    <size>0.075 0.075</size>
+    <mass>0.2</mass>
+    <mu1>0.2</mu1>
+
+    <visual>
+      <rpy>-90 0 0</rpy>
+      <size>0.17 0.1 0.17</size>
+      <mesh>Pioneer2dx/tire.mesh</mesh>
+      <material>Gazebo/Black</material>
+    </visual>
+
+    <visual>
+      <rpy>-90 0 0</rpy>
+      <size>0.073 0.05 0.073</size>
+      <mesh>Pioneer2at/wheel.mesh</mesh>
+      <material>Gazebo/Gold</material>
+    </visual>
+
+    <visual>
+      <rpy>0 0 0</rpy>
+      <xyz>0 0 0.015</xyz>
+      <size>0.04 0.04 0.08 </size>
+      <mesh>unit_cylinder</mesh>
+      <material>Gazebo/Black</material>
+    </visual>
+
+  </geom:cylinder>
+</body:cylinder>
+
+<body:cylinder name="front_right_wheel">
+  <xyz>0.17 0.15 0</xyz>
+  <rpy>0 90 90</rpy>
+
+  <geom:cylinder name="front_right_wheel_geom">
+    <size>0.075 0.075</size>
+    <mass>0.2</mass>
+    <mu1>0.2</mu1>
+
+    <visual>
+      <rpy>90 0 0</rpy>
+      <size>0.17 0.1 0.17</size>
+      <mesh>Pioneer2dx/tire.mesh</mesh>
+      <material>Gazebo/Black</material>
+    </visual>
+
+    <visual>
+      <rpy>90 0 0</rpy>
+      <size>0.073 0.05 0.073</size>
+      <mesh>Pioneer2at/wheel.mesh</mesh>
+      <material>Gazebo/Gold</material>
+    </visual>
+
+    <visual>
+      <rpy>0 0 0</rpy>
+      <xyz>0 0 0.015</xyz>
+      <size>0.04 0.04 0.08 </size>
+      <mesh>unit_cylinder</mesh>
+      <material>Gazebo/Black</material>
+    </visual>
+
+  </geom:cylinder>
+</body:cylinder>
+
+<joint:hinge2 name="front_left_wheel_hinge">
+  <body2>chassis_body</body2>
+  <body1>front_left_wheel</body1>
+  <anchor>front_left_wheel</anchor>
+  <anchorOffset>0 0.005 0</anchorOffset>
+  <axis1>0 0 1</axis1>
+  <axis2>0 1 0</axis2>
+  <lowStop1>-30</lowStop1>
+  <highStop1>30</highStop1>
+  <lowStop2>0</lowStop2>
+  <highStop2>0</highStop2>
+  <erp>0.8</erp>
+  <cfm>10e-5</cfm>
+</joint:hinge2>
+
+<joint:hinge2 name="front_right_wheel_hinge">
+  <body2>chassis_body</body2>
+  <body1>front_right_wheel</body1>
+  <anchor>front_right_wheel</anchor>
+  <anchorOffset>0 -0.005 0</anchorOffset>
+  <axis1>0 0 1</axis1>
+  <axis2>0 1 0</axis2>
+  <lowStop1>-30</lowStop1>
+  <highStop1>30</highStop1>
+  <lowStop2>0</lowStop2>
+  <highStop2>0</highStop2>
+  <erp>0.8</erp>
+  <cfm>10e-5</cfm>
+</joint:hinge2>
+
+<joint:hinge name="rear_right_wheel_hinge">
+  <body2>chassis_body</body2>
+  <body1>rear_right_wheel</body1>
+  <anchor>rear_right_wheel</anchor>
+  <anchorOffset>0 0.05 0</anchorOffset>
+  <axis>0 1 0</axis>
+  <erp>0.8</erp>
+  <cfm>0.1</cfm>
+</joint:hinge>
+
+<joint:hinge name="rear_left_wheel_hinge">
+  <body2>chassis_body</body2>
+  <body1>rear_left_wheel</body1>
+  <anchor>rear_left_wheel</anchor>
+  <anchorOffset>0 0.005 0</anchorOffset>
+  <axis>0 1 0</axis>
+  <erp>0.8</erp>
+  <cfm>0.1</cfm>
+</joint:hinge>
+
+</model:physical>
