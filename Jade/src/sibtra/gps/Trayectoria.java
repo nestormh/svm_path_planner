@@ -528,11 +528,15 @@ public class Trayectoria implements Serializable {
 		if(!esCerrada && indIni>indFin )
 			throw new IllegalArgumentException("Indice inicial el mayor que final (y no es cerrada)");
     	double dist = 0;
-    	for (int i=indIni;i!=(indFin+x.length-1)%x.length;i++){
+    	int indFinal = indFin;
+    	if (indIni == indFin-1){//Para que entre en el bucle en caso de índices consecutivos
+    		indFinal = indFinal + 1;
+    	}//La condición de parada no funciona si indIni y indFin son consecutivos,no entra en el bucle
+    	for (int i=indIni;i!=(indFinal+x.length-1)%x.length;i++){
     		double dx=x[i]-x[(i+1)%x.length];
-            double dy=y[i]-y[(i+1)%x.length];
-            dist += Math.sqrt(dx*dx+dy*dy);
-    	}
+    		double dy=y[i]-y[(i+1)%x.length];
+    		dist += Math.sqrt(dx*dx+dy*dy);
+    	}    	
     	return dist;
 	}
 	
