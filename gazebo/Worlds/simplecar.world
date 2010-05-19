@@ -27,8 +27,8 @@
 
   <rendering:gui>
     <type>fltk</type>
-    <size>640 480</size>
-    <pos>0 0</pos>
+    <size>800 600</size>
+    <pos>500 70</pos>
   </rendering:gui>
 
   <rendering:ogre>

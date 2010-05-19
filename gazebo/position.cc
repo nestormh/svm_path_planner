@@ -29,6 +29,7 @@ std::string pose2string(gazebo::Pose ps){
 
 void muestraData(gazebo::PositionData* data) {
 	std::cout
+	<< data->head.time
 	<< pose2string(data->cmdVelocity)
 	<< pose2string(data->pose)
 	<< pose2string(data->velocity)
@@ -82,6 +83,8 @@ int main()
 			<< e << "\n";
 		return -1;
 	}
+	
+	std::cout << "El interface es de tipo: " << posIface->GetType()<< "\n";
 
 	// Enable the motor
 	std::cout << "Enable the motor\n" ;
@@ -89,26 +92,39 @@ int main()
 	posIface->Lock(1);
 	posIface->data->cmdEnableMotors = 1;
 	muestraData(posIface->data);
+ //posIface->data->cmdVelocity.yaw = -5;
+				posIface->data->cmdVelocity.pos.x = 0;
 	posIface->Unlock();
 
 	int i=0;
 	while (i<200)
 	{
 		
-		posIface->Lock(1);
- posIface->data->cmdVelocity.yaw = -0.1;
-		if(!(i%10)) {
+		if(!posIface->Lock(1))
+			std::cerr<<  "No se pudo Lock el interfaz\n";
+
+		if(i<100)
+				posIface->data->cmdVelocity.pos.x = 0;
+		else
+				posIface->data->cmdVelocity.pos.x = 10;
+				
+//			 posIface->data->cmdVelocity.yaw = (-20)*3.1416/180;
+			 posIface->data->cmdVelocity.yaw = +i/10;
+/*		if(!(i%10)) {
 			if((i/10)%2) {
 				double vel=0.2*(i/10+1);
-				posIface->data->cmdVelocity.pos.x = vel;
+ posIface->data->cmdVelocity.yaw = (-vel*20)*3.1416/180;
+//				posIface->data->cmdVelocity.pos.x = vel;
 				//std::cout << "Velocidad x="<< vel<<"\n";
 			} else {
+ posIface->data->cmdVelocity.yaw = 0;
 				//std::cout << "Velocidad x=0\n";
-				posIface->data->cmdVelocity.pos.x = 0;
+//				posIface->data->cmdVelocity.pos.x = 0;
 			}
 		}
-
+*/
 		muestraData(posIface->data);
+		//posIface->Post();
 		posIface->Unlock();
 		
 		//sleep(2);

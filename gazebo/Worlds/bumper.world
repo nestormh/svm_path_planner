@@ -29,8 +29,8 @@
   </physics:ode>
 
   <rendering:gui>
-    <size>1024 780</size>
-    <pos>100 100</pos>
+  <size>800 600</size>
+  <pos>500 70</pos>
     <frames>
       <row height="100%">
         <camera width="100%">

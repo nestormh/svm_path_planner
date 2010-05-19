@@ -12,7 +12,7 @@
 	<rendering:gui>
 		<type>fltk</type>
 		<size>800 600</size>
-		<pos>0 0</pos>
+		<pos>500 70</pos>
 		<xyz>0 0 0</xyz>
 		<rpy>0 0 0</rpy>
 	</rendering:gui>
@@ -88,8 +88,8 @@
   </include>
   -->
 	<model:physical name="lince_model">
-		<xyz>0.00 0.00 0.00</xyz>
-		<rpy>0 0 0</rpy>
+		<xyz>0.00 0.00 0.25</xyz>
+		<rpy>0 180 0</rpy>
 		<!--
   <model:physical name="sonyvid30_model">
     <xyz>0.0 0.0 0.30</xyz>

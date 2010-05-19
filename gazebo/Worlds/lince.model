@@ -70,7 +70,7 @@
 
 
 <body:cylinder name="rear_left_wheel">
-  <xyz>-0.17 -0.15 0</xyz>
+  <xyz>-0.17 -0.2 -0.25</xyz>
   <rpy>0 90 90</rpy>
 
   <geom:cylinder name="rear_left_wheel_geom">
@@ -104,7 +104,7 @@
 </body:cylinder>
 
 <body:cylinder name="front_left_wheel">
-  <xyz>0.17 -0.15 0</xyz>
+  <xyz>0.17 -0.2 -0.25</xyz>
   <rpy>0 90 90</rpy>
 
   <geom:cylinder name="front_left_wheel_geom">
@@ -138,7 +138,7 @@
 </body:cylinder>
 
 <body:cylinder name="rear_right_wheel">
-  <xyz>-0.17 0.15 0</xyz>
+  <xyz>-0.17 0.2 -0.25</xyz>
   <rpy>0 90 90</rpy>
 
   <geom:cylinder name="rear_right_wheel_geom">
@@ -172,7 +172,7 @@
 </body:cylinder>
 
 <body:cylinder name="front_right_wheel">
-  <xyz>0.17 0.15 0</xyz>
+  <xyz>0.17 0.2 -0.25</xyz>
   <rpy>0 90 90</rpy>
 
   <geom:cylinder name="front_right_wheel_geom">
@@ -209,13 +209,22 @@
   <body2>chassis_body</body2>
   <body1>front_left_wheel</body1>
   <anchor>front_left_wheel</anchor>
-  <anchorOffset>0 0 0.005</anchorOffset>
-  <axis1>0 0 1</axis1>
+<!--   <anchorOffset>0 0 0.005</anchorOffset> -->
+  <anchorOffset>0 0 0.0375</anchorOffset>
+  
+  
+<!--  <axis1>0 0 1</axis1>
+  <axis2>0 1 0</axis2>-->
+
   <axis2>0 1 0</axis2>
-  <lowStop2>-30</lowStop2>
+  <axis1>0 0 1</axis1>
+  
+    
+      <lowStop2>-30</lowStop2>
   <highStop2>30</highStop2>
-  <lowStop1>0</lowStop1>
-  <highStop1>0</highStop1>
+<!--  <lowStop1>0</lowStop1>
+  <highStop1>0</highStop1>-->
+  
   <erp>0.8</erp>
   <cfm>10e-5</cfm>
 </joint:hinge2>
@@ -224,13 +233,21 @@
   <body2>chassis_body</body2>
   <body1>front_right_wheel</body1>
   <anchor>front_right_wheel</anchor>
-  <anchorOffset>0 0 -0.005</anchorOffset>
-  <axis1>0 0 1</axis1>
-  <axis2>0 1 0</axis2>
-  <lowStop2>-30</lowStop2>
-  <highStop2>30</highStop2>
-  <lowStop1>0</lowStop1>
-  <highStop1>0</highStop1>
+<!--   <anchorOffset>0 0 -0.005</anchorOffset> -->
+  <anchorOffset>0 0 -0.0375</anchorOffset>
+  
+<!--  <axis1>0 0 1</axis1>
+  <axis2>0 1 0</axis2>-->
+  
+  <axis1>0 1 0</axis1>
+  <axis2>0 0 1</axis2>
+
+  
+  <lowStop1>-30</lowStop1>
+  <highStop1>30</highStop1>
+<!--  <lowStop2>0</lowStop2>
+  <highStop2>0</highStop2>-->
+  
   <erp>0.8</erp>
   <cfm>10e-5</cfm>
 </joint:hinge2>
@@ -292,27 +309,28 @@
 			<joint>front_left_wheel_hinge</joint>
 			<type>steer</type>
 			<torque>0</torque>
-			<steerTorque>1</steerTorque>
+			<steerTorque>10</steerTorque>
 		</wheel>
 		<wheel>
 			<joint>front_right_wheel_hinge</joint>
 			<type>steer</type>
 			<torque>0</torque>
-			<steerTorque>1</steerTorque>
+			<steerTorque>10</steerTorque>
 		</wheel>
 		<steerPD>10 0.0</steerPD>
-		<!-- Henrik params start -->
+		<steerMaxAngle>50</steerMaxAngle>
+
+		<interface:position name="position_iface_0"/>
+		
+		<!-- no parece implementado 
 		<leftOdomJoint>front_left_wheel_hinge</leftOdomJoint>
 		<rightOdomJoint>front_right_wheel_hinge</rightOdomJoint>
 		<odomWheelSeparation>0.2</odomWheelSeparation>
 		<odomWheelDiameter>0.15</odomWheelDiameter>
 		<leftSteeringOdomJoint>front_left_wheel_hinge</leftSteeringOdomJoint>
 		<rightSteeringOdomJoint>front_right_wheel_hinge</rightSteeringOdomJoint>
-		<!-- Henrik params stop -->
-		<interface:position name="position_iface_0"/>
-		<!-- Henrik params start -->
 		<interface:actarray name="wheels_actarray_iface"/>
-		<!-- Henrik params stop -->
+		-->
 	</controller:steering_position2d>
 
 </model:physical>
