@@ -6,7 +6,7 @@ package sibtra.gps;
 import java.io.File;
 import java.util.Collection;
 import java.util.Vector;
-
+import sibtra.util.*;
 import sibtra.flota.InterfazFlota;
 import sibtra.flota.Prioridades;
 import sibtra.util.UtilCalculos;
@@ -262,7 +262,7 @@ public class GestionFlota {
 	}
 	
 	/**
-	 * Calcula la trayectoria que debe segirse para ir de la posición actual al destino
+	 * Calcula la trayectoria que debe seguirse para ir de la posición actual al destino
 	 * @param posicion vector de coordenadas locales (x.y)
 	 * @param orientacion orientación (yaw) del vehículo en radianes
 	 * @param destino vector de coordenadas locales (x,y)
@@ -273,8 +273,10 @@ public class GestionFlota {
 			, double posXdestino, double posYdestino) {
 		int[] indicesTramos=indicesTramosADestino(posXCoche, posYCoche, orientacionCoche
 				, posXdestino, posYdestino);
-		if(indicesTramos==null) //no fue posible calcular los tramos
+		if(indicesTramos==null){ //no fue posible calcular los tramos
+			System.out.println("No fue posible calcular los tramos");
 			return null;
+			}
 		return construyeTrayectoriaCompleta(indicesTramos,largoIni,largoFin);
 	}
 	
@@ -290,29 +292,80 @@ public class GestionFlota {
 	 */
 	private Trayectoria construyeTrayectoriaCompleta(int[] indicesTramos, double largoEnInicial, double largoEnFinal) {
 		int longitud = 0;
+		//calculamos la longitud total de la ruta completa como la suma de los tramos
 		for (int i=0;i<indicesTramos.length;i++){
-			longitud = trayectorias[indicesTramos[i]].length() + longitud;
-			System.out.println("la longitud del tramo "+indicesTramos[i]+" es " + +trayectorias[indicesTramos[i]].length());
+			if(i==indicesTramos.length-1){
+				int indFinal = trayectorias[indicesTramos[i]].indiceHastaLargo(largoEnFinal,0);
+				longitud = indFinal + longitud;
+			}else{
+				longitud = trayectorias[indicesTramos[i]].length() + longitud;
+			}			
+			System.out.println("la longitud del  tramo "+indicesTramos[i]+" es " + +trayectorias[indicesTramos[i]].length());
 		}		
 		System.out.println("Hay " + indicesTramos.length+ " en la trayectoria completa");
 		System.out.println("la longitud total de la ruta completa es " + longitud);
 		double[][] puntos = new double[longitud][5]; // x,y,z,velocidad y rumbo
 		int cont = 0;
+		// Unimos los tramos
 		for (int i=0;i<indicesTramos.length;i++){
-			for(int j=0;j<trayectorias[indicesTramos[i]].length();j++){
-				puntos[cont][0] = trayectorias[indicesTramos[i]].x[j];
-				puntos[cont][1] = trayectorias[indicesTramos[i]].y[j];
-				puntos[cont][2] = trayectorias[indicesTramos[i]].z[j];
-				puntos[cont][3] = trayectorias[indicesTramos[i]].velocidad[j];
-				puntos[cont][4] = trayectorias[indicesTramos[i]].rumbo[j];
-				cont++;				
-			}			
+			if(i==indicesTramos.length-1){
+				int indiceFinal = trayectorias[indicesTramos[i]].indiceHastaLargo(largoEnFinal,0);
+				System.out.println("el índice del punto que se encuentra a "+largoEnFinal+" es "+ indiceFinal);
+				for(int j=0;j<indiceFinal;j++){
+					puntos[cont][0] = trayectorias[indicesTramos[i]].x[j];
+					puntos[cont][1] = trayectorias[indicesTramos[i]].y[j];
+					puntos[cont][2] = trayectorias[indicesTramos[i]].z[j];
+					puntos[cont][3] = trayectorias[indicesTramos[i]].velocidad[j];
+					puntos[cont][4] = trayectorias[indicesTramos[i]].rumbo[j];
+					cont++;				
+				}
+			}else{
+				for(int j=0;j<trayectorias[indicesTramos[i]].length();j++){
+					puntos[cont][0] = trayectorias[indicesTramos[i]].x[j];
+					puntos[cont][1] = trayectorias[indicesTramos[i]].y[j];
+					puntos[cont][2] = trayectorias[indicesTramos[i]].z[j];
+					puntos[cont][3] = trayectorias[indicesTramos[i]].velocidad[j];
+					puntos[cont][4] = trayectorias[indicesTramos[i]].rumbo[j];
+					cont++;				
+				}
+			}						
 		}		
 		Trayectoria trayCompleta = new Trayectoria(puntos);
-		trayCompleta.nuevaDistanciaMaxima(0.01);
+		trayCompleta.nuevaDistanciaMaxima(0.05);
+		trayCompleta = generaRampaFrenado(trayCompleta, 3);
+//		for(int k=0;k<trayCompleta.length();k++){
+//			System.out.println("vel "+trayCompleta.velocidad[k]);
+//		}
 		return trayCompleta;
 	}
-
+	/**
+	 * Método que varía los valores de velocidad de la trayectoria que se le pasa de manera que
+	 * el vehículo se detenga en el último punto de la trayectoria. Si la trayectoria es cerrada
+	 * se detendrá igualmente en el último punto
+	 * @param tr Trayectoria que se desea variar
+	 * @param distIniFrenado Distancia a la que se desea que el vehículo comience a frenar
+	 * @return Trayectoria modificada
+	 */
+	public Trayectoria generaRampaFrenado(Trayectoria tr,double distIniFrenado){
+		double dist = 0;
+		int i = 0;
+		for(i=tr.length()-1;dist < distIniFrenado;i--){
+			//Encontramos el punto de la trayectoria donde hay que empezar a frenar
+			dist = UtilCalculos.distanciaPuntos(tr.x[i],tr.y[i],tr.x[i-1],tr.y[i-1])+dist;
+		}
+		double velocidadActual = tr.velocidad[i];
+		//Calculamos los parámetros de la rampa de frenado
+		int numPuntos = tr.length() - i;
+		double pendiente = -velocidadActual/distIniFrenado;
+		double c = -pendiente*distIniFrenado;
+		double T = distIniFrenado/numPuntos;
+		double t = T;		
+		for(int j=i;j<tr.length();j++){                 
+            tr.velocidad[j] = pendiente*t + c;
+            t = t + T;
+    }
+		return tr;
+	}
 	/**
 	 * @return the centro
 	 */
