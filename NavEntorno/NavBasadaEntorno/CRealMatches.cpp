@@ -12,18 +12,12 @@
 
 #define MIN_DIST 15
 
-#define SIZE1 cvSize(800, 600)
-#define SIZE2 cvSize(640, 480)
-#define SIZE3 cvSize(320, 240)
-#define SIZE4 cvSize(160, 120)
-#define SIZE5 cvSize(315, 240)
 
-
-CRealMatches::CRealMatches(bool usePrevious) {
+CRealMatches::CRealMatches(bool usePrevious, CvSize sizeIn) {
     currentPoint1 = cvPoint2D32f(-1, -1);
     currentIndex1 = -1;
 
-    size = SIZE5;
+    size = sizeIn;
 
     img1 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     img2 = cvCreateImage(size, IPL_DEPTH_8U, 1);
@@ -41,8 +35,23 @@ CRealMatches::CRealMatches(bool usePrevious) {
         img1Prev = cvCreateImage(size, IPL_DEPTH_8U, 1);
         img2Prev = cvCreateImage(size, IPL_DEPTH_8U, 1);
     }
-    aco = new CAntColony(size);
-    acoImg = cvCreateImage(size, IPL_DEPTH_8U, 3);
+
+    lastObst = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    cvZero(lastObst);
+
+    pointsMask = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    // Points mask is created
+    CvPoint * pMask = new CvPoint[4];
+    pMask[0] = cvPoint(0, size.height - 1);
+    pMask[1] = cvPoint(0, 102);
+    pMask[2] = cvPoint(size.width - 1, 102);
+    pMask[3] = cvPoint(size.width - 1, size.height - 1);
+    int npts = 4;
+    cvZero(pointsMask);
+    cvFillPoly(pointsMask, &pMask, &npts, 1, cvScalar(255));
+    delete pMask;
+
+    roadMask = NULL;
 }
 
 CRealMatches::CRealMatches(const CRealMatches& orig) {
@@ -60,8 +69,8 @@ CRealMatches::~CRealMatches() {
     cvReleaseMat(&D1);
     cvReleaseMat(&D2);
 
-    if (interestMask != NULL) {
-        cvReleaseImage(&interestMask);
+    if (roadMask != NULL) {
+        cvReleaseImage(&roadMask);
     }
 
     if (usePrevious) {
@@ -73,8 +82,8 @@ CRealMatches::~CRealMatches() {
     points2.clear();
     pairs.clear();
 
-    delete aco;
-    cvReleaseImage(&acoImg);
+    cvReleaseImage(&lastObst);
+    cvReleaseImage(&pointsMask);
 }
 
 void onMouseTest1(int event, int x, int y, int flags, void * param) {
@@ -542,7 +551,7 @@ inline void CRealMatches::testFast(IplImage * img, vector<CvPoint2D32f> &points)
 
     points.clear();
     for (int i = 0; i < numCorners; i++) {
-        if (cvGetReal2D(mask1, corners[i].y, corners[i].x) == 255)
+        if (cvGetReal2D(pointsMask, corners[i].y, corners[i].x) == 255)
             points.push_back(cvPointTo32f(corners[i]));
     }
 
@@ -629,6 +638,7 @@ inline void CRealMatches::findOFlowPairs(const IplImage * img1, const IplImage *
     int maxFeat = numberOfFeatures;
     numberOfFeatures = 0;
 
+    delete points1;
     points1 = new CvPoint2D32f[maxFeat];
     points2 = new CvPoint2D32f[maxFeat];
 
@@ -752,31 +762,18 @@ inline void CRealMatches::remap(CImageRegistration ir) {
 inline void CRealMatches::mainTest() {
     //getPoints(img1, points1);
     //getPoints(img2, points2);
-    clock_t myTime = clock();
-    cvCvtColor(img2, acoImg, CV_GRAY2BGR);
-    //CvPoint * road = aco->iterate(acoImg);
-    CvPoint * road = new CvPoint[4];
-    road[0] = cvPoint(0, size.height - 70);
-    road[1] = cvPoint(184, 102);
-    road[2] = cvPoint(207, 102);
-    road[3] = cvPoint(size.width - 1, size.height - 70);
-    int npts = 4;
-    cvZero(interestMask);
-    cvFillPoly(interestMask, &road, &npts, 1, cvScalar(255));
-    road[1].x = 0;
-    road[2].x = size.width - 1;
-    cvZero(mask1);
-    cvFillPoly(mask1, &road, &npts, 1, cvScalar(255));
-    delete road;    
-    time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
-    cout << "Tiempo invertido en ACO = " << time << endl;
 
-    myTime = clock();
+    clock_t myTime = clock();
     testFast(img1, points1);
     //testFast(img2, points2);
-    time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+    time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en fast = " << time << endl;
 
+    if (points1.size() < MIN_NFEAT) {
+        cerr << "No se han encontrado puntos iniciales suficientes para hacer el emparejamiento" << endl;
+        return;
+    }
+    
     myTime = clock();
     //getOflow(img1, img2, points1, pairs1);
     //getOflow(img2, img1, points2, pairs2);
@@ -856,17 +853,17 @@ inline void CRealMatches::mainTest() {
     cvCvtColor(wm.warpedImg, plinear, CV_BGR2GRAY);
     cvThreshold(plinear, mask1, 0, 255, CV_THRESH_BINARY);//*/
     //cvAnd(mask1, mask2, mask1);
-    cvNamedWindow("plinear2", 1);
-    cvShowImage("plinear2", plinear);
+    cvNamedWindow("plinear", 1);
+    cvShowImage("plinear", plinear);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en pieceWise = " << time << endl; //*/
     //wm(pairs, img1, img2);    
 
     myTime = clock();
-    if (interestMask != NULL) {
-        cvAnd(mask1, interestMask, mask1);
+    if (roadMask != NULL) {
+        //cvAnd(mask1, interestMask, mask1);
     }
-    if (cvCountNonZero(mask1) == 0) {
+    if (cvCountNonZero(mask1) < 4) {
         cerr << "El área de trabajo es demasiado pequeña" << endl;
         return;
     }
@@ -898,7 +895,7 @@ inline void CRealMatches::mainTest() {
     vm.pieceWiseLinear(img1, img2, color1, color2, mask);*/
 
     myTime = clock();
-    setMaskFromPoints(mask2, 0);
+    //setMaskFromPoints(mask2, 0);
     paint();
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en paint = " << time << endl;//*/
@@ -921,6 +918,43 @@ inline void CRealMatches::mainTest() {
             pairsPrev.push_back(*it);
         }
     }
+}
+
+inline void CRealMatches::checkCoveredArea(IplImage * imgB, IplImage * imgA, int &coveredArea) {
+    if ((cvCountNonZero(imgA) == 0) || (cvCountNonZero(imgB) == 0)) {
+        coveredArea = 0;
+        return;
+    }
+
+    cvCopyImage(imgA, img1);
+    cvCopyImage(imgB, img2);
+
+    testFast(img1, points1);
+    if (points1.size() < MIN_NFEAT) {
+        coveredArea = 0;
+
+        return;
+    }
+
+    oFlow(points1, pairs, img1, img2);
+
+    if (pairs.size() < MIN_NFEAT) {
+        coveredArea = 0;
+        
+        return;
+    }
+
+    cleanRANSAC(CV_FM_RANSAC, pairs);
+
+    if (pairs.size() < MIN_NFEAT) {
+        coveredArea = 0;
+        return;
+    }
+
+    setMaskFromPoints(mask1, 2);
+    
+    coveredArea = cvCountNonZero(mask1);
+    //coveredArea = pairs.size();
 }
 
 void CRealMatches::startTest(string path, string filename, string testName) {
@@ -1218,32 +1252,34 @@ void CRealMatches::startTest4() {
 
 void CRealMatches::startTest5() {
     CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
+    CRoadDetection rd(size);    
+
     IplImage * imgDB;
     IplImage * imgRT;
     int indexRT;
     int indexDB;
+    roadMask = cvCreateImage(size, IPL_DEPTH_8U, 1);       
 
-    interestMask = cvCreateImage(size, IPL_DEPTH_8U, 1);
-    /*cvZero(interestMask);
-    //cvFillPoly(CvArr* img, CvPoint** pts, int* npts, int contours, CvScalar color, int lineType=8, int shift=0)
-    CvPoint * interest = new CvPoint[4];
-    interest[0] = cvPoint(0, size.height - 1);
-    //interest[1] = cvPoint(122, 104);
-    //interest[2] = cvPoint(207, 104);
-    interest[1] = cvPoint(0, 104);
-    interest[2] = cvPoint(size.width - 1, 104);
-    interest[3] = cvPoint(size.width - 1, size.height - 1);
-    int npts = 4;
-    cvFillPoly(interestMask, &interest, &npts, 1, cvScalar(255));
-    cvNamedWindow("Interest", 1);
-    cvShowImage("Interest", interestMask);//*/
+    rd.detectFixed(roadMask);
+    //cvSet(roadMask, cvScalar(255));
 
     //cvNamedWindow("ImgDB", 1);
     //cvNamedWindow("ImgRT", 1);
-    int index = 392;
+    int index = 0;
     ruta.setCurrentPoint(index);
     while (true) {
         ruta.getNextImage(imgRT, imgDB);
+        //rd.detect(ruta.getSTPoint(), roadMask);
+        //rd.detectOcclusions(ruta.getSTPoint(), roadMask);
+        //cvSet(roadMask, cvScalar(255));
+        //cvShowImage("roadMask", interestMask);
+        //rd.detectRoadWithFATPoints(ruta.getSTPoint(), roadMask);
+        /*cvCvtColor(imgDB, imgColor, CV_GRAY2BGR);
+        CvPoint * poly = aco.iterate(imgColor);
+        int npts = 4;        
+        cvZero(roadMask);
+        cvFillPoly(roadMask, &poly, &npts, 1, cvScalar(255));
+        cvShowImage("roadMask", roadMask);//*/
         index++;
 
         if (cvCountNonZero(imgDB) == 0) {
@@ -1276,66 +1312,26 @@ void CRealMatches::startTest5() {
     }
 }
 
-void CRealMatches::startTestACO() {
-    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERConObs2", "Rutas/pruebaITERBase2", "/home/neztol/doctorado/Datos/DB");
-    IplImage * imgDB;
-    IplImage * imgRT;
-    IplImage * img = cvCreateImage(size, IPL_DEPTH_8U, 3);
-    IplImage * checkResults = cvCreateImage(size, IPL_DEPTH_8U, 3);
-    cvNamedWindow("checkResults", 1);
-
-    //cvNamedWindow("ImgDB", 1);
-    //cvNamedWindow("ImgRT", 1);
-    int index = 0;
-    ruta.setCurrentPoint(index);
-    CAntColony aco(size);
-    while (true) {
-        ruta.getNextImage(imgRT, imgDB);
-        index++;
-
+void CRealMatches::startTestRoadDetection() {
+    CRoadDetection rd(size);
+    IplImage * maskRoad = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    int index = 1050;
+    while (true) {        
         clock_t myTime = clock();
 
-        //cvCopyImage(imgRT, img1);
-        //cvCopyImage(imgDB, img2);
-        cvCvtColor(imgRT, img, CV_GRAY2BGR);
-        CvPoint * poly = aco.iterate(img);
-
-        cvZero(checkResults);
-        cvLine(checkResults, poly[0], poly[1], cvScalar(0, 255, 0), 3);
-        cvLine(checkResults, poly[2], poly[3], cvScalar(0, 255, 0), 3);
-        cvShowImage("checkResults", checkResults);
+        //rd.detect(index, maskRoad);
+        //rd.detectRoadWithFAST(index, maskRoad);
+        //rd.detectRoadWithFATPoints(index, maskRoad);
+        //rd.detectOcclusions(index, maskRoad);
+        rd.detectACO(index, maskRoad);
+        cvShowImage("aco", maskRoad);
+        index++;
 
         time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo TOTAL = " << time << endl;
         cout << "Index = " << (index - 1) << endl;
 
         int key = cvWaitKey(0);
-        if (key == 27)
-            exit(0);
-        if (key == 32)
-            cvWaitKey(0);
-
-        cvReleaseImage(&imgDB);
-        cvReleaseImage(&imgRT);
-    }
-    cvReleaseImage(&img);
-}
-
-void CRealMatches::startTestRoadDetection() {
-    CRoadDetection rd(size);
-    IplImage * maskRoad = cvCreateImage(size, IPL_DEPTH_8U, 1);
-    int index = 0;
-    while (true) {        
-        clock_t myTime = clock();
-
-        rd.detect(index, maskRoad);
-        index++;
-
-        time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
-        cout << "Tiempo TOTAL = " << time << endl;
-        cout << "Index = " << (index - 1) << endl;
-
-        int key = cvWaitKey(20);
         if (key == 27)
             exit(0);
         if (key == 32)
@@ -1348,4 +1344,188 @@ void CRealMatches::mainTest(IplImage * img1, IplImage * img2) {
     this->img2 = img2;
 
     mainTest();
+}
+
+void CRealMatches::startTest6() {
+    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
+    CRoadDetection rd(size);
+
+    IplImage * imgDB1;
+    IplImage * imgDB2;
+    IplImage * imgDB3;
+    IplImage * imgRT;
+    IplImage * imgDB;
+    int indexRT;
+    int indexDB;
+    roadMask = cvCreateImage(size, IPL_DEPTH_8U, 1);
+
+    rd.detectFixed(roadMask);
+    //cvSet(roadMask, cvScalar(255));
+
+    //cvNamedWindow("ImgDB", 1);
+    //cvNamedWindow("ImgRT", 1);
+    int index = 0;
+    ruta.setCurrentPoint(index);
+    while (true) {
+        clock_t myTime = clock();
+
+        ruta.getNextImage(imgRT, imgDB1, imgDB2, imgDB3);
+
+        int area1, area2, area3;
+        checkCoveredArea(imgRT, imgDB1, area1);
+        checkCoveredArea(imgRT, imgDB2, area2);
+        checkCoveredArea(imgRT, imgDB3, area3);        
+
+        cout << "Area1 = " << area1 << endl;
+        cout << "Area2 = " << area2 << endl;
+        cout << "Area3 = " << area3 << endl;
+        int maxArea = max(area1, max(area2, area3));
+        if (maxArea == area1) imgDB = imgDB1;
+        if (maxArea == area2) imgDB = imgDB2;
+        if (maxArea == area3) imgDB = imgDB3;
+
+        index++;
+
+        if (maxArea == 0) {
+            cout << "Aqui" << endl;
+            IplImage * fullColor = cvCreateImage(size, IPL_DEPTH_8U, 3);
+            cvSet(fullColor, cvScalar(rand() & 255, rand() & 255, rand() & 255));
+            cvShowImage("ResultadoFinal", fullColor);
+
+            cvWaitKey(20);
+            
+            cvReleaseImage(&imgDB1);
+            cvReleaseImage(&imgDB2);
+            cvReleaseImage(&imgDB3);
+            cvReleaseImage(&imgRT);
+            cvReleaseImage(&fullColor);
+
+            continue;
+        }
+
+        cvCopyImage(imgRT, img1);
+        cvCopyImage(imgDB, img2);
+
+        //cvShowImage("ImgDB", imgDB);
+        //cvShowImage("ImgRT", imgRT);
+        //clock_t myTime = clock();
+        mainTest();
+        time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo TOTAL = " << time << endl;
+        cout << "Index = " << (index - 1) << endl;
+
+        if (index == 630) exit(0);
+
+        int key = cvWaitKey(20);
+        if (key == 27)
+            exit(0);
+        if (key == 32)
+            cvWaitKey(0);
+
+        cvReleaseImage(&imgDB1);
+        cvReleaseImage(&imgDB2);
+        cvReleaseImage(&imgDB3);
+        cvReleaseImage(&imgRT);
+    }
+}
+
+void CRealMatches::startTest7() {
+    int testIdx = 2;
+    char * PATH_BASE_IMG;    
+    
+    switch (testIdx) {
+        case 0:                 
+            PATH_BASE_IMG = "/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/";
+            break;
+        case 1:                        
+            PATH_BASE_IMG = "/home/neztol/doctorado/Datos/EstadisticasITER/tripode2/";
+            break;
+        case 2:
+            PATH_BASE_IMG = "/home/neztol/doctorado/Datos/EstadisticasITER/tripode3/";
+            break;
+    }
+
+    roadMask = cvCreateImage(size, IPL_DEPTH_8U, 1);
+
+    CRoadDetection rd(size);
+    //rd.detectFixed(roadMask);
+
+    string maskPath = string(PATH_BASE_IMG);
+    maskPath += "mask.jpg";
+    IplImage * tmpMask = cvLoadImage(maskPath.c_str(), 0);
+    cvResize(tmpMask, roadMask);
+    cvReleaseImage(&tmpMask);
+
+
+    string path(PATH_BASE_IMG);
+    path += "datos_RT.txt";    
+
+    ifstream ifs(path.c_str() , ifstream::in );
+
+    char line[1024];
+
+    int nRT = 0;
+    ifs >> nRT;
+    ifs.ignore();
+    char ** rtPath = new char*[nRT];
+    for (int i = 0; i < nRT; i++) {
+        rtPath[i] = new char[1024];
+        ifs.getline(rtPath[i], 1024);
+    }    
+    ifs.getline(line, 1024);
+
+    string DBpath;
+    string RTpath;
+    while (ifs.good()) {
+        DBpath = string(PATH_BASE_IMG);        
+
+        int dist;
+        int angle;
+        ifs >> dist;
+        ifs >> angle;
+        ifs.ignore(2);
+
+        ifs.getline(line, 1024);
+        DBpath += line;
+        DBpath += ".JPG";
+
+        if (abs(dist) > 1) continue;
+        if ((dist == -1) && (angle < 0)) continue;        
+        if ((dist == 1) && (angle > 0)) continue;
+        if (abs(angle) > 10) continue;
+
+        for (int i = 0; i < nRT; i++) {
+            RTpath = string(PATH_BASE_IMG);
+            RTpath += rtPath[i];
+            RTpath += ".JPG";
+
+            cout << RTpath << endl;
+            cout << DBpath << endl;
+
+            IplImage * imgA = cvLoadImage(RTpath.c_str(), 0);
+            IplImage * imgB = cvLoadImage(DBpath.c_str(), 0);
+
+            cvResize(imgA, img1);
+            cvResize(imgB, img2);
+
+            cvSet(lastObst, cvScalar(255));
+
+            //cvShowImage("Img1", img1);
+            //cvShowImage("Img2", img2);            
+
+            mainTest();
+
+            int key = cvWaitKey(0);
+            if (key == 27)
+                exit(0);
+            if (key == 32)
+                cvWaitKey(0);
+
+            cvReleaseImage(&imgA);
+            cvReleaseImage(&imgB);
+        }
+    }
+
+    ifs.close();
+
 }

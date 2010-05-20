@@ -145,14 +145,14 @@ IplImage * CRutaDB2::getNearestImage(double localX, double localY, double angle)
     sqlite3_bind_double(statement, 10, DIST_THRESH);
 
     double minDist = DBL_MAX;
-    int timestamp = -1;
+    staticPoint = -1;
 
     while (sqlite3_step(statement) == SQLITE_ROW) {
         double tmpTimestamp = sqlite3_column_double(statement, 0);
         double tmpDist = sqlite3_column_int(statement, 2);
         if (minDist > tmpDist) {
             minDist = tmpDist;
-            timestamp = tmpTimestamp;
+            staticPoint = tmpTimestamp;
         }        
     }
 
@@ -160,7 +160,7 @@ IplImage * CRutaDB2::getNearestImage(double localX, double localY, double angle)
         cerr << "Error al finalizar el statement" << endl;
     }
 
-    if (timestamp == -1) {
+    if (staticPoint == -1) {
         cerr << "No se encontraron vecinos para la imagen " << endl;
         IplImage * rtImg = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 1);
         cvZero(rtImg);
@@ -169,7 +169,7 @@ IplImage * CRutaDB2::getNearestImage(double localX, double localY, double angle)
 
     char imageName[1024];
     IplImage * imgDB = NULL;
-    sprintf(imageName, "%s/%s/Camera2/Image%d.png", pathBase, dbStatic, timestamp);
+    sprintf(imageName, "%s/%s/Camera2/Image%d.png", pathBase, dbStatic, staticPoint);
     cout << imageName << endl;
     imgDB = cvLoadImage(imageName, 0);
 
@@ -191,4 +191,112 @@ void CRutaDB2::getImageAt(IplImage * &img, int type, int index) {
 
 void CRutaDB2::setCurrentPoint(int index) {
     currentPoint = index;
+}
+
+int CRutaDB2::getRTPoint() {
+    return currentPoint;
+}
+
+int CRutaDB2::getSTPoint() {
+    return staticPoint;
+}
+
+
+void CRutaDB2::getNextImage(IplImage * &imgRT, IplImage * &imgDB1, IplImage * &imgDB2, IplImage * &imgDB3) {
+    double localX, localY, angle;
+
+    sqlite3_stmt *statement;
+    char * sql = "SELECT localX, localY, angleIMU FROM points where (route == ?) AND (timestamp == ?);";
+    if (sqlite3_prepare_v2(db, sql, -1, &statement, NULL) != SQLITE_OK) {
+        cerr << "Error al iniciar la consulta: " << sql << ", " << sqlite3_errmsg(db) << endl;
+    }
+    sqlite3_bind_int(statement, 1, realTimeIndex);
+    sqlite3_bind_int(statement, 2, currentPoint);
+
+    if (sqlite3_step(statement) == SQLITE_ROW) {
+        localX = sqlite3_column_double(statement, 0);
+        localY = sqlite3_column_double(statement, 1);
+        angle = sqlite3_column_double(statement, 2);
+    }
+
+    if (sqlite3_finalize(statement) != SQLITE_OK) {
+        cerr << "Error al finalizar el statement" << endl;
+    }
+
+    char imageName[1024];
+    sprintf(imageName, "%s/%s/Camera2/Image%d.png", pathBase, dbRT, currentPoint);
+    cout << imageName << endl;
+    imgRT = cvLoadImage(imageName, 0);
+    getNearestImage(localX, localY, angle, imgDB1, imgDB2, imgDB3);
+
+    cvSetImageROI(imgRT, cvRect(5, 0, imgRT->width - 5, imgRT->height));
+    cvSetImageROI(imgDB1, cvRect(5, 0, imgDB1->width - 5, imgDB1->height));
+    cvSetImageROI(imgDB2, cvRect(5, 0, imgDB1->width - 5, imgDB1->height));
+    cvSetImageROI(imgDB3, cvRect(5, 0, imgDB1->width - 5, imgDB1->height));
+
+    //cvNamedWindow("imgRT", 1);
+    //cvShowImage("imgRT", imgRT);
+    //cvNamedWindow("imgDB", 1);
+    //cvShowImage("imgDB", imgDB);
+
+    //drawAllPoints(staticPoints, rtPoints, true, true);*/
+    currentPoint++;
+    if (currentPoint == nRTPoints)
+        currentPoint = 0;    
+}
+
+void CRutaDB2::getNearestImage(double localX, double localY, double angle, IplImage * &imgDB1, IplImage * &imgDB2, IplImage * &imgDB3) {
+    sqlite3_stmt *statement;
+    cout << localX << ", " << localY << ", " << angle << endl;
+
+    char * sql = "select timestamp, ((? - points.localX) * (? - points.localX) + (? - points.localY) * (? - points.localY)) as dist, ((abs(((360 + angleIMU)%360) - ?) + 360)%360) as difAng  from points where (((abs(((360 + angleIMU)%360) - ?) + 360)%360) < ?) and (route == ?) and (dist < ? * ?)";
+    if (sqlite3_prepare_v2(db, sql, -1, &statement, NULL) != SQLITE_OK) {
+        cerr << "Error al iniciar la consulta: " << sql << ", " << sqlite3_errmsg(db) << endl;
+    }
+    sqlite3_bind_double(statement, 1, localX);
+    sqlite3_bind_double(statement, 2, localX);
+    sqlite3_bind_double(statement, 3, localY);
+    sqlite3_bind_double(statement, 4, localY);
+    sqlite3_bind_double(statement, 5, angle);
+    sqlite3_bind_double(statement, 6, angle);
+    sqlite3_bind_double(statement, 7, ANGLE_THRESH);
+    sqlite3_bind_int(statement, 8, staticIndex);
+    sqlite3_bind_double(statement, 9, DIST_THRESH);
+    sqlite3_bind_double(statement, 10, DIST_THRESH);
+
+    double minDist = DBL_MAX;
+    staticPoint = -1;
+
+    while (sqlite3_step(statement) == SQLITE_ROW) {
+        double tmpTimestamp = sqlite3_column_double(statement, 0);
+        double tmpDist = sqlite3_column_int(statement, 2);
+        if (minDist > tmpDist) {
+            minDist = tmpDist;
+            staticPoint = tmpTimestamp;
+        }
+    }
+
+    if (sqlite3_finalize(statement) != SQLITE_OK) {
+        cerr << "Error al finalizar el statement" << endl;
+    }
+
+    if (staticPoint == -1) {
+        cerr << "No se encontraron vecinos para la imagen " << endl;
+        imgDB1 = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 1);
+        imgDB2 = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 1);
+        imgDB3 = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 1);
+        cvZero(imgDB1);
+        cvZero(imgDB2);
+        cvZero(imgDB3);
+
+        return;
+    }
+
+    char imageName[1024];    
+    sprintf(imageName, "%s/%s/Camera0/Image%d.png", pathBase, dbStatic, staticPoint);
+    imgDB1 = cvLoadImage(imageName, 0);
+    sprintf(imageName, "%s/%s/Camera1/Image%d.png", pathBase, dbStatic, staticPoint);
+    imgDB2 = cvLoadImage(imageName, 0);
+    sprintf(imageName, "%s/%s/Camera2/Image%d.png", pathBase, dbStatic, staticPoint);
+    imgDB3 = cvLoadImage(imageName, 0);    
 }

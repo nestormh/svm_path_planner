@@ -22,10 +22,13 @@ public:
 
     void getNextImage(IplImage * &imgRT, IplImage * &imgDB);
     IplImage * getNearestImage(double localX, double localY, double angle);
+    void getNextImage(IplImage * &imgRT, IplImage * &imgDB1, IplImage * &imgDB2, IplImage * &imgDB3);
+    void getNearestImage(double localX, double localY, double angle, IplImage * &imgDB1, IplImage * &imgDB2, IplImage * &imgDB3);
     void setCurrentPoint(int index);
     void getImageAt(IplImage * &img, int type, int index);
 
-    int currentPoint;
+    int getRTPoint();
+    int getSTPoint();
 
 private:
     sqlite3 * db;
@@ -40,6 +43,9 @@ private:
     char dbStatic[256];
     char dbRT[256];
     char pathBase[1024];
+
+    int staticPoint;
+    int currentPoint;
 
     IplImage * map;
 

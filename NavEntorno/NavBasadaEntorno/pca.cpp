@@ -3,22 +3,22 @@
 void CRealMatches::calcPCA(IplImage * img1, IplImage * img2, IplImage * mask) {
     int length = cvCountNonZero(mask);
     CvMat * data = cvCreateMat(2, length, CV_64FC1);
-    CvMat * data1 = cvCreateMat(1, length, CV_64FC1);
-    CvMat * data2 = cvCreateMat(1, length, CV_64FC1);
+    CvMat * data1 = cvCreateMatHeader(1, length, CV_64FC1);
+    CvMat * data2 = cvCreateMatHeader(1, length, CV_64FC1);
     CvMat * corr = cvCreateMat(2, 2, CV_64FC1);
     CvMat * avg = cvCreateMat(1, 2, CV_64FC1);
     CvMat * eigenValues = cvCreateMat(1, 2, CV_64FC1);
     CvMat * eigenVectors = cvCreateMat(2, 2, CV_64FC1);
     CvMat * pcaData = cvCreateMat(2, length, CV_64FC1);
-    CvMat * dataX = cvCreateMat(1, length, CV_64FC1);
-    CvMat * dataY = cvCreateMat(1, length, CV_64FC1);
+    CvMat * dataX = cvCreateMatHeader(1, length, CV_64FC1);
+    CvMat * dataY = cvCreateMatHeader(1, length, CV_64FC1);
     CvMat * distPCA = cvCreateMat(img1->height, img1->width, CV_64FC1);
     CvScalar xMean, yMean, xSdv, ySdv;
 
     vector<CvPoint> origPos;
 
-    data1 = cvGetRow(data, data1, 0);
-    data2 = cvGetRow(data, data2, 1);    
+    cvGetRow(data, data1, 0);
+    cvGetRow(data, data2, 1);    
 
     int pos = 0;
     for (int i = 0; i < img2->width; i++) {
@@ -75,8 +75,8 @@ void CRealMatches::calcPCA(IplImage * img1, IplImage * img2, IplImage * mask) {
     cvMatMul(eigenVectors, data, pcaData);
 
     // Gets ACP vectors X and Y
-    dataX = cvGetRow(pcaData, dataX, 1);
-    dataY = cvGetRow(pcaData, dataY, 0);
+    cvGetRow(pcaData, dataX, 1);
+    cvGetRow(pcaData, dataY, 0);
 
     // Calculates mean and stdev
     cvAvgSdv(dataX, &xMean, &xSdv);
@@ -105,4 +105,6 @@ void CRealMatches::calcPCA(IplImage * img1, IplImage * img2, IplImage * mask) {
     cvReleaseMat(&dataX);
     cvReleaseMat(&dataY);
     cvReleaseMat(&distPCA);
+
+    origPos.clear();
 }

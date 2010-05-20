@@ -18,6 +18,13 @@
 #define MIN_DIST 8
 #define MIN_DIST_SQR MIN_DIST * MIN_DIST
 
+#define SIZE1 cvSize(800, 600)
+#define SIZE2 cvSize(640, 480)
+#define SIZE3 cvSize(320, 240)
+#define SIZE4 cvSize(160, 120)
+#define SIZE5 cvSize(315, 240)
+#define SIZE6 cvSize(536, 356)
+
 typedef struct {
     CvPoint2D32f p1;
     CvPoint2D32f p2;
@@ -40,7 +47,7 @@ typedef struct {
 
 class CRealMatches {
 public:
-    CRealMatches(bool usePrevious = false);
+    CRealMatches(bool usePrevious = false, CvSize sizeIn = SIZE5);
     CRealMatches(const CRealMatches& orig);
     void mainTest(IplImage * img1, IplImage * img2);
     virtual ~CRealMatches();
@@ -50,7 +57,8 @@ public:
     void startTest3();
     void startTest4();
     void startTest5();
-    void startTestACO();
+    void startTest6();
+    void startTest7();
     void startTestRoadDetection();
     void onMouse1(int event, int x, int y, int flags, void * param);
     void onMouse2(int event, int x, int y, int flags, void * param);
@@ -98,6 +106,8 @@ private:
     double normal(double x, double mean, double sdv);
     void detectObstacles(IplImage * mask);
 
+    void checkCoveredArea(IplImage * imgA, IplImage * imgB, int &coveredArea);
+
     void test3D();
     void test3D_2();
     void calibrateCameras();
@@ -117,9 +127,10 @@ private:
     IplImage * img2;
     IplImage * mask2;
     IplImage * mask1;
+    IplImage * pointsMask;
     IplImage * plinear;
 
-    IplImage * interestMask;
+    IplImage * roadMask;
 
     IplImage * img1Prev;
     IplImage * img2Prev;
@@ -130,8 +141,7 @@ private:
 
     bool usePrevious;
 
-    CAntColony * aco;
-    IplImage * acoImg;
+    IplImage * lastObst;
 };
 
 #endif	/* _CREALMATCHES_H */

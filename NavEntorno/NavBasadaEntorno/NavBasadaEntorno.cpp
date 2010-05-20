@@ -854,12 +854,17 @@ int main(int argc, _TCHAR argv[]) {
         }
         case 15: {
             CRealMatches rm(false);
-            rm.startTestACO();
+            rm.startTestRoadDetection();
             break;
         }
         case 16: {
             CRealMatches rm(false);
-            rm.startTestRoadDetection();
+            rm.startTest6();
+            break;
+        }
+        case 17: {
+            CRealMatches rm(false, SIZE3);
+            rm.startTest7();
             break;
         }
         default: {

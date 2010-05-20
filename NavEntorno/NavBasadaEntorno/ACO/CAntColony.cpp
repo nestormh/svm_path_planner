@@ -14,8 +14,8 @@ extern CvPoint p3;
 extern CvPoint p4;
 
 CAntColony::CAntColony(CvSize size) {
-    bordeSup = 124;
-    horizonSlider = 90;
+    bordeSup = 110;
+    horizonSlider = 110;
     edgeSlider = 12; //75
     kBar = 80;
     kpBar = 70;
@@ -31,13 +31,10 @@ CAntColony::CAntColony(CvSize size) {
     attractionX = 160;
     attractionY = 270;
     attractionXAnt = refLeftY = refRightY = aRef = bRef = cRef = dRef = -1;
-    selectedImage = 1;
+    selectedImage = 2;
     corte = 0;
 
     storage = cvCreateMemStorage(0);
-
-    cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); //Creación y colocación de las ventanas
-    cvNamedWindow("sliderWin", CV_WINDOW_AUTOSIZE);
 
     //Creación de las imágenes
     
@@ -73,7 +70,7 @@ CAntColony::CAntColony(CvSize size) {
     //cvCreateTrackbar("Horiz.", "sliderWin", &horizonSlider, 200, on_trackbar);
     //cvCreateTrackbar("Bordes", "sliderWin", &edgeSlider, 255, NULL);
     //cvCreateTrackbar("Pos.Ini.", "sliderWin", &searchAreas, 170, NULL);
-    cvShowImage("sliderWin", traces);
+    //cvShowImage("sliderWin", traces);
 
     cvSet(shadowMask, cvScalar(1));
     consigna = 0;
@@ -166,7 +163,17 @@ CvPoint * CAntColony::iterate(IplImage * img) {
      * etapas del procesado. Si se pulsa otra tecla,
      * se termina la ejecución.
      * **********************************************/
-    switch (selectedImage) {
+    cvNamedWindow("img", CV_WINDOW_AUTOSIZE); //Creación y colocación de las ventanas
+    cvNamedWindow("tracesaux", CV_WINDOW_AUTOSIZE); //Creación y colocación de las ventanas
+    cvNamedWindow("bordes", CV_WINDOW_AUTOSIZE); //Creación y colocación de las ventanas
+    cvNamedWindow("segmented", CV_WINDOW_AUTOSIZE); //Creación y colocación de las ventanas
+
+    cvShowImage("img", img);
+    cvShowImage("tracesaux", tracesaux);
+    cvShowImage("bordes", bordes);
+    cvShowImage("segmented", segmented);
+
+    /*switch (selectedImage) {
         case 1:
             cvShowImage("mainWin", img);
             break;
@@ -189,7 +196,7 @@ CvPoint * CAntColony::iterate(IplImage * img) {
     else if (keyCode == '3')
         selectedImage = 3;
     else if (keyCode == '4')
-        selectedImage = 4;    
+        selectedImage = 4;    */
     /**********Fin de depuración***************/
 
     //cvSetTrackbarPos("Horiz.", "sliderWin", bordeSup);

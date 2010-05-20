@@ -94,6 +94,8 @@ void CRealMatches::obstacleDetectionQuartile(IplImage * pcaResult, IplImage * ma
         levels[i] = 0;
     }
 
+    cvAnd(mask, roadMask, mask);
+
     for (int i = 0; i < pcaResult->height; i++) {
         for (int j = 0; j < pcaResult->width; j++) {
             if (cvGetReal2D(mask, i, j) != 255) continue;
@@ -129,20 +131,31 @@ void CRealMatches::obstacleDetectionQuartile(IplImage * pcaResult, IplImage * ma
     }
 
     double maxThresh = q2 + k * (q2 - q1);
+    maxThresh = 10; // Para las de Dani, 30; para las otras, 10
 
     cvZero(obstaclesMask);
     cvCopy(pcaResult, obstaclesMask, mask);
-    cvThreshold(obstaclesMask, obstaclesMask, maxThresh, 255, CV_THRESH_BINARY);
+    cvThreshold(obstaclesMask, obstaclesMask, maxThresh, 255, CV_THRESH_BINARY);    
 
-    cvNamedWindow("ObstacleQ", 1);
-    cvShowImage("ObstacleQ", obstaclesMask);    
+    //cvNamedWindow("ObstacleQ", 1);
+    //cvShowImage("ObstacleQ", obstaclesMask);
 
-    cvErode(obstaclesMask, obstaclesMask);
+    //cvDilate(obstaclesMask, obstaclesMask);
+   
+    //cvErode(obstaclesMask, obstaclesMask);
 
     //cvNamedWindow("ObstacleQEroded", 1);
     //cvShowImage("ObstacleQEroded", obstaclesMask);
-
+    
     cvDilate(obstaclesMask, obstaclesMask);
+
+    IplImage * tmpImg = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    cvCopyImage(obstaclesMask, tmpImg);
+    cvAnd(obstaclesMask, lastObst, obstaclesMask);
+    cvCopyImage(tmpImg, lastObst);
+    cvReleaseImage(&tmpImg);
+
+    cvAnd(obstaclesMask, roadMask, obstaclesMask);
 
     cvNamedWindow("ObstacleQDilated", 1);
     cvShowImage("ObstacleQDilated", obstaclesMask);//*/
@@ -150,6 +163,7 @@ void CRealMatches::obstacleDetectionQuartile(IplImage * pcaResult, IplImage * ma
     detectObstacles(obstaclesMask);
 
     cvReleaseImage(&obstaclesMask);
+    cout << "Adiós" << endl;
 }
 
 void CRealMatches::detectObstacles(IplImage * mask) {
@@ -165,7 +179,7 @@ void CRealMatches::detectObstacles(IplImage * mask) {
 
     for (; contour != 0; contour = contour->h_next) {
         CvScalar color = CV_RGB(rand()&255, rand()&255, rand()&255);
-        if (fabs(cvContourArea(contour)) > 50) {
+        if (fabs(cvContourArea(contour)) > 40) {
             /* replace CV_FILLED with 1 to see the outlines */
             cvDrawContours(maskResult, contour, color, color, -1, CV_FILLED, 8);
 
