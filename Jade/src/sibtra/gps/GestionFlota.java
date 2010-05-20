@@ -315,8 +315,9 @@ public class GestionFlota {
 					puntos[cont][0] = trayectorias[indicesTramos[i]].x[j];
 					puntos[cont][1] = trayectorias[indicesTramos[i]].y[j];
 					puntos[cont][2] = trayectorias[indicesTramos[i]].z[j];
-					puntos[cont][3] = trayectorias[indicesTramos[i]].velocidad[j];
-					puntos[cont][4] = trayectorias[indicesTramos[i]].rumbo[j];
+					puntos[cont][3] = trayectorias[indicesTramos[i]].rumbo[j];
+					puntos[cont][4] = trayectorias[indicesTramos[i]].velocidad[j];
+					
 					cont++;				
 				}
 			}else{
@@ -324,15 +325,16 @@ public class GestionFlota {
 					puntos[cont][0] = trayectorias[indicesTramos[i]].x[j];
 					puntos[cont][1] = trayectorias[indicesTramos[i]].y[j];
 					puntos[cont][2] = trayectorias[indicesTramos[i]].z[j];
-					puntos[cont][3] = trayectorias[indicesTramos[i]].velocidad[j];
-					puntos[cont][4] = trayectorias[indicesTramos[i]].rumbo[j];
+					puntos[cont][3] = trayectorias[indicesTramos[i]].rumbo[j];
+					puntos[cont][4] = trayectorias[indicesTramos[i]].velocidad[j];
+					
 					cont++;				
 				}
 			}						
 		}		
 		Trayectoria trayCompleta = new Trayectoria(puntos);
-		trayCompleta.nuevaDistanciaMaxima(0.05);
-		trayCompleta = generaRampaFrenado(trayCompleta, 3);
+		trayCompleta.nuevaDistanciaMaxima(0.1);
+		trayCompleta = generaRampaFrenado(trayCompleta, 6);
 //		for(int k=0;k<trayCompleta.length();k++){
 //			System.out.println("vel "+trayCompleta.velocidad[k]);
 //		}
