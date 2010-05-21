@@ -682,8 +682,13 @@ public class GPSData implements Serializable, Cloneable {
         this.age = value;
     }
 
+    /** Actuliza altura. Si es distinta que la anterior anula coordenadas ECEF y locales*/
     public void setAltura(double value) {
+    	if(value==altura)
+    		return;
         this.altura = value;
+        coordECEF=null;
+        coordLocal=null;
     }
 
     public void setAngulo(double value) {
@@ -790,6 +795,7 @@ public class GPSData implements Serializable, Cloneable {
     		centro.calculaECEF(); //Las necesitará para los cálculos posteriores
     	}
     	calculaECEF(); //por si no están ya que se necesitan
+//    	System.out.println("Ecef:"+coordECEF.get(0,0)+","+coordECEF.get(1,0)+","+coordECEF.get(2,0));
     	Matrix res = getCoordECEF().minus(centro.getCoordECEF()); 
 		res = centro.T.times(res); //dejamos como vector columna
 		setCoordLocal(res);
@@ -817,12 +823,22 @@ public class GPSData implements Serializable, Cloneable {
         this.hora = value;
     }
 
+    /** Actuliza latitud. Si es distinta que la anterior anula coordenadas ECEF y locales*/
     public void setLatitud(double value) {
+    	if(value==latitud)
+    		return;
         this.latitud = value;
+        coordECEF=null;
+        coordLocal=null;
     }
 
+    /** Actuliza longitud. Si es distinta que la anterior anula coordenadas ECEF y locales*/
     public void setLongitud(double value) {
+    	if(value==longitud)
+    		return;
         this.longitud = value;
+        coordECEF=null;
+        coordLocal=null;
     }
 
     public void setMSL(double value) {
