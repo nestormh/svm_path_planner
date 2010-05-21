@@ -130,7 +130,7 @@ public class Trayectoria implements Serializable {
 		rumbo[indUltimo]=(
 				(aiA != null) ? Math.toRadians(aiA.getYaw()) //si hay ángulos el Yaw
 					:(esCerrada?ptoA.calculaAnguloGPS(ptoB) //si es cerrada se calcula con el primer punto
-							:rumbo[indUltimo-1]) //se toma el del punto anterior
+							:(indUltimo>0?rumbo[indUltimo-1]:Double.NaN)) //se toma el del punto anterior (si lo hay)
 		)+ desvMagnética;
 		velocidad[indUltimo]= (
 				ptoA.getVelocidad()!=Double.NaN? ptoA.getVelocidad()  //si tiene velocidad se toma
