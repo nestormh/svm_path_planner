@@ -300,17 +300,17 @@ public class GestionFlota {
 			}else{
 				longitud = trayectorias[indicesTramos[i]].length() + longitud;
 			}			
-			System.out.println("la longitud del  tramo "+indicesTramos[i]+" es " + +trayectorias[indicesTramos[i]].length());
+//			System.out.println("la longitud del  tramo "+indicesTramos[i]+" es " + +trayectorias[indicesTramos[i]].length());
 		}		
-		System.out.println("Hay " + indicesTramos.length+ " en la trayectoria completa");
-		System.out.println("la longitud total de la ruta completa es " + longitud);
+//		System.out.println("Hay " + indicesTramos.length+ " en la trayectoria completa");
+//		System.out.println("la longitud total de la ruta completa es " + longitud);
 		double[][] puntos = new double[longitud][5]; // x,y,z,velocidad y rumbo
 		int cont = 0;
 		// Unimos los tramos
 		for (int i=0;i<indicesTramos.length;i++){
 			if(i==indicesTramos.length-1){
 				int indiceFinal = trayectorias[indicesTramos[i]].indiceHastaLargo(largoEnFinal,0);
-				System.out.println("el índice del punto que se encuentra a "+largoEnFinal+" es "+ indiceFinal);
+//				System.out.println("el índice del punto que se encuentra a "+largoEnFinal+" es "+ indiceFinal);
 				for(int j=0;j<indiceFinal;j++){
 					puntos[cont][0] = trayectorias[indicesTramos[i]].x[j];
 					puntos[cont][1] = trayectorias[indicesTramos[i]].y[j];
@@ -326,8 +326,7 @@ public class GestionFlota {
 					puntos[cont][1] = trayectorias[indicesTramos[i]].y[j];
 					puntos[cont][2] = trayectorias[indicesTramos[i]].z[j];
 					puntos[cont][3] = trayectorias[indicesTramos[i]].rumbo[j];
-					puntos[cont][4] = trayectorias[indicesTramos[i]].velocidad[j];
-					
+					puntos[cont][4] = trayectorias[indicesTramos[i]].velocidad[j];			
 					cont++;				
 				}
 			}						
