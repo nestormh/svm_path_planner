@@ -195,9 +195,9 @@ public class Trayectoria implements Serializable {
 		for(int cont=0;cont<puntos.length-1;cont++) {
 			x[i]=puntos[i][0];
 			y[i]=puntos[i][1];
-			z[i]=(puntos[i].length>3)?puntos[i][2]:0.0;
-			rumbo[i]=(puntos[i].length>4)?puntos[i][3]:-Math.atan2(puntos[i+1][1]-puntos[i][1], puntos[i+1][0]-puntos[i][0]);
-			velocidad[i]=(puntos[i].length>5)?puntos[i][4]:1.0;
+			z[i]=(puntos[i].length>=3)?puntos[i][2]:0.0;
+			rumbo[i]=(puntos[i].length>=4)?puntos[i][3]:-Math.atan2(puntos[i+1][1]-puntos[i][1], puntos[i+1][0]-puntos[i][0]);
+			velocidad[i]=(puntos[i].length>=5)?puntos[i][4]:1.0;
 			//vamos actualizando la distancia maxima
 			double distAB=UtilCalculos.distanciaPuntos(puntos[i], puntos[i+1]);
 			if(distAB>distanciaMaxima) distanciaMaxima=distAB;
