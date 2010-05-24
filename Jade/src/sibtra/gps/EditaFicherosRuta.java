@@ -56,6 +56,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import sibtra.imu.DeclinacionMagnetica;
 import sibtra.util.PanelMuestraVariasTrayectorias;
 
 /**
@@ -291,7 +292,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 
 	private void añadeRuta(Ruta ruta, String nombre ){
 		tramos.añadeTramo(ruta, nombre);
-		if(pmvt.añadeTrayectoria(new Trayectoria(ruta,Double.MAX_VALUE,-1))!=(tramos.size()-1) )
+		if(pmvt.añadeTrayectoria(new Trayectoria(ruta,Double.MAX_VALUE,-1
+				,DeclinacionMagnetica.declinacionSegunPosicion(ruta.getCentro())))!=(tramos.size()-1) )
 			throw new IllegalStateException("Trayectoria no tendrá el mismo índice en el panel");
 		ajustaAnchos();
 	}
@@ -494,7 +496,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				ra.remove(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1
+						,DeclinacionMagnetica.declinacionSegunPosicion(ra.getCentro())));
 				per.setRuta(ra, true);
 				per.repaint();
 				pmvt.actualiza();
@@ -510,7 +513,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				ra.removeToBegin(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1
+						,DeclinacionMagnetica.declinacionSegunPosicion(ra.getCentro())));
 				per.setRuta(ra, true);
 				per.setIndice(0); //el primero
 				per.repaint();
@@ -527,7 +531,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				ra.removeToEnd(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1
+						,DeclinacionMagnetica.declinacionSegunPosicion(ra.getCentro())));
 				per.setRuta(ra, true);
 				per.setIndice(ra.getNumPuntos()-1); //el último
 				per.repaint();
@@ -545,7 +550,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 				Ruta segunda=ra.divideFrom(ipto);
 				//para que se actualice el número de puntos
 				modeloTR.fireTableCellUpdated(indRutaActual, COL_TAM);
-				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1));
+				pmvt.setTrayectoria(indRutaActual, new Trayectoria(ra,Double.MAX_VALUE,-1
+						,DeclinacionMagnetica.declinacionSegunPosicion(ra.getCentro())));
 				
 				añadeRuta(segunda, tramos.getNombre(indRutaActual)+"_B");
 				//ponemos puntos y rumbo como la seleccionada
@@ -943,7 +949,8 @@ public class EditaFicherosRuta extends JFrame implements  ItemListener, ActionLi
 					tramos=nuevoTramos;
 					//añadimos los nuevos tramos al panel gráfico
 					for(int i=0; i<tramos.size();i++)
-						pmvt.añadeTrayectoria(new Trayectoria(tramos.getRuta(i),Double.MAX_VALUE,-1));
+						pmvt.añadeTrayectoria(new Trayectoria(tramos.getRuta(i),Double.MAX_VALUE,-1
+								,DeclinacionMagnetica.declinacionSegunPosicion(tramos.getRuta(i).getCentro())));
 					pmvt.actualiza();
 					//se han cambiado todos los datos
 					modeloTR.fireTableDataChanged();

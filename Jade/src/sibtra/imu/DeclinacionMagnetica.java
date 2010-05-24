@@ -22,31 +22,45 @@ public class DeclinacionMagnetica {
 
 	private double declinacionAplicar=declinacionLaLaguna;
 
-	public DeclinacionMagnetica() {};
-	
-	public DeclinacionMagnetica(GPSData posicion) {
-		setPosicion(posicion);
-	}
-	
-	public DeclinacionMagnetica(double valor) {
-		declinacionAplicar=valor;
-	}
-	
-	public void setPosicion(GPSData posicion) {
+	/** Dada una posición devuelve la declinación a aplicar.
+	 * Si está lejos de puntos conocidos (o es <code>null</code>) devuelve {@link Double#NaN} */
+	public static double declinacionSegunPosicion(GPSData posicion) {
+		if(posicion==null)
+			return Double.NaN;
 		posicion.calculaLocales(posicionLaLaguna);
 		double[] vec={posicion.getXLocal(),posicion.getYLocal()};
 		if(UtilCalculos.largoVector(vec)<5000)
 			//estamos cerca de La Laguna
-			declinacionAplicar=declinacionLaLaguna;
+			 return declinacionLaLaguna;
 		else {
 			//probamos con el ITER
 			posicion.calculaLocales(posicionIter);
 			double[] vecI={posicion.getXLocal(),posicion.getYLocal()};
 			if(UtilCalculos.largoVector(vecI)<5000)
-				declinacionAplicar=declinacionIter;			
+				return declinacionIter;			
 		}
+		return Double.NaN; //No está cerca de ningún lugar conocido
+	}
+
+	/** contructor vacío supone que estamos en La Laguna */
+	public DeclinacionMagnetica() {};
+	
+	/** Constructor indicando la posición */
+	public DeclinacionMagnetica(GPSData posicion) {
+		setPosicion(posicion);
 	}
 	
+	/** Constructor que fija la {@link #declinacionAplicar} */
+	public DeclinacionMagnetica(double valor) {
+		declinacionAplicar=valor;
+	}
+	
+	/** Cambiamos la posición y con ello puede cambiar la {@link #declinacionAplicar} */
+	public void setPosicion(GPSData posicion) {
+		declinacionAplicar=declinacionSegunPosicion(posicion);
+	}
+	
+	/** Establecemos la {@link #declinacionAplicar} */
 	public void setDeclinacionAplicada(double valor) {
 		declinacionAplicar=valor;
 	}
@@ -59,7 +73,9 @@ public class DeclinacionMagnetica {
 		return UtilCalculos.normalizaAngulo(Math.toRadians(ai.getYaw())+declinacionAplicar);
 	}
 
+	/** @return la {@link #declinacionAplicar}*/
 	public double getDeclinacionAplicada() {
 		return declinacionAplicar;
 	}
+	
 }

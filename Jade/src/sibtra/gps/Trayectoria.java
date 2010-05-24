@@ -8,12 +8,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -86,13 +84,26 @@ public class Trayectoria implements Serializable {
 		
 	}
 
-	/** Constructor a partir de una ruta. Se invoca a {@link #Trayectoria(Ruta, double)} 
-	 * y luego a {@link #nuevaDistanciaMaxima(double)}.
+	/** Invoca a {@link #Trayectoria(Ruta, double, double, double)} tomando la desviación magnética de la que
+	 * se calcula a partir de los  puntos de la ruta.
 	 * @param ruta de donde tomar los puntos
 	 * @param nuevaDistMax distancia máxima que se quiere que exista entre los puntos
 	 * @param umbral para considerar la ruta como cerrada
 	 */
 	public Trayectoria(Ruta ruta, double nuevaDistMax, double umbral) {
+		this(ruta,nuevaDistMax,umbral,ruta.getDesviacionM());
+	}
+	
+	/** Constructor a partir de una ruta.
+	 * @param ruta de donde tomar los puntos
+	 * @param nuevaDistMax distancia máxima que se quiere que exista entre los puntos, 
+	 * 	se usa al invocando a {@link #nuevaDistanciaMaxima(double)} 
+	 * @param umbral para considerar la ruta como cerrada
+	 * @param desvMagnética declinación magnética a aplicar
+	 */
+	public Trayectoria(Ruta ruta, double nuevaDistMax, double umbral, double desvMagnética) {
+		if(ruta==null)
+			throw new IllegalArgumentException("La ruta pasada para construir la trayectoria no puede ser null");
 		distanciaMaxima=0.0;
 		int indUltimo=indiceUltimoConsiderar(ruta, umbral);
 		x=new double[indUltimo+1];
@@ -102,7 +113,6 @@ public class Trayectoria implements Serializable {
 		velocidad=new double[indUltimo+1];
 		if(indUltimo==-1)  //si la ruta no tienen puntos
 			return;
-		double desvMagnética = ruta.getDesviacionM();
 		GPSData ptoA;
 		GPSData ptoB = ruta.getPunto(0);                
 		AngulosIMU aiA;
@@ -145,7 +155,7 @@ public class Trayectoria implements Serializable {
 		nuevaDistanciaMaxima(nuevaDistMax);
 	}
 	
-	/** Constructor a partir de una ruta. Sencillamente ponemos los puntos de la ruta. 
+	/** Se invoca a {@link #Trayectoria(Ruta, double, double)} 
 	 * Se usa 3.0 metros para considerar si es cerrada
 	 * @param ruta de donde tomar los puntos 
 	 * @param nuevaDistMax distancia máxima que se quiere que exista entre los puntos
@@ -154,8 +164,8 @@ public class Trayectoria implements Serializable {
 		this(ruta,nuevaDistMax,3.0);		
 	}
 	
-	/** Construye con puntos de la ruta sin añadir ninguno más ya que no se exige distancia maxima
-	 * Se usa 3.0 metros para considerar si es cerrada 
+	/** Se invoca a {@link #Trayectoria(Ruta, double)} 
+	 * No añade puntos ya que utiliza {@link Double.#MAX_VALUE} para la distancia maxima entre puntos
 	 * @param ruta de donde tomar los puntos
 	 */
 	public Trayectoria(Ruta ruta) {

@@ -9,6 +9,7 @@ import java.util.Vector;
 import sibtra.util.*;
 import sibtra.flota.InterfazFlota;
 import sibtra.flota.Prioridades;
+import sibtra.imu.DeclinacionMagnetica;
 import sibtra.util.UtilCalculos;
 
 /**
@@ -48,6 +49,8 @@ public class GestionFlota {
 	 * en {@link #trayectoriaADestino(double[], double, double[])}
 	 */
 	private double largoFin;
+
+	private double declinaM;
 	
 	public GestionFlota() {
 		interfFlota=new InterfazFlota();
@@ -69,6 +72,7 @@ public class GestionFlota {
 			setCentro(centro);
 		else
 			setCentro(tramos.getCentro());
+		
 		//Cargamos los destinos del fichero asociado (si lo hay)
 		if(tramos.getNombFichDestinos()!=null)
 			addDestino(new File(tramos.getNombFichDestinos()));
@@ -112,6 +116,7 @@ public class GestionFlota {
 		if(nuevoCentro==null)
 			throw new IllegalArgumentException("El nuevo centro no puede ser null");
 		centro=nuevoCentro;
+		declinaM=DeclinacionMagnetica.declinacionSegunPosicion(getCentro());
 		if(tramos!=null)
 			creaTrayectorias();
 		//actulizamos los destinos al nuevo centro
@@ -131,7 +136,7 @@ public class GestionFlota {
 			ra.actualizaSistemaLocal(centro);
 			ra.actualizaCoordenadasLocales();
 			//Obtenemos trayectoria de la ruta sin añadir puntos ni mirar si es cerrada
-			trayectorias[i]=new Trayectoria(ra,Double.MAX_VALUE,-1);
+			trayectorias[i]=new Trayectoria(ra,Double.MAX_VALUE,-1,declinaM);
 		}
 	}			
 	
