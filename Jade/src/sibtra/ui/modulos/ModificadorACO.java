@@ -14,7 +14,13 @@ import sibtra.ui.defs.CalculaRuta;
 import sibtra.ui.defs.ModificadorTrayectoria;
 import sibtra.ui.defs.Motor;
 import sibtra.util.ThreadSupendible;
-
+/**
+ * Clase que implementa {@link ModificadorTrayectoria} y que lee de la memoria compartida los datos 
+ * suministrados por el algoritmo ACO y desplaza la trayectoria lateralmente en caso de 
+ * presentarse un estrechamiento de la carretera
+ * @author jesus
+ *
+ */
 public class ModificadorACO implements ModificadorTrayectoria{
 	
 	VentanasMonitoriza ventanaMonitoriza;
@@ -23,6 +29,58 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	String DESCRIPCION="Modifica la trayectoria usando la información de bordes de la carretera";
 	private Motor motor;
 	private ThreadSupendible thCiclico;
+	double distInicio;
+	double longitudTramoDesp;
+	int indiceInicial;
+	int indiceFinal;
+	
+	Coche modCoche;
+	/**
+	 * Seteador de la distancia a partir del coche a la que se desea empezar a desplazar
+	 * lateralmente la trayectoria
+	 * @param distInicio Distancia en metros
+	 */
+	public void setDistInicio(double distInicio) {			
+		this.distInicio = distInicio;
+	}
+	/**
+	 * Seteador de la longitud deseada para el tramo de la trayectoria que se va a desplazar
+	 * @param longitudTramoDesp Longitud en metros
+	 */
+	public void setLongitudTramoDesp(double longitudTramoDesp) {
+		this.longitudTramoDesp = longitudTramoDesp;
+	}
+	/**
+	 * Calcula el índice a partir del cual hay que empezara desplazar lateralmente la 
+	 * trayecoria
+	 * @return el índice de la trayectoria 
+	 */
+	public int calculaIndiceInicial(){
+		if (trayectoria != null){
+			trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
+			int indIni = trayectoria.indiceMasCercano();
+			this.indiceInicial = trayectoria.indiceHastaLargo(distInicio, indIni);  
+			return indiceInicial;
+		}else{
+			System.out.println("La trayectoria no puede ser null");
+			return 0;
+		}
+	}
+	
+	/**
+	 * Calcula el índice del punto de la trayectoria hasta el cual hay que realizar el desplazamiento
+	 * lateral
+	 * @return índice de la trayectoria
+	 */
+	public int calculaIndiceFinal(){
+		if (trayectoria != null){
+			this.indiceFinal = trayectoria.indiceHastaLargo(longitudTramoDesp, indiceInicial);
+		}else {
+			System.out.println("La trayectoria no puede ser null");
+			return 0;
+		}		
+		return indiceFinal;
+	}
 	
 	@Override
 	public void setTrayectoriaInicial(Trayectoria tra) {
@@ -49,6 +107,9 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			ventanaMonitoriza = ventMonitoriza;
 			todoBien = true;
 		}
+		//Le decimos que modelo de coche tiene que usar
+		modCoche = motor.getModeloCoche();
+		
 		thCiclico=new ThreadSupendible() {
 			private long tSig;
 			private long periodoMuestreoMili = 250;
@@ -76,12 +137,15 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		int distDerecha = ShmInterface.getAcoRightDist();
 		double despX = 0;
 		double despY = 0;	
-		Coche verdino = motor.getModeloCoche();
 		// Es necesario situar el coche en la ruta antes de buscar el indice más cercano 
-		trayectoria.situaCoche(verdino.getX(),verdino.getY());
+		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
+		setDistInicio(10);
+		setLongitudTramoDesp(10);
+		calculaIndiceInicial();
+		calculaIndiceFinal();
 		if(trayectoria.length() != 0){
-			for(int i=(trayectoria.indiceMasCercano()+10)%trayectoria.length();
-			i<(trayectoria.indiceMasCercano()+20)%trayectoria.length();
+			for(int i=(trayectoria.indiceMasCercano()+indiceInicial)%trayectoria.length();
+			i<(trayectoria.indiceMasCercano()+indiceFinal)%trayectoria.length();
 			i=(i+1)%trayectoria.length()){
 				// Se calcula un desplazamiento lateral perpendicular al rumbo de cada punto 
 				despY = -Math.cos(trayectoria.rumbo[i])*distDerecha/10;
