@@ -15,15 +15,22 @@ import Jama.Matrix;
  */
 public class Coche implements Cloneable {
     // Matrices del espacio de los estados del volante
-    
     protected Matrix A; 
     protected Matrix B;   
     protected Matrix C;
     protected Matrix D;
+    // Matrices del espacio de los estados de la tracción
+    protected Matrix Avel; 
+    protected Matrix Bvel;   
+    protected Matrix Cvel;
+    protected Matrix Dvel;
+    
     /** Distancia entre eje ruedas posteriores y eje de rueda(s) delanteras.*/
     protected double longitud;
     /** Estado del modelo del volante. En esta representación corresponde a ángulo y velocidad angular del volante */
     protected Matrix estado;
+    /** Estado del modelo de la traacción*/
+    protected Matrix estadoVel;
     /** coordenad X de la posición del vehículo. Eje X en dirección Norte */
     protected double x = 0;
     /** Corrdenada Y de la posición del vehículo. Eje Y en dirección Oeste.*/
@@ -49,9 +56,15 @@ public class Coche implements Cloneable {
         B = original.B;   
         C = original.C;
         D = original.D;
+        Avel = original.Avel; 
+        Bvel = original.Bvel;   
+        Cvel = original.Cvel;
+        Dvel = original.Dvel;
         longitud = original.longitud;
         if (original.estado != null)
             estado = (Matrix)original.estado.clone();
+        if (original.estado != null)
+        	estadoVel = (Matrix)original.estadoVel.clone();
         x = original.x;
         y = original.y;
         yaw = original.yaw;
@@ -92,11 +105,23 @@ public class Coche implements Cloneable {
         double[] arrayD = {0};
         A = new Matrix(arrayA,2,2);
         B = new Matrix(arrayB,2);
-//        C = new Matrix(arrayC,1,2);
         C = new Matrix(arrayC);
-        C.print(10,	3);
+//        C.print(10,	3);S
         D = new Matrix(arrayD,1);
-        estado = new Matrix(2,1);
+        estado = new Matrix(2,1);   
+          
+        double[][] arrayAvel = {{0.00000,1.00000},
+                {-1.84570,-3.05279}};
+        double[] arrayBvel = {0,1};          
+        double[][] arrayCvel = {{1.84570 ,0.0}};
+        double[] arrayDvel = {0};
+        Avel = new Matrix(arrayAvel,2,2);
+        Bvel = new Matrix(arrayBvel,2);        
+        Cvel = new Matrix(arrayCvel);
+//        Cvel.print(10,	3);
+        Dvel = new Matrix(arrayDvel,1);
+        estadoVel = new Matrix(2,1);
+        
         longitud =Parametros.batalla;
        
     }
@@ -263,6 +288,19 @@ public class Coche implements Cloneable {
         Matrix estadoAux = A.times(estado).plus(B.times(this.consignaVolante)).times(Ts);
         estado.plusEquals(estadoAux);
     }
+    /**
+     * Calcula la evolución de la velocidad dada la consigna de velocidad
+     * @param Ts
+     */
+    public void evolucionaVelocidad(double Ts){
+    	//Evoluciona la tracción
+    	Matrix estadoAux = Avel.times(estadoVel).plus(Bvel.times(this.consignaVelocidad)).times(Ts);
+        estadoVel.plusEquals(estadoAux);
+        Matrix velAux = Cvel.times(estadoVel);
+        velocidad = velAux.get(0,0);
+//        System.out.println("la velocidad calculada es ñeñe " + velocidad);
+//    	velocidad = consignaVelocidad;
+    }
     
     /**
      * Calcula la evolución del vehículo en un instante de muestreo
@@ -270,23 +308,24 @@ public class Coche implements Cloneable {
      * @param velocidad Velocidad lineal del vehículo
      * @param Ts Periodo de muestreo
      */
-    public void calculaEvolucion(double consignaVolante,double velocidad,double Ts){
+    public void calculaEvolucion(double consignaVolante,double consignaVelocidad,double Ts){
         this.consignaVolante = consignaVolante;
+        setConsignaVelocidad(consignaVelocidad);
         setConsignaVolante(consignaVolante);
-        setVelocidad(velocidad);
-        setConsignaVelocidad(velocidad); /*Por ahora no existe modelo dinámico para 
+//        setVelocidad(velocidad);      
+        /*Por ahora no existe modelo dinámico para 
         calcular la evolución de la velocidad del vehículo, por lo que se supone
         la velocidad igual a la consigna de la velocidad*/
 
         calculaEvolucion(Ts);
-        
     }
     
     /** Calcula la evolución del vehículo con los valores establecidos en los distintos campos
      * @param Ts segundos de la evolución
      */
-    public void calculaEvolucion(double Ts) {
-        evolucionaBicicleta(Ts);        
+    public void calculaEvolucion(double Ts) {    	
+        evolucionaBicicleta(Ts);
+        evolucionaVelocidad(Ts);
         evolucionaVolante(Ts);
     }
     
