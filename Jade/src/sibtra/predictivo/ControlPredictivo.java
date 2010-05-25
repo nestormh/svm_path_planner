@@ -242,7 +242,11 @@ public class ControlPredictivo {
 //+ k_ang*[cos(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1)),sin(tita_ref(mod(ind_min(k)+cerca,length(tita_ref))+1))];
 //        int indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());       
         //TODO usar directamente indiceMasCercanoOptimizado ya que es la posicion actual del coche
-        indMinAnt = ruta.indiceMasCercanoOptimizado(carroSim.getX(),carroSim.getY(),indMinAnt);
+        
+//        indMinAnt = ruta.indiceMasCercanoOptimizado(carroSim.getX(),carroSim.getY(),indMinAnt);
+        
+        ruta.situaCoche(carroSim.getX(),carroSim.getY());
+        indMinAnt = ruta.indiceMasCercano();
         double dx=ruta.x[indMinAnt]-carroSim.getX();
         double dy=ruta.y[indMinAnt]-carroSim.getY();
         distanciaLateral=Math.sqrt(dx*dx+dy*dy);
@@ -257,7 +261,9 @@ public class ControlPredictivo {
         for (int i=1; i<horPrediccion;i++ ){
             carroSim.calculaEvolucion(comando,velocidad,Ts);
             predicOrientacion[i] = carroSim.getYaw();
-            indMin = ruta.indiceMasCercanoOptimizado(carroSim.getX(),carroSim.getY(),indMin);
+//            indMin = ruta.indiceMasCercanoOptimizado(carroSim.getX(),carroSim.getY(),indMin);
+            ruta.situaCoche(carroSim.getX(),carroSim.getY());
+            indMin = ruta.indiceMasCercano();
 //            indMin = calculaDistMin(ruta,carroSim.getX(),carroSim.getY());
             vectorDeseadoX = ruta.x[indMin] - carroSim.getX() + Math.cos(ruta.rumbo[indMin]);
             vectorDeseadoY = ruta.y[indMin] - carroSim.getY() + Math.sin(ruta.rumbo[indMin]);
