@@ -7,8 +7,9 @@
 #include "CRutaDB.h"
 #include "CRealMatches.h"
 #include "CStatistics.h"
+#include "CImageSearch.h"
 
-#define EJECUCION 16
+#define EJECUCION 18
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -865,6 +866,12 @@ int main(int argc, _TCHAR argv[]) {
         case 17: {
             CRealMatches rm(false, SIZE3);
             rm.startTest7();
+            break;
+        }
+        case 18: {
+            //CImageSearch is("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/urbRadazulDiciembre08Base", "Rutas/urbRadazulDiciembre08obs", "/home/neztol/doctorado/Datos/DB", false, cvRect(0, 0, 310, 228));
+            CImageSearch is("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB", false, cvRect(5, 0, 310, 240), cvSize(176, 144));
+            is.startTest();
             break;
         }
         default: {
