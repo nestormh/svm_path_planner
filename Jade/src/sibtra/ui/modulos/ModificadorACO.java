@@ -112,7 +112,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		
 		thCiclico=new ThreadSupendible() {
 			private long tSig;
-			private long periodoMuestreoMili = 250;
+			private long periodoMuestreoMili = 1250;
 
 			@Override
 			protected void accion() {
@@ -135,27 +135,42 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	
 	private void accionPeriodica() {
 		int distDerecha = ShmInterface.getAcoRightDist();
+		int distIzquierda = ShmInterface.getAcoLeftDist();
+		//La trayectoria original se le indica al modificadorACO a través del método
+		//setTrayectoriaInicial y no se modifica
+		Trayectoria trAux = new Trayectoria(trayectoria); 
 		double despX = 0;
-		double despY = 0;	
-		// Es necesario situar el coche en la ruta antes de buscar el indice más cercano 
-		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
-		setDistInicio(10);
-		setLongitudTramoDesp(10);
+		double despY = 0;			
+		setDistInicio(1);
+		setLongitudTramoDesp(4);
 		calculaIndiceInicial();
 		calculaIndiceFinal();
+		// Es necesario situar el coche en la ruta antes de buscar el indice más cercano 
+		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
 		if(trayectoria.length() != 0){
-			for(int i=(trayectoria.indiceMasCercano()+indiceInicial)%trayectoria.length();
-			i<(trayectoria.indiceMasCercano()+indiceFinal)%trayectoria.length();
-			i=(i+1)%trayectoria.length()){
-				// Se calcula un desplazamiento lateral perpendicular al rumbo de cada punto 
-				despY = -Math.cos(trayectoria.rumbo[i])*distDerecha/10;
-				despX = Math.sin(trayectoria.rumbo[i])*distDerecha/10;
-				//Se añade el desplazamiento a las coordenadas del punto
-				trayectoria.x[i] = trayectoria.x[i] + despX;
-				trayectoria.y[i] = trayectoria.y[i] + despY;
+//			for(int i=(trayectoria.indiceMasCercano()+indiceInicial)%trayectoria.length();
+//			i<(trayectoria.indiceMasCercano()+indiceFinal)%trayectoria.length();
+//			i=(i+1)%trayectoria.length()){			
+			//Recorremos todos los puntos de la trayectoria
+			for(int i=0;i<trayectoria.length();i++){
+				//condición que cumplen los puntos de la trayectoria que se encuentran
+				//por delante del coche
+				if(i>(trayectoria.indiceMasCercano()+5)%trayectoria.length() &&
+				   i<(trayectoria.indiceMasCercano()+40)%trayectoria.length()){
+					// Se calcula un desplazamiento lateral perpendicular al rumbo de cada punto 
+					despY = -Math.cos(trayectoria.rumbo[i])*distDerecha/10;
+					despX = Math.sin(trayectoria.rumbo[i])*distDerecha/10;
+					//Se añade el desplazamiento a las coordenadas del punto
+					trAux.x[i] = trayectoria.x[i] + despX;
+					trAux.y[i] = trayectoria.y[i] + despY;
+				}else{//no modificamos si los puntos no están por delante del coche
+					trAux.x[i] = trayectoria.x[i];
+					trAux.y[i] = trayectoria.y[i];
+				}								
 			}			
 		}
-		motor.nuevaTrayectoria(trayectoria);
+//		Trayectoria trAux = new Trayectoria(trayectoria,0.1);		
+		motor.nuevaTrayectoria(trAux);
 //		return trayectoria;		
 	}
 	@Override
