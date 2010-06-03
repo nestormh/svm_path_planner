@@ -10,7 +10,7 @@
 #include <cv.h>
 #include <highgui.h>
 #include <time.h>
-#include <shmCInterface.h>
+#include <shmInterface.h>
 #include "aco.h"
 
 
@@ -33,17 +33,17 @@ int errorAnt;
 
 void on_trackbar(int h)
 {
-	shmWriteRoadSegmentationParams(horizonSlider,edgeSlider,searchAreas);
+	//shmWriteRoadSegmentationParams(horizonSlider,edgeSlider,searchAreas);
    if (horizonSlider >= 1)
 		bordeSup = horizonSlider;
 }
 void on_trackbar2(int h)
 {  
-	shmWriteRoadSegmentationParams(horizonSlider,edgeSlider,searchAreas);
+	//shmWriteRoadSegmentationParams(horizonSlider,edgeSlider,searchAreas);
 }
 void on_trackbar3(int h)
 {  
-	shmWriteRoadSegmentationParams(horizonSlider,edgeSlider,searchAreas);
+	//shmWriteRoadSegmentationParams(horizonSlider,edgeSlider,searchAreas);
 }
 
 
@@ -90,7 +90,7 @@ IplImage* tempCapture = 0;
 
 
 
-int keyCode;
+char keyCode;
 
 //variables de la colonia
 
@@ -130,7 +130,8 @@ img->origin = 1;											//herencia del Windows, la referencia en la imagen es
 															//inferior izquierda.
 
 //Creación de las imágenes
-
+shmSetResolucionVert(img->height);
+shmSetResolucionHoriz(img->width);
 gray = cvCreateImage(cvGetSize(img),8,1); gray->origin = 1;
 dst = cvCreateImage(cvGetSize(img),8,1); dst->origin =1;
 segmented = cvCreateImage(cvGetSize(img),8,1); segmented->origin = 1;
@@ -168,7 +169,7 @@ consigna = 0;
 while(1) {
 	
 	
-	shmReadRoadSegmentationParams(&horizonSlider,&edgeSlider,&searchAreas); // Leemos de memoria compartida los parámetros del preprocesado
+	//shmReadRoadSegmentationParams(&horizonSlider,&edgeSlider,&searchAreas); // Leemos de memoria compartida los parámetros del preprocesado
 	
 	cvConvertImage(img,img,1); 								//flip vertical para mostrar la imágen correctamente.
 	//cvCvtColor(img,hls,CV_BGR2HLS);						//en caso de que queramos trabajar con la luminancia
@@ -220,8 +221,10 @@ while(1) {
 
 	//actualización del punto de atracción
 	setPointofAttraction(mask,shadowMask,&shortestLeftPath,&shortestRightPath,&attractionX,&aRef,&bRef,&cRef,&dRef,&corte,consigna);
-	shmWriteRoadInformation(aRef,bRef,corte);
-
+	//shmWriteRoadInformation(aRef,bRef,corte);
+shmSetAcoRightDist(dRef);
+shmSetAcoLeftDist(cRef);
+printf("Izquierda -> %d /////// Derecha -> %d\n", cRef, dRef);
 	cvAdd(img,mask,img);									//solapamos el patrón con la imágen de entrada de fondo
 	
 	if (attractionXAnt == -1) attractionXAnt = attractionX;	
@@ -246,7 +249,7 @@ while(1) {
 		cvShowImage("mainWin",segmented);
 		break;
 	}	
-	keyCode = cvWaitKey(2);
+	keyCode = (char)cvWaitKey(2);
 	if (keyCode == '1') 
 		selectedImage = 1;
 	else if(keyCode == '2')
@@ -307,7 +310,7 @@ int main(int argc, char *argv[]){
 	
 	detectarCarretera();
 	
-	shmSafeErase();
+	shmSafeDeconnect();
 	
 	/*
 	int shmid;
