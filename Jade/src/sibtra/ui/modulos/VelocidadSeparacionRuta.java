@@ -97,6 +97,7 @@ public class VelocidadSeparacionRuta implements CalculoVelocidad, SubModuloUsaTr
 		consigna = 0;
 		//obtenemos posicion y orientación del modelo del coche.
         double angAct = modCoche.getYaw();
+        Tr.situaCoche(modCoche.getX(),modCoche.getY());
 		int indMin = Tr.indiceMasCercano();  //la posición del coche ya la ha puesto el motor
 		errorLateral = Tr.distanciaAlMasCercano();
 		errorOrientacion = Tr.rumbo[indMin] - angAct;
