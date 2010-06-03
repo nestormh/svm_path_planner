@@ -10,7 +10,7 @@ import sibtra.shm.ShmInterface;
 import sibtra.gps.Ruta;
 import sibtra.gps.Trayectoria;
 import sibtra.ui.VentanasMonitoriza;
-import sibtra.ui.defs.CalculaRuta;
+//import sibtra.ui.defs.CalculaRuta;
 import sibtra.ui.defs.ModificadorTrayectoria;
 import sibtra.ui.defs.Motor;
 import sibtra.util.ThreadSupendible;
@@ -35,6 +35,8 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	int indiceFinal;
 	
 	Coche modCoche;
+	public int umbralDesp = 30;
+	public double gananciaLateral = 0.1;
 	/**
 	 * Seteador de la distancia a partir del coche a la que se desea empezar a desplazar
 	 * lateralmente la trayectoria
@@ -134,8 +136,19 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	}
 	
 	private void accionPeriodica() {
-		int distDerecha = ShmInterface.getAcoRightDist();
+		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
+		System.out.println(ShmInterface.getResolucionHoriz());
 		int distIzquierda = ShmInterface.getAcoLeftDist();
+		double despLateral = 0;
+		if (distIzquierda>umbralDesp){
+			despLateral = distIzquierda*gananciaLateral;    // Cuando el desp es a la izquierda es negativo
+		}else if(distDerecha>umbralDesp){
+			despLateral = -distDerecha*gananciaLateral;
+		}else{
+			despLateral = 0;
+		}
+		
+		System.out.println("Dist Izquierda " + distIzquierda + "\\\\\\ Dist Derecha " + distDerecha);
 		//La trayectoria original se le indica al modificadorACO a través del método
 		//setTrayectoriaInicial y no se modifica
 		Trayectoria trAux = new Trayectoria(trayectoria); 
@@ -155,11 +168,11 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			for(int i=0;i<trayectoria.length();i++){
 				//condición que cumplen los puntos de la trayectoria que se encuentran
 				//por delante del coche
-				if(i>(trayectoria.indiceMasCercano()+5)%trayectoria.length() &&
+				if(i>(trayectoria.indiceMasCercano())%trayectoria.length() &&
 				   i<(trayectoria.indiceMasCercano()+40)%trayectoria.length()){
 					// Se calcula un desplazamiento lateral perpendicular al rumbo de cada punto 
-					despY = -Math.cos(trayectoria.rumbo[i])*distDerecha/10;
-					despX = Math.sin(trayectoria.rumbo[i])*distDerecha/10;
+					despY = -Math.cos(trayectoria.rumbo[i])*despLateral;
+					despX = Math.sin(trayectoria.rumbo[i])*despLateral;
 					//Se añade el desplazamiento a las coordenadas del punto
 					trAux.x[i] = trayectoria.x[i] + despX;
 					trAux.y[i] = trayectoria.y[i] + despY;
@@ -218,6 +231,18 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	public void parar() {
 		thCiclico.suspender();
 		
+	}
+	public int getUmbralDesp() {
+		return umbralDesp;
+	}
+	public void setUmbralDesp(int umbralDesp) {
+		this.umbralDesp = umbralDesp;
+	}
+	public double getGananciaLateral() {
+		return gananciaLateral;
+	}
+	public void setGananciaLateral(double gananciaLateral) {
+		this.gananciaLateral = gananciaLateral;
 	}
 	
 }

@@ -168,7 +168,7 @@ done
 (
 echo "
 #ifdef __cplusplus
-extern "C" {
+extern \"C\" {
 #endif
 
 #define LLAVE (key_t)235
@@ -192,6 +192,7 @@ void shmSafeGet(void);
 void shmSafeMap(void);
 void shmSafeDeconnect(void);
 void shmSafeErase(void);
+
 
 " 
 
@@ -265,6 +266,9 @@ void shmSafeDeconnect() {
 		printf (\"Error en la desconexion con la memoria compartida\");
 		exit(-1);
 	}
+}
+void shmSafeErase() {
+	shmSafeDeconnect();
 }
 "
 

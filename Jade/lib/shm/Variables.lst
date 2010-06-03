@@ -10,6 +10,8 @@ int AcoHorizon		rw	rw
 int AcoEdges		rw	rw
 int AcoSearchAreas	rw	rw
 int AcoAlive		rw	rw
+int ResolucionHoriz w  r
+int ResolucionVert  w  r
 
 #Aplicación GPS
 float GpsOrientation	rw	rw
