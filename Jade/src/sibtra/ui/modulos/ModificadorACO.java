@@ -13,6 +13,9 @@ import sibtra.ui.VentanasMonitoriza;
 //import sibtra.ui.defs.CalculaRuta;
 import sibtra.ui.defs.ModificadorTrayectoria;
 import sibtra.ui.defs.Motor;
+import sibtra.util.PanelFlow;
+import sibtra.util.SpinnerDouble;
+import sibtra.util.SpinnerInt;
 import sibtra.util.ThreadSupendible;
 /**
  * Clase que implementa {@link ModificadorTrayectoria} y que lee de la memoria compartida los datos 
@@ -24,6 +27,7 @@ import sibtra.util.ThreadSupendible;
 public class ModificadorACO implements ModificadorTrayectoria{
 	
 	VentanasMonitoriza ventanaMonitoriza;
+	PanelModACO panelACO;
 	private Trayectoria trayectoria;
 	String NOMBRE="Modificador ACO";
 	String DESCRIPCION="Modifica la trayectoria usando la información de bordes de la carretera";
@@ -109,6 +113,8 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			ventanaMonitoriza = ventMonitoriza;
 			todoBien = true;
 		}
+		panelACO = new PanelModACO();
+		ventMonitoriza.añadePanel(panelACO,"Panel ACO",false,false);
 		//Le decimos que modelo de coche tiene que usar
 		modCoche = motor.getModeloCoche();
 		
@@ -136,8 +142,9 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	}
 	
 	private void accionPeriodica() {
-		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
-		System.out.println(ShmInterface.getResolucionHoriz());
+		int distDerecha = ShmInterface.getAcoRightDist();
+//		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
+//		System.out.println(ShmInterface.getResolucionHoriz());
 		int distIzquierda = ShmInterface.getAcoLeftDist();
 		double despLateral = 0;
 		if (distIzquierda>umbralDesp){
@@ -244,5 +251,15 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	public void setGananciaLateral(double gananciaLateral) {
 		this.gananciaLateral = gananciaLateral;
 	}
-	
+	protected class PanelModACO extends PanelFlow {
+		public PanelModACO() {
+			super();
+//			setLayout(new GridLayout(0,4));
+			//TODO Definir los tamaños adecuados o poner layout
+			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setGananciaLateral",0,6,0.1), "Ganancia");
+			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setUmbralDesp",0,100,1), "Umbral");
+			
+			
+		}
+	}
 }
