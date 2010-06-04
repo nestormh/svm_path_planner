@@ -35,12 +35,13 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	private ThreadSupendible thCiclico;
 	double distInicio;
 	double longitudTramoDesp;
-	int indiceInicial;
+	int indiceInicial = 0;
 	int indiceFinal;
 	
 	Coche modCoche;
 	public int umbralDesp = 30;
 	public double gananciaLateral = 0.1;
+	public double periodoMuestreoMili = 1250;
 	/**
 	 * Seteador de la distancia a partir del coche a la que se desea empezar a desplazar
 	 * lateralmente la trayectoria
@@ -119,13 +120,12 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		modCoche = motor.getModeloCoche();
 		
 		thCiclico=new ThreadSupendible() {
-			private long tSig;
-			private long periodoMuestreoMili = 1250;
+			private long tSig;			
 
 			@Override
 			protected void accion() {
 				//apuntamos cual debe ser el instante siguiente
-		        tSig = System.currentTimeMillis() + periodoMuestreoMili ;
+		        tSig = System.currentTimeMillis() + (long)periodoMuestreoMili ;
 //		        if (calcular){
 		        accionPeriodica();
 //		        }				
@@ -142,8 +142,8 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	}
 	
 	private void accionPeriodica() {
-		int distDerecha = ShmInterface.getAcoRightDist();
-//		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
+//		int distDerecha = ShmInterface.getAcoRightDist();
+		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
 //		System.out.println(ShmInterface.getResolucionHoriz());
 		int distIzquierda = ShmInterface.getAcoLeftDist();
 		double despLateral = 0;
@@ -161,10 +161,10 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		Trayectoria trAux = new Trayectoria(trayectoria); 
 		double despX = 0;
 		double despY = 0;			
-		setDistInicio(1);
-		setLongitudTramoDesp(4);
-		calculaIndiceInicial();
-		calculaIndiceFinal();
+//		setDistInicio(1);
+//		setLongitudTramoDesp(4);
+//		calculaIndiceInicial();
+//		calculaIndiceFinal();
 		// Es necesario situar el coche en la ruta antes de buscar el indice más cercano 
 		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
 		if(trayectoria.length() != 0){
@@ -175,8 +175,8 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			for(int i=0;i<trayectoria.length();i++){
 				//condición que cumplen los puntos de la trayectoria que se encuentran
 				//por delante del coche
-				if(i>(trayectoria.indiceMasCercano())%trayectoria.length() &&
-				   i<(trayectoria.indiceMasCercano()+40)%trayectoria.length()){
+				if(i>(trayectoria.indiceMasCercano()+indiceInicial)%trayectoria.length() &&
+				   i<(trayectoria.indiceMasCercano()+indiceFinal)%trayectoria.length()){
 					// Se calcula un desplazamiento lateral perpendicular al rumbo de cada punto 
 					despY = -Math.cos(trayectoria.rumbo[i])*despLateral;
 					despX = Math.sin(trayectoria.rumbo[i])*despLateral;
@@ -193,6 +193,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		motor.nuevaTrayectoria(trAux);
 //		return trayectoria;		
 	}
+
 	@Override
 	public void terminar() {
 		thCiclico.terminar();		
@@ -251,15 +252,37 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	public void setGananciaLateral(double gananciaLateral) {
 		this.gananciaLateral = gananciaLateral;
 	}
+	public double getPeriodoMuestreoMili() {
+		return periodoMuestreoMili;
+	}
+
+	public void setPeriodoMuestreoMili(double periodoMuestreoMili) {
+		this.periodoMuestreoMili = periodoMuestreoMili;
+	}
+	
+	public int getIndiceInicial() {
+		return indiceInicial;
+	}
+	public void setIndiceInicial(int indiceInicial) {
+		this.indiceInicial = indiceInicial;
+	}
+	public int getIndiceFinal() {
+		return indiceFinal;
+	}
+	public void setIndiceFinal(int indiceFinal) {
+		this.indiceFinal = indiceFinal;
+	}
+	
 	protected class PanelModACO extends PanelFlow {
 		public PanelModACO() {
 			super();
 //			setLayout(new GridLayout(0,4));
 			//TODO Definir los tamaños adecuados o poner layout
-			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setGananciaLateral",0,6,0.1), "Ganancia");
+			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setGananciaLateral",0,6,0.01), "Ganancia");
 			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setUmbralDesp",0,100,1), "Umbral");
-			
-			
+			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setPeriodoMuestreoMili",0,2000,10), "T Muestreo");
+			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceInicial",0,100,1), "Inicio Desp");
+			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceFinal",indiceInicial,500,1), "Final Desp");						
 		}
 	}
 }
