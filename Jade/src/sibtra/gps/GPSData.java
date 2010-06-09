@@ -60,9 +60,9 @@ public class GPSData implements Serializable, Cloneable {
 
     /** @return Cadena de caracteres de representación en grados y minutos	 */
     public static String double2sexagesimal(double grados) {
-        double gr = Math.rint(grados);
+        double gr = (int)grados; //truncamos
         double minutos = (grados - gr) * 60.0;
-        return String.format((Locale) null, "% 3.0fº %8.5f'", grados, Math.abs(minutos));
+        return String.format((Locale) null, "% 3.0fº %8.5f'", gr, Math.abs(minutos));
     }
     /**
      * Age of differential corrections in seconds

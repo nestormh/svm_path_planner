@@ -15,10 +15,11 @@ import sibtra.util.UtilCalculos;
 public class DeclinacionMagnetica {
 
 	private static double declinacionLaLaguna=Math.toRadians(-(5.0+59.0/60.0));
+	//Centro ULL LLA = [ 28º 28.94909', -16º 19.30155' ,   613.73]
 	private static GPSData posicionLaLaguna=new GPSData(28+28.94909/60, -16-19.30155/60 ,   613.73);
-	
 	private static double declinacionIter=Math.toRadians(-(6.0+5.0/60.0));
-	private static GPSData posicionIter=new GPSData(28+4.19024/60, -17-29.2174/60 ,   73.44);
+	//Centro del ITER LLA = [ 28º  4.05182', -16º 30.72541' ,    69.46]
+	private static GPSData posicionIter=new GPSData(28+4.05182/60, -16-30.72541/60 ,   73.44);
 
 	private double declinacionAplicar=declinacionLaLaguna;
 
@@ -39,7 +40,8 @@ public class DeclinacionMagnetica {
 			if(UtilCalculos.largoVector(vecI)<5000)
 				return declinacionIter;			
 		}
-		return Double.NaN; //No está cerca de ningún lugar conocido
+		System.err.println("DeclinacionMagnetica: No está cerca de ningún lugar conocido");
+		return Double.NaN; 
 	}
 
 	/** contructor vacío supone que estamos en La Laguna */

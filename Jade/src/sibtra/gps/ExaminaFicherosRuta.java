@@ -109,6 +109,10 @@ public class ExaminaFicherosRuta extends JFrame implements  ItemListener, Action
 			}
 		}
 		System.out.println("Fecha del primer dato:"+new Date(rutaTemporal.getPunto(0).getSysTime()));
+		System.out.println("Centro Espacial:"+rutaEspacial.getCentro());
+		System.out.println("Centro Espacial: Lat"+rutaEspacial.getCentro().getLatitud()
+				+" Lon:"+rutaEspacial.getCentro().getLongitud());
+		System.out.println("Centro Temporal:"+rutaTemporal.getCentro());
 	}
 
 	public void itemStateChanged(ItemEvent e) {
