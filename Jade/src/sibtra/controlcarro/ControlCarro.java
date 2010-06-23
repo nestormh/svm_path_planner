@@ -192,11 +192,11 @@ public class ControlCarro implements SerialPortEventListener {
 //	private double kPDesfreno = 1.5;
 	
 	/** Ganancia proporcional del PID de avance */
-	private double kPAvance = 1.5;
+	private double kPAvance = 2.0;
 	/** Ganancia defivativa del PID de avance */
 	private double kDAvance = 0.3;
 	/** Ganancia integral del PID de avance */
-	private double kIAvance = 0.1;
+	private double kIAvance = 0.01;
 
 	/** Para indicar si se está aplicando control de velocidad */
 	private boolean controlando = false;
@@ -872,8 +872,11 @@ public class ControlCarro implements SerialPortEventListener {
 		//derivativo como y(k)-y(k-2)
 		double derivativo = error - errorAnt +  derivativoAnt;
 
-		if ( (integral < limiteIntegral)) //if ((comandoAnt > 0 )&& (comandoAnt < 254 ))
+//		if ( (integral < limiteIntegral)) //
+//		if ((comandoAnt > 0 )&& (comandoAnt < MAXAVANCE))
+		if((comandoAnt<MAXAVANCE) || ((errorAnt<0) && (integral>0)) )
 			integral += errorAnt;
+//		integral = UtilCalculos.limita(integral, -limiteIntegral, limiteIntegral);
 
 		double comandotemp = kPAvance * error + kDAvance * derivativo + kIAvance * integral;
 		double IncComando = comandotemp - comandoAnt;
@@ -902,12 +905,12 @@ public class ControlCarro implements SerialPortEventListener {
 			if(IncCom<=0) {
 				apertura=-(int)(IncCom*FactorFreno);
 				apertura=UtilCalculos.limita(apertura, 20, 150);
-				masFrena( apertura,20); /** Es un comando negativo, por lo que hay que frenar */
+				masFrena( apertura,30); /** Es un comando negativo, por lo que hay que frenar */
 				System.err.println("Mas frena "+apertura);
 			} else {
 				apertura=(int)(IncCom*FactorFreno);
 				apertura=UtilCalculos.limita(apertura, 20, 150);
-				menosFrena(apertura,20);
+				menosFrena(apertura,30);
 				System.err.println("menos frena "+apertura);
 				apertura=-apertura;
 			}
@@ -1028,6 +1031,7 @@ public class ControlCarro implements SerialPortEventListener {
 	public void stopControlVel() {
 		controlando = false;
 		comandoAnt = 0;
+		integral = 0;
 		Avanza(0);
 	}
 
