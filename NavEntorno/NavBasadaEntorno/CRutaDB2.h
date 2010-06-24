@@ -14,6 +14,9 @@
 #define ANGLE_THRESH 45
 #define DIST_THRESH 1.5
 
+#define TYPE_RT 1
+#define TYPE_ST 2
+
 class CRutaDB2 {
 public:
     CRutaDB2(const char * dbName, const char * staticRoute, const  char * rtRoute, const char * pathBase);
@@ -29,6 +32,9 @@ public:
 
     int getRTPoint();
     int getSTPoint();
+
+    int getMaxSTPoint();
+    int getMaxRTPoint();
 
 private:
     sqlite3 * db;

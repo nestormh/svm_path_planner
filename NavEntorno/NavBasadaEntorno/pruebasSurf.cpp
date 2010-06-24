@@ -609,3 +609,4 @@ void cleanMatches(IplImage * img1, IplImage * img2, vector<t_moment *> &regionPa
 
     cvReleaseImage(&result);
 }
+

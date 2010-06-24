@@ -8,8 +8,9 @@
 #include "CRealMatches.h"
 #include "CStatistics.h"
 #include "CImageSearch.h"
+#include "CImageNavigation.h"
 
-#define EJECUCION 18
+#define EJECUCION 19
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -825,8 +826,10 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 9: {
-            CRealMatches rm;
-            rm.startTest(string("/home/neztol/doctorado/Datos/Estadisticas/"), string("datos.txt"), string("testOFlow1"));
+            CRealMatches rm(false, SIZE3);
+            //rm.startTest(string("/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/"), string("datos.txt"), string("testOFlow1"));
+            //rm.startTest(string("/home/neztol/doctorado/Datos/Estadisticas/"), string("datos.txt"), string("testOFlow1"));
+            rm.startTest(string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/"), string("datos.txt"), string("testOFlow1"));
             break;
         }
         case 10: {
@@ -859,12 +862,13 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 16: {
+            //CRealMatches rm(false);
             CRealMatches rm(false);
             rm.startTest6();
             break;
         }
         case 17: {
-            CRealMatches rm(false, SIZE3);
+            CRealMatches rm(false, SIZE3);            
             rm.startTest7();
             break;
         }
@@ -872,6 +876,13 @@ int main(int argc, _TCHAR argv[]) {
             //CImageSearch is("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/urbRadazulDiciembre08Base", "Rutas/urbRadazulDiciembre08obs", "/home/neztol/doctorado/Datos/DB", false, cvRect(0, 0, 310, 228));
             CImageSearch is("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB", false, cvRect(5, 0, 310, 240), cvSize(176, 144));
             is.startTest();
+            break;
+        }
+        case 19: {
+            //CImageNavigation in("/home/neztol/doctorado/Datos/DB/Rutas/urbRadazulDiciembre08Base/Camera0/");
+            //CImageNavigation in("/home/neztol/doctorado/Datos/MRPT_Data/malaga2009_campus_2L/Images_rect/");
+            CImageNavigation in("/home/neztol/doctorado/Datos/EstadisticasITER/tripode3/");
+            in.makePairs();
             break;
         }
         default: {

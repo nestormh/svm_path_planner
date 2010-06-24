@@ -7,12 +7,12 @@
 
 #include "CImageSearch.h"
 
-CImageSearch::CImageSearch(string dbName, string dbST, string dbRT, string pathBase, bool useIMU, CvRect rect) {
+CImageSearch::CImageSearch(string dbName, string dbST, string dbRT, string pathBase, bool useIMU, CvRect rect, CvSize size) {
     this->dbST = dbST;
     this->dbRT = dbRT;
     this->pathBase = pathBase;
     this->rect = rect;
-    this->size = cvSize(rect.width, rect.height);
+    this->size = size;
 
     if (sqlite3_open(dbName.c_str(), &db) != SQLITE_OK){
         cerr << "Error al abrir la base de datos: " << sqlite3_errmsg(db) << endl;
@@ -89,7 +89,6 @@ CImageSearch::CImageSearch(string dbName, string dbST, string dbRT, string pathB
     img1 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     img2 = cvCreateImage(size, IPL_DEPTH_8U, 1);
 
-
     for (int i = 0; i < points.size(); i++) {
         for (int j = 0; j < points.size(); j++) {
             double dist = sqrt(pow(points.at(i).x - points.at(j).x, 2.0) + pow(points.at(i).y - points.at(j).y, 2.0));
@@ -104,20 +103,6 @@ CImageSearch::CImageSearch(string dbName, string dbST, string dbRT, string pathB
 
     indexST = 0;
     indexRT = 0;
-
-    IplImage * imgRT;
-    getRTImage(imgRT);
-    IplImage * imgST;
-
-    getInitialImage(imgRT, imgST);
-
-    cvShowImage("imgRT", imgRT);
-    cvShowImage("imgST", imgST);
-
-    cvWaitKey(0);
-
-    cvReleaseImage(&imgRT);
-    cvReleaseImage(&imgST);
 }
 
 CImageSearch::~CImageSearch() {
@@ -132,12 +117,14 @@ CImageSearch::~CImageSearch() {
 void CImageSearch::getRTImage(IplImage * &imgRT) {
     char imageName[1024];
 
-    sprintf(imageName, "%s/%s/Camera2/Image%d%s", pathBase.c_str(), dbRT.c_str(), indexRT, extRT.c_str());
+    sprintf(imageName, "%s/%s/Camera2/Image%d.%s", pathBase.c_str(), dbRT.c_str(), indexRT, extRT.c_str());    
 
-    IplImage * tmpImg = cvLoadImage(imageName, 0);
+    IplImage * tmpImg = cvLoadImage(imageName, 0);        
     cvSetImageROI(tmpImg, rect);
-    imgRT = cvCreateImage(cvSize(rect.width, rect.height), IPL_DEPTH_8U, 1);
-    cvCopyImage(tmpImg, imgRT);
+    imgRT = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    cvResize(tmpImg, imgRT);
+
+    indexRT++;
 
     cvReleaseImage(&tmpImg);
 }
@@ -148,18 +135,18 @@ void CImageSearch::getSTImage(IplImage * &imgST, int index) {
     if (index == -1)
         index = indexST;
 
-    sprintf(imageName, "%s/%s/Camera2/Image%d%s", pathBase.c_str(), dbST.c_str(), index, extST.c_str());
+    sprintf(imageName, "%s/%s/Camera2/Image%d.%s", pathBase.c_str(), dbST.c_str(), index, extST.c_str());
 
     IplImage * tmpImg = cvLoadImage(imageName, 0);
     cvSetImageROI(tmpImg, rect);
-    imgST = cvCreateImage(cvSize(rect.width, rect.height), IPL_DEPTH_8U, 1);
-    cvCopyImage(tmpImg, imgST);
+    imgST = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    cvResize(tmpImg, imgST);
 
     cvReleaseImage(&tmpImg);
 }
 
 inline void CImageSearch::testFast(IplImage * img, vector<CvPoint2D32f> &points) {
-    int inFASTThreshhold = 10; //30; //80
+    int inFASTThreshhold = 30; //10; //30; //80
     int inNpixels = 9;
     int inNonMaxSuppression = 1;
 
@@ -171,7 +158,7 @@ inline void CImageSearch::testFast(IplImage * img, vector<CvPoint2D32f> &points)
     points.clear();
     for (int i = 0; i < numCorners; i++) {
         //if (cvGetReal2D(pointsMask, corners[i].y, corners[i].x) == 255)
-        points.push_back(cvPointTo32f(corners[i]));
+            points.push_back(cvPointTo32f(corners[i]));
     }
 
     delete corners;
@@ -195,7 +182,7 @@ inline void CImageSearch::findOFlowPairs(const IplImage * img1, const IplImage *
     char * status1 = new char[numberOfFeatures];
 
     for (int i = 0; i < numberOfFeatures; i++) {
-        oFlowPoints1To2[0][i] = origPoints[i];
+        oFlowPoints1To2[0][i] = origPoints[i];        
     }
 
     // Optical flow from image 1 to image 2
@@ -303,6 +290,43 @@ inline void CImageSearch::cleanRANSAC(int method, vector<t_Pair> &pairs) {
     cvReleaseMat(&statusM);
 }
 
+inline void CImageSearch::setMaskFromPoints(IplImage * &mask, int index) {
+    CvPoint* pts = (CvPoint*) malloc(pairs.size() * sizeof (pts[0]));
+    int* hull = (int*) malloc(pairs.size() * sizeof (hull[0]));
+    CvMat point_mat = cvMat(1, pairs.size(), CV_32SC2, pts);
+    CvMat hull_mat = cvMat(1, pairs.size(), CV_32SC1, hull);
+
+    CvPoint pt;
+    if (index == 0) {
+        for (int i = 0; i < pairs.size(); i++) {
+            pts[i] = cvPointFrom32f(pairs.at(i).p2);
+        }
+    } else {
+        for (int i = 0; i < pairs.size(); i++) {
+            pts[i] = cvPointFrom32f(pairs.at(i).p1);
+        }
+    }
+
+    cvConvexHull2(&point_mat, &hull_mat, CV_CLOCKWISE, 0);
+    int hullcount = hull_mat.cols;
+
+    pt = pts[hull[hullcount - 1]];
+
+    CvPoint * poly = new CvPoint[hullcount];
+    for (int i = 0; i < hullcount; i++) {
+        poly[i] = pt;
+        pt = pts[hull[i]];
+    }
+
+    cvZero(mask);
+    cvFillConvexPoly(mask, poly, hullcount, cvScalar(255));
+
+    cvErode(mask, mask);
+
+    delete pts;
+    delete hull;
+    delete poly;
+}
 
 inline void CImageSearch::checkCoveredArea(IplImage * imgB, IplImage * imgA, int &coveredArea) {
     if ((cvCountNonZero(imgA) == 0) || (cvCountNonZero(imgB) == 0)) {
@@ -319,7 +343,7 @@ inline void CImageSearch::checkCoveredArea(IplImage * imgB, IplImage * imgA, int
 
         return;
     }
-
+    
     oFlow(points1, pairs, img1, img2);
 
     if (pairs.size() < MIN_NFEAT) {
@@ -333,33 +357,133 @@ inline void CImageSearch::checkCoveredArea(IplImage * imgB, IplImage * imgA, int
     if (pairs.size() < MIN_NFEAT) {
         coveredArea = 0;
         return;
-    }
+    }*/
 
-//    setMaskFromPoints(mask1, 2);
+    IplImage * mask = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    setMaskFromPoints(mask, 2);
 
-//    coveredArea = cvCountNonZero(mask1);*/
-    coveredArea = pairs.size();
+    coveredArea = cvCountNonZero(mask);
+    cvReleaseImage(&mask);
+    //coveredArea = pairs.size();
 }
 
 void CImageSearch::getInitialImage(IplImage * imgRT, IplImage * &imgST) {
     int maxCovered = 0;
     imgST = cvCreateImage(size, IPL_DEPTH_8U, 1);
+
+    int portion = mapDistances->width / 100;
+
     for (int i = 0; i < currentNearestPoints->width; i++) {
-        IplImage * tmpImgST;
+        if (i % portion == 0) {
+            cout << (i/portion) << "% completado. <";
+            for (int j = 0; j < (i/portion); j++)
+                cout << "=";
+            cout << ">\r";
+        }        
+        IplImage * tmpImgST;        
         getSTImage(tmpImgST, i);
-        int covered;
-        checkCoveredArea(imgRT, tmpImgST, covered);
+        int covered;        
+        checkCoveredArea(imgRT, tmpImgST, covered);        
         if (covered > maxCovered) {
             maxCovered = covered;
             cvCopyImage(tmpImgST, imgST);
             indexST = i;
         }
         cvReleaseImage(&tmpImgST);
+
+        if (covered == 0)
+            i += 10;
     }
 }
 
-void CImageSearch::getNearestImage(IplImage * imgRT, IplImage * &imgST) {
-    for (int i = 0; i < currentNearestPoints->width; i++) {
-        
+void CImageSearch::getNearestImage(IplImage * imgRT, IplImage * &imgST, int &code) {
+    imgST = cvCreateImage(size, IPL_DEPTH_8U, 1);
+
+    int maxCovered = 0;
+    int countTests = 0;
+    int tmpIndex = -1;
+    for (int i = 0; i < mapDistances->width; i++) {
+        if ((cvGetReal2D(mapDistances, indexST, i) <= 4) && (cvGetReal2D(mapDistances, indexST, i) <= 4)) {
+            //if (cvGetReal2D(mapAngles, indexST, i) <= 90) {
+                IplImage * tmpImgST;
+                getSTImage(tmpImgST, i);
+                int covered;
+                checkCoveredArea(imgRT, tmpImgST, covered);
+                if (covered > maxCovered) {
+                    maxCovered = covered;
+                    cvCopyImage(tmpImgST, imgST);
+                    tmpIndex = i;
+                }
+                cvReleaseImage(&tmpImgST);
+
+                countTests++;            
+            //}
+        }
     }
+
+    if (countTests == 0) {
+        cout << "No se encontraron imágenes cercanas" << endl;
+        code = -1;
+    } else if (maxCovered == 0) {
+        cout << "No se encontraron imágenes compatibles" << endl;
+        code = -2;
+    } else {
+        code = 0;        
+    }
+    indexST = tmpIndex;
+}
+
+void CImageSearch::startTest() {
+    IplImage * imgRT;
+    getRTImage(imgRT);
+    IplImage * imgST;
+
+    clock_t myTime = clock();
+    getInitialImage(imgRT, imgST);
+    time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+    cout << "Tiempo invertido en getNearestImage = " << time << endl;
+
+    cvShowImage("imgRT", imgRT);
+    cvShowImage("imgST", imgST);
+
+    cvWaitKey(0);
+
+    cout << indexST << endl;
+
+    //indexST = 1896;
+    //indexST = 746;
+    
+    int code;
+
+    while (true) {
+        getRTImage(imgRT);
+
+        cvShowImage("imgRT", imgRT);
+        myTime = clock();
+        if (indexST == -1) {
+            getInitialImage(imgRT, imgST);
+            indexRT += 5;
+        } else {
+            getNearestImage(imgRT, imgST, code);
+        }
+        time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo invertido en getNearestImage = " << time << endl;
+
+        if (code == 0) {
+            
+            cvShowImage("imgRT", imgRT);
+            cvShowImage("imgST", imgST);            
+
+            int key = cvWaitKey(20);
+            if (key == 27)
+                exit(0);
+            if (key == 32)
+                cvWaitKey(0);
+
+            cvReleaseImage(&imgST);
+ 
+        }
+
+        cvReleaseImage(&imgRT);
+    }   
 }

@@ -85,7 +85,7 @@ void CRealMatches::obstacleDetectionQuartile(IplImage * pcaResult, IplImage * ma
 
     IplImage * obstaclesMask = cvCreateImage(size, IPL_DEPTH_8U, 1);
 
-    double k = 2;
+    double k = 2; //0.5; //2;
 
     // Ordenamos los datos
     vector<double> data;
@@ -94,7 +94,7 @@ void CRealMatches::obstacleDetectionQuartile(IplImage * pcaResult, IplImage * ma
         levels[i] = 0;
     }
 
-    cvAnd(mask, roadMask, mask);
+    //cvAnd(mask, roadMask, mask);
 
     for (int i = 0; i < pcaResult->height; i++) {
         for (int j = 0; j < pcaResult->width; j++) {
@@ -131,7 +131,7 @@ void CRealMatches::obstacleDetectionQuartile(IplImage * pcaResult, IplImage * ma
     }
 
     double maxThresh = q2 + k * (q2 - q1);
-    maxThresh = 10; // Para las de Dani, 30; para las otras, 10
+    //maxThresh = 10; // Para las de Dani, 30; para las otras, 10
 
     cvZero(obstaclesMask);
     cvCopy(pcaResult, obstaclesMask, mask);
@@ -189,13 +189,24 @@ void CRealMatches::detectObstacles(IplImage * mask) {
                     puntos[i] = *p;
                     cout << puntos[i].x << ", " << puntos[i].y << endl;
             }*/
-            CvPoint p[4];
+            /*CvPoint p[4];
             p[0] = cvPoint(10, 10);
             p[1] = cvPoint(20, 10);
             p[2] = cvPoint(20, 20);
-            p[3] = cvPoint(10, 20);
-            CvRect rect = cvBoundingRect(contour);
-            cvRectangle(recuadro, cvPoint(rect.x, rect.y), cvPoint(rect.x + rect.width, rect.y + rect.height), cvScalar(0, 255, 0));
+            p[3] = cvPoint(10, 20);*/
+            //CvRect rect = cvBoundingRect(contour);
+            //cvRectangle(recuadro, cvPoint(rect.x, rect.y), cvPoint(rect.x + rect.width, rect.y + rect.height), cvScalar(0, 255, 0));
+
+            CvBox2D box = cvMinAreaRect2(contour);
+
+            CvPoint2D32f pt[4];
+            cvBoxPoints(box, pt);
+
+            for (int i = 0; i < 4; i++) {
+                int j = (i + 1) % 4;
+                cvLine(recuadro, cvPointFrom32f(pt[i]), cvPointFrom32f(pt[j]), cvScalar(0, 255, 0));
+            }
+
         }
     }
 
@@ -204,6 +215,10 @@ void CRealMatches::detectObstacles(IplImage * mask) {
 
     cvNamedWindow("ResultadoFinal", 1);
     cvShowImage("ResultadoFinal", recuadro);
+
+    char fileName[1024];
+    sprintf(fileName, "/home/neztol/doctorado/articulos/Deteccion/secuencia/Image%d.png", (rand() % 1024));
+    cvSaveImage(fileName, recuadro);
 
     cvReleaseImage(&recuadro);
     cvReleaseImage(&maskResult);

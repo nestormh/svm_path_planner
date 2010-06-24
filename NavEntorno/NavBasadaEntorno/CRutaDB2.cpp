@@ -25,7 +25,7 @@ CRutaDB2::CRutaDB2(const char * dbName, const char * staticRoute, const  char * 
 
     sqlite3_bind_text(statement, 1, staticRoute, -1, NULL);
     if (sqlite3_step(statement) == SQLITE_ROW) {
-        staticIndex = sqlite3_column_int(statement, 0);
+        staticIndex = sqlite3_column_int(statement, 0);        
     }
     if (sqlite3_reset(statement) != SQLITE_OK) {
         cerr << "Error al resetear el statement" << endl;
@@ -180,13 +180,18 @@ IplImage * CRutaDB2::getNearestImage(double localX, double localY, double angle)
 void CRutaDB2::getImageAt(IplImage * &img, int type, int index) {
     char imageName[1024];
     if (type == 1)
-        sprintf(imageName, "%s/%s/Camera2/Image%d.png", pathBase, dbRT, index);
-    else sprintf(imageName, "%s/%s/Camera2/Image%d.png", pathBase, dbStatic, index);
+        sprintf(imageName, "%s/%s/Camera2/Image%d.jpg", pathBase, dbRT, index);
+    else sprintf(imageName, "%s/%s/Camera2/Image%d.jpg", pathBase, dbStatic, index);
     
-    cout << imageName << endl;
-    img = cvLoadImage(imageName, 0);
+    //cout << imageName << endl;
+    //img = cvLoadImage(imageName, 0);
 
-    cvSetImageROI(img, cvRect(5, 0, img->width - 5, img->height));    
+    //cvSetImageROI(img, cvRect(5, 0, img->width - 5, img->height));
+    IplImage * tmpImg = cvLoadImage(imageName, 0);
+    cvSetImageROI(tmpImg, cvRect(0, 0, tmpImg->width - 10, tmpImg->height - 10));
+    img = cvCreateImage(cvSize(315, 240), IPL_DEPTH_8U, 1);
+    cvResize(tmpImg, img);
+    cvReleaseImage(&tmpImg);//*/
 }
 
 void CRutaDB2::setCurrentPoint(int index) {
@@ -233,7 +238,7 @@ void CRutaDB2::getNextImage(IplImage * &imgRT, IplImage * &imgDB1, IplImage * &i
     cvSetImageROI(imgDB1, cvRect(5, 0, imgDB1->width - 5, imgDB1->height));
     cvSetImageROI(imgDB2, cvRect(5, 0, imgDB1->width - 5, imgDB1->height));
     cvSetImageROI(imgDB3, cvRect(5, 0, imgDB1->width - 5, imgDB1->height));
-
+    
     //cvNamedWindow("imgRT", 1);
     //cvShowImage("imgRT", imgRT);
     //cvNamedWindow("imgDB", 1);
@@ -299,4 +304,12 @@ void CRutaDB2::getNearestImage(double localX, double localY, double angle, IplIm
     imgDB2 = cvLoadImage(imageName, 0);
     sprintf(imageName, "%s/%s/Camera2/Image%d.png", pathBase, dbStatic, staticPoint);
     imgDB3 = cvLoadImage(imageName, 0);    
+}
+
+int CRutaDB2::getMaxSTPoint() {
+    return nStaticPoints;
+}
+
+int CRutaDB2::getMaxRTPoint() {
+    return nRTPoints;
 }

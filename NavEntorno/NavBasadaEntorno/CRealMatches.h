@@ -11,8 +11,13 @@
 #include "ViewMorphing.h"
 #include "ImageRegistration.h"
 #include "ACO/CAntColony.h"
+#include "CRutaDB2.h"
 #include <sqlite3.h>
 #include <map>
+#include "Surf/imload.h"
+#include "Surf/surflib.h"
+#include "Surf/os_mapping.h"
+
 
 #define MIN_NFEAT 8
 #define MIN_DIST 8
@@ -45,6 +50,21 @@ typedef struct {
     CvPoint2D32f p;
 } t_DistDesc;
 
+typedef struct {
+    // x, y value of the interest point
+    double x, y;
+    // detected scale
+    double scale;
+    // strength of the interest point
+    double strength;
+    // orientation
+    double ori;
+    // sign of Laplacian
+    int laplace;
+    // descriptor
+    double *ivec;
+} ISurfPoint;
+
 class CRealMatches {
 public:
     CRealMatches(bool usePrevious = false, CvSize sizeIn = SIZE5);
@@ -60,6 +80,7 @@ public:
     void startTest6();
     void startTest7();
     void startTestRoadDetection();
+    void startTestNearestImage();
     void onMouse1(int event, int x, int y, int flags, void * param);
     void onMouse2(int event, int x, int y, int flags, void * param);
 private:    
@@ -68,7 +89,13 @@ private:
     void cleanRANSAC(int method, vector<t_Pair> &pairs);
     void fusePairs(vector<t_Pair> pairs1, vector<t_Pair> pairs2, bool crossed);
     void paint(char * img1Name = "Img1", char * img2Name = "Img2", char * plinearName = "PLinear", char * diffName = "Resta");
+    vector< Ipoint > findSURF(Image *im, double thresh, int &VLength);
+    void testSurf2(IplImage * img1, IplImage * img2);
     void testSurf(IplImage * img1, IplImage * img2);
+    double distSquare(double *v1, double *v2, int n);
+    int findMatch(const ISurfPoint& ip1, const vector< ISurfPoint >& ipts, int vlen);
+    vector< int > findMatches(const vector< ISurfPoint >& ipts1, const vector< ISurfPoint >& ipts2, int vlen);
+    void bruteMatch2(CvSeq *kp1, CvSeq *desc1, CvSeq *kp2, CvSeq * desc2);
     void testFast(IplImage * img, vector<CvPoint2D32f> &points);
     void remap(CImageRegistration ir);
     void setMaskFromPoints(IplImage * &mask, int index);
@@ -108,6 +135,8 @@ private:
 
     void checkCoveredArea(IplImage * imgA, IplImage * imgB, int &coveredArea);
 
+    void getNearest(IplImage * imgRT, IplImage * &imgDB, int index1, int index2, CRutaDB2 &ruta);
+
     void test3D();
     void test3D_2();
     void calibrateCameras();
@@ -129,6 +158,9 @@ private:
     IplImage * mask1;
     IplImage * pointsMask;
     IplImage * plinear;
+
+    IplImage * smallImg1;
+    IplImage * smallImg2;
 
     IplImage * roadMask;
 

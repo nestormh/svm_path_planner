@@ -87,6 +87,10 @@
         <itemPath>GeographicLib/UTMUPS.cpp</itemPath>
         <itemPath>GeographicLib/UTMUPS.hpp</itemPath>
       </logicalFolder>
+      <logicalFolder name="f6" displayName="ImageSearch" projectFiles="true">
+        <itemPath>CImageSearch.cpp</itemPath>
+        <itemPath>CImageSearch.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="f4" displayName="memcount" projectFiles="true">
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.cpp</itemPath>
         <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.hpp</itemPath>
@@ -148,6 +152,8 @@
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
+    <itemPath>CImageNavigation.cpp</itemPath>
+    <itemPath>CImageNavigation.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>/usr/local/include/opencv</Elem>

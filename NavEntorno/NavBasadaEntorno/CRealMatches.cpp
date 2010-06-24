@@ -7,7 +7,6 @@
 
 #include "CRealMatches.h"
 #include "fast/cvfast.h"
-#include "CRutaDB2.h"
 #include "CRoadDetection.h"
 
 #define MIN_DIST 15
@@ -21,6 +20,8 @@ CRealMatches::CRealMatches(bool usePrevious, CvSize sizeIn) {
 
     img1 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     img2 = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    smallImg1 = cvCreateImage(cvSize(size.width / 2, size.height / 2), IPL_DEPTH_8U, 1);
+    smallImg2 = cvCreateImage(cvSize(size.width / 2, size.height / 2), IPL_DEPTH_8U, 1);
     mask1 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     mask2 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     plinear = cvCreateImage(size, IPL_DEPTH_8U, 1);
@@ -63,6 +64,9 @@ CRealMatches::~CRealMatches() {
     cvReleaseImage(&mask1);
     cvReleaseImage(&mask2);
     cvReleaseImage(&plinear);
+
+    cvReleaseImage(&smallImg1);
+    cvReleaseImage(&smallImg2);
 
     cvReleaseMat(&M1);
     cvReleaseMat(&M2);
@@ -339,8 +343,8 @@ inline void CRealMatches::cleanRANSAC(int method, vector<t_Pair> &pairs) {
         cvSet2D(p2, 0, i, cvScalar(pairs.at(i).p2.x, pairs.at(i).p2.y));
     }
 
-    //cvFindFundamentalMat(p1, p2, F, method, 3., 0.70, statusM);
-    cvFindFundamentalMat(p1, p2, F, method, 3., 0.99, statusM);
+    cvFindFundamentalMat(p1, p2, F, method, 3., 0.70, statusM);
+    //cvFindFundamentalMat(p1, p2, F, method, 3., 0.99, statusM);
 
     removeOutliers(&p1, &p2, statusM);
 
@@ -492,17 +496,190 @@ inline void CRealMatches::paint(char * img1Name, char * img2Name, char * plinear
     cvReleaseImage(&resta);
 }
 
+vector< Ipoint > CRealMatches::findSURF(Image *im, double thresh, int &VLength) {
+    // Length of the descriptor vector
+    VLength = 0;
+    // Initial sampling step (default 2)
+    int samplingStep = 2;
+    // Number of analysed octaves (default 4)
+    int octaves = 4;
+    // Blob response treshold
+    double thres = thresh; //4.0;
+    // Set this flag "true" to double the image size
+    bool doubleImageSize = false;
+    // Initial lobe size, default 3 and 5 (with double image size)
+    int initLobe = 3;
+    // Upright SURF or rotation invaraiant
+    bool upright = true;
+    // If the extended flag is turned on, SURF 128 is used
+    bool extended = false;
+    // Spatial size of the descriptor window (default 4)
+    int indexSize = 4;
+    // Variables for the timing measure
+    osmapping::os_TIME tim1, tim2; //STS
+    // verbose output
+    bool bVerbose = true;
+    // skip sign of laplacian
+    bool bLaplacian = false;
+
+    bool bLoadRegions = false;
+    string sRegionFile = "";
+
+    // Start measuring the time
+    osmapping::os_GetTime(&tim1);
+
+    // Create the integral image
+    Image iimage(im, doubleImageSize);
+
+    // These are the interest points
+    vector< Ipoint > ipts;
+    ipts.reserve(1000);
+
+    // Extract interest points with Fast-Hessian
+    FastHessian fh(&iimage, /* pointer to integral image */
+            ipts,
+            thres, /* blob response threshold */
+            doubleImageSize, /* double image size flag */
+            initLobe * 3 /* 3 times lobe size equals the mask size */,
+            samplingStep, /* subsample the blob response map */
+            octaves /* number of octaves to be analysed */);
+
+    fh.getInterestPoints();
+
+    // Initialise the SURF descriptor
+    Surf des(&iimage, /* pointer to integral image */
+            doubleImageSize, /* double image size flag */
+            upright, /* rotation invariance or upright */
+            extended, /* use the extended descriptor */
+            indexSize /* square size of the descriptor window (default 4x4)*/);
+
+    // Get the length of the descriptor vector resulting from the parameters
+    VLength = des.getVectLength();
+    // Compute the orientation and the descriptor for every interest point
+    for (unsigned n = 0; n < ipts.size(); n++) {
+        //for (Ipoint *k = ipts; k != NULL; k = k->next){
+        // set the current interest point
+        des.setIpoint(&ipts[n]);
+        // assign reproducible orientation
+        des.assignOrientation();
+        // make the SURF descriptor
+        des.makeDescriptor();
+    }
+
+    // stop measuring the time, we're all done
+    osmapping::os_GetTime(&tim2);
+
+    return ipts;
+}
+
+void CRealMatches::testSurf2(IplImage * img1, IplImage * img2) {
+    Image *im1 = new Image(img1->width, img1->height);
+    Image *im2 = new Image(img2->width, img2->height);
+
+    for (int y = 0; y < img1->height; y++) {
+        for (int x = 0; x < img1->width; x++) {
+            im1->setPix(x, y, cvGetReal2D(img1, y, x));
+            im2->setPix(x, y, cvGetReal2D(img2, y, x));
+        }
+    }
+
+    int vlength1, vlength2;
+    vector< Ipoint > ipts1 = findSURF(im1, 500, vlength1);
+    vector< Ipoint > ipts2 = findSURF(im2, 500, vlength2);
+
+    cout << ipts1.size() << endl;
+
+    vector< ISurfPoint > iSpts1;
+    vector< ISurfPoint > iSpts2;
+    for (int i = 0; i < ipts1.size(); i++) {
+        ISurfPoint p;
+        p.x = ipts1.at(i).x;
+        p.y = ipts1.at(i).y;
+        p.scale = ipts1.at(i).scale;
+        p.strength = ipts1.at(i).strength;
+        p.ori = ipts1.at(i).ori;
+        p.laplace = ipts1.at(i).laplace;
+        p.ivec = ipts1.at(i).ivec;
+
+        iSpts1.push_back(p);
+    }
+
+    for (int i = 0; i < ipts2.size(); i++) {
+        ISurfPoint p;
+        p.x = ipts2.at(i).x;
+        p.y = ipts2.at(i).y;
+        p.scale = ipts2.at(i).scale;
+        p.strength = ipts2.at(i).strength;
+        p.ori = ipts2.at(i).ori;
+        p.laplace = ipts2.at(i).laplace;
+        p.ivec = ipts2.at(i).ivec;
+
+        iSpts2.push_back(p);
+    }
+
+    vector<int> matches = findMatches(iSpts1, iSpts2, vlength1);
+
+    pairs.clear();
+    for (int i = 0; i < matches.size(); i++) {
+        if (matches.at(i) != -1) {
+            bool isUsed = false;
+            for (int j = 0; j < i; j++) {
+                if (matches.at(j) == matches.at(i)) {
+                    isUsed = true;
+                    break;
+                }
+            }
+            if (!isUsed) {
+                t_Pair pair;
+                pair.p1 = cvPoint2D32f(iSpts1.at(i).x, iSpts1.at(i).y);
+                pair.p2 = cvPoint2D32f(iSpts2.at(matches.at(i)).x, iSpts2.at(matches.at(i)).y);
+                pairs.push_back(pair);
+            }
+        }
+    }//*/
+
+    IplImage * surf1 = cvCreateImage(size, IPL_DEPTH_8U, 3);
+    IplImage * surf2 = cvCreateImage(size, IPL_DEPTH_8U, 3);
+
+    cvCvtColor(img1, surf1, CV_GRAY2BGR);
+    cvCvtColor(img2, surf2, CV_GRAY2BGR);
+
+    /*for (int i = 0; i < iSpts1.size(); i++) {
+        cvCircle(surf1, cvPoint(iSpts1[i].x, iSpts1[i].y), 2, cvScalar(0, 0, 255), -1);
+    }
+
+    for (int i = 0; i < iSpts2.size(); i++) {
+        cvCircle(surf2, cvPoint(iSpts2[i].x, iSpts2[i].y), 2, cvScalar(0, 0, 255), -1);
+    }//*/
+
+    for (vector<t_Pair>::iterator it = pairs.begin(); it != pairs.end(); it++) {
+    //for (vector<t_Pair>::iterator it = tmpPairs.begin(); it != tmpPairs.end(); it++) {
+        CvScalar color = cvScalar(rand() & 255, rand() & 255, rand() & 255);
+        cvCircle(surf1, cvPointFrom32f(it->p2), 2, color, -1);
+        cvCircle(surf2, cvPointFrom32f(it->p1), 2, color, -1);
+    }//*/
+
+    cvShowImage("surf1", surf1);
+    cvShowImage("surf2", surf2);
+
+    cvReleaseImage(&surf1);
+    cvReleaseImage(&surf2);//*/
+
+    delete im1;
+    delete im2;
+}
+
 inline void CRealMatches::testSurf(IplImage * img1, IplImage * img2) {
     clock_t myTime = clock();
 
     CvSeq *kp1 = NULL, *kp2 = NULL;
     CvSeq *desc1 = NULL, *desc2 = NULL;
     CvMemStorage *storage = cvCreateMemStorage(0);
-    cvExtractSURF(img1, NULL, &kp1, &desc1, storage, cvSURFParams(300, 0));
+    cvExtractSURF(img1, NULL, &kp1, &desc1, storage, cvSURFParams(200, 0));
     time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en surf1 = " << time << endl;
     myTime = clock();
-    cvExtractSURF(img2, NULL, &kp2, &desc2, storage, cvSURFParams(300, 0));
+    cvExtractSURF(img2, NULL, &kp2, &desc2, storage, cvSURFParams(200, 0));
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en surf2 = " << time << endl;
 
@@ -519,7 +696,7 @@ inline void CRealMatches::testSurf(IplImage * img1, IplImage * img2) {
     int fm_count = cvFindFundamentalMat(points1, points2, F, CV_FM_RANSAC, 1., 0.99, status);
     removeOutliers(&points1, &points2, status);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
-    cout << "Tiempo invertido en RANSAC = " << time << endl;
+    cout << "Tiempo invertido en RANSAC = " << time << endl;//*/
 
     CvScalar p;
 
@@ -532,10 +709,147 @@ inline void CRealMatches::testSurf(IplImage * img1, IplImage * img2) {
         pair.p2 = cvPoint2D32f(p.val[0], p.val[1]);
 
         pairs.push_back(pair);
-    }
+    }//*/
+    //this->bruteMatch2(kp1, desc1, kp2, desc2);
 
     //showPairs2("surf", img1, img2, points1, points2);
+
+    IplImage * surf1 = cvCreateImage(size, IPL_DEPTH_8U, 3);
+    IplImage * surf2 = cvCreateImage(size, IPL_DEPTH_8U, 3);
+
+    cvCvtColor(img1, surf1, CV_GRAY2BGR);
+    cvCvtColor(img2, surf2, CV_GRAY2BGR);
+
+    /*for (int i = 0; i < points1.size(); i++) {
+        cvCircle(surf1, cvPoint(points1[i].x, points1[i].y), 2, cvScalar(0, 0, 255), -1);
+    }
+
+    for (int i = 0; i < points2.size(); i++) {
+        cvCircle(surf2, cvPoint(points2[i].x, points2[i].y), 2, cvScalar(0, 0, 255), -1);
+    }//*/
+
+    for (vector<t_Pair>::iterator it = pairs.begin(); it != pairs.end(); it++) {
+    //for (vector<t_Pair>::iterator it = tmpPairs.begin(); it != tmpPairs.end(); it++) {
+        CvScalar color = cvScalar(rand() & 255, rand() & 255, rand() & 255);
+        cvCircle(surf1, cvPointFrom32f(it->p2), 2, color, -1);
+        cvCircle(surf2, cvPointFrom32f(it->p1), 2, color, -1);
+    }//*/
+
+    cvShowImage("surf1", surf1);
+    cvShowImage("surf2", surf2);
+
+    cvReleaseImage(&surf1);
+    cvReleaseImage(&surf2);//*/
 }
+
+double CRealMatches::distSquare(double *v1, double *v2, int n) {
+	double dsq = 0.;
+	while (n--) {
+		dsq += (*v1 - *v2) * (*v1 - *v2);
+		v1++;
+		v2++;
+	}
+	return dsq;
+}
+
+// Find closest interest point in a list, given one interest point
+int CRealMatches::findMatch(const ISurfPoint& ip1, const vector< ISurfPoint >& ipts, int vlen) {
+	double mind = 1e100, second = 1e100;
+	int match = -1;
+
+	for (unsigned i = 0; i < ipts.size(); i++) {
+
+		// Take advantage of Laplacian to speed up matching
+		if (ipts[i].laplace != ip1.laplace)
+			continue;
+
+		double d = distSquare(ipts[i].ivec, ip1.ivec, vlen);
+
+		if (d < mind) {
+			second = mind;
+			mind = d;
+			match = i;
+		} else if (d < second) {
+			second = d;
+		}
+
+	}
+
+	if (mind < 0.5 * second)
+		return match;
+
+	return -1;
+}
+
+// Find all possible matches between two images
+vector< int > CRealMatches::findMatches(const vector< ISurfPoint >& ipts1, const vector< ISurfPoint >& ipts2, int vlen) {
+	vector< int > matches(ipts1.size());
+	int c = 0;
+	for (unsigned i = 0; i < ipts1.size(); i++) {
+		int match = findMatch(ipts1[i], ipts2, vlen);
+		matches[i] = match;
+		if (match != -1) {
+                    c++;
+		}
+	}
+
+        return matches;
+}
+
+void CRealMatches::bruteMatch2(CvSeq *kp1, CvSeq *desc1, CvSeq *kp2, CvSeq * desc2) {
+    vector<ISurfPoint> points1;
+    vector<ISurfPoint> points2;
+    int vlen = desc1->total;
+    for (int i = 0; i < kp1->total; i++) {
+        ISurfPoint ip;
+        CvSURFPoint * surfPt = (CvSURFPoint *)cvGetSeqElem(kp1, i);
+        ip.x = surfPt->pt.x;
+        ip.y = surfPt->pt.y;
+        ip.scale = surfPt->size;
+        ip.ori = surfPt->dir;
+        ip.strength = surfPt->hessian;
+        ip.laplace = surfPt->laplacian;
+
+        ip.ivec = (double *) cvGetSeqElem(desc1, i);
+
+        points1.push_back(ip);
+    }
+    for (int i = 0; i < kp2->total; i++) {
+        ISurfPoint ip;
+        CvSURFPoint * surfPt = (CvSURFPoint *)cvGetSeqElem(kp2, i);
+        ip.x = surfPt->pt.x;
+        ip.y = surfPt->pt.y;
+        ip.scale = surfPt->size;
+        ip.ori = surfPt->dir;
+        ip.strength = surfPt->hessian;
+        ip.laplace = surfPt->laplacian;
+
+        ip.ivec = (double *) cvGetSeqElem(desc2, i);
+
+        points2.push_back(ip);
+    }
+    vector<int> matches = findMatches(points1, points2, vlen);    
+    
+    pairs.clear();    
+    for (int i = 0; i < matches.size(); i++) {        
+        if (matches.at(i) != -1) {            
+            bool isUsed = false;
+            for (int j = 0; j < i; j++) {
+                if (matches.at(j) == matches.at(i)) {
+                    isUsed = true;
+                    break;
+                }
+            }
+            if (!isUsed) {                
+                t_Pair pair;
+                pair.p1 = cvPoint2D32f(points1.at(i).x, points1.at(i).y);
+                pair.p2 = cvPoint2D32f(points2.at(matches.at(i)).x, points2.at(matches.at(i)).y);
+                pairs.push_back(pair);
+            }
+        }        
+    }              
+}
+
 
 // http://mirror2image.wordpress.com/2009/01/25/fast-with-surf-descriptor/
 
@@ -551,7 +865,7 @@ inline void CRealMatches::testFast(IplImage * img, vector<CvPoint2D32f> &points)
 
     points.clear();
     for (int i = 0; i < numCorners; i++) {
-        if (cvGetReal2D(pointsMask, corners[i].y, corners[i].x) == 255)
+        //if (cvGetReal2D(pointsMask, corners[i].y, corners[i].x) == 255)
             points.push_back(cvPointTo32f(corners[i]));
     }
 
@@ -759,11 +1073,15 @@ inline void CRealMatches::remap(CImageRegistration ir) {
     delete points2;
 }
 
-inline void CRealMatches::mainTest() {
+inline void CRealMatches::mainTest() {    
     //getPoints(img1, points1);
     //getPoints(img2, points2);
 
+    cvResize(img1, smallImg1);
+    cvResize(img2, smallImg2);
+
     clock_t myTime = clock();
+    //testFast(smallImg1, points1);
     testFast(img1, points1);
     //testFast(img2, points2);
     time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
@@ -777,8 +1095,17 @@ inline void CRealMatches::mainTest() {
     myTime = clock();
     //getOflow(img1, img2, points1, pairs1);
     //getOflow(img2, img1, points2, pairs2);
-    oFlow(points1, pairs, img1, img2);
-    //testSurf(img1, img2);
+    //oFlow(points1, pairs, smallImg1, smallImg2);
+    //oFlow(points1, pairs, img1, img2);
+    /*vector<t_Pair> tmpPairs;
+    for (int i = 0; i < pairs.size(); i++) {
+        tmpPairs.push_back(pairs.at(i));
+    }//*/
+    testSurf2(img1, img2);
+    /*for (int i = 0; i < tmpPairs.size(); i++) {
+        pairs.push_back(tmpPairs.at(i));
+    }//*/
+
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en oFlow = " << time << endl;
 
@@ -787,12 +1114,19 @@ inline void CRealMatches::mainTest() {
         return;
     }
 
+    /*for (int i = 0; i < pairs.size(); i++) {
+        pairs.at(i).p1.x *= 2;
+        pairs.at(i).p1.y *= 2;
+        pairs.at(i).p2.x *= 2;
+        pairs.at(i).p2.y *= 2;
+    }*/
+
     /*myTime = clock();
     fusePairs(pairs1, pairs2, false);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en fusion = " << time << endl;//*/
 
-    myTime = clock();    
+    myTime = clock();
     cleanRANSAC(CV_FM_RANSAC, pairs);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en ransac = " << time << endl;
@@ -834,8 +1168,8 @@ inline void CRealMatches::mainTest() {
     myTime = clock();
     //cvSmooth(img1, img1, CV_GAUSSIAN, 3);
     //cvSmooth(img2, img2, CV_GAUSSIAN, 3);    
-    pieceWiseLinear();
-    /*CViewMorphing wm(cvGetSize(img1));
+    //pieceWiseLinear();
+    CViewMorphing wm(cvGetSize(img1));
     IplImage * img1C = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 3);
     IplImage * img2C = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 3);
     cvCvtColor(img1, img1C, CV_GRAY2BGR);
@@ -872,8 +1206,8 @@ inline void CRealMatches::mainTest() {
     cout << "Tiempo invertido en calcPCA = " << time << endl; //*/
     
     myTime = clock();
-    //obstacleDetectionChauvenet(plinear, mask1);
-    obstacleDetectionQuartile(plinear, mask1);
+    obstacleDetectionChauvenet(plinear, mask1);
+    //obstacleDetectionQuartile(plinear, mask1);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en obstacleDetection = " << time << endl; //*/
 
@@ -926,17 +1260,20 @@ inline void CRealMatches::checkCoveredArea(IplImage * imgB, IplImage * imgA, int
         return;
     }
 
-    cvCopyImage(imgA, img1);
-    cvCopyImage(imgB, img2);
+    //cvCopyImage(imgA, img1);
+    //cvCopyImage(imgB, img2);
 
-    testFast(img1, points1);
+    cvResize(imgA, smallImg1);
+    cvResize(imgB, smallImg2);
+
+    testFast(smallImg1, points1);
     if (points1.size() < MIN_NFEAT) {
         coveredArea = 0;
 
         return;
     }
 
-    oFlow(points1, pairs, img1, img2);
+    oFlow(points1, pairs, smallImg1, smallImg2);
 
     if (pairs.size() < MIN_NFEAT) {
         coveredArea = 0;
@@ -951,10 +1288,10 @@ inline void CRealMatches::checkCoveredArea(IplImage * imgB, IplImage * imgA, int
         return;
     }
 
-    setMaskFromPoints(mask1, 2);
+//    setMaskFromPoints(mask1, 2);
     
-    coveredArea = cvCountNonZero(mask1);
-    //coveredArea = pairs.size();
+//    coveredArea = cvCountNonZero(mask1);
+    coveredArea = pairs.size();
 }
 
 void CRealMatches::startTest(string path, string filename, string testName) {
@@ -977,6 +1314,10 @@ void CRealMatches::startTest(string path, string filename, string testName) {
     cvNamedWindow("Img1", 1);
     cvNamedWindow("Img2", 1);
     cvNamedWindow("Mask", 1);
+
+    roadMask = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    CRoadDetection rd(size);
+    rd.detectFixed(roadMask);
 
     if (usePrevious) {
         cvNamedWindow("Prev1a", 1);
@@ -1002,7 +1343,7 @@ void CRealMatches::startTest(string path, string filename, string testName) {
         ifs.getline(line, 1024);
         //if ((abs(dist) > 1) || (abs(ang) > 225)) continue;
         if (abs(dist) > 1) continue;
-        if (abs(ang) > 10) continue;
+        if (abs(ang) > 5) continue;
         if ((dist < 0) && (ang < 0)) continue;
         if ((dist > 0) && (ang > 0)) continue;
 
@@ -1017,7 +1358,7 @@ void CRealMatches::startTest(string path, string filename, string testName) {
         cvReleaseImage(&img2L);
 
         clock_t myTime = clock();
-        mainTest();
+        mainTest();        
         time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo TOTAL = " << time << endl;
 
@@ -1240,7 +1581,7 @@ void CRealMatches::startTest4() {
             time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
             cout << "Tiempo TOTAL = " << time << endl;
 
-            int key = cvWaitKey(10);
+            int key = cvWaitKey(0);
             if (key == 27)
                 exit(0);
             if (key == 32)
@@ -1364,7 +1705,7 @@ void CRealMatches::startTest6() {
 
     //cvNamedWindow("ImgDB", 1);
     //cvNamedWindow("ImgRT", 1);
-    int index = 0;
+    int index = 120;
     ruta.setCurrentPoint(index);
     while (true) {
         clock_t myTime = clock();
@@ -1416,7 +1757,7 @@ void CRealMatches::startTest6() {
 
         if (index == 630) exit(0);
 
-        int key = cvWaitKey(20);
+        int key = cvWaitKey(0);
         if (key == 27)
             exit(0);
         if (key == 32)
@@ -1430,7 +1771,7 @@ void CRealMatches::startTest6() {
 }
 
 void CRealMatches::startTest7() {
-    int testIdx = 2;
+    int testIdx =0;
     char * PATH_BASE_IMG;    
     
     switch (testIdx) {
@@ -1528,4 +1869,119 @@ void CRealMatches::startTest7() {
 
     ifs.close();
 
+}
+
+#define TOTAL_MATCHES 100
+void CRealMatches::getNearest(IplImage * imgRT, IplImage * &imgDB, int index1, int index2, CRutaDB2 &ruta) {
+    cout << index1 << ", " << index2 << endl;
+    if (((int)((index2 - index1) / TOTAL_MATCHES)) <= 1) {
+        int maxCoincidence = INT_MIN;
+        int index = -1;
+        imgDB = cvCreateImage(size, IPL_DEPTH_8U, 1);
+
+        for (int i = index1; i <= index2; i++) {
+
+            IplImage * tmpDB;
+            ruta.getImageAt(tmpDB, TYPE_ST, i);
+            int coincidences;
+            checkCoveredArea(imgRT, tmpDB, coincidences);
+            if (coincidences > maxCoincidence) {
+                maxCoincidence = coincidences;
+                cvResize(tmpDB, imgDB);
+                index = i;
+            }
+
+            cvReleaseImage(&tmpDB);
+        }
+    } else {
+        int dif = (int)((index2 - index1) / TOTAL_MATCHES);
+
+        int maxCoincidence = INT_MIN;
+        int index = -1;        
+
+        for (int i = 0; i < TOTAL_MATCHES; i++) {            
+            IplImage * tmpDB;
+            ruta.getImageAt(tmpDB, TYPE_ST, i * dif + index1);            
+            
+            int coincidences;
+            checkCoveredArea(imgRT, tmpDB, coincidences);
+            if (coincidences > maxCoincidence) {
+                maxCoincidence = coincidences;                
+                index = i;
+            }
+
+            cvReleaseImage(&tmpDB);
+        }
+
+        int newIndex1 = index * dif + index1;
+        int newIndex2 = (index + 1) * dif + index1 - 1;       
+
+        getNearest(imgRT, imgDB, newIndex1, newIndex2, ruta);
+    }
+}
+
+void CRealMatches::startTestNearestImage() {
+    //CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
+    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/urbRadazulDiciembre08Base", "Rutas/urbRadazulDiciembre08obs", "/home/neztol/doctorado/Datos/DB");
+
+    for (int i = 900; i < ruta.getMaxRTPoint(); i += 20) {
+        IplImage * imgRT;
+        ruta.getImageAt(imgRT, TYPE_RT, i);
+        /*clock_t myTime = clock();
+        IplImage * imgDB;
+        getNearest(imgRT, imgDB, 0, ruta.getMaxSTPoint(), ruta);
+        time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo = " << time << endl;//*/
+        int maxCoincidence = INT_MIN;
+        int index = -1;
+        IplImage * imgDB = cvCreateImage(size, IPL_DEPTH_8U, 1);
+        int * nCoincidences = new int[ruta.getMaxSTPoint()];
+        clock_t myTime = clock();
+        for (int j = 0; j < ruta.getMaxSTPoint(); j++) {
+            IplImage * tmpDB;
+            ruta.getImageAt(tmpDB, TYPE_ST, j);
+            int coincidences;            
+            checkCoveredArea(imgRT, tmpDB, coincidences);
+            nCoincidences[j] = coincidences;
+            if (coincidences > maxCoincidence) {
+                maxCoincidence = coincidences;
+                cvResize(tmpDB, imgDB);
+                index = j;
+            }
+
+            cvReleaseImage(&tmpDB);
+        }
+        time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo = " << time << endl;
+        cout << i << " " << index << endl;//*/
+
+        cout << "coinc = [";
+        for (int j = 0; j < ruta.getMaxSTPoint() - 1; j++) {
+            cout << j << ", " << nCoincidences[j] << ";" << endl;
+        }
+        cout << (ruta.getMaxSTPoint() - 1) << ", " << nCoincidences[ruta.getMaxSTPoint() - 1] << "];" << endl;
+        
+        //cvShowImage("ImgRT", imgRT);
+        //cvShowImage("ImgDB", imgDB);
+
+        cvCopyImage(imgRT, img1);
+        cvCopyImage(imgDB, img2);
+        roadMask = cvCreateImage(size, IPL_DEPTH_8U, 1);
+        cvSet(roadMask, cvScalar(255));
+        cvSet(pointsMask, cvScalar(255));
+
+        //cvShowImage("ImgDB", imgDB);
+        //cvShowImage("ImgRT", imgRT);
+        //clock_t myTime = clock();
+        mainTest();
+
+        int key = cvWaitKey(0);
+        if (key == 27)
+            exit(0);
+        if (key == 32)
+            cvWaitKey(0);
+
+        cvReleaseImage(&imgDB);
+        cvReleaseImage(&imgRT);
+    }
 }

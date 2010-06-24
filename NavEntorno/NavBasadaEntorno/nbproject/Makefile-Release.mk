@@ -38,9 +38,10 @@ OBJECTFILES= \
 	${OBJECTDIR}/ImageRegistration.o \
 	${OBJECTDIR}/GeographicLib/AzimuthalEquidistant.o \
 	${OBJECTDIR}/NavEntorno.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.o \
 	${OBJECTDIR}/mainCjtosImagenes.o \
+	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.o \
 	${OBJECTDIR}/GeographicLib/PolarStereographic.o \
+	${OBJECTDIR}/CImageSearch.o \
 	${OBJECTDIR}/GeographicLib/Geodesic.o \
 	${OBJECTDIR}/GeographicLib/CassiniSoldner.o \
 	${OBJECTDIR}/NavBasadaEntorno.o \
@@ -61,6 +62,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Surf/os_mapping.o \
 	${OBJECTDIR}/mser/msertest.o \
 	${OBJECTDIR}/pruebasSurf.o \
+	${OBJECTDIR}/CRoadDetection.o \
 	${OBJECTDIR}/utils.o \
 	${OBJECTDIR}/AffineAndEuclidean.o \
 	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.o \
@@ -76,9 +78,12 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o \
 	${OBJECTDIR}/GeographicLib/TransverseMercatorExact.o \
 	${OBJECTDIR}/CRuta.o \
+	${OBJECTDIR}/ACO/CAntColony.o \
+	${OBJECTDIR}/CImageNavigation.o \
 	${OBJECTDIR}/GeographicLib/MGRS.o \
 	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/piecewiseLinear.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/pca.o
+	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/pca.o \
+	${OBJECTDIR}/ACO/aco.o
 
 # C Compiler Flags
 CFLAGS=
@@ -140,20 +145,25 @@ ${OBJECTDIR}/NavEntorno.o: nbproject/Makefile-${CND_CONF}.mk NavEntorno.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/NavEntorno.o NavEntorno.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
-	${RM} $@.d
-	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.o /home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.cpp
-
 ${OBJECTDIR}/mainCjtosImagenes.o: nbproject/Makefile-${CND_CONF}.mk mainCjtosImagenes.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/mainCjtosImagenes.o mainCjtosImagenes.cpp
 
+${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
+	${RM} $@.d
+	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.o /home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.cpp
+
 ${OBJECTDIR}/GeographicLib/PolarStereographic.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/PolarStereographic.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
 	${RM} $@.d
 	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/GeographicLib/PolarStereographic.o GeographicLib/PolarStereographic.cpp
+
+${OBJECTDIR}/CImageSearch.o: nbproject/Makefile-${CND_CONF}.mk CImageSearch.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/CImageSearch.o CImageSearch.cpp
 
 ${OBJECTDIR}/GeographicLib/Geodesic.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/Geodesic.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
@@ -255,6 +265,11 @@ ${OBJECTDIR}/pruebasSurf.o: nbproject/Makefile-${CND_CONF}.mk pruebasSurf.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/pruebasSurf.o pruebasSurf.cpp
 
+${OBJECTDIR}/CRoadDetection.o: nbproject/Makefile-${CND_CONF}.mk CRoadDetection.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/CRoadDetection.o CRoadDetection.cpp
+
 ${OBJECTDIR}/utils.o: nbproject/Makefile-${CND_CONF}.mk utils.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
@@ -330,6 +345,16 @@ ${OBJECTDIR}/CRuta.o: nbproject/Makefile-${CND_CONF}.mk CRuta.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/CRuta.o CRuta.cpp
 
+${OBJECTDIR}/ACO/CAntColony.o: nbproject/Makefile-${CND_CONF}.mk ACO/CAntColony.cpp 
+	${MKDIR} -p ${OBJECTDIR}/ACO
+	${RM} $@.d
+	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/ACO/CAntColony.o ACO/CAntColony.cpp
+
+${OBJECTDIR}/CImageNavigation.o: nbproject/Makefile-${CND_CONF}.mk CImageNavigation.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/CImageNavigation.o CImageNavigation.cpp
+
 ${OBJECTDIR}/GeographicLib/MGRS.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/MGRS.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
 	${RM} $@.d
@@ -344,6 +369,11 @@ ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/pca.o: nbproject
 	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
 	${RM} $@.d
 	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/pca.o /home/neztol/NetBeansProjects/NavBasadaEntorno/pca.cpp
+
+${OBJECTDIR}/ACO/aco.o: nbproject/Makefile-${CND_CONF}.mk ACO/aco.cpp 
+	${MKDIR} -p ${OBJECTDIR}/ACO
+	${RM} $@.d
+	$(COMPILE.cc) -O3 -s -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -I/usr/local/include -MMD -MP -MF $@.d -o ${OBJECTDIR}/ACO/aco.o ACO/aco.cpp
 
 # Subprojects
 .build-subprojects:
