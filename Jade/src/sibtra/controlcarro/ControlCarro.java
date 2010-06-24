@@ -192,7 +192,7 @@ public class ControlCarro implements SerialPortEventListener {
 //	private double kPDesfreno = 1.5;
 	
 	/** Ganancia proporcional del PID de avance */
-	private double kPAvance = 2.0;
+	private double kPAvance = 1.0;
 	/** Ganancia defivativa del PID de avance */
 	private double kDAvance = 0.3;
 	/** Ganancia integral del PID de avance */
@@ -228,7 +228,7 @@ public class ControlCarro implements SerialPortEventListener {
 	/**	Registrador de todos los datos del PID de avance*/
 	private LoggerArrayDoubles logControl;
 
-	double FactorFreno=20;
+	double FactorFreno=15;
 	
 	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato */
 	private Object mutexDatos;
@@ -262,7 +262,7 @@ public class ControlCarro implements SerialPortEventListener {
 		logMenEnviados= LoggerFactory.nuevoLoggerArrayInts(this, "mensajesEnviados",(int)(1/T)+1);
 		logMenEnviados.setDescripcion("ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno");
 		logControl=LoggerFactory.nuevoLoggerArrayDoubles(this, "controlPID",(int)(1/T)+1);
-		logControl.setDescripcion("consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,apertura");
+		logControl.setDescripcion("consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,apertura,Kp,Ki");
 	}
 
 	/**
@@ -882,19 +882,20 @@ public class ControlCarro implements SerialPortEventListener {
 		double IncComando = comandotemp - comandoAnt;
 		
 		//Limitamos el incremento de comando
-		IncComando=UtilCalculos.limita(IncComando,-255,maxInc);
+		if(comandotemp>0)
+			IncComando=UtilCalculos.limita(IncComando,-255,maxInc);
 		comando=comandoAnt+IncComando;
 		//Limitamos el comando maximo a aplicar
-		comando=UtilCalculos.limita(comando, -255, MAXAVANCE);
+		comando=UtilCalculos.limita(comando, -25500, MAXAVANCE);
 		//umbralizamos la zona muerta
 		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, ZonaMuerta, -1);
 //				, -90/FactorFreno+comandoAnt);  //TODO da valores positivos
 		
 
 		int apertura=0;
-		if (comando >= 0) {
-			if(comandoAnt<=0) {
-				menosFrena(255, 255);
+		if (comando > 0) {
+			if(comandoAnt<0) {
+				menosFrena(apertura=255, 255);
 //				DesFrena(255);
 //				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
 			}
@@ -902,24 +903,26 @@ public class ControlCarro implements SerialPortEventListener {
 		}
 		else {
 			double IncCom=comando-comandoAnt;
-			if(IncCom<=0) {
+			if(IncCom<0) {
 				apertura=-(int)(IncCom*FactorFreno);
 				apertura=UtilCalculos.limita(apertura, 20, 150);
 				masFrena( apertura,30); /** Es un comando negativo, por lo que hay que frenar */
 				System.err.println("Mas frena "+apertura);
-			} else {
+			} else if(IncCom> maxInc){
 				apertura=(int)(IncCom*FactorFreno);
 				apertura=UtilCalculos.limita(apertura, 20, 150);
 				menosFrena(apertura,30);
 				System.err.println("menos frena "+apertura);
 				apertura=-apertura;
 			}
+			//ente 0 y masInc no hace nada
 		}
 		//guardamos todo para la iteración siguiente
 		errorAnt = error;
 		derivativoAnt = derivativo;
 		comandoAnt = comando;
-		logControl.add((double)consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,(double)apertura);
+		logControl.add((double)consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,(double)apertura
+				,kPAvance,kIAvance);
 	}
 	
 	public double getComando() {

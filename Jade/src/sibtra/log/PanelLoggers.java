@@ -58,6 +58,7 @@ public class PanelLoggers extends JTabbedPane {
 	/** Vector con los loger considerados y si están seleccionados */
 	Vector<ApuntaLog> vecLA=null;
 	private ModeloTablaLoggers modeloTL;
+	private AbstractAction accionParaSalvaLimpia;
 
 	final static int COL_SEL=0;
 	final static int COL_NOM=1;
@@ -119,6 +120,18 @@ public class PanelLoggers extends JTabbedPane {
 				buttonPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
 				buttonPane.add(Box.createHorizontalGlue());
+				
+				accionParaSalvaLimpia=new AbstractAction("Para/Salva/Limpia") {
+//					{ setName("Refrescar"); }
+					public void actionPerformed(ActionEvent e) {
+						accionDesactivar.actionPerformed(null);
+						accionSalvar.actionPerformed(null);
+						accionLimpiar.actionPerformed(null);
+					}
+				};
+				buttonPane.add(new JButton(accionParaSalvaLimpia));
+
+				buttonPane.add(Box.createRigidArea(new Dimension(10, 0)));
 				
 				accionRefrescar=new AbstractAction("Refrescar") {
 //					{ setName("Refrescar"); }
