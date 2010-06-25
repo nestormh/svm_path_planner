@@ -228,6 +228,9 @@ public class ControlCarro implements SerialPortEventListener {
 	/**	Registrador de todos los datos del PID de avance*/
 	private LoggerArrayDoubles logControl;
 
+	/**	Registrador de todos los parámetros del PID de avance*/
+	private LoggerArrayDoubles logParamPID;
+
 	double FactorFreno=15;
 	
 	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato */
@@ -262,7 +265,9 @@ public class ControlCarro implements SerialPortEventListener {
 		logMenEnviados= LoggerFactory.nuevoLoggerArrayInts(this, "mensajesEnviados",(int)(1/T)+1);
 		logMenEnviados.setDescripcion("ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno");
 		logControl=LoggerFactory.nuevoLoggerArrayDoubles(this, "controlPID",(int)(1/T)+1);
-		logControl.setDescripcion("consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,apertura,Kp,Ki");
+		logControl.setDescripcion("consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,apertura");
+		logParamPID=LoggerFactory.nuevoLoggerArrayDoubles(this, "ParamPID",(int)(1/T)+1);
+		logParamPID.setDescripcion("[kPAvance,kIAvance,kDAvance,maxInc, FactorFreno]");
 	}
 
 	/**
@@ -923,6 +928,7 @@ public class ControlCarro implements SerialPortEventListener {
 		comandoAnt = comando;
 		logControl.add((double)consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,(double)apertura
 				,kPAvance,kIAvance);
+		logParamPID.add(kPAvance,kIAvance,kDAvance,maxInc, FactorFreno);
 	}
 	
 	public double getComando() {
