@@ -149,13 +149,13 @@ void CRealMatches::obstacleDetectionQuartile(IplImage * pcaResult, IplImage * ma
     
     cvDilate(obstaclesMask, obstaclesMask);
 
-    IplImage * tmpImg = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    /*IplImage * tmpImg = cvCreateImage(size, IPL_DEPTH_8U, 1);
     cvCopyImage(obstaclesMask, tmpImg);
     cvAnd(obstaclesMask, lastObst, obstaclesMask);
     cvCopyImage(tmpImg, lastObst);
-    cvReleaseImage(&tmpImg);
+    cvReleaseImage(&tmpImg);//*/
 
-    cvAnd(obstaclesMask, roadMask, obstaclesMask);
+    //cvAnd(obstaclesMask, roadMask, obstaclesMask);
 
     cvNamedWindow("ObstacleQDilated", 1);
     cvShowImage("ObstacleQDilated", obstaclesMask);//*/
@@ -179,7 +179,7 @@ void CRealMatches::detectObstacles(IplImage * mask) {
 
     for (; contour != 0; contour = contour->h_next) {
         CvScalar color = CV_RGB(rand()&255, rand()&255, rand()&255);
-        if (fabs(cvContourArea(contour)) > 40) {
+        if (fabs(cvContourArea(contour)) > 4 * 40) {
             /* replace CV_FILLED with 1 to see the outlines */
             cvDrawContours(maskResult, contour, color, color, -1, CV_FILLED, 8);
 

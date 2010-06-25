@@ -82,17 +82,6 @@ private:
 
         t_Statistic_Item * statItem;
 
-        // Function that find a surf feature in a image represented by an Image structure
-        vector< Ipoint > surfFeatureFinder(IplImage * img, double thresh, int &vLength);
-        // Calculate square distance of two vectors
-        double distSquare(double *v1, double *v2, int n);
-        // Find closest interest point in a list, given one interest point
-        int findSurfMatch(const Ipoint& ip1, const vector< Ipoint >& ipts, int vlen);
-        // Find all possible matches between two images
-        void findSurfMatches(const vector< Ipoint >& ipts1, const vector< Ipoint >& ipts2, int vLength);
-        // Finds and matches the features by using SURF
-        void SurfFeatureTracker(IplImage * img1, IplImage * &img2);
-
         void cleanUsingDelaunay(IplImage * img1, IplImage * img2);
         bool areSameTriangles(triangle tri1, triangle tri2);
         bool areSameTrianglesIndexed(triangle tri1, triangle tri2);

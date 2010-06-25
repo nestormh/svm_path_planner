@@ -48,13 +48,13 @@
         <itemPath>ACO/aco.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f3" displayName="fast" projectFiles="true">
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_10.cc</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_11.cc</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.cc</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_9.cc</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cvfast.cpp</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cvfast.h</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/fast_tree_openCV</itemPath>
+        <itemPath>fast/cv_fast_10.cc</itemPath>
+        <itemPath>fast/cv_fast_11.cc</itemPath>
+        <itemPath>fast/cv_fast_12.cc</itemPath>
+        <itemPath>fast/cv_fast_9.cc</itemPath>
+        <itemPath>fast/cvfast.cpp</itemPath>
+        <itemPath>fast/cvfast.h</itemPath>
+        <itemPath>fast/fast_tree_openCV</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="GeographicalLib" projectFiles="true">
         <itemPath>GeographicLib/AzimuthalEquidistant.cpp</itemPath>
@@ -92,8 +92,8 @@
         <itemPath>CImageSearch.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f4" displayName="memcount" projectFiles="true">
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.cpp</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.hpp</itemPath>
+        <itemPath>memcount/memcount.cpp</itemPath>
+        <itemPath>memcount/memcount.hpp</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="mser" projectFiles="true">
         <itemPath>mser/msertest.cpp</itemPath>
@@ -102,20 +102,20 @@
                      displayName="NavBasadaEntorno"
                      projectFiles="true">
         <itemPath>AffineAndEuclidean.cpp</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.cpp</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.h</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.cpp</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.h</itemPath>
+        <itemPath>CMRPT_Route.cpp</itemPath>
+        <itemPath>CMRPT_Route.h</itemPath>
+        <itemPath>CRealMatches.cpp</itemPath>
+        <itemPath>CRealMatches.h</itemPath>
         <itemPath>CRoadDetection.cpp</itemPath>
         <itemPath>CRoadDetection.h</itemPath>
         <itemPath>CRuta.cpp</itemPath>
         <itemPath>CRuta.h</itemPath>
         <itemPath>CRutaDB.cpp</itemPath>
         <itemPath>CRutaDB.h</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.cpp</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.h</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.cpp</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.h</itemPath>
+        <itemPath>CRutaDB2.cpp</itemPath>
+        <itemPath>CRutaDB2.h</itemPath>
+        <itemPath>CStatistics.cpp</itemPath>
+        <itemPath>CStatistics.h</itemPath>
         <itemPath>ContourMatching.cpp</itemPath>
         <itemPath>CornerDetectionAndMatching.cpp</itemPath>
         <itemPath>Flusser.cpp</itemPath>
@@ -127,24 +127,20 @@
         <itemPath>NonRigidTransform.cpp</itemPath>
         <itemPath>ViewMorphing.cpp</itemPath>
         <itemPath>ViewMorphing.h</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/changeDetection.cpp</itemPath>
+        <itemPath>changeDetection.cpp</itemPath>
         <itemPath>mainCjtosImagenes.cpp</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/pca.cpp</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/piecewiseLinear.cpp</itemPath>
+        <itemPath>pca.cpp</itemPath>
+        <itemPath>piecewiseLinear.cpp</itemPath>
         <itemPath>pruebasSurf.cpp</itemPath>
         <itemPath>resource.h</itemPath>
         <itemPath>stdafx.cpp</itemPath>
         <itemPath>stdafx.h</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/stereo.cpp</itemPath>
+        <itemPath>stereo.cpp</itemPath>
         <itemPath>utils.cpp</itemPath>
         <itemPath>utils.h</itemPath>
-        <itemPath>/home/neztol/NetBeansProjects/NavBasadaEntorno/wm.cpp</itemPath>
+        <itemPath>wm.cpp</itemPath>
         <itemPath>xform.cpp</itemPath>
         <itemPath>xform.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="Surf" displayName="Surf" projectFiles="true">
-        <itemPath>Surf/imload.cpp</itemPath>
-        <itemPath>Surf/os_mapping.cpp</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -154,6 +150,8 @@
     </logicalFolder>
     <itemPath>CImageNavigation.cpp</itemPath>
     <itemPath>CImageNavigation.h</itemPath>
+    <itemPath>SurfGPU.cpp</itemPath>
+    <itemPath>SurfGPU.h</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>/usr/local/include/opencv</Elem>
@@ -223,6 +221,7 @@
             <pElem>/usr/local/include/opencv</pElem>
             <pElem>/usr/include/gtk-2.0</pElem>
             <pElem>/usr/local/include</pElem>
+            <pElem>../../gpusurf-0.2.0/include</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -232,18 +231,20 @@
           <output>navbasadaentorno</output>
           <linkerAddLib>
             <pElem>/usr/local/lib</pElem>
+            <pElem>/tmp/SURF-V1.0.9</pElem>
+            <pElem>../../gpusurf-0.2.0/build/lib</pElem>
           </linkerAddLib>
           <stripSymbols>true</stripSymbols>
           <linkerLibItems>
-            <linkerLibFileItem>/usr/local/lib/libcv.so</linkerLibFileItem>
             <linkerLibLibItem>cvaux</linkerLibLibItem>
+            <linkerLibLibItem>cv</linkerLibLibItem>
+            <linkerLibLibItem>ml</linkerLibLibItem>
             <linkerLibLibItem>cxcore</linkerLibLibItem>
             <linkerLibLibItem>highgui</linkerLibLibItem>
-            <linkerLibLibItem>ml</linkerLibLibItem>
             <linkerLibLibItem>gsl</linkerLibLibItem>
             <linkerLibLibItem>gslcblas</linkerLibLibItem>
-            <linkerLibLibItem>SurfJni</linkerLibLibItem>
             <linkerLibLibItem>sqlite3</linkerLibLibItem>
+            <linkerLibLibItem>gpusurf</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

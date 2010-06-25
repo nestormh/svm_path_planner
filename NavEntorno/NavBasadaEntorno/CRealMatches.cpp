@@ -496,179 +496,6 @@ inline void CRealMatches::paint(char * img1Name, char * img2Name, char * plinear
     cvReleaseImage(&resta);
 }
 
-vector< Ipoint > CRealMatches::findSURF(Image *im, double thresh, int &VLength) {
-    // Length of the descriptor vector
-    VLength = 0;
-    // Initial sampling step (default 2)
-    int samplingStep = 2;
-    // Number of analysed octaves (default 4)
-    int octaves = 4;
-    // Blob response treshold
-    double thres = thresh; //4.0;
-    // Set this flag "true" to double the image size
-    bool doubleImageSize = false;
-    // Initial lobe size, default 3 and 5 (with double image size)
-    int initLobe = 3;
-    // Upright SURF or rotation invaraiant
-    bool upright = true;
-    // If the extended flag is turned on, SURF 128 is used
-    bool extended = false;
-    // Spatial size of the descriptor window (default 4)
-    int indexSize = 4;
-    // Variables for the timing measure
-    osmapping::os_TIME tim1, tim2; //STS
-    // verbose output
-    bool bVerbose = true;
-    // skip sign of laplacian
-    bool bLaplacian = false;
-
-    bool bLoadRegions = false;
-    string sRegionFile = "";
-
-    // Start measuring the time
-    osmapping::os_GetTime(&tim1);
-
-    // Create the integral image
-    Image iimage(im, doubleImageSize);
-
-    // These are the interest points
-    vector< Ipoint > ipts;
-    ipts.reserve(1000);
-
-    // Extract interest points with Fast-Hessian
-    FastHessian fh(&iimage, /* pointer to integral image */
-            ipts,
-            thres, /* blob response threshold */
-            doubleImageSize, /* double image size flag */
-            initLobe * 3 /* 3 times lobe size equals the mask size */,
-            samplingStep, /* subsample the blob response map */
-            octaves /* number of octaves to be analysed */);
-
-    fh.getInterestPoints();
-
-    // Initialise the SURF descriptor
-    Surf des(&iimage, /* pointer to integral image */
-            doubleImageSize, /* double image size flag */
-            upright, /* rotation invariance or upright */
-            extended, /* use the extended descriptor */
-            indexSize /* square size of the descriptor window (default 4x4)*/);
-
-    // Get the length of the descriptor vector resulting from the parameters
-    VLength = des.getVectLength();
-    // Compute the orientation and the descriptor for every interest point
-    for (unsigned n = 0; n < ipts.size(); n++) {
-        //for (Ipoint *k = ipts; k != NULL; k = k->next){
-        // set the current interest point
-        des.setIpoint(&ipts[n]);
-        // assign reproducible orientation
-        des.assignOrientation();
-        // make the SURF descriptor
-        des.makeDescriptor();
-    }
-
-    // stop measuring the time, we're all done
-    osmapping::os_GetTime(&tim2);
-
-    return ipts;
-}
-
-void CRealMatches::testSurf2(IplImage * img1, IplImage * img2) {
-    Image *im1 = new Image(img1->width, img1->height);
-    Image *im2 = new Image(img2->width, img2->height);
-
-    for (int y = 0; y < img1->height; y++) {
-        for (int x = 0; x < img1->width; x++) {
-            im1->setPix(x, y, cvGetReal2D(img1, y, x));
-            im2->setPix(x, y, cvGetReal2D(img2, y, x));
-        }
-    }
-
-    int vlength1, vlength2;
-    vector< Ipoint > ipts1 = findSURF(im1, 500, vlength1);
-    vector< Ipoint > ipts2 = findSURF(im2, 500, vlength2);
-
-    cout << ipts1.size() << endl;
-
-    vector< ISurfPoint > iSpts1;
-    vector< ISurfPoint > iSpts2;
-    for (int i = 0; i < ipts1.size(); i++) {
-        ISurfPoint p;
-        p.x = ipts1.at(i).x;
-        p.y = ipts1.at(i).y;
-        p.scale = ipts1.at(i).scale;
-        p.strength = ipts1.at(i).strength;
-        p.ori = ipts1.at(i).ori;
-        p.laplace = ipts1.at(i).laplace;
-        p.ivec = ipts1.at(i).ivec;
-
-        iSpts1.push_back(p);
-    }
-
-    for (int i = 0; i < ipts2.size(); i++) {
-        ISurfPoint p;
-        p.x = ipts2.at(i).x;
-        p.y = ipts2.at(i).y;
-        p.scale = ipts2.at(i).scale;
-        p.strength = ipts2.at(i).strength;
-        p.ori = ipts2.at(i).ori;
-        p.laplace = ipts2.at(i).laplace;
-        p.ivec = ipts2.at(i).ivec;
-
-        iSpts2.push_back(p);
-    }
-
-    vector<int> matches = findMatches(iSpts1, iSpts2, vlength1);
-
-    pairs.clear();
-    for (int i = 0; i < matches.size(); i++) {
-        if (matches.at(i) != -1) {
-            bool isUsed = false;
-            for (int j = 0; j < i; j++) {
-                if (matches.at(j) == matches.at(i)) {
-                    isUsed = true;
-                    break;
-                }
-            }
-            if (!isUsed) {
-                t_Pair pair;
-                pair.p1 = cvPoint2D32f(iSpts1.at(i).x, iSpts1.at(i).y);
-                pair.p2 = cvPoint2D32f(iSpts2.at(matches.at(i)).x, iSpts2.at(matches.at(i)).y);
-                pairs.push_back(pair);
-            }
-        }
-    }//*/
-
-    IplImage * surf1 = cvCreateImage(size, IPL_DEPTH_8U, 3);
-    IplImage * surf2 = cvCreateImage(size, IPL_DEPTH_8U, 3);
-
-    cvCvtColor(img1, surf1, CV_GRAY2BGR);
-    cvCvtColor(img2, surf2, CV_GRAY2BGR);
-
-    /*for (int i = 0; i < iSpts1.size(); i++) {
-        cvCircle(surf1, cvPoint(iSpts1[i].x, iSpts1[i].y), 2, cvScalar(0, 0, 255), -1);
-    }
-
-    for (int i = 0; i < iSpts2.size(); i++) {
-        cvCircle(surf2, cvPoint(iSpts2[i].x, iSpts2[i].y), 2, cvScalar(0, 0, 255), -1);
-    }//*/
-
-    for (vector<t_Pair>::iterator it = pairs.begin(); it != pairs.end(); it++) {
-    //for (vector<t_Pair>::iterator it = tmpPairs.begin(); it != tmpPairs.end(); it++) {
-        CvScalar color = cvScalar(rand() & 255, rand() & 255, rand() & 255);
-        cvCircle(surf1, cvPointFrom32f(it->p2), 2, color, -1);
-        cvCircle(surf2, cvPointFrom32f(it->p1), 2, color, -1);
-    }//*/
-
-    cvShowImage("surf1", surf1);
-    cvShowImage("surf2", surf2);
-
-    cvReleaseImage(&surf1);
-    cvReleaseImage(&surf2);//*/
-
-    delete im1;
-    delete im2;
-}
-
 inline void CRealMatches::testSurf(IplImage * img1, IplImage * img2) {
     clock_t myTime = clock();
 
@@ -696,7 +523,7 @@ inline void CRealMatches::testSurf(IplImage * img1, IplImage * img2) {
     int fm_count = cvFindFundamentalMat(points1, points2, F, CV_FM_RANSAC, 1., 0.99, status);
     removeOutliers(&points1, &points2, status);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
-    cout << "Tiempo invertido en RANSAC = " << time << endl;//*/
+    cout << "Tiempo invertido en RANSAC = " << time << endl;//* /
 
     CvScalar p;
 
@@ -775,7 +602,7 @@ int CRealMatches::findMatch(const ISurfPoint& ip1, const vector< ISurfPoint >& i
 
 	}
 
-	if (mind < 0.5 * second)
+	if (mind < 0.8 * second)
 		return match;
 
 	return -1;
@@ -1101,7 +928,7 @@ inline void CRealMatches::mainTest() {
     for (int i = 0; i < pairs.size(); i++) {
         tmpPairs.push_back(pairs.at(i));
     }//*/
-    testSurf2(img1, img2);
+    testSurf(img1, img2);
     /*for (int i = 0; i < tmpPairs.size(); i++) {
         pairs.push_back(tmpPairs.at(i));
     }//*/
@@ -1168,8 +995,8 @@ inline void CRealMatches::mainTest() {
     myTime = clock();
     //cvSmooth(img1, img1, CV_GAUSSIAN, 3);
     //cvSmooth(img2, img2, CV_GAUSSIAN, 3);    
-    //pieceWiseLinear();
-    CViewMorphing wm(cvGetSize(img1));
+    pieceWiseLinear();
+    /*CViewMorphing wm(cvGetSize(img1));
     IplImage * img1C = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 3);
     IplImage * img2C = cvCreateImage(cvGetSize(img1), IPL_DEPTH_8U, 3);
     cvCvtColor(img1, img1C, CV_GRAY2BGR);
@@ -1206,8 +1033,8 @@ inline void CRealMatches::mainTest() {
     cout << "Tiempo invertido en calcPCA = " << time << endl; //*/
     
     myTime = clock();
-    obstacleDetectionChauvenet(plinear, mask1);
-    //obstacleDetectionQuartile(plinear, mask1);
+    //obstacleDetectionChauvenet(plinear, mask1);
+    obstacleDetectionQuartile(plinear, mask1);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en obstacleDetection = " << time << endl; //*/
 
@@ -1581,7 +1408,7 @@ void CRealMatches::startTest4() {
             time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
             cout << "Tiempo TOTAL = " << time << endl;
 
-            int key = cvWaitKey(0);
+            int key = cvWaitKey(20);
             if (key == 27)
                 exit(0);
             if (key == 32)

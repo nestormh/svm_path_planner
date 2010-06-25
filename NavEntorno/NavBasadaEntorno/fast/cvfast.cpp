@@ -150,7 +150,7 @@ cvCornerFast( const CvArr* input_image, int threshold, int N, int nonmax_suppres
 
 	CvMat stub, *src;
 
-    __BEGIN__;
+    __CV_BEGIN__;
 
 	if(!input_image)
         CV_ERROR( CV_StsNullPtr, "" );
@@ -214,6 +214,6 @@ cvCornerFast( const CvArr* input_image, int threshold, int N, int nonmax_suppres
 
 	free(scores);
 
-    __END__;
+    __CV_END__;
 }
 

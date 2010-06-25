@@ -89,8 +89,6 @@ private:
     void cleanRANSAC(int method, vector<t_Pair> &pairs);
     void fusePairs(vector<t_Pair> pairs1, vector<t_Pair> pairs2, bool crossed);
     void paint(char * img1Name = "Img1", char * img2Name = "Img2", char * plinearName = "PLinear", char * diffName = "Resta");
-    vector< Ipoint > findSURF(Image *im, double thresh, int &VLength);
-    void testSurf2(IplImage * img1, IplImage * img2);
     void testSurf(IplImage * img1, IplImage * img2);
     double distSquare(double *v1, double *v2, int n);
     int findMatch(const ISurfPoint& ip1, const vector< ISurfPoint >& ipts, int vlen);
@@ -176,5 +174,6 @@ private:
     IplImage * lastObst;
 };
 
-#endif	/* _CREALMATCHES_H */
+int gpuSurf(int argc, char * argv[]);
 
+#endif	/* _CREALMATCHES_H */

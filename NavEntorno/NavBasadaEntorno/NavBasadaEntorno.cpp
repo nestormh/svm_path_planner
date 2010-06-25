@@ -9,8 +9,9 @@
 #include "CStatistics.h"
 #include "CImageSearch.h"
 #include "CImageNavigation.h"
+#include "SurfGPU.h"
 
-#define EJECUCION 19
+#define EJECUCION 17
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -843,7 +844,7 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 12: {
-            CRealMatches rm(false);
+            CRealMatches rm(false, SIZE2);
             rm.startTest4();
             break;
         }
@@ -868,7 +869,7 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 17: {
-            CRealMatches rm(false, SIZE3);            
+            CRealMatches rm(false, SIZE2);
             rm.startTest7();
             break;
         }
@@ -880,9 +881,14 @@ int main(int argc, _TCHAR argv[]) {
         }
         case 19: {
             //CImageNavigation in("/home/neztol/doctorado/Datos/DB/Rutas/urbRadazulDiciembre08Base/Camera0/");
-            //CImageNavigation in("/home/neztol/doctorado/Datos/MRPT_Data/malaga2009_campus_2L/Images_rect/");
-            CImageNavigation in("/home/neztol/doctorado/Datos/EstadisticasITER/tripode3/");
-            in.makePairs();
+            CImageNavigation in("/home/neztol/doctorado/Datos/MRPT_Data/malaga2009_campus_2L/Images_rect/", "jpg");
+            //CImageNavigation in("/home/neztol/doctorado/Datos/EstadisticasITER/tripode3/");
+            in.makePairsOFlow();
+            break;
+        }
+        case 20: {
+            SurfGPU surf;
+            surf.testSurf(string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0560.JPG"), string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0555.JPG"));
             break;
         }
         default: {

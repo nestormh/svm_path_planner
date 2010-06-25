@@ -34,55 +34,54 @@ OBJECTFILES= \
 	${OBJECTDIR}/GeographicLib/DMS.o \
 	${OBJECTDIR}/NonRigidTransform.o \
 	${OBJECTDIR}/GeographicLib/UTMUPS.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.o \
+	${OBJECTDIR}/CRutaDB2.o \
 	${OBJECTDIR}/ImageRegistration.o \
 	${OBJECTDIR}/GeographicLib/AzimuthalEquidistant.o \
+	${OBJECTDIR}/changeDetection.o \
+	${OBJECTDIR}/fast/cv_fast_9.o \
 	${OBJECTDIR}/NavEntorno.o \
+	${OBJECTDIR}/pca.o \
 	${OBJECTDIR}/mainCjtosImagenes.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.o \
 	${OBJECTDIR}/GeographicLib/PolarStereographic.o \
 	${OBJECTDIR}/CImageSearch.o \
 	${OBJECTDIR}/GeographicLib/Geodesic.o \
 	${OBJECTDIR}/GeographicLib/CassiniSoldner.o \
 	${OBJECTDIR}/NavBasadaEntorno.o \
-	${OBJECTDIR}/Surf/imload.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/wm.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.o \
 	${OBJECTDIR}/GeographicLib/Geocentric.o \
+	${OBJECTDIR}/memcount/memcount.o \
 	${OBJECTDIR}/GeographicLib/TransverseMercator.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/stereo.o \
 	${OBJECTDIR}/ContourMatching.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_10.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_11.o \
 	${OBJECTDIR}/Flusser.o \
+	${OBJECTDIR}/CMRPT_Route.o \
 	${OBJECTDIR}/GeographicLib/GeoCoords.o \
 	${OBJECTDIR}/CornerDetectionAndMatching.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cvfast.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.o \
-	${OBJECTDIR}/Surf/os_mapping.o \
+	${OBJECTDIR}/fast/cv_fast_11.o \
+	${OBJECTDIR}/fast/cvfast.o \
+	${OBJECTDIR}/stereo.o \
 	${OBJECTDIR}/mser/msertest.o \
 	${OBJECTDIR}/pruebasSurf.o \
 	${OBJECTDIR}/CRoadDetection.o \
 	${OBJECTDIR}/utils.o \
 	${OBJECTDIR}/AffineAndEuclidean.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.o \
+	${OBJECTDIR}/CStatistics.o \
 	${OBJECTDIR}/GeographicLib/LocalCartesian.o \
+	${OBJECTDIR}/fast/cv_fast_12.o \
 	${OBJECTDIR}/GeographicLib/EllipticFunction.o \
 	${OBJECTDIR}/ViewMorphing.o \
+	${OBJECTDIR}/piecewiseLinear.o \
 	${OBJECTDIR}/stdafx.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_9.o \
 	${OBJECTDIR}/GeographicLib/Geoid.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/changeDetection.o \
 	${OBJECTDIR}/CRutaDB.o \
 	${OBJECTDIR}/xform.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o \
+	${OBJECTDIR}/SurfGPU.o \
+	${OBJECTDIR}/fast/cv_fast_10.o \
 	${OBJECTDIR}/GeographicLib/TransverseMercatorExact.o \
 	${OBJECTDIR}/CRuta.o \
 	${OBJECTDIR}/ACO/CAntColony.o \
 	${OBJECTDIR}/CImageNavigation.o \
 	${OBJECTDIR}/GeographicLib/MGRS.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/piecewiseLinear.o \
-	${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/pca.o \
+	${OBJECTDIR}/CRealMatches.o \
+	${OBJECTDIR}/wm.o \
 	${OBJECTDIR}/ACO/aco.o
 
 # C Compiler Flags
@@ -123,10 +122,10 @@ ${OBJECTDIR}/GeographicLib/UTMUPS.o: nbproject/Makefile-${CND_CONF}.mk Geographi
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/GeographicLib/UTMUPS.o GeographicLib/UTMUPS.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount
+${OBJECTDIR}/CRutaDB2.o: nbproject/Makefile-${CND_CONF}.mk CRutaDB2.cpp 
+	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.o /home/neztol/NetBeansProjects/NavBasadaEntorno/memcount/memcount.cpp
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/CRutaDB2.o CRutaDB2.cpp
 
 ${OBJECTDIR}/ImageRegistration.o: nbproject/Makefile-${CND_CONF}.mk ImageRegistration.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -138,20 +137,30 @@ ${OBJECTDIR}/GeographicLib/AzimuthalEquidistant.o: nbproject/Makefile-${CND_CONF
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/GeographicLib/AzimuthalEquidistant.o GeographicLib/AzimuthalEquidistant.cpp
 
+${OBJECTDIR}/changeDetection.o: nbproject/Makefile-${CND_CONF}.mk changeDetection.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/changeDetection.o changeDetection.cpp
+
+${OBJECTDIR}/fast/cv_fast_9.o: nbproject/Makefile-${CND_CONF}.mk fast/cv_fast_9.cc 
+	${MKDIR} -p ${OBJECTDIR}/fast
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/fast/cv_fast_9.o fast/cv_fast_9.cc
+
 ${OBJECTDIR}/NavEntorno.o: nbproject/Makefile-${CND_CONF}.mk NavEntorno.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/NavEntorno.o NavEntorno.cpp
 
+${OBJECTDIR}/pca.o: nbproject/Makefile-${CND_CONF}.mk pca.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/pca.o pca.cpp
+
 ${OBJECTDIR}/mainCjtosImagenes.o: nbproject/Makefile-${CND_CONF}.mk mainCjtosImagenes.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/mainCjtosImagenes.o mainCjtosImagenes.cpp
-
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.o /home/neztol/NetBeansProjects/NavBasadaEntorno/CMRPT_Route.cpp
 
 ${OBJECTDIR}/GeographicLib/PolarStereographic.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/PolarStereographic.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
@@ -178,55 +187,35 @@ ${OBJECTDIR}/NavBasadaEntorno.o: nbproject/Makefile-${CND_CONF}.mk NavBasadaEnto
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/NavBasadaEntorno.o NavBasadaEntorno.cpp
 
-${OBJECTDIR}/Surf/imload.o: nbproject/Makefile-${CND_CONF}.mk Surf/imload.cpp 
-	${MKDIR} -p ${OBJECTDIR}/Surf
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Surf/imload.o Surf/imload.cpp
-
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/wm.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/wm.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/wm.o /home/neztol/NetBeansProjects/NavBasadaEntorno/wm.cpp
-
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.o /home/neztol/NetBeansProjects/NavBasadaEntorno/CStatistics.cpp
-
 ${OBJECTDIR}/GeographicLib/Geocentric.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/Geocentric.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/GeographicLib/Geocentric.o GeographicLib/Geocentric.cpp
+
+${OBJECTDIR}/memcount/memcount.o: nbproject/Makefile-${CND_CONF}.mk memcount/memcount.cpp 
+	${MKDIR} -p ${OBJECTDIR}/memcount
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/memcount/memcount.o memcount/memcount.cpp
 
 ${OBJECTDIR}/GeographicLib/TransverseMercator.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/TransverseMercator.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/GeographicLib/TransverseMercator.o GeographicLib/TransverseMercator.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/stereo.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/stereo.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/stereo.o /home/neztol/NetBeansProjects/NavBasadaEntorno/stereo.cpp
-
 ${OBJECTDIR}/ContourMatching.o: nbproject/Makefile-${CND_CONF}.mk ContourMatching.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/ContourMatching.o ContourMatching.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_10.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_10.cc 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_10.o /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_10.cc
-
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_11.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_11.cc 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_11.o /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_11.cc
-
 ${OBJECTDIR}/Flusser.o: nbproject/Makefile-${CND_CONF}.mk Flusser.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Flusser.o Flusser.cpp
+
+${OBJECTDIR}/CMRPT_Route.o: nbproject/Makefile-${CND_CONF}.mk CMRPT_Route.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/CMRPT_Route.o CMRPT_Route.cpp
 
 ${OBJECTDIR}/GeographicLib/GeoCoords.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/GeoCoords.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
@@ -238,20 +227,20 @@ ${OBJECTDIR}/CornerDetectionAndMatching.o: nbproject/Makefile-${CND_CONF}.mk Cor
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/CornerDetectionAndMatching.o CornerDetectionAndMatching.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cvfast.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cvfast.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast
+${OBJECTDIR}/fast/cv_fast_11.o: nbproject/Makefile-${CND_CONF}.mk fast/cv_fast_11.cc 
+	${MKDIR} -p ${OBJECTDIR}/fast
 	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cvfast.o /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cvfast.cpp
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/fast/cv_fast_11.o fast/cv_fast_11.cc
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
+${OBJECTDIR}/fast/cvfast.o: nbproject/Makefile-${CND_CONF}.mk fast/cvfast.cpp 
+	${MKDIR} -p ${OBJECTDIR}/fast
 	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.o /home/neztol/NetBeansProjects/NavBasadaEntorno/CRealMatches.cpp
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/fast/cvfast.o fast/cvfast.cpp
 
-${OBJECTDIR}/Surf/os_mapping.o: nbproject/Makefile-${CND_CONF}.mk Surf/os_mapping.cpp 
-	${MKDIR} -p ${OBJECTDIR}/Surf
+${OBJECTDIR}/stereo.o: nbproject/Makefile-${CND_CONF}.mk stereo.cpp 
+	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Surf/os_mapping.o Surf/os_mapping.cpp
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/stereo.o stereo.cpp
 
 ${OBJECTDIR}/mser/msertest.o: nbproject/Makefile-${CND_CONF}.mk mser/msertest.cpp 
 	${MKDIR} -p ${OBJECTDIR}/mser
@@ -278,15 +267,20 @@ ${OBJECTDIR}/AffineAndEuclidean.o: nbproject/Makefile-${CND_CONF}.mk AffineAndEu
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/AffineAndEuclidean.o AffineAndEuclidean.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
+${OBJECTDIR}/CStatistics.o: nbproject/Makefile-${CND_CONF}.mk CStatistics.cpp 
+	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.o /home/neztol/NetBeansProjects/NavBasadaEntorno/CRutaDB2.cpp
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/CStatistics.o CStatistics.cpp
 
 ${OBJECTDIR}/GeographicLib/LocalCartesian.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/LocalCartesian.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/GeographicLib/LocalCartesian.o GeographicLib/LocalCartesian.cpp
+
+${OBJECTDIR}/fast/cv_fast_12.o: nbproject/Makefile-${CND_CONF}.mk fast/cv_fast_12.cc 
+	${MKDIR} -p ${OBJECTDIR}/fast
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/fast/cv_fast_12.o fast/cv_fast_12.cc
 
 ${OBJECTDIR}/GeographicLib/EllipticFunction.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/EllipticFunction.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
@@ -298,25 +292,20 @@ ${OBJECTDIR}/ViewMorphing.o: nbproject/Makefile-${CND_CONF}.mk ViewMorphing.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/ViewMorphing.o ViewMorphing.cpp
 
+${OBJECTDIR}/piecewiseLinear.o: nbproject/Makefile-${CND_CONF}.mk piecewiseLinear.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/piecewiseLinear.o piecewiseLinear.cpp
+
 ${OBJECTDIR}/stdafx.o: nbproject/Makefile-${CND_CONF}.mk stdafx.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/stdafx.o stdafx.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_9.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_9.cc 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_9.o /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_9.cc
-
 ${OBJECTDIR}/GeographicLib/Geoid.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/Geoid.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/GeographicLib/Geoid.o GeographicLib/Geoid.cpp
-
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/changeDetection.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/changeDetection.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
-	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/changeDetection.o /home/neztol/NetBeansProjects/NavBasadaEntorno/changeDetection.cpp
 
 ${OBJECTDIR}/CRutaDB.o: nbproject/Makefile-${CND_CONF}.mk CRutaDB.cpp 
 	${MKDIR} -p ${OBJECTDIR}
@@ -328,10 +317,15 @@ ${OBJECTDIR}/xform.o: nbproject/Makefile-${CND_CONF}.mk xform.cpp
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/xform.o xform.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.cc 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast
+${OBJECTDIR}/SurfGPU.o: nbproject/Makefile-${CND_CONF}.mk SurfGPU.cpp 
+	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.o /home/neztol/NetBeansProjects/NavBasadaEntorno/fast/cv_fast_12.cc
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/SurfGPU.o SurfGPU.cpp
+
+${OBJECTDIR}/fast/cv_fast_10.o: nbproject/Makefile-${CND_CONF}.mk fast/cv_fast_10.cc 
+	${MKDIR} -p ${OBJECTDIR}/fast
+	${RM} $@.d
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/fast/cv_fast_10.o fast/cv_fast_10.cc
 
 ${OBJECTDIR}/GeographicLib/TransverseMercatorExact.o: nbproject/Makefile-${CND_CONF}.mk GeographicLib/TransverseMercatorExact.cpp 
 	${MKDIR} -p ${OBJECTDIR}/GeographicLib
@@ -358,15 +352,15 @@ ${OBJECTDIR}/GeographicLib/MGRS.o: nbproject/Makefile-${CND_CONF}.mk GeographicL
 	${RM} $@.d
 	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/GeographicLib/MGRS.o GeographicLib/MGRS.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/piecewiseLinear.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/piecewiseLinear.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
+${OBJECTDIR}/CRealMatches.o: nbproject/Makefile-${CND_CONF}.mk CRealMatches.cpp 
+	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/piecewiseLinear.o /home/neztol/NetBeansProjects/NavBasadaEntorno/piecewiseLinear.cpp
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/CRealMatches.o CRealMatches.cpp
 
-${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/pca.o: nbproject/Makefile-${CND_CONF}.mk /home/neztol/NetBeansProjects/NavBasadaEntorno/pca.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno
+${OBJECTDIR}/wm.o: nbproject/Makefile-${CND_CONF}.mk wm.cpp 
+	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/home/neztol/NetBeansProjects/NavBasadaEntorno/pca.o /home/neztol/NetBeansProjects/NavBasadaEntorno/pca.cpp
+	$(COMPILE.cc) -g -Isift -ILeastSquares -I/usr/local/include/opencv -I/usr/include/gtk-2.0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/wm.o wm.cpp
 
 ${OBJECTDIR}/ACO/aco.o: nbproject/Makefile-${CND_CONF}.mk ACO/aco.cpp 
 	${MKDIR} -p ${OBJECTDIR}/ACO
