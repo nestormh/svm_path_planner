@@ -1,6 +1,10 @@
 package sibtra.controlcarro;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import sibtra.log.VentanaLoggers;
@@ -30,7 +34,24 @@ public class VentanaCoche extends JFrame {
 		super("Control Carro");
 		if(cc==null) 
 			throw new IllegalArgumentException("Control de carro pasado no puede ser null");
-		panCarro=new PanelCarro(cc);
+		panCarro=new PanelCarro(cc) {
+			final class accFijaVel extends AbstractAction {
+				double velAplicar=0.0;
+				public accFijaVel(double vel) {
+					super(vel+" ");
+					velAplicar=vel;
+				}
+				public void actionPerformed(ActionEvent ev) {
+					contCarro.setConsignaAvanceMS(velAplicar);
+				}
+			}
+			{ //inicializador de la instancia, reemplaza al constructor
+				añadeAPanel(new JButton(new accFijaVel(0)), "Cons.V");
+				añadeAPanel(new JButton(new accFijaVel(1)), "Cons.V");
+				añadeAPanel(new JButton(new accFijaVel(2)), "Cons.V");
+				añadeAPanel(new JButton(new accFijaVel(3)), "Cons.V");
+			}
+		};
 
 		add(panCarro,BorderLayout.CENTER);
 		panCarro.actulizacionPeridodica(milisPeriodo);
