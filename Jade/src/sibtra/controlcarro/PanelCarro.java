@@ -26,47 +26,47 @@ import sibtra.util.SpinnerInt;
 public class PanelCarro extends PanelDatos implements ActionListener, ChangeListener {
 
 	/** Maximo comando de velocidad esperado */
-	private static final int maxComVelocidad = 255;
+	protected static final int maxComVelocidad = 255;
 
 	/** Conexión al carro*/
-	private ControlCarro contCarro;
+	protected ControlCarro contCarro;
 
 	/** Para elegir consigna para el volante */
-	private SpinnerNumberModel jspMConsignaVolante;
+	protected SpinnerNumberModel jspMConsignaVolante;
 	/** Para aplicar consigna del volante */
-	private JButton jbAplicaConsignaVolante;
+	protected JButton jbAplicaConsignaVolante;
 
 	/** para saber si se están recibiendo paquetes del coche */
-	private int cuentaBytes=0;
+	protected int cuentaBytes=0;
 	
 	/** Para elegir consigna para la velocidad */
-	private SpinnerNumberModel jspMConsignaVelocidad;
+	protected SpinnerNumberModel jspMConsignaVelocidad;
 	/** Para aplicar consigna de velocidad */
-	private JButton jbAplicaConsignaVelocidad;
-//	private SpinnerNumberModel jspMAvance;
-	private JProgressBar jBarraComVel;
+	protected JButton jbAplicaConsignaVelocidad;
+//	protected SpinnerNumberModel jspMAvance;
+	protected JProgressBar jBarraComVel;
 
-	private SpinnerNumberModel jspTiempoFrena;
+	protected SpinnerNumberModel jspTiempoFrena;
 
-	private SpinnerNumberModel jspValorFrena;
+	protected SpinnerNumberModel jspValorFrena;
 
-	private JButton jbAplicaFreno;
+	protected JButton jbAplicaFreno;
 
-	private SpinnerNumberModel jspTiempoDesFrena;
+	protected SpinnerNumberModel jspTiempoDesFrena;
 
-	private SpinnerNumberModel jspValorDesFrena;
+	protected SpinnerNumberModel jspValorDesFrena;
 
-	private JButton jbAplicaDesFreno;
+	protected JButton jbAplicaDesFreno;
 
-	private JButton jbDesfrena;
+	protected JButton jbDesfrena;
 
-	private SpinnerNumberModel jspValorFactorFrena;
+	protected SpinnerNumberModel jspValorFactorFrena;
 
-	private JButton jbParaControl;
+	protected JButton jbParaControl;
 
-	private SpinnerNumberModel jspMAvance;
+	protected SpinnerNumberModel jspMAvance;
 
-	private JButton jbAplicaAvance;
+	protected JButton jbAplicaAvance;
 
 	public PanelCarro(ControlCarro cc) {
 		super();
