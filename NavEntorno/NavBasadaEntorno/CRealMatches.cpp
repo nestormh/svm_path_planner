@@ -928,7 +928,18 @@ inline void CRealMatches::mainTest() {
     for (int i = 0; i < pairs.size(); i++) {
         tmpPairs.push_back(pairs.at(i));
     }//*/
-    testSurf(img1, img2);
+    //testSurf(img1, img2);
+    vector<t_SURF_Pair> pairsSurf;
+    surfGpu.testSurf(img1, img2, pairsSurf);
+    pairs.clear();
+    for (int i = 0; i < pairsSurf.size(); i++) {
+        t_Pair pair;
+        pair.p1 = cvPointTo32f(pairsSurf.at(i).kp1.pt);
+        pair.p2 = cvPointTo32f(pairsSurf.at(i).kp2.pt);
+
+        pairs.push_back(pair);
+    }//*/
+
     /*for (int i = 0; i < tmpPairs.size(); i++) {
         pairs.push_back(tmpPairs.at(i));
     }//*/
@@ -1389,14 +1400,14 @@ void CRealMatches::startTest4() {
             ifs1.getline(line1, 1024);
             ifs2.getline(line2, 1024);
 
-            string imgPath = path + (*it) + "Images/" + line1;
+            string imgPath = path + (*it) + "Images_rect/" + line1;
             cout << imgPath << ", ";
             IplImage * img1L = cvLoadImage(imgPath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
             cvResize(img1L, img1);
             //cvSmooth(img1, img1, CV_GAUSSIAN, 3);
             cvReleaseImage(&img1L);
             
-            imgPath = path + (*it) + "Images/" + line2;
+            imgPath = path + (*it) + "Images_rect/" + line2;
             cout << imgPath << endl;
             IplImage * img2L = cvLoadImage(imgPath.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
             cvResize(img2L, img2);
@@ -1657,7 +1668,7 @@ void CRealMatches::startTest7() {
         DBpath += line;
         DBpath += ".JPG";
 
-        if (abs(dist) > 1) continue;
+        if (abs(dist) > 0) continue;
         if ((dist == -1) && (angle < 0)) continue;        
         if ((dist == 1) && (angle > 0)) continue;
         if (abs(angle) > 10) continue;

@@ -295,7 +295,8 @@ int mesrTest(const IplImage * img, char * name, t_moment * &momentList, int &nMo
         cvNamedWindow(name, 1);
 
         //cvExtractMSER(maskRegions, NULL, &contours, storage, cvMSERParams( 5, 60, 1000, .25, .2, 200, 1.01, .003, 5 ) );
-        cvExtractMSER(maskRegions, NULL, &contours, storage, cvMSERParams( 5, 200, 5000, .25, .2, 200, 1.01, .003, 1 ) );
+        //cvExtractMSER(maskRegions, NULL, &contours, storage, cvMSERParams( 5, 200, 5000, .25, .2, 200, 1.01, .003, 1 ) );
+        cvExtractMSER(maskRegions, NULL, &contours, storage, cvMSERParams( 5, 60, 640 * 480, .25, .2, 200, 1.01, .003, 1 ) );
 
         momentList = new t_moment[contours->total];
         nMoments = contours->total;
@@ -329,7 +330,7 @@ int mesrTest(const IplImage * img, char * name, t_moment * &momentList, int &nMo
             momentList[i].normHu[5] = ((momentList[i].hu.hu6 < 0)? -1: 1) * log(abs(momentList[i].hu.hu6));
             momentList[i].normHu[6] = ((momentList[i].hu.hu7 < 0)? -1: 1) * log(abs(momentList[i].hu.hu7));
             
-            cvEllipseBox( result, box, colors[10], 1 );            
+            //cvEllipseBox( result, box, colors[10], 1 );
             CvPoint2D32f pts[4];
             cvBoxPoints(box, pts);
             //cvRectangle(result, cvPointFrom32f(pts[0]), cvPointFrom32f(pts[2]), colors[10]);

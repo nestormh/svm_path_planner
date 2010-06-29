@@ -17,6 +17,7 @@
 #include "Surf/imload.h"
 #include "Surf/surflib.h"
 #include "Surf/os_mapping.h"
+#include "SurfGPU.h"
 
 
 #define MIN_NFEAT 8
@@ -172,6 +173,8 @@ private:
     bool usePrevious;
 
     IplImage * lastObst;
+
+    SurfGPU surfGpu;
 };
 
 int gpuSurf(int argc, char * argv[]);

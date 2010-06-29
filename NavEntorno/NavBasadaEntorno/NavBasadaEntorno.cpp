@@ -11,7 +11,7 @@
 #include "CImageNavigation.h"
 #include "SurfGPU.h"
 
-#define EJECUCION 17
+#define EJECUCION 12
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -888,7 +888,9 @@ int main(int argc, _TCHAR argv[]) {
         }
         case 20: {
             SurfGPU surf;
-            surf.testSurf(string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0560.JPG"), string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0555.JPG"));
+            surf.testSurf(string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0605.JPG"), string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0555.JPG"));
+            
+            //surf.testSurf(string("/home/neztol/doctorado/Datos/imagenesSueltas/cocina1.jpg"), string("/home/neztol/doctorado/Datos/imagenesSueltas/cocina2.jpg"));
             break;
         }
         default: {
