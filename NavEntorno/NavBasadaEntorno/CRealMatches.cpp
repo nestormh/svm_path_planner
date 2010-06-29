@@ -938,7 +938,7 @@ inline void CRealMatches::mainTest() {
         pair.p2 = cvPointTo32f(pairsSurf.at(i).kp2.pt);
 
         pairs.push_back(pair);
-    }//*/
+    }
 
     /*for (int i = 0; i < tmpPairs.size(); i++) {
         pairs.push_back(tmpPairs.at(i));
