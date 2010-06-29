@@ -205,7 +205,7 @@ public class ControlCarro implements SerialPortEventListener {
 	private double consignaVel = 0;
 
 	/** Maximo incremento permitido en el comando para evitar aceleraciones bruscas */
-	private int maxInc = 1;
+	private int maxInc = 2;
         
 	/** Zona Muerta donde el motor empieza a actuar realmente 	 */
 	static final int ZonaMuerta = 60;
@@ -231,10 +231,11 @@ public class ControlCarro implements SerialPortEventListener {
 	/**	Registrador de todos los parámetros del PID de avance*/
 	private LoggerArrayDoubles logParamPID;
 
-	double FactorFreno=15;
+	double FactorFreno=30;
 	
 	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato */
 	private Object mutexDatos;
+	private double comandoNOUmbralizadoAnt;
 
 	/**
 	 * Crea la conexión serial al carro en el puerto indicado.
@@ -265,7 +266,7 @@ public class ControlCarro implements SerialPortEventListener {
 		logMenEnviados= LoggerFactory.nuevoLoggerArrayInts(this, "mensajesEnviados",(int)(1/T)+1);
 		logMenEnviados.setDescripcion("ConsignaVolante,ComandoVelocidad,ConsignaFreno,ConsignaNumPasosFreno");
 		logControl=LoggerFactory.nuevoLoggerArrayDoubles(this, "controlPID",(int)(1/T)+1);
-		logControl.setDescripcion("consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,apertura");
+		logControl.setDescripcion("consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,apertura,avanceAplicado");
 		logParamPID=LoggerFactory.nuevoLoggerArrayDoubles(this, "ParamPID",(int)(1/T)+1);
 		logParamPID.setDescripcion("[kPAvance,kIAvance,kDAvance,maxInc, FactorFreno]");
 	}
@@ -870,8 +871,8 @@ public class ControlCarro implements SerialPortEventListener {
 		if (!controlando) 
 			return;
 
-//		if (consignaVel == 0)
-//			stopControlVel();
+		if (consignaVel == 0 && velocidadCS<20)
+			stopControlVel();
 
 		double error = consignaVel - velocidadCS;
 		//derivativo como y(k)-y(k-2)
@@ -886,27 +887,40 @@ public class ControlCarro implements SerialPortEventListener {
 		double comandotemp = kPAvance * error + kDAvance * derivativo + kIAvance * integral;
 		double IncComando = comandotemp - comandoAnt;
 		
+		double maxDec=4;
 		//Limitamos el incremento de comando
 		if(comandotemp>0)
-			IncComando=UtilCalculos.limita(IncComando,-255,maxInc);
+			if (comandoAnt<0)
+				IncComando=-comandoAnt+maxInc;
+			else
+				IncComando=UtilCalculos.limita(IncComando,-255,maxInc);
+		else if (comandotemp<0)//el comando temp es negativo
+			if(comandoAnt>0)
+				IncComando=-comandoAnt-maxDec;
+			else
+				IncComando=UtilCalculos.limita(IncComando,-maxDec,255);
 		comando=comandoAnt+IncComando;
 		//Limitamos el comando maximo a aplicar
 		comando=UtilCalculos.limita(comando, -25500, MAXAVANCE);
 		//umbralizamos la zona muerta
-		comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, ZonaMuerta, -1);
+//		double comandoNOUmbralizado=comando;
+//		comando=UtilCalculos.zonaMuertaCon0(comando, comandoNOUmbralizadoAnt, ZonaMuerta, -1);
 //				, -90/FactorFreno+comandoAnt);  //TODO da valores positivos
-		
 
 		int apertura=0;
+		int avanceAplicado=0;
 		if (comando > 0) {
-			if(comandoAnt<0) {
+			if(comandoAnt<=0) {
 				menosFrena(apertura=255, 255);
 //				DesFrena(255);
 //				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
 			}
-			Avanza((int)comando);
+			avanceAplicado=(int)comando;
+//			avanceAplicado=(int)UtilCalculos.zonaMuertaCon0(comando, 
+//					comandoNOUmbralizadoAnt, ZonaMuerta, -1);
+			Avanza(avanceAplicado);
 		}
-		else {
+		else if (comando<0) {
 			double IncCom=comando-comandoAnt;
 			if(IncCom<0) {
 				apertura=-(int)(IncCom*FactorFreno);
@@ -922,12 +936,13 @@ public class ControlCarro implements SerialPortEventListener {
 			}
 			//ente 0 y masInc no hace nada
 		}
+		//comando 0 no hacemos nada
+		
 		//guardamos todo para la iteración siguiente
 		errorAnt = error;
 		derivativoAnt = derivativo;
 		comandoAnt = comando;
-		logControl.add((double)consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,(double)apertura
-				,kPAvance,kIAvance);
+		logControl.add((double)consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,(double)apertura,avanceAplicado);
 		logParamPID.add(kPAvance,kIAvance,kDAvance,maxInc, FactorFreno);
 	}
 	
@@ -1042,6 +1057,7 @@ public class ControlCarro implements SerialPortEventListener {
 		comandoAnt = 0;
 		integral = 0;
 		Avanza(0);
+		masFrena(150, 60);
 	}
 
 	/**
