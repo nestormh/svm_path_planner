@@ -35,13 +35,21 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	private ThreadSupendible thCiclico;
 	double distInicio;
 	double longitudTramoDesp;
-	int indiceInicial = 0;
-	int indiceFinal;
+	/** Indice contando a partir del punto más cercano al coche en el que empieza la rampa**/
+	int indiceInicial = 10;
+	/** Indice contando a partir del punto más cercano al coche en el que acaba la rampa**/
+	int indiceFinal = indiceInicial + 20;
+	int finalRampa = 0;
+	boolean centroDesplazado = false;
+	boolean esquivando = false;
 	
 	Coche modCoche;
 	public int umbralDesp = 30;
 	public double gananciaLateral = 0.1;
-	public double periodoMuestreoMili = 1250;
+	public double periodoMuestreoMili = 100;
+	private Trayectoria trAux;
+	private Trayectoria trDesplazada;
+	private boolean rampaPasada = false;
 	/**
 	 * Seteador de la distancia a partir del coche a la que se desea empezar a desplazar
 	 * lateralmente la trayectoria
@@ -92,6 +100,8 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	@Override
 	public void setTrayectoriaInicial(Trayectoria tra) {
 		this.trayectoria = tra;
+		trAux = new Trayectoria(trayectoria);
+		trDesplazada = new Trayectoria(trayectoria);
 	}
 
 	@Override
@@ -123,22 +133,111 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			private long tSig;			
 
 			@Override
-			protected void accion() {
+			protected void accion() {				
 				//apuntamos cual debe ser el instante siguiente
-		        tSig = System.currentTimeMillis() + (long)periodoMuestreoMili ;
-//		        if (calcular){
+		        tSig = System.currentTimeMillis() + (long)periodoMuestreoMili;
 		        accionPeriodica();
-//		        }				
 		        //esperamos hasta que haya pasado el tiempo convenido
 				while (System.currentTimeMillis() < tSig) {
 		            try {
 		                Thread.sleep(tSig - System.currentTimeMillis());
 		            } catch (Exception e) {}
 		        }
-			}			
+			}						
 		};
 		thCiclico.setName(getNombre());
 		return todoBien;
+	}
+	
+	private boolean isAlineado(Trayectoria tr) {
+		boolean alineado = false;
+		double umbralRumbo = Math.toRadians(20);
+		double umbralSeparacion = 0.8;
+		tr.situaCoche(motor.getModeloCoche().getX(),motor.getModeloCoche().getY());
+		int masCercano = tr.indiceMasCercano();
+		double difRumbo = Math.abs(motor.getModeloCoche().getYaw()-tr.rumbo[masCercano]);
+		if((difRumbo < umbralRumbo) && (tr.distanciaAlMasCercano() < umbralSeparacion)){
+			alineado = true;
+		}else{
+			alineado = false;
+		}
+		return alineado;
+		
+	}
+	
+	private void desplazaTrayectoria(double despLateral,int masCercano,
+			int indInicial,int indFinal){
+		double despX = 0; 
+		double despY = 0;
+		double dx = trayectoria.x[(indFinal+masCercano)%trayectoria.length()]-
+					trayectoria.x[(indInicial+masCercano)%trayectoria.length()];
+		double dy = trayectoria.y[(indFinal+masCercano)%trayectoria.length()]-
+					trayectoria.y[(indInicial+masCercano)%trayectoria.length()];
+		double distanciaRampa = Math.sqrt(dx*dx+dy*dy);
+		double despLateralMax = despLateral;
+		double pendiente = Math.abs(despLateralMax)/distanciaRampa;
+		for(int i=0;i<trayectoria.length();i++){
+			despY = -Math.cos(trayectoria.rumbo[i])*despLateral;
+			despX = Math.sin(trayectoria.rumbo[i])*despLateral;
+//			trDesplazada.x[i] = trayectoria.x[i] + despX;
+//			trDesplazada.y[i] = trayectoria.y[i] + despY;	
+			//condición que cumplen los puntos de la trayectoria que se encuentran
+			//por delante del coche				
+			if(i>(masCercano+indInicial)%trayectoria.length()){
+	
+				if (i<masCercano+indFinal){ //Sección de la trayectoria en rampa
+					double posXrampa = trayectoria.getLargo(indInicial+masCercano, i);
+					despLateral = (posXrampa)*pendiente;
+				}					
+				// Se calcula un desplazamiento lateral perpendicular al rumbo de cada punto 
+				despY = -Math.cos(trayectoria.rumbo[i])*despLateral;
+				despX = Math.sin(trayectoria.rumbo[i])*despLateral;
+				//Se añade el desplazamiento a las coordenadas del punto
+				trAux.x[i] = trayectoria.x[i] + despX;
+				trAux.y[i] = trayectoria.y[i] + despY;					
+				double dxAux = trAux.x[i]-trAux.x[i-1];
+				double dyAux = trAux.y[i]-trAux.y[i-1];
+				trAux.rumbo[i] = Math.atan2(dyAux,dxAux);
+			}else{//no modificamos si los puntos no están por delante del coche
+				trAux.x[i] = trayectoria.x[i];
+				trAux.y[i] = trayectoria.y[i];
+				trAux.rumbo[i] = trayectoria.rumbo[i];
+			}								
+		}	
+	}
+	
+	private void vuelveTrayectoriaOriginal(double despLateral,int masCercano,
+			int indInicial,int indFinal){
+		double despX = 0;
+		double despY = 0;
+		double dx = trAux.x[(indFinal+masCercano)%trAux.length()]-
+					trAux.x[(indInicial+masCercano)%trAux.length()];
+		double dy = trAux.y[(indFinal+masCercano)%trAux.length()]-
+					trAux.y[(indInicial+masCercano)%trAux.length()];
+		double distanciaRampa = Math.sqrt(dx*dx+dy*dy);
+		double pendiente = -Math.abs(despLateral)/distanciaRampa;
+		for(int j=0;j<trAux.length();j++){
+			
+			if(j>(masCercano)%trAux.length() &&
+					   j<=(masCercano+indFinal)%trAux.length()){
+				if(j>masCercano+indInicial){
+					double posXrampa = trAux.getLargo(indInicial+masCercano,j);
+					despLateral = (posXrampa)*pendiente;
+					despY = -Math.cos(trAux.rumbo[j])*despLateral;
+					despX = Math.sin(trAux.rumbo[j])*despLateral;
+				}								
+				//Se añade el desplazamiento a las coordenadas del punto
+				trAux.x[j] = trAux.x[j] + despX;
+				trAux.y[j] = trAux.y[j] + despY;
+				double dxAux = trAux.x[j]-trAux.x[j-1];
+				double dyAux = trAux.y[j]-trAux.y[j-1];
+				trAux.rumbo[j] = Math.atan2(dyAux,dxAux);
+			}else{
+				trAux.x[j] = trayectoria.x[j];
+				trAux.y[j] = trayectoria.y[j];
+				trAux.rumbo[j] = trayectoria.rumbo[j];
+			}
+		}
 	}
 	
 	private void accionPeriodica() {
@@ -146,56 +245,76 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
 //		System.out.println(ShmInterface.getResolucionHoriz());
 		int distIzquierda = ShmInterface.getAcoLeftDist();
-		double despLateral = 0;
+		double centro = (double)distIzquierda + (double)(distDerecha-distIzquierda)/2;
+		double despLateral = 0;		
+		int masCercano = 0;
+		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
+		masCercano = trayectoria.indiceMasCercano();
 		if (distIzquierda>umbralDesp){
-			despLateral = distIzquierda*gananciaLateral;    // Cuando el desp es a la izquierda es negativo
+			despLateral = distIzquierda*gananciaLateral;    // Cuando el desp es a la izquierda es negativo			
+//			finalRampa = masCercano+indiceFinal;
+			centroDesplazado = true;
 		}else if(distDerecha>umbralDesp){
-			despLateral = -distDerecha*gananciaLateral;
+			despLateral = -distDerecha*gananciaLateral;			
+//			finalRampa = masCercano+indiceFinal;
+			centroDesplazado = true;
 		}else{
-			despLateral = 0;
+			despLateral = 0;			
+			if(masCercano>trayectoria.indiceMasCercano()+indiceFinal){
+			}
 		}
 		
-		System.out.println("Dist Izquierda " + distIzquierda + "\\\\\\ Dist Derecha " + distDerecha);
+		//Comprobamos si el coche ya ha superado la rampa
+		if (masCercano > finalRampa){
+			rampaPasada  = true;
+		}
+		
+//		System.out.println("Dist Izquierda " + distIzquierda + "\\\\\\ Dist Derecha " + distDerecha);
 		//La trayectoria original se le indica al modificadorACO a través del método
-		//setTrayectoriaInicial y no se modifica
-		Trayectoria trAux = new Trayectoria(trayectoria); 
+		//setTrayectoriaInicial y no se modifica		
 		double despX = 0;
 		double despY = 0;			
 //		setDistInicio(1);
 //		setLongitudTramoDesp(4);
 //		calculaIndiceInicial();
 //		calculaIndiceFinal();
-		// Es necesario situar el coche en la ruta antes de buscar el indice más cercano 
-		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
-		if(trayectoria.length() != 0){
-//			for(int i=(trayectoria.indiceMasCercano()+indiceInicial)%trayectoria.length();
-//			i<(trayectoria.indiceMasCercano()+indiceFinal)%trayectoria.length();
-//			i=(i+1)%trayectoria.length()){			
-			//Recorremos todos los puntos de la trayectoria
-			for(int i=0;i<trayectoria.length();i++){
-				//condición que cumplen los puntos de la trayectoria que se encuentran
-				//por delante del coche
-				if(i>(trayectoria.indiceMasCercano()+indiceInicial)%trayectoria.length() &&
-				   i<(trayectoria.indiceMasCercano()+indiceFinal)%trayectoria.length()){
-					// Se calcula un desplazamiento lateral perpendicular al rumbo de cada punto 
-					despY = -Math.cos(trayectoria.rumbo[i])*despLateral;
-					despX = Math.sin(trayectoria.rumbo[i])*despLateral;
-					//Se añade el desplazamiento a las coordenadas del punto
-					trAux.x[i] = trayectoria.x[i] + despX;
-					trAux.y[i] = trayectoria.y[i] + despY;
-				}else{//no modificamos si los puntos no están por delante del coche
-					trAux.x[i] = trayectoria.x[i];
-					trAux.y[i] = trayectoria.y[i];
-				}								
-			}			
+		// Es necesario situar el coche en la ruta antes de buscar el indice más cercano 		
+//		int masCercano = trayectoria.indiceMasCercano();
+//		if (masCercano>finalRampa){
+//			esquivando = false;
+//		}
+		// Rama del bucle para esquivar
+		if((trayectoria.length() != 0) && centroDesplazado && isAlineado(trayectoria)
+				&& !esquivando && rampaPasada){
+			rampaPasada = false;
+			finalRampa = masCercano+indiceFinal;
+			esquivando = true;
+			centroDesplazado = false;
+			System.out.println("Esquivando!!");
+			desplazaTrayectoria(despLateral, masCercano,indiceInicial,indiceFinal);
+		}
+		
+		//Rama del bucle para volver a la trayectoria
+		if((trayectoria.length() != 0) && centroDesplazado && isAlineado(trAux)
+				&& esquivando && rampaPasada){
+			System.out.println("Volviendo a la trayectoria original!!");
+			rampaPasada = false;
+			esquivando = false;
+			centroDesplazado = false;
+			trAux.situaCoche(modCoche.getX(),modCoche.getY());
+			masCercano = trAux.indiceMasCercano();
+			finalRampa = masCercano+indiceFinal;
+//			trAux = trayectoria;
+			vuelveTrayectoriaOriginal(despLateral, masCercano,indiceInicial,indiceFinal);
+							
 		}
 //		Trayectoria trAux = new Trayectoria(trayectoria,0.1);		
 		motor.nuevaTrayectoria(trAux);
-//		return trayectoria;		
 	}
 
 	@Override
 	public void terminar() {
+		ventanaMonitoriza.quitaPanel(panelACO);
 		thCiclico.terminar();		
 	}
 	
@@ -281,8 +400,8 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setGananciaLateral",0,6,0.01), "Ganancia");
 			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setUmbralDesp",0,100,1), "Umbral");
 			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setPeriodoMuestreoMili",0,2000,10), "T Muestreo");
-			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceInicial",0,100,1), "Inicio Desp");
-			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceFinal",indiceInicial,500,1), "Final Desp");						
+			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceInicial",0,indiceFinal,1), "Inicio Desp");
+			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceFinal",indiceInicial+10,500,1), "Final Desp");						
 		}
 	}
 }
