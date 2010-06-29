@@ -11,7 +11,7 @@
 #include "CImageNavigation.h"
 #include "SurfGPU.h"
 
-#define EJECUCION 12
+#define EJECUCION 20
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
