@@ -206,6 +206,11 @@ public class ControlCarro implements SerialPortEventListener {
 
 	/** Maximo incremento permitido en el comando para evitar aceleraciones bruscas */
 	private int maxInc = 2;
+	
+	/** Máximo decremento permitido del comando aplicado cuando este es negativo.
+	 * Hace que el decremento sea constante al principio y se aplique el freno seguido.
+	 */
+	private int maxDec=4;
         
 	/** Zona Muerta donde el motor empieza a actuar realmente 	 */
 	static final int ZonaMuerta = 60;
@@ -235,7 +240,6 @@ public class ControlCarro implements SerialPortEventListener {
 	
 	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato */
 	private Object mutexDatos;
-	private double comandoNOUmbralizadoAnt;
 
 	/**
 	 * Crea la conexión serial al carro en el puerto indicado.
@@ -887,37 +891,32 @@ public class ControlCarro implements SerialPortEventListener {
 		double comandotemp = kPAvance * error + kDAvance * derivativo + kIAvance * integral;
 		double IncComando = comandotemp - comandoAnt;
 		
-		double maxDec=4;
 		//Limitamos el incremento de comando
 		if(comandotemp>0)
 			if (comandoAnt<0)
-				IncComando=-comandoAnt+maxInc;
+				IncComando=-comandoAnt+Math.min(maxInc,comandotemp);
 			else
 				IncComando=UtilCalculos.limita(IncComando,-255,maxInc);
 		else if (comandotemp<0)//el comando temp es negativo
 			if(comandoAnt>0)
-				IncComando=-comandoAnt-maxDec;
+				IncComando=-comandoAnt+Math.max(-maxDec, comandotemp);
 			else
 				IncComando=UtilCalculos.limita(IncComando,-maxDec,255);
 		comando=comandoAnt+IncComando;
 		//Limitamos el comando maximo a aplicar
 		comando=UtilCalculos.limita(comando, -25500, MAXAVANCE);
 		//umbralizamos la zona muerta
-//		double comandoNOUmbralizado=comando;
-//		comando=UtilCalculos.zonaMuertaCon0(comando, comandoNOUmbralizadoAnt, ZonaMuerta, -1);
-//				, -90/FactorFreno+comandoAnt);  //TODO da valores positivos
+		//comando=UtilCalculos.zonaMuertaCon0(comando, comandoAnt, ZonaMuerta, -1);
 
 		int apertura=0;
 		int avanceAplicado=0;
 		if (comando > 0) {
 			if(comandoAnt<=0) {
 				menosFrena(apertura=255, 255);
-//				DesFrena(255);
 //				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
 			}
 			avanceAplicado=(int)comando;
-//			avanceAplicado=(int)UtilCalculos.zonaMuertaCon0(comando, 
-//					comandoNOUmbralizadoAnt, ZonaMuerta, -1);
+//			avanceAplicado=(int)UtilCalculos.zonaMuertaCon0(comando, comandoAnt, ZonaMuerta, -1);
 			Avanza(avanceAplicado);
 		}
 		else if (comando<0) {
@@ -950,25 +949,6 @@ public class ControlCarro implements SerialPortEventListener {
 		return comando;
 	}
 
-	/*
-	 * public void setConsigna(double valor) { boolean retroceso = false;
-	 * 
-	 * if (valor < 0) { retroceso = true; valor *= -1; } double error = valor -
-	 * velocidad; System.out.println("Error: " + error);
-	 * 
-	 * if (error >= 0) { if (getDesfreno() == 0) { comando += (int)(kPDesfreno *
-	 * error);
-	 * 
-	 * DesFrenaPasos(comando); System.out.println("Desfrenando: " + comando); }
-	 * else { comando += (int)(kPAvance * error);
-	 * 
-	 * if (retroceso == true) { System.out.println("Retrocediendo: " + comando);
-	 * Retrocede(comando); } else { //System.out.println("Avanzando: " +
-	 * comando); Avanza(comando); } } } else { comando += (int)(kPFreno *
-	 * error);
-	 * 
-	 * Avanza(0); FrenaPasos(comando); } }
-	 */
 	/**
 	 * Fija el valor de la velocidad de avance en cuentas Segundo y activa el
 	 * control
@@ -977,6 +957,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 *            consigna en cuentas/Seg
 	 */
 	public void setConsignaAvanceCS(double valor) {
+		if(consignaVel==valor) return; //Si es la misma consigna no cambiamos nada
 		consignaVel = valor;
 		controlando = true;
 	}
@@ -1073,6 +1054,14 @@ public class ControlCarro implements SerialPortEventListener {
 	/** @return el valor de {@link #maxInc}, máximo incrmento de comando premitido */
 	public int getMaxIncremento() {
 		return maxInc;
+	}
+	
+	public void setMaxDecremento(int decremento) {
+		maxDec=decremento;
+	}
+	
+	public int getMaxDecremento() {
+		return maxDec;
 	}
 
 	public int getPaquetes() {
