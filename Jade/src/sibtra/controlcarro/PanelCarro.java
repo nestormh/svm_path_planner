@@ -191,7 +191,7 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getAlarma","%10d")
 		, "Zeta");
 
-		añadeAPanel(new SpinnerDouble(contCarro,"setFactorFreno",0,50,0.1), "Fact Freno");
+		añadeAPanel(new SpinnerDouble(contCarro,"setFactorFreno",0,100,0.5), "Fact Freno");
 		añadeAPanel(new SpinnerInt(contCarro,"setMaxIncremento",0,255*2,1), "Max Inc");
 		añadeAPanel(new SpinnerInt(contCarro,"setMaxDecremento",0,255*2,1), "Max Dec");
 		añadeAPanel(new SpinnerDouble(contCarro,"setKPAvance",0,50,0.1), "KP Avance");

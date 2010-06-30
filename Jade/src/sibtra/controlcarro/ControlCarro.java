@@ -272,7 +272,7 @@ public class ControlCarro implements SerialPortEventListener {
 		logControl=LoggerFactory.nuevoLoggerArrayDoubles(this, "controlPID",(int)(1/T)+1);
 		logControl.setDescripcion("consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,apertura,avanceAplicado");
 		logParamPID=LoggerFactory.nuevoLoggerArrayDoubles(this, "ParamPID",(int)(1/T)+1);
-		logParamPID.setDescripcion("[kPAvance,kIAvance,kDAvance,maxInc, FactorFreno]");
+		logParamPID.setDescripcion("[kPAvance,kIAvance,kDAvance,maxInc, FactorFreno, maxDec]");
 	}
 
 	/**
@@ -910,25 +910,28 @@ public class ControlCarro implements SerialPortEventListener {
 
 		int apertura=0;
 		int avanceAplicado=0;
-		if (comando > 0) {
-			if(comandoAnt<=0) {
-				menosFrena(apertura=255, 255);
-//				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
+		if (comando > 0.0) {
+			if(comandoAnt<=0.0) {
+				menosFrena(255, 255);
+//				menosFrena(150, 255);
+				apertura=-255; //indicamos que desfrenamos
+				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
 			}
 			avanceAplicado=(int)comando;
 //			avanceAplicado=(int)UtilCalculos.zonaMuertaCon0(comando, comandoAnt, ZonaMuerta, -1);
 			Avanza(avanceAplicado);
 		}
-		else if (comando<0) {
+		else if (comando<0.0) {
 			double IncCom=comando-comandoAnt;
-			if(IncCom<0) {
+			if(IncCom<0.0) {
 				apertura=-(int)(IncCom*FactorFreno);
 				apertura=UtilCalculos.limita(apertura, 20, 150);
 				masFrena( apertura,30); /** Es un comando negativo, por lo que hay que frenar */
 				System.err.println("Mas frena "+apertura);
 			} else if(IncCom> maxInc){
 				apertura=(int)(IncCom*FactorFreno);
-				apertura=UtilCalculos.limita(apertura, 20, 150);
+//				apertura=UtilCalculos.limita(apertura, 20, 150);
+				apertura=UtilCalculos.limita(apertura, 20, 50);
 				menosFrena(apertura,30);
 				System.err.println("menos frena "+apertura);
 				apertura=-apertura;
@@ -942,7 +945,7 @@ public class ControlCarro implements SerialPortEventListener {
 		derivativoAnt = derivativo;
 		comandoAnt = comando;
 		logControl.add((double)consignaVel,velocidadCS,derivativo,integral,comandotemp,comando,(double)apertura,avanceAplicado);
-		logParamPID.add(kPAvance,kIAvance,kDAvance,maxInc, FactorFreno);
+		logParamPID.add(kPAvance,kIAvance,kDAvance,maxInc, FactorFreno, maxDec);
 	}
 	
 	public double getComando() {
@@ -975,9 +978,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 *            consigna en metros/seg
 	 */
 	public void setConsignaAvanceMS(double valor) {
-		consignaVel = valor * PULSOS_METRO;
-//		System.out.println("Consigna Avance " + consignaVel);
-		controlando = true;
+		setConsignaAvanceCS(valor * PULSOS_METRO);
 	}
 
 	/** @return la consigna fijada en metros por segundo */
@@ -993,8 +994,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 *            consigna en Kilometros hora
 	 */
 	public void setConsignaAvanceKH(double valor) {
-		consignaVel = valor * PULSOS_METRO * 1000 / 3600;
-		controlando = true;
+		setConsignaAvanceCS(valor * PULSOS_METRO * 1000 / 3600);
 	}
 
 	/** @return la consigna fijada en Kilometros por hora */
