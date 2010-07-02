@@ -69,6 +69,8 @@ public class Trayectoria implements Serializable {
 	protected void copia(Trayectoria trOriginal) {
 		esCerrada=trOriginal.esCerrada;
 		distanciaMaxima=trOriginal.distanciaMaxima;
+//		indiceUltimoCercano = trOriginal.indiceUltimoCercano;
+		ultimaPosCoche = trOriginal.ultimaPosCoche;
 		
 		x=new double[trOriginal.x.length];
 		System.arraycopy(trOriginal.x,0,x,0,trOriginal.x.length);
@@ -431,7 +433,8 @@ public class Trayectoria implements Serializable {
 	    double dy;
 	    double distMin=Double.POSITIVE_INFINITY;
 	    int indMin=0;
-	    int indiceInicial = indMinAnt - 10;
+//	    int indiceInicial = indMinAnt - 10;
+	    int indiceInicial = 0;
 	    if (esCerrada){
 	    	indiceInicial = (indMinAnt + length() - 10)%length();
 	    }else{        	
@@ -510,7 +513,7 @@ public class Trayectoria implements Serializable {
 	/** @return el indice del más cercano. Para invocar después de {@link #situaCoche(double[])} */
 	public int indiceMasCercano() {
 		if(indiceUltimoCercano<0 || ultimaPosCoche==null)
-			throw new IllegalStateException("La posción de el coche aún no se ha establecido");
+			throw new IllegalStateException("La posición de el coche aún no se ha establecido");
 		return indiceUltimoCercano;
 	}
 	
@@ -535,6 +538,9 @@ public class Trayectoria implements Serializable {
 	public double getLargo(int indIni,int indFin) {
 		if(indIni<0 || indIni>x.length || indFin<0 || indFin>x.length)
 			throw new IllegalArgumentException("Indices fuera de rango");
+		if (indIni == indFin){
+			return 0;
+		}
 		if(!esCerrada && indIni>indFin )
 			throw new IllegalArgumentException("Indice inicial el mayor que final (y no es cerrada)");
     	double dist = 0;
