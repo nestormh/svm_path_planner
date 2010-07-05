@@ -210,7 +210,7 @@ public class ControlCarro implements SerialPortEventListener {
 	/** Máximo decremento permitido del comando aplicado cuando este es negativo.
 	 * Hace que el decremento sea constante al principio y se aplique el freno seguido.
 	 */
-	private int maxDec=4;
+	private int maxDec=12;
         
 	/** Zona Muerta donde el motor empieza a actuar realmente 	 */
 	static final int ZonaMuerta = 60;
@@ -236,10 +236,11 @@ public class ControlCarro implements SerialPortEventListener {
 	/**	Registrador de todos los parámetros del PID de avance*/
 	private LoggerArrayDoubles logParamPID;
 
-	double FactorFreno=30;
+	double FactorFreno=10;
 	
 	/** Mutex donde se bloquean los hilos que quieren espera por un nuevo dato */
 	private Object mutexDatos;
+	private int contDes=0;
 
 	/**
 	 * Crea la conexión serial al carro en el puerto indicado.
@@ -899,7 +900,8 @@ public class ControlCarro implements SerialPortEventListener {
 				IncComando=UtilCalculos.limita(IncComando,-255,maxInc);
 		else if (comandotemp<0)//el comando temp es negativo
 			if(comandoAnt>0)
-				IncComando=-comandoAnt+Math.max(-maxDec, comandotemp);
+//				IncComando=-comandoAnt+Math.max(-maxDec, comandotemp);
+				IncComando=-comandoAnt-0.001; //Justo por debajo de 0
 			else
 				IncComando=UtilCalculos.limita(IncComando,-maxDec,255);
 		comando=comandoAnt+IncComando;
@@ -911,12 +913,20 @@ public class ControlCarro implements SerialPortEventListener {
 		int apertura=0;
 		int avanceAplicado=0;
 		if (comando > 0.0) {
-			if(comandoAnt<=0.0) {
-				menosFrena(255, 255);
-//				menosFrena(150, 255);
-				apertura=-255; //indicamos que desfrenamos
-				System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
-			}
+//			if(comandoAnt<=0.0) {
+//				if(velocidadCS<10) {
+			if((comandoAnt<=0.0) && (velocidadCS<10)) {
+					//arranque inicial fuerte
+					menosFrena(255, 255);
+					apertura=-255; //indicamos que desfrenamos
+					System.err.println("========== Abrimos :"+comandoAnt+" > "+comando);
+				} else if( (getDesfreno()!=1) && ((contDes=(contDes+1)%70)==0)) { 
+					//de resto siempre desfrenamos
+					System.err.println("========== Desfreno Periódico");
+					menosFrena(150, 60);
+					apertura=-150;
+				}
+//			}
 			avanceAplicado=(int)comando;
 //			avanceAplicado=(int)UtilCalculos.zonaMuertaCon0(comando, comandoAnt, ZonaMuerta, -1);
 			Avanza(avanceAplicado);
