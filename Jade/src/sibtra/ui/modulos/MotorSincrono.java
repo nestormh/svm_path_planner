@@ -149,7 +149,8 @@ public class MotorSincrono extends MotorTipico implements Motor  {
 	    	distanciaMinima=Math.min(distanciaMinima, detectoresObstaculos[i].getDistanciaLibre());
 	    
 	    double velRampa=(distanciaMinima-margenColision)*pendienteFrenado;
-	    double consignaVelocidadRampa=consignaVelocidad=Math.min(consignaVelocidad, velRampa);
+	    double consignaVelocidadRampa=consignaVelocidad=Math.max(0,  //consigna no puede ser negativa (por ahora)
+	    		Math.min(consignaVelocidad, velRampa));
 	    
 	    double incrementoConsigna=consignaVelocidad-consignaVelAnterior;
 	    if(incrementoConsigna>maximoIncrementoVelocidad)

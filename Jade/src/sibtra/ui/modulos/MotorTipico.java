@@ -168,7 +168,7 @@ public abstract class MotorTipico implements Motor {
 	
 	public void setModificadorTrayectoria(ModificadorTrayectoria modifTr) {
 		modificadorTr=modifTr;
-		if(trayInicial==null) {
+		if(modificadorTr!=null && trayInicial==null) {
 	    	//obtenos la trayectoria inicial seleccinonada por usuario
 			//Lo hacemos aquí para que no esperar a la primera acción
 	    	trayInicial=ventanaMonitoriza.getTrayectoriaSeleccionada();
