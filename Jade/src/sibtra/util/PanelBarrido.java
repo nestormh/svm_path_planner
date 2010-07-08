@@ -12,6 +12,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -28,7 +30,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 @SuppressWarnings("serial")
-public class PanelBarrido extends JPanel implements ChangeListener, MouseListener {
+public class PanelBarrido extends JPanel implements ChangeListener, MouseListener, MouseWheelListener {
 	
 	protected static final int TamMarca = 40;
 
@@ -241,6 +243,8 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 		JPanelGrafico.setPreferredSize(new Dimension(Short.MAX_VALUE,Short.MAX_VALUE));
 		JPanelGrafico.setBackground(Color.BLACK);
 		JPanelGrafico.addMouseListener(this);
+		JPanelGrafico.addMouseWheelListener(this);
+		
 		
 		//después (a la dercha) el slider
 		JSliderZoom=new JSlider(SwingConstants.VERTICAL,0,distMax,distMax);
@@ -249,6 +253,7 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 		JSliderZoom.setPaintLabels(true);
 		JSliderZoom.setPaintTicks(true);
 		JSliderZoom.addChangeListener(this);
+		JSliderZoom.addMouseWheelListener(this);
 
 		//Panel que contedrá grafica y slider de zoom
 		JPanel jpGS=new JPanel();
@@ -365,6 +370,17 @@ public class PanelBarrido extends JPanel implements ChangeListener, MouseListene
 				repaint();						
 			}
 		});		
+	}
+
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		int zoomAct=JSliderZoom.getValue();
+		if((e.getWheelRotation()==-1) &&
+				zoomAct<JSliderZoom.getMaximum()) {
+			JSliderZoom.setValue(zoomAct+1);
+		}
+		if((e.getWheelRotation()==1) && zoomAct>JSliderZoom.getMinimum()) {
+			JSliderZoom.setValue(zoomAct-1);
+		}		
 	}
 	
 //	public void repaint() {
