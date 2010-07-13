@@ -45,16 +45,16 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	
 	Coche modCoche;
 	public int umbralDesp = 30;
-	public double gananciaLateral = 0.1;
+	public double gananciaLateral = 0.005;
 	public double periodoMuestreoMili = 100;
 	private Trayectoria trAux;
 	private Trayectoria trDesplazada;
 	private boolean rampaPasada = false;
 	private double ultimoDesp = 0;
 	/** Umbral por debajo del cual se considera que el vehículo está bien alineado con la trayectoria**/
-	private double umbralRumbo = Math.toRadians(20);
+	private double umbralRumbo = 10;
 	/** Umbral por debajo del cual se considera que el coche está encima de la trayectoria**/
-	private double umbralSeparacion = 0.8;
+	private double umbralSeparacion = 0.3;
 	
 	public double getUmbralRumbo() {
 		return umbralRumbo;
@@ -64,7 +64,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	 * @param umbralRumbo Umbral angular en grados
 	 */
 	public void setUmbralRumbo(double umbralRumbo) {
-		this.umbralRumbo = Math.toRadians(umbralRumbo);
+		this.umbralRumbo = umbralRumbo;
 	}
 	
 	public double getUmbralSeparacion() {
@@ -272,11 +272,13 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	}
 	
 	private void accionPeriodica() {
-//		int distDerecha = ShmInterface.getAcoRightDist();
-		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
+		int distDerecha = ShmInterface.getAcoRightDist();
+//		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
 //		System.out.println(ShmInterface.getResolucionHoriz());
 		int distIzquierda = ShmInterface.getAcoLeftDist();
 		double centro = (double)distIzquierda + (double)(distDerecha-distIzquierda)/2;
+		System.out.println("posición del centro "+centro +"posición izquierda "+distIzquierda
+				+"posición derecha "+ distDerecha);
 		double despLateral = 0;
 		int masCercano = 0;		
 		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
@@ -436,7 +438,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			super();
 //			setLayout(new GridLayout(0,4));
 			//TODO Definir los tamaños adecuados o poner layout
-			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setGananciaLateral",0,6,0.01), "Ganancia");
+			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setGananciaLateral",0,10,0.001), "Ganancia");
 			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setUmbralDesp",0,100,1), "Umbral");
 			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setPeriodoMuestreoMili",0,2000,10), "T Muestreo");
 			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceInicial",0,indiceFinal,1), "Inicio Desp");
