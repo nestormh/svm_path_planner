@@ -433,8 +433,8 @@ public class Trayectoria implements Serializable {
 	    double dy;
 	    double distMin=Double.POSITIVE_INFINITY;
 	    int indMin=0;
-//	    int indiceInicial = indMinAnt - 10;
-	    int indiceInicial = 0;
+	    int indiceInicial = indMinAnt - 10;
+//	    int indiceInicial = 0;
 	    if (esCerrada){
 	    	indiceInicial = (indMinAnt + length() - 10)%length();
 	    }else{        	
