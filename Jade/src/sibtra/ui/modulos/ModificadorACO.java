@@ -50,6 +50,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	private Trayectoria trAux;
 	private Trayectoria trDesplazada;
 	private boolean rampaPasada = false;
+	private double ultimoDesp = 0;
 	/**
 	 * Seteador de la distancia a partir del coche a la que se desea empezar a desplazar
 	 * lateralmente la trayectoria
@@ -179,8 +180,8 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		for(int i=0;i<trayectoria.length();i++){
 			despY = -Math.cos(trayectoria.rumbo[i])*despLateral;
 			despX = Math.sin(trayectoria.rumbo[i])*despLateral;
-//			trDesplazada.x[i] = trayectoria.x[i] + despX;
-//			trDesplazada.y[i] = trayectoria.y[i] + despY;	
+			trDesplazada.x[i] = trayectoria.x[i] + despX;
+			trDesplazada.y[i] = trayectoria.y[i] + despY;	
 			//condición que cumplen los puntos de la trayectoria que se encuentran
 			//por delante del coche				
 			if(i>(masCercano+indInicial)%trayectoria.length()){
@@ -210,21 +211,30 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			int indInicial,int indFinal){
 		double despX = 0;
 		double despY = 0;
-		double dx = trAux.x[(indFinal+masCercano)%trAux.length()]-
-					trAux.x[(indInicial+masCercano)%trAux.length()];
-		double dy = trAux.y[(indFinal+masCercano)%trAux.length()]-
-					trAux.y[(indInicial+masCercano)%trAux.length()];
+//		double dx = trAux.x[(indFinal+masCercano)%trAux.length()]-
+//					trAux.x[(indInicial+masCercano)%trAux.length()];
+//		double dy = trAux.y[(indFinal+masCercano)%trAux.length()]-
+//					trAux.y[(indInicial+masCercano)%trAux.length()];
+		double dx = trDesplazada.x[(indFinal+masCercano)%trDesplazada.length()]-
+			trDesplazada.x[(indInicial+masCercano)%trDesplazada.length()];
+		double dy = trDesplazada.y[(indFinal+masCercano)%trDesplazada.length()]-
+			trDesplazada.y[(indInicial+masCercano)%trDesplazada.length()];
 		double distanciaRampa = Math.sqrt(dx*dx+dy*dy);
+		System.out.println("LA rampa mide " +distanciaRampa);
 		double pendiente = -Math.abs(despLateral)/distanciaRampa;
 		for(int j=0;j<trAux.length();j++){
 			
-			if(j>(masCercano)%trAux.length() &&
-					   j<=(masCercano+indFinal)%trAux.length()){
+			if(j>=(masCercano)%trAux.length() &&
+					   j<(masCercano+indFinal)%trAux.length()){
 				if(j>masCercano+indInicial){
-					double posXrampa = trAux.getLargo(indInicial+masCercano,j);
-					despLateral = (posXrampa)*pendiente;
-					despY = -Math.cos(trAux.rumbo[j])*despLateral;
-					despX = Math.sin(trAux.rumbo[j])*despLateral;
+//					double posXrampa = trAux.getLargo(indInicial+masCercano,j);
+					double posXrampa = trDesplazada.getLargo(indInicial+masCercano,j);
+					System.out.println("posicion en la rampa "+posXrampa);
+					double despLateralAplicado = (posXrampa)*pendiente;
+//					despY = -Math.cos(trAux.rumbo[j])*despLateralAplicado;
+//					despX = Math.sin(trAux.rumbo[j])*despLateralAplicado;
+					despY = -Math.cos(trDesplazada.rumbo[j])*despLateralAplicado;
+					despX = Math.sin(trDesplazada.rumbo[j])*despLateralAplicado;
 				}								
 				//Se añade el desplazamiento a las coordenadas del punto
 				trAux.x[j] = trAux.x[j] + despX;
@@ -246,23 +256,30 @@ public class ModificadorACO implements ModificadorTrayectoria{
 //		System.out.println(ShmInterface.getResolucionHoriz());
 		int distIzquierda = ShmInterface.getAcoLeftDist();
 		double centro = (double)distIzquierda + (double)(distDerecha-distIzquierda)/2;
-		double despLateral = 0;		
-		int masCercano = 0;
+		double despLateral = 0;
+		int masCercano = 0;		
 		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
 		masCercano = trayectoria.indiceMasCercano();
-		if (distIzquierda>umbralDesp){
-			despLateral = distIzquierda*gananciaLateral;    // Cuando el desp es a la izquierda es negativo			
-//			finalRampa = masCercano+indiceFinal;
+		
+		if (centro > umbralDesp){
+			despLateral = centro*gananciaLateral;
 			centroDesplazado = true;
-		}else if(distDerecha>umbralDesp){
-			despLateral = -distDerecha*gananciaLateral;			
-//			finalRampa = masCercano+indiceFinal;
-			centroDesplazado = true;
-		}else{
-			despLateral = 0;			
-			if(masCercano>trayectoria.indiceMasCercano()+indiceFinal){
-			}
 		}
+		
+		
+//		if (distIzquierda>umbralDesp){
+//			despLateral = distIzquierda*gananciaLateral;    // Cuando el desp es a la izquierda es negativo			
+////			finalRampa = masCercano+indiceFinal;
+//			centroDesplazado = true;
+//		}else if(distDerecha>umbralDesp){
+//			despLateral = -distDerecha*gananciaLateral;			
+////			finalRampa = masCercano+indiceFinal;
+//			centroDesplazado = true;
+//		}else{
+//			despLateral = 0;			
+//			if(masCercano>trayectoria.indiceMasCercano()+indiceFinal){
+//			}
+//		}
 		
 		//Comprobamos si el coche ya ha superado la rampa
 		if (masCercano > finalRampa){
@@ -273,7 +290,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		//La trayectoria original se le indica al modificadorACO a través del método
 		//setTrayectoriaInicial y no se modifica		
 		double despX = 0;
-		double despY = 0;			
+		double despY = 0;	
 //		setDistInicio(1);
 //		setLongitudTramoDesp(4);
 //		calculaIndiceInicial();
@@ -292,6 +309,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			centroDesplazado = false;
 			System.out.println("Esquivando!!");
 			desplazaTrayectoria(despLateral, masCercano,indiceInicial,indiceFinal);
+			ultimoDesp  = despLateral;
 		}
 		
 		//Rama del bucle para volver a la trayectoria
@@ -305,7 +323,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			masCercano = trAux.indiceMasCercano();
 			finalRampa = masCercano+indiceFinal;
 //			trAux = trayectoria;
-			vuelveTrayectoriaOriginal(despLateral, masCercano,indiceInicial,indiceFinal);
+			vuelveTrayectoriaOriginal(ultimoDesp, masCercano,indiceInicial,indiceFinal);
 							
 		}
 //		Trayectoria trAux = new Trayectoria(trayectoria,0.1);		
