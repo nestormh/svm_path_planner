@@ -51,6 +51,29 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	private Trayectoria trDesplazada;
 	private boolean rampaPasada = false;
 	private double ultimoDesp = 0;
+	/** Umbral por debajo del cual se considera que el vehículo está bien alineado con la trayectoria**/
+	private double umbralRumbo = Math.toRadians(20);
+	/** Umbral por debajo del cual se considera que el coche está encima de la trayectoria**/
+	private double umbralSeparacion = 0.8;
+	
+	public double getUmbralRumbo() {
+		return umbralRumbo;
+	}
+	/**
+	 * 
+	 * @param umbralRumbo Umbral angular en grados
+	 */
+	public void setUmbralRumbo(double umbralRumbo) {
+		this.umbralRumbo = Math.toRadians(umbralRumbo);
+	}
+	
+	public double getUmbralSeparacion() {
+		return umbralSeparacion;
+	}
+	
+	public void setUmbralSeparacion(double umbralSeparacion) {
+		this.umbralSeparacion = umbralSeparacion;
+	}
 	/**
 	 * Seteador de la distancia a partir del coche a la que se desea empezar a desplazar
 	 * lateralmente la trayectoria
@@ -152,8 +175,6 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	
 	private boolean isAlineado(Trayectoria tr) {
 		boolean alineado = false;
-		double umbralRumbo = Math.toRadians(20);
-		double umbralSeparacion = 0.8;
 		tr.situaCoche(motor.getModeloCoche().getX(),motor.getModeloCoche().getY());
 		int masCercano = tr.indiceMasCercano();
 		double difRumbo = Math.abs(motor.getModeloCoche().getYaw()-tr.rumbo[masCercano]);
@@ -419,7 +440,9 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setUmbralDesp",0,100,1), "Umbral");
 			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setPeriodoMuestreoMili",0,2000,10), "T Muestreo");
 			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceInicial",0,indiceFinal,1), "Inicio Desp");
-			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceFinal",indiceInicial+10,500,1), "Final Desp");						
+			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceFinal",indiceInicial+10,500,1), "Final Desp");
+			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setUmbralRumbo",0,360,0.1), "Umbral angular");
+			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setUmbralSeparacion",0,100,0.1), "Umbral separación");
 		}
 	}
 }
