@@ -13,6 +13,7 @@ import sibtra.ui.VentanasMonitoriza;
 //import sibtra.ui.defs.CalculaRuta;
 import sibtra.ui.defs.ModificadorTrayectoria;
 import sibtra.ui.defs.Motor;
+import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelFlow;
 import sibtra.util.SpinnerDouble;
 import sibtra.util.SpinnerInt;
@@ -55,7 +56,14 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	private double umbralRumbo = 10;
 	/** Umbral por debajo del cual se considera que el coche está encima de la trayectoria**/
 	private double umbralSeparacion = 0.3;
+	private double despCentro;
 	
+	public double getDespCentro() {
+		return despCentro;
+	}
+	public void setDespCentro(double despCentro) {
+		this.despCentro = despCentro;
+	}
 	public double getUmbralRumbo() {
 		return umbralRumbo;
 	}
@@ -276,16 +284,17 @@ public class ModificadorACO implements ModificadorTrayectoria{
 //		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
 //		System.out.println(ShmInterface.getResolucionHoriz());
 		int distIzquierda = ShmInterface.getAcoLeftDist();
-		double centro = (double)distIzquierda + (double)(distDerecha-distIzquierda)/2;
-		System.out.println("posición del centro "+centro +"posición izquierda "+distIzquierda
-				+"posición derecha "+ distDerecha);
+		double posCentro = (double)distIzquierda + (double)(distDerecha-distIzquierda)/2;
+		despCentro = posCentro - (double)ShmInterface.getResolucionHoriz()/2;
+//		System.out.println("posición del centro "+centro +"posición izquierda "+distIzquierda
+//				+"posición derecha "+ distDerecha);
 		double despLateral = 0;
 		int masCercano = 0;		
 		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
 		masCercano = trayectoria.indiceMasCercano();
 		
-		if (centro > umbralDesp){
-			despLateral = centro*gananciaLateral;
+		if (despCentro > umbralDesp){
+			despLateral = despCentro*gananciaLateral;
 			centroDesplazado = true;
 		}
 		
@@ -358,37 +367,6 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		ventanaMonitoriza.quitaPanel(panelACO);
 		thCiclico.terminar();		
 	}
-	
-//	public static void main(String[] args) {
-//		CalculaRutaACO cal =new CalculaRutaACO();
-//		String fichero = "Rutas/Universidad/Parq_16_07_cerr";
-//		Ruta re;
-//    	Trayectoria rutaPruebaRellena;
-//    try {
-//        File file = new File(fichero);
-//        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-//        re = (Ruta) ois.readObject();
-//        ois.close();
-//        double distMax = 0.5;
-//        rutaPruebaRellena = new Trayectoria(re,distMax);
-//        System.out.println(rutaPruebaRellena.length());
-//        System.out.println("Abrimos el fichero");
-//
-//    } catch (IOException ioe) {
-//        re = new Ruta();
-//        rutaPruebaRellena = null;
-//        System.err.println("Error al abrir el fichero " + fichero);
-//        System.err.println(ioe.getMessage());
-//    } catch (ClassNotFoundException cnfe) {
-//        re = new Ruta();
-//        rutaPruebaRellena = null;
-//        System.err.println("Objeto leído inválido: " + cnfe.getMessage());
-//    }
-//    	cal.setTrayectoriaInicial(rutaPruebaRellena);
-//    	while(true){
-//    		cal.getTrayectoriaActual();
-//    	}	
-//	}
 
 	@Override
 	public void actuar() {
@@ -445,6 +423,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			añadeAPanel(new SpinnerInt(ModificadorACO.this,"setIndiceFinal",indiceInicial+10,500,1), "Final Desp");
 			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setUmbralRumbo",0,360,0.1), "Umbral angular");
 			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setUmbralSeparacion",0,100,0.1), "Umbral separación");
+			añadeAPanel(new LabelDatoFormato(ModificadorACO.class,"getDespCentro","%4.2f m/s"), "Desp centro");
 		}
 	}
 }
