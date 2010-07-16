@@ -1,8 +1,12 @@
 package sibtra.ui.modulos;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+
+import javax.swing.JButton;
 
 import sibtra.predictivo.Coche;
 import sibtra.shm.ShmInterface;
@@ -45,7 +49,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	boolean esquivando = false;
 	
 	Coche modCoche;
-	public int umbralDesp = 30;
+	public int umbralDesp = 50;
 	public double gananciaLateral = 0.005;
 	public double periodoMuestreoMili = 100;
 	private Trayectoria trAux;
@@ -53,7 +57,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 	private boolean rampaPasada = false;
 	private double ultimoDesp = 0;
 	/** Umbral por debajo del cual se considera que el vehículo está bien alineado con la trayectoria**/
-	private double umbralRumbo = 10;
+	private double umbralRumbo = 5;
 	/** Umbral por debajo del cual se considera que el coche está encima de la trayectoria**/
 	private double umbralSeparacion = 0.3;
 	private double despCentro;
@@ -411,9 +415,12 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		this.indiceFinal = indiceFinal;
 	}
 	
-	protected class PanelModACO extends PanelFlow {
+	protected class PanelModACO extends PanelFlow implements ActionListener {
+		JButton resetear = new JButton("Resetear");		
 		public PanelModACO() {
 			super();
+			añadeAPanel(resetear,"Reseteo del modificador");
+			resetear.addActionListener(this);
 //			setLayout(new GridLayout(0,4));
 			//TODO Definir los tamaños adecuados o poner layout
 			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setGananciaLateral",0,10,0.001), "Ganancia");
@@ -424,6 +431,17 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setUmbralRumbo",0,360,0.1), "Umbral angular");
 			añadeAPanel(new SpinnerDouble(ModificadorACO.this,"setUmbralSeparacion",0,100,0.1), "Umbral separación");
 			añadeAPanel(new LabelDatoFormato(ModificadorACO.class,"getDespCentro","%4.2f m/s"), "Desp centro");
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(e.getSource()==resetear) {
+				motor.nuevaTrayectoria(trayectoria);
+				centroDesplazado = false;
+				rampaPasada = false;
+				esquivando = false;
+			}
+			
 		}
 	}
 }
