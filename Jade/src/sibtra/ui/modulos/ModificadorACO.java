@@ -348,6 +348,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			System.out.println("Esquivando!!");
 			desplazaTrayectoria(despLateral, masCercano,indiceInicial,indiceFinal);
 			ultimoDesp  = despLateral;
+			motor.nuevaTrayectoria(trAux);
 		}
 		
 		//Rama del bucle para volver a la trayectoria
@@ -360,12 +361,9 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			trAux.situaCoche(modCoche.getX(),modCoche.getY());
 			masCercano = trAux.indiceMasCercano();
 			finalRampa = masCercano+indiceFinal;
-//			trAux = trayectoria;
 			vuelveTrayectoriaOriginal(ultimoDesp, masCercano,indiceInicial,indiceFinal);
-							
-		}
-//		Trayectoria trAux = new Trayectoria(trayectoria,0.1);		
-		motor.nuevaTrayectoria(trAux);
+			motor.nuevaTrayectoria(trAux);
+		}				
 	}
 
 	@Override
