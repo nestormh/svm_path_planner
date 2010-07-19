@@ -209,7 +209,8 @@ public class ModificadorACO implements ModificadorTrayectoria{
 					trayectoria.y[(indInicial+masCercano)%trayectoria.length()];
 		double distanciaRampa = Math.sqrt(dx*dx+dy*dy);
 		double despLateralMax = despLateral;
-		double pendiente = Math.abs(despLateralMax)/distanciaRampa;
+//		double pendiente = Math.abs(despLateralMax)/distanciaRampa;
+		double pendiente = despLateralMax/distanciaRampa;
 		for(int i=0;i<trayectoria.length();i++){
 			despY = -Math.cos(trayectoria.rumbo[i])*despLateral;
 			despX = Math.sin(trayectoria.rumbo[i])*despLateral;
@@ -254,7 +255,8 @@ public class ModificadorACO implements ModificadorTrayectoria{
 			trDesplazada.y[(indInicial+masCercano)%trDesplazada.length()];
 		double distanciaRampa = Math.sqrt(dx*dx+dy*dy);
 		System.out.println("LA rampa mide " +distanciaRampa);
-		double pendiente = -Math.abs(despLateral)/distanciaRampa;
+//		double pendiente = -Math.abs(despLateral)/distanciaRampa;
+		double pendiente = -despLateral/distanciaRampa;
 		for(int j=0;j<trAux.length();j++){
 			
 			if(j>=(masCercano)%trAux.length() &&
@@ -288,7 +290,7 @@ public class ModificadorACO implements ModificadorTrayectoria{
 //		int distDerecha = ShmInterface.getResolucionHoriz()-ShmInterface.getAcoRightDist();
 //		System.out.println(ShmInterface.getResolucionHoriz());
 		int distIzquierda = ShmInterface.getAcoLeftDist();
-		double posCentro = (double)distIzquierda + (double)(distDerecha-distIzquierda)/2;
+		double posCentro = /*(double)distIzquierda +*/ (double)(distDerecha+distIzquierda)/2;
 		despCentro = posCentro - (double)ShmInterface.getResolucionHoriz()/2;
 //		System.out.println("posición del centro "+centro +"posición izquierda "+distIzquierda
 //				+"posición derecha "+ distDerecha);
@@ -297,11 +299,11 @@ public class ModificadorACO implements ModificadorTrayectoria{
 		trayectoria.situaCoche(modCoche.getX(),modCoche.getY());
 		masCercano = trayectoria.indiceMasCercano();
 		
-		if (despCentro > umbralDesp){
+		if (Math.abs(despCentro) > umbralDesp){
 			despLateral = despCentro*gananciaLateral;
 			centroDesplazado = true;
 		}
-		
+		panelACO.actualizaDatos(this);
 		
 //		if (distIzquierda>umbralDesp){
 //			despLateral = distIzquierda*gananciaLateral;    // Cuando el desp es a la izquierda es negativo			
