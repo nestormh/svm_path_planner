@@ -10,6 +10,7 @@
 #include "CImageSearch.h"
 #include "CImageNavigation.h"
 #include "SurfGPU.h"
+#include "CUDAlib.h"
 
 #define EJECUCION 20
 
@@ -849,7 +850,7 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 13: {
-            stat.MRTP_test();
+            stat.MRTP_test(SIZE2);
             break;
         }
         case 14: {
@@ -864,7 +865,7 @@ int main(int argc, _TCHAR argv[]) {
         }
         case 16: {
             //CRealMatches rm(false);
-            CRealMatches rm(false);
+            CRealMatches rm(false, SIZE2);
             rm.startTest6();
             break;
         }
@@ -888,9 +889,14 @@ int main(int argc, _TCHAR argv[]) {
         }
         case 20: {
             SurfGPU surf;
-            surf.testSurf(string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0605.JPG"), string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0555.JPG"));
+            surf.testSurf(string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0555.JPG"), string("/home/neztol/doctorado/Datos/EstadisticasITER/tripode1/DSC_0559.JPG"));
             
             //surf.testSurf(string("/home/neztol/doctorado/Datos/imagenesSueltas/cocina1.jpg"), string("/home/neztol/doctorado/Datos/imagenesSueltas/cocina2.jpg"));
+            break;
+        }
+        case 21: {
+            enumerateDevices();
+            sumaArrays();
             break;
         }
         default: {

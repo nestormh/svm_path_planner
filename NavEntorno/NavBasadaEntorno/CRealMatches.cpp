@@ -920,9 +920,12 @@ inline void CRealMatches::mainTest() {
     }
     
     myTime = clock();
+    vector <t_Pair> pairs2;
     //getOflow(img1, img2, points1, pairs1);
     //getOflow(img2, img1, points2, pairs2);
     //oFlow(points1, pairs, smallImg1, smallImg2);
+    //oFlow(points1, pairs2, img1, img2);
+    //cleanRANSAC(CV_FM_RANSAC, pairs2);
     //oFlow(points1, pairs, img1, img2);
     /*vector<t_Pair> tmpPairs;
     for (int i = 0; i < pairs.size(); i++) {
@@ -930,7 +933,7 @@ inline void CRealMatches::mainTest() {
     }//*/
     //testSurf(img1, img2);
     vector<t_SURF_Pair> pairsSurf;
-    surfGpu.testSurf(img1, img2, pairsSurf);
+    surfGpu.testSurf(img1, img2, pairsSurf);    
     pairs.clear();
     for (int i = 0; i < pairsSurf.size(); i++) {
         t_Pair pair;
@@ -938,6 +941,9 @@ inline void CRealMatches::mainTest() {
         pair.p2 = cvPointTo32f(pairsSurf.at(i).kp2.pt);
 
         pairs.push_back(pair);
+    }
+    for (int i = 0; i < pairs2.size(); i++) {
+        pairs.push_back(pairs2.at(i));
     }
 
     /*for (int i = 0; i < tmpPairs.size(); i++) {
@@ -964,8 +970,10 @@ inline void CRealMatches::mainTest() {
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en fusion = " << time << endl;//*/
 
+
     myTime = clock();
-    cleanRANSAC(CV_FM_RANSAC, pairs);
+    //cleanByTriangles();
+    //cleanRANSAC(CV_FM_RANSAC, pairs);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en ransac = " << time << endl;
     /*myTime = clock();
@@ -978,6 +986,9 @@ inline void CRealMatches::mainTest() {
     remap(ir);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo invertido en TPS = " << time << endl;//*/
+
+    //drawTriangles("tri1", "tri2", false);
+    //drawTriangles("tri1b", "tri2b", true);
 
     if (usePrevious) {
         updatePrevious();
@@ -1331,13 +1342,13 @@ void CRealMatches::startTest3() {
             time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
             cout << "Tiempo TOTAL = " << time << endl;
 
-            if (index != 1) {
-                int key = cvWaitKey(10);
+            //if (index != 1) {
+                int key = cvWaitKey(0);
                 if (key == 27)
                     exit(0);
                 if (key == 98)
                     break;
-            }
+            //}
 
             index++;
         }        
@@ -1582,8 +1593,10 @@ void CRealMatches::startTest6() {
             continue;
         }
 
-        cvCopyImage(imgRT, img1);
-        cvCopyImage(imgDB, img2);
+        //cvCopyImage(imgRT, img1);
+        //cvCopyImage(imgDB, img2);
+        cvResize(imgRT, img1);
+        cvResize(imgDB, img2);
 
         //cvShowImage("ImgDB", imgDB);
         //cvShowImage("ImgRT", imgRT);
@@ -1595,7 +1608,7 @@ void CRealMatches::startTest6() {
 
         if (index == 630) exit(0);
 
-        int key = cvWaitKey(0);
+        int key = cvWaitKey(20);
         if (key == 27)
             exit(0);
         if (key == 32)
@@ -1668,12 +1681,13 @@ void CRealMatches::startTest7() {
         DBpath += line;
         DBpath += ".JPG";
 
-        if (abs(dist) > 0) continue;
-        if ((dist == -1) && (angle < 0)) continue;        
+        if (abs(dist) > 1) continue;
+        if ((dist == -1) && (angle < 0)) continue;
         if ((dist == 1) && (angle > 0)) continue;
         if (abs(angle) > 10) continue;
 
         for (int i = 0; i < nRT; i++) {
+        //int i = 5;
             RTpath = string(PATH_BASE_IMG);
             RTpath += rtPath[i];
             RTpath += ".JPG";
@@ -1692,7 +1706,10 @@ void CRealMatches::startTest7() {
             //cvShowImage("Img1", img1);
             //cvShowImage("Img2", img2);            
 
+            clock_t myTime = clock();
             mainTest();
+            time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+            cout << "Tiempo TOTAL = " << time << endl;
 
             int key = cvWaitKey(0);
             if (key == 27)

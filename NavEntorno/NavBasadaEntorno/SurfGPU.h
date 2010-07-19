@@ -14,6 +14,7 @@
 #include <string>
 #include "stdafx.h"
 #include "ImageRegistration.h"
+#include "CUDAlib.h"
 
 using namespace cv;
 using namespace asrl;
@@ -22,6 +23,9 @@ using namespace std;
 typedef struct {
     KeyPoint kp1;
     KeyPoint kp2;
+
+    float size;
+    float angle;
 
     vector<float> desc1;
     vector<float> desc2;
@@ -49,6 +53,16 @@ private:
 
     void removeOutliers(CvMat **points1, CvMat **points2, CvMat *status);
     void cleanRANSAC(int method, vector<t_SURF_Pair> &pairs);
+
+    void setMaskFromPoints(IplImage * &mask, vector<t_SURF_Pair> pairs, int index);
+    void cleanByPosition(vector<t_SURF_Pair> pairs, CvSize size);
+
+    CvPoint2D32f * getSquare(KeyPoint k);
+    double calcCCorr(IplImage * img1, IplImage * img2, t_SURF_Pair pair, bool show);
+    double getCorrelation(vector <float> data1, vector<float> data2);
+    void cleanByCorrelation(vector<t_SURF_Pair> &pairs, IplImage * img1, IplImage * img2);
+
+    void cleanDistances(IplImage * img1, IplImage * img2, vector<t_SURF_Pair> &pairs);
 
     GpuSurfConfiguration config;
     GpuSurfDetector detector;

@@ -208,8 +208,13 @@
           <developmentMode>6</developmentMode>
           <stripSymbols>true</stripSymbols>
           <incDir>
+            <pElem>sift</pElem>
+            <pElem>LeastSquares</pElem>
             <pElem>/usr/local/include/opencv</pElem>
             <pElem>/usr/include/gtk-2.0</pElem>
+            <pElem>/usr/local/include</pElem>
+            <pElem>../../gpusurf-0.2.0/include</pElem>
+            <pElem>/home/nestor/NetBeansProjects/CUDALib</pElem>
           </incDir>
         </cTool>
         <ccTool>
@@ -222,6 +227,7 @@
             <pElem>/usr/include/gtk-2.0</pElem>
             <pElem>/usr/local/include</pElem>
             <pElem>../../gpusurf-0.2.0/include</pElem>
+            <pElem>/home/nestor/NetBeansProjects/CUDALib</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -233,6 +239,7 @@
             <pElem>/usr/local/lib</pElem>
             <pElem>/tmp/SURF-V1.0.9</pElem>
             <pElem>../../gpusurf-0.2.0/build/lib</pElem>
+            <pElem>/home/nestor/NetBeansProjects/CUDALib/dist/Release/NVCC-Linux-x86</pElem>
           </linkerAddLib>
           <stripSymbols>true</stripSymbols>
           <linkerLibItems>
@@ -245,6 +252,7 @@
             <linkerLibLibItem>gslcblas</linkerLibLibItem>
             <linkerLibLibItem>sqlite3</linkerLibLibItem>
             <linkerLibLibItem>gpusurf</linkerLibLibItem>
+            <linkerLibLibItem>cudalib</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

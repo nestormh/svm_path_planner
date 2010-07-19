@@ -29,6 +29,7 @@ public:
     void addPoints(string path, string file);
     CMRPT_Route(const CMRPT_Route& orig);
     virtual ~CMRPT_Route();
+    void setIndex(int index);
 
 private:    
 

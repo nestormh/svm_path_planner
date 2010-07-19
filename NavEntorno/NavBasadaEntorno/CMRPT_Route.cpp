@@ -80,6 +80,8 @@ IplImage * CMRPT_Route::getNearest(t_RoutePoint point_in) {
 
     //cout << "Distancia = " << minDist << endl;
 
+    cout << minPos->image.c_str() << endl;
+
     return cvLoadImage(minPos->image.c_str(), 0);
 }
 
@@ -90,7 +92,12 @@ IplImage * CMRPT_Route::getNext(t_RoutePoint &currentPoint) {
     if (index == route.size())
         index = 0;
 
+    cout << currentPoint.image.c_str() << endl;
     return cvLoadImage(currentPoint.image.c_str(), 0);
+}
+
+void CMRPT_Route::setIndex(int index) {
+    this->index = index;
 }
 
 CMRPT_Route::CMRPT_Route(const CMRPT_Route& orig) {

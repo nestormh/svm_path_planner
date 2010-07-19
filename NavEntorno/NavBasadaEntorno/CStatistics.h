@@ -43,7 +43,7 @@ public:
     void statistics();
     void statistics(int testIdx, int index, int z, int s, int b1, int b2);
     void tests(int testNumber);
-    void MRTP_test();
+    void MRTP_test(CvSize size);
     void statistics(int size, int zoom, int b1, int b2);
 private:
     char * PATH_BASE_STAT;

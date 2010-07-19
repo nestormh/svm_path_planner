@@ -365,20 +365,22 @@ void CStatistics::tests(int testNumber) {
     cvReleaseImage(&imgRTC);
 }
 
-void CStatistics::MRTP_test() {
+void CStatistics::MRTP_test(CvSize size) {
     CMRPT_Route route1("/home/neztol/doctorado/Datos/MRPT_Data/malaga2009_parking_0L/", "GT_path_CAMERA_LEFT.txt");
     CMRPT_Route route2("/home/neztol/doctorado/Datos/MRPT_Data/malaga2009_parking_2L/", "GT_path_CAMERA_LEFT.txt");
     route2.addPoints("/home/neztol/doctorado/Datos/MRPT_Data/malaga2009_parking_6L/", "GT_path_CAMERA_LEFT.txt");
 
     t_RoutePoint currentPoint;
 
-    IplImage * imgRT = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 1);
-    IplImage * imgDB = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 1);
+    IplImage * imgRT = cvCreateImage(size, IPL_DEPTH_8U, 1);
+    IplImage * imgDB = cvCreateImage(size, IPL_DEPTH_8U, 1);
 
-    CRealMatches rm(false);
+    CRealMatches rm(false, size);
 
     cvNamedWindow("imgRT", 1);
     cvNamedWindow("imgDB", 1);
+
+    route1.setIndex(310);
 
     while (true) {
         IplImage * imgRT_L = route1.getNext(currentPoint);
@@ -394,9 +396,12 @@ void CStatistics::MRTP_test() {
 
         cvShowImage("imgRT", imgRT);
         cvShowImage("imgDB", imgDB);
+        clock_t myTime = clock();
         rm.mainTest(imgRT, imgDB);
+        time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo TOTAL = " << time << endl;
 
-        int key = cvWaitKey(10);
+        int key = cvWaitKey(0);
         if (key == 27)
             exit(0);
         if (key == 32)
