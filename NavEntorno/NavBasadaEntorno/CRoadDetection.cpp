@@ -11,7 +11,7 @@
 #define SUB_DISTANCE 2
 
 CRoadDetection::CRoadDetection(CvSize size) {
-    ruta = new CRutaDB2("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
+    ruta = new CRutaDB2("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB", cvRect(5, 0, size.width - 5, size.height), cvSize(320, 240));
     img1 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     img2 = cvCreateImage(size, IPL_DEPTH_8U, 1);
     mask = cvCreateImage(size, IPL_DEPTH_8U, 1);

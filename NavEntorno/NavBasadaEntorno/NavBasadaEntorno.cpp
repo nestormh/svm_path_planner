@@ -12,7 +12,7 @@
 #include "SurfGPU.h"
 #include "CUDAlib.h"
 
-#define EJECUCION 20
+#define EJECUCION 16
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1

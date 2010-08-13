@@ -942,7 +942,7 @@ inline void CRealMatches::mainTest() {
 
         pairs.push_back(pair);
     }
-    for (int i = 0; i < pairs2.size(); i++) {
+    /*for (int i = 0; i < pairs2.size(); i++) {
         pairs.push_back(pairs2.at(i));
     }
 
@@ -1441,7 +1441,7 @@ void CRealMatches::startTest4() {
 }
 
 void CRealMatches::startTest5() {
-    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
+    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB", cvRect(5, 5, size.width - 5, size.height - 5), size);
     CRoadDetection rd(size);    
 
     IplImage * imgDB;
@@ -1537,7 +1537,8 @@ void CRealMatches::mainTest(IplImage * img1, IplImage * img2) {
 }
 
 void CRealMatches::startTest6() {
-    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
+    //CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
+    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno5.sqlite", "Rutas/iter20julBase6", "Rutas/iter20julConObs2", "/home/neztol/doctorado/Datos/DB", cvRect(6,1, 633, 475), size);
     CRoadDetection rd(size);
 
     IplImage * imgDB1;
@@ -1554,7 +1555,7 @@ void CRealMatches::startTest6() {
 
     //cvNamedWindow("ImgDB", 1);
     //cvNamedWindow("ImgRT", 1);
-    int index = 120;
+    int index = 629;
     ruta.setCurrentPoint(index);
     while (true) {
         clock_t myTime = clock();
@@ -1606,12 +1607,12 @@ void CRealMatches::startTest6() {
         cout << "Tiempo TOTAL = " << time << endl;
         cout << "Index = " << (index - 1) << endl;
 
-        if (index == 630) exit(0);
+        if (index == 1866) exit(0);
 
-        int key = cvWaitKey(20);
+        int key = cvWaitKey(0);        
         if (key == 27)
             exit(0);
-        if (key == 32)
+        if (key == 1048608)
             cvWaitKey(0);
 
         cvReleaseImage(&imgDB1);
@@ -1777,7 +1778,7 @@ void CRealMatches::getNearest(IplImage * imgRT, IplImage * &imgDB, int index1, i
 
 void CRealMatches::startTestNearestImage() {
     //CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/pruebaITERBase2", "Rutas/pruebaITERConObs2", "/home/neztol/doctorado/Datos/DB");
-    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/urbRadazulDiciembre08Base", "Rutas/urbRadazulDiciembre08obs", "/home/neztol/doctorado/Datos/DB");
+    CRutaDB2 ruta("/home/neztol/doctorado/Datos/DB/navEntorno3.sqlite", "Rutas/urbRadazulDiciembre08Base", "Rutas/urbRadazulDiciembre08obs", "/home/neztol/doctorado/Datos/DB", cvRect(5, 0, size.width - 5, size.height), size);
 
     for (int i = 900; i < ruta.getMaxRTPoint(); i += 20) {
         IplImage * imgRT;

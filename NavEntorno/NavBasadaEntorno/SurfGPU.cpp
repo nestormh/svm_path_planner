@@ -9,6 +9,7 @@
 #include "CRealMatches.h"
 
 SurfGPU::SurfGPU() {
+    config.threshold=0.0001;
 }
 
 SurfGPU::SurfGPU(const SurfGPU& orig) {
@@ -996,13 +997,13 @@ void SurfGPU::testSurf(string file1, string file2) {
 
     //cleanByPosition(pairs, cvSize(640, 480));
     
-    drawKeypoints(points1, img1, "surfImg1");
-    drawKeypoints(points2, img2, "surfImg2");
+    //drawKeypoints(points1, img1, "surfImg1");
+    //drawKeypoints(points2, img2, "surfImg2");
 
     cleanDistances(img1, img2, pairs);
     //cleanByCorrelation(pairs, img1, img2);
 
-    drawPairs(pairs, img1, img2);//*/    
+    //drawPairs(pairs, img1, img2);//*/
 
     /*t_moment * moments1, * moments2;
     int nMoments1, nMoments2;
@@ -1058,7 +1059,7 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
         cout << "Tiempo match = " << time << endl;//*/
     }
 
-    drawPairs(pairs, img1, img2);
+    //drawPairs(pairs, img1, img2);
 
     //cleanByPosition(pairs, cvGetSize(img1));
 }

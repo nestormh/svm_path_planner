@@ -7,10 +7,13 @@
 
 #include "CRutaDB2.h"
 
-CRutaDB2::CRutaDB2(const char * dbName, const char * staticRoute, const  char * rtRoute, const char * pathBase) {
+CRutaDB2::CRutaDB2(const char * dbName, const char * staticRoute, const  char * rtRoute, const char * pathBase, CvRect roi, CvSize size) {
     strcpy(dbStatic, staticRoute);
     strcpy(dbRT, rtRoute);
     strcpy(this->pathBase, pathBase);
+
+    this->roi = roi;
+    this->size = size;
 
     if (sqlite3_open(dbName, &db) != SQLITE_OK){
         cerr << "Error al abrir la base de datos: " << sqlite3_errmsg(db) << endl;
@@ -67,7 +70,7 @@ CRutaDB2::CRutaDB2(const char * dbName, const char * staticRoute, const  char * 
     }
 
     cout << "nPoints = " << nRTPoints << endl;
-    map = cvCreateImage(cvSize(480, 480), IPL_DEPTH_8U, 3);
+    map = cvCreateImage(size, IPL_DEPTH_8U, 3);
     currentPoint = 0;
 }
 
@@ -109,8 +112,8 @@ void CRutaDB2::getNextImage(IplImage * &imgRT, IplImage * &imgDB) {
     imgRT = cvLoadImage(imageName, 0);    
     imgDB = getNearestImage(localX, localY, angle);
 
-    cvSetImageROI(imgRT, cvRect(5, 0, imgRT->width - 5, imgRT->height));
-    cvSetImageROI(imgDB, cvRect(5, 0, imgDB->width - 5, imgDB->height));
+    cvSetImageROI(imgRT, roi);
+    cvSetImageROI(imgDB, roi);
 
     //cvNamedWindow("imgRT", 1);
     //cvShowImage("imgRT", imgRT);
@@ -162,7 +165,7 @@ IplImage * CRutaDB2::getNearestImage(double localX, double localY, double angle)
 
     if (staticPoint == -1) {
         cerr << "No se encontraron vecinos para la imagen " << endl;
-        IplImage * rtImg = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 1);
+        IplImage * rtImg = cvCreateImage(size, IPL_DEPTH_8U, 1);
         cvZero(rtImg);
         return rtImg;
     }
@@ -188,8 +191,8 @@ void CRutaDB2::getImageAt(IplImage * &img, int type, int index) {
 
     //cvSetImageROI(img, cvRect(5, 0, img->width - 5, img->height));
     IplImage * tmpImg = cvLoadImage(imageName, 0);
-    cvSetImageROI(tmpImg, cvRect(0, 0, tmpImg->width - 10, tmpImg->height - 10));
-    img = cvCreateImage(cvSize(315, 240), IPL_DEPTH_8U, 1);
+    cvSetImageROI(tmpImg, roi);
+    img = cvCreateImage(size, IPL_DEPTH_8U, 1);
     cvResize(tmpImg, img);
     cvReleaseImage(&tmpImg);//*/
 }
@@ -234,10 +237,10 @@ void CRutaDB2::getNextImage(IplImage * &imgRT, IplImage * &imgDB1, IplImage * &i
     imgRT = cvLoadImage(imageName, 0);
     getNearestImage(localX, localY, angle, imgDB1, imgDB2, imgDB3);
 
-    cvSetImageROI(imgRT, cvRect(5, 0, imgRT->width - 5, imgRT->height));
-    cvSetImageROI(imgDB1, cvRect(5, 0, imgDB1->width - 5, imgDB1->height));
-    cvSetImageROI(imgDB2, cvRect(5, 0, imgDB1->width - 5, imgDB1->height));
-    cvSetImageROI(imgDB3, cvRect(5, 0, imgDB1->width - 5, imgDB1->height));
+    cvSetImageROI(imgRT, roi);
+    cvSetImageROI(imgDB1, roi);
+    cvSetImageROI(imgDB2, roi);
+    cvSetImageROI(imgDB3, roi);
     
     //cvNamedWindow("imgRT", 1);
     //cvShowImage("imgRT", imgRT);
@@ -299,6 +302,7 @@ void CRutaDB2::getNearestImage(double localX, double localY, double angle, IplIm
 
     char imageName[1024];    
     sprintf(imageName, "%s/%s/Camera0/Image%d.png", pathBase, dbStatic, staticPoint);
+    cout << imageName << endl;
     imgDB1 = cvLoadImage(imageName, 0);
     sprintf(imageName, "%s/%s/Camera1/Image%d.png", pathBase, dbStatic, staticPoint);
     imgDB2 = cvLoadImage(imageName, 0);

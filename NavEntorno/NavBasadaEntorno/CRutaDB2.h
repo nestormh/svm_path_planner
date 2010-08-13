@@ -19,7 +19,7 @@
 
 class CRutaDB2 {
 public:
-    CRutaDB2(const char * dbName, const char * staticRoute, const  char * rtRoute, const char * pathBase);
+    CRutaDB2(const char * dbName, const char * staticRoute, const  char * rtRoute, const char * pathBase, CvRect roi, CvSize size);
     CRutaDB2(const CRutaDB2& orig);
     virtual ~CRutaDB2();
 
@@ -54,6 +54,9 @@ private:
     int currentPoint;
 
     IplImage * map;
+
+    CvSize size;
+    CvRect roi;
 
     void drawAllPoints(CvMat * stPoints, CvMat * rtPoints, bool centered, bool angles);
 };
