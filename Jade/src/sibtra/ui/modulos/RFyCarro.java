@@ -3,7 +3,7 @@
  */
 package sibtra.ui.modulos;
 
-import sibtra.lms.BarridoAngular;
+import sibtra.lidar.BarridoAngular;
 import sibtra.rfycarro.FuturoObstaculo;
 import sibtra.rfycarro.PanelFuturoObstaculo;
 import sibtra.ui.VentanasMonitoriza;

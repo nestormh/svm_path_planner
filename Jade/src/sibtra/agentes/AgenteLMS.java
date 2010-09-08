@@ -19,9 +19,9 @@ import jade.proto.SimpleAchieveREResponder;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
-import sibtra.lms.BarridoAngular;
+import sibtra.lidar.BarridoAngular;
 import sibtra.lms.LMSException;
-import sibtra.lms.ManejaLMS;
+import sibtra.lms.ManejaLMS221;
 import sibtra.lms.ManejaTelegramasIO;
 import sibtra.lms.ZonaLMS;
 
@@ -49,7 +49,7 @@ public class AgenteLMS extends Agent {
 	 */
 	private boolean logs;
 
-	private ManejaLMS manLMS;
+	private ManejaLMS221 manLMS;
 	
 	/**
 	 * Metodo para emitir los mensajes de Log
@@ -89,9 +89,9 @@ public class AgenteLMS extends Agent {
 		agentLog("Usamos puerto serie: "+puertoSerie);
 		if(usaRXTX) {
 			//le pasamos el objeto IO
-			manLMS=new ManejaLMS(puertoSerie,new ManejaTelegramasIO());
+			manLMS=new ManejaLMS221(puertoSerie,new ManejaTelegramasIO());
 		} else
-			manLMS=new ManejaLMS(puertoSerie);
+			manLMS=new ManejaLMS221(puertoSerie);
 
 		//Tratamos de pasar al modo 25
 		try { manLMS.CambiaAModo25(); } catch (LMSException e) {

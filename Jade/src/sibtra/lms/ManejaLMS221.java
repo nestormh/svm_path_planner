@@ -5,11 +5,14 @@ package sibtra.lms;
 
 import java.util.Arrays;
 
+import sibtra.lidar.BarridoAngular;
+import sibtra.lidar.Lidar;
+
 /**
  * @author alberto
  *
  */
-public class ManejaLMS {
+public class ManejaLMS221 implements Lidar {
 
 	/**
 	 * Password del LMS
@@ -57,7 +60,7 @@ public class ManejaLMS {
 	private Object mutexBarridos=new Object();
 
 	/** Contendrá el último barrido continuo recibido */
-	private BarridoAngular ultimoBarrido=null;
+	private BarridoAngular221 ultimoBarrido=null;
 	
 	/** numero de reintentos en el envío de un mensaje */
 	private int numReintentos=4;
@@ -67,7 +70,7 @@ public class ManejaLMS {
 	 * Constructor, por defecto usa ManejaTelegramasJNI
 	 * @param puertoSerie
 	 */	
-	public ManejaLMS(String puertoSerie){
+	public ManejaLMS221(String puertoSerie){
 		this(puertoSerie, new ManejaTelegramasJNI());
 	}
 	
@@ -76,7 +79,7 @@ public class ManejaLMS {
 	 * @param puertoSerie
 	 * @param mantel objeto de manejo de telegramas a usar
 	 */
-	public ManejaLMS(String puertoSerie, ManejaTelegramas mantel) {
+	public ManejaLMS221(String puertoSerie, ManejaTelegramas mantel) {
 		manTel=mantel;
 		if(!puertoSerie.equals("/dev/null")) {
 			manTel.ConectaPuerto(puertoSerie);
@@ -695,7 +698,7 @@ public class ManejaLMS {
 	 * @return Barrido recibido
 	 * @throws LMSException 
 	 */
-	public synchronized BarridoAngular recibeBarrido() throws LMSException {
+	public synchronized BarridoAngular221 recibeBarrido() throws LMSException {
 		if(manTel==null) {
 			System.err.println(getClass().getName()+": Se trata de acceder al LMS en modo desconectado");
 			return null;
@@ -708,7 +711,7 @@ public class ManejaLMS {
 		if(respMen==null)
 			throw  new LMSException("no se pudo leer mensaje de respuesta.");
 		
-		BarridoAngular barr=manMen.mensajeABarridoAngular(respMen);
+		BarridoAngular221 barr=manMen.mensajeABarridoAngular(respMen);
 		if(barr==null) 
 			throw new LMSException("no se pudo interpretar correctamente mensaje.");
 		return barr;
@@ -793,10 +796,15 @@ public class ManejaLMS {
 	 * el estado actual. Se puede pedir el último barrido después de terminado 
 	 * el envío continuo 
 	 */
-	public BarridoAngular ultimoBarrido() {
+	public BarridoAngular221 ultimoBarrido() {
 		synchronized (mutexBarridos) {
 			return ultimoBarrido;
 		}
+	}
+
+	/** @return Barrido devuelto por {@link #ultimoBarrido()} */
+	public BarridoAngular221 getBarridoAngular() {
+		return ultimoBarrido();
 	}
 
 	/**
@@ -804,9 +812,9 @@ public class ManejaLMS {
 	 * Si no estamos en barrido continuo se bloqueará hasta que vuelva a comenzar
 	 * @return último barrido recibido de forma continua.
 	 */
-	public BarridoAngular esperaNuevoBarrido(BarridoAngular actual) {
+	public BarridoAngular esperaNuevoBarrido(BarridoAngular datoAnterior) {
 		synchronized (mutexBarridos) {
-			while(actual==ultimoBarrido)
+			while(datoAnterior.sysTime==ultimoBarrido.sysTime)
 				try {
 				mutexBarridos.wait(); //nos quedamos bloqueado en mutexBarridos
 				} catch (InterruptedException e) {
@@ -815,7 +823,7 @@ public class ManejaLMS {
 			return ultimoBarrido;
 		}
 	}
-
+	
 	/** Devuelve si ya ase esta recibiendo barrido continuo */
 	public boolean yaRecibiendoBarridoContinuo() {
 		return thContinuo.isEmitiendo();
@@ -864,7 +872,7 @@ public class ManejaLMS {
 						}
 				} catch (InterruptedException e) {	}
 				//Vemos si ya esta emitiendo o tenemos que solicitarlo
-				synchronized (ManejaLMS.this) {
+				synchronized (ManejaLMS221.this) {
 					pidi=pidiendo;	//copiamos el valor de pidiendo				
 				}
 				if(pidi==PIDIENDO_CONTINUO && !yaEmitiendo) {
@@ -894,7 +902,7 @@ public class ManejaLMS {
 					}
 				} else {
 					//TODO optimizar para que se reutilice el barrido
-					BarridoAngular barr=manMen.mensajeABarridoAngular(menBarridoC);
+					BarridoAngular221 barr=manMen.mensajeABarridoAngular(menBarridoC);
 					if(barr==null) {
 						System.err.println("no se ha podido convertir a barrdio :-(");
 						//TODO llevar contador de fallos
@@ -912,7 +920,7 @@ public class ManejaLMS {
 				//si se quería parar y ya no se emite nos suspendemos.
 				if(pidi==PIDIENDO_PARAR && !yaEmitiendo)  {
 					System.out.println("Se confirmo la peticion de parada de barrido continuo. NOS SUSPENDEMOS");
-					synchronized (ManejaLMS.this) {
+					synchronized (ManejaLMS221.this) {
 						pidiendo=PIDIENDO_NADA;						
 					}
 					suspendido=true;

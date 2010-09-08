@@ -6,6 +6,7 @@
 package sibtra.lms;
 
 import java.awt.geom.Point2D;
+import sibtra.lidar.BarridoAngular;
 
 /**
  * @author alberto
@@ -19,11 +20,11 @@ import java.awt.geom.Point2D;
  * Se define iterador para obtener valores procesados a partir de los datos: puntos, angulos, distancias, 
  * zonas infringidas, etc.
  */
-public class BarridoAngular implements java.io.Serializable {
+public class BarridoAngular221 extends BarridoAngular implements  java.io.Serializable {
 	/**
 	 * No inicializa los arrays de angulo y distancia
 	 */
-	public BarridoAngular() {
+	public BarridoAngular221() {
 		datos=null;
 		promedios=1;
 		enMilimetros=false;
@@ -33,7 +34,7 @@ public class BarridoAngular implements java.io.Serializable {
 	 * Inicializa los arrays de angulo y distancia la tamaño indicado
 	 * @param numDatos
 	 */
-	public BarridoAngular(int numDatos) {
+	public BarridoAngular221(int numDatos) {
 		datos=new short[numDatos];
 		promedios=1;
 		enMilimetros=false;
@@ -48,7 +49,7 @@ public class BarridoAngular implements java.io.Serializable {
 	 * @param enMilimetros
 	 * @param promedios Si tenemos más de un promedio sabemos que no hay flags
 	 */
-	public BarridoAngular(int numDatos,
+	public BarridoAngular221(int numDatos,
 			int anguloInicial, int incAngular, byte codigoRango, boolean enMilimetros, short promedios) {
 		datos=new short[numDatos];
 		this.promedios = promedios;

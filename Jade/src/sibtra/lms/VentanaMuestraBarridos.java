@@ -16,7 +16,7 @@ import sibtra.util.ThreadSupendible;
 @SuppressWarnings("serial")
 public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 
-	private ManejaLMS manLMS;
+	private ManejaLMS221 manLMS;
 	private PanelMuestraBarrido pmb;
 	/** contendrá el último barrido recibido del LMS */
 	private BarridoAngular barrAct=null;
@@ -25,7 +25,7 @@ public class VentanaMuestraBarridos extends JFrame implements WindowListener {
 		super("Muestra Barrido");
 		//Conectamos a RF
 		try { 		
-			manLMS=new ManejaLMS(ptoRF);
+			manLMS=new ManejaLMS221(ptoRF);
 			manLMS.setDistanciaMaxima(80);
 			manLMS.CambiaAModo25(); 
 		} catch (LMSException e) {

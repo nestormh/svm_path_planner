@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 import sibtra.gps.Trayectoria;
 import sibtra.lms.BarridoAngular;
 import sibtra.lms.LMSException;
-import sibtra.lms.ManejaLMS;
+import sibtra.lms.ManejaLMS221;
 
 
 /**
@@ -18,7 +18,7 @@ import sibtra.lms.ManejaLMS;
  */
 public class Navega2Matlab {
 
-	private ManejaLMS manLMS;
+	private ManejaLMS221 manLMS;
 
 	Trayectoria Tr=null;
 	private MiraObstaculo mi;
@@ -36,7 +36,7 @@ public class Navega2Matlab {
 
 		//Conectamos a RF
 		try { 		
-			manLMS=new ManejaLMS(puertoRF);
+			manLMS=new ManejaLMS221(puertoRF);
 			manLMS.setDistanciaMaxima(80);
 			manLMS.CambiaAModo25(); 
 		} catch (LMSException e) {

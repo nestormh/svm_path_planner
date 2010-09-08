@@ -11,14 +11,14 @@ import sibtra.util.EligeSerial;
  */
 public class VentanaRF extends JFrame {
 
-	private ManejaLMS manLMS;
+	private ManejaLMS221 manLMS;
 	private PanelRF panRF;
 	
 	public VentanaRF(String ptoRF) {
 		super("Ventana RF");
 		System.out.println("Conectamos a RF en: "+ptoRF);
 		try { 		
-			manLMS=new ManejaLMS(ptoRF);
+			manLMS=new ManejaLMS221(ptoRF);
 			manLMS.setDistanciaMaxima(80);
 			manLMS.CambiaAModo25(); 
 

@@ -3,10 +3,10 @@
  */
 package sibtra.lms;
 
-import sibtra.lms.BarridoAngular;
+import sibtra.lms.BarridoAngular221;
 import sibtra.lms.LMSException;
-import sibtra.lms.ManejaLMS;
-import sibtra.lms.BarridoAngular.barridoAngularIterator;
+import sibtra.lms.ManejaLMS221;
+import sibtra.lms.BarridoAngular221.barridoAngularIterator;
 
 /**
  * Clase para acceder a range finder LMS desde Matlab
@@ -16,14 +16,14 @@ import sibtra.lms.BarridoAngular.barridoAngularIterator;
  */
 public class LMS2Matlab {
 
-	protected ManejaLMS manLMS;
+	protected ManejaLMS221 manLMS;
 
 	/**
 	 * Conecta con el LMS y hace la configuración por defecto
 	 * @param puerto
 	 */
 	public LMS2Matlab(String puerto){
-		manLMS=new ManejaLMS(puerto);
+		manLMS=new ManejaLMS221(puerto);
 	}
 	
 	/**
@@ -64,7 +64,7 @@ public class LMS2Matlab {
 			manLMS.pideBarrido((short)Math.toDegrees(angInicial)
 					, (short)Math.toDegrees(angFinal)
 					, (short)promedios);
-			BarridoAngular barr=manLMS.recibeBarrido();
+			BarridoAngular221 barr=manLMS.recibeBarrido();
 			res=new double[barr.numDatos()][2];
 			barridoAngularIterator bit=barr.creaIterator();
 			for(int i=0; bit.hasNext(); i++) {

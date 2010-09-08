@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.Timer;
 
+import sibtra.lidar.BarridoAngular;
 import sibtra.util.PanelFlow;
 
 /**
@@ -20,14 +21,14 @@ import sibtra.util.PanelFlow;
  */
 public class PanelRF extends PanelMuestraBarrido {
 	
-	ManejaLMS manLMS;
+	ManejaLMS221 manLMS;
 	private sibtra.lms.PanelRF.ThreadActulizacion thActuliza;
 	private BarridoAngular barrAct;
 	private JProgressBar jpbTRF;
 	private long deltaT;
 	private JLabel jlTiempo;
 	
-	public PanelRF(ManejaLMS manLms) {
+	public PanelRF(ManejaLMS221 manLms) {
 		super((short)80);
 		manLMS=manLms;
 		try {

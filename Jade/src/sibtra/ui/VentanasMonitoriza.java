@@ -28,7 +28,7 @@ import sibtra.imu.ConexionSerialIMU;
 import sibtra.imu.DeclinacionMagnetica;
 import sibtra.imu.PanelIMU;
 import sibtra.lms.LMSException;
-import sibtra.lms.ManejaLMS;
+import sibtra.lms.ManejaLMS221;
 import sibtra.lms.PanelRF;
 import sibtra.ui.defs.CalculoDireccion;
 import sibtra.ui.defs.CalculoVelocidad;
@@ -107,7 +107,7 @@ public class VentanasMonitoriza extends Ventanas {
 	public ControlCarro conexionCarro=null;
 	public GPSConnectionTriumph conexionGPS=null;
 	public ConexionSerialIMU conexionIMU=null;  
-	public ManejaLMS conexionRF=null;	
+	public ManejaLMS221 conexionRF=null;	
 	
 	public DeclinacionMagnetica declinaMag=new DeclinacionMagnetica();
 	
@@ -187,7 +187,7 @@ public class VentanasMonitoriza extends Ventanas {
 			//Conectamos a RF
 			System.out.println("Abrimos conexión LMS en "+args[2]);
 			try {
-				conexionRF = new ManejaLMS(args[2]);
+				conexionRF = new ManejaLMS221(args[2]);
 				conexionRF.setDistanciaMaxima(80);
 //				manLMS.setResolucionAngular((short)100);
 				conexionRF.CambiaAModo25();

@@ -81,7 +81,7 @@ public class UtilMensajes extends ParametrosLMS {
 	 * @param mensaje Mensaje a interpretar.
 	 * @return Barrido angular correspondiente. null si hay algún error
 	 */
-	public BarridoAngular mensajeABarridoAngular(byte[] mensaje) {
+	public BarridoAngular221 mensajeABarridoAngular(byte[] mensaje) {
 		// Nos aseguramos que tiene al menos el tipo
 		if(mensaje==null || mensaje.length<1)
 			return null;
@@ -145,7 +145,7 @@ public class UtilMensajes extends ParametrosLMS {
 			aInc=1;  //el parcial es siempre en 1/4 de grado.
 		} 
 
-		BarridoAngular ba=new BarridoAngular(numDatos,aIni,aInc,codigoRango,(mDist==1),promedios);
+		BarridoAngular221 ba=new BarridoAngular221(numDatos,aIni,aInc,codigoRango,(mDist==1),promedios);
 		//nos limitamos a copiar los datos
 		for(int i=0; i<numDatos; i++)
 			ba.datos[i]=(short)UtilMensajes.men2Word(mensaje, i*2+indDatos);

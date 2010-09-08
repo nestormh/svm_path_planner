@@ -30,7 +30,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 @SuppressWarnings("serial")
-public class PanelBarrido extends JPanel implements ChangeListener, MouseListener, MouseWheelListener {
+public class PanelBarrido extends PanelActualizacion implements ChangeListener, MouseListener, MouseWheelListener {
 	
 	protected static final int TamMarca = 40;
 
