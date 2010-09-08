@@ -11,7 +11,7 @@ import java.net.Socket;
 
 /**
  * Clase para el acceso a los LMS111. Usa una conexión TCP/IP al puerto del dispositivo y a partir de ahí se envían
- * mensajes de texto. La respueste es también texto con los números representados en hexamecimal
+ * mensajes de texto. La respuesta es también texto con los números representados en hexamecimal
  * Las direcciónes IP están en el rango 192.168.0.X, por lo que es necesario cofigurar interfáz de la máquina en ese rango
  * Para Portatil 9 basta con hacer 
  * <code>ifconfig eth0 add 192.168.0.10 netmask 255.255.255.0</code>
@@ -65,6 +65,10 @@ public class ManejaLMS111 {
 		}
 	}
 	
+	/** Pasea la cadena correspondiente a entero del mensaje segun definición.
+	 * Los números decimales empiezan por + ó -, los hexadecimales son siempre positivos
+	 * @return el entero correspondiente o {@link Integer.MIN_VALUE} si hay error 
+	 */
 	int str2int(String st) {
 		st.trim();
 		try {
@@ -80,11 +84,13 @@ public class ManejaLMS111 {
 			System.err.println("Error al convertir a entero "+st+"\n"+ne.getLocalizedMessage());
 			ne.printStackTrace();
 		}
-		return -1;
+		return Integer.MIN_VALUE;
 	}
 	
+	/** Parsea los mensajes <code>sRA LMDscandata</code> y <code>sSN LMDscandata</code>*/
 	public boolean parseaBarrido(String resp) {
-		if(!resp.startsWith("sRA LMDscandata")) return false; //no es barrido
+		if(!resp.startsWith("sRA LMDscandata")
+				&& !resp.startsWith("sSN LMDscandata")) return false; //no es barrido
 		String[] campos=resp.split("\\s");
 		String log="";
 		int ca=2;
@@ -109,7 +115,7 @@ public class ManejaLMS111 {
 			log+="\n"+ca+": Chan"+i+" DataCont="+campos[ca++]+" ScanFact="+str2int(campos[ca++])
 			+" ScanOffset="+str2int(campos[ca++])+" StarAng="+str2int(campos[ca++])+" AngStep="+str2int(campos[ca++]);
 			int numData=str2int(campos[ca++]);
-			log+="\n\t"+(ca-1)+": "+"NumData="+numChanels16;
+			log+="\n\t"+(ca-1)+": "+"NumData="+numData;
 			ca+=numData;
 		}
 		
