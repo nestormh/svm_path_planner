@@ -39,7 +39,7 @@ public class PanelMuestraBarridoAngular extends PanelBarrido {
 	}
 
 	protected void cosasAPintar(Graphics g0) {
-		this.cosasAPintar(g0);
+		super.cosasAPintar(g0);
 		Graphics2D g=(Graphics2D)g0;
 	
 		if(barridoAct!=null && barridoAct.numDatos()>0 && jcbBarrido.isSelected()) {

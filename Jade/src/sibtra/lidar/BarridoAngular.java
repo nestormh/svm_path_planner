@@ -28,12 +28,25 @@ public abstract class BarridoAngular {
 	/** @return Distancia correspondiente al dato i-ésimo */
 	public abstract double getDistancia(int i);
 
-	/** @return {@link Point2D} correspondiente al dato i-ésimo */
-	public abstract Point2D.Double getPunto(int i);
+	/** @return {@link Point2D} correspondiente al dato i-ésimo */ 
+	public Point2D.Double getPunto(int i){
+		if (i<0 || i>=numDatos()) return null;
+		double ang=getAngulo(i);
+		double dis=getDistancia(i);
+		return new Point2D.Double(dis*Math.cos(ang),dis*Math.sin(ang));
+	}
+	
 
 	/** @return la distancia máxima posible */
 	public abstract double getDistanciaMaxima();
 	
-	
+	public String toString() {
+		String ret="NumDat="+numDatos();
+		for(int i=0; i<numDatos(); i++) {
+			ret+=String.format("[%f,%f]", getAngulo(i),getDistancia(i));
+		}
+		return ret;
+	}
+
 
 }
