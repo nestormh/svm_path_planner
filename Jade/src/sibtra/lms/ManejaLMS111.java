@@ -86,8 +86,8 @@ public class ManejaLMS111 implements Lidar {
 			else
 				return Integer.parseInt(st, 16);
 		} catch (NumberFormatException ne) {
-			System.err.println("Error al convertir a entero "+st+"\n"+ne.getLocalizedMessage());
-			ne.printStackTrace();
+//			System.err.println("Error al convertir a entero "+st+"\n"+ne.getLocalizedMessage());
+//			ne.printStackTrace();
 		}
 		return Integer.MIN_VALUE;
 	}
@@ -286,11 +286,12 @@ public class ManejaLMS111 implements Lidar {
 		
 		
 		Frame vent=new Frame("ManejaLMS111");
-		PanelMuestraBarridoAngular pmba=new PanelMuestraBarridoAngular((short)30);
+		PanelMuestraBarridoAngular pmba=new PanelMuestraBarridoAngular((short)10);
 		pmba.setBarrido(null);
 		vent.add(pmba);
 		vent.pack();
 		vent.setVisible(true);
+        vent.setBounds(-1, -1, 1024, 742);
 
 		System.out.println("Tratamos de conectar");
 		m111.conecta("192.168.0.3", 2111);
@@ -317,7 +318,7 @@ public class ManejaLMS111 implements Lidar {
 			resp=m111.enviaEspera("sRN STlms");
 		} while(resp.charAt(10)!='7');
 
-		for(int i=1; i<20; i++) {
+		for(int i=1; i<5; i++) {
 			//Pedimos una medida
 			resp=m111.enviaEspera("sRN LMDscandata");
 			ba=m111.parseaBarrido(resp);
@@ -326,6 +327,24 @@ public class ManejaLMS111 implements Lidar {
 			pmba.setBarrido(ba);
 			try { Thread.sleep(5000); } catch (Exception e) {}
 		}
+		
+		//iniciamos el modo contínuo
+		resp=m111.enviaEspera("sEN LMDscandata 1");
+		
+		for(int i=1; i<2000; i++) {
+			//esperamos una medida
+			resp=m111.leeMensaje();
+			ba=m111.parseaBarrido(resp);
+//			System.out.println("Barrido parseado:"+ba);
+//			System.out.println("Distancia Maxima:"+ba.getDistanciaMaxima());
+			pmba.setBarrido(ba);
+//			try { Thread.sleep(5000); } catch (Exception e) {}
+		}
+		//Paramos el modo contínuo
+		resp=m111.enviaEspera("sEN LMDscandata 0");
+		
+		
+		
 		//paramos el LMS
 //		m111.enviaEspera("sMN LMCstopmeas");
 		
