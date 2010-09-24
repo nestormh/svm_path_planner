@@ -39,7 +39,7 @@ public class SalvaMATv4 {
 	 * @param nomFich nombre del fichero
 	 * @throws IOException
 	 */
-	public void open(String nomFich) throws IOException { 
+	private void open(String nomFich) throws IOException { 
 		if (nomFich==null || nomFich.length()==0)
 			throw new IllegalArgumentException("Necesario nombre de fichero ");
 		if(dos!=null)

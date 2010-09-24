@@ -1,6 +1,9 @@
 package sibtra.lidar;
 
 import java.awt.geom.Point2D;
+import java.io.IOException;
+
+import sibtra.util.SalvaMATv4;
 
 public abstract class BarridoAngular {
 
@@ -48,5 +51,14 @@ public abstract class BarridoAngular {
 		return ret;
 	}
 
-
+	public void savalAMatv4(SalvaMATv4 sm4, String nombreMatriz) throws IOException {
+		//creamos matriz de dobles
+		double[][] datos=new double[numDatos()][2];
+		for(int nd=0; nd<numDatos(); nd++) {
+			datos[nd][0]=getAngulo(nd);
+			datos[nd][1]=getDistancia(nd);			
+		}
+		//la escribimos
+		sm4.matrizDoubles(datos, nombreMatriz);
+	}
 }
