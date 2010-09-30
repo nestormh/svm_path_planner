@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+    <itemPath>/home/nestor/NetBeansProjects/CUDALib/CUDAlib.h</itemPath>
+    <itemPath>/home/nestor/NetBeansProjects/CUDALib/devices.cu</itemPath>
+    <itemPath>/home/nestor/NetBeansProjects/CUDALib/matchSURF.cu</itemPath>
+    <itemPath>/home/nestor/NetBeansProjects/CUDALib/sumaArrays.cu</itemPath>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="3">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>NVCC|GNU</compilerSet>
+        <platform>2</platform>
+        <dependencyChecking>false</dependencyChecking>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/c++/4.3</pElem>
+            <pElem>/usr/include</pElem>
+            <pElem>/usr/local/cuda/include</pElem>
+            <pElem>/home/nestor/NVIDIA_GPU_Computing_SDK/C/common/inc</pElem>
+          </incDir>
+          <commandLine>-DUNIX -D_DEBUG --compiler-bindir=/usr/bin/gcc-4.3</commandLine>
+          <preprocessorList>
+            <Elem>__global__</Elem>
+            <Elem>__shared__</Elem>
+            <Elem>__constant__</Elem>
+            <Elem>__device__</Elem>
+            <Elem>__host__</Elem>
+          </preprocessorList>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>/usr/include/c++/4.3</pElem>
+            <pElem>/usr/include</pElem>
+            <pElem>/usr/local/cuda/include</pElem>
+            <pElem>/home/nestor/NVIDIA_GPU_Computing_SDK/C/common/inc</pElem>
+          </incDir>
+          <commandLine>-DUNIX -D_DEBUG --compiler-bindir=/usr/bin/gcc-4.3</commandLine>
+          <preprocessorList>
+            <Elem>__global__</Elem>
+            <Elem>__shared__</Elem>
+            <Elem>__constant__</Elem>
+            <Elem>__device__</Elem>
+            <Elem>__host__</Elem>
+          </preprocessorList>
+        </ccTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+    </conf>
+    <conf name="Release" type="3">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>NVCC|GNU</compilerSet>
+        <platform>2</platform>
+        <dependencyChecking>false</dependencyChecking>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>/usr/include/c++/4.3</pElem>
+            <pElem>/usr/include</pElem>
+            <pElem>/usr/local/cuda/include</pElem>
+            <pElem>/home/nestor/NVIDIA_GPU_Computing_SDK/C/common/inc</pElem>
+            <pElem>/home/nestor/gpusurf-0.2.0/include</pElem>
+            <pElem>/usr/local/include/opencv</pElem>
+          </incDir>
+          <commandLine>-DUNIX --compiler-options -fno-strict-aliasing --compiler-bindir=/usr/bin/gcc-4.3 --host-compilation=c++</commandLine>
+          <preprocessorList>
+            <Elem>__global__</Elem>
+            <Elem>__shared__</Elem>
+            <Elem>__constant__</Elem>
+            <Elem>__device__</Elem>
+            <Elem>__host__</Elem>
+          </preprocessorList>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>/usr/include/c++/4.3</pElem>
+            <pElem>/usr/include</pElem>
+            <pElem>/usr/local/cuda/include</pElem>
+            <pElem>/home/nestor/NVIDIA_GPU_Computing_SDK/C/common/inc</pElem>
+            <pElem>/home/nestor/gpusurf-0.2.0/include</pElem>
+            <pElem>/usr/local/include/opencv</pElem>
+          </incDir>
+          <commandLine>-DUNIX --compiler-options -fno-strict-aliasing --compiler-bindir=/usr/bin/gcc-4.3 --host-compilation=c++</commandLine>
+          <preprocessorList>
+            <Elem>__global__</Elem>
+            <Elem>__shared__</Elem>
+            <Elem>__constant__</Elem>
+            <Elem>__device__</Elem>
+            <Elem>__host__</Elem>
+          </preprocessorList>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+    </conf>
+    <conf name="Debug-Emu" type="3">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>NVCC|GNU</compilerSet>
+        <platform>2</platform>
+        <dependencyChecking>false</dependencyChecking>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/c++/4.3</pElem>
+            <pElem>/usr/include</pElem>
+            <pElem>/usr/local/cuda/include</pElem>
+            <pElem>/home/nestor/NVIDIA_GPU_Computing_SDK/C/common/inc</pElem>
+          </incDir>
+          <commandLine>-DUNIX -D_DEBUG -deviceemu --compiler-bindir=/usr/bin/gcc-4.3</commandLine>
+          <preprocessorList>
+            <Elem>__global__</Elem>
+            <Elem>__shared__</Elem>
+            <Elem>__constant__</Elem>
+            <Elem>__device__</Elem>
+            <Elem>__host__</Elem>
+          </preprocessorList>
+        </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>/usr/include/c++/4.3</pElem>
+            <pElem>/usr/include</pElem>
+            <pElem>/usr/local/cuda/include</pElem>
+            <pElem>/home/nestor/NVIDIA_GPU_Computing_SDK/C/common/inc</pElem>
+          </incDir>
+          <commandLine>-DUNIX -D_DEBUG -deviceemu --compiler-bindir=/usr/bin/gcc-4.3</commandLine>
+          <preprocessorList>
+            <Elem>__global__</Elem>
+            <Elem>__shared__</Elem>
+            <Elem>__constant__</Elem>
+            <Elem>__device__</Elem>
+            <Elem>__host__</Elem>
+          </preprocessorList>
+        </ccTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+    </conf>
+  </confs>
+</configurationDescriptor>
