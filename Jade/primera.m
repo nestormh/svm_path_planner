@@ -22,6 +22,7 @@ numTitas=length(rangoTitas)
 MatVota=zeros(length(rangoD),numTitas);
 
 function tita=calculaTita(alfa,l,d)
+	if(sin(alfa)==0.0) alfa, error("Seno de alfa se hace 0"); endif
 	tita=atan((d/l-cos(alfa))/sin(alfa));
 endfunction
 
@@ -77,20 +78,44 @@ figure (2);
 #mesh(rangoTitas,rangoD,MatVota);
 
 [maxD,indMD]=max(MatVota);
-[maxTita,indMTita]=max(maxD);
+[maxTita,indTitaSel]=max(maxD);
 maxTita
-titaSel=rangoTitas(indMTita)
-dSel=rangoD(indMD(indMTita))
+titaSel=rangoTitas(indTitaSel)
+indDSel=indMD(indTitaSel);
+dSel=rangoD(indDSel)
 distintos=find(usadosTeo != usados);
 numCalculos 
 numUsados=length(find(usados))
 numUsadosTeo=length(find(usadosTeo))
 numDistintos=length(distintos)
+
+#Encontramos los que maxTita que contribullen al máximo
+contribuye=zeros(size(l));
+for indPto=find(usados)'
+	alfaAct=alfa(indPto);
+	lAct=l(indPto);
+	if (abs(alfaAct)<rad(0.1) )
+		if ((round((lAct-Dmin)/Dinc)+1)==indDSel)
+			contribuye(indPto)=1;
+		endif
+		continue;
+	endif
+	tita=calculaTita(alfaAct,lAct,dSel);
+	indTita=round((tita-TitaMin)/TitaInc)+1;
+	if(indTita==indTitaSel)
+		contribuye(indPto)=1;
+	endif
+endfor
+
+numContribuyen=length(find(contribuye))
+
 figure(1);
 lr=4;
 lUsados=l(find(usados)); alfaUsados=alfa(find(usados));
+lContribuyen=l(find(contribuye)); alfaContribuyen=alfa(find(contribuye));
 plot(l.*cos(alfa+pi/2),l.*sin(alfa+pi/2)
-  ,lUsados.*cos(alfaUsados+pi/2),lUsados.*sin(alfaUsados+pi/2),"x"
+#  ,lUsados.*cos(alfaUsados+pi/2),lUsados.*sin(alfaUsados+pi/2),"x"
+  ,lContribuyen.*cos(alfaContribuyen+pi/2),lContribuyen.*sin(alfaContribuyen+pi/2),"o"
  ,lr*[-cos(titaSel), cos(titaSel)],lr*[-sin(titaSel) ,sin(titaSel)]+dSel
   ,lr*[-cos(TitaMax), 0, cos(TitaMin)],lr*[-sin(TitaMax), 0 ,sin(TitaMin)]+Dmin
   ,lr*[-cos(TitaMin), 0, cos(TitaMax)],lr*[-sin(TitaMin), 0 ,sin(TitaMax)]+Dmax
