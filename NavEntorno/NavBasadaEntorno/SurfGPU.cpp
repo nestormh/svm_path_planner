@@ -193,7 +193,10 @@ void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vec
             pairs.push_back(pair);
         }        
     }*/
-    /*float* avg1 = (float*) malloc(sizeof (float) * points1.size());
+}
+
+void SurfGPU::bruteMatchSequential(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs) {
+    float* avg1 = (float*) malloc(sizeof (float) * points1.size());
     float* avg2 = (float*) malloc(sizeof (float) * points2.size());
     float* dev1 = (float*) malloc(sizeof (float) * points1.size());
     float* dev2 = (float*) malloc(sizeof (float) * points2.size());
@@ -242,38 +245,20 @@ void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vec
         best2corr[i] = -1.;
     }
 
-    /*for (int i = 0; i < 1000; i += 200) {
-        cout << avg1[i] << "\t\t" << avg2[i] << "\t\t" << dev1[i] << "\t\t" << dev2[i] << endl;
-    }
-    cout << endl;//*/
-    
-    /*for (int i = 0; i < (64 * 5); i += 64)
-        cout << (desc2.at(i) - avg2[i/64]) << "\t\t";
-        //cout << desc1.at(i) << "\t\t";
-    
-    cout << endl << endl;//* /
-
     float corr;
     for (int i = 0; i < points1.size(); i++) {
-    //for (int i = 0; i < 5; i++) {
         vector<float> descriptor1;
         for (int k = i * descriptor_size; k < (i * descriptor_size) + descriptor_size; k++)
             descriptor1.push_back(desc1.at(k));
-        // seq1 = (float*) cvGetSeqElem(desc1, i); //seq1 es el descriptor1
         for (int j = 0; j < points2.size(); j++) {
-        //for (int j = 0; j < 5; j++) {
             vector<float> descriptor2;
             for (int k = j * descriptor_size; k < (j * descriptor_size) + descriptor_size; k++)
                 descriptor2.push_back(desc2.at(k));
 
             corr = 0;
-            // seq2 = (float*) cvGetSeqElem(desc1, i); //seq2 es el descriptor2
             for (int k = 0; k < descriptor_size; k++)
                 corr += (descriptor1.at(k) - avg1[i]) * (descriptor2.at(k) - avg2[j]);
             corr /= (descriptor_size - 1) * dev1[i] * dev2[j];
-            //corr /= (descriptor_size - 1);
-            if ((i < 5) && (j < 5))
-                cout << corr << "\t\t";
             if (corr > best1corr[i]) {
                 best1corr[i] = corr;
                 best1[i] = j;
@@ -283,15 +268,10 @@ void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vec
                 best2[j] = i;
             }            
         }
-        if (i < 5)
-            cout << endl;
     }
-    cout << endl;
 
-    for (int i = 0; i < 5; i++)
-        cout << best1[i] << ":" << best1corr[i] << "\t\t" << best2[i] << ":" << best2corr[i] << endl;
 
-    /*float CORRELATION_THRESHOLD = 0.75;
+    float CORRELATION_THRESHOLD = 0.75;
     for (int i = 0; i < points1.size(); i++) {
         if (best2[best1[i]] == i && best1corr[i] > CORRELATION_THRESHOLD) {
             t_SURF_Pair pair;
@@ -299,7 +279,8 @@ void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vec
             pair.kp2 = points2.at(best1[i]);
             pairs.push_back(pair);
         }
-    }//* /
+    }
+
     free(best2corr);
     free(best1corr);
     free(best2);
@@ -307,7 +288,7 @@ void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vec
     free(avg1);
     free(avg2);
     free(dev1);
-    free(dev2);//*/
+    free(dev2);
 }
 
 inline void SurfGPU::removeOutliers(CvMat **points1, CvMat **points2, CvMat *status) {
@@ -1054,7 +1035,7 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
             cleanRANSAC(CV_FM_RANSAC, pairs);
             //cleanRANSAC(CV_FM_RANSAC, pairs);
         }
-        cleanDistances(img1, img2, pairs);
+        //cleanDistances(img1, img2, pairs);
         time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo match = " << time << endl;//*/
     }
