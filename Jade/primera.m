@@ -81,15 +81,32 @@ figure (2);
 
 [maxD,indMD]=max(MatVota);
 [maxTita,indTitaSel]=max(maxD);
-maxTita
-titaSel=rangoTitas(indTitaSel)
+maxTita;
+titaSel=rangoTitas(indTitaSel);
 indDSel=indMD(indTitaSel);
-dSel=rangoD(indDSel)
+dSel=rangoD(indDSel);
 distintos=find(usadosTeo != usados);
-numCalculos 
-numUsados=length(find(usados))
-numUsadosTeo=length(find(usadosTeo))
-numDistintos=length(distintos)
+#numCalculos 
+numUsados=length(find(usados));
+numUsadosTeo=length(find(usadosTeo));
+numDistintos=length(distintos);
+
+disp(["\n 1º (" num2str(dSel) "," num2str(degree(titaSel)) "º) [" int2str(indDSel) \
+	"," int2str(indTitaSel) "] con " int2str(maxTita) ])
+
+#Buscamos siguientes maximos
+MatVota2=MatVota;
+indDSel2=indDSel; indTitaSel2=indTitaSel;
+for k=2:30
+	MatVota2(indDSel2,indTitaSel2)=0;
+	[maxD2,indMD2]=max(MatVota2);
+	[maxTita2,indTitaSel2]=max(maxD2);
+	titaSel2=rangoTitas(indTitaSel2);
+	indDSel2=indMD2(indTitaSel2);
+	dSel2=rangoD(indDSel2);
+	disp([" " int2str(k) "º (" num2str(dSel2) "," num2str(degree(titaSel2)) "º) [" \
+	int2str(indDSel2) "," int2str(indTitaSel2) "] con " int2str(maxTita2) ])
+endfor
 
 #Encontramos los que maxTita que contribullen al máximo
 DeltaD=1; DeltaTita=1;
