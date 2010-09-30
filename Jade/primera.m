@@ -4,40 +4,71 @@ load "Barrido.mat"
 
 figure (1);
 #polar( barrido1(:,1), barrido1(:,2) )
-l=barrido1 (:,2); alfa=(barrido1(:,1)-pi/2)+pi/6;
+l=barrido1 (:,2); alfa=(barrido1(:,1)-pi/2)+0;
+numPtos=length(l)
 plot(l.*cos(alfa+pi/2),l.*sin(alfa+pi/2)) ;
 grid on
 
 Dmin=1; Dmax=3; Dinc=0.01;
-TitaMin=rad(-45);
-TitaMax=rad(45);
+TitaMax=rad(30);
+TitaMin=-TitaMax;
 TitaInc=rad(0.1);
 
 rangoD=[Dmin:Dinc:Dmax];
+numD=length(rangoD)
 rangoTitas=[TitaMin:TitaInc:TitaMax];
-numTitas=length(rangoTitas);
+numTitas=length(rangoTitas)
 
 MatVota=zeros(length(rangoD),numTitas);
 
+function tita=calculaTita(alfa,l,d)
+	tita=atan((d/l-cos(alfa))/sin(alfa));
+endfunction
 
-for ptac=[alfa l]'
-	alfaAct=ptac(1);
-	lAct=ptac(2);
-	if (abs(alfaAct)<0.1)  #paracticamente 0
+usados=zeros(size(l)); #Para anotar los que son usados
+usadosTeo=usados; #Para anotar los que son usados
+numCalculos=0;
+for indPto=[1:numPtos]
+	alfaAct=alfa(indPto);
+	lAct=l(indPto);
+	if (abs(alfaAct)<rad(0.1))  #paracticamente 0
 		indD=round((lAct-Dmin)/Dinc)+1;
 		if (indD>0 && indD<=length(rangoD))
 			#Vota a todos los titas de esa distancia
 			MatVota(indD,:)+=ones(size(rangoTitas));
+			usados(indPto)=1;
+			usadosTeo(indPto)=1;
 		endif
 		continue
 	endif
+	usadosTeo(indPto)=1; #Teoricamente se usará
+	#Probamos para ver si entan muy cerca
+	tita=calculaTita(alfaAct,lAct,rangoD(1));
+	if( ( (alfaAct>0) && (tita>TitaMax) ) 
+		|| ( (alfaAct<0) && (tita<TitaMin) ) )
+		#Esta fuera de rango
+		usadosTeo(indPto)=0; #Teoricamente no se usará
+		continue
+	endif
+	#Probamos si están muy lejos
+	tita=calculaTita(alfaAct,lAct,rangoD(numD));
+	if( ( (alfaAct>0) && (tita<TitaMin) ) 
+		|| ( (alfaAct<0) && (tita>TitaMax) ) )
+		#Esta fuera de rango
+		usadosTeo(indPto)=0; #Teoricamente no se usará
+		continue
+	endif
+	numCalculos++;
 	for indd=[1:length(rangoD)]
 		d=rangoD(indd);
-#		tita=atan(sin(alfaAct)/(cos(alfaAct)-d/lAct));
-		tita=atan((d/lAct-cos(alfaAct))/sin(alfaAct));
+		tita=calculaTita(alfaAct,lAct,d);
 		indTita=round((tita-TitaMin)/TitaInc)+1;
 		if(indTita>0 && indTita<=numTitas)
 			MatVota(indd,indTita)++;
+			usados(indPto)=1; #Se uso
+			if ( usadosTeo(indPto)==0 )
+				indPto
+			endif
 		endif
 	endfor
 endfor
@@ -47,13 +78,22 @@ figure (2);
 
 [maxD,indMD]=max(MatVota);
 [maxTita,indMTita]=max(maxD);
+maxTita
 titaSel=rangoTitas(indMTita)
 dSel=rangoD(indMD(indMTita))
-
+distintos=find(usadosTeo != usados);
+numCalculos 
+numUsados=length(find(usados))
+numUsadosTeo=length(find(usadosTeo))
+numDistintos=length(distintos)
 figure(1);
 lr=4;
+lUsados=l(find(usados)); alfaUsados=alfa(find(usados));
 plot(l.*cos(alfa+pi/2),l.*sin(alfa+pi/2)
+  ,lUsados.*cos(alfaUsados+pi/2),lUsados.*sin(alfaUsados+pi/2),"x"
  ,lr*[-cos(titaSel), cos(titaSel)],lr*[-sin(titaSel) ,sin(titaSel)]+dSel
+  ,lr*[-cos(TitaMax), 0, cos(TitaMin)],lr*[-sin(TitaMax), 0 ,sin(TitaMin)]+Dmin
+  ,lr*[-cos(TitaMin), 0, cos(TitaMax)],lr*[-sin(TitaMin), 0 ,sin(TitaMax)]+Dmax
 ) ;
 grid on
 
