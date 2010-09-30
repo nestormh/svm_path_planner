@@ -4,7 +4,9 @@ load "Barrido.mat"
 
 figure (1);
 #polar( barrido1(:,1), barrido1(:,2) )
-l=barrido1 (:,2); alfa=(barrido1(:,1)-pi/2)+0;
+if (!exist("rotacion","var")) rotacion=0; endif
+rotacion
+l=barrido1 (:,2); alfa=(barrido1(:,1)-pi/2)+rotacion;
 numPtos=length(l)
 plot(l.*cos(alfa+pi/2),l.*sin(alfa+pi/2)) ;
 grid on
@@ -90,21 +92,24 @@ numUsadosTeo=length(find(usadosTeo))
 numDistintos=length(distintos)
 
 #Encontramos los que maxTita que contribullen al máximo
+DeltaD=1; DeltaTita=1;
 contribuye=zeros(size(l));
 for indPto=find(usados)'
 	alfaAct=alfa(indPto);
 	lAct=l(indPto);
 	if (abs(alfaAct)<rad(0.1) )
-		if ((round((lAct-Dmin)/Dinc)+1)==indDSel)
+		if ( abs((round((lAct-Dmin)/Dinc)+1)-indDSel)<=DeltaD )
 			contribuye(indPto)=1;
 		endif
 		continue;
 	endif
-	tita=calculaTita(alfaAct,lAct,dSel);
-	indTita=round((tita-TitaMin)/TitaInc)+1;
-	if(indTita==indTitaSel)
-		contribuye(indPto)=1;
-	endif
+	for delta=[-DeltaD:DeltaD]
+		tita=calculaTita(alfaAct,lAct,rangoD(indDSel+delta));
+		indTita=round((tita-TitaMin)/TitaInc)+1;
+		if(abs(indTita-indTitaSel)<=DeltaTita)
+			contribuye(indPto)=1;
+		endif
+	endfor
 endfor
 
 numContribuyen=length(find(contribuye))
