@@ -37,7 +37,7 @@ public:
     SurfGPU(const SurfGPU& orig);
     virtual ~SurfGPU();
     void testSurf(string file1, string file2);
-    void testSurf(IplImage * img1, IplImage * img2, vector<t_SURF_Pair> &pairs);
+    void testSurf(IplImage * img1, IplImage * img2, vector<t_SURF_Pair> &pairs, t_Timings &timings);
 
 private:
     void testSurfGPU(cv::Mat img, vector<KeyPoint> &points, vector<float> &descriptors, GpuSurfConfiguration config);

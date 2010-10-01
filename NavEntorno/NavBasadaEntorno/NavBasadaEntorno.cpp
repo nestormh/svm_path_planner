@@ -12,7 +12,7 @@
 #include "SurfGPU.h"
 #include "CUDAlib.h"
 
-#define EJECUCION 16
+#define EJECUCION 22
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -897,6 +897,20 @@ int main(int argc, _TCHAR argv[]) {
         case 21: {
             enumerateDevices();
             sumaArrays();
+            break;
+        }
+        case 22: {
+            string testName = "testSinCUDA";
+            CRealMatches rm1(false, cvSize(512, 512));
+            rm1.startTestCMU(testName, true);
+            rm1.~CRealMatches();
+            CRealMatches rm2(false, cvSize(768, 768));
+            rm2.startTestCMU(testName);
+            rm2.~CRealMatches();
+            CRealMatches rm3(false, cvSize(1024, 1024));
+            rm3.startTestCMU(testName);
+            rm3.~CRealMatches();
+
             break;
         }
         default: {

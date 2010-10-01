@@ -1008,7 +1008,7 @@ void SurfGPU::testSurf(string file1, string file2) {
     cvReleaseImage(&img2);
 }
 
-void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &pairs) {
+void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &pairs, t_Timings &timings) {
     vector<KeyPoint> points1;
     vector<KeyPoint> points2;
 
@@ -1019,26 +1019,43 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
     testSurfGPU(img1, points1, desc1, config);
     time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo img1 = " << time << endl;
+    timings.tSurf1 = time;
     myTime = clock();
     testSurfGPU(img2, points2, desc2, config);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
-    cout << "Tiempo img2 = " << time << endl;   
-    
+    cout << "Tiempo img2 = " << time << endl;
+    timings.tSurf2 = time;
+
+    timings.nPoints1 = points1.size();
+    timings.nPoints2 = points2.size();
+
     myTime = clock();
     if ((points1.size() == 0) || (points2.size() == 0)) {
         pairs.clear();
+        timings.nPairs = pairs.size();
     } else {
-        bruteMatch(points1, points2, desc1, desc2, pairs);
+        clock_t matchTime = clock();
+        bruteMatchSequential(points1, points2, desc1, desc2, pairs);
+        time = (double(clock() - matchTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo match sin RANSAC = " << time << endl;//*/
+        timings.tPrevRANSAC = time;
+        timings.nPairs = pairs.size();
         //cleanByCorrelation(pairs, img1, img2);
 
+        clock_t ransacTime = clock();
         if (pairs.size() > 8) {
             cleanRANSAC(CV_FM_RANSAC, pairs);
             //cleanRANSAC(CV_FM_RANSAC, pairs);
         }
         //cleanDistances(img1, img2, pairs);
-        time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
-        cout << "Tiempo match = " << time << endl;//*/
+        time = (double(clock() - ransacTime) / CLOCKS_PER_SEC * 1000);
+        cout << "Tiempo RANSAC = " << time << endl;//*/
+        timings.tRANSAC = time;
     }
+    time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
+    cout << "Tiempo match = " << time << endl;//*/
+    timings.nPairsClean = pairs.size();
+    timings.tTotal = time;
 
     //drawPairs(pairs, img1, img2);
 

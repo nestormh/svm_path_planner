@@ -13,6 +13,10 @@
 
 
 CRealMatches::CRealMatches(bool usePrevious, CvSize sizeIn) {
+    init(usePrevious, sizeIn);
+}
+
+void CRealMatches::init(bool usePrevious, CvSize sizeIn) {
     currentPoint1 = cvPoint2D32f(-1, -1);
     currentIndex1 = -1;
 
@@ -55,10 +59,16 @@ CRealMatches::CRealMatches(bool usePrevious, CvSize sizeIn) {
     roadMask = NULL;
 }
 
+
+
 CRealMatches::CRealMatches(const CRealMatches& orig) {
 }
 
 CRealMatches::~CRealMatches() {
+    destroy();
+}
+
+void CRealMatches::destroy() {
     cvReleaseImage(&img1);
     cvReleaseImage(&img2);
     cvReleaseImage(&mask1);
@@ -933,7 +943,8 @@ inline void CRealMatches::mainTest() {
     }//*/
     //testSurf(img1, img2);
     vector<t_SURF_Pair> pairsSurf;
-    surfGpu.testSurf(img1, img2, pairsSurf);    
+    t_Timings timings;
+    surfGpu.testSurf(img1, img2, pairsSurf, timings);
     pairs.clear();
     for (int i = 0; i < pairsSurf.size(); i++) {
         t_Pair pair;
@@ -1725,6 +1736,67 @@ void CRealMatches::startTest7() {
 
     ifs.close();
 
+}
+
+void CRealMatches::startTestCMU(string testName, bool cabecera) {
+    string leftStr;
+    string rightStr;
+
+    string PATH_BASE = "/home/neztol/doctorado/Datos/CMU Image Database Stereo/";
+
+    string dataFileName = PATH_BASE + string("datos.txt");
+    string outputFileName = string("/home/neztol/doctorado/articulos/CUDA/") + testName + string(".txt");
+
+    ifstream ifs(dataFileName.c_str() , ifstream::in );
+    ofstream ofs(outputFileName.c_str(), ios::app );
+    if (cabecera) {
+        ofs << "testName\texample\twidth\theight\tnPoints1\tnPoints2\tnPairs\tnPairsClean\ttSurf1\ttSurf2\ttCalcMeanSdv";
+        ofs << "\ttCalcCorrelation\ttCalcBestCorr\ttCalcMatches\ttMalloc1\ttMalloc2\ttMalloc\ttFreeMem";
+        ofs << "\ttPrevRANSAC\ttRANSAC\ttTotal\tthreadsPerBlock\tblocksPerGrid\tdimBlock1\tdimBlock2";
+        ofs << "\tdimGrid1\tdimGrid2\n\n";
+    }
+
+    string line;
+
+    while (ifs >> line) {
+        leftStr = PATH_BASE + line + string("/left.png");
+        rightStr = PATH_BASE + line + string("/right.png");
+
+        cout << leftStr << endl;
+        cout << rightStr << endl;
+
+        IplImage * imgA = cvLoadImage(leftStr.c_str(), 0);
+        IplImage * imgB = cvLoadImage(rightStr.c_str(), 0);
+
+        cvResize(imgA, img1);
+        cvResize(imgB, img2);
+
+        cvReleaseImage(&imgA);
+        cvReleaseImage(&imgB);
+
+        //cvShowImage("img1", img1);
+        //cvShowImage("img2", img2);
+
+        //mainTest();       // Descomentar para comprobar que el método está funcionando correctamente
+        vector<t_SURF_Pair> pairsSurf;
+        t_Timings timings;
+        surfGpu.testSurf(img1, img2, pairsSurf, timings);
+
+        ofs << testName << "\t" << line << "\t" << size.width << "\t" << size.height << "\t" << timings.nPoints1
+                << "\t" << timings.nPoints2 << "\t" << timings.nPairs << "\t" << timings.nPairsClean << "\t" << timings.tSurf1 
+                << "\t" << timings.tSurf2 << "\t" << "\t" << timings.tCalcMeanSdv << "\t" << timings.tCalcCorrelation << "\t"
+                << timings.tCalcBestCorr << "\t" << timings.tCalcMatches << "\t" << timings.tMalloc1 << "\t" << timings.tMalloc2
+                << "\t" << timings.tMalloc << "\t" << timings.tFreeMem << "\t" << timings.tPrevRANSAC << "\t"
+                << timings.tRANSAC << "\t" << timings.tTotal << "\t" << timings.threadsPerBlock << "\t"
+                << timings.blocksPerGrid << "\t" << timings.dimBlock.x << "\t" << timings.dimBlock.y
+                << "\t" << timings.dimGrid.x << "\t" << timings.dimGrid.y << endl;
+
+        //cvWaitKey(0);
+        
+    }
+
+    ifs.close();
+    ofs.close();
 }
 
 #define TOTAL_MATCHES 100

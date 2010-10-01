@@ -80,11 +80,15 @@ public:
     void startTest5();
     void startTest6();
     void startTest7();
+    void startTestCMU(string testName, bool cabecera = false);
     void startTestRoadDetection();
     void startTestNearestImage();
     void onMouse1(int event, int x, int y, int flags, void * param);
     void onMouse2(int event, int x, int y, int flags, void * param);
-private:    
+private:
+    void init(bool usePrevious, CvSize sizeIn);
+    void destroy();
+
     void getPoints(IplImage * img, vector<CvPoint2D32f> &points);
     void getOflow(IplImage * img1, IplImage * img2, vector<CvPoint2D32f> points, vector<t_Pair> &pairs);
     void cleanRANSAC(int method, vector<t_Pair> &pairs);
