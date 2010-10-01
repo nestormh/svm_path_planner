@@ -52,7 +52,7 @@ void calcCorrelation(float * desc1, float * desc2, float * corr, float * sdv1, f
     if (row >= rows) return;
     if (col >= cols) return;
 
-    if (resp1[row] == resp2[col]) {
+    //if (resp1[row] == resp2[col]) {
         int idx = __fmaf_rn(row, cols, col);
         float correl = 0.0f;
         #pragma unroll 64
@@ -60,7 +60,7 @@ void calcCorrelation(float * desc1, float * desc2, float * corr, float * sdv1, f
             correl = __fadd_rn(correl, __fmul_rn(desc1[row * SURF_DESCRIPTOR_SIZE + i], desc2[col * SURF_DESCRIPTOR_SIZE + i]));
         }
         corr[idx] = __fdiv_rn(__fdiv_rn(__fdiv_rn(correl, SURF_DESCRIPTOR_SIZE - 1), sdv1[row]), sdv2[col]);
-    }
+    //}
 }
 
 __global__
