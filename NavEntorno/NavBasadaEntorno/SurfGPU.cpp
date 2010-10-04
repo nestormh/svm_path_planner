@@ -1019,12 +1019,12 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
     testSurfGPU(img1, points1, desc1, config);
     time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo img1 = " << time << endl;
-    timings.tSurf1 = time;
+    timings.tSurf1 = clock() - myTime;
     myTime = clock();
     testSurfGPU(img2, points2, desc2, config);
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo img2 = " << time << endl;
-    timings.tSurf2 = time;
+    timings.tSurf2 = clock() - myTime;
 
     timings.nPoints1 = points1.size();
     timings.nPoints2 = points2.size();
@@ -1038,7 +1038,7 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
         bruteMatchSequential(points1, points2, desc1, desc2, pairs);
         time = (double(clock() - matchTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo match sin RANSAC = " << time << endl;//*/
-        timings.tPrevRANSAC = time;
+        timings.tPrevRANSAC = clock() - matchTime;
         timings.nPairs = pairs.size();
         //cleanByCorrelation(pairs, img1, img2);
 
@@ -1050,12 +1050,13 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
         //cleanDistances(img1, img2, pairs);
         time = (double(clock() - ransacTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo RANSAC = " << time << endl;//*/
-        timings.tRANSAC = time;
+        timings.tRANSAC = clock() - ransacTime;
     }
     time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo match = " << time << endl;//*/
+    timings.tTotal = clock() - myTime;
     timings.nPairsClean = pairs.size();
-    timings.tTotal = time;
+    
 
     //drawPairs(pairs, img1, img2);
 
