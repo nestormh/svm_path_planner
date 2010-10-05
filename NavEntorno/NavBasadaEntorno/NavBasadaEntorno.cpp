@@ -900,7 +900,7 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 22: {
-            string testName = "testSinCUDA";
+            string testName = "testCUDASinOptimizar";
             CRealMatches rm1(false, cvSize(512, 512));
             rm1.startTestCMU(testName, true);
             rm1.~CRealMatches();

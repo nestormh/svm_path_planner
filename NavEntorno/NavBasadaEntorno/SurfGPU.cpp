@@ -139,7 +139,7 @@ void SurfGPU::drawPairs(vector<t_SURF_Pair> const & pairs, IplImage * imgGraysca
     cvReleaseImage(&imgColor2);
 }
 
-void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs) {
+void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs, t_Timings &timings) {
 
     vector<t_Point> tmpPoints1;
     vector<t_Point> tmpPoints2;
@@ -164,7 +164,7 @@ void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vec
     }
 
     clock_t myTime = clock();
-    bruteMatchParallel(tmpPoints1, tmpPoints2, desc1, desc2, matches);
+    bruteMatchParallel(tmpPoints1, tmpPoints2, desc1, desc2, matches, timings);
     time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo match 1 = " << time << endl;
 
@@ -967,8 +967,9 @@ void SurfGPU::testSurf(string file1, string file2) {
 
     //matchSequential(points2, points1, desc2, desc1, pairs);
     //for (int i = 0; i < 3; i++) {
-        //clock_t myTime = clock();
-        bruteMatch(points1, points2, desc1, desc2, pairs);
+        //clock_t myTime = clock();ç
+        t_Timings timings;
+        bruteMatch(points1, points2, desc1, desc2, pairs, timings);
         cleanRANSAC(CV_FM_RANSAC, pairs);
         //time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
         //cout << "Tiempo match = " << time << endl;
@@ -1035,7 +1036,7 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
         timings.nPairs = pairs.size();
     } else {
         clock_t matchTime = clock();
-        bruteMatchSequential(points1, points2, desc1, desc2, pairs);
+        bruteMatch(points1, points2, desc1, desc2, pairs, timings);
         time = (double(clock() - matchTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo match sin RANSAC = " << time << endl;//*/
         timings.tPrevRANSAC = clock() - matchTime;

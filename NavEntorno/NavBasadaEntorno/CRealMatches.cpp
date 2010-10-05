@@ -1751,7 +1751,7 @@ void CRealMatches::startTestCMU(string testName, bool cabecera) {
     ofstream ofs(outputFileName.c_str(), ios::app );
     if (cabecera) {
         ofs << "testName\texample\twidth\theight\tnPoints1\tnPoints2\tnPairs\tnPairsClean\ttSurf1\ttSurf2\ttCalcMeanSdv";
-        ofs << "\ttCalcCorrelation\ttCalcBestCorr\ttCalcMatches\ttMalloc1\ttMalloc2\ttMalloc\ttFreeMem";
+        ofs << "\ttCalcCorrelation\ttCalcBestCorr\ttCalcMatches\ttMalloc1\ttMalloc2\ttMalloc\ttMemCpy\ttFreeMem";
         ofs << "\ttPrevRANSAC\ttRANSAC\ttTotal\tthreadsPerBlock\tblocksPerGrid\tdimBlock1\tdimBlock2";
         ofs << "\tdimGrid1\tdimGrid2\n\n";
     }
@@ -1780,13 +1780,13 @@ void CRealMatches::startTestCMU(string testName, bool cabecera) {
         //mainTest();       // Descomentar para comprobar que el método está funcionando correctamente
         vector<t_SURF_Pair> pairsSurf;
         t_Timings timings;
-        surfGpu.testSurf(img1, img2, pairsSurf, timings);
+        surfGpu.testSurf(img1, img2, pairsSurf, timings);        
 
         ofs << testName << "\t" << line << "\t" << size.width << "\t" << size.height << "\t" << timings.nPoints1
                 << "\t" << timings.nPoints2 << "\t" << timings.nPairs << "\t" << timings.nPairsClean << "\t" << timings.tSurf1 
-                << "\t" << timings.tSurf2 << "\t" << "\t" << timings.tCalcMeanSdv << "\t" << timings.tCalcCorrelation << "\t"
+                << "\t" << timings.tSurf2 << "\t" << timings.tCalcMeanSdv << "\t" << timings.tCalcCorrelation << "\t"
                 << timings.tCalcBestCorr << "\t" << timings.tCalcMatches << "\t" << timings.tMalloc1 << "\t" << timings.tMalloc2
-                << "\t" << timings.tMalloc << "\t" << timings.tFreeMem << "\t" << timings.tPrevRANSAC << "\t"
+                << "\t" << timings.tMalloc << "\t" << timings.tMemCpy << "\t" << timings.tFreeMem << "\t" << timings.tPrevRANSAC << "\t"
                 << timings.tRANSAC << "\t" << timings.tTotal << "\t" << timings.threadsPerBlock << "\t"
                 << timings.blocksPerGrid << "\t" << timings.dimBlock.x << "\t" << timings.dimBlock.y
                 << "\t" << timings.dimGrid.x << "\t" << timings.dimGrid.y << endl;
