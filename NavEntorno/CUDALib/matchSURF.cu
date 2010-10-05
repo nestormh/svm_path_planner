@@ -116,11 +116,12 @@ void calcMatches(int * bestCorr1, int * bestCorr2, int * matches, int n1) {
     }
 }
 
-void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector<float> desc1, vector<float> desc2, vector<int> &matches) {
+void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector<float> desc1, vector<float> desc2, vector<int> &matches, t_Timings &timings) {
 
     cout << "Points1 " << points1.size() << endl;
     cout << "Points2 " << points2.size() << endl;
 
+    clock_t myTime = clock();
     size_t corrSize = points1.size() * points2.size() * sizeof(float);    
 
     float * h_desc1 = (float *)malloc(desc1.size() * sizeof(float));
@@ -162,9 +163,16 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     cutilSafeCall(cudaMemcpy(d_desc1, h_desc1, desc1.size() * sizeof(float), cudaMemcpyHostToDevice));
     cutilSafeCall(cudaMemcpy(d_desc2, h_desc2, desc2.size() * sizeof(float), cudaMemcpyHostToDevice));
 
+    timings.tMalloc1 = clock() - myTime;
+    myTime = clock();
+
     int threadsPerBlock = 512;
     int blocksPerGrid = ((points1.size() + points2.size()) / threadsPerBlock) + 1;
     calcMeanSdv <<< blocksPerGrid, threadsPerBlock >>> (d_desc1, d_desc2, d_m1, d_m2, d_sdv1, d_sdv2, points1.size(), points2.size());
+    cudaThreadSynchronize();
+
+    timings.tCalcMeanSdv = clock() - myTime;
+    myTime = clock();
 
     cutilSafeCall(cudaFree(d_m1));
     cutilSafeCall(cudaFree(d_m2));
@@ -179,22 +187,47 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     cutilSafeCall(cudaMemcpy(d_response1, h_response1, points1.size() * sizeof(bool), cudaMemcpyHostToDevice));
     cutilSafeCall(cudaMemcpy(d_response2, h_response2, points2.size() * sizeof(bool), cudaMemcpyHostToDevice));
 
+    timings.tMalloc2 = clock() - myTime;
+    timings.tMalloc = timings.tMalloc1 + timings.tMalloc2;
+    myTime = clock();
+
     dim3 dimBlock(16, 16);
     dim3 dimGrid((points2.size() / dimBlock.x) + 1, (points1.size() / dimBlock.y) + 1);
 
     calcCorrelation <<< dimGrid, dimBlock >>> (d_desc1, d_desc2, d_corr, d_sdv1, d_sdv2, d_response1, d_response2, points1.size(), points2.size());
+    cudaThreadSynchronize();
+
+    timings.tCalcCorrelation = clock() - myTime;
+    myTime = clock();
 
     calcBestCorr <<< blocksPerGrid, threadsPerBlock >>> (d_corr, d_bestCorr1, d_bestCorr2, points1.size(), points2.size());
+    cudaThreadSynchronize();
+
+    timings.tCalcBestCorr = clock() - myTime;
+    myTime = clock();
 
     blocksPerGrid = ((points1.size() - 1) / threadsPerBlock) + 1;
     calcMatches <<< blocksPerGrid, threadsPerBlock >>> (d_bestCorr1, d_bestCorr2, d_matches, points1.size());
+    cudaThreadSynchronize();
 
+    timings.tCalcMatches = clock() - myTime;
+    myTime = clock();
+
+    clock_t tmpTime = clock();
     int * h_matches = (int *)malloc(points1.size() * sizeof(int));
+    cout << "memCpy1 = " << clock() - tmpTime << endl;
+    tmpTime = clock();
 
     cutilSafeCall(cudaMemcpy(h_matches, d_matches, points1.size() * sizeof(int), cudaMemcpyDeviceToHost));
+    cout << "memCpy2 = " << clock() - tmpTime << endl;
+    tmpTime = clock();
 
     for (int i = 0; i < points1.size(); i++)
         matches.push_back(h_matches[i]);
+    cout << "memCpy3 = " << clock() - tmpTime << endl;
+
+    timings.tMemCpy = clock() - myTime;
+    myTime = clock();
 
     cutilSafeCall(cudaFree(d_desc1));
     cutilSafeCall(cudaFree(d_desc2));
@@ -207,9 +240,13 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     cutilSafeCall(cudaFree(d_bestCorr2));
     cutilSafeCall(cudaFree(d_matches));
 
+    timings.tFreeMem = clock() - myTime;
+    
     free(h_desc1);
     free(h_desc2);
     free(h_response1);
     free(h_response2);
     free(h_matches);
+
+    
 }

@@ -24,20 +24,21 @@ typedef struct {
 } t_Point;
 
 typedef struct {
-    float tTotal;
-    float tCalcMeanSdv;
-    float tCalcCorrelation;
-    float tCalcBestCorr;
-    float tCalcMatches;
-    float tMalloc1;
-    float tMalloc2;
-    float tMalloc;
-    float tFreeMem;
-    float tRANSAC;
-    float tPrevRANSAC;
+    long tTotal;
+    long tCalcMeanSdv;
+    long tCalcCorrelation;
+    long tCalcBestCorr;
+    long tCalcMatches;
+    long tMalloc1;
+    long tMalloc2;
+    long tMalloc;
+    long tMemCpy;
+    long tFreeMem;
+    long tRANSAC;
+    long tPrevRANSAC;
 
-    float tSurf1;
-    float tSurf2;
+    long tSurf1;
+    long tSurf2;
 
     int nPoints1;
     int nPoints2;
@@ -54,7 +55,7 @@ typedef struct {
 
     void sumaArrays();
     void enumerateDevices();
-    void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector<float> desc1, vector<float> desc2, vector<int> &matches);
+    void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector<float> desc1, vector<float> desc2, vector<int> &matches, t_Timings &timings);
 
 #endif	/* _TESTCUDA_H */
 
