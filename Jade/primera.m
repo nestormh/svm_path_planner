@@ -11,10 +11,13 @@ numPtos=length(l)
 plot(l.*cos(alfa+pi/2),l.*sin(alfa+pi/2)) ;
 grid on
 
-Dmin=1; Dmax=3; Dinc=0.01;
-TitaMax=rad(30);
-TitaMin=-TitaMax;
-TitaInc=rad(0.1);
+Dmin=1; Dmax=3; 
+if (!exist("Dinc","var")) Dinc=0.01; endif
+Dinc
+
+TitaMax=rad(30); TitaMin=-TitaMax;
+if (!exist("TitaInc","var")) TitaInc=rad(0.1); endif
+incGrados=degree(TitaInc)
 
 rangoD=[Dmin:Dinc:Dmax];
 numD=length(rangoD)
@@ -31,7 +34,8 @@ endfunction
 usados=zeros(size(l)); #Para anotar los que son usados
 usadosTeo=usados; #Para anotar los que son usados
 numCalculos=0;
-Traza=[];
+Traza=zeros(numD*numPtos,10); indTraza=1;
+teoricosPeroNoUsados=[]; usadosPeroNoTeoricos=[];
 for indPto=[1:numPtos]
 	alfaAct=alfa(indPto);
 	lAct=l(indPto);
@@ -52,7 +56,7 @@ for indPto=[1:numPtos]
 		|| ( (alfaAct<0) && (tita<TitaMin) ) )
 		#Esta fuera de rango
 		usadosTeo(indPto)=0; #Teoricamente no se usará
-		continue
+		#continue
 	endif
 	#Probamos si están muy lejos
 	tita=calculaTita(alfaAct,lAct,rangoD(numD));
@@ -60,7 +64,7 @@ for indPto=[1:numPtos]
 		|| ( (alfaAct<0) && (tita>TitaMax) ) )
 		#Esta fuera de rango
 		usadosTeo(indPto)=0; #Teoricamente no se usará
-		continue
+		#continue
 	endif
 	numCalculos++;
 	d=Dmin-Dinc/2;
@@ -76,21 +80,19 @@ for indPto=[1:numPtos]
 		usadoIf=0;
 		if( (indTita1<=numTitas &&  indTita1>=1) || (indTita2<=numTitas &&  indTita2>=1) )
 			usadoIf=1;
-			inc=1; if(indTita1>indTita2) ind=-1; endif
+			inc=1; if(indTita1>indTita2) inc=-1; endif
 			for indTita=[it1Aco:inc:it2Aco]
 				MatVota(indd,indTita)++;
 				usados(indPto)=1; #Se uso
 			endfor
 		endif
-		Traza=[Traza; [indPto indd d degree(tita1) indTita1 it1Aco degree(tita2) indTita2 it2Aco usadoIf]];
+		Traza(indTraza++,:)=[indPto indd d degree(tita1) indTita1 it1Aco degree(tita2) indTita2 it2Aco usadoIf];
 	endfor
 	if ( usados(indPto)==1 && usadosTeo(indPto)==0 )
-			indPto
+		usadosPeroNoTeoricos=[usadosPeroNoTeoricos; indPto];
 	endif
 	if( usadosTeo(indPto)==1 && usados(indPto)==0 )
-		indPto
-		tita=degree(calculaTita(alfaAct,lAct,rangoD(1)))
-		tita=degree(calculaTita(alfaAct,lAct,rangoD(numD)))
+		teoricosPeroNoUsados=[teoricosPeroNoUsados; indPto];
 	endif
 endfor
 
@@ -98,10 +100,10 @@ figure (2);
 #mesh(rangoTitas,rangoD,MatVota);
 
 [maxD,indMD]=max(MatVota);
-[maxTita,indTitaSel]=max(maxD);
-maxTita;
-titaSel=rangoTitas(indTitaSel);
+[maxVota,indTitaSel]=max(maxD);
 indDSel=indMD(indTitaSel);
+maxVota;
+titaSel=rangoTitas(indTitaSel);
 dSel=rangoD(indDSel);
 distintos=find(usadosTeo != usados);
 numCalculos 
@@ -110,7 +112,7 @@ numUsadosTeo=length(find(usadosTeo))
 numDistintos=length(distintos);
 
 disp(["\n 1º (" num2str(dSel) "," num2str(degree(titaSel)) "º) [" int2str(indDSel) \
-	"," int2str(indTitaSel) "] con " int2str(maxTita) ])
+	"," int2str(indTitaSel) "] con " int2str(maxVota) ])
 
 #Buscamos siguientes maximos
 MatVota2=MatVota;
@@ -118,12 +120,12 @@ indDSel2=indDSel; indTitaSel2=indTitaSel;
 for k=2:30
 	MatVota2(indDSel2,indTitaSel2)=0;
 	[maxD2,indMD2]=max(MatVota2);
-	[maxTita2,indTitaSel2]=max(maxD2);
-	titaSel2=rangoTitas(indTitaSel2);
+	[maxVota2,indTitaSel2]=max(maxD2);
 	indDSel2=indMD2(indTitaSel2);
+	titaSel2=rangoTitas(indTitaSel2);
 	dSel2=rangoD(indDSel2);
 	disp([" " int2str(k) "º (" num2str(dSel2) "," num2str(degree(titaSel2)) "º) [" \
-	int2str(indDSel2) "," int2str(indTitaSel2) "] con " int2str(maxTita2) ])
+	int2str(indDSel2) "," int2str(indTitaSel2) "] con " int2str(maxVota2) ])
 endfor
 
 #Encontramos los que maxTita que contribullen al máximo
