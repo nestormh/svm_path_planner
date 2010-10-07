@@ -31,6 +31,7 @@ endfunction
 usados=zeros(size(l)); #Para anotar los que son usados
 usadosTeo=usados; #Para anotar los que son usados
 numCalculos=0;
+Traza=[];
 for indPto=[1:numPtos]
 	alfaAct=alfa(indPto);
 	lAct=l(indPto);
@@ -62,18 +63,35 @@ for indPto=[1:numPtos]
 		continue
 	endif
 	numCalculos++;
+	d=Dmin-Dinc/2;
+	tita2=calculaTita(alfaAct,lAct,d);
+	indTita2=round((tita2-TitaMin)/TitaInc)+1;
+	it2Aco=max([ min([indTita2 numTitas]) 1]);
 	for indd=[1:length(rangoD)]
-		d=rangoD(indd);
-		tita=calculaTita(alfaAct,lAct,d);
-		indTita=round((tita-TitaMin)/TitaInc)+1;
-		if(indTita>0 && indTita<=numTitas)
-			MatVota(indd,indTita)++;
-			usados(indPto)=1; #Se uso
-			if ( usadosTeo(indPto)==0 )
-				indPto
-			endif
+		d+=Dinc;
+		tita1=tita2;  indTita1=indTita2;  it1Aco=it2Aco;
+		tita2=calculaTita(alfaAct,lAct,d);
+		indTita2=round((tita2-TitaMin)/TitaInc)+1;
+		it2Aco=max([ min([indTita2 numTitas]) 1]);
+		usadoIf=0;
+		if( (indTita1<=numTitas &&  indTita1>=1) || (indTita2<=numTitas &&  indTita2>=1) )
+			usadoIf=1;
+			inc=1; if(indTita1>indTita2) ind=-1; endif
+			for indTita=[it1Aco:inc:it2Aco]
+				MatVota(indd,indTita)++;
+				usados(indPto)=1; #Se uso
+			endfor
 		endif
+		Traza=[Traza; [indPto indd d degree(tita1) indTita1 it1Aco degree(tita2) indTita2 it2Aco usadoIf]];
 	endfor
+	if ( usados(indPto)==1 && usadosTeo(indPto)==0 )
+			indPto
+	endif
+	if( usadosTeo(indPto)==1 && usados(indPto)==0 )
+		indPto
+		tita=degree(calculaTita(alfaAct,lAct,rangoD(1)))
+		tita=degree(calculaTita(alfaAct,lAct,rangoD(numD)))
+	endif
 endfor
 
 figure (2);
@@ -86,9 +104,9 @@ titaSel=rangoTitas(indTitaSel);
 indDSel=indMD(indTitaSel);
 dSel=rangoD(indDSel);
 distintos=find(usadosTeo != usados);
-#numCalculos 
-numUsados=length(find(usados));
-numUsadosTeo=length(find(usadosTeo));
+numCalculos 
+numUsados=length(find(usados))
+numUsadosTeo=length(find(usadosTeo))
 numDistintos=length(distintos);
 
 disp(["\n 1º (" num2str(dSel) "," num2str(degree(titaSel)) "º) [" int2str(indDSel) \
