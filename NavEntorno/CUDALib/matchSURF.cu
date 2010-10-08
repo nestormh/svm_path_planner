@@ -78,14 +78,14 @@ void calcCorrelation(float * desc1, float * desc2, float * corr, float * mean1, 
         __syncthreads();
 
         for (int k = 0; k < TILE_WIDTH; k++) {
-            pVal += (tmpDesc1[ty][k] - tmpMean[0][ty]) * (tmpDesc2[tx][k] - tmpMean[1][tx]);
+            pVal = __fadd_rn(pVal, __fmul_rn(__fadd_rn(tmpDesc1[ty][k], -tmpMean[0][ty]), __fadd_rn(tmpDesc2[tx][k], -tmpMean[1][tx])));
         }
 
         __syncthreads();
     }
-    pVal /= (width - 1) * tmpSdv[0][ty] * tmpSdv[1][tx];
-    
-    corr[col * rows + row] = pVal;
+    pVal /= (width - 1) * __fmul_rn(tmpSdv[0][ty], tmpSdv[1][tx]);
+        
+    corr[row * cols + col] = pVal;
 }
 
 __global__
@@ -294,10 +294,22 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     calcCorrelation <<< dimGrid, dimBlock >>> (d_desc1, d_desc2, d_corr, d_m1, d_m2, d_sdv1, d_sdv2, d_response1, d_response2, size1, size2);
     cudaThreadSynchronize();
 
+    float * hCorr = (float *)malloc(corrSize);
+    cutilSafeCall(cudaMemcpy(hCorr, d_corr, corrSize, cudaMemcpyDeviceToHost));
+
+    /*for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            cout << "[" << hCorr[i * size2 + j] << "]";
+        }
+        cout << endl;
+    }
+    free(hCorr);
+*/
+
     timings.tCalcCorrelation = clock() - myTime;
     myTime = clock();
 
-    /*calcBestCorr <<< blocksPerGrid, threadsPerBlock >>> (d_corr, d_bestCorr1, d_bestCorr2, points1.size(), points2.size());
+    calcBestCorr <<< blocksPerGrid, threadsPerBlock >>> (d_corr, d_bestCorr1, d_bestCorr2, points1.size(), points2.size());
     cudaThreadSynchronize();
 
     timings.tCalcBestCorr = clock() - myTime;
@@ -324,7 +336,7 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     cout << "memCpy3 = " << clock() - tmpTime << endl;
 
     timings.tMemCpy = clock() - myTime;
-    myTime = clock();*/
+    myTime = clock();
 
     cout << (size1 + size2) * sizeof(float) << endl;
     cutilSafeCall(cudaFree(d_m1));
