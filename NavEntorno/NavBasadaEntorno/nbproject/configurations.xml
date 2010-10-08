@@ -253,6 +253,7 @@
             <linkerLibLibItem>sqlite3</linkerLibLibItem>
             <linkerLibLibItem>gpusurf</linkerLibLibItem>
             <linkerLibLibItem>cudalib</linkerLibLibItem>
+            <linkerLibLibItem>cudalib</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

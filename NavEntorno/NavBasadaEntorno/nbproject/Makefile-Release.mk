@@ -98,7 +98,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -L/tmp/SURF-V1.0.9 -L../../gpusurf-0.2.0/build/lib -L/home/nestor/NetBeansProjects/CUDALib/dist/Release/NVCC-Linux-x86 -lcvaux -lcv -lml -lcxcore -lhighgui -lgsl -lgslcblas -lsqlite3 -lgpusurf -lcudalib
+LDLIBSOPTIONS=-L/usr/local/lib -L/tmp/SURF-V1.0.9 -L../../gpusurf-0.2.0/build/lib -L/home/nestor/NetBeansProjects/CUDALib/dist/Release/NVCC-Linux-x86 -lcvaux -lcv -lml -lcxcore -lhighgui -lgsl -lgslcblas -lsqlite3 -lgpusurf -lcudalib -lcudalib
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

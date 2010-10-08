@@ -245,7 +245,7 @@ void SurfGPU::bruteMatchSequential(vector<KeyPoint> points1, vector<KeyPoint> po
         best2corr[i] = -1.;
     }
 
-    float corr;
+    /*float corr;
     for (int i = 0; i < points1.size(); i++) {
         vector<float> descriptor1;
         for (int k = i * descriptor_size; k < (i * descriptor_size) + descriptor_size; k++)
@@ -268,6 +268,32 @@ void SurfGPU::bruteMatchSequential(vector<KeyPoint> points1, vector<KeyPoint> po
                 best2[j] = i;
             }            
         }
+    }*/
+
+    /*for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 64; j++) {
+            cout << "[" << desc2.at(i * 64 + j) << "]";
+        }
+        cout << endl;
+    }*/
+    float corr;
+    for (int i = 0; i < 10; i++) {
+        vector<float> descriptor1;
+        for (int k = i * descriptor_size; k < (i * descriptor_size) + descriptor_size; k++)
+            descriptor1.push_back(desc1.at(k));
+        for (int j = 0; j < 10; j++) {
+            vector<float> descriptor2;
+            for (int k = j * descriptor_size; k < (j * descriptor_size) + descriptor_size; k++)
+                descriptor2.push_back(desc2.at(k));
+
+            corr = 0;
+            for (int k = 0; k < descriptor_size; k++)
+                corr += (descriptor1.at(k) - avg1[i]) * (descriptor2.at(k) - avg2[j]);
+                //corr = descriptor2.at(k);
+            corr /= (descriptor_size - 1) * dev1[i] * dev2[j];            
+            cout << "[" << corr << "]";
+        }
+        cout << endl;
     }
 
 
@@ -1036,6 +1062,7 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
         timings.nPairs = pairs.size();
     } else {
         clock_t matchTime = clock();
+        //bruteMatchSequential(points1, points2, desc1, desc2, pairs);
         bruteMatch(points1, points2, desc1, desc2, pairs, timings);
         time = (double(clock() - matchTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo match sin RANSAC = " << time << endl;//*/

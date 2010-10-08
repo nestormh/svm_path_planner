@@ -777,6 +777,122 @@ int inicio0(int inicio, int optionImg) {
 	return 0;
 }
 
+    float tmpDesc1[TILE_WIDTH][TILE_WIDTH];
+    float tmpDesc2[TILE_WIDTH][TILE_WIDTH];
+    float tmpMean[2][TILE_WIDTH];
+    float tmpSdv[2][TILE_WIDTH];
+
+void calcCorrelation(CvPoint blockIdx, CvPoint threadIdx, float * desc1, float * desc2, float * corr, float * mean1, float * mean2, float * sdv, float * sdv2, bool * resp1, bool * resp2, int rows, int cols) {
+
+    int bx = blockIdx.x; int by = blockIdx.y;
+    int tx = threadIdx.x; int ty = threadIdx.y;
+
+    int row = by * TILE_WIDTH + ty;
+    int col = bx * TILE_WIDTH + tx;
+
+    int width = SURF_DESCRIPTOR_SIZE;
+
+    cout << "*********************" << tx << ", " << ty << endl;
+
+    if (ty == 0) {
+        tmpMean[ty][tx] = mean1[ty * rows + by * TILE_WIDTH + tx];
+        tmpSdv[ty][tx] = sdv[ty * rows + by * TILE_WIDTH + tx];
+    } else if (ty == 1) {
+        tmpMean[ty][tx] = mean1[ty * rows + bx * TILE_WIDTH + tx];
+        tmpSdv[ty][tx] = sdv[ty * rows + bx * TILE_WIDTH + tx];
+    }
+    //__syncthreads();
+
+    float pVal = 0;
+    for (int m = 0; m < width / TILE_WIDTH; m++) {
+        // Collaborative loading of tiles
+        tmpDesc1[ty][tx] = desc1[row * width + (m * TILE_WIDTH + tx)];
+        tmpDesc2[ty][tx] = desc2[col * width + (m * TILE_WIDTH + tx)];
+
+        //__syncthreads();
+
+        for (int k = 0; k < TILE_WIDTH; k++) {
+            pVal += (tmpDesc1[ty][k] - tmpMean[0][ty]) * (tmpDesc2[tx][k] - tmpMean[1][tx]);
+        }
+
+        //__syncthreads();
+    }
+    pVal /= (width - 1) * tmpSdv[0][ty] * tmpSdv[1][tx];
+
+    corr[row * rows + col] = pVal;
+    //*/
+}
+
+void testCuda() {
+
+     //CvPoint blockIdx, CvPoint threadIdx, float * desc1, float * desc2, float * corr, float * mean1, float * mean2, float * sdv, float * sdv2, bool * resp1, bool * resp2, int rows, int cols
+    float desc1[64 * 7];
+    float desc2[64 * 5];
+    float corr[7 * 5];
+    float * mean1 = new float[7 + 5];
+    float * mean2 = mean1 + 7;
+    float * sdv1 = new float[7 + 5];
+    float * sdv2 = sdv1 + 7;
+    bool * resp1;
+    bool * resp2;
+    int rows = 7;
+    int cols = 5;
+
+    for (int i = 0; i < 7; i++) {
+        for (int j = 0; j < 64; j++) {
+            desc1[i * 64 + j] = 5000 * (i + 1) + j;
+        }
+    }
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 64; j++) {
+            desc2[i * 64 + j] = 6000 * (i + 1) + j;
+        }
+    }
+    for (int i = 0; i < 7; i++) {
+        mean1[i] = 1000 + i;
+        sdv1[i] = 2000 + i;
+    }
+    for (int i = 0; i < 5; i++) {
+        mean2[i] = 3000 + i;
+        sdv2[i] = 4000 + i;
+    }
+
+    CvPoint blockIdx = cvPoint(1,0);
+    CvPoint threadIdx = cvPoint(0,0);
+    for (int i = 0; i < TILE_WIDTH; i++) {
+        threadIdx.y = i;
+        for (int j = 0; j < TILE_WIDTH; j++) {
+            threadIdx.x = j;
+            calcCorrelation(blockIdx, threadIdx, desc1, desc2, corr, mean1, mean2, sdv1, sdv2, resp1, resp2, rows, cols);
+        }
+    }
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < TILE_WIDTH; j++) {
+            cout << "[" << tmpMean[i][j] << "]";
+        }
+        cout << endl;
+    }
+
+    cout << endl;
+
+    for (int i = 0; i < TILE_WIDTH; i++) {
+        for (int j = 0; j < TILE_WIDTH; j++) {
+            cout << "[" << tmpDesc1[i][j] << "]";
+        }
+        cout << endl;
+    }
+
+    cout << endl;
+
+    for (int i = 0; i < TILE_WIDTH; i++) {
+        for (int j = 0; j < TILE_WIDTH; j++) {
+            cout << "[" << tmpDesc2[i][j] << "]";
+        }
+        cout << endl;
+    }
+}
+
 int main(int argc, _TCHAR argv[]) {    
 	/*for (int i = DTO_PNG; i < ART_EXP0_ILLUM1; i++) {
 		inicio0(EJECUCION, i);
@@ -900,7 +1016,7 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 22: {
-            string testName = "testCUDASinOptimizar";
+            string testName = "testCUDAOptimizaCorrelacion";
             CRealMatches rm1(false, cvSize(512, 512));
             rm1.startTestCMU(testName, true);
             rm1.~CRealMatches();
@@ -909,7 +1025,8 @@ int main(int argc, _TCHAR argv[]) {
             rm2.~CRealMatches();
             CRealMatches rm3(false, cvSize(1024, 1024));
             rm3.startTestCMU(testName);
-            rm3.~CRealMatches();
+            rm3.~CRealMatches();//*/
+            //testCuda();
 
             break;
         }

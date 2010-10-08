@@ -1790,8 +1790,7 @@ void CRealMatches::startTestCMU(string testName, bool cabecera) {
                 << timings.tRANSAC << "\t" << timings.tTotal << "\t" << timings.threadsPerBlock << "\t"
                 << timings.blocksPerGrid << "\t" << timings.dimBlock.x << "\t" << timings.dimBlock.y
                 << "\t" << timings.dimGrid.x << "\t" << timings.dimGrid.y << endl;
-
-        //cvWaitKey(0);
+        //cvWaitKey(0);        
         
     }
 
