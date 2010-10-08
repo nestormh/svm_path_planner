@@ -14,6 +14,7 @@
 
 #define SURF_DESCRIPTOR_SIZE 64
 #define CORRELATION_THRESH 0.99
+#define TILE_WIDTH 16
 
 using namespace std;
 

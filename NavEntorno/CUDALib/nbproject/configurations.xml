@@ -40,7 +40,7 @@
             <pElem>/usr/local/cuda/include</pElem>
             <pElem>/home/nestor/NVIDIA_GPU_Computing_SDK/C/common/inc</pElem>
           </incDir>
-          <commandLine>-DUNIX -D_DEBUG --compiler-bindir=/usr/bin/gcc-4.3</commandLine>
+          <commandLine>-g -G -DUNIX -D_DEBUG --compiler-bindir=/usr/bin/gcc-4.3</commandLine>
           <preprocessorList>
             <Elem>__global__</Elem>
             <Elem>__shared__</Elem>
@@ -56,7 +56,7 @@
             <pElem>/usr/local/cuda/include</pElem>
             <pElem>/home/nestor/NVIDIA_GPU_Computing_SDK/C/common/inc</pElem>
           </incDir>
-          <commandLine>-DUNIX -D_DEBUG --compiler-bindir=/usr/bin/gcc-4.3</commandLine>
+          <commandLine>-g -G -DUNIX -D_DEBUG --compiler-bindir=/usr/bin/gcc-4.3</commandLine>
           <preprocessorList>
             <Elem>__global__</Elem>
             <Elem>__shared__</Elem>
