@@ -78,12 +78,12 @@ void calcCorrelation(float * desc1, float * desc2, float * corr, float * mean1, 
         __syncthreads();
 
         for (int k = 0; k < TILE_WIDTH; k++) {
-            pVal = __fadd_rn(pVal, __fmul_rn(__fadd_rn(tmpDesc1[ty][k], -tmpMean[0][ty]), __fadd_rn(tmpDesc2[tx][k], -tmpMean[1][tx])));
+            pVal += (tmpDesc1[ty][k] - tmpMean[0][ty]) * (tmpDesc2[tx][k] - tmpMean[1][tx]);
         }
 
         __syncthreads();
     }
-    pVal /= (width - 1) * __fmul_rn(tmpSdv[0][ty], tmpSdv[1][tx]);
+    pVal /= (width - 1) * tmpSdv[0][ty] * tmpSdv[1][tx];
         
     corr[row * cols + col] = pVal;
 }
