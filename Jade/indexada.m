@@ -1,7 +1,6 @@
-# Primera prueba algoritmo detección del suelo
+# Pasamos a apuntar los que contribuyen a cada votación.
 
 load "Barrido.mat"
-
 figure (1);
 #polar( barrido1(:,1), barrido1(:,2) )
 if (!exist("rotacion","var")) rotacion=0; endif
@@ -24,11 +23,23 @@ numD=length(rangoD)
 rangoTitas=[TitaMin:TitaInc:TitaMax];
 numTitas=length(rangoTitas)
 
-MatVota=zeros(length(rangoD),numTitas);
+#Ahora cada fila de MatVotaQuien apuntará los puntos que votan cada opción
+#  El primer elemento indica cuantos hay usados en la fila.
+MatVotaQuien=zeros(numD*numTitas,numPtos+1);
 
 function tita=calculaTita(alfa,l,d)
 	if(sin(alfa)==0.0) alfa, error("Seno de alfa se hace 0"); endif
 	tita=atan((d/l-cos(alfa))/sin(alfa));
+endfunction
+
+
+function ApuntaEnMatVotaQuien(id,iT,iP,MVQ,nT)
+	indMV=(id-1)*nT+iT;
+	[ indMV MVQ(indMV,[1:10])]
+	posAct=++MVQ(indMV,1);
+	MVQ(indMV,posAct+1)=iP;
+#	keyboard
+	[ indMV MVQ(indMV,[1:10])]
 endfunction
 
 usados=zeros(size(l)); #Para anotar los que son usados
@@ -43,7 +54,12 @@ for indPto=[1:numPtos]
 		indD=round((lAct-Dmin)/Dinc)+1;
 		if (indD>0 && indD<=length(rangoD))
 			#Vota a todos los titas de esa distancia
-			MatVota(indD,:)+=ones(size(rangoTitas));
+			for i=1:numTitas
+				#ApuntaEnMatVotaQuien(indD,i,indPto,MatVotaQuien,numTitas);
+				indMV=(indD-1)*numTitas+i;
+				posAct=++MatVotaQuien(indMV,1);
+				MatVotaQuien(indMV,posAct+1)=indPto;
+			endfor
 			usados(indPto)=1;
 			usadosTeo(indPto)=1;
 		endif
@@ -82,7 +98,10 @@ for indPto=[1:numPtos]
 			usadoIf=1;
 			inc=1; if(indTita1>indTita2) inc=-1; endif
 			for indTita=[it1Aco:inc:it2Aco]
-				MatVota(indd,indTita)++;
+				#ApuntaEnMatVotaQuien(indd,indTita,indPto,MatVotaQuien,numTitas);
+				indMV=(indd-1)*numTitas+indTita;
+				posAct=++MatVotaQuien(indMV,1);
+				MatVotaQuien(indMV,posAct+1)=indPto;
 				usados(indPto)=1; #Se uso
 			endfor
 		endif
@@ -99,9 +118,10 @@ endfor
 figure (2);
 #mesh(rangoTitas,rangoD,MatVota);
 
-[maxD,indMD]=max(MatVota);
-[maxVota,indTitaSel]=max(maxD);
-indDSel=indMD(indTitaSel);
+[maxVota,indMaxVota]=max(MatVotaQuien(:,1));
+indMaxVota
+indDSel=ceil(indMaxVota/numTitas);
+indTitaSel=rem(indMaxVota,numTitas);
 maxVota;
 titaSel=rangoTitas(indTitaSel);
 dSel=rangoD(indDSel);
@@ -115,13 +135,13 @@ disp(["\n 1º (" num2str(dSel) "," num2str(degree(titaSel)) "º) [" int2str(indD
 	"," int2str(indTitaSel) "] con " int2str(maxVota) ])
 
 #Buscamos siguientes maximos
-MatVota2=MatVota;
-indDSel2=indDSel; indTitaSel2=indTitaSel;
+MatVotaQuien2=MatVotaQuien;
+indMaxVota2=indMaxVota;
 for k=2:5
-	MatVota2(indDSel2,indTitaSel2)=0;
-	[maxD2,indMD2]=max(MatVota2);
-	[maxVota2,indTitaSel2]=max(maxD2);
-	indDSel2=indMD2(indTitaSel2);
+	MatVotaQuien2(indMaxVota2)=0;
+	[maxVota2,indMaxVota2]=max(MatVotaQuien2(:,1));
+	indDSel2=ceil(indMaxVota2/numTitas);
+	indTitaSel2=rem(indMaxVota2,numTitas)+1;
 	titaSel2=rangoTitas(indTitaSel2);
 	dSel2=rangoD(indDSel2);
 	disp([" " int2str(k) "º (" num2str(dSel2) "," num2str(degree(titaSel2)) "º) [" \
@@ -129,32 +149,13 @@ for k=2:5
 endfor
 
 #Encontramos los que maxTita que contribullen al máximo
-DeltaD=1; DeltaTita=1;
-contribuye=zeros(size(l));
-for indPto=find(usados)'
-	alfaAct=alfa(indPto);
-	lAct=l(indPto);
-	if (abs(alfaAct)<rad(0.1) )
-		if ( abs((round((lAct-Dmin)/Dinc)+1)-indDSel)<=DeltaD )
-			contribuye(indPto)=1;
-		endif
-		continue;
-	endif
-	for delta=[-DeltaD:DeltaD]
-		tita=calculaTita(alfaAct,lAct,rangoD(indDSel+delta));
-		indTita=round((tita-TitaMin)/TitaInc)+1;
-		if(abs(indTita-indTitaSel)<=DeltaTita)
-			contribuye(indPto)=1;
-		endif
-	endfor
-endfor
-
-numContribuyen=length(find(contribuye))
+contribuyen=MatVotaQuien(indMaxVota,[2:maxVota+1]);
+numContribuyen=length(contribuyen)
 
 figure(1);
 lr=4;
 lUsados=l(find(usados)); alfaUsados=alfa(find(usados));
-lContribuyen=l(find(contribuye)); alfaContribuyen=alfa(find(contribuye));
+lContribuyen=l(contribuyen); alfaContribuyen=alfa(contribuyen);
 plot(l.*cos(alfa+pi/2),l.*sin(alfa+pi/2)
 #  ,lUsados.*cos(alfaUsados+pi/2),lUsados.*sin(alfaUsados+pi/2),"x"
   ,lContribuyen.*cos(alfaContribuyen+pi/2),lContribuyen.*sin(alfaContribuyen+pi/2),"o"
