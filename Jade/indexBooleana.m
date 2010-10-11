@@ -1,7 +1,8 @@
 # Pasamos a apuntar los que contribuyen a cada votación.
+#  pero lo apuntamos como 0s y 1s para que sea más fácil quitarlos de los demás
 
-load "Barrido.mat"
-figure (1);
+if (!exist("barrido1","var")) load "Barrido.mat"; endif
+#figure (1);
 #polar( barrido1(:,1), barrido1(:,2) )
 if (!exist("rotacion","var")) rotacion=0; endif
 rotacion
@@ -24,7 +25,8 @@ rangoTitas=[TitaMin:TitaInc:TitaMax];
 numTitas=length(rangoTitas)
 
 #Ahora cada fila de MatVotaQuien apuntará los puntos que votan cada opción
-#  El primer elemento indica cuantos hay usados en la fila.
+#  El primer elemento indica cuantos hay usados en la fila, 
+#  el resto será un 1 a los que contribuyen
 MatVotaQuien=zeros(numD*numTitas,numPtos+1);
 
 function tita=calculaTita(alfa,l,d)
@@ -32,15 +34,6 @@ function tita=calculaTita(alfa,l,d)
 	tita=atan((d/l-cos(alfa))/sin(alfa));
 endfunction
 
-
-function ApuntaEnMatVotaQuien(id,iT,iP,MVQ,nT)
-	indMV=(id-1)*nT+iT;
-	[ indMV MVQ(indMV,[1:10])]
-	posAct=++MVQ(indMV,1);
-	MVQ(indMV,posAct+1)=iP;
-#	keyboard
-	[ indMV MVQ(indMV,[1:10])]
-endfunction
 
 usados=zeros(size(l)); #Para anotar los que son usados
 usadosTeo=usados; #Para anotar los que son usados
@@ -57,8 +50,8 @@ for indPto=[1:numPtos]
 			for i=1:numTitas
 				#ApuntaEnMatVotaQuien(indD,i,indPto,MatVotaQuien,numTitas);
 				indMV=(indD-1)*numTitas+i;
-				posAct=++MatVotaQuien(indMV,1);
-				MatVotaQuien(indMV,posAct+1)=indPto;
+				MatVotaQuien(indMV,1)++;
+				MatVotaQuien(indMV,indPto+1)=1;
 			endfor
 			usados(indPto)=1;
 			usadosTeo(indPto)=1;
@@ -100,8 +93,8 @@ for indPto=[1:numPtos]
 			for indTita=[it1Aco:inc:it2Aco]
 				#ApuntaEnMatVotaQuien(indd,indTita,indPto,MatVotaQuien,numTitas);
 				indMV=(indd-1)*numTitas+indTita;
-				posAct=++MatVotaQuien(indMV,1);
-				MatVotaQuien(indMV,posAct+1)=indPto;
+				MatVotaQuien(indMV,1)++;
+				MatVotaQuien(indMV,indPto+1)=1;
 				usados(indPto)=1; #Se uso
 			endfor
 		endif
@@ -134,11 +127,42 @@ numDistintos=length(distintos);
 disp(["\n 1º (" num2str(dSel) "," num2str(degree(titaSel)) "º) [" int2str(indDSel) \
 	"," int2str(indTitaSel) "] con " int2str(maxVota) ])
 
+#Encontramos los que maxTita que contribullen al máximo
+contribuyen=find(MatVotaQuien(indMaxVota,[2:numPtos+1]));
+numContribuyen=length(contribuyen)
+
+#Segundo contribuyen
+MatVotaQuien2=MatVotaQuien;
+indMaxVota2=indMaxVota;
+mascaraElegidos=ones(rows(MatVotaQuien2),1)*MatVotaQuien2(indMaxVota2,[2:numPtos+1]);
+MatVotaQuien2(:,2:numPtos+1)&= !mascaraElegidos;
+MatVotaQuien2(:,1)=sum(MatVotaQuien2(:,2:numPtos+1)')';
+[maxVota2,indMaxVota2]=max(MatVotaQuien2(:,1));
+contribuyen2=find(MatVotaQuien(indMaxVota2,[2:numPtos+1]));
+
+
+figure(1);
+lr=4;
+lUsados=l(find(usados)); alfaUsados=alfa(find(usados));
+lContribuyen=l(contribuyen); alfaContribuyen=alfa(contribuyen);
+lContribuyen2=l(contribuyen2); alfaContribuyen2=alfa(contribuyen2);
+plot(l.*cos(alfa+pi/2),l.*sin(alfa+pi/2)
+#  ,lUsados.*cos(alfaUsados+pi/2),lUsados.*sin(alfaUsados+pi/2),"x"
+  ,lContribuyen.*cos(alfaContribuyen+pi/2),lContribuyen.*sin(alfaContribuyen+pi/2),"o"
+  ,lContribuyen2.*cos(alfaContribuyen2+pi/2),lContribuyen2.*sin(alfaContribuyen2+pi/2),"o"
+ ,lr*[-cos(titaSel), cos(titaSel)],lr*[-sin(titaSel) ,sin(titaSel)]+dSel
+  ,lr*[-cos(TitaMax), 0, cos(TitaMin)],lr*[-sin(TitaMax), 0 ,sin(TitaMin)]+Dmin
+  ,lr*[-cos(TitaMin), 0, cos(TitaMax)],lr*[-sin(TitaMin), 0 ,sin(TitaMax)]+Dmax
+) ;
+grid on
+
 #Buscamos siguientes maximos
 MatVotaQuien2=MatVotaQuien;
 indMaxVota2=indMaxVota;
 for k=2:5
-	MatVotaQuien2(indMaxVota2)=0;
+	mascaraElegidos=ones(rows(MatVotaQuien2),1)*MatVotaQuien2(indMaxVota2,[2:numPtos+1]);
+	MatVotaQuien2(:,2:numPtos+1)&= !mascaraElegidos;
+	MatVotaQuien2(:,1)=sum(MatVotaQuien2(:,2:numPtos+1)')';
 	[maxVota2,indMaxVota2]=max(MatVotaQuien2(:,1));
 	indDSel2=ceil(indMaxVota2/numTitas);
 	indTitaSel2=rem(indMaxVota2,numTitas)+1;
@@ -147,22 +171,5 @@ for k=2:5
 	disp([" " int2str(k) "º (" num2str(dSel2) "," num2str(degree(titaSel2)) "º) [" \
 	int2str(indDSel2) "," int2str(indTitaSel2) "] con " int2str(maxVota2) ])
 endfor
-
-#Encontramos los que maxTita que contribullen al máximo
-contribuyen=MatVotaQuien(indMaxVota,[2:maxVota+1]);
-numContribuyen=length(contribuyen)
-
-figure(1);
-lr=4;
-lUsados=l(find(usados)); alfaUsados=alfa(find(usados));
-lContribuyen=l(contribuyen); alfaContribuyen=alfa(contribuyen);
-plot(l.*cos(alfa+pi/2),l.*sin(alfa+pi/2)
-#  ,lUsados.*cos(alfaUsados+pi/2),lUsados.*sin(alfaUsados+pi/2),"x"
-  ,lContribuyen.*cos(alfaContribuyen+pi/2),lContribuyen.*sin(alfaContribuyen+pi/2),"o"
- ,lr*[-cos(titaSel), cos(titaSel)],lr*[-sin(titaSel) ,sin(titaSel)]+dSel
-  ,lr*[-cos(TitaMax), 0, cos(TitaMin)],lr*[-sin(TitaMax), 0 ,sin(TitaMin)]+Dmin
-  ,lr*[-cos(TitaMin), 0, cos(TitaMax)],lr*[-sin(TitaMin), 0 ,sin(TitaMax)]+Dmax
-) ;
-grid on
 
 
