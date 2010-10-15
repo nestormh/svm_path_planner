@@ -276,6 +276,10 @@ void SurfGPU::bruteMatchSequential(vector<KeyPoint> points1, vector<KeyPoint> po
         }
         cout << endl;
     }*/
+    for (int i = 0; i < 10; i++) {
+        cout << "[" << avg1[i] << "]";
+    }
+    cout << endl;
     float corr;
     for (int i = 0; i < 10; i++) {
         vector<float> descriptor1;

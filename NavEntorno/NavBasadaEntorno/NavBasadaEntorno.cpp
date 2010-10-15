@@ -1016,7 +1016,7 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 22: {
-            string testName = "testCUDAOptimizaCorrelacion";
+            string testName = "testCUDAOptimizaMeanSdv";
             CRealMatches rm1(false, cvSize(512, 512));
             rm1.startTestCMU(testName, true);
             rm1.~CRealMatches();

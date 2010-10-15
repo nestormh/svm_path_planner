@@ -1780,7 +1780,7 @@ void CRealMatches::startTestCMU(string testName, bool cabecera) {
         //mainTest();       // Descomentar para comprobar que el método está funcionando correctamente
         vector<t_SURF_Pair> pairsSurf;
         t_Timings timings;
-        surfGpu.testSurf(img1, img2, pairsSurf, timings);        
+        surfGpu.testSurf(img1, img2, pairsSurf, timings);
 
         ofs << testName << "\t" << line << "\t" << size.width << "\t" << size.height << "\t" << timings.nPoints1
                 << "\t" << timings.nPoints2 << "\t" << timings.nPairs << "\t" << timings.nPairsClean << "\t" << timings.tSurf1 
@@ -1790,8 +1790,8 @@ void CRealMatches::startTestCMU(string testName, bool cabecera) {
                 << timings.tRANSAC << "\t" << timings.tTotal << "\t" << timings.threadsPerBlock << "\t"
                 << timings.blocksPerGrid << "\t" << timings.dimBlock.x << "\t" << timings.dimBlock.y
                 << "\t" << timings.dimGrid.x << "\t" << timings.dimGrid.y << endl;
-        //cvWaitKey(0);        
-        
+        //cvWaitKey(0);
+        //break;
     }
 
     ifs.close();
