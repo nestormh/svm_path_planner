@@ -56,8 +56,11 @@ void calcMean(float * desc1, float * desc2, float * m1, float * m2) {
     unsigned int bx = blockIdx.x;
     unsigned int by = blockIdx.y;
 
-    partialSum1[ty][tx] = desc1[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx];
-    partialSum2[ty][tx] = desc2[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx];
+    unsigned int descPos = (bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx;
+    unsigned int mPos = bx * MEAN_SDV_THREADS + ty;
+
+    partialSum1[ty][tx] = desc1[descPos];
+    partialSum2[ty][tx] = desc2[descPos];
 
     for (unsigned int stride = blockDim.x>>1; stride > 0; stride >>= 1) {
         __syncthreads();
@@ -71,8 +74,8 @@ void calcMean(float * desc1, float * desc2, float * m1, float * m2) {
     __syncthreads();
 
     if (tx == 0) {
-        m1[bx * MEAN_SDV_THREADS + ty] = partialSum1[ty][0] / SURF_DESCRIPTOR_SIZE;        
-        m2[bx * MEAN_SDV_THREADS + ty] = partialSum2[ty][0] / SURF_DESCRIPTOR_SIZE;
+        m1[mPos] = partialSum1[ty][0] / SURF_DESCRIPTOR_SIZE;
+        m2[mPos] = partialSum2[ty][0] / SURF_DESCRIPTOR_SIZE;
     }    
 }
 
@@ -88,16 +91,21 @@ void calcSdv(float * desc1, float * desc2, float * m1, float * m2, float * sdv1,
     unsigned int bx = blockIdx.x;
     unsigned int by = blockIdx.y;
 
+    unsigned int mPos = bx * MEAN_SDV_THREADS + ty;
+    unsigned int descPos = (bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx;
+
     if (tx == 0) {
-        mean1[ty] = m1[bx * MEAN_SDV_THREADS + ty];
-        mean2[ty] = m2[bx * MEAN_SDV_THREADS + ty];
+        mean1[ty] = m1[mPos];
+        mean2[ty] = m2[mPos];
     }
     __syncthreads();
 
-    partialSum1[ty][tx] = (desc1[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx] - mean1[ty]) *
-                          (desc1[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx] - mean1[ty]);
-    partialSum2[ty][tx] = (desc2[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx] - mean2[ty]) *
-                          (desc2[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx] - mean2[ty]);
+    float sub1 = desc1[descPos] - mean1[ty];
+    float sub2 = desc2[descPos] - mean2[ty];
+
+    partialSum1[ty][tx] = sub1 * sub1;
+    partialSum2[ty][tx] = sub2 * sub2;
+    
     for (unsigned int stride = blockDim.x>>1; stride > 0; stride >>= 1) {
         __syncthreads();
 
@@ -110,9 +118,9 @@ void calcSdv(float * desc1, float * desc2, float * m1, float * m2, float * sdv1,
     __syncthreads();
 
     if (tx == 0) {
-        sdv1[bx * MEAN_SDV_THREADS + ty] = sqrt(partialSum1[ty][0] / SURF_DESCRIPTOR_SIZE);
-        sdv2[bx * MEAN_SDV_THREADS + ty] = sqrt(partialSum2[ty][0] / SURF_DESCRIPTOR_SIZE);
-    }
+        sdv1[mPos] = sqrt(partialSum1[ty][0] / SURF_DESCRIPTOR_SIZE);
+        sdv2[mPos] = sqrt(partialSum2[ty][0] / SURF_DESCRIPTOR_SIZE);
+    }       
 }
 
 __global__
@@ -386,7 +394,7 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
         }
         cout << endl;
     }
-    free(hCorr);*/
+    free(hCorr);//*/
 
     timings.tCalcCorrelation = clock() - myTime;
     myTime = clock();
