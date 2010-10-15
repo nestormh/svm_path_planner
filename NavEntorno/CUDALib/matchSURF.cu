@@ -1,5 +1,7 @@
 #include "CUDAlib.h"
 #include <cutil_inline.h>
+#include <c++/4.4/limits>
+#include <c++/4.4/cmath>
 
 __constant__ float * d_desc1;
 __constant__ float * d_desc2;
@@ -45,6 +47,75 @@ void calcMeanSdv(float * desc1, float * desc2, float * m1, float * m2, float * s
 }
 
 __global__
+void calcMean(float * desc1, float * desc2, float * m1, float * m2) {
+    __shared__ float partialSum1[MEAN_SDV_THREADS][SURF_DESCRIPTOR_SIZE];
+    __shared__ float partialSum2[MEAN_SDV_THREADS][SURF_DESCRIPTOR_SIZE];
+    
+    unsigned int tx = threadIdx.x;
+    unsigned int ty = threadIdx.y;
+    unsigned int bx = blockIdx.x;
+    unsigned int by = blockIdx.y;
+
+    partialSum1[ty][tx] = desc1[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx];
+    partialSum2[ty][tx] = desc2[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx];
+
+    for (unsigned int stride = blockDim.x>>1; stride > 0; stride >>= 1) {
+        __syncthreads();
+
+        if (tx < stride) {
+            partialSum1[ty][tx] += partialSum1[ty][tx + stride];
+            partialSum2[ty][tx] += partialSum2[ty][tx + stride];
+        }        
+    }
+
+    __syncthreads();
+
+    if (tx == 0) {
+        m1[bx * MEAN_SDV_THREADS + ty] = partialSum1[ty][0] / SURF_DESCRIPTOR_SIZE;        
+        m2[bx * MEAN_SDV_THREADS + ty] = partialSum2[ty][0] / SURF_DESCRIPTOR_SIZE;
+    }    
+}
+
+__global__
+void calcSdv(float * desc1, float * desc2, float * m1, float * m2, float * sdv1, float * sdv2) {
+    __shared__ float partialSum1[MEAN_SDV_THREADS][SURF_DESCRIPTOR_SIZE];
+    __shared__ float partialSum2[MEAN_SDV_THREADS][SURF_DESCRIPTOR_SIZE];
+    __shared__ float mean1[MEAN_SDV_THREADS];
+    __shared__ float mean2[MEAN_SDV_THREADS];
+
+    unsigned int tx = threadIdx.x;
+    unsigned int ty = threadIdx.y;
+    unsigned int bx = blockIdx.x;
+    unsigned int by = blockIdx.y;
+
+    if (tx == 0) {
+        mean1[ty] = m1[bx * MEAN_SDV_THREADS + ty];
+        mean2[ty] = m2[bx * MEAN_SDV_THREADS + ty];
+    }
+    __syncthreads();
+
+    partialSum1[ty][tx] = (desc1[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx] - mean1[ty]) *
+                          (desc1[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx] - mean1[ty]);
+    partialSum2[ty][tx] = (desc2[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx] - mean2[ty]) *
+                          (desc2[(bx * (MEAN_SDV_THREADS) + ty) * SURF_DESCRIPTOR_SIZE + tx] - mean2[ty]);
+    for (unsigned int stride = blockDim.x>>1; stride > 0; stride >>= 1) {
+        __syncthreads();
+
+        if (tx < stride) {
+            partialSum1[ty][tx] += partialSum1[ty][tx + stride];
+            partialSum2[ty][tx] += partialSum2[ty][tx + stride];
+        }
+    }
+
+    __syncthreads();
+
+    if (tx == 0) {
+        sdv1[bx * MEAN_SDV_THREADS + ty] = sqrt(partialSum1[ty][0] / SURF_DESCRIPTOR_SIZE);
+        sdv2[bx * MEAN_SDV_THREADS + ty] = sqrt(partialSum2[ty][0] / SURF_DESCRIPTOR_SIZE);
+    }
+}
+
+__global__
 void calcCorrelation(float * desc1, float * desc2, float * corr, float * mean1, float * mean2, float * sdv1, float * sdv2, bool * resp1, bool * resp2, int rows, int cols) {
 
     __shared__ float tmpDesc1[TILE_WIDTH][TILE_WIDTH];
@@ -86,25 +157,6 @@ void calcCorrelation(float * desc1, float * desc2, float * corr, float * mean1, 
     pVal /= (width - 1) * tmpSdv[0][ty] * tmpSdv[1][tx];
         
     corr[row * cols + col] = pVal;
-}
-
-__global__
-void calcCorrelationOrig(float * desc1, float * desc2, float * corr, float * sdv1, float * sdv2, bool * resp1, bool * resp2, int rows, int cols) {
-    int row = blockIdx.y * blockDim.y + threadIdx.y;
-    int col = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (row >= rows) return;
-    if (col >= cols) return;
-
-    //if (resp1[row] == resp2[col]) {
-    int idx = __fmaf_rn(row, cols, col);
-    float correl = 0.0f;
-#pragma unroll 64
-    for (int i = 0; i < SURF_DESCRIPTOR_SIZE; i++) {
-        correl = __fadd_rn(correl, __fmul_rn(desc1[row * SURF_DESCRIPTOR_SIZE + i], desc2[col * SURF_DESCRIPTOR_SIZE + i]));
-    }
-    corr[idx] = __fdiv_rn(__fdiv_rn(__fdiv_rn(correl, SURF_DESCRIPTOR_SIZE - 1), sdv1[row]), sdv2[col]);
-    //}
 }
 
 __global__
@@ -171,10 +223,10 @@ void calcMeanSdvSequential(vector<t_Point> points1, vector<t_Point> points2, vec
         // find average and standard deviation of each descriptor
         avg1[i] = 0;
         dev1[i] = 0;
-
+        
         for (int k = i * descriptor_size; k < (i * descriptor_size) + descriptor_size; k++) {
             avg1[i] += desc1.at(k);
-        }
+        }        
         avg1[i] /= descriptor_size;
         for (int k = i * descriptor_size; k < (i * descriptor_size) + descriptor_size; k++) {
             dev1[i] += (desc1.at(k) - avg1[i]) * (desc1.at(k) - avg1[i]);
@@ -196,6 +248,11 @@ void calcMeanSdvSequential(vector<t_Point> points1, vector<t_Point> points2, vec
         dev2[i] = sqrt(dev2[i] / descriptor_size);
     }
 
+    for (int i = 0; i < 65; i++) {
+        cout << i << "[" << dev2[i] << "]";
+    }
+    cout << endl;
+
     cutilSafeCall(cudaMemcpy(d_m1, avg1, points1.size() * sizeof(float), cudaMemcpyHostToDevice));
     cutilSafeCall(cudaMemcpy(d_m2, avg2, points2.size() * sizeof(float), cudaMemcpyHostToDevice));
     cutilSafeCall(cudaMemcpy(d_sdv1, dev1, points1.size() * sizeof(float), cudaMemcpyHostToDevice));
@@ -207,24 +264,39 @@ void calcMeanSdvSequential(vector<t_Point> points1, vector<t_Point> points2, vec
     delete dev2;
 }
 
+template<typename T>
+inline bool isNAN(T value) {
+    return std::numeric_limits<T>::has_quiet_NaN;
+}
+
 void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector<float> desc1, vector<float> desc2, vector<int> &matches, t_Timings &timings) {
 
     cout << "Points1 " << points1.size() << endl;
     cout << "Points2 " << points2.size() << endl;
 
     clock_t myTime = clock();    
+    int size1 = (int(points1.size() / TILE_WIDTH) + 1) * TILE_WIDTH;
+    int size2 = (int(points2.size() / TILE_WIDTH) + 1) * TILE_WIDTH;
+    int size = max(size1, size2);
+    size_t corrSize = size1 * size2 * sizeof(float);
 
-    float * h_desc1 = (float *)malloc(desc1.size() * sizeof(float));
-    float * h_desc2 = (float *)malloc(desc2.size() * sizeof(float));
-    float * h_response1 = (float *)malloc(points1.size() * sizeof(float));
-    float * h_response2 = (float *)malloc(points2.size() * sizeof(float));
+    float * h_desc1 = (float *)malloc(size * SURF_DESCRIPTOR_SIZE * sizeof(float));
+    float * h_desc2 = (float *)malloc(size * SURF_DESCRIPTOR_SIZE * sizeof(float));
+    float * h_response1 = (float *)malloc(size1 * sizeof(float));
+    float * h_response2 = (float *)malloc(size2 * sizeof(float));
 
     for (int i = 0; i < desc1.size(); i++) {
-        h_desc1[i] = desc1.at(i);
+        h_desc1[i] = (float)desc1.at(i);
     }
     for (int i = 0; i < desc2.size(); i++) {
-        h_desc2[i] = desc2.at(i);
+        h_desc2[i] = (float)desc2.at(i);
     }
+    for (int i = desc1.size(); i < size * SURF_DESCRIPTOR_SIZE; i++) {
+        h_desc1[i] = 0;
+    }
+    for (int i = desc2.size(); i < size * SURF_DESCRIPTOR_SIZE; i++) {
+        h_desc2[i] = 0;
+    }    
     for (int i = 0; i < points1.size(); i++) {
         h_response1[i] = points1.at(i).response;
     }
@@ -241,23 +313,19 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     bool * d_response2;
     int * d_bestCorr1;
     int * d_bestCorr2;
-    int * d_matches;
-
-    int size1 = (int(points1.size() / TILE_WIDTH) + 1) * TILE_WIDTH;
-    int size2 = (int(points2.size() / TILE_WIDTH) + 1) * TILE_WIDTH;
-    size_t corrSize = size1 * size2 * sizeof(float);
+    int * d_matches;    
 
     //cutilSafeCall(cudaMalloc(&d_m2, size1 + size2 * sizeof(float)));
     //cutilSafeCall(cudaMalloc(&d_sdv2, size2 * sizeof(float)));
-    cutilSafeCall(cudaMalloc(&d_m1, size1 * sizeof(float)));
-    cutilSafeCall(cudaMalloc(&d_sdv1, size1 * sizeof(float)));
-    cutilSafeCall(cudaMalloc(&d_m2, size2 * sizeof(float)));
-    cutilSafeCall(cudaMalloc(&d_sdv2, size2 * sizeof(float)));
-    cutilSafeCall(cudaMalloc(&d_desc1, size1 * SURF_DESCRIPTOR_SIZE * sizeof(float)));
-    cutilSafeCall(cudaMalloc(&d_desc2, size2 * SURF_DESCRIPTOR_SIZE * sizeof(float)));
+    cutilSafeCall(cudaMalloc(&d_m1, size * sizeof(float)));
+    cutilSafeCall(cudaMalloc(&d_sdv1, size * sizeof(float)));
+    cutilSafeCall(cudaMalloc(&d_m2, size * sizeof(float)));
+    cutilSafeCall(cudaMalloc(&d_sdv2, size * sizeof(float)));
+    cutilSafeCall(cudaMalloc(&d_desc1, size * SURF_DESCRIPTOR_SIZE * sizeof(float)));
+    cutilSafeCall(cudaMalloc(&d_desc2, size * SURF_DESCRIPTOR_SIZE * sizeof(float)));
 
-    cutilSafeCall(cudaMemcpy(d_desc1, h_desc1, desc1.size() * sizeof(float), cudaMemcpyHostToDevice));    
-    cutilSafeCall(cudaMemcpy(d_desc2, h_desc2, desc2.size() * sizeof(float), cudaMemcpyHostToDevice));    
+    cutilSafeCall(cudaMemcpy(d_desc1, h_desc1, size * SURF_DESCRIPTOR_SIZE * sizeof(float), cudaMemcpyHostToDevice));
+    cutilSafeCall(cudaMemcpy(d_desc2, h_desc2, size * SURF_DESCRIPTOR_SIZE * sizeof(float), cudaMemcpyHostToDevice));
 
     timings.tMalloc1 = clock() - myTime;
     myTime = clock();
@@ -266,7 +334,22 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     int blocksPerGrid = ((points1.size() + points2.size()) / threadsPerBlock) + 1;
     //calcMeanSdv <<< blocksPerGrid, threadsPerBlock >>> (d_desc1, d_desc2, d_m1, d_m2, d_sdv1, d_sdv2, points1.size(), points2.size());
     //cudaThreadSynchronize();
-    calcMeanSdvSequential(points1, points2, desc1, desc2, d_m1, d_m2, d_sdv1, d_sdv2);
+    //calcMeanSdvSequential(points1, points2, desc1, desc2, d_m1, d_m2, d_sdv1, d_sdv2);
+    dim3 dimBlockMeanSdv(SURF_DESCRIPTOR_SIZE, MEAN_SDV_THREADS);
+    dim3 dimGridMeanSdv(size / dimBlockMeanSdv.y, 1);
+    calcMean <<< dimGridMeanSdv, dimBlockMeanSdv >>> (d_desc1, d_desc2, d_m1, d_m2);
+    calcSdv <<< dimGridMeanSdv, dimBlockMeanSdv >>> (d_desc1, d_desc2, d_m1, d_m2, d_sdv1, d_sdv2);
+    cudaThreadSynchronize();
+
+    /*float * m1 = (float *)malloc(size * sizeof(float));
+    cout << dimBlockMeanSdv.x << endl;
+    
+    cutilSafeCall(cudaMemcpy(m1, d_sdv2, size * sizeof(float), cudaMemcpyDeviceToHost));
+    for (int i = 0; i < 65; i++) {
+        cout << i << "[" << m1[i] << "]";
+    }
+    cout << endl;
+    free(m1);*/
 
     timings.tCalcMeanSdv = clock() - myTime;
     myTime = clock();
@@ -281,8 +364,8 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     cutilSafeCall(cudaMalloc(&d_bestCorr2, size2 * sizeof(int)));
     cutilSafeCall(cudaMalloc(&d_matches, size1 * sizeof(int)));
 
-    cutilSafeCall(cudaMemcpy(d_response1, h_response1, points1.size() * sizeof(bool), cudaMemcpyHostToDevice));
-    cutilSafeCall(cudaMemcpy(d_response2, h_response2, points2.size() * sizeof(bool), cudaMemcpyHostToDevice));
+    cutilSafeCall(cudaMemcpy(d_response1, h_response1, size1 * sizeof(bool), cudaMemcpyHostToDevice));
+    cutilSafeCall(cudaMemcpy(d_response2, h_response2, size2 * sizeof(bool), cudaMemcpyHostToDevice));
 
     timings.tMalloc2 = clock() - myTime;
     timings.tMalloc = timings.tMalloc1 + timings.tMalloc2;
@@ -294,17 +377,16 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     calcCorrelation <<< dimGrid, dimBlock >>> (d_desc1, d_desc2, d_corr, d_m1, d_m2, d_sdv1, d_sdv2, d_response1, d_response2, size1, size2);
     cudaThreadSynchronize();
 
-    float * hCorr = (float *)malloc(corrSize);
+    /*float * hCorr = (float *)malloc(corrSize);
     cutilSafeCall(cudaMemcpy(hCorr, d_corr, corrSize, cudaMemcpyDeviceToHost));
 
-    /*for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 10; j++) {
             cout << "[" << hCorr[i * size2 + j] << "]";
         }
         cout << endl;
     }
-    free(hCorr);
-*/
+    free(hCorr);*/
 
     timings.tCalcCorrelation = clock() - myTime;
     myTime = clock();
@@ -322,23 +404,14 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     timings.tCalcMatches = clock() - myTime;
     myTime = clock();
 
-    clock_t tmpTime = clock();
     int * h_matches = (int *)malloc(points1.size() * sizeof(int));
-    cout << "memCpy1 = " << clock() - tmpTime << endl;
-    tmpTime = clock();
-
     cutilSafeCall(cudaMemcpy(h_matches, d_matches, points1.size() * sizeof(int), cudaMemcpyDeviceToHost));
-    cout << "memCpy2 = " << clock() - tmpTime << endl;
-    tmpTime = clock();
-
     for (int i = 0; i < points1.size(); i++)
         matches.push_back(h_matches[i]);
-    cout << "memCpy3 = " << clock() - tmpTime << endl;
 
     timings.tMemCpy = clock() - myTime;
     myTime = clock();
-
-    cout << (size1 + size2) * sizeof(float) << endl;
+    
     cutilSafeCall(cudaFree(d_m1));
     cutilSafeCall(cudaFree(d_m2));
     cutilSafeCall(cudaFree(d_desc1));

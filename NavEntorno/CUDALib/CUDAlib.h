@@ -11,10 +11,13 @@
 #include <vector>
 #include <stdio.h>
 #include <iostream>
+#include <limits>
 
 #define SURF_DESCRIPTOR_SIZE 64
 #define CORRELATION_THRESH 0.99
 #define TILE_WIDTH 16
+#define MAX_THREADS_PER_BLOCK 512
+#define MEAN_SDV_THREADS MAX_THREADS_PER_BLOCK / SURF_DESCRIPTOR_SIZE
 
 using namespace std;
 
