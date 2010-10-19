@@ -19,6 +19,9 @@
 #define MAX_THREADS_PER_BLOCK 512
 #define MEAN_SDV_THREADS MAX_THREADS_PER_BLOCK / SURF_DESCRIPTOR_SIZE
 
+#define BEST_CORR_X 16
+#define BEST_CORR_Y 32
+
 using namespace std;
 
 typedef struct {
