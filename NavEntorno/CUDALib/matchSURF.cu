@@ -185,7 +185,7 @@ void bestCorrX(float * corr, int * bestCorr1, int size1, int size2) {
     partialIdx[ty][tx] = ty;
 
     // Obtenemos el mayor de cada "pseudobloque"
-    for (unsigned int i = 0; i < size1; i += BEST_CORR_X) {
+    for (unsigned int i = BEST_CORR_X; i < size1; i += BEST_CORR_X) {
         yPos = i + ty;
         tmpVal = corr[(yPos * size2) + partialCorrPos];
         if (partialComp[ty][tx] < tmpVal) {
