@@ -211,7 +211,7 @@ void bestCorrX(float * corr, int * bestCorr2, int size1, int size2) {
 }
 
 __global__
-void bestCorrY(float * corr, int * bestCorr1, int size1, int size2) {
+void bestCorrY(float * corr, int * bestCorr2, int * matches, int size2) {
     __shared__ float partialComp[BEST_CORR_Y][BEST_CORR_X];
     __shared__ int partialIdx[BEST_CORR_Y][BEST_CORR_X];
 
@@ -249,10 +249,29 @@ void bestCorrY(float * corr, int * bestCorr1, int size1, int size2) {
     }
 
     if (tx == 0) {
-        bestCorr1[ty + by * BEST_CORR_Y] = partialIdx[ty][tx];
+        int pos = ty + by * BEST_CORR_Y;
+        int bestCorr1 = partialIdx[ty][tx];
+
+        if ((bestCorr2[bestCorr1] == pos) && (partialComp[ty][tx] > CORRELATION_THRESH)) {
+            matches[pos] = bestCorr1;
+        } else {
+            matches[pos] = -1;
+        }
     }    
 }
 
+/*
+ void calcMatches(int * bestCorr1, int * bestCorr2, int * matches, int n1) {
+    int pos = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (pos >= n1) return;
+
+    if (bestCorr2[bestCorr1[pos]] == pos) {
+        matches[pos] = bestCorr1[pos];
+    } else {
+        matches[pos] = -1;
+    }
+}*/
 __global__
 void calcBestCorr(float * corr, int * bestCorr1, int * bestCorr2, int rows, int cols) {
     int pos = blockIdx.x * blockDim.x + threadIdx.x;
@@ -496,7 +515,7 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
 
     dim3 dimBlockBestCorrY(BEST_CORR_X, BEST_CORR_Y);
     dim3 dimGridBestCorrY(1, size1 / BEST_CORR_Y);
-    bestCorrY <<< dimGridBestCorrY, dimBlockBestCorrY >>> (d_corr, d_bestCorr1, size1, size2);
+    bestCorrY <<< dimGridBestCorrY, dimBlockBestCorrY >>> (d_corr, d_bestCorr2, d_matches, size2);
     cudaThreadSynchronize();
 
     timings.tCalcBestCorr = clock() - myTime;
@@ -511,12 +530,12 @@ void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector
     cout << endl;    
     free(bestCorr1);//*/
 
-    blocksPerGrid = ((points1.size() - 1) / threadsPerBlock) + 1;
+    /*blocksPerGrid = ((points1.size() - 1) / threadsPerBlock) + 1;
     calcMatches <<< blocksPerGrid, threadsPerBlock >>> (d_bestCorr1, d_bestCorr2, d_matches, points1.size());
     cudaThreadSynchronize();
 
     timings.tCalcMatches = clock() - myTime;
-    myTime = clock();
+    myTime = clock();*/
 
     int * h_matches = (int *)malloc(points1.size() * sizeof(int));
     cutilSafeCall(cudaMemcpy(h_matches, d_matches, points1.size() * sizeof(int), cudaMemcpyDeviceToHost));
