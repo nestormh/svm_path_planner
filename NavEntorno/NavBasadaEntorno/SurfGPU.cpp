@@ -139,7 +139,7 @@ void SurfGPU::drawPairs(vector<t_SURF_Pair> const & pairs, IplImage * imgGraysca
     cvReleaseImage(&imgColor2);
 }
 
-void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs, t_Timings &timings) {
+void SurfGPU::matchSURFParallel(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs, t_Timings &timings) {
 
     vector<t_Point> tmpPoints1;
     vector<t_Point> tmpPoints2;
@@ -164,7 +164,7 @@ void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vec
     }
 
     clock_t myTime = clock();
-    bruteMatchParallel(tmpPoints1, tmpPoints2, desc1, desc2, matches, timings);
+    matchSURFGPU(tmpPoints1, tmpPoints2, desc1, desc2, matches, timings);
     time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
     cout << "Tiempo match 1 = " << time << endl;
 
@@ -195,7 +195,7 @@ void SurfGPU::bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vec
     }*/
 }
 
-void SurfGPU::bruteMatchSequential(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs) {
+void SurfGPU::matchSURFSequential(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs) {
     float* avg1 = (float*) malloc(sizeof (float) * points1.size());
     float* avg2 = (float*) malloc(sizeof (float) * points2.size());
     float* dev1 = (float*) malloc(sizeof (float) * points1.size());
@@ -977,7 +977,7 @@ void SurfGPU::testSurf(string file1, string file2) {
     //for (int i = 0; i < 3; i++) {
         //clock_t myTime = clock();ç
         t_Timings timings;
-        bruteMatch(points1, points2, desc1, desc2, pairs, timings);
+        matchSURFParallel(points1, points2, desc1, desc2, pairs, timings);
         cleanRANSAC(CV_FM_RANSAC, pairs);
         //time_t time = (double(clock() - myTime) / CLOCKS_PER_SEC * 1000);
         //cout << "Tiempo match = " << time << endl;
@@ -1038,14 +1038,17 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
     timings.nPoints1 = points1.size();
     timings.nPoints2 = points2.size();
 
+    cout << "Points1 " << points1.size() << endl;
+    cout << "Points2 " << points2.size() << endl;
+
     myTime = clock();
     if ((points1.size() == 0) || (points2.size() == 0)) {
         pairs.clear();
         timings.nPairs = pairs.size();
     } else {
         clock_t matchTime = clock();
-        //bruteMatchSequential(points1, points2, desc1, desc2, pairs);
-        bruteMatch(points1, points2, desc1, desc2, pairs, timings);
+        matchSURFSequential(points1, points2, desc1, desc2, pairs);
+        //matchSURFParallel(points1, points2, desc1, desc2, pairs, timings);
         time = (double(clock() - matchTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo match sin RANSAC = " << time << endl;//*/
         timings.tPrevRANSAC = clock() - matchTime;

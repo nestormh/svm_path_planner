@@ -49,8 +49,8 @@ private:
     float distSquare(vector <float> v1, vector <float> v2);
     void matchSequential(vector<KeyPoint> points1, vector<KeyPoint> points2,  vector<float> desc1, vector<float> desc2, vector <t_SURF_Pair> &pairs);
 
-    void bruteMatch(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs, t_Timings &timings);
-    void bruteMatchSequential(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs);
+    void matchSURFParallel(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs, t_Timings &timings);
+    void matchSURFSequential(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs);
 
     void removeOutliers(CvMat **points1, CvMat **points2, CvMat *status);
     void cleanRANSAC(int method, vector<t_SURF_Pair> &pairs);
