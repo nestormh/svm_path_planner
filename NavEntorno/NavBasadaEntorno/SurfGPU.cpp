@@ -270,37 +270,6 @@ void SurfGPU::bruteMatchSequential(vector<KeyPoint> points1, vector<KeyPoint> po
         }
     }
 
-    /*for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 64; j++) {
-            cout << "[" << desc2.at(i * 64 + j) << "]";
-        }
-        cout << endl;
-    }*/
-    for (int i = 0; i < points1.size(); i++) {
-        cout << i << " [" << best1[i] /*<< ":" << best2corr[i]*/ << "]";
-    }
-    cout << endl;
-    //float corr;
-    /*for (int i = 0; i < 10; i++) {
-        vector<float> descriptor1;
-        for (int k = i * descriptor_size; k < (i * descriptor_size) + descriptor_size; k++)
-            descriptor1.push_back(desc1.at(k));
-        for (int j = 0; j < 10; j++) {
-            vector<float> descriptor2;
-            for (int k = j * descriptor_size; k < (j * descriptor_size) + descriptor_size; k++)
-                descriptor2.push_back(desc2.at(k));
-
-            corr = 0;
-            for (int k = 0; k < descriptor_size; k++)
-                corr += (descriptor1.at(k) - avg1[i]) * (descriptor2.at(k) - avg2[j]);
-                //corr = descriptor2.at(k);
-            corr /= (descriptor_size - 1) * dev1[i] * dev2[j];            
-            cout << "[" << corr << "]";
-        }
-        cout << endl;
-    }
-
-
     float CORRELATION_THRESHOLD = 0.75;
     for (int i = 0; i < points1.size(); i++) {
         if (best2[best1[i]] == i && best1corr[i] > CORRELATION_THRESHOLD) {
@@ -309,7 +278,16 @@ void SurfGPU::bruteMatchSequential(vector<KeyPoint> points1, vector<KeyPoint> po
             pair.kp2 = points2.at(best1[i]);
             pairs.push_back(pair);
         }
-    }*/
+    }
+
+    /*for (int i = 0; i < points1.size(); i++) {
+        if ((best2[best1[i]] == i) && (best1corr[i] > CORRELATION_THRESH)) {
+            cout << "[" << best1[i] << "]";
+        } else {
+            cout << "[-1]";
+        }
+    }
+    cout << endl;//*/
 
     free(best2corr);
     free(best1corr);
