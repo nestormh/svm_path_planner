@@ -62,7 +62,7 @@ typedef struct {
 
     void sumaArrays();
     void enumerateDevices();
-    void bruteMatchParallel(vector<t_Point> points1, vector<t_Point> points2, vector<float> desc1, vector<float> desc2, vector<int> &matches, t_Timings &timings);
+    void matchSURFGPU(vector<t_Point> points1, vector<t_Point> points2, vector<float> desc1, vector<float> desc2, vector<int> &matches, t_Timings &timings);
 
 #endif	/* _TESTCUDA_H */
 
