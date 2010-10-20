@@ -1047,8 +1047,8 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
         timings.nPairs = pairs.size();
     } else {
         clock_t matchTime = clock();
-        matchSURFSequential(points1, points2, desc1, desc2, pairs);
-        //matchSURFParallel(points1, points2, desc1, desc2, pairs, timings);
+        //matchSURFSequential(points1, points2, desc1, desc2, pairs);
+        matchSURFParallel(points1, points2, desc1, desc2, pairs, timings);
         time = (double(clock() - matchTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo match sin RANSAC = " << time << endl;//*/
         timings.tPrevRANSAC = clock() - matchTime;
