@@ -1,5 +1,7 @@
 package repgrafica;
 
+import gps.Trayectoria;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -7,6 +9,7 @@ import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -14,6 +17,7 @@ import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 //import java.awt.geom.Line2D.Double;
 import java.io.File;
@@ -112,7 +116,7 @@ class Dibujante2 extends JPanel{
 	
 //	private int incrNuevosBoids = 3;
 //	private int contNuevosBoids = incrNuevosBoids ;
-//	private int contIteraciones = 0;
+	private int contIteraciones = 0;
 	
 	public void paintComponent(Graphics g2) {
 		Graphics2D g3 = (Graphics2D) g2;		
@@ -120,7 +124,7 @@ class Dibujante2 extends JPanel{
 		Matrix centroMasa = new Matrix(2,1);
 		// Pinto los Boids
 		if (bandadaPintar.size() > 0){		
-//			contIteraciones++;
+			contIteraciones++;
 			for (int i=0;i<bandadaPintar.size();i++){
 //				if (bandadaPintar.elementAt(i).isLider()){
 //					g2.setColor(Color.green);
@@ -145,12 +149,18 @@ class Dibujante2 extends JPanel{
 //					g2.draw(rutaLider);
 //				}
 //				else
-//				if (contIteraciones > contNuevosBoids){
-//					
+//				if (contIteraciones%4 == 0){				
 					g3.setColor(Color.blue);
-//					g2.setColor(Color.green);
-//					g2.setColor(Color.orange);
-//					g2.setColor(Color.pink);
+//				}
+//				if (contIteraciones%4 == 1){
+//					g3.setColor(Color.green);
+//				}
+//				if (contIteraciones%4 == 2){
+//					g3.setColor(Color.orange);
+//				}
+//				if (contIteraciones%4 == 3){
+//					g3.setColor(Color.pink);
+//				}	
 //				}
 					
 //				g2.draw(bandadaPintar.elementAt(i).getForma());
@@ -158,33 +168,36 @@ class Dibujante2 extends JPanel{
 				g3.drawOval((int)bandadaPintar.elementAt(i).getPosicion().get(0,0)-2,
 						(int)bandadaPintar.elementAt(i).getPosicion().get(1,0)-2,4,4);
 				
-//				g2.draw(bandadaPintar.elementAt(i).getLineaDireccion());
-//				GeneralPath ruta = new GeneralPath();
-//				ruta.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
-//				bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
-//				for(int k=1;k<bandadaPintar.elementAt(i).getRutaBoid().size();k++){
-//				ruta.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
-//				bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
-//				}
-//				g2.draw(ruta);
+			/*	g3.draw(bandadaPintar.elementAt(i).getLineaDireccion());
+				GeneralPath ruta = new GeneralPath();
+				ruta.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
+				bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
+				for(int k=1;k<bandadaPintar.elementAt(i).getRutaBoid().size();k++){
+				ruta.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
+				bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
+				}
+				g3.draw(ruta);*/
 //				centroMasa = centroMasa.plus(bandadaPintar.elementAt(i).getPosicion());
 			}
 		}
-		g3.setStroke(new BasicStroke(3));
-		g3.setPaint(Color.GRAY);
+//		g3.setStroke(new BasicStroke(3));
+//		g3.setPaint(Color.GRAY);
+		
+		/*Pinto el coche*/
+		
 		g3.setColor(Color.GRAY);
-		double[] esqDD={posCoche.get(0,0)+anchoCoche/2*Math.sin(getYawCoche())
-				,posCoche.get(1,0)-anchoCoche/2*Math.cos(getYawCoche()) };
-		double[] esqDI={posCoche.get(0,0)-anchoCoche/2*Math.sin(getYawCoche())
-				,posCoche.get(1,0)+anchoCoche/2*Math.cos(getYawCoche()) };
-		double[] esqPD={esqDD[0]-largoCoche*Math.cos(getYawCoche())
-				,esqDD[1]-largoCoche*Math.sin(getYawCoche()) };
-		double[] esqPI={esqDI[0]-largoCoche*Math.cos(getYawCoche())
-				,esqDI[1]-largoCoche*Math.sin(getYawCoche()) };
-		Point2D pxDD=point2Pixel(esqDD);
-		Point2D pxDI=point2Pixel(esqDI);
-		Point2D pxPD=point2Pixel(esqPD);
-		Point2D pxPI=point2Pixel(esqPI);
+		double[] esqDD={posCoche.get(0,0)+10*anchoCoche/2*Math.sin(getYawCoche())
+				,posCoche.get(1,0)-10*anchoCoche/2*Math.cos(getYawCoche()) };
+		double[] esqDI={posCoche.get(0,0)-10*anchoCoche/2*Math.sin(getYawCoche())
+				,posCoche.get(1,0)+10*anchoCoche/2*Math.cos(getYawCoche()) };
+		double[] esqPD={esqDD[0]-10*largoCoche*Math.cos(getYawCoche())
+				,esqDD[1]-10*largoCoche*Math.sin(getYawCoche()) };
+		double[] esqPI={esqDI[0]-10*largoCoche*Math.cos(getYawCoche())
+				,esqDI[1]-10*largoCoche*Math.sin(getYawCoche()) };
+		Point2D pxDD=new Point((int)esqDD[0],(int)esqDD[1]);
+		Point2D pxDI=new Point((int)esqDI[0],(int)esqDI[1]);
+		Point2D pxPD=new Point((int)esqPD[0],(int)esqPD[1]);
+		Point2D pxPI=new Point((int)esqPI[0],(int)esqPI[1]);
 		GeneralPath coche=new GeneralPath();
 		coche.moveTo((float)pxDD.getX(),(float)pxDD.getY());
 		coche.lineTo((float)pxPD.getX(),(float)pxPD.getY());
@@ -193,8 +206,8 @@ class Dibujante2 extends JPanel{
 		coche.closePath();
 		g3.fill(coche);
 		g3.draw(coche);
-		g3.setColor(Color.green);
-		g3.drawOval((int)posCoche.get(0,0)-5,(int)posCoche.get(1,0)-5,10,10);
+//		g3.setColor(Color.green);
+//		g3.drawOval((int)posCoche.get(0,0)-5,(int)posCoche.get(1,0)-5,10,10);
 //		// Pinto el centro de masa
 //		centroMasa.timesEquals((double)1/(double)bandadaPintar.size());		
 //		g2.setColor(Color.cyan);
@@ -306,6 +319,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		barraMenu.add(menuBandada);
 		pintor = new Dibujante2();
 		sim = new Simulador();
+		sim.getCp().iniciaNavega();
 		pintor.introducirBandada(getSim().getBandada());
 		pintor.addMouseListener(this);
 		cp.add(pintor);
@@ -732,7 +746,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		while (true){
 			if (gui.play){
 				tAnt = System.currentTimeMillis();
-				gui.getSim().moverObstaculos();
+//				gui.getSim().moverObstaculos();
 				indMinAnt = gui.getSim().moverBoids(indMinAnt);
 				int indice = 0;
 				double distObj = Double.POSITIVE_INFINITY;
@@ -743,11 +757,21 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						distObj = distan;
 					}
 				}
+				boolean flagUnaVez = true;
 				gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
 				gui.pintor.setRutaDinamica(gui.getRutaDinamica());
-				gui.getSim().moverPtoInicial(System.currentTimeMillis(),System.currentTimeMillis()-tAnt);
+				/*if (gui.getRutaDinamica().size()>1){ //Comprobar si hay ruta que seguir					
+					Trayectoria tr = new Trayectoria(gui.getSim().traduceRuta(gui.getRutaDinamica()));
+					Trayectoria trMasPuntos = new Trayectoria(tr,0.1);
+					trMasPuntos.situaCoche(gui.getSim().getModCoche().getX(),gui.getSim().getModCoche().getY());
+					if (flagUnaVez){
+						gui.getSim().getCp().setRuta(trMasPuntos);
+						flagUnaVez = false;
+					}					
+					gui.getSim().moverPtoInicial(System.currentTimeMillis(),System.currentTimeMillis()-tAnt);
+				}								
 				gui.pintor.setPosCoche(gui.getSim().getPosInicial());
-				gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
+				gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());*/
 //				gui.getSim().simuPorLotes();				
 				if (gui.pintarEscena)
 					gui.pintor.repaint();
@@ -762,15 +786,15 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	    				gui.getSim().crearBandada();
 	    				gui.getSim().posicionarBandada(gui.getSim().getPosInicial());	    				
 	    				gui.getSim().simuPorLotes();
-	    				gui.tiempoConsumido.setText("Tardó " + gui.getSim().getContIteraciones() + " iteraciones");	    				
+	    				gui.tiempoConsumido.setText("Tardó " + gui.getSim().getTiempoInvertido() + " sec");	    				
 	    				if (gui.pintarEscena){
 	    					for(int j=0;j<gui.getSim().getBoidsOk().size();j++){
-	    						gui.getSim().getBoidsOk().elementAt(j).setRutaBoid(
+/*OJO! aqui se mejora la ruta*/			/*gui.getSim().getBoidsOk().elementAt(j).setRutaBoid(
 	    								gui.getSim().mejoraRuta(
 	    								gui.getSim().getBoidsOk().elementAt(j).getRutaBoid()));
 	    						gui.getSim().getBoidsOk().elementAt(j).setRutaBoid(
 	    								gui.getSim().mejoraRuta(
-	    								gui.getSim().getBoidsOk().elementAt(j).getRutaBoid()));
+	    								gui.getSim().getBoidsOk().elementAt(j).getRutaBoid())); */
 	    						//El identificador del tipo de camino será el número de vertices que tiene el
 	    						//camino después de haber mejorado la ruta
 	    						int identificador = gui.getSim().getBoidsOk().elementAt(j).getRutaBoid().size();
