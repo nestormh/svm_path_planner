@@ -1,5 +1,7 @@
 package boids;
 
+import gps.Trayectoria;
+
 import java.awt.geom.Line2D;
 import java.io.File;
 import java.util.Enumeration;
@@ -8,8 +10,9 @@ import java.util.Vector;
 
 import javax.swing.JFileChooser;
 
-import predictivo.Coche;
-import predictivo.UtilCalculos;
+import predictivo.*;
+import util.*;
+//import predictivo.UtilCalculos;
 
 import Jama.Matrix;
 
@@ -23,8 +26,7 @@ public class Simulador {
 		this.tiempoAnt = tiempoAnt;
 	}
 
-	Vector<Matrix> rutaDinamica = new Vector<Matrix>();
-	Coche modCoche = new Coche();
+	
 	public Coche getModCoche() {
 		return modCoche;
 	}
@@ -33,6 +35,14 @@ public class Simulador {
 		this.modCoche = modCoche;
 	}
 
+	Vector<Matrix> rutaDinamica = new Vector<Matrix>();
+	Trayectoria tr;
+	Coche modCoche = new Coche();
+	int horPrediccion = 13;
+	int horControl = 3;
+	double landa = 1;
+	double Ts = 0.5;
+	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, Ts);	
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Simulaciones"));
 	/** Coordenadas a partir de las cuales se situa la bandada*/
 	Matrix posInicial = new Matrix(2,1);
@@ -196,16 +206,20 @@ public class Simulador {
 		double difAngular = UtilCalculos.normalizaAngulo(AngAlPunto - modCoche.getYaw());
 		comando = UtilCalculos.limita(difAngular,-cotaAngulo,cotaAngulo);
 //		System.out.println("el comando es " + comando);
-		System.out.println("La orient del coche "+modCoche.getYaw()+"La difAng es "+difAngular+" y el comando es "+comando);
+//		System.out.println("La orient del coche "+modCoche.getYaw()+"La difAng es "+difAngular+" y el comando es "+comando);
 		return comando;
 	}
 	public void moverPtoInicial(double tiempoActual,double Ts){
 
 		if(Math.abs(tiempoActual-tiempoAnt) > 500){
-			comando  = calculaComandoVolante();
+//			comando  = calculaComandoVolante();
+			contPred.setTs(Ts/1000);
+			comando  = contPred.calculaComando();
+			comando = util.UtilCalculos.limita(comando,-Math.PI/6,Math.PI/6);
+			System.out.println("el comando calculado es " + comando);
 			setTiempoAnt(tiempoActual);
 		}
-			modCoche.calculaEvolucion(comando,5,Ts/500);
+			modCoche.calculaEvolucion(comando,5,Ts/1000);
 			posInicial.set(0,0,modCoche.getX());
 			posInicial.set(1,0,modCoche.getY());		
 	}
@@ -440,6 +454,18 @@ public class Simulador {
 		return rutaMejor;
 	}
 	
+	public double[][] traduceRuta(Vector<Matrix> ruta){
+		if (ruta.size()==0){
+			throw new IllegalArgumentException("la ruta tiene que tener puntos para poderla traducir");
+		}
+		double [][] arrayRuta = new double[ruta.size()][2];
+		for (int i=0;i==ruta.size();i++){
+			arrayRuta[i][0] = ruta.get(i).get(0,0);
+			arrayRuta[i][1] = -ruta.get(i).get(1,0);
+		}
+		return arrayRuta;
+	}
+	
 	public void configurador(Hashtable designPoint,String[] nomParam){
 		for (Enumeration e = designPoint.keys() ; e.hasMoreElements() ;) {
 //	         System.out.println();
@@ -474,6 +500,14 @@ public class Simulador {
 	//-------------------Getters y Setters-----------------------------------
 	//-----------------------------------------------------------------------
 	
+	public ControlPredictivo getCp() {
+		return contPred;
+	}
+
+	public void setCp(ControlPredictivo cp) {
+		this.contPred = cp;
+	}
+
 	public Vector<Boid> getBandada() {
 		return bandada;
 	}
