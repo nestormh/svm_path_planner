@@ -16,7 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.bruceeckel.swing.Console;
+//import com.bruceeckel.swing.Console;
 
 import Jama.Matrix;
 
@@ -31,6 +31,8 @@ public class Boid implements Serializable{
 	GeneralPath triangulo;
 	/**Linea que muestra la dirección del desplazamiento del boid*/
 	Line2D lineaDireccion = new Line2D.Double();
+	/**Color del boid para diferenciar las distintas generaciones**/
+	Color color;
 	Vector<Matrix> rutaBoid = new Vector<Matrix>();
 	public boolean lider = false;
 	public boolean caminoLibre = false;
@@ -389,7 +391,7 @@ public class Boid implements Serializable{
 	
 	public void setPosicion(Matrix pos) {
 		this.posicion = pos;		
-//		nuevoPuntoRuta(this.posicion);
+		nuevoPuntoRuta(this.posicion);
 	}
 //	public void setPosicion(double x, double y) {
 //		this.posicion.set(0,0,x);
