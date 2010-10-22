@@ -40,6 +40,8 @@ public:
     void testSurf(IplImage * img1, IplImage * img2, vector<t_SURF_Pair> &pairs, t_Timings &timings);
 
 private:
+    void getMatches(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs);
+
     void testSurfGPU(cv::Mat img, vector<KeyPoint> &points, vector<float> &descriptors, GpuSurfConfiguration config);
     bool isLastBitSet(const int * f);
     bool isLastBitSet(const float & f);

@@ -12,7 +12,7 @@
 #include "SurfGPU.h"
 #include "CUDAlib.h"
 
-#define EJECUCION 22
+#define EJECUCION 16
 
 #define METHOD_CHEBYSHEV 0
 #define METHOD_HARRIS 1
@@ -1016,7 +1016,7 @@ int main(int argc, _TCHAR argv[]) {
             break;
         }
         case 22: {
-            string testName = "testCUDAOptimizacionFinal";
+            string testName = "testDistancePairs";
             CRealMatches rm1(false, cvSize(512, 512));
             rm1.startTestCMU(testName, true);
             rm1.~CRealMatches();

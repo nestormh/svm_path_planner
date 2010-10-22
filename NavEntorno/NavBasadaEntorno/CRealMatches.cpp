@@ -1620,7 +1620,7 @@ void CRealMatches::startTest6() {
 
         if (index == 1866) exit(0);
 
-        int key = cvWaitKey(0);        
+        int key = cvWaitKey(20);
         if (key == 27)
             exit(0);
         if (key == 1048608)
@@ -1792,6 +1792,20 @@ void CRealMatches::startTestCMU(string testName, bool cabecera) {
                 << "\t" << timings.dimGrid.x << "\t" << timings.dimGrid.y << endl;
         //cvWaitKey(0);
         //break;
+
+        /*char sWidth[5];
+        char sHeight[5];
+        sprintf(sWidth, "%d", size.width);
+        sprintf(sHeight, "%d", size.height);
+        string pairsFile = string("/home/neztol/doctorado/articulos/CUDA/pairs/") + line + string("_") + string(sWidth) + string("x") + string(sHeight) + string(".pairs.txt");
+        cout << pairsFile << endl;
+        ofstream pf(pairsFile.c_str(), ios::trunc);
+
+        for (int i = 0; i < pairsSurf.size(); i++) {
+            t_SURF_Pair pair = pairsSurf.at(i);
+            pf << pair.kp1.pt.x << "\t" << pair.kp1.pt.y << "\t" << pair.kp2.pt.x << "\t" << pair.kp2.pt.y << endl;
+        }
+        pf.close();//*/
     }
 
     ifs.close();

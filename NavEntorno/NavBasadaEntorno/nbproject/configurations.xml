@@ -208,9 +208,9 @@
           <developmentMode>6</developmentMode>
           <stripSymbols>true</stripSymbols>
           <incDir>
+            <pElem>/usr/local/include/opencv</pElem>
             <pElem>sift</pElem>
             <pElem>LeastSquares</pElem>
-            <pElem>/usr/local/include/opencv</pElem>
             <pElem>/usr/include/gtk-2.0</pElem>
             <pElem>/usr/local/include</pElem>
             <pElem>../../gpusurf-0.2.0/include</pElem>
@@ -221,9 +221,9 @@
           <developmentMode>6</developmentMode>
           <stripSymbols>true</stripSymbols>
           <incDir>
+            <pElem>/usr/local/include/opencv</pElem>
             <pElem>sift</pElem>
             <pElem>LeastSquares</pElem>
-            <pElem>/usr/local/include/opencv</pElem>
             <pElem>/usr/include/gtk-2.0</pElem>
             <pElem>/usr/local/include</pElem>
             <pElem>../../gpusurf-0.2.0/include</pElem>
@@ -243,11 +243,11 @@
           </linkerAddLib>
           <stripSymbols>true</stripSymbols>
           <linkerLibItems>
-            <linkerLibLibItem>cvaux</linkerLibLibItem>
             <linkerLibLibItem>cv</linkerLibLibItem>
-            <linkerLibLibItem>ml</linkerLibLibItem>
+            <linkerLibLibItem>cvaux</linkerLibLibItem>
             <linkerLibLibItem>cxcore</linkerLibLibItem>
             <linkerLibLibItem>highgui</linkerLibLibItem>
+            <linkerLibLibItem>ml</linkerLibLibItem>
             <linkerLibLibItem>gsl</linkerLibLibItem>
             <linkerLibLibItem>gslcblas</linkerLibLibItem>
             <linkerLibLibItem>sqlite3</linkerLibLibItem>

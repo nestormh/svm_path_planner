@@ -18,6 +18,8 @@
 #include "Surf/surflib.h"
 #include "Surf/os_mapping.h"
 #include "SurfGPU.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 
 #define MIN_NFEAT 8

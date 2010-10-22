@@ -9,7 +9,7 @@
 #include "CRealMatches.h"
 
 SurfGPU::SurfGPU() {
-    config.threshold=0.0001;
+    config.threshold=0.0001;    
 }
 
 SurfGPU::SurfGPU(const SurfGPU& orig) {
@@ -145,7 +145,7 @@ void SurfGPU::matchSURFParallel(vector<KeyPoint> points1, vector<KeyPoint> point
     vector<t_Point> tmpPoints2;
     vector<int> matches;
 
-    for (int i = 0; i < points1.size(); i += 1) {
+    for (int i = 0; i < points1.size(); i += 1) {        
         t_Point p;
         p.x = points1.at(i).pt.x;
         p.y = points1.at(i).pt.y;
@@ -193,6 +193,45 @@ void SurfGPU::matchSURFParallel(vector<KeyPoint> points1, vector<KeyPoint> point
             pairs.push_back(pair);
         }        
     }*/
+}
+
+void SurfGPU::getMatches(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs) {
+//(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches) {
+  float dist, d1, d2;
+  int match;
+
+  pairs.clear();
+
+  for (unsigned int i = 0; i < points1.size(); i++) {
+        d1 = d2 = FLT_MAX;
+
+        for (unsigned int j = 0; j < points2.size(); j++) {
+            dist = 0;
+            for (int k = 0; k < SURF_DESCRIPTOR_SIZE; k++)
+                dist += (desc1.at(i * SURF_DESCRIPTOR_SIZE + k) - desc2.at(j * SURF_DESCRIPTOR_SIZE + k)) * (desc1.at(i * SURF_DESCRIPTOR_SIZE + k) - desc2.at(j * SURF_DESCRIPTOR_SIZE + k));
+            dist = sqrt(dist);
+
+            if (dist < d1) { // if this feature matches better than current best
+                d2 = d1;
+                d1 = dist;
+                match = j;
+            } else if (dist < d2) {// this feature matches better than second best
+                d2 = dist;
+            }
+        }
+
+        // If match has a d1:d2 ratio < 0.65 ipoints are a match        
+        if (d1 / d2 < 0.65) {
+            // Store the change in position
+            //ipts1[i].dx = match->x - ipts1[i].x;
+            //ipts1[i].dy = match->y - ipts1[i].y;
+            //matches.push_back(std::make_pair(ipts1[i], *match));
+            t_SURF_Pair pair;
+            pair.kp1 = points1.at(i);
+            pair.kp2 = points2.at(match);
+            pairs.push_back(pair);
+        }
+    }
 }
 
 void SurfGPU::matchSURFSequential(vector<KeyPoint> points1, vector<KeyPoint> points2, vector<float> desc1, vector<float> desc2, vector<t_SURF_Pair> &pairs) {
@@ -1048,7 +1087,8 @@ void SurfGPU::testSurf(IplImage * img1, IplImage * img2, vector <t_SURF_Pair> &p
     } else {
         clock_t matchTime = clock();
         //matchSURFSequential(points1, points2, desc1, desc2, pairs);
-        matchSURFParallel(points1, points2, desc1, desc2, pairs, timings);
+        //matchSURFParallel(points1, points2, desc1, desc2, pairs, timings);
+        getMatches(points1, points2, desc1, desc2, pairs);
         time = (double(clock() - matchTime) / CLOCKS_PER_SEC * 1000);
         cout << "Tiempo match sin RANSAC = " << time << endl;//*/
         timings.tPrevRANSAC = clock() - matchTime;
