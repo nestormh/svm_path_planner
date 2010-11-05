@@ -1,5 +1,5 @@
 package sibtra.controlcarro;
-
+ 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +16,7 @@ import sibtra.util.LabelDatoFormato;
 import sibtra.util.PanelDatos;
 import sibtra.util.SpinnerDouble;
 import sibtra.util.SpinnerInt;
-
+ 
 /**
  * {@link PanelDatos} para mostrar la información del carro y permitir fijar consignas de
  * velocidad y volante.
@@ -26,7 +26,7 @@ import sibtra.util.SpinnerInt;
 public class PanelCarro extends PanelDatos implements ActionListener, ChangeListener {
 
 	/** Maximo comando de velocidad esperado */
-	protected static final int maxComVelocidad = 255;
+	 protected static final int maxComVelocidad = 255;
 
 	/** Conexión al carro*/
 	protected ControlCarro contCarro;
@@ -67,6 +67,7 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 	protected SpinnerNumberModel jspMAvance;
 
 	protected JButton jbAplicaAvance;
+	protected JButton jbAplicaAutomatico;
 
 	public PanelCarro(ControlCarro cc) {
 		super();
@@ -190,19 +191,31 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 		//Alarma Zeta
 		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getAlarma","%10d")
 		, "Zeta");
-
+//		Consigna Velocidad
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getVBateria","%5.2f V"), "Volt Bateria");
+		añadeAPanel(new LabelDatoFormato(ControlCarro.class,"getPresion","%5.2f Bar"), "Presion Compresor");
+		
+		
 		añadeAPanel(new SpinnerDouble(contCarro,"setFactorFreno",0,100,0.5), "Fact Freno");
 		añadeAPanel(new SpinnerInt(contCarro,"setMaxIncremento",0,255*2,1), "Max Inc");
 		añadeAPanel(new SpinnerInt(contCarro,"setMaxDecremento",0,255*2,1), "Max Dec");
 		añadeAPanel(new SpinnerDouble(contCarro,"setKPAvance",0,50,0.1), "KP Avance");
 		añadeAPanel(new SpinnerDouble(contCarro,"setKIAvance",0,50,0.1), "KI Avance");
-		añadeAPanel(new SpinnerDouble(contCarro,"setKDAvance",0,50,0.1), "KD Avance");
+		añadeAPanel(new SpinnerDouble(contCarro,"setKDAvance",0,50,0.1), "KD Avance");		
 
 		{// Boton parar el control
 			jbParaControl=new JButton("PARAR");
 			añadeAPanel(jbParaControl, "Control");
 			jbParaControl.addActionListener(this);
 		}
+		
+
+		{// Boton aplicar
+			jbAplicaAutomatico=new JButton("Aplicar");
+			añadeAPanel(jbAplicaAutomatico, "Automatico");
+			jbAplicaAutomatico.addActionListener(this);
+		}
+
 
 	}
 	
@@ -233,6 +246,10 @@ public class PanelCarro extends PanelDatos implements ActionListener, ChangeList
 			int fuerza=jspMAvance.getNumber().intValue();
 			contCarro.Avanza(fuerza);
 			System.out.println("Aplicado avance "+fuerza);
+		}
+		if(ev.getSource()==jbAplicaAutomatico) {
+			contCarro.setAutomatico();
+			System.out.println("Aplicado control Automatico ");
 		}
 	}
 
