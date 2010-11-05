@@ -1,4 +1,4 @@
-/* @(#)SerialConnection.java	1.6 98/07/17 SMI
+ /* @(#)SerialConnection.java	1.6 98/07/17 SMI
  *
  * Clase de Control del veh�culo Guistub
  */
@@ -23,7 +23,7 @@ import sibtra.log.LoggerFactory;
 import sibtra.util.UtilCalculos;
 
 
-
+ 
 /**
  * Clase para gestionar la comunicación con el PIC que controla el carro.
  * El lazo del control del volante se cierra a bajo nivel (en el PIC) por lo que 
@@ -31,11 +31,11 @@ import sibtra.util.UtilCalculos;
  * El control de velocidad se realiza en esta clase. Para ello hay que combinar la 
  * fuerza aplicada al motor (avance) y el freno.
  * 
- * @author jonay
+ * @author jonay 
  */
 public class ControlCarro implements SerialPortEventListener {
 
-	/*
+	/* 
 	 * En el freno existen 3 variables a modificar Sentido_freno = indica si se
 	 * debe frenar o desfrenar Valor_Freno = indica la fuerza, la amplitud con
 	 * la que se abre la valvula que abre el circuito de frenado. Tiempo_freno =
@@ -158,7 +158,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 *  </code>
 	 *  */
 	private int ConsignaSentidoFreno = PARAR_FRENO;
-	
+	 
 	static public int PARAR_FRENO=0;
 	static public int ABRIR_DESFRENAR=1;
 	static public int ABRIR_FRENAR=2;
@@ -182,8 +182,10 @@ public class ControlCarro implements SerialPortEventListener {
 	private LoggerArrayInts logMenEnviados;
 //	private int RVolante;
 
-	
-        
+	private double Bateria; /** Voltaje de carga de la bateria */
+    private double Presion; /** Presion en el compresor */
+    private int Automatico; /** Configuracion automatico-manual desde el coche*/
+    private int Luces; /** luces On OFF */
 //	private int refresco = 300;
 
 //	/** Ganancia proporcional del PID de freno */
@@ -428,7 +430,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 * Maneja la llegada de datos por la serial
 	 */
 	public void serialEvent(SerialPortEvent e) {
-		int buffer[] = new int[6]; //porque el 0 no se usa :-(
+		int buffer[] = new int[10]; //porque el 0 no se usa :-(
 		int newData = 0;
 
 		//Sólo atendemos la disponibilidad de datos
@@ -455,9 +457,17 @@ public class ControlCarro implements SerialPortEventListener {
 				buffer[3] = inputStream.read();
 				buffer[4] = inputStream.read();
 				buffer[5] = inputStream.read();
+				buffer[6] = inputStream.read();
+				buffer[7] = inputStream.read();
+				buffer[8] = inputStream.read();
+				buffer[9] = inputStream.read();
 				newData = inputStream.read();
-				if (newData != 255)  //no está la marca de fin de paquete
+
+				
+				if (newData != 255) {  //no está la marca de fin de paquete
+					System.out.println("Error fin paquete");
 					continue; //no lo consideramos
+				}
 				//Ya tenemos paquete valido en buffer
 				trataMensaje(buffer);
 			} catch (IOException ex) {
@@ -513,7 +523,14 @@ public class ControlCarro implements SerialPortEventListener {
 
 		alarma = buffer[4];
 		NumPasosFreno = buffer[5];
-
+		double temp=(buffer[6]<<8)+(buffer[7]);
+		Bateria = 9.16*5.0*(temp/1024);
+		temp=(buffer[8]<<8)+(buffer[9]);
+		Presion = 1.5879*(5.0*(temp/1024))+0.1;
+		
+		
+		
+		
 //		if (ConsignaSentidoFreno != 0)
 //			System.out.println("NumPasosFreno = "+ NumPasosFreno);
 //		if (NumPasosFreno == 255) {
@@ -587,6 +604,7 @@ public class ControlCarro implements SerialPortEventListener {
 	 * @return Devuelve el angulo del volante en radianes respecto al centro (+izquierda, - derecha).
 	 */
 	public double getAnguloVolante() {
+//		System.out.println("carro centro " + CARRO_CENTRO + "volante " + volante + "radianes por cuenta " +RADIANES_POR_CUENTA);
 		return (CARRO_CENTRO-volante) * RADIANES_POR_CUENTA;
 	}
 
@@ -731,7 +749,7 @@ public class ControlCarro implements SerialPortEventListener {
 		}*/
 
 		ComandoVelocidad = Fuerza;
-		ConsignaSentidoVelocidad = 2;  //para alante
+		ConsignaSentidoVelocidad =  2;  //para alante
 //		ConsignaFreno = 4;  //dejar el freno como está
 		ConsignaSentidoFreno = NOCAMBIAR_FRENO;
 		ConsignaNumPasosFreno = 0; //TODO sobra
@@ -840,10 +858,10 @@ public class ControlCarro implements SerialPortEventListener {
 		a[4] = ConsignaFreno;
 		a[5] = ConsignaSentidoFreno;
 		a[6] = ComandoVelocidad;
-		a[7] = ConsignaSentidoVelocidad;
+		a[7] = ConsignaSentidoVelocidad | Automatico<<2 | Luces<<3;
 		a[8] = ConsignaNumPasosFreno;
 		a[9] = 255;
-
+System.out.println("vel "+a[7]);
 		if(isOpen()) {
 		for (int i = 0; i < 10; i++)
 			try {
@@ -1077,6 +1095,14 @@ public class ControlCarro implements SerialPortEventListener {
 	public int getPaquetes() {
 		return NumPaquetes;
 	}
+	
+	public double getVBateria() {
+		return Bateria;
+	}
+	
+	public double getPresion() {
+		return Presion;
+	}
 
 	/**
 	 * @return el factorFreno
@@ -1158,4 +1184,26 @@ public class ControlCarro implements SerialPortEventListener {
 		return NumPaquetes;  
 	}
 
+	public void setAutomatico() {
+		Automatico=1;
+		Envia();
+	}
+	
+	public void setManual() {
+		Automatico=0;
+		Envia();
+	}
+	
+	public void setLucesOn() {
+		Luces = 1;
+		Envia();
+	}
+	
+	public void setLucesOff() {
+		Luces = 0;
+		Envia();
+	}
+	
+	
+	
 }
