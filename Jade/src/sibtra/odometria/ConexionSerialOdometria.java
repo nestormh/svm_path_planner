@@ -40,7 +40,8 @@ public class ConexionSerialOdometria implements SerialPortEventListener {
 	private SerialPort sPort;
 	private OutputStream outputStream;
 	private boolean open;
-	private DatosOdometria datos = new DatosOdometria(0,0,0);
+	public DatosOdometria datos = new DatosOdometria(0,0,0);
+	
 	int bufferAnt[] = new int[5];
 
 	/**
@@ -262,7 +263,7 @@ public class ConexionSerialOdometria implements SerialPortEventListener {
 				//Ya tenemos paquete valido en buffer
 				trataMensaje(buffer);
 				bufferAnt = buffer.clone();				
-				
+				System.out.println("buffer[1] "+buffer[1]+" buffer[2] "+buffer[2]+" buffer[3] "+buffer[3]+" buffer[4]"+buffer[4]);
 			} catch (IOException ex) {
 				System.err.println(ex);
 				return;
@@ -273,7 +274,7 @@ public class ConexionSerialOdometria implements SerialPortEventListener {
 	private void trataMensaje(int buffer[]) {	
 		int encoder1Ant = UtilCalculos.byte2entero(bufferAnt[1], bufferAnt[2]);
 		int encoder2Ant = UtilCalculos.byte2entero(bufferAnt[3], bufferAnt[4]);
-
+		
 		int encoder1leido = UtilCalculos.byte2entero(buffer[1], buffer[2]);
 		int encoder2leido = UtilCalculos.byte2entero(buffer[3], buffer[4]);
 		
@@ -379,5 +380,14 @@ public class ConexionSerialOdometria implements SerialPortEventListener {
 	public void setNumPaquetes(int numPaquetes) {
 		NumPaquetes = numPaquetes;
 	}
+	
+	public DatosOdometria getDatos() {
+		return datos;
+	}
+
+	public void setDatos(DatosOdometria datos) {
+		this.datos = datos;
+	}
+
 
 }
