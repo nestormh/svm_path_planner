@@ -1,8 +1,9 @@
 package boids;
 
-import gps.Trayectoria;
+import sibtra.gps.Trayectoria;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -10,8 +11,9 @@ import java.util.Vector;
 
 import javax.swing.JFileChooser;
 
-import predictivo.*;
-import util.*;
+import sibtra.lms.BarridoAngular;
+import sibtra.predictivo.*;
+import sibtra.util.*;
 //import predictivo.UtilCalculos;
 
 import Jama.Matrix;
@@ -213,9 +215,9 @@ public class Simulador {
 
 		if(Math.abs(tiempoActual-tiempoAnt) > 500){
 //			comando  = calculaComandoVolante();
-			contPred.setTs(Ts/1000);
+//			contPred.setTs(Ts/1000);
 			comando  = contPred.calculaComando();
-			comando = util.UtilCalculos.limita(comando,-Math.PI/6,Math.PI/6);
+			comando = sibtra.util.UtilCalculos.limita(comando,-Math.PI/6,Math.PI/6);
 			System.out.println("el comando calculado es " + comando);
 			setTiempoAnt(tiempoActual);
 		}
@@ -296,7 +298,40 @@ public class Simulador {
 		}
 		return indLider;				
 	}
+	/**
+	 * Método que utiliza la información de un barrido de rangeFinder para posicionar 
+	 * los obstáculos en el escenario
+	 * @param ba Barrido de un rangeFinder, tanto LMS221 como LMS112
+	 */
+	public Vector<Obstaculo> posicionarObstaculos(BarridoAngular ba){
+		getObstaculos().clear(); // Se eliminan los obstáculos que pudieran existir en el
+								// escenario
+		for (int i = 0; i<ba.numDatos();i++){
+			double ang=ba.getAngulo(i);
+			double dis=ba.getDistancia(i)*500;
+//			System.out.println("distancia medida " + dis);
+			double pos[] = {Math.abs(dis*Math.cos(ang)),Math.abs(dis*Math.sin(ang))};
+			double vel[] = {0,0}; // En un futuro tal vez se tenga una estimación de la velocidad
+			getObstaculos().add(new Obstaculo(new Matrix(pos,2),new Matrix(vel,2)));
+//			getObstaculos().get(i).posicion.print(2,2);
+			
+		}
+		return getObstaculos();
+		//Usando un BarridoAngularIterator en lugar de BarridoAngular
+//		while(ba.next()){
+//			double ang=ba.angulo();
+//			double dis=ba.distancia();
+//			double pos[] = {dis*Math.cos(ang),dis*Math.sin(ang)};
+//			double vel[] = {0,0}; // En un futuro tal vez se tenga una estimación de la velocidad
+//			getObstaculos().add(new Obstaculo(new Matrix(pos,2),new Matrix(vel,2)));
+//		}
+	}
 	
+	/**
+	 * Recorre el vector de obstáculos y dependiendo de los valores de velocidad y aceleración 
+	 * de cada obstáculo se calcula el desplazamiento y se actualiza el valor de posición de 
+	 * cada obstáculo
+	 */
 	public void moverObstaculos(){
 		if(getObstaculos().size() != 0){
 			for(int i = 0;i<getObstaculos().size();i++){
@@ -373,6 +408,13 @@ public class Simulador {
 //    		}
 //        }        
 	}
+	/**
+	 * Método que se encarga de crear la trayectoria hasta el objetivo usando la técnica de
+	 * la cadena de boids
+	 * @param indLider Se le pasa el índice del boid más cercano y con visión directa hasta el objetivo
+	 * @return
+	 */
+	
 	public Vector<Matrix> calculaRutaDinamica(int indLider){	
 		rutaDinamica.clear();
 		int boidActual = indLider;
@@ -420,7 +462,7 @@ public class Simulador {
 			}
 			if(encontrado){
 				getBandada().elementAt(boidAux).setConectado(true);
-				getBandada().elementAt(boidAux).setExperiencia(1);
+//				getBandada().elementAt(boidAux).setExperiencia(1);
 //				System.out.println("La valoracion es : " + valoracion);
 				rutaDinamica.add(getBandada().elementAt(boidAux).getPosicion());
 				boidActual = boidAux;
@@ -432,6 +474,12 @@ public class Simulador {
 //		rutaDinamica = mejoraRuta(rutaDinamica);
 		return rutaDinamica;
 	}
+	/**
+	 * Método que simplifica la ruta calculada por calculaRutaDinamica
+	 * @param ruta
+	 * @return
+	 */
+	
 	public  Vector<Matrix> mejoraRuta(Vector<Matrix> ruta){
 		Vector<Matrix> rutaMejor = new Vector<Matrix>();		
 		int ptoBase=0;
@@ -453,7 +501,11 @@ public class Simulador {
 		rutaMejor.add(ruta.elementAt(ruta.size()-1));		
 		return rutaMejor;
 	}
-	
+	/**
+	 * Método que traduce la información de la ruta (vector de matrices) a un array de varias dimensiones
+	 * @param ruta
+	 * @return
+	 */
 	public double[][] traduceRuta(Vector<Matrix> ruta){
 		if (ruta.size()==0){
 			throw new IllegalArgumentException("la ruta tiene que tener puntos para poderla traducir");
