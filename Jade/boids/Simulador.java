@@ -14,6 +14,8 @@ import javax.swing.JFileChooser;
 import sibtra.lms.BarridoAngular;
 import sibtra.predictivo.*;
 import sibtra.util.*;
+import sibtra.log.LoggerArrayDoubles;
+import sibtra.log.LoggerFactory;
 //import predictivo.UtilCalculos;
 
 import Jama.Matrix;
@@ -40,11 +42,11 @@ public class Simulador {
 	Vector<Matrix> rutaDinamica = new Vector<Matrix>();
 	Trayectoria tr;
 	Coche modCoche = new Coche();
-	int horPrediccion = 13;
-	int horControl = 3;
-	double landa = 1;
-	double Ts = 0.5;
-	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, Ts);	
+//	int horPrediccion = 13;
+//	int horControl = 3;
+//	double landa = 1;
+	double Ts = 0.05;
+//	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, Ts);	
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Simulaciones"));
 	/** Coordenadas a partir de las cuales se situa la bandada*/
 	Matrix posInicial = new Matrix(2,1);
@@ -74,15 +76,21 @@ public class Simulador {
 	/** Vector que contiene los puntos de diseño para la simulación por lotes*/
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
 	Vector <TipoCamino> caminos = new Vector<TipoCamino>();
-	private int incrNuevosBoids = 3;
-	private int incrPensar = 2;
+	private int incrNuevosBoids = 2;
+	private int incrPensar = 1;
 	private int contNuevosBoids = incrNuevosBoids ;
 	private int contPensar = 0;
 	private double comando = 0;
+	public double anchoEscenario = 0;
+	public double largoEscenario = 0;
+	private LoggerArrayDoubles logPosturaCoche;
+	private double distOkAlOrigen = 5;
+	private boolean rutaCompleta;
 	
 	
 	//-------------Constructores---------------------------------------------------
 	
+
 	public Vector<TipoCamino> getCaminos() {
 		return caminos;
 	}
@@ -98,8 +106,10 @@ public class Simulador {
 		posicionarBandada(new Matrix(2,1));
 		setObjetivo(new Matrix(2,1));
 		setTiempoMax(5);
-		setDistOk(50);
+		setDistOk(2);
 		setNumBoidsOkDeseados(2);
+		logPosturaCoche=LoggerFactory.nuevoLoggerArrayDoubles(this, "PosturaCoche");
+		logPosturaCoche.setDescripcion("Coordenadas y yaw [x,y,yaw]");
 	}
 	
 	public Simulador(Matrix puntoIni,Matrix objetivo,double tMax,int boidsOk,
@@ -192,38 +202,53 @@ public class Simulador {
 		double comando = 0;
 		double cotaAngulo=Math.toRadians(10);
 		Matrix ultimoPunto = new Matrix(2,1);
-		if (rutaDinamica.size() == 0){
+		if (rutaDinamica.size() <= 1){
 			System.out.println("La ruta dinámica está vacia");
 		}else{
-			ultimoPunto.set(0,0, rutaDinamica.elementAt(rutaDinamica.size()-1).get(0,0));
-			ultimoPunto.set(1,0, rutaDinamica.elementAt(rutaDinamica.size()-1).get(1,0));
+			ultimoPunto.set(0,0, rutaDinamica.elementAt(rutaDinamica.size()-2).get(0,0));
+			ultimoPunto.set(1,0, rutaDinamica.elementAt(rutaDinamica.size()-2).get(1,0));
 //			ultimoPunto.set(0,0, rutaDinamica.lastElement().get(0,0));
 //			ultimoPunto.set(1,0, rutaDinamica.lastElement().get(1,0));
 //			ultimoPunto.set(0,0, 0);
 //			ultimoPunto.set(1,0, 0);
 		}
-		Matrix vector = ultimoPunto.minus(posInicial);
+		Matrix vectorDif = ultimoPunto.minus(posInicial);
+//		Matrix vectorDif = objetivo.minus(posInicial);
 //		double difAngular = UtilCalculos.normalizaAngulo(Math.atan2(vector.get(1,0),vector.get(0,0)));
-		double AngAlPunto = Math.atan2(vector.get(1,0),vector.get(0,0));
+		double AngAlPunto = Math.atan2(vectorDif.get(1,0),vectorDif.get(0,0));
 		double difAngular = UtilCalculos.normalizaAngulo(AngAlPunto - modCoche.getYaw());
 		comando = UtilCalculos.limita(difAngular,-cotaAngulo,cotaAngulo);
 //		System.out.println("el comando es " + comando);
 //		System.out.println("La orient del coche "+modCoche.getYaw()+"La difAng es "+difAngular+" y el comando es "+comando);
 		return comando;
 	}
+	
+	public double calculaVelocidadCoche(){
+		double velocidad = 0;
+		if (!isRutaCompleta()){
+			velocidad = -1;
+		}else{
+			velocidad = 3;
+		}
+		return velocidad;
+	}
+	
 	public void moverPtoInicial(double tiempoActual,double Ts){
 
-		if(Math.abs(tiempoActual-tiempoAnt) > 500){
-//			comando  = calculaComandoVolante();
+//		if(Math.abs(tiempoActual-tiempoAnt) > 500){
+			comando  = calculaComandoVolante();
+			double velocidad = calculaVelocidadCoche();
 //			contPred.setTs(Ts/1000);
-			comando  = contPred.calculaComando();
-			comando = sibtra.util.UtilCalculos.limita(comando,-Math.PI/6,Math.PI/6);
-			System.out.println("el comando calculado es " + comando);
+//			comando  = contPred.calculaComando();
+//			comando = sibtra.util.UtilCalculos.limita(comando,-Math.PI/6,Math.PI/6);
+//			System.out.println("el comando calculado es " + comando);
 			setTiempoAnt(tiempoActual);
-		}
-			modCoche.calculaEvolucion(comando,5,Ts/1000);
+//		}
+			modCoche.calculaEvolucion(comando,velocidad,Ts);
 			posInicial.set(0,0,modCoche.getX());
-			posInicial.set(1,0,modCoche.getY());		
+			posInicial.set(1,0,modCoche.getY());
+			logPosturaCoche.add(modCoche.getX(),modCoche.getY(),modCoche.getYaw());
+//			System.out.println("yaw del coche "+modCoche.getYaw());
 	}
 	/**
 	 * Calcula el desplazamiento y mueve cada uno de los Boids de la bandada. Se le pasa
@@ -234,7 +259,7 @@ public class Simulador {
 		double distMin = Double.POSITIVE_INFINITY;
 		boolean liderEncontrado = false;
 		contIteraciones++;
-		//If para controlar la frecuancia a la que se añaden boids a la bandada
+		//If para controlar la frecuencia a la que se añaden boids a la bandada
 		if(contIteraciones > contNuevosBoids){
 			for(int g=0;g<2;g++){				
 //				double pos[] = {Math.abs(700*Math.random()),Math.abs(500*Math.random())};
@@ -242,12 +267,19 @@ public class Simulador {
 //						getBandada().lastElement().getPosicion().get(1,0)+10*Math.random()};
 				double pos[] = {posInicial.get(0,0)+Math.random(), posInicial.get(1,0)+Math.random()};
 				Matrix posi = new Matrix(pos,2);
-				double vel[] = {Math.random(),Math.random()};
+				double vel[] = {0,0};
 				Matrix velo = new Matrix(vel,2);
 				double ace[] = {0,0};
 				Matrix acel = new Matrix(ace,2);
 				getBandada().add(new Boid(posi,velo,acel));
-			}			
+			}
+//			double posCentroEscenario[] = {largoEscenario/2,anchoEscenario/2};
+//			Matrix posiCentro = new Matrix(posCentroEscenario,2);
+//			double vel[] = {0,0};
+//			Matrix velo = new Matrix(vel,2);
+//			double ace[] = {0,0};
+//			Matrix acel = new Matrix(ace,2);
+//			getBandada().add(new Boid(posiCentro, velo, acel));
 			contNuevosBoids = contIteraciones + incrNuevosBoids;
 		}
 		// Iteramos sobre toda la bandada		
@@ -334,36 +366,62 @@ public class Simulador {
 	 */
 	public void moverObstaculos(){
 		if(getObstaculos().size() != 0){
-			for(int i = 0;i<getObstaculos().size();i++){
-				if(i<getObstaculos().size()/2){
-					double velo[] = {0,1};
-					Matrix vel = new Matrix(velo,2);
-					getObstaculos().elementAt(i).mover(vel);
-					if(getObstaculos().elementAt(i).getPosicion().get(1,0)>1000){
-						double pos[] = {getObstaculos().elementAt(i).getPosicion().get(0,0),0};
-						Matrix posi = new Matrix(pos,2);
-						getObstaculos().elementAt(i).setPosicion(posi);
-					}
-				}else{
-					double velo[] = {0,-1};
-					Matrix vel = new Matrix(velo,2);
-					getObstaculos().elementAt(i).mover(vel);
-					if(getObstaculos().elementAt(i).getPosicion().get(1,0)<0){
-						double pos[] = {getObstaculos().elementAt(i).getPosicion().get(0,0),1000};
-						Matrix posi = new Matrix(pos,2);
-						getObstaculos().elementAt(i).setPosicion(posi);
-					}
+			for(int i = 0;i<getObstaculos().size();i++){	
+				double gananciaVel = calculaGananciaVelObs(getObstaculos().elementAt(i));
+				getObstaculos().elementAt(i).mover(
+						getObstaculos().elementAt(i).getRumboDeseado().times(gananciaVel),Ts);
+				//-Control para que los obstáculos vuelvan a aparecer por el lado contrario-
+				//-al salirse del escenario
+				if(getObstaculos().elementAt(i).getPosicion().get(1,0)>anchoEscenario){
+					double pos[] = {getObstaculos().elementAt(i).getPosicion().get(0,0),0};
+					Matrix posi = new Matrix(pos,2);
+					getObstaculos().elementAt(i).setPosicion(posi);
 				}
-//				double velo[] = {2,0};
-//				Matrix vel = new Matrix(velo,2);
-//				getObstaculos().elementAt(i).mover(vel);
-				if(getObstaculos().elementAt(i).getPosicion().get(0,0)>1200){
+				if(getObstaculos().elementAt(i).getPosicion().get(1,0)<0){
+					double pos[] = {getObstaculos().elementAt(i).getPosicion().get(0,0),anchoEscenario};
+					Matrix posi = new Matrix(pos,2);
+					getObstaculos().elementAt(i).setPosicion(posi);
+				}
+
+				if(getObstaculos().elementAt(i).getPosicion().get(0,0)>largoEscenario){
 					double pos[] = {0,getObstaculos().elementAt(i).getPosicion().get(1,0)};
 					Matrix posi = new Matrix(pos,2);
 					getObstaculos().elementAt(i).setPosicion(posi);
-				}				
+				}	
 			}
 		}
+	}
+	/**
+	 * Dependiendo de la posición del vehículo el obstáculo se detendrá o no
+	 * @param Obs Obstáculo sobre el que se quiere calcular su velocidad 
+	 * @return velocidad
+	 */
+	public double calculaGananciaVelObs(Obstaculo Obs){
+		double velObstaculo = 0;		
+		// calculo el vector diferencia entre la pos del obstáculo
+		// y la posicion inicial de salida de los boids, es decir, la posición del
+		// vehículo
+		Matrix difPosInicialObs = new Matrix(2,1);
+		difPosInicialObs = posInicial.minus(Obs.getPosicion());
+		double dist = difPosInicialObs.norm2();
+		// calculo el ángulo entre la velocidad del obstáculo y el vector diferencia 
+		// anteriormente calculado para saber si el coche está dentro de la trayectoria
+		// del obstáculo
+		 // OJO CON EL MENOS DE LA COMPONENTE Y, EN ES SIST DE REF DE LA PANTALLA EL EJE Y
+		 // ESTÁ INVERTIDO!!
+		double orientacionObs = Math.atan2(Obs.getRumboDeseado().get(1,0)
+				,Obs.getRumboDeseado().get(0,0));
+		double orientacionVectorDif = Math.atan2(difPosInicialObs.get(1,0)
+				,difPosInicialObs.get(0,0));		
+		double difOrientaciones = UtilCalculos.normalizaAngulo(orientacionObs-orientacionVectorDif);
+
+		if ((Math.abs(difOrientaciones) < Math.PI/6)&&(dist < 3)){
+			velObstaculo = 0;
+		}
+		else{
+			velObstaculo = 1;
+		}
+		return velObstaculo;
 	}
 
 	public void simuPorLotes(){
@@ -417,15 +475,16 @@ public class Simulador {
 	
 	public Vector<Matrix> calculaRutaDinamica(int indLider){	
 		rutaDinamica.clear();
+		setRutaCompleta(false);
 		int boidActual = indLider;
 		int boidAux = 0;
 		int cont = 0;
 		boolean encontrado = false;
 		double valoracion = Double.NEGATIVE_INFINITY;
-		double umbralCercania = 300; // 300
+		double umbralCercania = 5; // 300
 //		System.out.println("Empezó nueva ruta");
 		rutaDinamica.add(getBandada().elementAt(indLider).getPosicion());
-		while (getBandada().elementAt(boidActual).getDistOrigen()>80 && cont < getBandada().size()){
+		while (getBandada().elementAt(boidActual).getDistOrigen()>distOkAlOrigen  && cont < getBandada().size()){
 			cont++;
 			encontrado=false;
 			for (int i=0;i < bandada.size();i++){				
@@ -450,10 +509,11 @@ public class Simulador {
 								}							
 							}
 							if(!caminoOcupado){
-								if(valoracion < getBandada().elementAt(i).getValoracion())
-								boidAux = i;
-								valoracion = getBandada().elementAt(i).getValoracion();
-								encontrado = true;
+								if(getBandada().elementAt(i).getValoracion() > valoracion){
+									boidAux = i;
+									valoracion = getBandada().elementAt(i).getValoracion();
+									encontrado = true;
+								}
 //								System.out.println("encontró compañero");
 							}
 						}
@@ -470,6 +530,25 @@ public class Simulador {
 			}
 			
 		}
+		rutaDinamica = mejoraRuta(rutaDinamica);
+		boolean caminoOcupadoPosIni = false;
+		// Calculamos la recta entre el ultimo punto de la ruta dinamica y la posición inicial
+		Line2D recta = 
+			new Line2D.Double(rutaDinamica.lastElement().get(0,0),
+					rutaDinamica.lastElement().get(1,0),
+					posInicial.get(0,0),posInicial.get(1,0));
+		for (int j=0;j < obstaculos.size();j++){// Se comprueba con todos los obstáculos
+//			double distObs = obstaculos.elementAt(j).getPosicion().minus(
+//					rutaDinamica.lastElement()).norm2();
+//			if (distObs < umbralCercania){
+				if (!caminoOcupadoPosIni)// Sólo se calcula la intersección mientras el camino siga sin ocupar
+					caminoOcupadoPosIni = recta.intersects(obstaculos.elementAt(j).getForma());
+//			}							
+		}
+		if(!caminoOcupadoPosIni){
+			rutaDinamica.add(posInicial);
+			setRutaCompleta(true);
+		}		
 //		System.out.println("acabó la ruta");
 //		rutaDinamica = mejoraRuta(rutaDinamica);
 		return rutaDinamica;
@@ -552,13 +631,13 @@ public class Simulador {
 	//-------------------Getters y Setters-----------------------------------
 	//-----------------------------------------------------------------------
 	
-	public ControlPredictivo getCp() {
-		return contPred;
-	}
-
-	public void setCp(ControlPredictivo cp) {
-		this.contPred = cp;
-	}
+//	public ControlPredictivo getCp() {
+//		return contPred;
+//	}
+//
+//	public void setCp(ControlPredictivo cp) {
+//		this.contPred = cp;
+//	}
 
 	public Vector<Boid> getBandada() {
 		return bandada;
@@ -607,8 +686,9 @@ public class Simulador {
 
 	public void setPosInicial(Matrix posInicial) {
 		this.posInicial = posInicial;
-		this.modCoche.setPostura(posInicial.get(0,0),posInicial.get(1,0),Math.PI);
+		this.modCoche.setPostura(posInicial.get(0,0),posInicial.get(1,0),0);
 		posicionarBandada(posInicial);
+		Boid.setPosInicial(posInicial);
 	}
 
 	public int getTamanoBandada() {
@@ -658,6 +738,38 @@ public class Simulador {
 	
 	public double getTiempoInvertido() {
 		return tiempoInvertido;
+	}
+	
+	public double getAnchoEscenario() {
+		return anchoEscenario;
+	}
+
+	public void setAnchoEscenario(double anchoEscenario) {
+		this.anchoEscenario = anchoEscenario;
+	}
+
+	public double getLargoEscenario() {
+		return largoEscenario;
+	}
+
+	public void setLargoEscenario(double largoEscenario) {
+		this.largoEscenario = largoEscenario;
+	}
+
+	public double getTs() {
+		return Ts;
+	}
+
+	public void setTs(double ts) {
+		Ts = ts;
+	}
+	
+	public boolean isRutaCompleta() {
+		return rutaCompleta;
+	}
+
+	public void setRutaCompleta(boolean rutaCompleta) {
+		this.rutaCompleta = rutaCompleta;
 	}
 	
 	//----------------------------------------------------------------------------

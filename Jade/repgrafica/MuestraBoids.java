@@ -5,6 +5,7 @@ import sibtra.lms.BarridoAngular;
 import sibtra.lms.ManejaLMS;
 import sibtra.lms.PanelMuestraBarrido;
 import sibtra.lms.ManejaLMS111;
+import sibtra.log.VentanaLoggers;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -122,6 +123,62 @@ class Dibujante2 extends JPanel{
 	public void setRutaDinamica(Vector<Matrix> ruta){
 		this.rutaDinamica = ruta;
 	}
+	/**
+	 * Coordenadas de la esquina superior izquierda.
+	 * En unidades mundo real.
+	 */
+	public Point2D esqSuperiorIzquierda;
+	
+		/**
+	 * Coordenadas de la esquina inferior derecha.
+	 * En unidades mundo real.
+	 */
+	public Point2D esqInferiorDerecha;
+	
+	public Point2D getEsqSuperiorIzquierda() {
+		return esqSuperiorIzquierda;
+	}
+
+	public void setEsqSuperiorIzquierda(Point2D esqSuperiorIzquierda) {
+		this.esqSuperiorIzquierda = esqSuperiorIzquierda;
+	}
+	
+	public void setEsqSuperiorIzquierda(double x, double y) {
+		this.esqSuperiorIzquierda = new Point2D.Double(x,y);
+	}
+
+	public Point2D getEsqInferiorDerecha() {
+		return esqInferiorDerecha;
+	}
+
+	public void setEsqInferiorDerecha(Point2D esqInferiorDerecha) {
+		this.esqInferiorDerecha = esqInferiorDerecha;
+	}
+
+	public void setEsqInferiorDerecha(double x, double y) {
+		this.esqInferiorDerecha = new Point2D.Double(x,y);
+	}
+	
+	/**
+	 * Convierte punto en el mundo real a punto en la pantalla.
+	 * @param x coordenada X del punto
+	 * @param y coordenada Y del punto
+	 * @return punto en pantalla
+	 */
+	protected Point2D.Double point2Pixel(double x, double y) {
+		return new Point2D.Double(x*this.getWidth()/esqInferiorDerecha.getX(),
+				this.getHeight()-(y*(this.getHeight()/esqSuperiorIzquierda.getY())));
+	}
+	/**
+	 * Convierte punto de la pantalla a coordenadas reales
+	 * @param x medida en píxeles de x
+	 * @param y medida en píxeles de y
+	 * @return
+	 */
+	protected Point2D.Double pixel2Point(int x, int y){
+		return new Point2D.Double(x*esqInferiorDerecha.getX()/this.getWidth(),
+				esqSuperiorIzquierda.getY()-(y*(esqSuperiorIzquierda.getY()/this.getHeight())));
+	}
 	
 //	private int incrNuevosBoids = 3;
 //	private int contNuevosBoids = incrNuevosBoids ;
@@ -131,51 +188,20 @@ class Dibujante2 extends JPanel{
 		Graphics2D g3 = (Graphics2D) g2;		
 		super.paintComponent(g3);
 		Matrix centroMasa = new Matrix(2,1);
-		// Pinto los Boids
+		
+		//------------------------- Pinto los Boids----------------------------
+		
 		if (bandadaPintar.size() > 0){		
 			contIteraciones++;
 			for (int i=0;i<bandadaPintar.size();i++){
-//				if (bandadaPintar.elementAt(i).isLider()){
-//					g2.setColor(Color.green);
-//					g2.drawOval((int)bandadaPintar.elementAt(i).getPosicion().get(0,0)-(int)Boid.getRadioCohesion(),
-//							(int)bandadaPintar.elementAt(i).getPosicion().get(1,0)-(int)Boid.getRadioCohesion(),
-//							(int)Boid.getRadioCohesion()*2,(int)Boid.getRadioCohesion()*2);
-//					GeneralPath rutaLider = new GeneralPath();
-//					rutaLider.moveTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(0,0),
-//							bandadaPintar.elementAt(i).getRutaBoid().elementAt(0).get(1,0));
-//					for(int k=1;k<bandadaPintar.elementAt(i).getRutaBoid().size();k++){
-//						rutaLider.lineTo(bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(0,0),
-//								bandadaPintar.elementAt(i).getRutaBoid().elementAt(k).get(1,0));
-//					}
-//					boolean choque = false;
-//					for(int k=0;k<obstaculosPintar.size();k++){
-//						if(rutaLider.intersects(obstaculosPintar.elementAt(k).getForma())){
-//							choque = true;
-//							break;
-//						}						
-//					}
-//					System.out.println("Hay intersección? "+choque);
-//					g2.draw(rutaLider);
-//				}
-//				else
-//				if (contIteraciones%4 == 0){				
-					g3.setColor(Color.blue);
-//				}
-//				if (contIteraciones%4 == 1){
-//					g3.setColor(Color.green);
-//				}
-//				if (contIteraciones%4 == 2){
-//					g3.setColor(Color.orange);
-//				}
-//				if (contIteraciones%4 == 3){
-//					g3.setColor(Color.pink);
-//				}	
-//				}
-					
-//				g2.draw(bandadaPintar.elementAt(i).getForma());
-//				g2.fill(bandadaPintar.elementAt(i).getForma());
-				g3.drawOval((int)bandadaPintar.elementAt(i).getPosicion().get(0,0)-2,
-						(int)bandadaPintar.elementAt(i).getPosicion().get(1,0)-2,4,4);
+		
+				g3.setColor(Color.blue);
+
+				Point2D pixel = point2Pixel(bandadaPintar.elementAt(i).getPosicion().get(0,0),
+						bandadaPintar.elementAt(i).getPosicion().get(1,0));
+				g3.drawOval((int)pixel.getX()-2,(int)pixel.getY()-2,4,4);
+//				g3.drawOval((int)bandadaPintar.elementAt(i).getPosicion().get(0,0)-2,
+//						(int)bandadaPintar.elementAt(i).getPosicion().get(1,0)-2,4,4);
 				
 			/*	g3.draw(bandadaPintar.elementAt(i).getLineaDireccion());
 				GeneralPath ruta = new GeneralPath();
@@ -189,61 +215,81 @@ class Dibujante2 extends JPanel{
 //				centroMasa = centroMasa.plus(bandadaPintar.elementAt(i).getPosicion());
 			}
 		}
-//		g3.setStroke(new BasicStroke(3));
-//		g3.setPaint(Color.GRAY);
 		
-		/*Pinto el coche*/
-		
+		/*------------------------Pinto el coche----------------------------------*/
+
 		g3.setColor(Color.GRAY);
-		double[] esqDD={posCoche.get(0,0)+10*anchoCoche/2*Math.sin(getYawCoche())
-				,posCoche.get(1,0)-10*anchoCoche/2*Math.cos(getYawCoche()) };
-		double[] esqDI={posCoche.get(0,0)-10*anchoCoche/2*Math.sin(getYawCoche())
-				,posCoche.get(1,0)+10*anchoCoche/2*Math.cos(getYawCoche()) };
-		double[] esqPD={esqDD[0]-10*largoCoche*Math.cos(getYawCoche())
-				,esqDD[1]-10*largoCoche*Math.sin(getYawCoche()) };
-		double[] esqPI={esqDI[0]-10*largoCoche*Math.cos(getYawCoche())
-				,esqDI[1]-10*largoCoche*Math.sin(getYawCoche()) };
-		Point2D pxDD=new Point((int)esqDD[0],(int)esqDD[1]);
-		Point2D pxDI=new Point((int)esqDI[0],(int)esqDI[1]);
-		Point2D pxPD=new Point((int)esqPD[0],(int)esqPD[1]);
-		Point2D pxPI=new Point((int)esqPI[0],(int)esqPI[1]);
+
+		Point2D pxDD= point2Pixel(posCoche.get(0,0)+anchoCoche/2*Math.sin(yawCoche),
+				posCoche.get(1,0)-anchoCoche/2*Math.cos(yawCoche));
+		Point2D pxDI= point2Pixel(posCoche.get(0,0)-anchoCoche/2*Math.sin(yawCoche),
+				posCoche.get(1,0)+anchoCoche/2*Math.cos(yawCoche));
+		Point2D pxPD=point2Pixel(posCoche.get(0,0)+anchoCoche/2*Math.sin(yawCoche)
+				-largoCoche*Math.cos(yawCoche),
+				posCoche.get(1,0)-anchoCoche/2*Math.cos(yawCoche)
+				-largoCoche*Math.sin(yawCoche));
+		Point2D pxPI= point2Pixel(posCoche.get(0,0)-anchoCoche/2*Math.sin(yawCoche)
+				-largoCoche*Math.cos(yawCoche),
+				posCoche.get(1,0)+anchoCoche/2*Math.cos(yawCoche)
+				-largoCoche*Math.sin(yawCoche));
 		GeneralPath coche=new GeneralPath();
 		coche.moveTo((float)pxDD.getX(),(float)pxDD.getY());
 		coche.lineTo((float)pxPD.getX(),(float)pxPD.getY());
 		coche.lineTo((float)pxPI.getX(),(float)pxPI.getY());
 		coche.lineTo((float)pxDI.getX(),(float)pxDI.getY());
-		coche.closePath();
-		g3.fill(coche);
+		coche.closePath();		
 		g3.draw(coche);
-//		g3.setColor(Color.green);
-//		g3.drawOval((int)posCoche.get(0,0)-5,(int)posCoche.get(1,0)-5,10,10);
-//		// Pinto el centro de masa
+		g3.fill(coche);
+		
+//		//---------------------- Pinto el centro de masa--------------------------------
+		
 //		centroMasa.timesEquals((double)1/(double)bandadaPintar.size());		
 //		g2.setColor(Color.cyan);
 //		g2.drawOval((int)centroMasa.get(0,0)-2,(int)centroMasa.get(1,0)-2,4,4);
 		
-		// Pinto los obstáculos
+		//------------------------ Pinto los obstáculos---------------------------------
+		
 		for (int i=0;i<obstaculosPintar.size();i++){
 			g3.setColor(Color.red);
-			g3.draw(obstaculosPintar.elementAt(i).getForma());
-			g3.fill(obstaculosPintar.elementAt(i).getForma());	
+			Point2D obst = point2Pixel(obstaculosPintar.elementAt(i).getPosicion().get(0,0)-
+					obstaculosPintar.elementAt(i).getLado()/2,
+					obstaculosPintar.elementAt(i).getPosicion().get(1,0)+
+					obstaculosPintar.elementAt(i).getLado()/2);
+			double lado = obstaculosPintar.elementAt(i).getLado()*this.getWidth()/esqInferiorDerecha.getX();
+			Rectangle2D cuadrado = new Rectangle2D.Double(obst.getX(),
+					obst.getY(),lado,lado);
+			g3.draw(cuadrado);
+			g3.fill(cuadrado);
+			obst = point2Pixel(obstaculosPintar.elementAt(i).getPosicion().get(0,0)-Boid.getRadioObstaculoCerca(),
+					obstaculosPintar.elementAt(i).getPosicion().get(1,0)+Boid.getRadioObstaculoCerca());
+			double radio = Boid.getRadioObstaculoCerca()*this.getWidth()/esqInferiorDerecha.getX();
+			g3.drawOval((int)obst.getX(),(int)obst.getY(),(int)radio*2,(int)radio*2);
+			obst = point2Pixel(obstaculosPintar.elementAt(i).getPosicion().get(0,0)-Boid.getRadioObstaculoLejos(),
+					obstaculosPintar.elementAt(i).getPosicion().get(1,0)+Boid.getRadioObstaculoLejos());
+			g3.setColor(Color.black);
+			radio = Boid.getRadioObstaculoLejos()*this.getWidth()/esqInferiorDerecha.getX();
+			g3.drawOval((int)obst.getX(),(int)obst.getY(),(int)radio*2,(int)radio*2);
 			
 		}
 		// Pinto el objetivo
 		g3.setColor(Color.magenta);
-		g3.drawOval((int)Boid.getObjetivo().get(0,0),(int)Boid.getObjetivo().get(1,0),5,5);
-		// Pinto la ruta dinámica
+		Point2D objetivo = point2Pixel(Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
+		g3.drawOval((int)objetivo.getX(),(int)objetivo.getY(),5,5);
+		
+		//----------------------- Pinto la ruta dinámica---------------------------------
+		
 		if (rutaDinamica != null){
 			if (rutaDinamica.size() > 0){
 				
 				GeneralPath rutaDinamic = new GeneralPath();
-				rutaDinamic.moveTo(rutaDinamica.elementAt(0).get(0,0),
+				Point2D ptoRuta = point2Pixel(rutaDinamica.elementAt(0).get(0,0),
 						rutaDinamica.elementAt(0).get(1,0));
+				rutaDinamic.moveTo(ptoRuta.getX(),ptoRuta.getY());
 				for(int k=1;k<rutaDinamica.size();k++){
-					rutaDinamic.lineTo(rutaDinamica.elementAt(k).get(0,0),
+					ptoRuta = point2Pixel(rutaDinamica.elementAt(k).get(0,0),
 							rutaDinamica.elementAt(k).get(1,0));
+					rutaDinamic.lineTo(ptoRuta.getX(),ptoRuta.getY());
 				}
-//				System.out.println("Ruta dinamica de tamaño " + rutaDinamica.size());
 				g3.draw(rutaDinamic);
 			}
 		}
@@ -267,6 +313,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	private boolean colocandoObs = false;
 	private boolean colocandoBan = false;
 	private boolean pintarEscena = false;
+	VentanaLoggers ventLogs = new VentanaLoggers();
 	Simulador sim;// = new Simulador();
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Escenarios"));
 	JMenuBar barraMenu = new JMenuBar(); 
@@ -285,25 +332,25 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	JLabel etiquetaAlineacion = new JLabel("Alineación");
 	SpinnerNumberModel spAlineacion = new SpinnerNumberModel(Boid.getPesoAlineacion(),0,100,0.1);
 	JSpinner spinnerAlineacion = new JSpinner(spAlineacion);
-	JLabel etiquetaObjetivo = new JLabel("Velocidad Objetivo");
+	JLabel etiquetaObjetivo = new JLabel("Vel Obj");
 	SpinnerNumberModel spObjetivo = new SpinnerNumberModel(Boid.getPesoObjetivo(),0,100,0.1);
 	JSpinner spinnerObjetivo = new JSpinner(spObjetivo);
-	JLabel etiquetaEvitaObs = new JLabel("Evitar Obstáculos");
+	JLabel etiquetaEvitaObs = new JLabel("Evitar Obst");
 	SpinnerNumberModel spEvitaObs = new SpinnerNumberModel(Boid.getPesoObstaculo(),0,1000,0.1);
 	JSpinner spinnerEvitaObs = new JSpinner(spEvitaObs);
-	JLabel etiquetaObsCerca = new JLabel("Obstáculos cerca");
+	JLabel etiquetaObsCerca = new JLabel("Obst cerca");
 	SpinnerNumberModel spEvitaObsCerca = new SpinnerNumberModel(Boid.getPesoObstaculoCerca(),0,1000,0.1);
 	JSpinner spinnerEvitaObsCerca = new JSpinner(spEvitaObsCerca);
-	JLabel etiquetaObsLejos = new JLabel("Obstáculos lejos");
+	JLabel etiquetaObsLejos = new JLabel("Obst lejos");
 	SpinnerNumberModel spEvitaObsLejos = new SpinnerNumberModel(Boid.getPesoObstaculoLejos(),0,1000,0.1);
 	JSpinner spinnerEvitaObsLejos = new JSpinner(spEvitaObsLejos);
-	JLabel etiquetaRadObsCerca = new JLabel("Radio Obs cerca");
+	JLabel etiquetaRadObsCerca = new JLabel("Radio cerca");
 	SpinnerNumberModel spRadioObsCerca = new SpinnerNumberModel(Boid.getRadioObstaculoCerca(),0,1000,0.1);
 	JSpinner spinnerRadioObsCerca = new JSpinner(spRadioObsCerca);
-	JLabel etiquetaRadObsLejos = new JLabel("Radio Obs lejos");
+	JLabel etiquetaRadObsLejos = new JLabel("Radio lejos");
 	SpinnerNumberModel spRadioObsLejos = new SpinnerNumberModel(Boid.getRadioObstaculoLejos(),0,1000,0.1);
 	JSpinner spinnerRadioObsLejos = new JSpinner(spRadioObsLejos);
-	JLabel etiquetaVelMax = new JLabel("Velocidad Máxima");
+	JLabel etiquetaVelMax = new JLabel("Vel Máx");
 	SpinnerNumberModel spVelMax = new SpinnerNumberModel(Boid.getVelMax(),0,100,1);
 	JSpinner spinnerVelMax = new JSpinner(spVelMax);
 	JLabel etiquetaNumBoids = new JLabel("Número de Boids");
@@ -340,7 +387,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		barraMenu.add(menuBandada);
 		pintor = new Dibujante2();
 		sim = new Simulador();
-		sim.getCp().iniciaNavega();
+//		sim.getCp().iniciaNavega();
 		pintor.introducirBandada(getSim().getBandada());
 		pintor.addMouseListener(this);
 		cp.add(pintor);
@@ -357,8 +404,8 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //		panelSur.add(spinnerAlineacion);
 		panelSur.add(etiquetaObjetivo);
 		panelSur.add(spinnerObjetivo);
-//		panelSur.add(etiquetaEvitaObs);
-//		panelSur.add(spinnerEvitaObs);
+		panelSur.add(etiquetaEvitaObs);
+		panelSur.add(spinnerEvitaObs);
 		panelSur.add(etiquetaObsCerca);
 		panelSur.add(spinnerEvitaObsCerca);
 		panelSur.add(etiquetaObsLejos);
@@ -387,7 +434,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		spinnerSeparacion.addChangeListener(this);
 		spinnerAlineacion.addChangeListener(this);
 		spinnerObjetivo.addChangeListener(this);
-//		spinnerEvitaObs.addChangeListener(this);
+		spinnerEvitaObs.addChangeListener(this);
 		spinnerEvitaObsCerca.addChangeListener(this);
 		spinnerEvitaObsLejos.addChangeListener(this);
 		spinnerRadioObsCerca.addChangeListener(this);
@@ -454,9 +501,9 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		if (e.getSource() == spinnerObjetivo){
 			Boid.setPesoObjetivo(spObjetivo.getNumber().doubleValue());
 		}
-//		if (e.getSource() == spinnerEvitaObs){
-//			Boid.setPesoObstaculo(spEvitaObs.getNumber().doubleValue());
-//		}
+		if (e.getSource() == spinnerEvitaObs){
+			Boid.setPesoObstaculo(spEvitaObs.getNumber().doubleValue());
+		}
 		if (e.getSource() == spinnerEvitaObsCerca){
 			Boid.setPesoObstaculoCerca(spEvitaObsCerca.getNumber().doubleValue());
 		}
@@ -580,27 +627,47 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 
 	public void mouseClicked(MouseEvent e) {
 		if (colocandoObs){
-			double pos[] = {e.getX(),e.getY()};
+			Point2D posicionReal = pintor.pixel2Point(e.getX(),e.getY());
+			double pos[] = {posicionReal.getX(),posicionReal.getY()};
+//			System.out.println("posición real del obstáculo "+posicionReal.getX()+" "+
+//					posicionReal.getY());
 			double vel[] = {0,0};
-			Matrix posicion = new Matrix(pos,2);
+			double rumbo[] = {0,0};
+			Matrix posicion = new Matrix(pos,2);			
+			int i = 0;
+			if(getSim().getObstaculos().size()%2 <= 0){
+				vel[0] = 0;
+				vel[1] = 2;
+				rumbo[0] = 0;
+				rumbo[1] = 2;
+			}else{
+				vel[0] = 0;
+				vel[1] = -2;
+				rumbo[0] = 0;
+				rumbo[1] = -2;
+			}
 			Matrix velocidad = new Matrix(vel,2);
-			Obstaculo nuevoObs = new Obstaculo(posicion,velocidad);
+			Matrix rumboDes = new Matrix(rumbo,2);
+			Obstaculo nuevoObs = new Obstaculo(posicion,velocidad,rumboDes);
 			this.getSim().getObstaculos().add(nuevoObs);
 			pintor.introducirObstaculo(nuevoObs);
-			System.out.println("Hay "+pintor.obstaculosPintar.size()+" obstáculos");
+//			System.out.println("Hay "+pintor.obstaculosPintar.size()+" obstáculos");
 			repaint();
 		}
 		if (colocandoBan){
-			double pos[] = {e.getX(),e.getY()};
+			Point2D posIniReal = pintor.pixel2Point(e.getX(),e.getY());
+			double pos[] = {posIniReal.getX(),posIniReal.getY()};
 			Matrix posicion = new Matrix(pos,2);
 			this.getSim().posicionarBandada(posicion);
 			this.getSim().setPosInicial(posicion);
+			pintor.setPosCoche(posicion);
 //			System.out.println(getSim().getBandada());
 			pintor.introducirBandada(this.getSim().getBandada());
 			repaint();
 		}
 		if (!colocandoBan && !colocandoObs){		
-			Boid.setObjetivo(e.getX(),e.getY()); // cambia el coordenadas del objetivo
+			Point2D objetivo = pintor.pixel2Point(e.getX(),e.getY());
+			Boid.setObjetivo(objetivo.getX(),objetivo.getY()); // cambia las coordenadas del objetivo
 			repaint();
 		}
 		
@@ -736,128 +803,36 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //		gui.pintor.introducirBandada(gui.getSim().getBandada());
 		Console.run(gui,1200,1000);
 		int alturaPanel = gui.pintor.getHeight();
-		int anchuraPanel = gui.pintor.getWidth();		
-//		Bucle para crear los bordes
-		int cont = 1;
-//		for (int k=0; k<2;k++){			
-//			for (int i = 0;i < alturaPanel;i=i+20){
-//				double posObstaculos[] = {cont,i};
-//				double velObstaculos[] = {0,0};				
-//				Matrix posiObs = new Matrix(posObstaculos,2);
-//				Matrix velObs = new Matrix(velObstaculos,2);
-//				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-//			}
-//			cont = anchuraPanel-10;
-//		}
-//		cont = 1;
-//		for (int k=0; k<2;k++){			
-//			for (int i = 0;i < anchuraPanel;i=i+20){
-//				double posObstaculos[] = {i,cont};
-//				double velObstaculos[] = {0,0};				
-//				Matrix posiObs = new Matrix(posObstaculos,2);
-//				Matrix velObs = new Matrix(velObstaculos,2);
-//				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-//			}
-//			cont = alturaPanel-15;
-//		}
-		// Bucles para crear el escenario simétrico 4 caminos
-		// Definición de las constantes que situan los obstáculos
-		int x1 = anchuraPanel - 7*(anchuraPanel/8);
-		int y11 =0;
-		int y12 = alturaPanel - 5*(alturaPanel/6);
-		int y13 = alturaPanel - 4*(alturaPanel/6);
-		int y14 = alturaPanel - 2*(alturaPanel/6);
-		int y15 = alturaPanel - 1*(alturaPanel/6);
-		int x2 = anchuraPanel - 7*(anchuraPanel/10);
-		int y21 = alturaPanel - alturaPanel/7;
-		int y22 = alturaPanel - 3*(alturaPanel/7);
-		int y23 = alturaPanel - 4*(alturaPanel/7);
-		int y24 = alturaPanel - 6*(alturaPanel/7);
-		int x3 = anchuraPanel - 5*(anchuraPanel/10);
-		int y31 = alturaPanel - alturaPanel/3;
-		int y32 = alturaPanel - 2*(alturaPanel/3);
-		
-		// Bucle generador de obstáculos (eje Y)
-		/*boolean interruptor = true;
-		for(int i=x1; i<=anchuraPanel;i=i+anchuraPanel/4){
-			if (interruptor){ // columnas pares
-				for(int j=y22;j<y21;j=j+100){
-					double posObstaculos[] = {i,j};
-					double velObstaculos[] = {0,0};				
-					Matrix posiObs = new Matrix(posObstaculos,2);
-					Matrix velObs = new Matrix(velObstaculos,2);
-					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-				}
-				for(int j=y24;j<y23;j=j+100){
-					double posObstaculos[] = {i,j};
-					double velObstaculos[] = {0,0};				
-					Matrix posiObs = new Matrix(posObstaculos,2);
-					Matrix velObs = new Matrix(velObstaculos,2);
-					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-				}
-				interruptor = false;
-			}
-			else{// Columnas impares
-//				for(int j=y11;j<y12;j=j+20){
-//					double posObstaculos[] = {i,j};
-//					double velObstaculos[] = {0,0};				
-//					Matrix posiObs = new Matrix(posObstaculos,2);
-//					Matrix velObs = new Matrix(velObstaculos,2);
-//					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-//				}
-				for(int j=y13;j<y14;j=j+100){
-					double posObstaculos[] = {i,j};
-					double velObstaculos[] = {0,0};				
-					Matrix posiObs = new Matrix(posObstaculos,2);
-					Matrix velObs = new Matrix(velObstaculos,2);
-					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-				}
-//				for(int j=y15;j<alturaPanel;j=j+10){
-//					double posObstaculos[] = {i,j};
-//					double velObstaculos[] = {0,0};				
-//					Matrix posiObs = new Matrix(posObstaculos,2);
-//					Matrix velObs = new Matrix(velObstaculos,2);
-//					gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-//				}
-				interruptor = true;
-			}
-		}*/
-		
-		// Bucle generador de obstáculos eje X
-//		int conta = 0;
-//		int[][] limites = {{anchuraPanel-5*(anchuraPanel/8),anchuraPanel-4*(anchuraPanel/8)}
-//		,{anchuraPanel-3*(anchuraPanel/8),anchuraPanel-2*(anchuraPanel/8)},
-//		{0,0},
-//		{anchuraPanel-5*(anchuraPanel/8),anchuraPanel-4*(anchuraPanel/8)},
-//		{0,anchuraPanel-7*(anchuraPanel/8)}};
-//		for(int i=y12;i<=alturaPanel && conta < 5;i=i+alturaPanel/6){
-//			for(int j=limites[conta][0];j<limites[conta][1];j = j+10){
-//				double posObstaculos[] = {j,i};
-//				double velObstaculos[] = {0,0};				
-//				Matrix posiObs = new Matrix(posObstaculos,2);
-//				Matrix velObs = new Matrix(velObstaculos,2);
-//				gui.getSim().getObstaculos().add(new Obstaculo(posiObs,velObs));
-//			}
-//			conta++;
-//		}
+		int anchuraPanel = gui.pintor.getWidth();
+		double longitudEscenario = 60;
+		double anchuraEscenario = longitudEscenario*alturaPanel/anchuraPanel;
+		gui.getSim().setAnchoEscenario(anchuraEscenario);
+		gui.getSim().setLargoEscenario(longitudEscenario);
+		gui.getPintor().setEsqInferiorDerecha(longitudEscenario,0);
+		gui.getPintor().setEsqSuperiorIzquierda(0,anchuraEscenario);
+
 		gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 		
 		//creamos las zonas para clasificar las rutas
 		
 		// Indico la posición del objetivo y la posición inicial
-		double[] objetivo = {70,alturaPanel/2};
+		double[] objetivo = {gui.pintor.getEsqInferiorDerecha().getX(),
+				gui.pintor.getEsqSuperiorIzquierda().getY()/2};
 		gui.getSim().setObjetivo(new Matrix(objetivo,2));
-		double[] inicial = {anchuraPanel - anchuraPanel/12,alturaPanel/2};
+		double[] inicial = {3,gui.pintor.getEsqSuperiorIzquierda().getY()/2};
 		gui.getSim().setPosInicial(new Matrix(inicial,2));
+		gui.pintor.setPosCoche(gui.getSim().getPosInicial());
+		gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
 		
 		//-------------------------------------------------------------------
 		//----------------BUCLE PRINCIPAL------------------------------------
 		//-------------------------------------------------------------------
 		
 		int indMinAnt = 0;
-		double tAnt = 0;
+		double tAnt = System.currentTimeMillis();
 		while (true){
 			if (gui.play){
+//				System.out.println("La duración de cada iteración es "+ (System.currentTimeMillis() - tAnt));
 				tAnt = System.currentTimeMillis();
 //				resp=m111.leeMensaje();
 //				ba=m111.parseaBarrido(resp);//
@@ -877,7 +852,9 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				}
 				boolean flagUnaVez = true;
 				gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
+				gui.getSim().moverPtoInicial(tAnt, gui.getSim().getTs());
 				gui.pintor.setRutaDinamica(gui.getRutaDinamica());
+				gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
 				/*if (gui.getRutaDinamica().size()>1){ //Comprobar si hay ruta que seguir					
 					Trayectoria tr = new Trayectoria(gui.getSim().traduceRuta(gui.getRutaDinamica()));
 					Trayectoria trMasPuntos = new Trayectoria(tr,0.1);
