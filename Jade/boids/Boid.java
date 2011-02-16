@@ -37,21 +37,21 @@ public class Boid implements Serializable{
 	public boolean lider = false;
 	public boolean caminoLibre = false;
 	public boolean conectado = false;
-	static double radioObstaculo = 100;//50
-	static double radioObstaculoLejos = 200;
-	static double radioObstaculoCerca = 100;
-	static double radioCohesion = 300;
-	static double radioSeparacion = 50;
-	static double radioAlineacion = 120;
+	static double radioObstaculo = 1;//50
+	static double radioObstaculoLejos = 3;
+	static double radioObstaculoCerca = 5;
+	static double radioCohesion = 5;
+	static double radioSeparacion = 2;
+	static double radioAlineacion = 3;
 	static double pesoCohesion = 0.01;
 	static double pesoSeparacion = 0.5; // 10
 	static double pesoAlineacion = 5; //0.5
-	static double pesoObjetivo = 7;  //1
-	static double pesoObstaculo = 2.6;  // 300
-	static double pesoObstaculoLejos = 0.1;
-	static double pesoObstaculoCerca = 2;
+	static double pesoObjetivo = 1;  //1
+	static double pesoObstaculo = 1.4;  // 300
+	static double pesoObstaculoLejos = 0;
+	static double pesoObstaculoCerca = 1;
 	static double pesoLider = 0.1; //10
-	static double velMax = 50; //10
+	static double velMax = 2; //10
 	
 	static double pesoDistOrigen = 1;
 	static double pesoAntiguo = 1;
@@ -59,6 +59,7 @@ public class Boid implements Serializable{
 	static double coorObjetivo[] = {800,800};
 	static Matrix objetivo = new Matrix(coorObjetivo,2);
 	static Matrix posInicial;
+
 	/** Dependiendo del valor de esta variable el boid tendrá tendencia a esquivar un obstáculo
 	 *  hacia un lado o hacia otro. Este valor se asignará aleatoriamente al crear el objeto 
 	 *  Boid*/
@@ -93,7 +94,8 @@ public class Boid implements Serializable{
 	}
 
 	public void setExperiencia(double experiencia) {
-		this.experiencia = this.experiencia + experiencia ;
+//		this.experiencia = this.experiencia + experiencia ;
+		this.experiencia = experiencia ;
 	}
 
 	/**Constructor donde se inicializa la posición y velocidad de cada boid,
@@ -102,7 +104,7 @@ public class Boid implements Serializable{
 		this.aceleracion = aceleracion;
 		this.velocidad = velocidad;
 		this.posicion = posicion;
-		this.posInicial = posicion;
+//		this.posInicial = posicion;
 //		lineaDireccion.setLine(this.posicion.get(0,0),this.posicion.get(1,0),
 //				this.velocidad.get(0,0),this.velocidad.get(1, 0));
 		/**Inicialización del aspecto gráfico del cuerpo del boid*/
@@ -290,7 +292,8 @@ public class Boid implements Serializable{
 		double zero[] = {0,0};
 		Matrix cero = new Matrix(zero,2);
 		Matrix c = new Matrix(pos,2);
-		Matrix compensacion = new Matrix(2,1);
+		Matrix repulsion = new Matrix(zero,2);
+		Matrix compensacion = new Matrix(zero,2);
 		boolean caminoOcupado = false;
 		double dist = 0;
 		Line2D recta = 
@@ -299,31 +302,30 @@ public class Boid implements Serializable{
 		for (int i=0;i < obstaculos.size();i++){
 			dist = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();
 			if ((dist > radioObstaculoCerca) && (dist < radioObstaculoLejos)){
-				c = c.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));				
-				c = c.times(pesoObstaculoLejos);
-				if (!(pesoObstaculoLejos == 0)){
-					System.out.println("Calculamos compensación lejos");
-					compensacion = obstaculos.elementAt(i).getVelocidad().times(100*pesoObstaculoLejos);
-					c = c.plus(compensacion);
-				}				
+				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
 				if (dist != 0){
-					c = c.times(1/(dist)*(dist));
+					repulsion = repulsion.times(1/(dist)*(dist));
 				}
-				
+				repulsion = repulsion.times(pesoObstaculo);
+				if (!(pesoObstaculoLejos == 0)){
+//					System.out.println("Calculamos compensación lejos");
+					compensacion = obstaculos.elementAt(i).getVelocidad().times(pesoObstaculoLejos);
+				}				
+				c = c.plus(repulsion.plus(compensacion));
 			}
 			else if(dist < radioObstaculoCerca){
-				c = c.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
-				c = c.times(pesoObstaculoCerca);
-				if (!(pesoObstaculoCerca == 0)){
-					System.out.println("Calculamos compensación cerca");
-					compensacion = obstaculos.elementAt(i).getVelocidad().times(-100*pesoObstaculoCerca);
-					c = c.plus(compensacion);
-				}
+				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));				
 				if (dist != 0){
-					c = c.times(1/(dist)*(dist));
+					repulsion = repulsion.times(1/(dist)*(dist));
 				}
+				repulsion = repulsion.times(pesoObstaculo);
+				if (!(pesoObstaculoCerca == 0)){
+//					System.out.println("Calculamos compensación cerca");
+					compensacion = obstaculos.elementAt(i).getVelocidad().times(-pesoObstaculoCerca);
+				}
+				c = c.plus(repulsion.plus(compensacion));
 			}
-
+		
 			if (!caminoOcupado)// Sólo se calcula la intersección mientras el camino siga sin ocupar
 				caminoOcupado = recta.intersects(obstaculos.elementAt(i).getForma());
 		}
@@ -342,7 +344,8 @@ public class Boid implements Serializable{
 //		c = compensacion;
 //		c = c.times(pesoObstaculo);
 //		c = limitaVelocidad(c);
-		c = c.minus(this.getVelocidad());
+//		c = c.minus(this.getVelocidad());
+//		c.print(10,4);
 		setCaminoLibre(!caminoOcupado); // Si no tiene el camino ocupado por el momento es el lider
 		return c;
 	}
@@ -366,7 +369,7 @@ public class Boid implements Serializable{
 		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid));
 		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad());
 //		desp = limitaVelocidad(((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad()));
-		desp = desp.timesEquals(0.05); // Simula la masa del boid
+		desp = desp.timesEquals(0.05); // Simula la masa del boid 
 		setAceleracion(desp);
 //		desp = limitaVelocidad(despCohesion.plus(despSeparacion).plus(despAlineacion).plus(despObjetivo).plus(despObstaculo).plus(this.getVelocidad()));
 //		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
@@ -498,6 +501,20 @@ public class Boid implements Serializable{
 		 double distancia = (objetivo.minus(this.getPosicion())).norm2();
 		return distancia;		
 	}
+	/**
+	 * 
+	 * @return Posición inicial de la bandada
+	 */
+	public static Matrix getPosInicial() {
+		return posInicial;
+	}
+	/**
+	 * Setea la posición inicial de la bandada
+	 * @param posInicial
+	 */
+	public static void setPosInicial(Matrix posInicial) {
+		Boid.posInicial = posInicial;
+	}
 	/**Calcula la distancia euclidea existente entre el Boid y la posición inicial de la bandada*/
 	public double getDistOrigen(){
 		 double distancia = (posInicial.minus(this.getPosicion())).norm2();
@@ -505,7 +522,8 @@ public class Boid implements Serializable{
 	}
 	
 	public void calculaValoracion(){
-		valoracion = (pesoDistOrigen/getDistOrigen()) + (pesoAntiguo/getAntiguo() + getExperiencia());
+//		valoracion = (pesoDistOrigen/getDistOrigen()) + (pesoAntiguo/getAntiguo() + getExperiencia());
+		valoracion = (pesoDistOrigen/getDistOrigen()) + getExperiencia();
 //		valoracion = pesoDistOrigen/getDistOrigen();
 	}
 	
