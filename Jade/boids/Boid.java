@@ -16,6 +16,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import sibtra.util.UtilCalculos;
+
 //import com.bruceeckel.swing.Console;
 
 import Jama.Matrix;
@@ -37,21 +39,21 @@ public class Boid implements Serializable{
 	public boolean lider = false;
 	public boolean caminoLibre = false;
 	public boolean conectado = false;
-	static double radioObstaculo = 1;//50
-	static double radioObstaculoLejos = 3;
-	static double radioObstaculoCerca = 5;
+	static double radioObstaculo = 6;
+//	static double radioObstaculoLejos = 3;
+//	static double radioObstaculoCerca = 5;
 	static double radioCohesion = 5;
 	static double radioSeparacion = 2;
 	static double radioAlineacion = 3;
 	static double pesoCohesion = 0.01;
-	static double pesoSeparacion = 0.5; // 10
+	static double pesoSeparacion = 0.3; // 10
 	static double pesoAlineacion = 5; //0.5
 	static double pesoObjetivo = 1;  //1
-	static double pesoObstaculo = 1.4;  // 300
-	static double pesoObstaculoLejos = 0;
-	static double pesoObstaculoCerca = 1;
-	static double pesoLider = 0.1; //10
-	static double velMax = 2; //10
+	static double pesoObstaculo = 1.2;
+	static double pesoCompensacionLateral = 1.6;
+//	static double pesoObstaculoCerca = 1;
+	static double pesoLider = 0.1;
+	static double velMax = 2;
 	
 	static double pesoDistOrigen = 1;
 	static double pesoAntiguo = 1;
@@ -287,65 +289,91 @@ public class Boid implements Serializable{
 	
 	/** Regla para esquivar los obstáculos*/
 	
-	public Matrix evitaObstaculo(Vector<Obstaculo> obstaculos,Boid b){
+	public Matrix evitaObstaculo(Vector<Obstaculo> obstaculos,Boid b,Matrix direcObjetivo){
 		double pos[] = {0,0};
 		double zero[] = {0,0};
 		Matrix cero = new Matrix(zero,2);
 		Matrix c = new Matrix(pos,2);
 		Matrix repulsion = new Matrix(zero,2);
+		Matrix direcBoidObstaculo = new Matrix(zero,2);
 		Matrix compensacion = new Matrix(zero,2);
 		boolean caminoOcupado = false;
 		double dist = 0;
+		double umbralEsquivar = Math.PI/8;
+		int sentidoCompensacionLateral = 0;
 		Line2D recta = 
 			new Line2D.Double(this.getPosicion().get(0,0),this.getPosicion().get(1,0)
 						,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
 		for (int i=0;i < obstaculos.size();i++){
 			dist = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();
-			if ((dist > radioObstaculoCerca) && (dist < radioObstaculoLejos)){
+			if (dist < radioObstaculo){
 				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
+				//es el vector que apunta desde al boid hacia el obstáculo
 				if (dist != 0){
 					repulsion = repulsion.times(1/(dist)*(dist));
 				}
 				repulsion = repulsion.times(pesoObstaculo);
-				if (!(pesoObstaculoLejos == 0)){
-//					System.out.println("Calculamos compensación lejos");
-					compensacion = obstaculos.elementAt(i).getVelocidad().times(pesoObstaculoLejos);
-				}				
-				c = c.plus(repulsion.plus(compensacion));
-			}
-			else if(dist < radioObstaculoCerca){
-				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));				
-				if (dist != 0){
-					repulsion = repulsion.times(1/(dist)*(dist));
+				//Dependiendo de la velocidad del obstáculo, de la posición del Boid
+				//y de la posición del objetivo, se calculará una compensación lateral
+				direcBoidObstaculo = repulsion.times(-1);
+				double angVelObst = Math.atan2(obstaculos.elementAt(i).getVelocidad().get(1,0),
+						obstaculos.elementAt(i).getVelocidad().get(0,0));
+				double angDirecBoidObstaculo = Math.atan2(direcBoidObstaculo.get(1,0),
+						direcBoidObstaculo.get(0,0));
+				double angDirecObjetivo = Math.atan2(direcObjetivo.get(1,0),
+						direcObjetivo.get(0, 0));
+				// caso en el que el boid y el obstáculo van a cruzar sus caminos 
+				// en el futuro
+				if (UtilCalculos.diferenciaAngulos(angVelObst,angDirecBoidObstaculo) >=
+				UtilCalculos.diferenciaAngulos(angVelObst, angDirecObjetivo)){
+					if (UtilCalculos.diferenciaAngulos(angDirecBoidObstaculo, angDirecObjetivo) <= umbralEsquivar){
+						sentidoCompensacionLateral = -1;
+					}else{
+						sentidoCompensacionLateral = 1;
+					}
+					if (!(pesoCompensacionLateral == 0)){
+//						System.out.println("Calculamos compensación lejos");
+						compensacion = obstaculos.elementAt(i).getVelocidad().times(
+								pesoCompensacionLateral*sentidoCompensacionLateral);
+					}
+					c = c.plus(repulsion.plus(compensacion));
+				}else{//Si no va a cruzarse con el obstáculo no se le añade compensación lateral
+					  //ni repulsion
+//					c = c.plus(repulsion);
+					c = c.plus(cero);
 				}
-				repulsion = repulsion.times(pesoObstaculo);
-				if (!(pesoObstaculoCerca == 0)){
-//					System.out.println("Calculamos compensación cerca");
-					compensacion = obstaculos.elementAt(i).getVelocidad().times(-pesoObstaculoCerca);
-				}
-				c = c.plus(repulsion.plus(compensacion));
+								
+				
 			}
+//			if ((dist > radioObstaculoCerca) && (dist < radioObstaculoLejos)){
+//				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
+//				if (dist != 0){
+//					repulsion = repulsion.times(1/(dist)*(dist));
+//				}
+//				repulsion = repulsion.times(pesoObstaculo);
+//				if (!(pesoObstaculoLejos == 0)){
+////					System.out.println("Calculamos compensación lejos");
+//					compensacion = obstaculos.elementAt(i).getVelocidad().times(pesoObstaculoLejos);
+//				}				
+//				c = c.plus(repulsion.plus(compensacion));
+//			}
+//			else if(dist < radioObstaculoCerca){
+//				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));				
+//				if (dist != 0){
+//					repulsion = repulsion.times(1/(dist)*(dist));
+//				}
+//				repulsion = repulsion.times(pesoObstaculo);
+//				if (!(pesoObstaculoCerca == 0)){
+////					System.out.println("Calculamos compensación cerca");
+//					compensacion = obstaculos.elementAt(i).getVelocidad().times(-pesoObstaculoCerca);
+//				}
+//				c = c.plus(repulsion.plus(compensacion));
+//			}
 		
 			if (!caminoOcupado)// Sólo se calcula la intersección mientras el camino siga sin ocupar
 				caminoOcupado = recta.intersects(obstaculos.elementAt(i).getForma());
 		}
-		//Evitamos que la repulsion de los obstáculos sea perpendicular al obstáculo
-//		if (tendenciaRepulsion>0 && tendenciaRepulsion<= 0.4){
-//			compensacion.set(0,0,-c.get(1,0));
-//			compensacion.set(1,0,c.get(0,0));
-//		}
-//		else if(tendenciaRepulsion>0.4 && tendenciaRepulsion<= 0.8){
-//			compensacion.set(0,0,c.get(1,0));
-//			compensacion.set(1,0,-c.get(0,0));
-//		}
-		
-//		compensacion.timesEquals(1);
-//		c = c.plus(compensacion);
-//		c = compensacion;
-//		c = c.times(pesoObstaculo);
-//		c = limitaVelocidad(c);
-//		c = c.minus(this.getVelocidad());
-//		c.print(10,4);
+
 		setCaminoLibre(!caminoOcupado); // Si no tiene el camino ocupado por el momento es el lider
 		return c;
 	}
@@ -366,7 +394,7 @@ public class Boid implements Serializable{
 //		despAlineacion = alineacion(bandada, indBoid);
 		despAliCoheSep = aliCoheSep(bandada, indBoid);
 		despObjetivo = seguirObjetivo(bandada,indBoid,obj);
-		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid));
+		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid),despObjetivo);
 		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad());
 //		desp = limitaVelocidad(((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad()));
 		desp = desp.timesEquals(0.05); // Simula la masa del boid 
@@ -523,7 +551,7 @@ public class Boid implements Serializable{
 	
 	public void calculaValoracion(){
 //		valoracion = (pesoDistOrigen/getDistOrigen()) + (pesoAntiguo/getAntiguo() + getExperiencia());
-		valoracion = (pesoDistOrigen/getDistOrigen()) + getExperiencia();
+		valoracion = (pesoDistOrigen/getDistObjetivo()) + getExperiencia();
 //		valoracion = pesoDistOrigen/getDistOrigen();
 	}
 	
@@ -544,37 +572,37 @@ public class Boid implements Serializable{
 	public static double getPesoObstaculo() {
 		return pesoObstaculo;
 	}
-	public static double getRadioObstaculoLejos() {
-		return radioObstaculoLejos;
+//	public static double getRadioObstaculoLejos() {
+//		return radioObstaculoLejos;
+//	}
+//
+//	public static void setRadioObstaculoLejos(double radioObstaculoLejos) {
+//		Boid.radioObstaculoLejos = radioObstaculoLejos;
+//	}
+//
+//	public static double getRadioObstaculoCerca() {
+//		return radioObstaculoCerca;
+//	}
+//
+//	public static void setRadioObstaculoCerca(double radioObstaculoCerca) {
+//		Boid.radioObstaculoCerca = radioObstaculoCerca;
+//	}
+
+	public static double getPesoCompensacionLateral() {
+		return pesoCompensacionLateral;
 	}
 
-	public static void setRadioObstaculoLejos(double radioObstaculoLejos) {
-		Boid.radioObstaculoLejos = radioObstaculoLejos;
+	public static void setPesoCompensacionLateral(double pesoCompensacionLateral) {
+		Boid.pesoCompensacionLateral = pesoCompensacionLateral;
 	}
 
-	public static double getRadioObstaculoCerca() {
-		return radioObstaculoCerca;
-	}
-
-	public static void setRadioObstaculoCerca(double radioObstaculoCerca) {
-		Boid.radioObstaculoCerca = radioObstaculoCerca;
-	}
-
-	public static double getPesoObstaculoLejos() {
-		return pesoObstaculoLejos;
-	}
-
-	public static void setPesoObstaculoLejos(double pesoObstaculoLejos) {
-		Boid.pesoObstaculoLejos = pesoObstaculoLejos;
-	}
-
-	public static double getPesoObstaculoCerca() {
-		return pesoObstaculoCerca;
-	}
-
-	public static void setPesoObstaculoCerca(double pesoObstaculoCerca) {
-		Boid.pesoObstaculoCerca = pesoObstaculoCerca;
-	}
+//	public static double getPesoObstaculoCerca() {
+//		return pesoObstaculoCerca;
+//	}
+//
+//	public static void setPesoObstaculoCerca(double pesoObstaculoCerca) {
+//		Boid.pesoObstaculoCerca = pesoObstaculoCerca;
+//	}
 
 	public static double getPesoSeparacion() {
 		return pesoSeparacion;
