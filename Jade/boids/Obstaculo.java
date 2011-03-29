@@ -48,6 +48,26 @@ public class Obstaculo implements Serializable{
 		logDatosObst=LoggerFactory.nuevoLoggerArrayDoubles(this, "posVelObst");
 		logDatosObst.setDescripcion("Coordenadas y velocidad [x,y,vel]");
 	}
+	/**
+	 * Constructor donde se pasan las componentes de cada vector por separado
+	 * @param posX Componente x del vector posición
+	 * @param posY Componente y del vector posición
+	 * @param velX Componente x del vector velocidad
+	 * @param velY Componente y del vector velocidad
+	 * @param vecRumboX Componente x del vector rumboDeseado
+	 * @param vecRumboY Componente y del vector rumboDeseado
+	 */
+	public Obstaculo(double posX,double posY,double velX,double velY,double vecRumboX,double vecRumboY){
+		double[] arrayPos = {posX,posY};
+		double[] arrayVel = {velX,velY};
+		double[] arrayRumbo = {vecRumboX,vecRumboY};
+		this.posicion = new Matrix(arrayPos,2);
+		this.velocidad = new Matrix(arrayVel,2);
+		this.rumboDeseado = new Matrix(arrayRumbo,2);
+		cuadrado = new Rectangle2D.Double(posicion.get(0,0)-lado/2,posicion.get(1,0)-lado/2,lado,lado);
+		logDatosObst=LoggerFactory.nuevoLoggerArrayDoubles(this, "posVelObst");
+		logDatosObst.setDescripcion("Coordenadas y velocidad [x,y,vel]");
+	}
 	
 	public void mover(Matrix vel,double Ts){
 //		this.getForma().transform(AffineTransform.getTranslateInstance(vel.get(0,0), vel.get(1,0)));

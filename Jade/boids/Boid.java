@@ -231,7 +231,34 @@ public class Boid implements Serializable{
 		}
 		return velCohesion;
 	}
-	
+	/** Calcula el centro de masas alrededor de un boid con un determinado
+	 * radio de vecindad*/
+	public Matrix calculaCentroMasas(Vector<Boid> bandada,double radioCentroMasas){
+		double pos[] = {0,0};
+		int cont = 0;
+		Matrix centroMasa = new Matrix(pos,2);		
+		for (int i=0;i < bandada.size();i++){
+				if (Math.abs(bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2()) < radioCentroMasas){
+					centroMasa = centroMasa.plus(bandada.elementAt(i).getPosicion());					
+					cont++;
+			}
+		}
+//		System.out.println("Antes de dividir");
+//		centroMasa.print(10,4);
+		if (cont != 0){ //Puede que no haya boids en el radio de vecindad
+//			centroMasa = centroMasa.timesEquals(1/cont);
+			centroMasa.timesEquals((double)1/(double)cont);
+//			System.out.println("Después de dividir y cont vale " +cont);
+//			centroMasa.print(10,4);
+		}
+		else{ // si no hay vecinos nos quedamos con la posición del boid
+			centroMasa = this.getPosicion();
+//			System.out.println("No había vecinos");
+//			centroMasa.print(10,4);
+		}
+		
+		return centroMasa;
+	}
 	/**Los boids intentan mantener la velocidad media de la bandada*/
 	
 	public Matrix alineacion(Vector<Boid> bandada,int indBoid){
@@ -299,7 +326,8 @@ public class Boid implements Serializable{
 		Matrix compensacion = new Matrix(zero,2);
 		boolean caminoOcupado = false;
 		double dist = 0;
-		double umbralEsquivar = Math.PI/8;
+		double umbralEsquivar = Math.PI/20;
+		double umbralCaso3 = -Math.PI/10;
 		int sentidoCompensacionLateral = 0;
 		Line2D recta = 
 			new Line2D.Double(this.getPosicion().get(0,0),this.getPosicion().get(1,0)
@@ -322,27 +350,43 @@ public class Boid implements Serializable{
 						direcBoidObstaculo.get(0,0));
 				double angDirecObjetivo = Math.atan2(direcObjetivo.get(1,0),
 						direcObjetivo.get(0, 0));
-				// caso en el que el boid y el obstáculo van a cruzar sus caminos 
-				// en el futuro
-				if (UtilCalculos.diferenciaAngulos(angVelObst,angDirecBoidObstaculo) >=
-				UtilCalculos.diferenciaAngulos(angVelObst, angDirecObjetivo)){
-					if (UtilCalculos.diferenciaAngulos(angDirecBoidObstaculo, angDirecObjetivo) <= umbralEsquivar){
-						sentidoCompensacionLateral = -1;
-					}else{
-						sentidoCompensacionLateral = 1;
+				// Solo producen repulsión aquellos obstáculos que se encuentren entre el objetivo
+				// y el boid, los que quedan detrás del boid no influencian
+				if (UtilCalculos.diferenciaAngulos(angDirecObjetivo, angDirecBoidObstaculo)< 3*Math.PI/2){
+					//Diferencia entre el ángulo formado por el vector desde el boid hacia
+					//el obstáculo y la velocidad del obstáculo y el ángulo formado entre
+					//el vector que va desde el boid hacia el objetivo y la velocidad del
+					//obstáculo
+					double angObsBoidObj = UtilCalculos.diferenciaAngulos(angVelObst,angDirecBoidObstaculo) -
+							UtilCalculos.diferenciaAngulos(angVelObst, angDirecObjetivo);
+					// caso en el que el boid y el obstáculo van a cruzar sus caminos 
+					// en el futuro
+//					if (UtilCalculos.diferenciaAngulos(angVelObst,angDirecBoidObstaculo) >=
+//						UtilCalculos.diferenciaAngulos(angVelObst, angDirecObjetivo)){
+					if (angObsBoidObj >= umbralCaso3){
+						if (UtilCalculos.diferenciaAngulos(angDirecBoidObstaculo, angDirecObjetivo) <= umbralEsquivar){
+							compensacion.set(0,0,-repulsion.get(0,0));
+							compensacion.set(1,0,repulsion.get(1,0));
+//							System.out.println("Por detrás");
+//							sentidoCompensacionLateral = -1;
+						}else{
+							compensacion.set(0,0,repulsion.get(0,0));
+							compensacion.set(1,0,-repulsion.get(1,0));
+//							System.out.println("Por delante");
+//							sentidoCompensacionLateral = 1;
+						}
+						if (!(pesoCompensacionLateral == 0)){
+							//						System.out.println("Calculamos compensación lejos");
+							compensacion = obstaculos.elementAt(i).getVelocidad().times(
+									pesoCompensacionLateral*sentidoCompensacionLateral);
+						}
+						c = c.plus(repulsion.plus(compensacion));
+					}else{//Si no va a cruzarse con el obstáculo no se le añade compensación lateral
+						//ni repulsion
+						//					c = c.plus(repulsion);
+						c = c.plus(cero);
 					}
-					if (!(pesoCompensacionLateral == 0)){
-//						System.out.println("Calculamos compensación lejos");
-						compensacion = obstaculos.elementAt(i).getVelocidad().times(
-								pesoCompensacionLateral*sentidoCompensacionLateral);
-					}
-					c = c.plus(repulsion.plus(compensacion));
-				}else{//Si no va a cruzarse con el obstáculo no se le añade compensación lateral
-					  //ni repulsion
-//					c = c.plus(repulsion);
-					c = c.plus(cero);
-				}
-								
+				}				
 				
 			}
 //			if ((dist > radioObstaculoCerca) && (dist < radioObstaculoLejos)){
