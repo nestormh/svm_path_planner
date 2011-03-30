@@ -35,8 +35,8 @@ public class Obstaculo implements Serializable{
 		this.posicion = posicion;
 		/**Inicialización del aspecto gráfico del cuerpo del obstáculo*/
 		cuadrado = new Rectangle2D.Double(posicion.get(0,0)-lado/2,posicion.get(1,0)-lado/2,lado,lado);
-		logDatosObst=LoggerFactory.nuevoLoggerArrayDoubles(this, "posVelObst");
-		logDatosObst.setDescripcion("Coordenadas y velocidad [x,y,vel]");
+//		logDatosObst=LoggerFactory.nuevoLoggerArrayDoubles(this, "posVelObst");
+//		logDatosObst.setDescripcion("Coordenadas y velocidad [x,y,vel]");
 	}
 	
 	public Obstaculo(Matrix posicion, Matrix velocidad, Matrix rumbo) {
@@ -45,8 +45,8 @@ public class Obstaculo implements Serializable{
 		this.rumboDeseado = rumbo;
 		/**Inicialización del aspecto gráfico del cuerpo del obstáculo*/
 		cuadrado = new Rectangle2D.Double(posicion.get(0,0)-lado/2,posicion.get(1,0)-lado/2,lado,lado);
-		logDatosObst=LoggerFactory.nuevoLoggerArrayDoubles(this, "posVelObst");
-		logDatosObst.setDescripcion("Coordenadas y velocidad [x,y,vel]");
+//		logDatosObst=LoggerFactory.nuevoLoggerArrayDoubles(this, "posVelObst");
+//		logDatosObst.setDescripcion("Coordenadas y velocidad [x,y,vel]");
 	}
 	/**
 	 * Constructor donde se pasan las componentes de cada vector por separado
@@ -65,16 +65,16 @@ public class Obstaculo implements Serializable{
 		this.velocidad = new Matrix(arrayVel,2);
 		this.rumboDeseado = new Matrix(arrayRumbo,2);
 		cuadrado = new Rectangle2D.Double(posicion.get(0,0)-lado/2,posicion.get(1,0)-lado/2,lado,lado);
-		logDatosObst=LoggerFactory.nuevoLoggerArrayDoubles(this, "posVelObst");
-		logDatosObst.setDescripcion("Coordenadas y velocidad [x,y,vel]");
+//		logDatosObst=LoggerFactory.nuevoLoggerArrayDoubles(this, "posVelObst");
+//		logDatosObst.setDescripcion("Coordenadas y velocidad [x,y,vel]");
 	}
 	
 	public void mover(Matrix vel,double Ts){
 //		this.getForma().transform(AffineTransform.getTranslateInstance(vel.get(0,0), vel.get(1,0)));
 		this.setVelocidad(vel);
 		this.setPosicion(this.getPosicion().plus(this.getVelocidad().times(Ts)));
-		logDatosObst.add(getPosicion().get(0,0),getPosicion().get(1,0),
-				getVelocidad().norm2());
+//		logDatosObst.add(getPosicion().get(0,0),getPosicion().get(1,0),
+//				getVelocidad().norm2());
 	}
 	
 	public Matrix getPosicion(){

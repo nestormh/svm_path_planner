@@ -55,7 +55,7 @@ public class Boid implements Serializable{
 	static double pesoLider = 0.1;
 	static double velMax = 2;
 	
-	static double pesoDistOrigen = 1;
+	static double pesoDistOrigen = 10000;
 	static double pesoAntiguo = 1;
 	
 	static double coorObjetivo[] = {800,800};
@@ -70,17 +70,19 @@ public class Boid implements Serializable{
 	int numIteraciones;
 	/** Longitud de la ruta seguida por le boid*/
 	double longitudRuta;
+	/**Iteración del bucle principal en la que se creo el boid*/
+	double fechaNacimiento;
 	private double valoracion;
 	private double experiencia;	
 	private double antiguo;
 
-	
 	public double getAntiguo() {
 		return antiguo;
 	}
 
 	public void setAntiguo(double antiguo) {
-		this.antiguo = antiguo;
+		if (antiguo != 0)
+			this.antiguo = (antiguo-getFechaNacimiento())/antiguo;
 	}
 
 	public double getValoracion() {
@@ -129,6 +131,10 @@ public class Boid implements Serializable{
 //			tendenciaRepulsion = false;
 	}
 	
+	public Boid(Matrix posicion, Matrix velocidad,Matrix aceleracion,double fechaNacimiento) {
+		this(posicion,velocidad,aceleracion);
+		setFechaNacimiento(fechaNacimiento);		
+	}
 	/**Método optimizado para calcular la cohesión, alineación y separación para un boid. 
 	 * Sólo usa un bucle for, y no una para cada regla*/
 	
@@ -573,6 +579,15 @@ public class Boid implements Serializable{
 		 double distancia = (objetivo.minus(this.getPosicion())).norm2();
 		return distancia;		
 	}
+	
+	public double getFechaNacimiento() {
+		return fechaNacimiento;
+	}
+
+	public void setFechaNacimiento(double fechaNacimiento) {
+		this.fechaNacimiento = fechaNacimiento;
+	}
+
 	/**
 	 * 
 	 * @return Posición inicial de la bandada
@@ -595,7 +610,9 @@ public class Boid implements Serializable{
 	
 	public void calculaValoracion(){
 //		valoracion = (pesoDistOrigen/getDistOrigen()) + (pesoAntiguo/getAntiguo() + getExperiencia());
-		valoracion = (pesoDistOrigen/getDistObjetivo()) + getExperiencia();
+		valoracion = (pesoDistOrigen/getDistObjetivo());//+(pesoAntiguo/getAntiguo());
+//		valoracion = (pesoDistOrigen/getDistOrigen())*(getAntiguo());
+//		valoracion = (pesoDistOrigen/getDistObjetivo()) + getExperiencia();
 //		valoracion = pesoDistOrigen/getDistOrigen();
 	}
 	

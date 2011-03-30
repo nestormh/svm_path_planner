@@ -42,11 +42,11 @@ public class Simulador {
 	Vector<Matrix> rutaDinamica = new Vector<Matrix>();
 	Trayectoria tr;
 	Coche modCoche = new Coche();
-	int horPrediccion = 13;
-	int horControl = 3;
-	double landa = 1;
+//	int horPrediccion = 13;
+//	int horControl = 3;
+//	double landa = 1;
 	double Ts = 0.05;
-	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, Ts);	
+//	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, Ts);	
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Simulaciones"));
 	/** Coordenadas a partir de las cuales se situa la bandada*/
 	Matrix posInicial = new Matrix(2,1);
@@ -84,6 +84,7 @@ public class Simulador {
 	public double anchoEscenario = 0;
 	public double largoEscenario = 0;
 	private LoggerArrayDoubles logPosturaCoche;
+	private LoggerArrayDoubles logEstadistica;
 	private double distOkAlOrigen = 5;
 	private boolean rutaCompleta;
 	
@@ -110,6 +111,10 @@ public class Simulador {
 		setNumBoidsOkDeseados(2);
 		logPosturaCoche=LoggerFactory.nuevoLoggerArrayDoubles(this, "PosturaCoche");
 		logPosturaCoche.setDescripcion("Coordenadas y yaw [x,y,yaw]");
+		logEstadistica=LoggerFactory.nuevoLoggerArrayDoubles(this, "Estadistica");
+		logEstadistica.setDescripcion(
+				"Valores estadisticos del comportamiento del coche" +
+				" [mediaVel,desvTipicaVel,mediaYaw,desvTipicaYaw]");
 	}
 	
 	public Simulador(Matrix puntoIni,Matrix objetivo,double tMax,int boidsOk,
@@ -141,6 +146,18 @@ public class Simulador {
     	}
     	posicionarBandada(posInicial);
 	}
+	
+	public void crearBandada(int numBoids,double fechaNacimiento){
+		if (getBandada().size() > 0)
+			borrarBandada();
+		setTamanoBandada(numBoids);
+    	for (int i=0; i< tamanoBandada;i++){
+    		getBandada().add(new Boid(new Matrix(2,1),new Matrix(2,1),new Matrix(2,1),
+    				fechaNacimiento));
+    	}
+    	posicionarBandada(posInicial);
+	}
+	
 	public void crearBandada(){
 //		if (getBandada().size() > 0)
 //			borrarBandada();
@@ -302,7 +319,10 @@ public class Simulador {
 				Matrix velo = new Matrix(vel,2);
 				double ace[] = {0,0};
 				Matrix acel = new Matrix(ace,2);
-				getBandada().add(new Boid(posi,velo,acel));
+				//Indicamos en que iteracion se crea el boid para despues calcular
+				//su antiguedad
+				getBandada().add(new Boid(posi,velo,acel,getContIteraciones()));
+//				getBandada().add(new Boid(posi,velo,acel));
 			}
 //			double posCentroEscenario[] = {largoEscenario/2,anchoEscenario/2};
 //			Matrix posiCentro = new Matrix(posCentroEscenario,2);
@@ -319,8 +339,8 @@ public class Simulador {
 		
 			for (int j = 0;j<getBandada().size();j++){
 				getBandada().elementAt(j).setConectado(false);
-				getBandada().elementAt(j).calculaValoracion();
-				getBandada().elementAt(j).setAntiguo(contIteraciones);
+				getBandada().elementAt(j).setAntiguo((double)contIteraciones);
+				getBandada().elementAt(j).calculaValoracion();				
 				if(contIteraciones > contPensar){
 					getBandada().elementAt(j).calculaMover(getBandada()
 						,getObstaculos(),j,Boid.getObjetivo());					
@@ -333,9 +353,10 @@ public class Simulador {
 				// de la bandada por cercanía al objetivo				
 //				Si está lo suficientemente cerca del objetivo lo quitamos de la bandada
 				if (dist < distOk){
-					getBandada().elementAt(j).setNumIteraciones(getContIteraciones());
-					traspasarBoid(j);
-					numBoidsOk++; // Incremento el numero de boids que han llegado al objetivo
+					getBandada().remove(j);//Simplemente lo quito, no guardo lo que hizo
+//					getBandada().elementAt(j).setNumIteraciones(getContIteraciones());
+//					traspasarBoid(j);
+//					numBoidsOk++; // Incremento el numero de boids que han llegado al objetivo
 				}
 				// Buscamos al lider
 				if(j < getBandada().size()){
@@ -361,6 +382,8 @@ public class Simulador {
 		}
 		return indLider;				
 	}
+	
+
 	/**
 	 * Método que utiliza la información de un barrido de rangeFinder para posicionar 
 	 * los obstáculos en el escenario
@@ -586,10 +609,10 @@ public class Simulador {
 //		System.out.println("acabó la ruta");
 		if (rutaDinamica.size()>=2){
 			setRutaCompleta(true);
-			tr = new Trayectoria(traduceRuta(rutaDinamica));
-//			tr = new Trayectoria(tr,0.1);
-			tr.situaCoche(posInicial.get(0,0),posInicial.get(1,0));
-			contPred.setRuta(tr);
+//			tr = new Trayectoria(traduceRuta(rutaDinamica));
+////			tr = new Trayectoria(tr,0.1);
+//			tr.situaCoche(posInicial.get(0,0),posInicial.get(1,0));
+//			contPred.setRuta(tr);
 		}
 //		rutaDinamica = mejoraRuta(rutaDinamica);
 		return rutaDinamica;
@@ -707,6 +730,10 @@ public class Simulador {
 	public int getContIteraciones() {
 		return contIteraciones;
 	}
+	
+	public void setContIteraciones(int contIteraciones) {
+		this.contIteraciones = contIteraciones;
+	}
 
 	public void setObjetivo(Matrix objetivo) {
 		this.objetivo = objetivo;
@@ -782,6 +809,10 @@ public class Simulador {
 	
 	public void setNumBoidsOkDeseados(double numBoidsOkDeseados) {
 		this.numBoidsOkDeseados = (int)numBoidsOkDeseados;
+	}
+	
+	public LoggerArrayDoubles getLogEstadistica() {
+		return logEstadistica;
 	}
 	
 	public double getTiempoInvertido() {
