@@ -184,7 +184,8 @@ public class Simulador {
 //				double pos[] = {e.getX()+Math.random()*getTamanoBan()*2, e.getY()+Math.random()*getTamanoBan()*2};
 				double pos[] = {puntoIni.get(0,0)+Math.random(), puntoIni.get(1,0)+Math.random()};
 				Matrix posi = new Matrix(pos,2);
-				double vel[] = {Math.random(),Math.random()};
+//				double vel[] = {Math.random(),Math.random()};
+				double vel[] = {0,0};
 				Matrix velo = new Matrix(vel,2);
 				this.getBandada().elementAt(i).resetRuta();
 //				this.getBandada().elementAt(i).getForma().transform(AffineTransform.getTranslateInstance(pos[0]-getBandada().elementAt(i).getPosicion().get(0,0),
@@ -280,7 +281,6 @@ public class Simulador {
 	}
 	
 	public void moverPtoInicial(double tiempoActual,double Ts){
-
 //		if(Math.abs(tiempoActual-tiempoAnt) > 500){
 			double velocidad = calculaVelocidadCoche();
 //			if (tr.length()>3)
@@ -537,7 +537,8 @@ public class Simulador {
 		int cont = 0;
 		boolean encontrado = false;
 		double valoracion = Double.NEGATIVE_INFINITY;
-		double umbralCercania = 5; 
+		double umbralCercania = 8;
+		double radioCentroMasas = umbralCercania*0.5;
 //		System.out.println("Empezó nueva ruta");
 		rutaDinamica.add(posInicial);
 		while (cont < getBandada().size()){
@@ -581,7 +582,7 @@ public class Simulador {
 //				getBandada().elementAt(boidAux).setExperiencia(1);
 //				System.out.println("La valoracion es : " + valoracion);
 //				rutaDinamica.add(getBandada().elementAt(boidAux).getPosicion());
-				rutaDinamica.add(getBandada().elementAt(boidAux).calculaCentroMasas(getBandada(),4));
+				rutaDinamica.add(getBandada().elementAt(boidAux).calculaCentroMasas(getBandada(),radioCentroMasas));
 				boidActual = boidAux;
 //				System.out.println("saltó al siguiente boid");
 			}
@@ -733,6 +734,8 @@ public class Simulador {
 	
 	public void setContIteraciones(int contIteraciones) {
 		this.contIteraciones = contIteraciones;
+		this.contNuevosBoids = contIteraciones;
+		this.contPensar = contIteraciones;
 	}
 
 	public void setObjetivo(Matrix objetivo) {

@@ -332,8 +332,8 @@ public class Boid implements Serializable{
 		Matrix compensacion = new Matrix(zero,2);
 		boolean caminoOcupado = false;
 		double dist = 0;
-		double umbralEsquivar = Math.PI/20;
-		double umbralCaso3 = -Math.PI/10;
+		double umbralEsquivar = Math.toRadians(20);
+		double umbralCaso3 = -Math.toRadians(10);
 		int sentidoCompensacionLateral = 0;
 		Line2D recta = 
 			new Line2D.Double(this.getPosicion().get(0,0),this.getPosicion().get(1,0)
@@ -356,6 +356,7 @@ public class Boid implements Serializable{
 						direcBoidObstaculo.get(0,0));
 				double angDirecObjetivo = Math.atan2(direcObjetivo.get(1,0),
 						direcObjetivo.get(0, 0));
+				double angCompensacion = 0;
 				// Solo producen repulsión aquellos obstáculos que se encuentren entre el objetivo
 				// y el boid, los que quedan detrás del boid no influencian
 				if (UtilCalculos.diferenciaAngulos(angDirecObjetivo, angDirecBoidObstaculo)< 3*Math.PI/2){
@@ -370,22 +371,43 @@ public class Boid implements Serializable{
 //					if (UtilCalculos.diferenciaAngulos(angVelObst,angDirecBoidObstaculo) >=
 //						UtilCalculos.diferenciaAngulos(angVelObst, angDirecObjetivo)){
 					if (angObsBoidObj >= umbralCaso3){
-						if (UtilCalculos.diferenciaAngulos(angDirecBoidObstaculo, angDirecObjetivo) <= umbralEsquivar){
-							compensacion.set(0,0,-repulsion.get(0,0));
-							compensacion.set(1,0,repulsion.get(1,0));
-//							System.out.println("Por detrás");
+//						if (UtilCalculos.diferenciaAngulos(angDirecBoidObstaculo, angDirecObjetivo) <= umbralEsquivar){
+						if (angObsBoidObj > umbralEsquivar){// Por delante
+							System.out.println("va por delante del  obstáculo");
+							compensacion.set(0,0,repulsion.get(1,0));
+							compensacion.set(1,0,-repulsion.get(0,0));
+							angCompensacion = Math.atan2(compensacion.get(1,0),
+									compensacion.get(0,0));
+							if (UtilCalculos.
+									diferenciaAngulos(angVelObst,angCompensacion)>Math.toRadians(90)){
+								//Si se da la condición lo cambiamos de sentido, si no se queda 
+								//como se calculó antes del if
+								compensacion.set(0,0,-repulsion.get(1,0));
+								compensacion.set(1,0,repulsion.get(0,0));
+							}
+							
 //							sentidoCompensacionLateral = -1;
-						}else{
-							compensacion.set(0,0,repulsion.get(0,0));
-							compensacion.set(1,0,-repulsion.get(1,0));
-//							System.out.println("Por delante");
+						}else{//Por detrás
+							System.out.println("va por detrás del  obstáculo");
+							compensacion.set(0,0,repulsion.get(1,0));
+							compensacion.set(1,0,-repulsion.get(0,0));
+							angCompensacion = Math.atan2(compensacion.get(1,0),
+									compensacion.get(0,0));
+							if (UtilCalculos.
+									diferenciaAngulos(angVelObst,angCompensacion)<Math.toRadians(90)){
+								//Si se da la condición lo cambiamos de sentido, si no se queda 
+								//como se calculó antes del if
+								compensacion.set(0,0,-repulsion.get(1,0));
+								compensacion.set(1,0,repulsion.get(0,0));
+							}
 //							sentidoCompensacionLateral = 1;
 						}
-						if (!(pesoCompensacionLateral == 0)){
+//						if (!(pesoCompensacionLateral == 0)){
+						compensacion.timesEquals(pesoCompensacionLateral);
 							//						System.out.println("Calculamos compensación lejos");
-							compensacion = obstaculos.elementAt(i).getVelocidad().times(
-									pesoCompensacionLateral*sentidoCompensacionLateral);
-						}
+//							compensacion = obstaculos.elementAt(i).getVelocidad().times(
+//									pesoCompensacionLateral*sentidoCompensacionLateral);
+//						}
 						c = c.plus(repulsion.plus(compensacion));
 					}else{//Si no va a cruzarse con el obstáculo no se le añade compensación lateral
 						//ni repulsion

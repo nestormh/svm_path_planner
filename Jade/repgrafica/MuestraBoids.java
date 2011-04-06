@@ -815,7 +815,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		gui.getPintor().setEsqInferiorDerecha(longitudEscenario,0);
 		gui.getPintor().setEsqSuperiorIzquierda(0,anchuraEscenario);
 		// generamos los obstáculos aleatoriamente
-		gui.getSim().generaObstaculos(8,1.5);
+//		gui.getSim().generaObstaculos(8,1.5);
 		int numSimu = 0;
 		int simuDeseadas = 5;
 		double distCercana = 2;
@@ -839,17 +839,17 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		//-------------------------------------------------------------------
 		
 		int indMinAnt = 0;
-		double tAnt = System.currentTimeMillis();
+		double tMaximo = 100;
 		double distCocheObjetivo = Double.POSITIVE_INFINITY;
-//		while (true){
-		while (numSimu < simuDeseadas){			
+		while (true){
+//		while (numSimu < simuDeseadas){			
 			if (gui.play){
 				// reinicio todo para la siguiente simulación
 				gui.getSim().setContIteraciones(0);
 				vectorPosCoche.clear();
 				yawCoche.clear();
-				gui.getSim().generaObstaculos(8,1.5);
 				gui.pintor.eliminarObstáculos();
+				gui.getSim().generaObstaculos(10,1.5);				
 				gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 				gui.getSim().borrarBandada();
 				gui.getSim().crearBandada(20,gui.getSim().getContIteraciones());
@@ -857,9 +857,14 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				gui.pintor.setPosCoche(gui.getSim().getPosInicial());
 				gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
 				distCocheObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
-				while(distCocheObjetivo > distCercana){
+				double tAnt = System.currentTimeMillis()/1000;
+				double tSim = System.currentTimeMillis()/1000;
+				//La simulación acabará cuando el coche llegue al objetivo o cuando haya
+				//transcurrido más tiempo del estipulado como bueno para una sola simulación
+				//Para evitar que se atasque toda la simulación por lotes
+				while((distCocheObjetivo > distCercana)&&(tSim-tAnt < tMaximo)){					
 //					System.out.println("La duración de cada iteración es "+ (System.currentTimeMillis() - tAnt));
-					tAnt = System.currentTimeMillis();
+//					tAnt = System.currentTimeMillis();
 //					resp=m111.leeMensaje();
 //					ba=m111.parseaBarrido(resp);//
 //					gui.getSim().posicionarObstaculos(ba);
@@ -885,7 +890,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						}
 					}
 
-					boolean flagUnaVez = true;
+//					boolean flagUnaVez = true;
 					gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
 					gui.pintor.setRutaDinamica(gui.getRutaDinamica());
 					gui.getSim().moverPtoInicial(tAnt, gui.getSim().getTs());
@@ -912,7 +917,9 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 					gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());*/
 //					gui.getSim().simuPorLotes();				
 					if (gui.pintarEscena)
-						gui.pintor.repaint();					
+						gui.pintor.repaint();	
+					//recogemos el tiempo que transcurre en cada simulación
+					tSim = System.currentTimeMillis()/1000;
 				}
 				numSimu++;
 //				Poner aqui el cálculo de las medias, varianzas,etc del estudio estadístico
@@ -1037,6 +1044,6 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //				gui.simulacionBatch.setEnabled(true);				
 			}			
 		}
-		System.out.println("Acabó todas las simulaciones");
+//		System.out.println("Acabó todas las simulaciones");
 	}
 }
