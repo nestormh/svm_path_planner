@@ -39,21 +39,22 @@ public class Boid implements Serializable{
 	public boolean lider = false;
 	public boolean caminoLibre = false;
 	public boolean conectado = false;
-	static double radioObstaculo = 6;
+	static double radioObstaculo = 5;//6;
 //	static double radioObstaculoLejos = 3;
 //	static double radioObstaculoCerca = 5;
 	static double radioCohesion = 5;
 	static double radioSeparacion = 2;
 	static double radioAlineacion = 3;
-	static double pesoCohesion = 0.01;
-	static double pesoSeparacion = 0.3; // 10
-	static double pesoAlineacion = 5; //0.5
+	static double pesoCohesion = 0;//0.01;
+	static double pesoSeparacion = 0.5;//0.3; // 10
+	static double pesoAlineacion = 1;//5; //0.5
 	static double pesoObjetivo = 1;  //1
-	static double pesoObstaculo = 1.2;
+	static double pesoObstaculo = 0.9;//1.2;
 	static double pesoCompensacionLateral = 1.6;
 //	static double pesoObstaculoCerca = 1;
 	static double pesoLider = 0.1;
-	static double velMax = 2;
+	static double velMax = 4.5;
+	static double masa = 5;
 	
 	static double pesoDistOrigen = 10000;
 	static double pesoAntiguo = 1;
@@ -181,14 +182,19 @@ public class Boid implements Serializable{
 			} // if (i != indBoid) para todas las reglas
 		} // for principal
 		// calculos para la separacion
+		
 		separa = separa.times(pesoSeparacion);
 		separa = separa.minus(this.getVelocidad());
+		separa = limitaVelocidad(separa);
+//		separa = separa.times(1/separa.norm2());// lo pasamos a unitario
 		// calculos para la velocidad de alineación
 		if (contAlineacion != 0){
 			velMedia = velMedia.timesEquals((double)1/(double)contAlineacion);
-			velMedia = velMedia.minus(this.getVelocidad());
+			velMedia = velMedia.minus(this.getVelocidad());			
 			velMedia = velMedia.times(pesoAlineacion);
 			velMedia = velMedia.minus(this.getVelocidad());
+			velMedia = limitaVelocidad(velMedia);
+//			velMedia = velMedia.times(1/velMedia.norm2()); // lo pasamos a unitario
 		}else{
 			velMedia.set(0,0,0);
 			velMedia.set(1,0,0);
@@ -197,12 +203,17 @@ public class Boid implements Serializable{
 		if (cont != 0 && liderCerca == false){
 			centroMasa = centroMasa.times((double)1/(double)cont);
 			velCohesion = (centroMasa.minus(this.getPosicion())).times(pesoCohesion);
+//			velCohesion = (centroMasa.minus(this.getPosicion()));
+//			velCohesion = velCohesion.times(pesoCohesion);			
 		}
 		if(liderCerca == true){
 			velCohesion = (bandada.elementAt(indLider).getPosicion().minus(this.getPosicion())).times(pesoLider);
 		}
 		velCohesion = velCohesion.minus(this.getVelocidad());
+		velCohesion = limitaVelocidad(velCohesion);
+//		velCohesion = velCohesion.times(1/velCohesion.norm2());// lo pasamos a unitario
 		velResultante = (velMedia.plus(velCohesion)).plus(separa);
+//		velResultante = velResultante.times(1/velResultante.norm2());
 		return velResultante;
 	}
 	/** Esta regla genera un vector velocidad que hace que el boid se agrupe
@@ -305,8 +316,9 @@ public class Boid implements Serializable{
 			velObj = velObj.times(pesoObjetivo*10);
 		else
 			velObj = velObj.times(pesoObjetivo);
-		velObj = limitaVelocidad(velObj);
 		velObj = velObj.minus(this.getVelocidad());
+		velObj = limitaVelocidad(velObj);
+//		velObj = velObj.times(1/velObj.norm2()); // lo hacemos unitario
 		return velObj;
 	}
 	
@@ -373,7 +385,7 @@ public class Boid implements Serializable{
 					if (angObsBoidObj >= umbralCaso3){
 //						if (UtilCalculos.diferenciaAngulos(angDirecBoidObstaculo, angDirecObjetivo) <= umbralEsquivar){
 						if (angObsBoidObj > umbralEsquivar){// Por delante
-							System.out.println("va por delante del  obstáculo");
+//							System.out.println("va por delante del  obstáculo");
 							compensacion.set(0,0,repulsion.get(1,0));
 							compensacion.set(1,0,-repulsion.get(0,0));
 							angCompensacion = Math.atan2(compensacion.get(1,0),
@@ -387,8 +399,9 @@ public class Boid implements Serializable{
 							}
 							
 //							sentidoCompensacionLateral = -1;
-						}else{//Por detrás
-							System.out.println("va por detrás del  obstáculo");
+						}else{
+							//Por detrás 
+//							System.out.println("va por detrás del  obstáculo");
 							compensacion.set(0,0,repulsion.get(1,0));
 							compensacion.set(1,0,-repulsion.get(0,0));
 							angCompensacion = Math.atan2(compensacion.get(1,0),
@@ -446,7 +459,11 @@ public class Boid implements Serializable{
 				caminoOcupado = recta.intersects(obstaculos.elementAt(i).getForma());
 		}
 
-		setCaminoLibre(!caminoOcupado); // Si no tiene el camino ocupado por el momento es el lider
+		setCaminoLibre(!caminoOcupado);// Si no tiene el camino ocupado por el momento es el lider
+		 
+		c = c.minus(this.getVelocidad());
+//		c = limitaVelocidad(c);
+//		c = c.times(1/c.norm2());// lo hacemos unitario
 		return c;
 	}
 	
@@ -467,9 +484,11 @@ public class Boid implements Serializable{
 		despAliCoheSep = aliCoheSep(bandada, indBoid);
 		despObjetivo = seguirObjetivo(bandada,indBoid,obj);
 		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid),despObjetivo);
-		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad());
+//		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad());
+		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo));
+//		desp = desp.times(1/desp.norm2());
 //		desp = limitaVelocidad(((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad()));
-		desp = desp.timesEquals(0.05); // Simula la masa del boid 
+		desp = desp.timesEquals(1/masa); // Simula la masa del boid 
 		setAceleracion(desp);
 //		desp = limitaVelocidad(despCohesion.plus(despSeparacion).plus(despAlineacion).plus(despObjetivo).plus(despObstaculo).plus(this.getVelocidad()));
 //		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
