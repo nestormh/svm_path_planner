@@ -5,6 +5,7 @@ import sibtra.lms.BarridoAngular;
 import sibtra.lms.ManejaLMS;
 import sibtra.lms.PanelMuestraBarrido;
 import sibtra.lms.ManejaLMS111;
+import sibtra.log.LoggerFactory;
 import sibtra.log.VentanaLoggers;
 
 import java.awt.BasicStroke;
@@ -60,7 +61,10 @@ class Dibujante2 extends JPanel{
 	double largoCoche = 1.7;
 	double anchoCoche = 1;
 	Matrix posCoche = new Matrix(2,1);
+	Matrix posCocheSolitario = new Matrix(2,1);
+	Matrix vectorDirectorCoche = new Matrix(2,1);
 	double yawCoche;
+	double yawCocheSolitario;
 	Vector<Boid> bandadaPintar;// = new Vector<Boid>();
 	Vector<Obstaculo> obstaculosPintar;// = new Vector<Obstaculo>();
 	Vector<Matrix> rutaDinamica = null;
@@ -68,6 +72,13 @@ class Dibujante2 extends JPanel{
 	public Dibujante2(){
 		bandadaPintar = new Vector<Boid>();
 		obstaculosPintar = new Vector<Obstaculo>();
+	}
+	public Matrix getVectorDirectorCoche() {
+		return vectorDirectorCoche;
+	}
+
+	public void setVectorDirectorCoche(Matrix vectorDirectorCoche) {
+		this.vectorDirectorCoche = vectorDirectorCoche;
 	}
 	
 	public double getYawCoche() {
@@ -78,6 +89,13 @@ class Dibujante2 extends JPanel{
 		this.yawCoche = yawCoche;
 	}
 
+	public double getYawCocheSolitario() {
+		return yawCocheSolitario;
+	}
+
+	public void setYawCocheSolitario(double yawCocheSolitario) {
+		this.yawCocheSolitario = yawCocheSolitario;
+	}
 
 	public Matrix getPosCoche() {
 		return posCoche;
@@ -85,6 +103,14 @@ class Dibujante2 extends JPanel{
 
 	public void setPosCoche(Matrix posIni) {
 		this.posCoche = posIni;
+	}
+	
+	public Matrix getPosCocheSolitario() {
+		return posCocheSolitario;
+	}
+
+	public void setPosCocheSolitario(Matrix posCocheSolitario) {
+		this.posCocheSolitario = posCocheSolitario;
 	}
 	
 	public void introducirBoid(Boid b){
@@ -242,6 +268,39 @@ class Dibujante2 extends JPanel{
 		g3.draw(coche);
 		g3.fill(coche);
 		
+		/*----------------------Pinto el coche solitario---------------------------------*/
+		g3.setColor(Color.green);
+
+		Point2D pxDD2= point2Pixel(posCocheSolitario.get(0,0)+anchoCoche/2*Math.sin(yawCocheSolitario),
+				posCocheSolitario.get(1,0)-anchoCoche/2*Math.cos(yawCocheSolitario));
+		Point2D pxDI2= point2Pixel(posCocheSolitario.get(0,0)-anchoCoche/2*Math.sin(yawCocheSolitario),
+				posCocheSolitario.get(1,0)+anchoCoche/2*Math.cos(yawCocheSolitario));
+		Point2D pxPD2=point2Pixel(posCocheSolitario.get(0,0)+anchoCoche/2*Math.sin(yawCocheSolitario)
+				-largoCoche*Math.cos(yawCocheSolitario),
+				posCocheSolitario.get(1,0)-anchoCoche/2*Math.cos(yawCocheSolitario)
+				-largoCoche*Math.sin(yawCocheSolitario));
+		Point2D pxPI2= point2Pixel(posCocheSolitario.get(0,0)-anchoCoche/2*Math.sin(yawCocheSolitario)
+				-largoCoche*Math.cos(yawCocheSolitario),
+				posCocheSolitario.get(1,0)+anchoCoche/2*Math.cos(yawCocheSolitario)
+				-largoCoche*Math.sin(yawCocheSolitario));
+		GeneralPath cocheSolitario=new GeneralPath();
+		cocheSolitario.moveTo((float)pxDD2.getX(),(float)pxDD2.getY());
+		cocheSolitario.lineTo((float)pxPD2.getX(),(float)pxPD2.getY());
+		cocheSolitario.lineTo((float)pxPI2.getX(),(float)pxPI2.getY());
+		cocheSolitario.lineTo((float)pxDI2.getX(),(float)pxDI2.getY());
+		cocheSolitario.closePath();
+		g3.draw(cocheSolitario);
+		g3.fill(cocheSolitario);
+		Point2D vertice1 = point2Pixel(posCocheSolitario.get(0,0),posCocheSolitario.get(1,0));
+		Point2D vertice2 = point2Pixel(vectorDirectorCoche.get(0,0)+posCocheSolitario.get(0,0),
+				vectorDirectorCoche.get(1,0)+posCocheSolitario.get(1,0));
+		GeneralPath vecCocheSolitario = new GeneralPath();
+		vecCocheSolitario.moveTo((float)vertice1.getX(),(float)vertice1.getY());
+		vecCocheSolitario.lineTo((float)vertice2.getX(),(float)vertice2.getY());
+		vecCocheSolitario.closePath();
+		g3.setColor(Color.BLACK);
+		g3.draw(vecCocheSolitario);
+		g3.fill(vecCocheSolitario);
 //		//---------------------- Pinto el centro de masa--------------------------------
 		
 		centroMasa.timesEquals((double)1/(double)bandadaPintar.size());		
@@ -640,14 +699,18 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 			int i = 0;
 			if(getSim().getObstaculos().size()%2 <= 0){
 				vel[0] = 0;
-				vel[1] = 2;
+//				vel[1] = 2;
+				vel[1] = 0;
 				rumbo[0] = 0;
-				rumbo[1] = 2;
+//				rumbo[1] = 2;
+				rumbo[1] = 0;
 			}else{
 				vel[0] = 0;
-				vel[1] = -2;
+//				vel[1] = -2;
+				vel[1] = 0;
 				rumbo[0] = 0;
-				rumbo[1] = -2;
+//				rumbo[1] = -2;
+				rumbo[1] = 0;
 			}
 			Matrix velocidad = new Matrix(vel,2);
 			Matrix rumboDes = new Matrix(rumbo,2);
@@ -801,35 +864,33 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //		//----------------------------------------//
 		
 		MuestraBoids gui = new MuestraBoids();
-//		Simulador simula = new Simulador();
-//		gui.setSim(simula);
-//		gui.getSim().setTamanoBandada(gui.getSim().getTamanoBandada());
-//		gui.pintor.introducirBandada(gui.getSim().getBandada());
 		Console.run(gui,1200,1000);
 		int alturaPanel = gui.pintor.getHeight();
 		int anchuraPanel = gui.pintor.getWidth();
-		double longitudEscenario = 60;
-		double anchuraEscenario = longitudEscenario*alturaPanel/anchuraPanel;
+		double longitudEscenario = 100; // inicialmente a 60
+		double anchuraEscenario = 30;//longitudEscenario*alturaPanel/anchuraPanel;
 		gui.getSim().setAnchoEscenario(anchuraEscenario);
 		gui.getSim().setLargoEscenario(longitudEscenario);
 		gui.getPintor().setEsqInferiorDerecha(longitudEscenario,0);
-		gui.getPintor().setEsqSuperiorIzquierda(0,anchuraEscenario);
-		// generamos los obstáculos aleatoriamente
-//		gui.getSim().generaObstaculos(8,1.5);
+		gui.getPintor().setEsqSuperiorIzquierda(0,longitudEscenario*alturaPanel/anchuraPanel);
 		int numSimu = 0;
-		int simuDeseadas = 5;
-		double distCercana = 2;
+		int simuDeseadas = 1000;
+		int numObstaculos = 25;
+		double distCercana = 3;
 		Vector<Matrix> vectorPosCoche = new Vector<Matrix>();
 		Vector<Double> yawCoche = new Vector<Double>();
+		Vector<Double> distMinObst = new Vector<Double>();
 		gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 		
 		//creamos las zonas para clasificar las rutas
 		
 		// Indico la posición del objetivo y la posición inicial
-		double[] objetivo = {gui.pintor.getEsqInferiorDerecha().getX(),
-				gui.pintor.getEsqSuperiorIzquierda().getY()/2};
+//		double[] objetivo = {gui.pintor.getEsqInferiorDerecha().getX(),
+//				gui.pintor.getEsqSuperiorIzquierda().getY()/2};
+		double[] objetivo = {longitudEscenario,anchuraEscenario/2};
 		gui.getSim().setObjetivo(new Matrix(objetivo,2));
-		double[] inicial = {3,gui.pintor.getEsqSuperiorIzquierda().getY()/2};
+//		double[] inicial = {3,gui.pintor.getEsqSuperiorIzquierda().getY()/2};
+		double[] inicial = {3,anchuraEscenario/2};
 		gui.getSim().setPosInicial(new Matrix(inicial,2));
 		gui.pintor.setPosCoche(gui.getSim().getPosInicial());
 		gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
@@ -839,23 +900,27 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		//-------------------------------------------------------------------
 		
 		int indMinAnt = 0;
-		double tMaximo = 100;
+		double tMaximo = 120; // 80
 		double distCocheObjetivo = Double.POSITIVE_INFINITY;
-		while (true){
-//		while (numSimu < simuDeseadas){			
+//		while (true){
+		LoggerFactory.activaLoggers(1000);
+		while (numSimu < simuDeseadas){			
 			if (gui.play){
 				// reinicio todo para la siguiente simulación
 				gui.getSim().setContIteraciones(0);
 				vectorPosCoche.clear();
 				yawCoche.clear();
+				distMinObst.clear();
 				gui.pintor.eliminarObstáculos();
-				gui.getSim().generaObstaculos(10,1.5);				
+				gui.getSim().generaObstaculos(numObstaculos,1.5);				
 				gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 				gui.getSim().borrarBandada();
 				gui.getSim().crearBandada(20,gui.getSim().getContIteraciones());
 				gui.getSim().setPosInicial(new Matrix(inicial,2));
 				gui.pintor.setPosCoche(gui.getSim().getPosInicial());
+				gui.pintor.setPosCocheSolitario((gui.getSim().getPosCocheSolitario()));
 				gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
+				gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));
 				distCocheObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
 				double tAnt = System.currentTimeMillis()/1000;
 				double tSim = System.currentTimeMillis()/1000;
@@ -871,8 +936,9 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //					gui.pintor.eliminarObstáculos();
 //					gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 					gui.getSim().moverObstaculos();
-					indMinAnt = gui.getSim().moverBoids(indMinAnt);
-					int indice = 0;
+//					indMinAnt = gui.getSim().moverBoids(indMinAnt);
+					gui.getSim().moverBoids();
+//					int indice = 0;
 //					double distObj = Double.POSITIVE_INFINITY;
 //					for(int h = 0; h<gui.getSim().getBandada().size();h++){
 //						double distan = gui.getSim().getBandada().elementAt(h).getDistObjetivo();
@@ -881,28 +947,31 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //							distObj = distan;
 //						}
 //					}
-					double distOrigen = Double.POSITIVE_INFINITY;
-					for(int h = 0; h<gui.getSim().getBandada().size();h++){
-						double distan = gui.getSim().getBandada().elementAt(h).getDistOrigen();
-						if(distan < distOrigen){
-							indice = h;
-							distOrigen = distan;
-						}
-					}
-
-//					boolean flagUnaVez = true;
-					gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
+					//	QUITO LA BÚSQUEDA DEL LIDER
+//					double distOrigen = Double.POSITIVE_INFINITY;
+//					for(int h = 0; h<gui.getSim().getBandada().size();h++){
+//						double distan = gui.getSim().getBandada().elementAt(h).getDistOrigen();
+//						if(distan < distOrigen){
+//							indice = h;
+//							distOrigen = distan;
+//						}
+//					}
+//					gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
+					gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
 					gui.pintor.setRutaDinamica(gui.getRutaDinamica());
 					gui.getSim().moverPtoInicial(tAnt, gui.getSim().getTs());
+					gui.pintor.setVectorDirectorCoche(
+							gui.getSim().moverCocheSolitario(gui.getSim().getTs()));
 					//Rellenamos los datos del camino seguido por el coche
 					double[] posCocheAux = {gui.getSim().getPosInicial().get(0,0),
 							gui.getSim().getPosInicial().get(1,0)};
 					vectorPosCoche.add(new Matrix(posCocheAux,2));
-//					vectorPosCoche.lastElement().print(10,4);
 					yawCoche.add(gui.getSim().getModCoche().getYaw());
+					distMinObst.add(gui.getSim().distObstaculoMasCercanoAlCoche());
 					//Medimos la distancia a la que se encuentra el coche del objetivo
 					distCocheObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
 					gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
+					gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));
 					/*if (gui.getRutaDinamica().size()>1){ //Comprobar si hay ruta que seguir					
 						Trayectoria tr = new Trayectoria(gui.getSim().traduceRuta(gui.getRutaDinamica()));
 						Trayectoria trMasPuntos = new Trayectoria(tr,0.1);
@@ -922,53 +991,74 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 					tSim = System.currentTimeMillis()/1000;
 				}
 				numSimu++;
-//				Poner aqui el cálculo de las medias, varianzas,etc del estudio estadístico
-				double distEntrePtos = 0;
-				int numDatos = vectorPosCoche.size()-1;
-				double[] velCoche = new double[numDatos];
-				double sumaVel = 0;
-				double sumaYaw = 0;
-				double mediaVel = 0;
-				double mediaYaw = 0;
-				double varianzaVel = 0;
-				double varianzaYaw = 0;
-				double sumaVarianzaVel = 0;
-				double sumaVarianzaYaw = 0;
-				double desvTipicaVel = 0;
-				double desvTipicaYaw = 0;				
-				//cálculo de las medias
-//				System.out.println("posInicial de los boids");
-//				System.out.println("-----------------------------------");
-//				gui.getSim().getPosInicial().print(10,4);
-//				System.out.println("-----------------------------------");
-//				for (int i=0;i<vectorPosCoche.size();i++){
-//					vectorPosCoche.elementAt(i).print(10,4);
-//					System.out.println("yaw "+yawCoche.elementAt(i));
-//				}
-				for (int h=0;h<numDatos;h++){
-					distEntrePtos = vectorPosCoche.elementAt(h+1).minus(vectorPosCoche.elementAt(h)).norm2();
-//					System.out.println("dist entre puntos "+ distEntrePtos);
-					//distEntrePtos/gui.getSim().getTs() = dist/tiempo = velocidad
-					sumaVel = sumaVel + distEntrePtos/gui.getSim().getTs();
-					velCoche[h] = distEntrePtos/gui.getSim().getTs();
-					sumaYaw = sumaYaw + yawCoche.elementAt(h);
-				}				
-				mediaVel = sumaVel/numDatos;
-				mediaYaw = sumaYaw/numDatos;
-				//calculo las varianzas
-				for (int k = 0;k<numDatos;k++){
-					sumaVarianzaVel = sumaVarianzaVel + Math.sqrt(Math.abs(velCoche[k]-mediaVel));
-					sumaVarianzaYaw = sumaVarianzaYaw + Math.sqrt(Math.abs(yawCoche.elementAt(k)-mediaYaw));
+				if (distCocheObjetivo <= distCercana){
+//					Cálculo de las medias, varianzas,etc del estudio estadístico
+					double distEntrePtos = 0;
+					int numDatos = vectorPosCoche.size()-1;
+					double[] velCoche = new double[numDatos];
+					double[] acelCoche = new double[numDatos];
+					double sumaVel = 0;
+					double sumaYaw = 0;
+					double sumaAcel = 0;
+					double sumaDistMin = 0;
+					double mediaVel = 0;
+					double mediaYaw = 0;
+					double mediaAcel = 0;
+					double mediaDistMin = 0;
+					double varianzaVel = 0;
+					double varianzaYaw = 0;
+					double varianzaAcel = 0;
+					double varianzaDistMin = 0;
+					double sumaVarianzaVel = 0;
+					double sumaVarianzaYaw = 0;
+					double sumaVarianzaAcel = 0;
+					double sumaVarianzaDistMin = 0;
+					double desvTipicaVel = 0;
+					double desvTipicaYaw = 0;
+					double desvTipicaAcel = 0;
+					double desvtipicaDistMin = 0;
+					//cálculo de las medias
+					for (int h=0;h<numDatos;h++){
+						distEntrePtos = vectorPosCoche.elementAt(h+1).minus(vectorPosCoche.elementAt(h)).norm2();
+						sumaVel = sumaVel + distEntrePtos/gui.getSim().getTs();
+						velCoche[h] = distEntrePtos/gui.getSim().getTs();
+						sumaYaw = sumaYaw + yawCoche.elementAt(h);
+						sumaDistMin = sumaDistMin + distMinObst.elementAt(h);
+					}
+					for (int h=0;h<numDatos-1;h++){
+						acelCoche[h] = velCoche[h+1]-velCoche[h];
+						sumaAcel = sumaAcel + acelCoche[h];
+					}				
+					mediaVel = sumaVel/numDatos;
+					mediaYaw = sumaYaw/numDatos;
+					mediaAcel = sumaAcel/numDatos;
+					mediaDistMin = sumaDistMin/numDatos;
+					//calculo las varianzas
+					for (int k = 0;k<numDatos;k++){
+						sumaVarianzaVel = sumaVarianzaVel + Math.sqrt(Math.abs(velCoche[k]-mediaVel));
+						sumaVarianzaYaw = sumaVarianzaYaw + Math.sqrt(Math.abs(yawCoche.elementAt(k)-mediaYaw));
+						sumaVarianzaAcel = sumaVarianzaAcel + Math.sqrt(Math.abs(acelCoche[k]-mediaAcel));
+						sumaVarianzaDistMin = sumaVarianzaDistMin + Math.sqrt(Math.abs(distMinObst.elementAt(k)-mediaDistMin)); 
+					}
+					System.out.println("numDatos="+numDatos+" varianzaVel="+sumaVarianzaVel+" varianzaYaw="+sumaVarianzaYaw);
+					varianzaVel = sumaVarianzaVel/numDatos;
+					varianzaYaw = sumaVarianzaYaw/numDatos;
+					varianzaAcel = sumaVarianzaAcel/numDatos;
+					varianzaDistMin = sumaVarianzaDistMin/numDatos;
+					desvTipicaVel = Math.sqrt(varianzaVel);
+					desvTipicaYaw = Math.sqrt(varianzaYaw);
+					desvTipicaAcel = Math.sqrt(varianzaAcel);
+					desvtipicaDistMin = Math.sqrt(varianzaDistMin);
+					//rellenamos los valores en el loger estadístico
+					gui.getSim().getLogEstadistica().add(mediaVel,desvTipicaVel,mediaYaw,desvTipicaYaw,
+							mediaAcel,desvTipicaAcel,mediaDistMin,desvtipicaDistMin);
+					System.out.println("Acabó la simulación "+numSimu+" de "+simuDeseadas+" y calculó la estadística, los valores son "
+							+mediaVel+" "+desvTipicaVel+" "+mediaYaw+" "+desvTipicaYaw+" "+mediaAcel+" "+desvTipicaAcel);
+
 				}
-				System.out.println("numDatos="+numDatos+" varianzaVel="+sumaVarianzaVel+" varianzaYaw="+sumaVarianzaYaw);
-				varianzaVel = sumaVarianzaVel/numDatos;
-				varianzaYaw = sumaVarianzaYaw/numDatos;
-				desvTipicaVel = Math.sqrt(varianzaVel);
-				desvTipicaYaw = Math.sqrt(varianzaYaw);
-				//rellenamos los valores en el loger estadístico
-				gui.getSim().getLogEstadistica().add(mediaVel,desvTipicaVel,mediaYaw,desvTipicaYaw);
-				System.out.println("Acabó una simulación y calculó la estadística, los valores son "
-						+mediaVel+" "+desvTipicaVel+" "+mediaYaw+" "+desvTipicaYaw);
+				else{
+					System.out.println("El coche no alcanzó el objetivo en el tiempo establecido");
+				}
 			}
 			if (gui.batch){
 				gui.getSim().getBoidsOk().clear();
@@ -1044,6 +1134,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //				gui.simulacionBatch.setEnabled(true);				
 			}			
 		}
-//		System.out.println("Acabó todas las simulaciones");
+		LoggerFactory.vuelcaLoggersMATv4("/home/jesus/Octave/Boids/boids"+numObstaculos+"Obstaculos");
+		System.out.println("Acabaron todas las simulaciones");
 	}
 }

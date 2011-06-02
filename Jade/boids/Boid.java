@@ -39,21 +39,22 @@ public class Boid implements Serializable{
 	public boolean lider = false;
 	public boolean caminoLibre = false;
 	public boolean conectado = false;
-	static double radioObstaculo = 5;//6;
+	static double radioObstaculo = 5.5;//6;
 //	static double radioObstaculoLejos = 3;
 //	static double radioObstaculoCerca = 5;
 	static double radioCohesion = 5;
-	static double radioSeparacion = 2;
-	static double radioAlineacion = 3;
-	static double pesoCohesion = 0;//0.01;
-	static double pesoSeparacion = 0.5;//0.3; // 10
-	static double pesoAlineacion = 1;//5; //0.5
+	static double radioSeparacion = 3;//2;
+	static double radioAlineacion = 5;//3;
+	static double pesoCohesion = 0;//0.1;//0;//0.01;
+	static double pesoSeparacion = 1;//0.2;//0.3; // 10
+	static double pesoAlineacion = 0;//5; //0.5
 	static double pesoObjetivo = 1;  //1
-	static double pesoObstaculo = 0.9;//1.2;
-	static double pesoCompensacionLateral = 1.6;
+	static double pesoObstaculo = 1;//0.9;//1.2;
+	static double pesoCompensacionLateral = 1;//1.6;
 //	static double pesoObstaculoCerca = 1;
-	static double pesoLider = 0.1;
-	static double velMax = 4.5;
+	static double pesoLider = 0;
+	static double velMax = 3.5;
+	static double fuerzaMax = 4.5;
 	static double masa = 5;
 	
 	static double pesoDistOrigen = 10000;
@@ -185,7 +186,7 @@ public class Boid implements Serializable{
 		
 		separa = separa.times(pesoSeparacion);
 		separa = separa.minus(this.getVelocidad());
-		separa = limitaVelocidad(separa);
+		separa = limitaFuerza(separa);
 //		separa = separa.times(1/separa.norm2());// lo pasamos a unitario
 		// calculos para la velocidad de alineación
 		if (contAlineacion != 0){
@@ -193,7 +194,7 @@ public class Boid implements Serializable{
 			velMedia = velMedia.minus(this.getVelocidad());			
 			velMedia = velMedia.times(pesoAlineacion);
 			velMedia = velMedia.minus(this.getVelocidad());
-			velMedia = limitaVelocidad(velMedia);
+			velMedia = limitaFuerza(velMedia);
 //			velMedia = velMedia.times(1/velMedia.norm2()); // lo pasamos a unitario
 		}else{
 			velMedia.set(0,0,0);
@@ -210,7 +211,7 @@ public class Boid implements Serializable{
 			velCohesion = (bandada.elementAt(indLider).getPosicion().minus(this.getPosicion())).times(pesoLider);
 		}
 		velCohesion = velCohesion.minus(this.getVelocidad());
-		velCohesion = limitaVelocidad(velCohesion);
+		velCohesion = limitaFuerza(velCohesion);
 //		velCohesion = velCohesion.times(1/velCohesion.norm2());// lo pasamos a unitario
 		velResultante = (velMedia.plus(velCohesion)).plus(separa);
 //		velResultante = velResultante.times(1/velResultante.norm2());
@@ -317,7 +318,7 @@ public class Boid implements Serializable{
 		else
 			velObj = velObj.times(pesoObjetivo);
 		velObj = velObj.minus(this.getVelocidad());
-		velObj = limitaVelocidad(velObj);
+		velObj = limitaFuerza(velObj);
 //		velObj = velObj.times(1/velObj.norm2()); // lo hacemos unitario
 		return velObj;
 	}
@@ -332,6 +333,26 @@ public class Boid implements Serializable{
 		return velLimitada;
 	}
 	
+/** Regla para no permitir grandes aceleraciones*/ 
+	
+	public Matrix limitaFuerza(Matrix fuerza){
+		Matrix fuerzaLimitada = new Matrix(2,1);
+		fuerzaLimitada = fuerza;
+		if (Math.abs(fuerza.norm2()) > fuerzaMax)
+			fuerzaLimitada = fuerza.times(1/fuerza.norm2()).times(fuerzaMax);
+		return fuerzaLimitada;
+	}
+
+/** Regla para no permitir grandes aceleraciones*/ 
+	
+	public Matrix limitaFuerza(Matrix fuerza,double fuerzaMaxima){
+		Matrix fuerzaLimitada = new Matrix(2,1);
+		fuerzaLimitada = fuerza;
+		if (Math.abs(fuerza.norm2()) > fuerzaMaxima)
+			fuerzaLimitada = fuerza.times(1/fuerza.norm2()).times(fuerzaMaxima);
+		return fuerzaLimitada;
+	}
+
 	/** Regla para esquivar los obstáculos*/
 	
 	public Matrix evitaObstaculo(Vector<Obstaculo> obstaculos,Boid b,Matrix direcObjetivo){
@@ -424,8 +445,8 @@ public class Boid implements Serializable{
 						c = c.plus(repulsion.plus(compensacion));
 					}else{//Si no va a cruzarse con el obstáculo no se le añade compensación lateral
 						//ni repulsion
-						//					c = c.plus(repulsion);
-						c = c.plus(cero);
+											c = c.plus(repulsion);
+//						c = c.plus(cero);
 					}
 				}				
 				
@@ -462,7 +483,7 @@ public class Boid implements Serializable{
 		setCaminoLibre(!caminoOcupado);// Si no tiene el camino ocupado por el momento es el lider
 		 
 		c = c.minus(this.getVelocidad());
-//		c = limitaVelocidad(c);
+//		c = limitaFuerza(c);
 //		c = c.times(1/c.norm2());// lo hacemos unitario
 		return c;
 	}
@@ -488,7 +509,8 @@ public class Boid implements Serializable{
 		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo));
 //		desp = desp.times(1/desp.norm2());
 //		desp = limitaVelocidad(((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad()));
-		desp = desp.timesEquals(1/masa); // Simula la masa del boid 
+		desp = desp.timesEquals(1/masa); // Simula la masa del boid
+		desp = limitaFuerza(desp);
 		setAceleracion(desp);
 //		desp = limitaVelocidad(despCohesion.plus(despSeparacion).plus(despAlineacion).plus(despObjetivo).plus(despObstaculo).plus(this.getVelocidad()));
 //		this.getForma().transform(AffineTransform.getTranslateInstance(desp.get(0,0), desp.get(1,0)));
