@@ -422,8 +422,8 @@ public class Simulador {
 				velTotal = velTotal.times(1/velTotal.norm2()); // vector unitario
 			double angVelCocheSolitario = Math.atan2(velCocheSolitario.get(1,0),
 					velCocheSolitario.get(0,0));
-			System.out.println("ángulo del coche "+ angVelCocheSolitario);
-			System.out.println("yaw del coche "+ cocheSolitario.getYaw());
+//			System.out.println("ángulo del coche "+ angVelCocheSolitario);
+//			System.out.println("yaw del coche "+ cocheSolitario.getYaw());
 			// descompongo el vector veltotal en sus componentes perpendiculares y paralelas
 			// a la velocidad del coche. La paralela será la consigna de velocidad y la 
 			// perpendicular será la consigna del volante
@@ -436,7 +436,7 @@ public class Simulador {
 //			double consVolanteVec = velTotal.get(1,0);
 			double consVolante = consVolanteVec*Math.toRadians(30);// a lo mejor hay que cambiar signo
 			cocheSolitario.calculaEvolucion(consVolante,consVelocidad,Ts);
-			System.out.println("consigna volante: "+consVolante+"consigna velocidad: "+consVelocidad);
+//			System.out.println("consigna volante: "+consVolante+"consigna velocidad: "+consVelocidad);
 			posCocheSolitario.set(0,0,cocheSolitario.getX());
 			posCocheSolitario.set(1,0,cocheSolitario.getY());
 			velCocheSolitario.set(0,0,Math.cos(cocheSolitario.getYaw()));
@@ -687,12 +687,13 @@ public class Simulador {
 		int cont = 0;
 		boolean encontrado = false;
 		double valoracion = Double.NEGATIVE_INFINITY;
-		double umbralCercania = 5;//12;
+		double umbralCercania = 8;//12;
 		double radioCentroMasas = umbralCercania*0.2;//*0.5;
 //		System.out.println("Empezó nueva ruta");
 		rutaDinamica.add(posInicial);
-		double puntoActualX = posInicial.get(0,0);
-		double puntoActualY = posInicial.get(1,0);
+		Matrix puntoActual = new Matrix(2,1);
+		puntoActual.set(0,0,posInicial.get(0,0));
+		puntoActual.set(1,0,posInicial.get(1,0));
 		while (cont < getBandada().size()){
 			cont++;
 			encontrado=false;
@@ -700,7 +701,8 @@ public class Simulador {
 				if (i != boidActual){// No se comprueba consigo mismo
 					if(!getBandada().elementAt(i).isConectado()){// El boid elegido no puede estar
 						// conectado con otro
-						double dist = bandada.elementAt(boidActual).getPosicion().minus(getBandada().elementAt(i).getPosicion()).norm2();
+//						double dist = bandada.elementAt(boidActual).getPosicion().minus(getBandada().elementAt(i).getPosicion()).norm2();
+						double dist = puntoActual.minus(getBandada().elementAt(i).getPosicion()).norm2();
 						if (dist < umbralCercania){// Tiene que estar lo suficientemente cerca
 							boolean caminoOcupado = false;
 							// Calculamos la recta entre ambos boids
@@ -710,7 +712,7 @@ public class Simulador {
 //										getBandada().elementAt(i).getPosicion().get(0,0),
 //										getBandada().elementAt(i).getPosicion().get(1,0));
 							Line2D recta = 
-								new Line2D.Double(puntoActualX,puntoActualY,
+								new Line2D.Double(puntoActual.get(0,0),puntoActual.get(1,0),
 										getBandada().elementAt(i).getPosicion().get(0,0),
 										getBandada().elementAt(i).getPosicion().get(1,0));
 							for (int j=0;j < obstaculos.size();j++){
@@ -740,8 +742,8 @@ public class Simulador {
 				rutaDinamica.add(getBandada().elementAt(boidAux).getPosicion());
 //				rutaDinamica.add(getBandada().elementAt(boidAux).calculaCentroMasas(getBandada(),radioCentroMasas));
 				boidActual = boidAux;
-				puntoActualX = getBandada().elementAt(boidActual).getPosicion().get(0,0);
-				puntoActualY = getBandada().elementAt(boidActual).getPosicion().get(1,0);
+				puntoActual.set(0,0,getBandada().elementAt(boidActual).getPosicion().get(0,0));
+				puntoActual.set(1,0,getBandada().elementAt(boidActual).getPosicion().get(1,0));
 //				System.out.println("saltó al siguiente boid");
 			}
 			

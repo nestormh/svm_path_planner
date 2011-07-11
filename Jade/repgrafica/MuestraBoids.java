@@ -239,7 +239,7 @@ class Dibujante2 extends JPanel{
 //				ruta.lineTo(pixel.getX(),pixel.getY());
 //				}
 //				g3.draw(ruta);
-				centroMasa = centroMasa.plus(bandadaPintar.elementAt(i).getPosicion());
+//				centroMasa = centroMasa.plus(bandadaPintar.elementAt(i).getPosicion());
 			}
 		}
 		
@@ -303,11 +303,11 @@ class Dibujante2 extends JPanel{
 		g3.fill(vecCocheSolitario);
 //		//---------------------- Pinto el centro de masa--------------------------------
 		
-		centroMasa.timesEquals((double)1/(double)bandadaPintar.size());		
-		Point2D centroMasaPixel = point2Pixel(centroMasa.get(0, 0),
-				centroMasa.get(1, 0));
-		g2.setColor(Color.cyan);
-		g2.drawOval((int)centroMasaPixel.getX()-2,(int)centroMasaPixel.getY()-2,4,4);
+//		centroMasa.timesEquals((double)1/(double)bandadaPintar.size());		
+//		Point2D centroMasaPixel = point2Pixel(centroMasa.get(0, 0),
+//				centroMasa.get(1, 0));
+//		g2.setColor(Color.cyan);
+//		g2.drawOval((int)centroMasaPixel.getX()-2,(int)centroMasaPixel.getY()-2,4,4);
 		
 		//------------------------ Pinto los obstáculos---------------------------------
 		
@@ -379,56 +379,56 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	Simulador sim;// = new Simulador();
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Escenarios"));
 	JMenuBar barraMenu = new JMenuBar(); 
-	JMenu menuArchivo = new JMenu("Archivo");
-	JMenu menuBandada = new JMenu("Bandada");
+	JMenu menuArchivo = new JMenu("File");
+	JMenu menuBandada = new JMenu("Flock");
 	Dibujante2 pintor;// = new Dibujante2();
-	JLabel etiquetaPesoLider = new JLabel("Liderazgo");
-	SpinnerNumberModel spPesoLider = new SpinnerNumberModel(Boid.getPesoLider(),0,100,0.1);
-	JSpinner spinnerPesoLider = new JSpinner(spPesoLider);
-	JLabel etiquetaCohesion = new JLabel("Cohesión");
-	SpinnerNumberModel spCohesion = new SpinnerNumberModel(Boid.getPesoCohesion(),0,100,0.1);
+//	JLabel etiquetaPesoLider = new JLabel("Liderazgo");
+//	SpinnerNumberModel spPesoLider = new SpinnerNumberModel(Boid.getPesoLider(),0,100,0.1);
+//	JSpinner spinnerPesoLider = new JSpinner(spPesoLider);
+	JLabel etiquetaCohesion = new JLabel("Cohesion");
+	SpinnerNumberModel spCohesion = new SpinnerNumberModel(Boid.getRadioCohesion(),0,100,0.1);
 	JSpinner spinnerCohesion = new JSpinner(spCohesion);
-	JLabel etiquetaSeparacion = new JLabel("Separación");
-	SpinnerNumberModel spSeparacion = new SpinnerNumberModel(Boid.getPesoSeparacion(),0,1000,0.1);
+	JLabel etiquetaSeparacion = new JLabel("Separation");
+	SpinnerNumberModel spSeparacion = new SpinnerNumberModel(Boid.getRadioSeparacion(),0,1000,0.1);
 	JSpinner spinnerSeparacion = new JSpinner(spSeparacion);
-	JLabel etiquetaAlineacion = new JLabel("Alineación");
-	SpinnerNumberModel spAlineacion = new SpinnerNumberModel(Boid.getPesoAlineacion(),0,100,0.1);
+	JLabel etiquetaAlineacion = new JLabel("Alignement");
+	SpinnerNumberModel spAlineacion = new SpinnerNumberModel(Boid.getRadioAlineacion(),0,100,0.1);
 	JSpinner spinnerAlineacion = new JSpinner(spAlineacion);
-	JLabel etiquetaObjetivo = new JLabel("Vel Obj");
-	SpinnerNumberModel spObjetivo = new SpinnerNumberModel(Boid.getPesoObjetivo(),0,100,0.1);
-	JSpinner spinnerObjetivo = new JSpinner(spObjetivo);
-	JLabel etiquetaEvitaObs = new JLabel("Evitar Obst");
-	SpinnerNumberModel spEvitaObs = new SpinnerNumberModel(Boid.getPesoObstaculo(),0,1000,0.1);
-	JSpinner spinnerEvitaObs = new JSpinner(spEvitaObs);
+//	JLabel etiquetaObjetivo = new JLabel("Vel Obj");
+//	SpinnerNumberModel spObjetivo = new SpinnerNumberModel(Boid.getPesoObjetivo(),0,100,0.1);
+//	JSpinner spinnerObjetivo = new JSpinner(spObjetivo);
+//	JLabel etiquetaEvitaObs = new JLabel("Evitar Obst");
+//	SpinnerNumberModel spEvitaObs = new SpinnerNumberModel(Boid.getPesoObstaculo(),0,1000,0.1);
+//	JSpinner spinnerEvitaObs = new JSpinner(spEvitaObs);
 //	JLabel etiquetaObsCerca = new JLabel("Obst cerca");
 //	SpinnerNumberModel spEvitaObsCerca = new SpinnerNumberModel(Boid.getPesoObstaculo(),0,1000,0.1);
 //	JSpinner spinnerEvitaObsCerca = new JSpinner(spEvitaObsCerca);
-	JLabel etiquetaCompLateral = new JLabel("Comp lateral");
-	SpinnerNumberModel spCompLateral = new SpinnerNumberModel(Boid.getPesoCompensacionLateral(),0,1000,0.1);
-	JSpinner spinnerCompLateral = new JSpinner(spCompLateral);
-	JLabel etiquetaRadObs = new JLabel("Radio obst");
+//	JLabel etiquetaCompLateral = new JLabel("Comp lateral");
+//	SpinnerNumberModel spCompLateral = new SpinnerNumberModel(Boid.getPesoCompensacionLateral(),0,1000,0.1);
+//	JSpinner spinnerCompLateral = new JSpinner(spCompLateral);
+	JLabel etiquetaRadObs = new JLabel("Obstacle Radius");
 	SpinnerNumberModel spRadioObs = new SpinnerNumberModel(Boid.getRadioObstaculo(),0,1000,0.1);
 	JSpinner spinnerRadioObs = new JSpinner(spRadioObs);
 //	JLabel etiquetaRadObsLejos = new JLabel("Radio lejos");
 //	SpinnerNumberModel spRadioObsLejos = new SpinnerNumberModel(Boid.getRadioObstaculoLejos(),0,1000,0.1);
 //	JSpinner spinnerRadioObsLejos = new JSpinner(spRadioObsLejos);
-	JLabel etiquetaVelMax = new JLabel("Vel Máx");
+	JLabel etiquetaVelMax = new JLabel("Maximun velocity");
 	SpinnerNumberModel spVelMax = new SpinnerNumberModel(Boid.getVelMax(),0,100,1);
 	JSpinner spinnerVelMax = new JSpinner(spVelMax);
-	JLabel etiquetaNumBoids = new JLabel("Número de Boids");
+	JLabel etiquetaNumBoids = new JLabel("Cuantity of boids");
 	SpinnerNumberModel spNumBoids = new SpinnerNumberModel(20,1,200,1);
 	JSpinner spinnerNumBoids = new JSpinner(spNumBoids);
 	JButton pausa = new JButton("Play");
-	JButton colocarObs = new JButton("Colocar obstáculos");
-	JButton colocarBan = new JButton("Colocar la bandada");
-	JMenuItem botonSalvar = new JMenuItem("Salvar escenario");
-	JMenuItem botonCargar = new JMenuItem("Cargar escenario");
-	JMenuItem botonBorrarBandada = new JMenuItem("Borrar Bandada");
-	JMenuItem botonCrearBandada = new JMenuItem("Crear Bandada");
-	JCheckBox checkBoxPintar = new JCheckBox("Dibujar");
-	JButton configurar = new JButton("Configurar simulación batch");
-	JButton simulacionBatch = new JButton("Ejecutar simulación batch");
-	JLabel tiempoConsumido = new JLabel("0");
+	JButton colocarObs = new JButton("Place obstacles");
+	JButton colocarBan = new JButton("Place flock");
+	JMenuItem botonSalvar = new JMenuItem("Save scenary");
+	JMenuItem botonCargar = new JMenuItem("Load scenary");
+	JMenuItem botonBorrarBandada = new JMenuItem("Erase flock");
+	JMenuItem botonCrearBandada = new JMenuItem("Create flock");
+	JCheckBox checkBoxPintar = new JCheckBox("Draw");
+	JButton configurar = new JButton("Configure batch simulation");
+	JButton simulacionBatch = new JButton("Execute batch simulation");
+//	JLabel tiempoConsumido = new JLabel("0");
 	public double tiempo;
 	ConfigParam configurador;
 	
@@ -458,20 +458,20 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		JPanel panelNorte = new JPanel(new FlowLayout());
 //		panelSur.add(etiquetaPesoLider);
 //		panelSur.add(spinnerPesoLider);
-//		panelSur.add(etiquetaCohesion);
-//		panelSur.add(spinnerCohesion);
+		panelSur.add(etiquetaCohesion);
+		panelSur.add(spinnerCohesion);
 		panelSur.add(etiquetaSeparacion);
 		panelSur.add(spinnerSeparacion);
-//		panelSur.add(etiquetaAlineacion);
-//		panelSur.add(spinnerAlineacion);
-		panelSur.add(etiquetaObjetivo);
-		panelSur.add(spinnerObjetivo);
-		panelSur.add(etiquetaEvitaObs);
-		panelSur.add(spinnerEvitaObs);
+		panelSur.add(etiquetaAlineacion);
+		panelSur.add(spinnerAlineacion);
+//		panelSur.add(etiquetaObjetivo);
+//		panelSur.add(spinnerObjetivo);
+//		panelSur.add(etiquetaEvitaObs);
+//		panelSur.add(spinnerEvitaObs);
 //		panelSur.add(etiquetaObsCerca);
 //		panelSur.add(spinnerEvitaObsCerca);
-		panelSur.add(etiquetaCompLateral);
-		panelSur.add(spinnerCompLateral);
+//		panelSur.add(etiquetaCompLateral);
+//		panelSur.add(spinnerCompLateral);
 		panelSur.add(etiquetaRadObs);
 		panelSur.add(spinnerRadioObs);
 //		panelSur.add(etiquetaRadObsLejos);
@@ -488,17 +488,17 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		panelNorte.add(colocarBan);
 		panelNorte.add(configurar);
 		panelNorte.add(simulacionBatch);
-		panelNorte.add(tiempoConsumido);
+//		panelNorte.add(tiempoConsumido);
 //		panelNorte.add(botonSalvar);
 //		panelNorte.add(botonCargar);		
-		spinnerPesoLider.addChangeListener(this);
+//		spinnerPesoLider.addChangeListener(this);
 		spinnerCohesion.addChangeListener(this);
 		spinnerSeparacion.addChangeListener(this);
 		spinnerAlineacion.addChangeListener(this);
-		spinnerObjetivo.addChangeListener(this);
-		spinnerEvitaObs.addChangeListener(this);
+//		spinnerObjetivo.addChangeListener(this);
+//		spinnerEvitaObs.addChangeListener(this);
 		spinnerRadioObs.addChangeListener(this);
-		spinnerCompLateral.addChangeListener(this);
+//		spinnerCompLateral.addChangeListener(this);
 //		spinnerRadioObsCerca.addChangeListener(this);
 //		spinnerRadioObsLejos.addChangeListener(this);
 		spinnerVelMax.addChangeListener(this);
@@ -548,9 +548,9 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		
 
 	public void stateChanged(ChangeEvent e) {
-		if (e.getSource() == spinnerPesoLider){
-			Boid.setPesoLider(spPesoLider.getNumber().doubleValue());
-		}
+//		if (e.getSource() == spinnerPesoLider){
+//			Boid.setPesoLider(spPesoLider.getNumber().doubleValue());
+//		}
 		if (e.getSource() == spinnerCohesion){
 			Boid.setPesoCohesion(spCohesion.getNumber().doubleValue());
 		}
@@ -560,18 +560,15 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		if (e.getSource() == spinnerAlineacion){
 			Boid.setPesoAlineacion(spAlineacion.getNumber().doubleValue());
 		}
-		if (e.getSource() == spinnerObjetivo){
-			Boid.setPesoObjetivo(spObjetivo.getNumber().doubleValue());
-		}
-		if (e.getSource() == spinnerEvitaObs){
-			Boid.setPesoObstaculo(spEvitaObs.getNumber().doubleValue());
-		}
-		if (e.getSource() == spinnerEvitaObs){
-			Boid.setPesoObstaculo(spEvitaObs.getNumber().doubleValue());
-		}
-		if (e.getSource() == spinnerCompLateral){
-			Boid.setPesoCompensacionLateral(spCompLateral.getNumber().doubleValue());
-		}
+//		if (e.getSource() == spinnerObjetivo){
+//			Boid.setPesoObjetivo(spObjetivo.getNumber().doubleValue());
+//		}
+//		if (e.getSource() == spinnerEvitaObs){
+//			Boid.setPesoObstaculo(spEvitaObs.getNumber().doubleValue());
+//		}
+//		if (e.getSource() == spinnerCompLateral){
+//			Boid.setPesoCompensacionLateral(spCompLateral.getNumber().doubleValue());
+//		}
 		if (e.getSource() == spinnerRadioObs){
 			Boid.setRadioObstaculo(spRadioObs.getNumber().doubleValue());
 		}
@@ -589,7 +586,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	public void actionPerformed(ActionEvent e){
 		if (e.getSource() == pausa){
 			if (!play){ // La etiqueta del botón cambia
-				pausa.setText("Pausa");
+				pausa.setText("Pause");
 				tiempo = System.currentTimeMillis();
 				botonBorrarBandada.setEnabled(false);
 				botonCrearBandada.setEnabled(false);
@@ -864,18 +861,18 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //		//----------------------------------------//
 		
 		MuestraBoids gui = new MuestraBoids();
-		Console.run(gui,1200,1000);
+		Console.run(gui,1200,500);
 		int alturaPanel = gui.pintor.getHeight();
 		int anchuraPanel = gui.pintor.getWidth();
 		double longitudEscenario = 100; // inicialmente a 60
-		double anchuraEscenario = 30;//longitudEscenario*alturaPanel/anchuraPanel;
+		double anchuraEscenario = longitudEscenario*alturaPanel/anchuraPanel;//30
 		gui.getSim().setAnchoEscenario(anchuraEscenario);
 		gui.getSim().setLargoEscenario(longitudEscenario);
 		gui.getPintor().setEsqInferiorDerecha(longitudEscenario,0);
 		gui.getPintor().setEsqSuperiorIzquierda(0,longitudEscenario*alturaPanel/anchuraPanel);
 		int numSimu = 0;
 		int simuDeseadas = 1000;
-		int numObstaculos = 25;
+		int numObstaculos = 20;
 		double distCercana = 3;
 		Vector<Matrix> vectorPosCoche = new Vector<Matrix>();
 		Vector<Double> yawCoche = new Vector<Double>();
@@ -927,7 +924,9 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				//La simulación acabará cuando el coche llegue al objetivo o cuando haya
 				//transcurrido más tiempo del estipulado como bueno para una sola simulación
 				//Para evitar que se atasque toda la simulación por lotes
-				while((distCocheObjetivo > distCercana)&&(tSim-tAnt < tMaximo)){					
+				while((distCocheObjetivo > distCercana)&&(tSim-tAnt < tMaximo)){
+					System.out.println("numero de iteraciones del bucle principal " + 
+							gui.getSim().getContIteraciones());
 //					System.out.println("La duración de cada iteración es "+ (System.currentTimeMillis() - tAnt));
 //					tAnt = System.currentTimeMillis();
 //					resp=m111.leeMensaje();
@@ -1070,7 +1069,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	    				gui.getSim().crearBandada();
 	    				gui.getSim().posicionarBandada(gui.getSim().getPosInicial());	    				
 	    				gui.getSim().simuPorLotes();
-	    				gui.tiempoConsumido.setText("Tardó " + gui.getSim().getTiempoInvertido() + " sec");	    				
+//	    				gui.tiempoConsumido.setText("Tardó " + gui.getSim().getTiempoInvertido() + " sec");	    				
 	    				if (gui.pintarEscena){
 	    					for(int j=0;j<gui.getSim().getBoidsOk().size();j++){
 /*OJO! aqui se mejora la ruta*/			/*gui.getSim().getBoidsOk().elementAt(j).setRutaBoid(
