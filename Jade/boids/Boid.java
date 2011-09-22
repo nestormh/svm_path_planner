@@ -499,12 +499,14 @@ public class Boid implements Serializable{
 		Matrix despObjetivo = new Matrix(2,1);
 		Matrix despAliCoheSep = new Matrix(2,1);
 		Matrix despObstaculo = new Matrix(2,1);
+		Matrix haciaObjetivo = new Matrix(2,1);
+		haciaObjetivo = this.objetivo.minus(this.getPosicion());
 //		despCohesion = cohesion(bandada, indBoid);
 //		despSeparacion = separacion(bandada, indBoid);
 //		despAlineacion = alineacion(bandada, indBoid);
 		despAliCoheSep = aliCoheSep(bandada, indBoid);
 		despObjetivo = seguirObjetivo(bandada,indBoid,obj);
-		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid),despObjetivo);
+		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid),haciaObjetivo);
 //		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad());
 		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo));
 //		desp = desp.times(1/desp.norm2());
