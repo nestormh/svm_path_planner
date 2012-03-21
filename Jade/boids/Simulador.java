@@ -46,10 +46,10 @@ public class Simulador {
 	Trayectoria tr;
 	Coche modCoche = new Coche();
 	Coche cocheSolitario = new Coche();
-	int horPrediccion = 10;
+	int horPrediccion = 13;
 	int horControl = 3;
 	double landa = 1;
-	double Ts = 0.05;
+	double Ts = 0.2;
 	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, Ts);	
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Simulaciones"));
 	/**Coordenadas del coche con comportamiento reactivo*/
@@ -310,11 +310,11 @@ public class Simulador {
 				contPred.setCarroOriginal(this.modCoche);
 				trayec.situaCoche(posInicial.get(0,0),posInicial.get(1,0));				
 				contPred.setRuta(trayec);
-				contPred.setTs(Ts/1000);
+//				contPred.setTs(Ts/1000);
 				comando  = contPred.calculaComando();
-				comando = sibtra.util.UtilCalculos.limita(comando,-Math.PI/10,Math.PI/12);
+				comando = sibtra.util.UtilCalculos.limita(comando,-Math.PI/6,Math.PI/6);
 			}	
-			System.out.println("el comando calculado es " + comando);
+//			System.out.println("el comando calculado es " + comando);
 			setTiempoAnt(tiempoActual);
 //		}   
 			modCoche.calculaEvolucion(comando,velocidad,Ts);
