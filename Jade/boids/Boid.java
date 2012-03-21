@@ -193,7 +193,7 @@ public class Boid implements Serializable{
 			velMedia = velMedia.timesEquals((double)1/(double)contAlineacion);
 			velMedia = velMedia.minus(this.getVelocidad());			
 			velMedia = velMedia.times(pesoAlineacion);
-			velMedia = velMedia.minus(this.getVelocidad());
+//			velMedia = velMedia.minus(this.getVelocidad());
 			velMedia = limitaFuerza(velMedia);
 //			velMedia = velMedia.times(1/velMedia.norm2()); // lo pasamos a unitario
 		}else{
@@ -365,7 +365,7 @@ public class Boid implements Serializable{
 		Matrix compensacion = new Matrix(zero,2);
 		boolean caminoOcupado = false;
 		double dist = 0;
-		double umbralEsquivar = Math.toRadians(20);
+		double umbralEsquivar = Math.toRadians(5);//20
 		double umbralCaso3 = -Math.toRadians(10);
 		int sentidoCompensacionLateral = 0;
 		Line2D recta = 
@@ -376,7 +376,7 @@ public class Boid implements Serializable{
 			if (dist < radioObstaculo){
 				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
 				//es el vector que apunta desde al boid hacia el obstáculo
-				if (dist != 0){
+				if (dist != 0){ // Para no dividir entre cero
 					repulsion = repulsion.times(1/(dist)*(dist));
 				}
 				repulsion = repulsion.times(pesoObstaculo);
@@ -500,7 +500,7 @@ public class Boid implements Serializable{
 		Matrix despAliCoheSep = new Matrix(2,1);
 		Matrix despObstaculo = new Matrix(2,1);
 		Matrix haciaObjetivo = new Matrix(2,1);
-		haciaObjetivo = this.objetivo.minus(this.getPosicion());
+		haciaObjetivo = objetivo.minus(this.getPosicion());
 //		despCohesion = cohesion(bandada, indBoid);
 //		despSeparacion = separacion(bandada, indBoid);
 //		despAlineacion = alineacion(bandada, indBoid);
