@@ -611,7 +611,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				botonCrearBandada.setEnabled(false);
 				setObjetivoEncontrado(false);
 			}
-			if (play){
+			if (playObs){
 				pausaObs.setText("Play Obs");
 				botonBorrarBandada.setEnabled(true);
 				botonCrearBandada.setEnabled(true);
@@ -943,12 +943,19 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));
 				distCocheObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
 				double tAnt = System.currentTimeMillis()/1000;
-				double tSim = System.currentTimeMillis()/1000;			
+				double tSim = System.currentTimeMillis()/1000;		
+				double tInicioIteracion = System.currentTimeMillis()/1000;
 				//La simulación acabará cuando el coche llegue al objetivo o cuando haya
 				//transcurrido más tiempo del estipulado como bueno para una sola simulación
 				//Para evitar que se atasque toda la simulación por lotes
-				while((distCocheObjetivo > distCercana)&&(tSim-tAnt < tMaximo)){
+				while((distCocheObjetivo > distCercana)&&(tSim-tAnt < tMaximo)){					
 					while(gui.play){
+						try {
+							Thread.sleep(100-(long)(tSim-tInicioIteracion));
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+						tInicioIteracion = System.currentTimeMillis()/1000;
 //						System.out.println("numero de iteraciones del bucle principal " + 
 //								gui.getSim().getContIteraciones());
 //						System.out.println("La duración de cada iteración es "+ (System.currentTimeMillis() - tAnt));
