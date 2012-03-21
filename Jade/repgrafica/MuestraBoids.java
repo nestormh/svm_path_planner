@@ -135,7 +135,7 @@ class Dibujante2 extends JPanel{
 		}
 	}
 	
-	public void eliminarObstáculos(){
+	public void eliminarObstaculos(){
 		obstaculosPintar.clear();
 	}
 	
@@ -269,38 +269,38 @@ class Dibujante2 extends JPanel{
 		g3.fill(coche);
 		
 		/*----------------------Pinto el coche solitario---------------------------------*/
-		g3.setColor(Color.green);
-
-		Point2D pxDD2= point2Pixel(posCocheSolitario.get(0,0)+anchoCoche/2*Math.sin(yawCocheSolitario),
-				posCocheSolitario.get(1,0)-anchoCoche/2*Math.cos(yawCocheSolitario));
-		Point2D pxDI2= point2Pixel(posCocheSolitario.get(0,0)-anchoCoche/2*Math.sin(yawCocheSolitario),
-				posCocheSolitario.get(1,0)+anchoCoche/2*Math.cos(yawCocheSolitario));
-		Point2D pxPD2=point2Pixel(posCocheSolitario.get(0,0)+anchoCoche/2*Math.sin(yawCocheSolitario)
-				-largoCoche*Math.cos(yawCocheSolitario),
-				posCocheSolitario.get(1,0)-anchoCoche/2*Math.cos(yawCocheSolitario)
-				-largoCoche*Math.sin(yawCocheSolitario));
-		Point2D pxPI2= point2Pixel(posCocheSolitario.get(0,0)-anchoCoche/2*Math.sin(yawCocheSolitario)
-				-largoCoche*Math.cos(yawCocheSolitario),
-				posCocheSolitario.get(1,0)+anchoCoche/2*Math.cos(yawCocheSolitario)
-				-largoCoche*Math.sin(yawCocheSolitario));
-		GeneralPath cocheSolitario=new GeneralPath();
-		cocheSolitario.moveTo((float)pxDD2.getX(),(float)pxDD2.getY());
-		cocheSolitario.lineTo((float)pxPD2.getX(),(float)pxPD2.getY());
-		cocheSolitario.lineTo((float)pxPI2.getX(),(float)pxPI2.getY());
-		cocheSolitario.lineTo((float)pxDI2.getX(),(float)pxDI2.getY());
-		cocheSolitario.closePath();
-		g3.draw(cocheSolitario);
-		g3.fill(cocheSolitario);
-		Point2D vertice1 = point2Pixel(posCocheSolitario.get(0,0),posCocheSolitario.get(1,0));
-		Point2D vertice2 = point2Pixel(vectorDirectorCoche.get(0,0)+posCocheSolitario.get(0,0),
-				vectorDirectorCoche.get(1,0)+posCocheSolitario.get(1,0));
-		GeneralPath vecCocheSolitario = new GeneralPath();
-		vecCocheSolitario.moveTo((float)vertice1.getX(),(float)vertice1.getY());
-		vecCocheSolitario.lineTo((float)vertice2.getX(),(float)vertice2.getY());
-		vecCocheSolitario.closePath();
-		g3.setColor(Color.BLACK);
-		g3.draw(vecCocheSolitario);
-		g3.fill(vecCocheSolitario);
+//		g3.setColor(Color.green);
+//
+//		Point2D pxDD2= point2Pixel(posCocheSolitario.get(0,0)+anchoCoche/2*Math.sin(yawCocheSolitario),
+//				posCocheSolitario.get(1,0)-anchoCoche/2*Math.cos(yawCocheSolitario));
+//		Point2D pxDI2= point2Pixel(posCocheSolitario.get(0,0)-anchoCoche/2*Math.sin(yawCocheSolitario),
+//				posCocheSolitario.get(1,0)+anchoCoche/2*Math.cos(yawCocheSolitario));
+//		Point2D pxPD2=point2Pixel(posCocheSolitario.get(0,0)+anchoCoche/2*Math.sin(yawCocheSolitario)
+//				-largoCoche*Math.cos(yawCocheSolitario),
+//				posCocheSolitario.get(1,0)-anchoCoche/2*Math.cos(yawCocheSolitario)
+//				-largoCoche*Math.sin(yawCocheSolitario));
+//		Point2D pxPI2= point2Pixel(posCocheSolitario.get(0,0)-anchoCoche/2*Math.sin(yawCocheSolitario)
+//				-largoCoche*Math.cos(yawCocheSolitario),
+//				posCocheSolitario.get(1,0)+anchoCoche/2*Math.cos(yawCocheSolitario)
+//				-largoCoche*Math.sin(yawCocheSolitario));
+//		GeneralPath cocheSolitario=new GeneralPath();
+//		cocheSolitario.moveTo((float)pxDD2.getX(),(float)pxDD2.getY());
+//		cocheSolitario.lineTo((float)pxPD2.getX(),(float)pxPD2.getY());
+//		cocheSolitario.lineTo((float)pxPI2.getX(),(float)pxPI2.getY());
+//		cocheSolitario.lineTo((float)pxDI2.getX(),(float)pxDI2.getY());
+//		cocheSolitario.closePath();
+//		g3.draw(cocheSolitario);
+//		g3.fill(cocheSolitario);
+//		Point2D vertice1 = point2Pixel(posCocheSolitario.get(0,0),posCocheSolitario.get(1,0));
+//		Point2D vertice2 = point2Pixel(vectorDirectorCoche.get(0,0)+posCocheSolitario.get(0,0),
+//				vectorDirectorCoche.get(1,0)+posCocheSolitario.get(1,0));
+//		GeneralPath vecCocheSolitario = new GeneralPath();
+//		vecCocheSolitario.moveTo((float)vertice1.getX(),(float)vertice1.getY());
+//		vecCocheSolitario.lineTo((float)vertice2.getX(),(float)vertice2.getY());
+//		vecCocheSolitario.closePath();
+//		g3.setColor(Color.BLACK);
+//		g3.draw(vecCocheSolitario);
+//		g3.fill(vecCocheSolitario);
 //		//---------------------- Pinto el centro de masa--------------------------------
 		
 //		centroMasa.timesEquals((double)1/(double)bandadaPintar.size());		
@@ -372,6 +372,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	boolean batch = false;
 	private boolean objetivoEncontrado;
 	private boolean play = false;
+	private boolean playObs = false;
 	private boolean colocandoObs = false;
 	private boolean colocandoBan = false;
 	private boolean pintarEscena = false;
@@ -419,6 +420,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	SpinnerNumberModel spNumBoids = new SpinnerNumberModel(20,1,200,1);
 	JSpinner spinnerNumBoids = new JSpinner(spNumBoids);
 	JButton pausa = new JButton("Play");
+	JButton pausaObs = new JButton("Play obst");
 	JButton colocarObs = new JButton("Place obstacles");
 	JButton colocarBan = new JButton("Place flock");
 	JMenuItem botonSalvar = new JMenuItem("Save scenary");
@@ -484,6 +486,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //		panelNorte.add(botonCrearBandada);
 //		panelNorte.add(botonBorrarBandada);
 		panelNorte.add(pausa);
+		panelNorte.add(pausaObs);
 		panelNorte.add(colocarObs);
 		panelNorte.add(colocarBan);
 		panelNorte.add(configurar);
@@ -504,6 +507,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		spinnerVelMax.addChangeListener(this);
 		spinnerNumBoids.addChangeListener(this);
 		pausa.addActionListener(this);
+		pausaObs.addActionListener(this);
 		colocarObs.addActionListener(this);
 		colocarBan.addActionListener(this);
 		botonSalvar.addActionListener(this);
@@ -599,6 +603,22 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 			}
 			play = !play;
 		}
+		if (e.getSource() == pausaObs){
+			if (!playObs){ // La etiqueta del botón cambia
+				pausaObs.setText("Pause Obs");
+				tiempo = System.currentTimeMillis();
+				botonBorrarBandada.setEnabled(false);
+				botonCrearBandada.setEnabled(false);
+				setObjetivoEncontrado(false);
+			}
+			if (play){
+				pausaObs.setText("Play Obs");
+				botonBorrarBandada.setEnabled(true);
+				botonCrearBandada.setEnabled(true);
+			}
+			playObs = !playObs;
+		}
+		
 		if (e.getSource() == colocarObs){
 			if (!colocandoObs){ // La etiqueta del botón cambia
 				colocarObs.setText("Colocando obstáculos");				
@@ -884,7 +904,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		// Indico la posición del objetivo y la posición inicial
 //		double[] objetivo = {gui.pintor.getEsqInferiorDerecha().getX(),
 //				gui.pintor.getEsqSuperiorIzquierda().getY()/2};
-		double[] objetivo = {longitudEscenario,anchuraEscenario/2};
+		double[] objetivo = {longitudEscenario-3,anchuraEscenario/2};
 		gui.getSim().setObjetivo(new Matrix(objetivo,2));
 //		double[] inicial = {3,gui.pintor.getEsqSuperiorIzquierda().getY()/2};
 		double[] inicial = {3,anchuraEscenario/2};
@@ -901,14 +921,17 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		double distCocheObjetivo = Double.POSITIVE_INFINITY;
 //		while (true){
 		LoggerFactory.activaLoggers(1000);
-		while (numSimu < simuDeseadas){			
-			if (gui.play){
+		System.out.println("Antes del while");
+		while (numSimu < simuDeseadas){
+//			System.out.println("Despues del while");
+			if (gui.play){				
+//				System.out.println("dentro del gui.play = " + gui.play);
 				// reinicio todo para la siguiente simulación
 				gui.getSim().setContIteraciones(0);
 				vectorPosCoche.clear();
 				yawCoche.clear();
 				distMinObst.clear();
-				gui.pintor.eliminarObstáculos();
+				gui.pintor.eliminarObstaculos();
 				gui.getSim().generaObstaculos(numObstaculos,1.5);				
 				gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 				gui.getSim().borrarBandada();
@@ -920,75 +943,91 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));
 				distCocheObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
 				double tAnt = System.currentTimeMillis()/1000;
-				double tSim = System.currentTimeMillis()/1000;
+				double tSim = System.currentTimeMillis()/1000;			
 				//La simulación acabará cuando el coche llegue al objetivo o cuando haya
 				//transcurrido más tiempo del estipulado como bueno para una sola simulación
 				//Para evitar que se atasque toda la simulación por lotes
 				while((distCocheObjetivo > distCercana)&&(tSim-tAnt < tMaximo)){
-					System.out.println("numero de iteraciones del bucle principal " + 
-							gui.getSim().getContIteraciones());
-//					System.out.println("La duración de cada iteración es "+ (System.currentTimeMillis() - tAnt));
-//					tAnt = System.currentTimeMillis();
-//					resp=m111.leeMensaje();
-//					ba=m111.parseaBarrido(resp);//
-//					gui.getSim().posicionarObstaculos(ba);
-//					gui.pintor.eliminarObstáculos();
-//					gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
-					gui.getSim().moverObstaculos();
-//					indMinAnt = gui.getSim().moverBoids(indMinAnt);
-					gui.getSim().moverBoids();
-//					int indice = 0;
-//					double distObj = Double.POSITIVE_INFINITY;
-//					for(int h = 0; h<gui.getSim().getBandada().size();h++){
-//						double distan = gui.getSim().getBandada().elementAt(h).getDistObjetivo();
-//						if(distan < distObj){
-//							indice = h;
-//							distObj = distan;
+					while(gui.play){
+//						System.out.println("numero de iteraciones del bucle principal " + 
+//								gui.getSim().getContIteraciones());
+//						System.out.println("La duración de cada iteración es "+ (System.currentTimeMillis() - tAnt));
+//						tAnt = System.currentTimeMillis();
+//						resp=m111.leeMensaje();
+//						ba=m111.parseaBarrido(resp);//
+//						gui.getSim().posicionarObstaculos(ba);
+//						gui.pintor.eliminarObstáculos();
+//						gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());		
+						if (gui.playObs){
+							gui.getSim().moverObstaculos();
+						}
+						
+//						indMinAnt = gui.getSim().moverBoids(indMinAnt);
+						gui.getSim().moverBoids();
+//						int indice = 0;
+//						double distObj = Double.POSITIVE_INFINITY;
+//						for(int h = 0; h<gui.getSim().getBandada().size();h++){
+//							double distan = gui.getSim().getBandada().elementAt(h).getDistObjetivo();
+//							if(distan < distObj){
+//								indice = h;
+//								distObj = distan;
+//							}
 //						}
-//					}
-					//	QUITO LA BÚSQUEDA DEL LIDER
-//					double distOrigen = Double.POSITIVE_INFINITY;
-//					for(int h = 0; h<gui.getSim().getBandada().size();h++){
-//						double distan = gui.getSim().getBandada().elementAt(h).getDistOrigen();
-//						if(distan < distOrigen){
-//							indice = h;
-//							distOrigen = distan;
+						//	QUITO LA BÚSQUEDA DEL LIDER
+//						double distOrigen = Double.POSITIVE_INFINITY;
+//						for(int h = 0; h<gui.getSim().getBandada().size();h++){
+//							double distan = gui.getSim().getBandada().elementAt(h).getDistOrigen();
+//							if(distan < distOrigen){
+//								indice = h;
+//								distOrigen = distan;
+//							}
 //						}
-//					}
-//					gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
-					gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
-					gui.pintor.setRutaDinamica(gui.getRutaDinamica());
-					gui.getSim().moverPtoInicial(tAnt, gui.getSim().getTs());
-					gui.pintor.setVectorDirectorCoche(
-							gui.getSim().moverCocheSolitario(gui.getSim().getTs()));
-					//Rellenamos los datos del camino seguido por el coche
-					double[] posCocheAux = {gui.getSim().getPosInicial().get(0,0),
-							gui.getSim().getPosInicial().get(1,0)};
-					vectorPosCoche.add(new Matrix(posCocheAux,2));
-					yawCoche.add(gui.getSim().getModCoche().getYaw());
-					distMinObst.add(gui.getSim().distObstaculoMasCercanoAlCoche());
-					//Medimos la distancia a la que se encuentra el coche del objetivo
-					distCocheObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
-					gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
-					gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));
-					/*if (gui.getRutaDinamica().size()>1){ //Comprobar si hay ruta que seguir					
-						Trayectoria tr = new Trayectoria(gui.getSim().traduceRuta(gui.getRutaDinamica()));
-						Trayectoria trMasPuntos = new Trayectoria(tr,0.1);
-						trMasPuntos.situaCoche(gui.getSim().getModCoche().getX(),gui.getSim().getModCoche().getY());
-						if (flagUnaVez){
-							gui.getSim().getCp().setRuta(trMasPuntos);
-							flagUnaVez = false;
+//						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
+//						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
+						// Si la ruta no ha sido intersectada por un obst�culo no se vuelve a calcular
+						if (gui.getSim().compruebaRuta() || !gui.getSim().isRutaCompleta()){
+							gui.getSim().calculaRutaDinamica();
+							if (gui.getSim().getRutaDinamica().size() <= 3){
+								gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
+							}else{
+								gui.setRutaDinamica(gui.getSim().suavizador(0.1));
+							}
 						}					
-						gui.getSim().moverPtoInicial(System.currentTimeMillis(),System.currentTimeMillis()-tAnt);
-					}								
-					gui.pintor.setPosCoche(gui.getSim().getPosInicial());
-					gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());*/
-//					gui.getSim().simuPorLotes();				
-					if (gui.pintarEscena)
-						gui.pintor.repaint();	
-					//recogemos el tiempo que transcurre en cada simulación
-					tSim = System.currentTimeMillis()/1000;
+//						gui.setRutaDinamica(gui.getSim().suavizador(0.1));
+						gui.pintor.setRutaDinamica(gui.getRutaDinamica());
+						gui.getSim().moverPtoInicial(tAnt, gui.getSim().getTs());
+						gui.pintor.setVectorDirectorCoche(
+								gui.getSim().moverCocheSolitario(gui.getSim().getTs()));
+						//Rellenamos los datos del camino seguido por el coche
+						double[] posCocheAux = {gui.getSim().getPosInicial().get(0,0),
+								gui.getSim().getPosInicial().get(1,0)};
+						vectorPosCoche.add(new Matrix(posCocheAux,2));
+						yawCoche.add(gui.getSim().getModCoche().getYaw());
+						distMinObst.add(gui.getSim().distObstaculoMasCercanoAlCoche());
+						//Medimos la distancia a la que se encuentra el coche del objetivo
+						distCocheObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
+						gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
+						gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));
+						/*if (gui.getRutaDinamica().size()>1){ //Comprobar si hay ruta que seguir					
+							Trayectoria tr = new Trayectoria(gui.getSim().traduceRuta(gui.getRutaDinamica()));
+							Trayectoria trMasPuntos = new Trayectoria(tr,0.1);
+							trMasPuntos.situaCoche(gui.getSim().getModCoche().getX(),gui.getSim().getModCoche().getY());
+							if (flagUnaVez){
+								gui.getSim().getCp().setRuta(trMasPuntos);
+								flagUnaVez = false;
+							}					
+							gui.getSim().moverPtoInicial(System.currentTimeMillis(),System.currentTimeMillis()-tAnt);
+						}								
+						gui.pintor.setPosCoche(gui.getSim().getPosInicial());
+						gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());*/
+//						gui.getSim().simuPorLotes();				
+						if (gui.pintarEscena)
+							gui.pintor.repaint();	
+						//recogemos el tiempo que transcurre en cada simulación
+						tSim = System.currentTimeMillis()/1000;
+					}
 				}
+				
 				numSimu++;
 				if (distCocheObjetivo <= distCercana){
 //					Cálculo de las medias, varianzas,etc del estudio estadístico
