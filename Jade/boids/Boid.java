@@ -38,6 +38,34 @@ public class Boid implements Serializable{
 	Vector<Matrix> rutaBoid = new Vector<Matrix>();
 	public boolean lider = false;
 	public boolean caminoLibre = false;
+	
+	//------Campos para la gestión de la búsqueda a*------------------------
+	/**
+	 * Indica si el boid está en la lista openSet, es decir, aquellos nodos que todavía pueden ser explorados
+	 */
+	public boolean openSet = false;	
+	/**
+	 * Indica si el boid está en la lista closedSet, es decir, aquellos nodos que ya han sido explorados
+	 */
+	public boolean closedSet = false;
+	/**
+	 * Función de costo del camino, que es el costo desde el nodo inicial hasta este
+	 */
+	public double g_score = 0;	
+	/**
+	 * Valor de una heurística admisible de la distancia hasta el objetivo. En principio en este caso será la 
+	 * distancia euclídea desde este boid hasta el objetivo .ver el método getDistObjetivo() de esta clase
+	 */
+	public double h_score = 0;
+	/**
+	 * Valoración completa del boid. Es la suma de g_score + h_score
+	 */
+	public double f_score = 0;
+	/**
+	 * Índice del vecino a través del cual el camino a llegado a este boid
+	 */
+	public Boid came_from;
+	//------Acaban los campos para la gestión de la búsqueda a*------------------------		
 	public boolean conectado = false;
 	static double radioObstaculo = 5.5;//6;
 //	static double radioObstaculoLejos = 3;
@@ -752,6 +780,23 @@ public class Boid implements Serializable{
 	public void setConectado(boolean conectado) {
 		this.conectado = conectado;
 	}
+	
+	public boolean isOpenSet() {
+		return openSet;
+	}
+
+	public void setOpenSet(boolean openSet) {
+		this.openSet = openSet;
+	}
+
+	public boolean isClosedSet() {
+		return closedSet;
+	}
+
+	public void setClosedSet(boolean closedSet) {
+		this.closedSet = closedSet;
+	}
+
 
 	
 	public static void main(String[] args) {
@@ -847,6 +892,42 @@ public class Boid implements Serializable{
 	public void setRutaBoid(Vector<Matrix> rutaBoid) {
 		this.rutaBoid = rutaBoid;
 	}	
+	
+	public double getG_score() {
+		return g_score;
+	}
+
+	public void setG_score(double g_score) {
+		this.g_score = g_score;
+	}
+
+	public double getH_score() {
+		return h_score;
+	}
+
+	public void setH_score(double h_score) {
+		this.h_score = h_score;
+	}
+
+	public double getF_score() {
+		return f_score;
+	}
+
+	public void setF_score(double f_score) {
+		this.f_score = f_score;
+	}
+	public double calculaF_score(){
+		this.setF_score(this.getG_score() + this.getH_score());
+		return this.f_score;
+	}
+
+	public Boid getCame_from() {
+		return came_from;
+	}
+
+	public void setCame_from(Boid came_from) {
+		this.came_from = came_from;
+	}
 }
 
 class panelMuestraBoid extends JPanel{
