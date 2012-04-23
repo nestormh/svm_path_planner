@@ -19,6 +19,7 @@ import sibtra.log.LoggerFactory;
 //import predictivo.UtilCalculos;
 import flanagan.*;
 import flanagan.interpolation.CubicSpline;
+import gridBasedSearch.Grid;
 import Jama.Matrix;
 
 public class Simulador {
@@ -47,10 +48,12 @@ public class Simulador {
 	Coche modCoche = new Coche();
 	Coche cocheSolitario = new Coche();
 	int horPrediccion = 13;
-	int horControl = 3;
-	double landa = 1;
-	double Ts = 0.2;
-	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, Ts);	
+	int horControl = 2;//3;
+	double landa = 1;//1;
+	double Ts = 0.1;
+	double TsPred = 0.2;
+	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, TsPred);	
+
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Simulaciones"));
 	/**Coordenadas del coche con comportamiento reactivo*/
 	Matrix posCocheSolitario = new Matrix(2,1);
@@ -94,15 +97,36 @@ public class Simulador {
 	private LoggerArrayDoubles logPosturaCoche;
 	private LoggerArrayDoubles logEstadistica;
 	private double distOkAlOrigen = 5;
+	/**
+	 * radio en el que se busca el siguiente boid para formar el camino
+	 */
+	double umbralCercania = 8;//12;
+
+	/**
+	 * indica si existe una ruta con un tamaño mayor o igual a 2 puntos
+	 */
+	private boolean rutaParcial;
+	/**
+	 * 
+	 */
 	private boolean rutaCompleta;
 	private double[] x = null;
 	private double[] y = null;
 	
+	//Búsqueda A estrella
 	
-	
+	Grid rejilla;
 	
 	//-------------Constructores---------------------------------------------------
 	
+
+	public Grid getRejilla() {
+		return rejilla;
+	}
+
+	public void setRejilla(Grid rejilla) {
+		this.rejilla = rejilla;
+	}
 
 	public Vector<TipoCamino> getCaminos() {
 		return caminos;
@@ -285,10 +309,10 @@ public class Simulador {
 		for (int i=0;i<getObstaculos().size();i++)
 		paradaEmergencia = calculaParadaEmergencia(getObstaculos().elementAt(i).getPosicion(),
 				posInicial,velo);
-		if (!isRutaCompleta()){
+		if (!isRutaParcial()){
 			velocidad = -1*paradaEmergencia;
 		}else{
-			velocidad = 1*paradaEmergencia;//3*paradaEmergencia;
+			velocidad = 3*paradaEmergencia;
 		}
 //		System.out.println("velocidad calculada "+velocidad);
 		return velocidad;
@@ -304,7 +328,7 @@ public class Simulador {
 ////			tr = new Trayectoria(tr,0.1);
 //			tr.situaCoche(posInicial.get(0,0),posInicial.get(1,0));
 //			contPred.setRuta(tr);
-				System.out.println("tamaño de la ruta suavizada " + rutaDinamicaSuave.size());
+//				System.out.println("tamaño de la ruta suavizada " + rutaDinamicaSuave.size());
 				double [][] trayecAux = traduceRuta(rutaDinamicaSuave);
 				Trayectoria trayec = new Trayectoria(trayecAux);
 				contPred.setCarroOriginal(this.modCoche);
@@ -474,7 +498,7 @@ public class Simulador {
 		contIteraciones++;
 		//If para controlar la frecuencia a la que se aÃ±aden boids a la bandada
 		if(contIteraciones > contNuevosBoids){
-			for(int g=0;g<2;g++){				
+			for(int g=0;g<3;g++){				
 //				double pos[] = {Math.abs(700*Math.random()),Math.abs(500*Math.random())};
 //				double pos[] = {getBandada().lastElement().getPosicion().get(0,0)+10*Math.random(),
 //						getBandada().lastElement().getPosicion().get(1,0)+10*Math.random()};
@@ -698,14 +722,14 @@ public class Simulador {
 //	public Vector<Matrix> calculaRutaDinamica(int indLider){	
 	public Vector<Matrix> calculaRutaDinamica(){
 		rutaDinamica.clear();
+		setRutaParcial(false);
 		setRutaCompleta(false);
 //		int boidActual = indLider;
 		int boidActual = 0;
 		int boidAux = 0;
 		int cont = 0;
 		boolean encontrado = false;
-		double valoracion = Double.NEGATIVE_INFINITY;
-		double umbralCercania = 12;//8;
+		double valoracion = Double.NEGATIVE_INFINITY;		
 		double radioCentroMasas = umbralCercania*0.2;//*0.5;
 //		System.out.println("EmpezÃ³ nueva ruta");
 		rutaDinamica.add(posInicial);
@@ -755,14 +779,20 @@ public class Simulador {
 			}
 			if(encontrado){
 				getBandada().elementAt(boidAux).setConectado(true);
-//				getBandada().elementAt(boidAux).setExperiencia(1);
-//				System.out.println("La valoracion es : " + valoracion);
-				rutaDinamica.add(getBandada().elementAt(boidAux).getPosicion());
-//				rutaDinamica.add(getBandada().elementAt(boidAux).calculaCentroMasas(getBandada(),radioCentroMasas));
-				boidActual = boidAux;
-				puntoActual.set(0,0,getBandada().elementAt(boidActual).getPosicion().get(0,0));
-				puntoActual.set(1,0,getBandada().elementAt(boidActual).getPosicion().get(1,0));
-//				System.out.println("saltÃ³ al siguiente boid");
+				if (getBandada().elementAt(boidAux).getPosicion().minus(objetivo).norm2()<distOkAlOrigen){
+					setRutaCompleta(true);
+					rutaDinamica.add(objetivo);
+				}else{
+//					getBandada().elementAt(boidAux).setExperiencia(1);
+//					System.out.println("La valoracion es : " + valoracion);
+					rutaDinamica.add(getBandada().elementAt(boidAux).getPosicion());
+//					rutaDinamica.add(getBandada().elementAt(boidAux).calculaCentroMasas(getBandada(),radioCentroMasas));
+					boidActual = boidAux;
+					puntoActual.set(0,0,getBandada().elementAt(boidActual).getPosicion().get(0,0));
+					puntoActual.set(1,0,getBandada().elementAt(boidActual).getPosicion().get(1,0));
+//					System.out.println("saltÃ³ al siguiente boid");
+				}
+
 			}
 			
 		}
@@ -787,7 +817,7 @@ public class Simulador {
 //		}		
 //		System.out.println("acabÃ³ la ruta");
 		if (rutaDinamica.size()>=2){
-			setRutaCompleta(true);
+			setRutaParcial(true);
 //			tr = new Trayectoria(traduceRuta(rutaDinamica));
 ////			tr = new Trayectoria(tr,0.1);
 //			tr.situaCoche(posInicial.get(0,0),posInicial.get(1,0));
@@ -796,6 +826,132 @@ public class Simulador {
 //		rutaDinamica = mejoraRuta(rutaDinamica);
 		return rutaDinamica;
 	}
+	
+	public Vector<Matrix> busquedaAEstrella(){
+		
+		boolean tentative_is_better = false;
+		boolean caminoCompleto = false;
+		double minF_score = Double.POSITIVE_INFINITY;
+		int indMin = 0;
+		Vector<Matrix> camino = new Vector<Matrix>();
+		Vector<Boid> openSet = new Vector<Boid>();
+		Vector<Boid> closedSet = new Vector<Boid>();		
+		openSet.clear();
+		closedSet.clear();
+		// reseteamos los valores de las variables de binarias de la bandada
+		for (int h=0;h<bandada.size();h++){
+			bandada.elementAt(h).setOpenSet(false);
+			bandada.elementAt(h).setClosedSet(false);
+		}
+		//Añadimos un boid en la posición del coche para que sea el nodo inicial 
+		double pos[] = {posInicial.get(0,0), posInicial.get(1,0)};
+		Matrix posi = new Matrix(pos,2);
+		double vel[] = {0,0};
+		Matrix velo = new Matrix(vel,2);
+		double ace[] = {0,0};
+		Matrix acel = new Matrix(ace,2);
+		//Calculamos su h_score y su f_score y se lo asignamos, su g_score es cero al ser el nodo inicial
+		Boid nodo_inicial = new Boid(posi,velo,acel,getContIteraciones());
+		Boid actual = nodo_inicial;
+		nodo_inicial.setG_score(0);
+		nodo_inicial.setH_score(nodo_inicial.getDistObjetivo());//Distancia euclídea hasta el objetivo
+		nodo_inicial.calculaF_score();
+		//y lo añadimos al openSet y a la bandada
+		this.getBandada().add(nodo_inicial);
+		nodo_inicial.setOpenSet(true);
+		nodo_inicial.setClosedSet(false);
+		openSet.add(nodo_inicial);
+		
+		//Bucle principal del algoritmo
+		while (!openSet.isEmpty()){//Mientras queden nodos en el openset el algoritmo continua
+			//el nodo actual será aquel que tenga el f_score más bajo de entre los que se encuentran en el openSet
+			minF_score = Double.POSITIVE_INFINITY;
+//			System.out.println("tamaño del openSet = "+openSet.size());
+			for (int i=0;i<openSet.size();i++){
+				if(openSet.elementAt(i).getF_score() < minF_score) {
+					indMin=i;
+					minF_score=openSet.elementAt(i).getF_score();
+				}								
+			}
+			actual = openSet.elementAt(indMin);
+//			System.out.println("posición del actual "+actual.getPosicion().get(1,0)+" "+actual.getPosicion().get(1,0));
+			// no estoy seguro de que podamos asignar esto así...
+			// Si el boid acutal está lo suficientemente cerca del objetivo damos por concluida la búsqueda
+			if (actual.getDistObjetivo() < distOkAlOrigen){
+				// reconstruir el camino,acaba el algoritmo
+//				rutaDinamica.clear();
+//				rutaDinamica = reconstruirCaminoAEstrella(actual);
+				camino = reconstruirCaminoAEstrella(actual);
+				caminoCompleto = true;
+				System.out.println("se encontró un camino completo");
+			}
+			//Quitamos el nodo actual del openSet 
+			openSet.remove(indMin); //También existe un método para quitar un elemento especificando que objeto hay que quitar
+			//y lo añadimos al closedSet
+			actual.setOpenSet(false);
+			actual.setClosedSet(true);
+			closedSet.add(actual);
+			for (int j = 0;j<getBandada().size();j++){				
+				//Los nodos que  se estudian tienen que ser vecinos del actual
+				if (actual.getPosicion().minus(getBandada().elementAt(j).getPosicion()).norm2() <= umbralCercania){
+					//g_score_tentativo es la suma del g_score del actual más la distancia entre al actual
+					//y el vecino en cuestión
+					if (getBandada().elementAt(j).isClosedSet()){
+//						System.out.println("está en el closedSet");
+						continue; // si el nodo está en el closedSet no hacemos nada con el y seguimos mirando
+						
+					}
+					double g_score_tentativo = actual.getG_score() +
+							actual.getPosicion().minus(getBandada().elementAt(j).getPosicion()).norm2();
+					if (!getBandada().elementAt(j).isOpenSet()){//Comprobamos si el vecino está en el openSet
+//						System.out.println("el vecino no está en el openset");
+						//si no está lo metemos en el openSet
+						getBandada().elementAt(j).setOpenSet(true);
+						getBandada().elementAt(j).setClosedSet(false);
+						openSet.add(getBandada().elementAt(j));
+						//Calculamos su h_score (distancia euclídea hasta el objetivo) y se lo asignamos
+						getBandada().elementAt(j).setH_score(getBandada().elementAt(j).getDistObjetivo());
+						tentative_is_better = true;
+					}else if (g_score_tentativo < getBandada().elementAt(j).getG_score()){
+//						System.out.println("el vecino está en el openset y la tentativa es mejor");
+						//la tentativa es mejor si el g_score tentativo es mejor que el g_score del vecino
+						tentative_is_better = true;
+					}else{// si no es así la tentativa es peor
+//						System.out.println("el vecino está en el openset y la tentativa es peor");
+						tentative_is_better = false;
+					}
+					if (tentative_is_better){
+//						System.out.println("la tentativa es mejor");
+						//Indicamos desde que nodo (boid) hemos llegado a este vecino
+						getBandada().elementAt(j).setCame_from(actual);
+						getBandada().elementAt(j).setG_score(g_score_tentativo);
+						getBandada().elementAt(j).calculaF_score();
+						
+					}
+//					System.out.println("diferencia de f_score entre bandada y openSet "+(getBandada().elementAt(j).getF_score()-openSet.lastElement().getF_score()));
+				}
+			}
+		}
+		if (!caminoCompleto){
+//			rutaDinamica.clear();
+//			rutaDinamica = reconstruirCaminoAEstrella(actual);
+			camino = reconstruirCaminoAEstrella(actual);
+			System.out.println("no se logró un camino completo");
+		}
+		return camino;
+	}
+	
+	public Vector<Matrix> reconstruirCaminoAEstrella(Boid actual){
+		Vector<Matrix> camino = new Vector<Matrix>();
+		Boid aux = actual;
+		while(aux.getCame_from() != null){
+			camino.add(aux.getPosicion());
+			aux = aux.getCame_from();			
+		}
+		System.out.println("tamaño del camino a estrella "+ camino.size());
+		return camino;
+	}
+	
 	/**
 	 * 
 	 * @param ruta vector de Matriz con los puntos de la ruta dinámica
@@ -932,14 +1088,15 @@ public class Simulador {
 	//-----------------------------------------------------------------------
 	//-------------------Getters y Setters-----------------------------------
 	//-----------------------------------------------------------------------
+	//
 	
-//	public ControlPredictivo getCp() {
-//		return contPred;
-//	}
-//
-//	public void setCp(ControlPredictivo cp) {
-//		this.contPred = cp;
-//	}
+	public double getUmbralCercania() {
+		return umbralCercania;
+	}
+
+	public void setUmbralCercania(double umbralCercania) {
+		this.umbralCercania = umbralCercania;
+	}
 	
 	public Vector<Matrix> getRutaDinamicaSuave() {
 		return rutaDinamicaSuave;
@@ -1107,6 +1264,19 @@ public class Simulador {
 	public void setLargoEscenario(double largoEscenario) {
 		this.largoEscenario = largoEscenario;
 	}
+	
+	public void creaRejilla(){
+		rejilla = new Grid(0.5, getLargoEscenario(), getAnchoEscenario());
+		for (int i=0; i < getObstaculos().size();i++){
+			double posXObs = getObstaculos().elementAt(i).getPosicion().get(0,0);
+			double posYObs = getObstaculos().elementAt(i).getPosicion().get(1,0);
+			double dimensionX = getObstaculos().elementAt(i).getLado();
+			double dimensionY = getObstaculos().elementAt(i).getLado();
+//			System.out.println("creamos la rejilla ");
+			rejilla.addObstacle(posXObs, posYObs, dimensionX, dimensionY);
+		}
+		
+	}
 
 	public double getTs() {
 		return Ts;
@@ -1116,12 +1286,24 @@ public class Simulador {
 		Ts = ts;
 	}
 	
+	public boolean isRutaParcial() {
+		return rutaParcial;
+	}
+
+	public void setRutaParcial(boolean rutaParcial) {
+		this.rutaParcial = rutaParcial;
+	}
+	
 	public boolean isRutaCompleta() {
 		return rutaCompleta;
 	}
 
 	public void setRutaCompleta(boolean rutaCompleta) {
 		this.rutaCompleta = rutaCompleta;
+	}
+	
+	public ControlPredictivo getContPred() {
+		return contPred;
 	}
 	
 	//----------------------------------------------------------------------------
