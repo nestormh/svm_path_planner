@@ -68,6 +68,8 @@ class Dibujante2 extends JPanel{
 	Vector<Boid> bandadaPintar;// = new Vector<Boid>();
 	Vector<Obstaculo> obstaculosPintar;// = new Vector<Obstaculo>();
 	Vector<Matrix> rutaDinamica = null;
+	double [][] prediccion;
+	int horPrediccion;
 	
 	public Dibujante2(){
 		bandadaPintar = new Vector<Boid>();
@@ -149,6 +151,17 @@ class Dibujante2 extends JPanel{
 	public void setRutaDinamica(Vector<Matrix> ruta){
 		this.rutaDinamica = ruta;
 	}
+	
+	public void setPrediccion(double[][] prediccionPosPorFilas) {
+		this.prediccion = prediccionPosPorFilas;		
+	}
+	
+	public int getHorPrediccion() {
+		return horPrediccion;
+	}
+	public void setHorPrediccion(int horPrediccion) {
+		this.horPrediccion = horPrediccion;
+	}
 	/**
 	 * Coordenadas de la esquina superior izquierda.
 	 * En unidades mundo real.
@@ -209,6 +222,24 @@ class Dibujante2 extends JPanel{
 //	private int incrNuevosBoids = 3;
 //	private int contNuevosBoids = incrNuevosBoids ;
 	private int contIteraciones = 0;
+	
+//	public void pintarRuta(Vector<Matrix> ruta){
+//		if (ruta != null){
+//			if (ruta.size() > 0){
+//				
+//				GeneralPath rutaDinamic = new GeneralPath();
+//				Point2D ptoRuta = point2Pixel(ruta.elementAt(0).get(0,0),
+//						ruta.elementAt(0).get(1,0));
+//				rutaDinamic.moveTo(ptoRuta.getX(),ptoRuta.getY());
+//				for(int k=1;k<ruta.size();k++){
+//					ptoRuta = point2Pixel(ruta.elementAt(k).get(0,0),
+//							ruta.elementAt(k).get(1,0));
+//					rutaDinamic.lineTo(ptoRuta.getX(),ptoRuta.getY());
+//				}
+//				g3.draw(rutaDinamic);
+//			}
+//		}
+//	}
 	
 	public void paintComponent(Graphics g2) {
 		Graphics2D g3 = (Graphics2D) g2;		
@@ -355,11 +386,41 @@ class Dibujante2 extends JPanel{
 				g3.draw(rutaDinamic);
 			}
 		}
+		
+		//------------------------Pinto la predicci髇 del movimiento del veh韈ulo-------------------
+		g3.setColor(Color.black);
+		if (prediccion != null){
+//			if (prediccion. >= 2){		
+//				System.out.println("pintando la predicci髇 y el tama駉 de la predicci髇 es " + prediccion.length);
+				GeneralPath predicc = new GeneralPath();
+				Point2D ptoRuta = point2Pixel(prediccion[0][0],prediccion[1][0]);
+				predicc.moveTo(ptoRuta.getX(),ptoRuta.getY());
+				for(int k=1;k<horPrediccion;k++){
+					ptoRuta = point2Pixel(prediccion[0][k],prediccion[1][k]);
+					predicc.lineTo(ptoRuta.getX(),ptoRuta.getY());
+				}
+				g3.draw(predicc);
+//			}				
+		}
 	}		
 }
 
 
 public class MuestraBoids extends JApplet implements ChangeListener,ActionListener,MouseListener{
+	
+	/**
+	 * tiempo que pasa entre pintado y pintado de la escena, siempre y cuando el tiempo de c髆puto sea 
+	 * m醩 peque駉 que este valor. En milisegundos	
+	 */
+	long velReprod = 100;	
+	
+	public long getVelReprod() {
+		return velReprod;
+	}
+
+	public void setVelReprod(long velReprod) {
+		this.velReprod = velReprod;
+	}
 	
 	public Vector<Matrix> rutaDinamica;
 	public Vector<Matrix> getRutaDinamica() {
@@ -386,6 +447,9 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //	JLabel etiquetaPesoLider = new JLabel("Liderazgo");
 //	SpinnerNumberModel spPesoLider = new SpinnerNumberModel(Boid.getPesoLider(),0,100,0.1);
 //	JSpinner spinnerPesoLider = new JSpinner(spPesoLider);
+	JLabel etiquetaVelReprod = new JLabel("Vel reprod");
+	SpinnerNumberModel spVelReprod = new SpinnerNumberModel(velReprod,0,10000,1);
+	JSpinner spinnerVelReprod = new JSpinner(spVelReprod);
 	JLabel etiquetaCohesion = new JLabel("Cohesion");
 	SpinnerNumberModel spCohesion = new SpinnerNumberModel(Boid.getRadioCohesion(),0,100,0.1);
 	JSpinner spinnerCohesion = new JSpinner(spCohesion);
@@ -460,6 +524,8 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		JPanel panelNorte = new JPanel(new FlowLayout());
 //		panelSur.add(etiquetaPesoLider);
 //		panelSur.add(spinnerPesoLider);
+		panelSur.add(etiquetaVelReprod);
+		panelSur.add(spinnerVelReprod);
 		panelSur.add(etiquetaCohesion);
 		panelSur.add(spinnerCohesion);
 		panelSur.add(etiquetaSeparacion);
@@ -495,6 +561,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //		panelNorte.add(botonSalvar);
 //		panelNorte.add(botonCargar);		
 //		spinnerPesoLider.addChangeListener(this);
+		spinnerVelReprod.addChangeListener(this);
 		spinnerCohesion.addChangeListener(this);
 		spinnerSeparacion.addChangeListener(this);
 		spinnerAlineacion.addChangeListener(this);
@@ -555,6 +622,9 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //		if (e.getSource() == spinnerPesoLider){
 //			Boid.setPesoLider(spPesoLider.getNumber().doubleValue());
 //		}
+		if (e.getSource() == spinnerVelReprod){
+			setVelReprod(spVelReprod.getNumber().longValue());
+		}
 		if (e.getSource() == spinnerCohesion){
 			Boid.setPesoCohesion(spCohesion.getNumber().doubleValue());
 		}
@@ -898,7 +968,6 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		Vector<Double> yawCoche = new Vector<Double>();
 		Vector<Double> distMinObst = new Vector<Double>();
 		gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
-		
 		//creamos las zonas para clasificar las rutas
 		
 		// Indico la posici贸n del objetivo y la posici贸n inicial
@@ -923,7 +992,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		LoggerFactory.activaLoggers(1000);
 		System.out.println("Antes del while");
 		while (numSimu < simuDeseadas){
-//			System.out.println("Despues del while");
+			System.out.println("Despues del while");
 			if (gui.play){				
 //				System.out.println("dentro del gui.play = " + gui.play);
 				// reinicio todo para la siguiente simulaci贸n
@@ -932,11 +1001,17 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				yawCoche.clear();
 				distMinObst.clear();
 				gui.pintor.eliminarObstaculos();
-				gui.getSim().generaObstaculos(numObstaculos,1.5);				
+				gui.getSim().generaObstaculos(numObstaculos,1.5);								
 				gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 				gui.getSim().borrarBandada();
 				gui.getSim().crearBandada(20,gui.getSim().getContIteraciones());
 				gui.getSim().setPosInicial(new Matrix(inicial,2));
+				//Introducimos datos en la rejilla y la creamos	
+//				System.out.println("rejilla sin crear");
+//				gui.getSim().creaRejilla();
+////				System.out.println("rejilla creada");
+//				gui.getSim().getRejilla().setGoalPos(gui.getSim().getObjetivo().get(0, 0),gui.getSim().getObjetivo().get(0, 0));
+//				gui.getSim().getRejilla().setStartPos(gui.getSim().getPosInicial().get(0, 0),gui.getSim().getPosInicial().get(1, 0));
 				gui.pintor.setPosCoche(gui.getSim().getPosInicial());
 				gui.pintor.setPosCocheSolitario((gui.getSim().getPosCocheSolitario()));
 				gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
@@ -949,11 +1024,11 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				//transcurrido m谩s tiempo del estipulado como bueno para una sola simulaci贸n
 				//Para evitar que se atasque toda la simulaci贸n por lotes
 				while((distCocheObjetivo > distCercana)&&(tSim-tAnt < tMaximo)){					
-					while(gui.play){
+					while(gui.play){//C骴igo para temporizar la reproducci髇 de la simulaci髇
 						try {
-							Thread.sleep(100-(long)(tSim-tInicioIteracion));
+							Thread.sleep(gui.getVelReprod()-(long)(tSim-tInicioIteracion));
 						} catch (Exception e) {
-							// TODO: handle exception
+							System.out.println("No se pudo dormir el hilo principal de ejecuci髇, el valor de velReprod es "+gui.getVelReprod());
 						}
 						tInicioIteracion = System.currentTimeMillis()/1000;
 //						System.out.println("numero de iteraciones del bucle principal " + 
@@ -969,8 +1044,17 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 							gui.getSim().moverObstaculos();
 						}
 						
-//						indMinAnt = gui.getSim().moverBoids(indMinAnt);
 						gui.getSim().moverBoids();
+//						System.out.println("posici髇 del objetivo "+ gui.getSim().getObjetivo().get(0, 0)+
+//								" "+gui.getSim().getObjetivo().get(1, 0));
+						//Introducimos datos en la rejilla y la creamos	
+////						System.out.println("rejilla sin crear");
+						gui.getSim().creaRejilla();
+						gui.getSim().getRejilla().setSim(gui.getSim());
+						gui.getSim().getRejilla().setVelCoche(gui.getSim().getModCoche().getVelocidad());
+//						System.out.println("rejilla creada");
+						gui.getSim().getRejilla().setGoalPos(gui.getSim().getObjetivo().get(0, 0),gui.getSim().getObjetivo().get(1, 0));
+						gui.getSim().getRejilla().setStartPos(gui.getSim().getPosInicial().get(0, 0),gui.getSim().getPosInicial().get(1, 0));
 //						int indice = 0;
 //						double distObj = Double.POSITIVE_INFINITY;
 //						for(int h = 0; h<gui.getSim().getBandada().size();h++){
@@ -992,16 +1076,25 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
 //						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
 						// Si la ruta no ha sido intersectada por un obst醕ulo no se vuelve a calcular
-						if (gui.getSim().compruebaRuta() || !gui.getSim().isRutaCompleta()){
-							gui.getSim().calculaRutaDinamica();
-							if (gui.getSim().getRutaDinamica().size() <= 3){
-								gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
-							}else{
-								gui.setRutaDinamica(gui.getSim().suavizador(0.1));
-							}
-						}					
+//						if (gui.getSim().compruebaRuta() || !gui.getSim().isRutaCompleta()){							
+//							gui.getSim().calculaRutaDinamica();
+//							gui.getSim().busquedaAEstrella();
+//							gui.getSim().setRutaDinamica(gui.getSim().busquedaAEstrella());
+////							gui.getSim().setRutaDinamica(gui.getSim().getRejilla().busquedaAEstrella());
+//							if (gui.getSim().getRutaDinamica().size() <= 3){
+//////								gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
+////								gui.setRutaDinamica(gui.getSim().busquedaAEstrella());
+//////								gui.setRutaDinamica(gui.getSim().busquedaAEstrella());
+//							}else{
+//								gui.setRutaDinamica(gui.getSim().suavizador(0.25));
+//							}
+//						}					
 //						gui.setRutaDinamica(gui.getSim().suavizador(0.1));
-						gui.pintor.setRutaDinamica(gui.getRutaDinamica());
+//						gui.pintor.setRutaDinamica(gui.getSim().busquedaAEstrella());
+						gui.pintor.setRutaDinamica(gui.getSim().getRejilla().busquedaAEstrella());
+//						gui.pintor.setRutaDinamica(gui.getRutaDinamica());
+						gui.pintor.setHorPrediccion(gui.getSim().getContPred().getHorPrediccion());
+						gui.pintor.setPrediccion(gui.getSim().getContPred().getPrediccionPosPorFilas());
 						gui.getSim().moverPtoInicial(tAnt, gui.getSim().getTs());
 						gui.pintor.setVectorDirectorCoche(
 								gui.getSim().moverCocheSolitario(gui.getSim().getTs()));

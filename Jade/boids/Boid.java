@@ -529,6 +529,7 @@ public class Boid implements Serializable{
 		Matrix despObstaculo = new Matrix(2,1);
 		Matrix haciaObjetivo = new Matrix(2,1);
 		haciaObjetivo = objetivo.minus(this.getPosicion());
+		System.out.println("el objetivo está en "+objetivo.get(0, 0)+" "+objetivo.get(1, 0));
 //		despCohesion = cohesion(bandada, indBoid);
 //		despSeparacion = separacion(bandada, indBoid);
 //		despAlineacion = alineacion(bandada, indBoid);

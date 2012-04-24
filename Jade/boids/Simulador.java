@@ -22,25 +22,10 @@ import flanagan.interpolation.CubicSpline;
 import gridBasedSearch.Grid;
 import Jama.Matrix;
 
-public class Simulador {
-	double tiempoAnt;
-	public double getTiempoAnt() {
-		return tiempoAnt;
-	}
-
-	public void setTiempoAnt(double tiempoAnt) {
-		this.tiempoAnt = tiempoAnt;
-	}
-
+public class Simulador{
 	
-	public Coche getModCoche() {
-		return modCoche;
-	}
-
-	public void setModCoche(Coche modCoche) {
-		this.modCoche = modCoche;
-	}
-
+	double tiempoAnt;
+	
 	Vector<Matrix> rutaDinamica = new Vector<Matrix>();
 	Vector<Matrix> rutaDinamicaSuave = new Vector<Matrix>();
 
@@ -166,7 +151,7 @@ public class Simulador {
 		setDistOk(distanOk);
 		setNumBoidsOk(boidsOk);
 		
-	}
+	}	
 	
 	//-------------MÃ©todos para el manejo de la bandada----------------------------
 	
@@ -636,6 +621,42 @@ public class Simulador {
 			}
 		}
 	}
+	/**
+	 * 
+	 * @param tiempo instante en el que se quiere conocer la posición de los obstáculos
+	 * @param obstaculos Vector de obstáculos que van a ser proyectados hacia el futuro una cantidad tiempo
+	 */
+	public Vector<Obstaculo> moverObstaculos(double tiempo, Vector<Obstaculo> obstaculos){
+		if(obstaculos.size() != 0){
+			for(int i = 0;i<obstaculos.size();i++){	
+				double gananciaVel = calculaParadaEmergencia(posInicial,
+						obstaculos.elementAt(i).getPosicion(),
+						obstaculos.elementAt(i).getVelocidad());
+				obstaculos.elementAt(i).mover(
+						obstaculos.elementAt(i).getRumboDeseado().times(gananciaVel),tiempo);
+				//-Control para que los obstÃ¡culos vuelvan a aparecer por el lado contrario-
+				//-al salirse del escenario
+				if(obstaculos.elementAt(i).getPosicion().get(1,0)>anchoEscenario){
+					double pos[] = {obstaculos.elementAt(i).getPosicion().get(0,0),0};
+					Matrix posi = new Matrix(pos,2);
+					obstaculos.elementAt(i).setPosicion(posi);
+				}
+				if(obstaculos.elementAt(i).getPosicion().get(1,0)<0){
+					double pos[] = {obstaculos.elementAt(i).getPosicion().get(0,0),anchoEscenario};
+					Matrix posi = new Matrix(pos,2);
+					obstaculos.elementAt(i).setPosicion(posi);
+				}
+
+				if(obstaculos.elementAt(i).getPosicion().get(0,0)>largoEscenario){
+					double pos[] = {0,obstaculos.elementAt(i).getPosicion().get(1,0)};
+					Matrix posi = new Matrix(pos,2);
+					obstaculos.elementAt(i).setPosicion(posi);
+				}	
+			}
+		}
+		return obstaculos;
+	}
+	
 	/**
 	 * Dependiendo de la posiciÃ³n del vehÃ­culo el obstÃ¡culo se detendrÃ¡ o no
 	 * @param Obs ObstÃ¡culo sobre el que se quiere calcular su velocidad 
@@ -1229,6 +1250,24 @@ public class Simulador {
 		return logEstadistica;
 	}
 	
+	public double getTiempoAnt() {
+		return tiempoAnt;
+	}
+
+	public void setTiempoAnt(double tiempoAnt) {
+		this.tiempoAnt = tiempoAnt;
+	}
+
+	
+	public Coche getModCoche() {
+		return modCoche;
+	}
+
+	public void setModCoche(Coche modCoche) {
+		this.modCoche = modCoche;
+	}
+
+	
 	public double getTiempoInvertido() {
 		return tiempoInvertido;
 	}
@@ -1267,15 +1306,16 @@ public class Simulador {
 	
 	public void creaRejilla(){
 		rejilla = new Grid(0.5, getLargoEscenario(), getAnchoEscenario());
-		for (int i=0; i < getObstaculos().size();i++){
-			double posXObs = getObstaculos().elementAt(i).getPosicion().get(0,0);
-			double posYObs = getObstaculos().elementAt(i).getPosicion().get(1,0);
-			double dimensionX = getObstaculos().elementAt(i).getLado();
-			double dimensionY = getObstaculos().elementAt(i).getLado();
-//			System.out.println("creamos la rejilla ");
-			rejilla.addObstacle(posXObs, posYObs, dimensionX, dimensionY);
-		}
-		
+		rejilla.addObstacles(this.getObstaculos());
+//		for (int i=0; i < getObstaculos().size();i++){
+//			double posXObs = getObstaculos().elementAt(i).getPosicion().get(0,0);
+//			double posYObs = getObstaculos().elementAt(i).getPosicion().get(1,0);
+//			double dimensionX = getObstaculos().elementAt(i).getLado();
+//			double dimensionY = getObstaculos().elementAt(i).getLado();
+////			System.out.println("creamos la rejilla ");
+//			rejilla.addObstacle(posXObs, posYObs, dimensionX, dimensionY);
+//		}
+//		
 	}
 
 	public double getTs() {

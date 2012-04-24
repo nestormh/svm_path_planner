@@ -4,6 +4,8 @@ import java.util.Vector;
 
 import Jama.Matrix;
 import boids.Boid;
+import boids.Obstaculo;
+import boids.Simulador;
 
 public class Grid {
 	double resolution;
@@ -20,8 +22,25 @@ public class Grid {
 	 * posición de inicio en términos de índices de la rejilla
 	 */
 	int[] startPos;
-	
-	public Grid(double resolution, double longitudX, double longitudY){
+	/**
+	 * Vector que contiene los obstáculos del escenario. Cada miembro de este vector es un objeto de la clase obstaculo 
+	 * donde se almacena su forma, su velocidad, su posición, etc
+	 */
+	Vector<Obstaculo> obstaculos;	
+	/**
+	 * Clase simulador que usaremos para mover los obstáculos, para hacer la predicción de laas posiciones de los obstáculos
+	 * pasado un cierto tiempo. Esta clase tiene todos los métodos necesarios
+	 */
+	Simulador sim;
+	/**
+	 * Velocidad del coche, lo usaremos para realizar las predicciones de donde van a estar los obstáculos cuando el coche se 
+	 * vaya a cruzar con ellos
+	 */
+	double velCoche;
+
+	public Grid(double resolution, double longitudX, double longitudY){	
+//		sim = new Simulador();
+		obstaculos = new Vector<Obstaculo>();
 		this.resolution = resolution;
 		this.longitudX = longitudX;
 		this.longitudY = longitudY;
@@ -111,6 +130,22 @@ public class Grid {
 		}
 	}
 	
+	/**
+	 * Añade un grupo de obstáculos
+	 * @param obstaculos Vector de obstáculos
+	 */
+	
+	public void addObstacles(Vector<Obstaculo> obstaculos){
+		for (int i=0; i < obstaculos.size();i++){
+			double posXObs = obstaculos.elementAt(i).getPosicion().get(0,0);
+			double posYObs = obstaculos.elementAt(i).getPosicion().get(1,0);
+			double dimensionX = obstaculos.elementAt(i).getLado();
+			double dimensionY = obstaculos.elementAt(i).getLado();
+//			System.out.println("creamos la rejilla ");
+			this.addObstacle(posXObs, posYObs, dimensionX, dimensionY);
+		}
+	}
+	
 	public Vector<Matrix> busquedaAEstrella(){
 		
 		boolean caminoCompleto = false;
@@ -176,12 +211,21 @@ public class Grid {
 //						System.out.println("está en el closedSet");
 						continue; // si el nodo está en el closedSet no hacemos nada con el y seguimos mirando						
 					}
+					//Clonamos el vector de obstáculos
+					this.setObstaculos(this.sim.getObstaculos());
+					//Calculamos el tiempo que el vehículo va a alcanzar el obstáculo
+					double t = actual.getG_score()/this.getVelCoche();
+					//Calculamos la posición de los obstáculos un tiempo t después
+					setObstaculos(this.getSim().moverObstaculos(t,this.getObstaculos()));
+					//limpiamos las celdas anteriores marcadas con obstáculos
+					//Los marcamos en la rejilla
+					addObstacles(this.getObstaculos());
 					if (this.rejilla[j][k].isOccupied()){
 //						System.out.println("la celda está ocupada por un obstáculo");
 						continue; // si el nodo está en el closedSet no hacemos nada con el y seguimos mirando						
 					}
 					double g_score_tentativo = actual.getG_score() +
-							actual.distThisPoint2Point(this.rejilla[j][k].getxIndex(),this.rejilla[j][k].getyIndex());
+							actual.distThisPoint2Point(this.rejilla[j][k].getxPosition(),this.rejilla[j][k].getyPosition());
 					//Comprobamos si el vecino está en el openSet
 					if (!this.rejilla[j][k].isOpenSet()){
 //						System.out.println("el vecino no está en el openset y lo deberíamos meter");
@@ -255,6 +299,45 @@ public class Grid {
 				this.rejilla[i][j].setOccupied(false);
 			}
 		}
+	}
+	
+	public double getVelCoche() {
+		return velCoche;
+	}
+
+	public void setVelCoche(double velCoche) {
+		this.velCoche = velCoche;
+	}
+	
+	public Vector<Obstaculo> getObstaculos() {
+		return obstaculos;
+	}
+
+	public void setObstaculos(Vector<Obstaculo> obstaculos) {
+		if (!this.obstaculos.isEmpty()){
+			this.obstaculos.clear();
+		}
+		
+		for (int i=0;i<obstaculos.size();i++){
+			double posX = obstaculos.elementAt(i).getPosicion().get(0, 0);
+			double posY = obstaculos.elementAt(i).getPosicion().get(1, 0);
+			double velX = obstaculos.elementAt(i).getVelocidad().get(0, 0);
+			double velY = obstaculos.elementAt(i).getVelocidad().get(1, 0);
+			double vecRumboX = obstaculos.elementAt(i).getRumboDeseado().get(0, 0);
+			double vecRumboY = obstaculos.elementAt(i).getRumboDeseado().get(1, 0);
+					
+			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, vecRumboX, vecRumboY);
+			this.obstaculos.add(obs);
+		}
+	}
+
+	
+	public Simulador getSim() {
+		return sim;
+	}
+
+	public void setSim(Simulador sim) {
+		this.sim = sim;
 	}
 	
 	public double getResolution() {

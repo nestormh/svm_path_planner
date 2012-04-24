@@ -149,4 +149,14 @@ public class GridSearchPoint {
 				(this.getyIndex() - yIndex)*(this.getyIndex() - yIndex));
 		return dist; 
 	}
+	/**
+	 * Método que calcula la distancia euclídea entre este punto y el que se le pasa como parámetro. entre las posiciones reales
+	 * @param point Punto hasta el cual se quiere calcular la distancia euclídea
+	 * @return
+	 */
+	public double distThisPoint2Point(double xPos,double yPos){
+		double dist = Math.sqrt((this.getxPosition() - xPos)*(this.getxPosition() - xPos) + 
+				(this.getyPosition() - yPos)*(this.getyPosition() - yPos));
+		return dist; 
+	}
 }
