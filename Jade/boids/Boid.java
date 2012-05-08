@@ -67,11 +67,11 @@ public class Boid implements Serializable{
 	public Boid came_from;
 	//------Acaban los campos para la gestión de la búsqueda a*------------------------		
 	public boolean conectado = false;
-	static double radioObstaculo = 5.5;//6;
+	static double radioObstaculo = 5.5;//5.5;
 //	static double radioObstaculoLejos = 3;
 //	static double radioObstaculoCerca = 5;
 	static double radioCohesion = 5;
-	static double radioSeparacion = 3;//2;
+	static double radioSeparacion = 1;//2;
 	static double radioAlineacion = 5;//3;
 	static double pesoCohesion = 0;//0.1;//0;//0.01;
 	static double pesoSeparacion = 1;//0.2;//0.3; // 10
@@ -81,7 +81,7 @@ public class Boid implements Serializable{
 	static double pesoCompensacionLateral = 1;//1.6;
 //	static double pesoObstaculoCerca = 1;
 	static double pesoLider = 0;
-	static double velMax = 3.5;
+	static double velMax = 1.5;
 	static double fuerzaMax = 4.5;
 	static double masa = 5;
 	
@@ -393,15 +393,16 @@ public class Boid implements Serializable{
 		Matrix compensacion = new Matrix(zero,2);
 		boolean caminoOcupado = false;
 		double dist = 0;
-		double umbralEsquivar = Math.toRadians(5);//20
-		double umbralCaso3 = -Math.toRadians(10);
+		double umbralEsquivar = Math.toRadians(20);//20//5
+		double umbralCaso3 = -Math.toRadians(10);//10
 		int sentidoCompensacionLateral = 0;
 		Line2D recta = 
 			new Line2D.Double(this.getPosicion().get(0,0),this.getPosicion().get(1,0)
 						,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
 		for (int i=0;i < obstaculos.size();i++){
-			dist = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();
+			dist = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();			
 			if (dist < radioObstaculo){
+//			if (dist < radioObstaculo*(1+this.getDistOrigen()/100)){
 				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
 				//es el vector que apunta desde al boid hacia el obstÃ¡culo
 				if (dist != 0){ // Para no dividir entre cero
@@ -529,7 +530,7 @@ public class Boid implements Serializable{
 		Matrix despObstaculo = new Matrix(2,1);
 		Matrix haciaObjetivo = new Matrix(2,1);
 		haciaObjetivo = objetivo.minus(this.getPosicion());
-		System.out.println("el objetivo está en "+objetivo.get(0, 0)+" "+objetivo.get(1, 0));
+//		System.out.println("el objetivo está en "+objetivo.get(0, 0)+" "+objetivo.get(1, 0));
 //		despCohesion = cohesion(bandada, indBoid);
 //		despSeparacion = separacion(bandada, indBoid);
 //		despAlineacion = alineacion(bandada, indBoid);
