@@ -703,6 +703,12 @@ public class Boid implements Serializable{
 		return distancia;		
 	}
 	
+	public double distThisBoid2Point(double xPos,double yPos){
+		double dist = Math.sqrt((getPosicion().get(0, 0)- xPos)*(getPosicion().get(0, 0) - xPos) + 
+				(getPosicion().get(1, 0) - yPos)*(getPosicion().get(1, 0) - yPos));
+		return dist; 
+	}
+	
 	public void calculaValoracion(){
 //		valoracion = (pesoDistOrigen/getDistOrigen()) + (pesoAntiguo/getAntiguo() + getExperiencia());
 		valoracion = (pesoDistOrigen/getDistObjetivo());//+(pesoAntiguo/getAntiguo());

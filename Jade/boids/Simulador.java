@@ -78,6 +78,8 @@ public class Simulador{
 	Vector<Boid> boidsOk = new Vector<Boid>();
 	/** Vector con la informaciÃ³n de posiciÃ³n de los obstÃ¡culos del escenario*/
 	Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
+	/**Vector con la predicción de la posición de los obstáculos en un determinado instante del futuro*/
+	Vector<Obstaculo> obstaculosFuturos = new Vector<Obstaculo>();
 	/** Vector que contiene los puntos de diseÃ±o para la simulaciÃ³n por lotes*/
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
 	Vector <TipoCamino> caminos = new Vector<TipoCamino>();
@@ -693,8 +695,13 @@ public class Simulador{
 				getBandada().elementAt(j).setAntiguo((double)contIteraciones);
 				getBandada().elementAt(j).calculaValoracion();				
 				if(contIteraciones > contPensar){
+//					getBandada().elementAt(j).calculaMover(getBandada()
+//						,getObstaculos(),j,Boid.getObjetivo());
+					setObstaculosFuturos(getObstaculos());
+					double t = getBandada().elementAt(j).distThisBoid2Point(getModCoche().getX(),getModCoche().getY())/getModCoche().getVelocidad();
+					moverObstaculos(t,getObstaculosFuturos());
 					getBandada().elementAt(j).calculaMover(getBandada()
-						,getObstaculos(),j,Boid.getObjetivo());					
+							,getObstaculosFuturos(),j,Boid.getObjetivo());	
 				}
 //				getBandada().elementAt(j).mover(getBandada()
 //						,getObstaculos(),j,Boid.getObjetivo());
@@ -1493,6 +1500,32 @@ public class Simulador{
 
 	public void setObstaculos(Vector<Obstaculo> obstaculos) {
 		this.obstaculos = obstaculos;
+	}
+	
+	public Vector<Obstaculo> getObstaculosFuturos() {
+		return obstaculosFuturos;
+	}
+
+//	public void setObstaculosFuturos(Vector<Obstaculo> obstaculosFuturos) {
+//		this.obstaculosFuturos = obstaculosFuturos;
+//	}
+	
+	public void setObstaculosFuturos(Vector<Obstaculo> obstaculos) {
+		if (!this.obstaculosFuturos.isEmpty()){
+			this.obstaculosFuturos.clear();
+		}
+		
+		for (int i=0;i<obstaculos.size();i++){
+			double posX = obstaculos.elementAt(i).getPosicion().get(0, 0);
+			double posY = obstaculos.elementAt(i).getPosicion().get(1, 0);
+			double velX = obstaculos.elementAt(i).getVelocidad().get(0, 0);
+			double velY = obstaculos.elementAt(i).getVelocidad().get(1, 0);
+			double vecRumboX = obstaculos.elementAt(i).getRumboDeseado().get(0, 0);
+			double vecRumboY = obstaculos.elementAt(i).getRumboDeseado().get(1, 0);
+					
+			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, vecRumboX, vecRumboY);
+			this.obstaculosFuturos.add(obs);
+		}
 	}
 
 	public Matrix getPosInicial() {
