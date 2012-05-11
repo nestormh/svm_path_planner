@@ -988,8 +988,8 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		//---------Defino las condiciones de la simulación, número de obstáculos,etc-----------------
 		//-------------------------------------------------------------------------------------------
 		int numSimu = 0;
-		int simuDeseadas = 5;
-		int numObstaculos = 30;
+		int simuDeseadas = 100;
+		int numObstaculos = 40;
 		double distCercana = 3;		
 		gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 		int indMinAnt = 0;
@@ -1001,6 +1001,10 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		boolean cocheEnObjetivo = false;
 		boolean cocheAEstrellaEnObjetivo = false;
 		boolean cocheSolitarioEnObjetivo = false;
+		
+		int simCompletasCoche = 0;
+		int simCompletasCocheAEstrella = 0;
+		int simCompletasCocheSolitario = 0;
 		
 		//--------------------------------------------------------------------------------------------
 		//----------Indico la posición del objetivo y la posición inicial-----------------------------
@@ -1020,6 +1024,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //		while (true){
 		LoggerFactory.activaLoggers(1000);
 		System.out.println("Antes del while");
+		gui.getSim().creaRejilla(0.5);
 		while (numSimu < simuDeseadas){
 			System.out.println("Despues del while");
 			if (gui.play){								
@@ -1041,11 +1046,15 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				distMinObstSolitario.clear();
 				gui.pintor.eliminarObstaculos();
 //				gui.getSim().generaObstaculos(numObstaculos,1.5);								
-				gui.getSim().generaObstaculosEquiespaciados(5, 1.5);
+//				gui.getSim().generaObstaculosEquiespaciados(5, 1.5);
+				gui.getSim().generaObstaculosEquiespaciadosCruce(6, 1.5,2.5);
 				gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 				gui.getSim().borrarBandada();
 				gui.getSim().crearBandada(20,gui.getSim().getContIteraciones());
 				gui.getSim().setPosInicial(new Matrix(inicial,2));
+				
+				
+				
 				//Introducimos datos en la rejilla y la creamos	
 //				System.out.println("rejilla sin crear");
 //				gui.getSim().creaRejilla();
@@ -1167,7 +1176,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						//----------------------------------------------------------------------------------------
 						
 						if (distCocheObjetivo < distCercana){
-							cocheEnObjetivo = true;
+							cocheEnObjetivo = true;							
 						}
 						if (distCocheAEstrellaObjetivo < distCercana){
 							cocheAEstrellaEnObjetivo = true;
@@ -1240,8 +1249,23 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 
 				//-----------------Calculo la diferencia en el tiempo de llegada entre el coche A estrella----
 				//-----------------y el coche de los boids----------------------------------------------------
-				difTemConAEstrella = vectorPosCocheAEstrella.size()*gui.getSim().getTs() - vectorPosCoche.size()*gui.getSim().getTs();
-				difTemConSolitario = vectorPosCocheSolitario.size()*gui.getSim().getTs() - vectorPosCoche.size()*gui.getSim().getTs();
+				if(cocheEnObjetivo){
+					simCompletasCoche++;
+					if(cocheAEstrellaEnObjetivo){
+						difTemConAEstrella = vectorPosCocheAEstrella.size()*gui.getSim().getTs() - vectorPosCoche.size()*gui.getSim().getTs();
+					}
+					if(cocheSolitarioEnObjetivo){
+						difTemConSolitario = vectorPosCocheSolitario.size()*gui.getSim().getTs() - vectorPosCoche.size()*gui.getSim().getTs();
+					}					
+				}
+				if(cocheAEstrellaEnObjetivo){
+					simCompletasCocheAEstrella++;
+				}	
+				if(cocheSolitarioEnObjetivo){
+					simCompletasCocheSolitario++;
+				}
+				
+				
 				gui.getSim().getLogDifTemporales().add(difTemConAEstrella,difTemConSolitario);
 				//-----------------Calculamos la estadística para cada coche--------------------
 				//------------------------------------------------------------------------------
@@ -1397,6 +1421,8 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //				gui.simulacionBatch.setEnabled(true);				
 			}			
 		}
+		gui.getSim().getLogSimlacionesCompletadas().add(100*(simCompletasCoche/numSimu),100*(simCompletasCocheAEstrella/numSimu),
+				100*(simCompletasCocheSolitario/numSimu));
 		LoggerFactory.vuelcaLoggersMATv4("C:/Users/Jesús/Dropbox/workspace/Octave/Boids/DatosBoids/"+numObstaculos+"Obstaculos");
 		System.out.println("Acabaron todas las simulaciones");
 	}

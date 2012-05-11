@@ -15,6 +15,7 @@ import sibtra.lms.BarridoAngular;
 import sibtra.predictivo.*;
 import sibtra.util.*;
 import sibtra.log.LoggerArrayDoubles;
+import sibtra.log.LoggerArrayInts;
 import sibtra.log.LoggerFactory;
 //import predictivo.UtilCalculos;
 import flanagan.*;
@@ -94,6 +95,7 @@ public class Simulador{
 	private LoggerArrayDoubles logEstadisticaCocheAEstrella;
 	private LoggerArrayDoubles logEstadisticaCocheSolitario;
 	private LoggerArrayDoubles logDifTemporales;
+	private LoggerArrayDoubles logSimlacionesCompletadas;
 
 	private double distOkAlOrigen = 5;
 	/**
@@ -155,6 +157,8 @@ public class Simulador{
 				"mediaDistMin,desvTipicaDistMin,difTemConAEstrella,difTemConSolitario]");
 		logDifTemporales=LoggerFactory.nuevoLoggerArrayDoubles(this, "DifTemporales");
 		logDifTemporales.setDescripcion("diferencias de tiempo de llegada [difTemConAEstrella difTemConSolitario]");
+		logSimlacionesCompletadas=LoggerFactory.nuevoLoggerArrayDoubles(this,"SimCompletadas");
+		logSimlacionesCompletadas.setDescripcion("Porcentaje de simulaciones completadas [%coche %cocheAEstrella %Solitario]");
 		
 		logPosturaCocheAEstrella=LoggerFactory.nuevoLoggerArrayDoubles(this, "PosturaCocheAEstrella");
 		logPosturaCocheAEstrella.setDescripcion("Coordenadas y yaw [x,y,yaw] del coche A estrella");
@@ -171,8 +175,8 @@ public class Simulador{
 				"Valores estadisticos del comportamiento del coche solitario" +
 				" [mediaVel,desvTipicaVel,mediaYaw,desvTipicaYaw,mediaAcel,desvTipicaAcel," +
 				"mediaDistMin,desvTipicaDistMin]");
-	}
-	
+	}		
+
 	public Simulador(Matrix puntoIni,Matrix objetivo,double tMax,int boidsOk,
 			         double distanOk,int sizeBandada,Vector<Obstaculo> obstaculos){
 		
@@ -272,8 +276,8 @@ public class Simulador{
 	
 	//-----------MÃ©todos para la simulaciÃ³n---------------------------------
 	/**
-	 * MÃ©todo que genera tantos obstÃ¡culos como numObst, con una magnitud de velocidad velMax
-	 * con direcciÃ³n aleatoria. La posiciÃ³n de los obstÃ¡culos tambiÃ©n es aleatoria
+	 * Método que genera tantos obstáculos como numObst, con una magnitud de velocidad velMax
+	 * con dirección aleatoria. La posición de los obstáculos también es aleatoria
 	 */
 	public void generaObstaculos(int numObst,double velMax){
 		//Se eliminan los obstÃ¡culos que pudiera haber de anteriores simulaciones
@@ -302,6 +306,31 @@ public class Simulador{
 //			double velX = rand.nextGaussian()*velMax;
 			double velX = 0;
 			double velY = rand.nextGaussian()*velMax;
+			double rumboX = velX;
+			double rumboY = velY;
+			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, rumboX, rumboY);
+			obstaculos.add(obs);
+		}
+	}
+	
+	public void generaObstaculosEquiespaciadosCruce(double separacion,double velMax,double velCoche){
+		//Se eliminan los obstÃ¡culos que pudiera haber de anteriores simulaciones
+		obstaculos.clear();
+		Random rand = new Random();
+		int numObst = (int) Math.floor(largoEscenario/separacion);
+		for (int i=0;i<numObst;i++){
+			double posX = separacion*i;
+			double posY = Math.random()*anchoEscenario;
+//			double velX = rand.nextGaussian()*velMax;
+			double velX = 0;
+//			double velY = rand.nextGaussian()*velMax;
+			double velY = 0;
+			if (posY >= anchoEscenario/2){
+				velY = -(anchoEscenario/2)/(posX/velCoche);
+			}
+			if (posY < anchoEscenario/2 ){
+				velY = (anchoEscenario/2)/(posX/velCoche);
+			}
 			double rumboX = velX;
 			double rumboY = velY;
 			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, rumboX, rumboY);
@@ -1546,6 +1575,10 @@ public class Simulador{
 		return logDifTemporales;
 	}
 	
+	public LoggerArrayDoubles getLogSimlacionesCompletadas() {
+		return logSimlacionesCompletadas;
+	}
+	
 	public double getTiempoAnt() {
 		return tiempoAnt;
 	}
@@ -1609,7 +1642,7 @@ public class Simulador{
 	
 	public void creaRejilla(double resolucion){
 		rejilla = new Grid(resolucion, getLargoEscenario(), getAnchoEscenario());
-		rejilla.addObstacles(this.getObstaculos());
+//		rejilla.addObstacles(this.getObstaculos());
 //		for (int i=0; i < getObstaculos().size();i++){
 //			double posXObs = getObstaculos().elementAt(i).getPosicion().get(0,0);
 //			double posYObs = getObstaculos().elementAt(i).getPosicion().get(1,0);
