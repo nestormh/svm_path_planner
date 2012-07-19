@@ -33,14 +33,14 @@ public class ConfigParam extends JApplet implements ActionListener, ChangeListen
 	double tMax = 10;
 	SpinnerNumberModel spTmax = new SpinnerNumberModel(tMax,0,1000,1);
 	JSpinner spinnerTmax = new JSpinner(spTmax);
-	JLabel tMaxLabel = new JLabel("Tiempo máximo para la simulación");
+	JLabel tMaxLabel = new JLabel("Tiempo maximo para la simulacion");
 	JButton configurar = new JButton("Configurar");
 	
 	Vector <Parametro> params;
 	Vector <Hashtable> vectorSim = new Vector<Hashtable>();
-	String[] nomParam = {"Radio Obstáculos","Radio Cohesión","Radio Separación"
-			,"Radio Alineación","Peso Cohesión","Peso Separación","Peso Alineación"
-			,"Peso Objetivo","Peso Obstáculo","Peso Lider","Velocidad Máxima","Nº Boids","Boids Ok"};
+	String[] nomParam = {"Radio Obstaculos","Radio Cohesion","Radio Separacion"
+			,"Radio Alineacion","Peso Cohesion","Peso Separacion","Peso Alineacion"
+			,"Peso Objetivo","Peso Obstaculo","Peso Lider","Velocidad Maxima","N� Boids","Boids Ok"};
 	double[] valorParam = {Boid.getRadioObstaculo(),Boid.getRadioCohesion(),Boid.getRadioSeparacion()
 			,Boid.getRadioAlineacion(),Boid.getPesoCohesion(),Boid.getPesoSeparacion(),Boid.getPesoAlineacion()
 			,Boid.getPesoObjetivo(),Boid.getPesoObstaculo(),Boid.getPesoLider(),Boid.getVelMax(),20

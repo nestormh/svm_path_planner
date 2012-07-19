@@ -32,15 +32,15 @@ public class Parametro extends JPanel implements ActionListener,ChangeListener{
 		this.nombre = nombre;
 		parametroN = new JCheckBox(this.nombre);
 		valorIni = valIni;
-		spValorIni = new SpinnerNumberModel(valorIni,0,1000,1);
+		spValorIni = new SpinnerNumberModel(valorIni,0,1000,0.1);
 		spinnerValorIni = new JSpinner(spValorIni);
 		spinnerValorIni.setEnabled(false);
 		valorFin = valFin;
-		spValorFin = new SpinnerNumberModel(valorFin,0,1000,1);
+		spValorFin = new SpinnerNumberModel(valorFin,0,1000,0.1);
 		spinnerValorFin = new JSpinner(spValorFin);
 		spinnerValorFin.setEnabled(false);
 		valorPaso = paso;
-		spValorPaso = new SpinnerNumberModel(valorPaso,0,1000,1);
+		spValorPaso = new SpinnerNumberModel(valorPaso,0,1000,0.1);
 		spinnerValorPaso = new JSpinner(spValorPaso);
 		spinnerValorPaso.setEnabled(false);
 		setLayout(new GridLayout(1,7));
