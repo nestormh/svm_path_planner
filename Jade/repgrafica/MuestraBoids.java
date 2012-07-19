@@ -484,7 +484,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 	 * tiempo que pasa entre pintado y pintado de la escena, siempre y cuando el tiempo de cómputo sea 
 	 * más pequeño que este valor. En milisegundos	
 	 */
-	long velReprod = 10;	
+	long velReprod = 2;	
 	
 	public long getVelReprod() {
 		return velReprod;
@@ -680,8 +680,8 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 			File file = new File(fichero);
 			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
 			sim.setObstaculos((Vector<Obstaculo>) ois.readObject());
-			pintor.obstaculosPintar = sim.getObstaculos();
-			repaint();
+//			pintor.obstaculosPintar = sim.getObstaculos();
+//			repaint();
 			ois.close();
 		} catch (IOException ioe) {
 			System.err.println("Error al leer en el fichero " + fichero);
@@ -786,6 +786,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
             int devuelto = selectorArchivo.showSaveDialog(null);
             if (devuelto == JFileChooser.APPROVE_OPTION) {
                 File file = selectorArchivo.getSelectedFile();
+                System.out.println(file.getAbsolutePath());
                 salvarEscenario(file.getAbsolutePath(),this.getSim());
             }            
         }
@@ -824,7 +825,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
         if (e.getSource() == simulacionBatch){
         	if(!batch){        		
         		if (getConfigurador().getVectorSim().size() > 0){
-            		System.out.println("Existe un vector de puntos de diseÃ±o de tamaÃ±o "+getConfigurador().getVectorSim().size());
+            		System.out.println("Existe un vector de puntos de diseño de tamaño "+getConfigurador().getVectorSim().size());
             		batch = true;
             		simulacionBatch.setText("Parar simulaciÃ³n batch");
             		colocarBan.setEnabled(false);
@@ -834,7 +835,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
             	}
         	}
         	else{
-        		simulacionBatch.setText("Ejecutar simulaciÃ³n batch");
+        		simulacionBatch.setText("Ejecutar simulacion batch");
         		colocarBan.setEnabled(true);
 				colocarObs.setEnabled(true);
 				pausa.setEnabled(true);
@@ -973,8 +974,9 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		Vector<Matrix> vectorPosCoche = new Vector<Matrix>();
 		Vector<Double> yawCoche = new Vector<Double>();
 		Vector<Double> distMinObst = new Vector<Double>();
-		double difTemConAEstrella = 0;
-		double difTemConSolitario = 0;
+		double tiempoLlegadaCoche = 0;
+		double tiempoLlegadaCocheAEstrella = 0;
+		double tiempoLlegadaCocheSolitario = 0;
 		
 		Vector<Matrix> vectorPosCocheAEstrella = new Vector<Matrix>();
 		Vector<Double> yawCocheAEstrella = new Vector<Double>();
@@ -988,12 +990,13 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		//---------Defino las condiciones de la simulación, número de obstáculos,etc-----------------
 		//-------------------------------------------------------------------------------------------
 		int numSimu = 0;
-		int simuDeseadas = 100;
-		int numObstaculos = 40;
+		int simuDeseadas = 300;
+		int numObstaculos = 20;
+		double sepEntreObst = 5;
 		double distCercana = 3;		
 		gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 		int indMinAnt = 0;
-		double tMaximo = 50; // 80,120
+		double tMaximo = 100; // 80,120
 		double distCocheObjetivo = Double.POSITIVE_INFINITY;
 		double distCocheAEstrellaObjetivo = Double.POSITIVE_INFINITY;
 		double distCocheSolitarioObjetivo  = Double.POSITIVE_INFINITY;
@@ -1025,9 +1028,19 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		LoggerFactory.activaLoggers(1000);
 		System.out.println("Antes del while");
 		gui.getSim().creaRejilla(0.5);
+		int contConfigurador = 0;
 		while (numSimu < simuDeseadas){
 			System.out.println("Despues del while");
-			if (gui.play){								
+			if (gui.play){
+				//Si existe vector de configuración aplicamos las variaciones de los parámetros 
+				//para cada simulación
+				if (gui.getConfigurador().getVectorSim().size() != 0){
+					simuDeseadas = gui.getConfigurador().getVectorSim().size();
+					System.out.println("numero de simulaciones que se van a realizar "+simuDeseadas);
+					gui.getSim().configurador(gui.getConfigurador().getVectorSim().elementAt(contConfigurador),
+    						gui.getConfigurador().getNomParam());
+				}
+				contConfigurador++;
 				//------------------------------------------------------------------------------
 				//------------reinicio todo para la siguiente simulación------------------------
 				//------------------------------------------------------------------------------
@@ -1047,13 +1060,23 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				gui.pintor.eliminarObstaculos();
 //				gui.getSim().generaObstaculos(numObstaculos,1.5);								
 //				gui.getSim().generaObstaculosEquiespaciados(5, 1.5);
-				gui.getSim().generaObstaculosEquiespaciadosCruce(6, 1.5,2.5);
+				gui.getSim().generaObstaculosEquiespaciadosCruce(sepEntreObst, 1.5,2.6);
+				//leemos el escenario de un archivo
+//				try {
+//					gui.cargarEscenario("C:/Users/Jesús/Dropbox/workspace/Octave/Boids/DatosBoids/escenario",gui.getSim());
+//					System.out.println("cargamos el escenario");
+//				} catch (ClassNotFoundException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
 				gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 				gui.getSim().borrarBandada();
 				gui.getSim().crearBandada(20,gui.getSim().getContIteraciones());
 				gui.getSim().setPosInicial(new Matrix(inicial,2));
 				
-				
+				gui.getSim().getModCoche().setContParadas(0);
+				gui.getSim().getModeCocheAEstrella().setContParadas(0);
+				gui.getSim().getCocheSolitario().setContParadas(0);				
 				
 				//Introducimos datos en la rejilla y la creamos	
 //				System.out.println("rejilla sin crear");
@@ -1062,14 +1085,14 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //				gui.getSim().getRejilla().setGoalPos(gui.getSim().getObjetivo().get(0, 0),gui.getSim().getObjetivo().get(0, 0));
 //				gui.getSim().getRejilla().setStartPos(gui.getSim().getPosInicial().get(0, 0),gui.getSim().getPosInicial().get(1, 0));
 				gui.pintor.setPosCoche(gui.getSim().getModCoche().getX(),gui.getSim().getModCoche().getY());
-				gui.pintor.setPosCocheAEstrella(gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY());
-				gui.pintor.setPosCocheSolitario(gui.getSim().getPosCocheSolitario());
+//				gui.pintor.setPosCocheAEstrella(gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY());
+//				gui.pintor.setPosCocheSolitario(gui.getSim().getPosCocheSolitario());
 				gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
-				gui.pintor.setYawCocheAEstrella(gui.getSim().getModeCocheAEstrella().getYaw());
-				gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));
+//				gui.pintor.setYawCocheAEstrella(gui.getSim().getModeCocheAEstrella().getYaw());
+//				gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));
 				distCocheObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
-				distCocheAEstrellaObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
-				distCocheSolitarioObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
+//				distCocheAEstrellaObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
+//				distCocheSolitarioObjetivo = gui.getSim().getObjetivo().minus(gui.getSim().getPosInicial()).norm2();
 				double tAnt = System.currentTimeMillis()/1000;
 				double tSim = System.currentTimeMillis()/1000;		
 				double tInicioIteracion = System.currentTimeMillis()/1000;
@@ -1079,7 +1102,8 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				//-----------Para evitar que se atasque toda la simulación por lotes----------------------------------
 				
 //				while((distCocheObjetivo > distCercana)&&(tSim-tAnt < tMaximo)){
-				while(((!cocheEnObjetivo)||(!cocheAEstrellaEnObjetivo)||(!cocheSolitarioEnObjetivo))&&(tSim-tAnt < tMaximo)){
+//				while(((!cocheEnObjetivo)||(!cocheAEstrellaEnObjetivo)||(!cocheSolitarioEnObjetivo))&&(tSim-tAnt < tMaximo)){
+				while((!cocheEnObjetivo)&&(tSim-tAnt < tMaximo)){
 //				while((distCocheObjetivo - distCercana > 0)){
 //					if ((distCocheObjetivo < distCercana)){
 //						System.out.println("debería saltar a la siguiente simulación");
@@ -1102,17 +1126,17 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 
 						//Introducimos datos en la rejilla y la creamos	
 
-						gui.getSim().creaRejilla(0.5);
-						gui.getSim().getRejilla().setSim(gui.getSim());
-						gui.getSim().getRejilla().setVelCoche(gui.getSim().getModeCocheAEstrella().getVelocidad());
-						gui.getSim().getRejilla().setGoalPos(gui.getSim().getObjetivo().get(0, 0),gui.getSim().getObjetivo().get(1, 0));
-						gui.getSim().getRejilla().setStartPos(gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY());
+//						gui.getSim().creaRejilla(0.5);
+//						gui.getSim().getRejilla().setSim(gui.getSim());
+//						gui.getSim().getRejilla().setVelCoche(gui.getSim().getModeCocheAEstrella().getVelocidad());
+//						gui.getSim().getRejilla().setGoalPos(gui.getSim().getObjetivo().get(0, 0),gui.getSim().getObjetivo().get(1, 0));
+//						gui.getSim().getRejilla().setStartPos(gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY());
 
 						//-----------------------------------------------------------------------
 						//-----Cálculo de las diferentes trayectorias----------------------------
 						//-----------------------------------------------------------------------
 //						gui.getSim().setRutaDinamica(gui.getSim().calculaRutaDinamica(gui.getSim().getModCoche()));
-						gui.getSim().setRutaAEstrellaGrid(gui.getSim().getRejilla().busquedaAEstrella());
+//						gui.getSim().setRutaAEstrellaGrid(gui.getSim().getRejilla().busquedaAEstrella());
 //						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
 //						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
 						// Si la ruta no ha sido intersectada por un obstáculo no se vuelve a calcular
@@ -1134,7 +1158,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //						gui.getSim().setRutaDinamica(gui.getSim().suavizador(0.1));
 //						gui.pintor.setRutaDinamica(gui.getSim().busquedaAEstrella());
 						gui.pintor.setRutaDinamica(gui.getSim().getRutaDinamica());
-						gui.pintor.setRutaAEstrella(gui.getSim().getRutaAEstrellaGrid());
+//						gui.pintor.setRutaAEstrella(gui.getSim().getRutaAEstrellaGrid());
 //						gui.pintor.setRutaDinamica(gui.getRutaDinamica());
 						gui.pintor.setHorPrediccion(gui.getSim().getContPred().getHorPrediccion());
 						gui.pintor.setPrediccion(gui.getSim().getContPred().getPrediccionPosPorFilas());
@@ -1143,19 +1167,19 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						
 						//-----------Movemos los vehículos---------------------------------
 						//-----------------------------------------------------------------
-						
+						  
 //						gui.getSim().moverPtoInicial(tAnt, gui.getSim().getTs());
 						if(!cocheEnObjetivo){
 							gui.getSim().moverVehiculo(gui.getSim().getModCoche(),gui.getSim().getRutaDinamica(),
 									 gui.getSim().getTs(),false,true,gui.getSim().getContPred());
 						}
-						if(!cocheAEstrellaEnObjetivo){
-							gui.getSim().moverVehiculo(gui.getSim().getModeCocheAEstrella(),gui.getSim().getRutaAEstrellaGrid(),
-									 gui.getSim().getTs(),false,true,gui.getSim().getContPredAEstrella());
-						}
-						if(!cocheSolitarioEnObjetivo){
-							gui.pintor.setVectorDirectorCoche(gui.getSim().moverCocheSolitario(gui.getSim().getTs()));
-						}
+//						if(!cocheAEstrellaEnObjetivo){
+//							gui.getSim().moverVehiculo(gui.getSim().getModeCocheAEstrella(),gui.getSim().getRutaAEstrellaGrid(),
+//									 gui.getSim().getTs(),false,true,gui.getSim().getContPredAEstrella());
+//						}
+//						if(!cocheSolitarioEnObjetivo){
+//							gui.pintor.setVectorDirectorCoche(gui.getSim().moverCocheSolitario(gui.getSim().getTs()));
+//						}
 						
 						//-----Medimos la distancia a la que se encuentran los coches del objetivo----------
 						//----------------------------------------------------------------------------------
@@ -1164,13 +1188,13 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						Matrix posiCocheBoids = new Matrix(posCocheBoids,2);
 						distCocheObjetivo = gui.getSim().getObjetivo().minus(posiCocheBoids).norm2();
 
-						double posCocheAEstrella[] = {gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY()};
-						Matrix posiCocheAEstrella = new Matrix(posCocheAEstrella,2);
-						distCocheAEstrellaObjetivo = gui.getSim().getObjetivo().minus(posiCocheAEstrella).norm2();
-						
-						double posCocheSolitario[] = {gui.getSim().getCocheSolitario().getX(),gui.getSim().getCocheSolitario().getY()};
-						Matrix posiCocheSolitario = new Matrix(posCocheSolitario,2);
-						distCocheSolitarioObjetivo = gui.getSim().getObjetivo().minus(posiCocheSolitario).norm2();
+//						double posCocheAEstrella[] = {gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY()};
+//						Matrix posiCocheAEstrella = new Matrix(posCocheAEstrella,2);
+//						distCocheAEstrellaObjetivo = gui.getSim().getObjetivo().minus(posiCocheAEstrella).norm2();
+//						
+//						double posCocheSolitario[] = {gui.getSim().getCocheSolitario().getX(),gui.getSim().getCocheSolitario().getY()};
+//						Matrix posiCocheSolitario = new Matrix(posCocheSolitario,2);
+//						distCocheSolitarioObjetivo = gui.getSim().getObjetivo().minus(posiCocheSolitario).norm2();
 						
 						//---------Marcamos que vehículos han alcanzado el objetivo-------------------------------
 						//----------------------------------------------------------------------------------------
@@ -1178,12 +1202,12 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						if (distCocheObjetivo < distCercana){
 							cocheEnObjetivo = true;							
 						}
-						if (distCocheAEstrellaObjetivo < distCercana){
-							cocheAEstrellaEnObjetivo = true;
-						}
-						if (distCocheSolitarioObjetivo < distCercana){
-							cocheSolitarioEnObjetivo = true;
-						}
+//						if (distCocheAEstrellaObjetivo < distCercana){
+//							cocheAEstrellaEnObjetivo = true;
+//						}
+//						if (distCocheSolitarioObjetivo < distCercana){
+//							cocheSolitarioEnObjetivo = true;
+//						}
 						
 						//---------Rellenamos los datos de los caminos seguidos por los coches--------------
 						//----------------------------------------------------------------------------------
@@ -1195,21 +1219,21 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 							distMinObst.add(gui.getSim().distObstaculoMasCercanoAlCoche(gui.getSim().getModCoche()));
 						}
 						
-						if(!cocheAEstrellaEnObjetivo){
-							double[] posCocheAEstrellaAux = {gui.getSim().getModeCocheAEstrella().getX(),
-									gui.getSim().getModeCocheAEstrella().getY()};
-							vectorPosCocheAEstrella.add(new Matrix(posCocheAEstrellaAux,2));
-							yawCocheAEstrella.add(gui.getSim().getModeCocheAEstrella().getYaw());
-							distMinObstAEstrella.add(gui.getSim().distObstaculoMasCercanoAlCoche(gui.getSim().getModeCocheAEstrella()));
-						}						
-						
-						if (!cocheSolitarioEnObjetivo){
-							double[] posCocheSolitarioAux = {gui.getSim().getCocheSolitario().getX(),
-									gui.getSim().getCocheSolitario().getY()};
-							vectorPosCocheSolitario.add(new Matrix(posCocheSolitarioAux,2));
-							yawCocheSolitario.add(gui.getSim().getCocheSolitario().getYaw());
-							distMinObstSolitario.add(gui.getSim().distObstaculoMasCercanoAlCoche(gui.getSim().getCocheSolitario()));
-						}						
+//						if(!cocheAEstrellaEnObjetivo){
+//							double[] posCocheAEstrellaAux = {gui.getSim().getModeCocheAEstrella().getX(),
+//									gui.getSim().getModeCocheAEstrella().getY()};
+//							vectorPosCocheAEstrella.add(new Matrix(posCocheAEstrellaAux,2));
+//							yawCocheAEstrella.add(gui.getSim().getModeCocheAEstrella().getYaw());
+//							distMinObstAEstrella.add(gui.getSim().distObstaculoMasCercanoAlCoche(gui.getSim().getModeCocheAEstrella()));
+//						}						
+//						
+//						if (!cocheSolitarioEnObjetivo){
+//							double[] posCocheSolitarioAux = {gui.getSim().getCocheSolitario().getX(),
+//									gui.getSim().getCocheSolitario().getY()};
+//							vectorPosCocheSolitario.add(new Matrix(posCocheSolitarioAux,2));
+//							yawCocheSolitario.add(gui.getSim().getCocheSolitario().getYaw());
+//							distMinObstSolitario.add(gui.getSim().distObstaculoMasCercanoAlCoche(gui.getSim().getCocheSolitario()));
+//						}						
 						
 //						System.out.println("la distancia del coche hasta el objetivo es "+distCocheObjetivo);
 						
@@ -1217,11 +1241,11 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						//----------------------------------------------------------------------------------
 						
 						gui.pintor.setPosCoche(gui.getSim().getModCoche().getX(),gui.getSim().getModCoche().getY());
-						gui.pintor.setPosCocheAEstrella(gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY());
-						gui.pintor.setPosCocheSolitario(gui.getSim().getPosCocheSolitario());
+//						gui.pintor.setPosCocheAEstrella(gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY());
+//						gui.pintor.setPosCocheSolitario(gui.getSim().getPosCocheSolitario());
 						gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
-						gui.pintor.setYawCocheAEstrella(gui.getSim().getModeCocheAEstrella().getYaw());
-						gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));						
+//						gui.pintor.setYawCocheAEstrella(gui.getSim().getModeCocheAEstrella().getYaw());
+//						gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));						
 						/*if (gui.getRutaDinamica().size()>1){ //Comprobar si hay ruta que seguir					
 							Trayectoria tr = new Trayectoria(gui.getSim().traduceRuta(gui.getRutaDinamica()));
 							Trayectoria trMasPuntos = new Trayectoria(tr,0.1);
@@ -1250,33 +1274,40 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 				//-----------------Calculo la diferencia en el tiempo de llegada entre el coche A estrella----
 				//-----------------y el coche de los boids----------------------------------------------------
 				if(cocheEnObjetivo){
-					simCompletasCoche++;
-					if(cocheAEstrellaEnObjetivo){
-						difTemConAEstrella = vectorPosCocheAEstrella.size()*gui.getSim().getTs() - vectorPosCoche.size()*gui.getSim().getTs();
-					}
-					if(cocheSolitarioEnObjetivo){
-						difTemConSolitario = vectorPosCocheSolitario.size()*gui.getSim().getTs() - vectorPosCoche.size()*gui.getSim().getTs();
-					}					
+					tiempoLlegadaCoche = vectorPosCoche.size()*gui.getSim().getTs();
+					simCompletasCoche++;				
 				}
-				if(cocheAEstrellaEnObjetivo){
-					simCompletasCocheAEstrella++;
-				}	
-				if(cocheSolitarioEnObjetivo){
-					simCompletasCocheSolitario++;
-				}
+//				if(cocheAEstrellaEnObjetivo){
+//					tiempoLlegadaCocheAEstrella = vectorPosCocheAEstrella.size()*gui.getSim().getTs();
+//					simCompletasCocheAEstrella++;
+//				}	
+//				if(cocheSolitarioEnObjetivo){
+//					tiempoLlegadaCocheSolitario = vectorPosCocheSolitario.size()*gui.getSim().getTs();
+//					simCompletasCocheSolitario++;
+//				}
 				
 				
-				gui.getSim().getLogDifTemporales().add(difTemConAEstrella,difTemConSolitario);
+				gui.getSim().getLogTiemposdeLlegada().add(tiempoLlegadaCoche,0,0);
+				gui.getSim().getLogParadas().add(gui.getSim().getModCoche().getContParadas(),0,0);
+				gui.getSim().getLogParametrosBoid().add(Boid.getRadioSeparacion(),Boid.getRadioObstaculo());
+				
+//				gui.getSim().getLogTiemposdeLlegada().add(tiempoLlegadaCoche,tiempoLlegadaCocheAEstrella,tiempoLlegadaCocheSolitario);
+//				gui.getSim().getLogParadas().add(gui.getSim().getModCoche().getContParadas(),
+//												gui.getSim().getModeCocheAEstrella().getContParadas(),
+//												gui.getSim().getCocheSolitario().getContParadas());
+//				gui.getSim().getLogParametrosBoid().add(Boid.getRadioSeparacion(),Boid.getRadioObstaculo());
+				
+
 				//-----------------Calculamos la estadística para cada coche--------------------
 				//------------------------------------------------------------------------------
 
 				
 				gui.getSim().calculaEstadistica(vectorPosCoche, yawCoche, distMinObst, gui.getSim().getTs(),
 						gui.getSim().getLogEstadisticaCoche());
-				gui.getSim().calculaEstadistica(vectorPosCocheAEstrella, yawCocheAEstrella, distMinObstAEstrella,
-						gui.getSim().getTs(), gui.getSim().getLogEstadisticaCocheAEstrella());
-				gui.getSim().calculaEstadistica(vectorPosCocheSolitario, yawCocheSolitario, distMinObstSolitario,
-						gui.getSim().getTs(), gui.getSim().getLogEstadisticaCocheSolitario());
+//				gui.getSim().calculaEstadistica(vectorPosCocheAEstrella, yawCocheAEstrella, distMinObstAEstrella,
+//						gui.getSim().getTs(), gui.getSim().getLogEstadisticaCocheAEstrella());
+//				gui.getSim().calculaEstadistica(vectorPosCocheSolitario, yawCocheSolitario, distMinObstSolitario,
+//						gui.getSim().getTs(), gui.getSim().getLogEstadisticaCocheSolitario());
 				
 //				if (distCocheObjetivo <= distCercana){
 ////					CÃ¡lculo de las medias, varianzas,etc del estudio estadÃ­stico
@@ -1352,6 +1383,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //				gui.getSim().setNumBoidsOkDeseados(gui.getConfigurador().getNumBoidsOk());
 				gui.getSim().setTiempoMax(gui.getConfigurador().getTMax());
 				for(int i=0;i<gui.getConfigurador().getVectorSim().size() && gui.batch;i++){
+					//Configuramos los parámetros de la bandada
 	    				gui.getSim().configurador(gui.getConfigurador().getVectorSim().elementAt(i),
 	    						gui.getConfigurador().getNomParam());
 	    				gui.getSim().crearBandada();
@@ -1423,7 +1455,8 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 		}
 		gui.getSim().getLogSimlacionesCompletadas().add(100*(simCompletasCoche/numSimu),100*(simCompletasCocheAEstrella/numSimu),
 				100*(simCompletasCocheSolitario/numSimu));
-		LoggerFactory.vuelcaLoggersMATv4("C:/Users/Jesús/Dropbox/workspace/Octave/Boids/DatosBoids/"+numObstaculos+"Obstaculos");
+//		LoggerFactory.vuelcaLoggersMATv4("C:/Users/Jesús/Dropbox/workspace/Octave/Boids/DatosBoids/"+sepEntreObst+"deSepEntreObst");
+		LoggerFactory.vuelcaLoggersMATv4("C:/Users/Jesús/Dropbox/workspace/Octave/Boids/DatosBoids/VariacionParametros");
 		System.out.println("Acabaron todas las simulaciones");
 	}
 }
