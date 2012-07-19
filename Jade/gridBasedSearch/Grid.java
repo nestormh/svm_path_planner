@@ -215,11 +215,12 @@ public class Grid {
 					this.setObstaculos(this.sim.getObstaculos());
 					//Calculamos el tiempo que el vehículo va a alcanzar el obstáculo
 					double t = actual.getG_score()/this.getVelCoche();
-					System.out.println("tiempo t "+t);
+//					System.out.println("tiempo t "+t);
 					//Calculamos la posición de los obstáculos un tiempo t después
 //					setObstaculos(this.getSim().moverObstaculos(t,this.getObstaculos()));
 					this.getSim().moverObstaculos(t,this.getObstaculos());
 					//limpiamos las celdas anteriores marcadas con obstáculos
+					clearObstacles();
 					//Los marcamos en la rejilla
 					addObstacles(this.getObstaculos());
 					if (this.rejilla[j][k].isOccupied()){
