@@ -23,7 +23,7 @@ public class Obstaculo implements Serializable{
 	/**Forma geométrica con la que se pintará el obstáculo*/
 	Rectangle2D cuadrado;
 	LoggerArrayDoubles logDatosObst;
-	double lado = 2;	
+	double lado = 2;//2	
 
 	/**
 	 * Constructor general
