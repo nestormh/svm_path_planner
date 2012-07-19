@@ -96,8 +96,10 @@ public class Simulador{
 	private LoggerArrayDoubles logEstadisticaCoche;
 	private LoggerArrayDoubles logEstadisticaCocheAEstrella;
 	private LoggerArrayDoubles logEstadisticaCocheSolitario;
-	private LoggerArrayDoubles logDifTemporales;
+	private LoggerArrayDoubles logTiemposdeLlegada;
 	private LoggerArrayDoubles logSimlacionesCompletadas;
+	private LoggerArrayDoubles logParametrosBoid;	
+	private LoggerArrayInts logParadas;
 
 	private double distOkAlOrigen = 5;
 	/**
@@ -119,7 +121,7 @@ public class Simulador{
 	//Búsqueda A estrella
 	
 	Grid rejilla;
-	
+
 	//-------------Constructores---------------------------------------------------
 	
 
@@ -156,9 +158,9 @@ public class Simulador{
 		logEstadisticaCoche.setDescripcion(
 				"Valores estadisticos del comportamiento del coche" +
 				" [mediaVel,desvTipicaVel,mediaYaw,desvTipicaYaw,mediaAcel,desvTipicaAcel," +
-				"mediaDistMin,desvTipicaDistMin,difTemConAEstrella,difTemConSolitario]");
-		logDifTemporales=LoggerFactory.nuevoLoggerArrayDoubles(this, "DifTemporales");
-		logDifTemporales.setDescripcion("diferencias de tiempo de llegada [difTemConAEstrella difTemConSolitario]");
+				"mediaDistMin,desvTipicaDistMin]");
+		logTiemposdeLlegada=LoggerFactory.nuevoLoggerArrayDoubles(this, "TiemposDeLlegada");
+		logTiemposdeLlegada.setDescripcion("diferencias de tiempo de llegada [temDeLlegadaCoche temDeLlegadaCocheAEstrella temDeLlegadaCocheSolitario]");
 		logSimlacionesCompletadas=LoggerFactory.nuevoLoggerArrayDoubles(this,"SimCompletadas");
 		logSimlacionesCompletadas.setDescripcion("Porcentaje de simulaciones completadas [%coche %cocheAEstrella %Solitario]");
 		
@@ -177,6 +179,11 @@ public class Simulador{
 				"Valores estadisticos del comportamiento del coche solitario" +
 				" [mediaVel,desvTipicaVel,mediaYaw,desvTipicaYaw,mediaAcel,desvTipicaAcel," +
 				"mediaDistMin,desvTipicaDistMin]");
+		logParadas=LoggerFactory.nuevoLoggerArrayInts(this,"ParadasCoches");
+		logParadas.setDescripcion("Número de iteraciones en las que se disparan las condiciones de frenado de emergencia [ParadasBoids ParadasAEstrella ParadasSolitario]");
+		logParametrosBoid = LoggerFactory.nuevoLoggerArrayDoubles(this,"ParametrosBoid");
+		logParametrosBoid.setDescripcion("Valores de los parametros de la bandada de boids [radioSeparacion radioObstaculos]");
+		
 	}		
 
 	public Simulador(Matrix puntoIni,Matrix objetivo,double tMax,int boidsOk,
@@ -320,19 +327,25 @@ public class Simulador{
 		obstaculos.clear();
 		Random rand = new Random();
 		int numObst = (int) Math.floor(largoEscenario/separacion);
-		for (int i=0;i<numObst;i++){
+//		for (int i=0;i<numObst;i++){
+		for (int i=3;i<numObst-1;i++){ //los índices del bucle hacen que los primeros y el último obstáculo no se creen
 			double posX = separacion*i;
 			double posY = Math.random()*anchoEscenario;
 //			double velX = rand.nextGaussian()*velMax;
 			double velX = 0;
 //			double velY = rand.nextGaussian()*velMax;
 			double velY = 0;
-			if (posY >= anchoEscenario/2){
-				velY = -(anchoEscenario/2)/(posX/velCoche);
-			}
-			if (posY < anchoEscenario/2 ){
-				velY = (anchoEscenario/2)/(posX/velCoche);
-			}
+//			if(i%2 == 0){
+				if (posY >= anchoEscenario/2){
+					velY = -(anchoEscenario/2)/(posX/velCoche);
+				}
+				if (posY < anchoEscenario/2 ){
+					velY = (anchoEscenario/2)/(posX/velCoche);
+				}
+//			}else{
+//				velY = rand.nextGaussian()*velMax;
+//			}
+			
 			double rumboX = velX;
 			double rumboY = velY;
 			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, rumboX, rumboY);
@@ -397,7 +410,7 @@ public class Simulador{
 		Matrix velo = new Matrix(vel,2);
 		for (int i=0;i<getObstaculos().size();i++){
 			paradaEmergencia = calculaParadaEmergencia(getObstaculos().elementAt(i).getPosicion(),
-				posiCoche,velo);
+				posiCoche,velo,modVehi);
 			if (paradaEmergencia == 0)
 				break;
 		}
@@ -419,7 +432,7 @@ public class Simulador{
 		Matrix velo = new Matrix(vel,2);
 		for (int i=0;i<getObstaculos().size();i++){
 			paradaEmergencia = calculaParadaEmergencia(getObstaculos().elementAt(i).getPosicion(),
-				posiCoche,velo);
+				posiCoche,velo,modVehi);
 			if (paradaEmergencia == 0)
 				break;
 		}
@@ -479,7 +492,7 @@ public class Simulador{
 			}else{
 				double [][] trayecAux = traduceRuta(trayectoria);
 				Trayectoria trayec = new Trayectoria(trayecAux);
-				cp.setCarroOriginal(modVehi);
+				cp.setCarroOriginal(modVehi);				
 				trayec.situaCoche(modVehi.getX(),modVehi.getY());				
 				cp.setRuta(trayec);
 				comand  = cp.calculaComando();
@@ -848,7 +861,7 @@ public class Simulador{
 	 * @param Obs ObstÃ¡culo sobre el que se quiere calcular su velocidad 
 	 * @return velocidad
 	 */
-	public double calculaParadaEmergencia(Matrix posObst,Matrix posObjMovil, Matrix velObjMovil){
+	public double calculaParadaEmergencia(Matrix posObst,Matrix posObjMovil, Matrix velObjMovil,Coche modVehi){
 		double veloObjMovil = 0;		
 		// calculo el vector diferencia entre la pos del obstÃ¡culo
 		// y la posicion inicial de salida de los boids, es decir, la posiciÃ³n del
@@ -868,15 +881,24 @@ public class Simulador{
 		double difOrientaciones = UtilCalculos.normalizaAngulo(orientacionObjMovil-orientacionVectorDif);
 
 		if ((Math.abs(difOrientaciones) < Math.PI/6)&&(dist < 3)){
+//		if ((Math.abs(difOrientaciones) < Math.PI)&&(dist < 3)){
+			modVehi.setContParadas(modVehi.getContParadas()+1); //contParadas
 			veloObjMovil = 0;
+//			if(!modVehi.isFlagEmergencia()){
+//				modVehi.setFlagEmergencia(true); //Usamos el flag para evitar que una vez que el coche se detenga siga aumentando				
+//				modVehi.setContParadas(modVehi.getContParadas()+1); //contParadas
+//				System.out.println("Número de paradas "+modVehi.getContParadas());
+//			}
 //			System.out.println("Parada de emergencia!!");
 		}
 		else{
+//			modVehi.setFlagEmergencia(false);
 			veloObjMovil = 1;
 		}
 		return veloObjMovil;
 	}
 	
+
 	public void calculaEstadistica(Vector<Matrix> vecPosCoche,Vector<Double> vecYawCoche,Vector<Double> vecDistMinObst,double Ts,LoggerArrayDoubles log){
 //		Cálculo de las medias, varianzas,etc del estudio estadístico
 		double distEntrePtos = 0;
@@ -1166,7 +1188,7 @@ public class Simulador{
 //				rutaDinamica = reconstruirCaminoAEstrella(actual);
 				camino = reconstruirCaminoAEstrella(actual);
 				caminoCompleto = true;
-				System.out.println("se encontró un camino completo");
+//				System.out.println("se encontró un camino completo");
 			}
 			//Quitamos el nodo actual del openSet 
 			openSet.remove(indMin); //También existe un método para quitar un elemento especificando que objeto hay que quitar
@@ -1238,7 +1260,7 @@ public class Simulador{
 //			rutaDinamica.clear();
 //			rutaDinamica = reconstruirCaminoAEstrella(actual);
 			camino = reconstruirCaminoAEstrella(actual);
-			System.out.println("no se logró un camino completo");
+//			System.out.println("no se logró un camino completo");
 		}
 		return camino;
 	}
@@ -1250,7 +1272,7 @@ public class Simulador{
 			camino.add(aux.getPosicion());
 			aux = aux.getCame_from();			
 		}
-		System.out.println("tamaño del camino a estrella "+ camino.size());
+//		System.out.println("tamaño del camino a estrella "+ camino.size());
 		return camino;
 	}
 	
@@ -1604,13 +1626,26 @@ public class Simulador{
 		return logPosturaCocheSolitario;
 	}
 	
-	public LoggerArrayDoubles getLogDifTemporales() {
-		return logDifTemporales;
+	public LoggerArrayDoubles getLogTiemposdeLlegada() {
+		return logTiemposdeLlegada;
 	}
 	
 	public LoggerArrayDoubles getLogSimlacionesCompletadas() {
 		return logSimlacionesCompletadas;
 	}
+	
+	public LoggerArrayInts getLogParadas() {
+		return logParadas;
+	}
+
+	public void setLogParadas(LoggerArrayInts logParadas) {
+		this.logParadas = logParadas;
+	}
+	
+	public LoggerArrayDoubles getLogParametrosBoid() {
+		return logParametrosBoid;
+	}
+
 	
 	public double getTiempoAnt() {
 		return tiempoAnt;
@@ -1672,7 +1707,10 @@ public class Simulador{
 	public void setLargoEscenario(double largoEscenario) {
 		this.largoEscenario = largoEscenario;
 	}
-	
+	/**
+	 * Método que crea una rejilla de búsqueda
+	 * @param resolucion Tamaño del lado de la celda
+	 */
 	public void creaRejilla(double resolucion){
 		rejilla = new Grid(resolucion, getLargoEscenario(), getAnchoEscenario());
 //		rejilla.addObstacles(this.getObstaculos());
