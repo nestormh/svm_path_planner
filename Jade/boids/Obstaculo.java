@@ -24,6 +24,8 @@ public class Obstaculo implements Serializable{
 	Rectangle2D cuadrado;
 	LoggerArrayDoubles logDatosObst;
 	double lado = 2;//2	
+	/**Variable booleana que indica si el obstáculo es visible desde el vehículo o está ocluido*/
+	boolean visible = true;
 
 	/**
 	 * Constructor general
@@ -107,5 +109,13 @@ public class Obstaculo implements Serializable{
 
 	public void setLado(double lado) {
 		this.lado = lado;
+	}
+	
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 }

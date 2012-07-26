@@ -29,9 +29,9 @@ public class Boid implements Serializable{
 	Matrix velocidad;
 	/**Vector con las componentes de posicion del boid*/
 	Matrix posicion;
-	/**Objeto gráfico que representará al boid*/
+	/**Objeto grafico que representara al boid*/
 	GeneralPath triangulo;
-	/**Linea que muestra la dirección del desplazamiento del boid*/
+	/**Linea que muestra la direccion del desplazamiento del boid*/
 	Line2D lineaDireccion = new Line2D.Double();
 	/**Color del boid para diferenciar las distintas generaciones**/
 	Color color;
@@ -92,15 +92,15 @@ public class Boid implements Serializable{
 	static Matrix objetivo = new Matrix(coorObjetivo,2);
 	static Matrix posInicial;
 
-	/** Dependiendo del valor de esta variable el boid tendrá tendencia a esquivar un obstáculo
-	 *  hacia un lado o hacia otro. Este valor se asignará aleatoriamente al crear el objeto 
+	/** Dependiendo del valor de esta variable el boid tendra tendencia a esquivar un obstaculo
+	 *  hacia un lado o hacia otro. Este valor se asignara aleatoriamente al crear el objeto 
 	 *  Boid*/
 	double tendenciaRepulsion = 0;
 	/** Indica cuantas iteraciones a tardado el boid en alcanzar el objetivo*/
 	int numIteraciones;
 	/** Longitud de la ruta seguida por le boid*/
 	double longitudRuta;
-	/**Iteración del bucle principal en la que se creo el boid*/
+	/**Iteracion del bucle principal en la que se creo el boid*/
 	double fechaNacimiento;
 	private double valoracion;
 	private double experiencia;	
@@ -132,8 +132,8 @@ public class Boid implements Serializable{
 		this.experiencia = experiencia ;
 	}
 
-	/**Constructor donde se inicializa la posición y velocidad de cada boid,
-	 * además de el objeto gráfico que lo representará*/
+	/**Constructor donde se inicializa la posicion y velocidad de cada boid,
+	 * ademas de el objeto grafico que lo representara*/
 	public Boid(Matrix posicion, Matrix velocidad,Matrix aceleracion) {
 		this.aceleracion = aceleracion;
 		this.velocidad = velocidad;
@@ -141,7 +141,7 @@ public class Boid implements Serializable{
 //		this.posInicial = posicion;
 //		lineaDireccion.setLine(this.posicion.get(0,0),this.posicion.get(1,0),
 //				this.velocidad.get(0,0),this.velocidad.get(1, 0));
-		/**Inicialización del aspecto gráfico del cuerpo del boid*/
+		/**Inicializacion del aspecto grafico del cuerpo del boid*/
 //		float ptosX[] = {0,-2,2};
 //		float ptosY[] = {1,-1,-1};
 //		triangulo = new GeneralPath(GeneralPath.WIND_NON_ZERO,ptosX.length);
@@ -154,6 +154,7 @@ public class Boid implements Serializable{
 //		triangulo.transform(AffineTransform.getTranslateInstance(posicion.get(0,0),posicion.get(1,0)));
 //		this.nuevoPuntoRuta(this.getPosicion());
 		tendenciaRepulsion = Math.random();
+//		tendenciaRepulsion = 0.4;
 //		if (aleatorio < 0.5){
 //			tendenciaRepulsion = true;			
 //		}
@@ -165,8 +166,8 @@ public class Boid implements Serializable{
 		this(posicion,velocidad,aceleracion);
 		setFechaNacimiento(fechaNacimiento);		
 	}
-	/**Método optimizado para calcular la cohesión, alineación y separación para un boid. 
-	 * Sólo usa un bucle for, y no una para cada regla*/
+	/**Método optimizado para calcular la cohesion, alineacion y separacion para un boid. 
+	 * Solo usa un bucle for, y no una para cada regla*/
 	
 	public Matrix aliCoheSep(Vector<Boid> bandada,int indBoid){
 		double pos[] = {0,0};
@@ -203,7 +204,7 @@ public class Boid implements Serializable{
 				} // if (!this.isLider()) para la cohesion
 				if (dist < radioSeparacion){
 					separa = separa.minus(bandada.elementAt(i).getPosicion().minus(this.getPosicion()));
-					// Los boids más cercanos tienen que producir más repulsión
+					// Los boids mas cercanos tienen que producir mas repulsion
 					if (dist != 0)
 						separa = separa.times(1/(dist)*(dist));
 //					separa = separa.times(1/(dist)*(dist));
@@ -216,7 +217,7 @@ public class Boid implements Serializable{
 		separa = separa.minus(this.getVelocidad());
 		separa = limitaFuerza(separa);
 //		separa = separa.times(1/separa.norm2());// lo pasamos a unitario
-		// calculos para la velocidad de alineación
+		// calculos para la velocidad de alineacion
 		if (contAlineacion != 0){
 			velMedia = velMedia.timesEquals((double)1/(double)contAlineacion);
 			velMedia = velMedia.minus(this.getVelocidad());			
@@ -228,7 +229,7 @@ public class Boid implements Serializable{
 			velMedia.set(0,0,0);
 			velMedia.set(1,0,0);
 		}		
-		// calculos para la cohesión
+		// calculos para la cohesion
 		if (cont != 0 && liderCerca == false){
 			centroMasa = centroMasa.times((double)1/(double)cont);
 			velCohesion = (centroMasa.minus(this.getPosicion())).times(pesoCohesion);
@@ -297,7 +298,7 @@ public class Boid implements Serializable{
 //			System.out.println("Después de dividir y cont vale " +cont);
 //			centroMasa.print(10,4);
 		}
-		else{ // si no hay vecinos nos quedamos con la posición del boid
+		else{ // si no hay vecinos nos quedamos con la posicion del boid
 			centroMasa = this.getPosicion();
 //			System.out.println("No había vecinos");
 //			centroMasa.print(10,4);
@@ -341,7 +342,7 @@ public class Boid implements Serializable{
 	public Matrix seguirObjetivo(Vector<Boid> bandada,int indBoid,Matrix obj){
 		Matrix velObj = new Matrix(2,1);
 		velObj = obj.minus(bandada.elementAt(indBoid).getPosicion());
-		if(this.isLider()) // El lider es atraido con más fuerza por el objetivo
+		if(this.isLider()) // El lider es atraido con mas fuerza por el objetivo
 			velObj = velObj.times(pesoObjetivo*10);
 		else
 			velObj = velObj.times(pesoObjetivo);
@@ -381,7 +382,7 @@ public class Boid implements Serializable{
 		return fuerzaLimitada;
 	}
 
-	/** Regla para esquivar los obstáculos*/
+	/** Regla para esquivar los obstaculos*/
 	
 	public Matrix evitaObstaculo(Vector<Obstaculo> obstaculos,Boid b,Matrix direcObjetivo){
 		double pos[] = {0,0};
@@ -396,22 +397,20 @@ public class Boid implements Serializable{
 		double umbralEsquivar = Math.toRadians(20);//20//5
 		double umbralCaso3 = -Math.toRadians(10);//10
 		int sentidoCompensacionLateral = 0;
-		Line2D recta = 
-			new Line2D.Double(this.getPosicion().get(0,0),this.getPosicion().get(1,0)
-						,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
+//		Line2D recta = 
+//				new Line2D.Double(this.getPosicion().get(0,0),this.getPosicion().get(1,0)
+//						,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
 		for (int i=0;i < obstaculos.size();i++){
-			dist = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();			
+			//si el obst�culo no est� visible para el coche es como si no existiera para losw boids
+			if(!obstaculos.elementAt(i).isVisible())
+				continue;			
+			dist = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();		
 			if (dist < radioObstaculo){
-//			if (dist < radioObstaculo*(1+this.getDistOrigen()/100)){
-				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
-				//es el vector que apunta desde al boid hacia el obstáculo
-				if (dist != 0){ // Para no dividir entre cero
-					repulsion = repulsion.times(1/(dist)*(dist));
-				}
-				repulsion = repulsion.times(pesoObstaculo);
-				//Dependiendo de la velocidad del obstáculo, de la posición del Boid
-				//y de la posición del objetivo, se calculará una compensación lateral
-				direcBoidObstaculo = repulsion.times(-1);
+				//			if (dist < radioObstaculo*(1+this.getDistOrigen()/100)){
+				
+				//Dependiendo de la velocidad del obstaculo, de la posicion del Boid
+				//y de la posicion del objetivo, se calculara una compensacion lateral
+				direcBoidObstaculo = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion());
 				double angVelObst = Math.atan2(obstaculos.elementAt(i).getVelocidad().get(1,0),
 						obstaculos.elementAt(i).getVelocidad().get(0,0));
 				double angDirecBoidObstaculo = Math.atan2(direcBoidObstaculo.get(1,0),
@@ -419,101 +418,106 @@ public class Boid implements Serializable{
 				double angDirecObjetivo = Math.atan2(direcObjetivo.get(1,0),
 						direcObjetivo.get(0, 0));
 				double angCompensacion = 0;
-				// Solo producen repulsión aquellos obstáculos que se encuentren entre el objetivo
-				// y el boid, los que quedan detrás del boid no influencian
+				//--Si el obst�culo tiene velocidad lo esquivamos dinamicamente, si est� parado usamos la tendencia
+				//--lateral de nacimiento del boid
+				// Solo producen repulsion aquellos obstaculos que se encuentren entre el objetivo
+				// y el boid, los que quedan detras del boid no influencian
 				if (UtilCalculos.diferenciaAngulos(angDirecObjetivo, angDirecBoidObstaculo)< 3*Math.PI/2){
-					//Diferencia entre el ángulo formado por el vector desde el boid hacia
-					//el obstáculo y la velocidad del obstáculo y el ángulo formado entre
-					//el vector que va desde el boid hacia el objetivo y la velocidad del
-					//obstáculo
-					double angObsBoidObj = UtilCalculos.diferenciaAngulos(angVelObst,angDirecBoidObstaculo) -
-							UtilCalculos.diferenciaAngulos(angVelObst, angDirecObjetivo);
-					// caso en el que el boid y el obstáculo van a cruzar sus caminos 
-					// en el futuro
-//					if (UtilCalculos.diferenciaAngulos(angVelObst,angDirecBoidObstaculo) >=
-//						UtilCalculos.diferenciaAngulos(angVelObst, angDirecObjetivo)){
-					if (angObsBoidObj >= umbralCaso3){
-//						if (UtilCalculos.diferenciaAngulos(angDirecBoidObstaculo, angDirecObjetivo) <= umbralEsquivar){
-						if (angObsBoidObj > umbralEsquivar){// Por delante
-//							System.out.println("va por delante del  obstáculo");
-							compensacion.set(0,0,repulsion.get(1,0));
-							compensacion.set(1,0,-repulsion.get(0,0));
-							angCompensacion = Math.atan2(compensacion.get(1,0),
-									compensacion.get(0,0));
-							if (UtilCalculos.
-									diferenciaAngulos(angVelObst,angCompensacion)>Math.toRadians(90)){
-								//Si se da la condición lo cambiamos de sentido, si no se queda 
-								//como se calculó antes del if
-								compensacion.set(0,0,-repulsion.get(1,0));
-								compensacion.set(1,0,repulsion.get(0,0));
-							}
-							
-//							sentidoCompensacionLateral = -1;
-						}else{
-							//Por detrás 
-//							System.out.println("va por detrás del  obstáculo");
-							compensacion.set(0,0,repulsion.get(1,0));
-							compensacion.set(1,0,-repulsion.get(0,0));
-							angCompensacion = Math.atan2(compensacion.get(1,0),
-									compensacion.get(0,0));
-							if (UtilCalculos.
-									diferenciaAngulos(angVelObst,angCompensacion)<Math.toRadians(90)){
-								//Si se da la condición lo cambiamos de sentido, si no se queda 
-								//como se calculó antes del if
-								compensacion.set(0,0,-repulsion.get(1,0));
-								compensacion.set(1,0,repulsion.get(0,0));
-							}
-//							sentidoCompensacionLateral = 1;
-						}
-//						if (!(pesoCompensacionLateral == 0)){
-						compensacion.timesEquals(pesoCompensacionLateral);
-							//						System.out.println("Calculamos compensación lejos");
-//							compensacion = obstaculos.elementAt(i).getVelocidad().times(
-//									pesoCompensacionLateral*sentidoCompensacionLateral);
-//						}
-						c = c.plus(repulsion.plus(compensacion));
-					}else{//Si no va a cruzarse con el obstáculo no se le añade compensación lateral
-						//ni repulsion
-											c = c.plus(repulsion);
-//						c = c.plus(cero);
+					
+//					repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
+					repulsion = this.getPosicion().minus(obstaculos.elementAt(i).getPosicion());
+					//es el vector que apunta desde al boid hacia el obstaculo
+					if (dist != 0){ // Para no dividir entre cero
+						repulsion = repulsion.times(1/(dist)*(dist));
 					}
-				}				
-				
+					repulsion = repulsion.times(pesoObstaculo);
+//				if (UtilCalculos.diferenciaAngulos(angDirecObjetivo, angDirecBoidObstaculo)< Math.PI/2){
+
+					if(obstaculos.elementAt(i).velocidad.norm2() != 0){// Tiene velocidad						
+						//Diferencia entre el angulo formado por el vector desde el boid hacia
+						//el obstaculo y la velocidad del obstaculo y el angulo formado entre
+						//el vector que va desde el boid hacia el objetivo y la velocidad del
+						//obstaculo
+						double angObsBoidObj = UtilCalculos.diferenciaAngulos(angVelObst,angDirecBoidObstaculo) -
+								UtilCalculos.diferenciaAngulos(angVelObst, angDirecObjetivo);
+						// caso en el que el boid y el obstaculo van a cruzar sus caminos 
+						// en el futuro
+						//						if (UtilCalculos.diferenciaAngulos(angVelObst,angDirecBoidObstaculo) >=
+						//							UtilCalculos.diferenciaAngulos(angVelObst, angDirecObjetivo)){
+						if (angObsBoidObj >= umbralCaso3){
+							//							if (UtilCalculos.diferenciaAngulos(angDirecBoidObstaculo, angDirecObjetivo) <= umbralEsquivar){
+							if (angObsBoidObj > umbralEsquivar){// Por delante
+								//								System.out.println("va por delante del  obstaculo");
+								compensacion.set(0,0,repulsion.get(1,0));
+								compensacion.set(1,0,-repulsion.get(0,0));
+								angCompensacion = Math.atan2(compensacion.get(1,0),
+										compensacion.get(0,0));
+								if (UtilCalculos.
+										diferenciaAngulos(angVelObst,angCompensacion)>Math.toRadians(90)){
+									//Si se da la condicion lo cambiamos de sentido, si no se queda 
+									//como se calculo antes del if
+									compensacion.set(0,0,-repulsion.get(1,0));
+									compensacion.set(1,0,repulsion.get(0,0));
+								}
+
+								//								sentidoCompensacionLateral = -1;
+							}else{
+								//Por detras 
+								//								System.out.println("va por detras del  obstaculo");
+								compensacion.set(0,0,repulsion.get(1,0));
+								compensacion.set(1,0,-repulsion.get(0,0));
+								angCompensacion = Math.atan2(compensacion.get(1,0),
+										compensacion.get(0,0));
+								if (UtilCalculos.
+										diferenciaAngulos(angVelObst,angCompensacion)<Math.toRadians(90)){
+									//Si se da la condicion lo cambiamos de sentido, si no se queda 
+									//como se calculo antes del if
+									compensacion.set(0,0,-repulsion.get(1,0));
+									compensacion.set(1,0,repulsion.get(0,0));
+								}
+								//								sentidoCompensacionLateral = 1;
+							}
+							//							if (!(pesoCompensacionLateral == 0)){
+							compensacion.timesEquals(pesoCompensacionLateral);
+							//						System.out.println("Calculamos compensacion lejos");
+							//								compensacion = obstaculos.elementAt(i).getVelocidad().times(
+							//										pesoCompensacionLateral*sentidoCompensacionLateral);
+							//							}
+							c = c.plus(repulsion.plus(compensacion));
+						}else{//Si no va a cruzarse con el obstaculo no se le añade compensacion lateral
+							//ni repulsion
+							c = c.plus(repulsion);
+							//							c = c.plus(cero);
+						}									
+
+					}else{	// El obst�culo est� quieto													
+						//Evitamos que la repulsion de los obstáculos sea perpendicular al obstáculo
+						if (tendenciaRepulsion>=0 && tendenciaRepulsion< 0.5){
+							System.out.println("Izquierda");
+							compensacion.set(0,0,repulsion.get(1,0));
+							compensacion.set(1,0,-repulsion.get(0,0));
+						}
+						else {
+//							 if(tendenciaRepulsion>0.5 && tendenciaRepulsion<= 1)
+							System.out.println("Derecha");
+							compensacion.set(0,0,-repulsion.get(1,0));
+							compensacion.set(1,0,repulsion.get(0,0));
+							
+						}
+
+//						compensacion.timesEquals(2);
+//						repulsion = repulsion.times(10);
+//						repulsion = repulsion.plus(compensacion);
+						c = c.plus(repulsion.plus(compensacion));
+
+					}
+				}			
 			}
-//			if ((dist > radioObstaculoCerca) && (dist < radioObstaculoLejos)){
-//				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));
-//				if (dist != 0){
-//					repulsion = repulsion.times(1/(dist)*(dist));
-//				}
-//				repulsion = repulsion.times(pesoObstaculo);
-//				if (!(pesoObstaculoLejos == 0)){
-////					System.out.println("Calculamos compensación lejos");
-//					compensacion = obstaculos.elementAt(i).getVelocidad().times(pesoObstaculoLejos);
-//				}				
-//				c = c.plus(repulsion.plus(compensacion));
-//			}
-//			else if(dist < radioObstaculoCerca){
-//				repulsion = repulsion.minus(obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()));				
-//				if (dist != 0){
-//					repulsion = repulsion.times(1/(dist)*(dist));
-//				}
-//				repulsion = repulsion.times(pesoObstaculo);
-//				if (!(pesoObstaculoCerca == 0)){
-////					System.out.println("Calculamos compensación cerca");
-//					compensacion = obstaculos.elementAt(i).getVelocidad().times(-pesoObstaculoCerca);
-//				}
-//				c = c.plus(repulsion.plus(compensacion));
-//			}
-		
-			if (!caminoOcupado)// Sólo se calcula la intersección mientras el camino siga sin ocupar
-				caminoOcupado = recta.intersects(obstaculos.elementAt(i).getForma());
 		}
 
-		setCaminoLibre(!caminoOcupado);// Si no tiene el camino ocupado por el momento es el lider
-		 
 		c = c.minus(this.getVelocidad());
-//		c = limitaFuerza(c);
-//		c = c.times(1/c.norm2());// lo hacemos unitario
+		//		c = limitaFuerza(c);
+		//		c = c.times(1/c.norm2());// lo hacemos unitario
 		return c;
 	}
 	
@@ -633,7 +637,7 @@ public class Boid implements Serializable{
 	public void setLineaDireccion(double xPtoa,double yPtoa,double xPtob, double yPtob) {
 		this.lineaDireccion.setLine(xPtoa,yPtoa,xPtob,yPtob);
 	}
-	/** Seters estáticos para cambiar los parámetros de comportamiento
+	/** Seters estaticos para cambiar los parametros de comportamiento
 	 *  de los Boids*/
 	
 	static public void setPesoLider(double peso){
@@ -659,11 +663,11 @@ public class Boid implements Serializable{
 	static public void setPesoObstaculo(double evitaObs){
 		pesoObstaculo = evitaObs;
 	}
-	/**Determina la velocidad máxima, en módulo, para todos los boids (es estático)*/	
+	/**Determina la velocidad maxima, en modulo, para todos los boids (es estatico)*/	
 	static public void setVelMax(double veloMax){
 		velMax = veloMax;
 	}
-	/**Fija la posición del objetivo*/
+	/**Fija la posicion del objetivo*/
 	static public void setObjetivo(double x,double y){
 		objetivo.set(0,0,x);
 		objetivo.set(1,0,y);
@@ -685,19 +689,19 @@ public class Boid implements Serializable{
 
 	/**
 	 * 
-	 * @return Posición inicial de la bandada
+	 * @return Posicion inicial de la bandada
 	 */
 	public static Matrix getPosInicial() {
 		return posInicial;
 	}
 	/**
-	 * Setea la posición inicial de la bandada
+	 * Setea la posicion inicial de la bandada
 	 * @param posInicial
 	 */
 	public static void setPosInicial(Matrix posInicial) {
 		Boid.posInicial = posInicial;
 	}
-	/**Calcula la distancia euclidea existente entre el Boid y la posición inicial de la bandada*/
+	/**Calcula la distancia euclidea existente entre el Boid y la posicion inicial de la bandada*/
 	public double getDistOrigen(){
 		 double distancia = (posInicial.minus(this.getPosicion())).norm2();
 		return distancia;		

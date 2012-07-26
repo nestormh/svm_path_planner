@@ -105,7 +105,7 @@ public class Simulador{
 	/**
 	 * radio en el que se busca el siguiente boid para formar el camino
 	 */
-	double umbralCercania = 8;//12;
+	double umbralCercania = 12;//12;
 
 	/**
 	 * indica si existe una ruta con un tamaño mayor o igual a 2 puntos
@@ -288,9 +288,10 @@ public class Simulador{
 	 * Método que genera tantos obstáculos como numObst, con una magnitud de velocidad velMax
 	 * con dirección aleatoria. La posición de los obstáculos también es aleatoria
 	 */
-	public void generaObstaculos(int numObst,double velMax){
+	public void generaObstaculos(int numObst,double velMax,boolean addObst){
 		//Se eliminan los obstÃ¡culos que pudiera haber de anteriores simulaciones
-		obstaculos.clear();
+		if(!addObst)
+			obstaculos.clear();
 		Random rand = new Random();
 		for (int i=0;i<numObst;i++){
 			double posX = Math.random()*largoEscenario;
@@ -304,9 +305,10 @@ public class Simulador{
 		}
 	}
 	
-	public void generaObstaculosEquiespaciados(double separacion,double velMax){
+	public void generaObstaculosEquiespaciados(double separacion,double velMax,boolean addObst){
 		//Se eliminan los obstÃ¡culos que pudiera haber de anteriores simulaciones
-		obstaculos.clear();
+		if(!addObst)
+			obstaculos.clear();
 		Random rand = new Random();
 		int numObst = (int) Math.floor(largoEscenario/separacion);
 		for (int i=0;i<numObst;i++){
@@ -322,9 +324,10 @@ public class Simulador{
 		}
 	}
 	
-	public void generaObstaculosEquiespaciadosCruce(double separacion,double velMax,double velCoche){
+	public void generaObstaculosEquiespaciadosCruce(double separacion,double velMax,double velCoche,boolean addObst){
 		//Se eliminan los obstÃ¡culos que pudiera haber de anteriores simulaciones
-		obstaculos.clear();
+		if(!addObst)
+			obstaculos.clear();
 		Random rand = new Random();
 		int numObst = (int) Math.floor(largoEscenario/separacion);
 //		for (int i=0;i<numObst;i++){
@@ -352,6 +355,31 @@ public class Simulador{
 			obstaculos.add(obs);
 		}
 	}
+	
+	public void marcaObstaculosVisibles(){
+		boolean visionOcluida;
+		for (int k=0;k < obstaculos.size();k++){//suponemos que todos los obstáculos son visibles inicialmente
+			getObstaculos().elementAt(k).setVisible(true);
+		}
+		for (int i=0;i < obstaculos.size();i++){
+			Line2D recta = 
+					new Line2D.Double(getModCoche().getX(),getModCoche().getY(),
+//							new Line2D.Double(getPosInicial().get(0,0),getPosInicial().get(1,0),
+							getObstaculos().elementAt(i).getPosicion().get(0,0),
+							getObstaculos().elementAt(i).getPosicion().get(1,0));
+			for (int j=0;j < obstaculos.size();j++){
+				if(i==j){					
+					continue;
+				}				
+				visionOcluida = recta.intersects(getObstaculos().elementAt(j).getForma());
+				if (visionOcluida){// Si el camino está ocupado no sigo mirando el resto de obstáculos
+					getObstaculos().elementAt(i).setVisible(false);
+					break;
+				}
+			}							
+		}
+	}
+
 	
 	public double calculaComandoVolante(){
 		double comando = 0;
@@ -668,6 +696,9 @@ public class Simulador{
 	 */
 //	public int moverBoids(int indMinAnt){
 	public void moverBoids(Coche ModCoche){
+		for (int k=0;k < obstaculos.size();k++){//suponemos que todos los obstáculos son visibles inicialmente
+			getObstaculos().elementAt(k).setVisible(true);
+		}
 		int indLider = 0;
 		double distMin = Double.POSITIVE_INFINITY;
 		boolean liderEncontrado = false;
@@ -710,11 +741,15 @@ public class Simulador{
 				if(contIteraciones > contPensar){
 //					getBandada().elementAt(j).calculaMover(getBandada()
 //						,getObstaculos(),j,Boid.getObjetivo());
-					setObstaculosFuturos(getObstaculos());
+					setObstaculosFuturos(getObstaculos()); 
+					//calculo el tiempo que el coche tardaría en alcanzar este boid
 					double t = getBandada().elementAt(j).distThisBoid2Point(getModCoche().getX(),getModCoche().getY())/getModCoche().getVelocidad();
+					//prediccion de donde van a estar los obstáculos cuando el coche llegue al luga r que ocupa este boid en este instante
 					moverObstaculos(t,getObstaculosFuturos());
 					getBandada().elementAt(j).calculaMover(getBandada()
 							,getObstaculosFuturos(),j,Boid.getObjetivo());	
+//					getBandada().elementAt(j).calculaMover(getBandada()
+//							,getObstaculos(),j,Boid.getObjetivo());	
 				}
 //				getBandada().elementAt(j).mover(getBandada()
 //						,getObstaculos(),j,Boid.getObjetivo());
@@ -1060,8 +1095,12 @@ public class Simulador{
 										getBandada().elementAt(i).getPosicion().get(0,0),
 										getBandada().elementAt(i).getPosicion().get(1,0));
 							for (int j=0;j < obstaculos.size();j++){
+//								if (!obstaculos.elementAt(j).isVisible())//si el obstáculo no está visible para el vehículo los boids tampoco lo ven
+//									continue;
+//								double distObs = obstaculos.elementAt(j).getPosicion().minus(
+//										getBandada().elementAt(boidActual).getPosicion()).norm2();
 								double distObs = obstaculos.elementAt(j).getPosicion().minus(
-										getBandada().elementAt(boidActual).getPosicion()).norm2();
+										puntoActual).norm2();
 								if (distObs < umbralCercania){									
 										caminoOcupado = recta.intersects(obstaculos.elementAt(j).getForma());
 										if (caminoOcupado){// Si el camino está ocupado no sigo mirando el resto de obstáculos
@@ -1089,8 +1128,8 @@ public class Simulador{
 				}else{
 //					getBandada().elementAt(boidAux).setExperiencia(1);
 //					System.out.println("La valoracion es : " + valoracion);
-//					rutaDinamica.add(getBandada().elementAt(boidAux).getPosicion());
-					rutaDinamica.add(getBandada().elementAt(boidAux).calculaCentroMasas(getBandada(),radioCentroMasas));
+					rutaDinamica.add(getBandada().elementAt(boidAux).getPosicion());
+//					rutaDinamica.add(getBandada().elementAt(boidAux).calculaCentroMasas(getBandada(),radioCentroMasas));
 					boidActual = boidAux;
 					puntoActual.set(0,0,getBandada().elementAt(boidActual).getPosicion().get(0,0));
 					puntoActual.set(1,0,getBandada().elementAt(boidActual).getPosicion().get(1,0));
