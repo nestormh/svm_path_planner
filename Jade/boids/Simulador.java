@@ -242,6 +242,10 @@ public class Simulador{
 		bandada.clear();
 //		setTamanoBandada(0);
 	}
+	public void borrarObstaculos(){
+		obstaculos.clear();
+		obstaculosFuturos.clear();
+	}
 	/**
 	 * Posiciona la bandada en un punto
 	 * @param puntoIni Matriz 2x1 que indica el punto alrededor del cual se va a colocar la 
@@ -353,6 +357,64 @@ public class Simulador{
 			double rumboY = velY;
 			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, rumboX, rumboY);
 			obstaculos.add(obs);
+		}
+	}
+	/**
+	 * Método para generar muros de obstáculos estáticos en el escenario
+	 * @param numMuros Número de muros deseados
+	 * @param porcentajeOcu porcentaje del ancho del escenario que se desea que ocupe el muro
+	 * @param posiciones Array que indica en que posición relaitva al escenario se desea colocar el muro. 1 es arriba
+	 * 2 es en el centro y 3 abajo. Cada muro tiene su posición en el escenario relacionada con el índice de este array
+	 */
+	public void generaObstaculosEstaticos(int numMuros,double porcentajeOcu,int[] posiciones){
+		int sepMuros = (int) Math.floor(largoEscenario/(numMuros+1));
+		double ladoObst = Obstaculo.lado;
+		double largoMuro = anchoEscenario*porcentajeOcu;
+		int numObstPorMuro = (int) Math.floor(largoMuro/ladoObst);
+		int numObstTotal = numObstPorMuro*numMuros;
+//		for (int i=0;i<numObst;i++){
+		for (int i=0;i<numMuros;i++){ //los índices del bucle hacen que los primeros y el último obstáculo no se creen			
+			double posX = sepMuros*(i+1);
+					for(int j=0;j<numObstPorMuro;j++){
+						double posY = 0;
+						switch(posiciones[i]){
+						case 1://arriba
+							posY = anchoEscenario-ladoObst - (ladoObst*j);
+							break;
+						case 2://centro
+							posY = anchoEscenario-ladoObst -(ladoObst*j) - anchoEscenario*((1-porcentajeOcu)/2);
+							break;
+						case 3://abajo
+							posY = anchoEscenario-ladoObst -(ladoObst*j) - anchoEscenario*(1-porcentajeOcu);
+							break;
+						}
+						double velX = 0;
+						double velY = 0;
+						double rumboX = velX;
+						double rumboY = velY;
+						Obstaculo obs = new Obstaculo(posX, posY, velX, velY, rumboX, rumboY);
+						obstaculos.add(obs);
+					}
+//			
+////			double velX = rand.nextGaussian()*velMax;
+//			double velX = 0;
+////			double velY = rand.nextGaussian()*velMax;
+//			double velY = 0;
+////			if(i%2 == 0){
+//				if (posY >= anchoEscenario/2){
+//					velY = -(anchoEscenario/2)/(posX/velCoche);
+//				}
+//				if (posY < anchoEscenario/2 ){
+//					velY = (anchoEscenario/2)/(posX/velCoche);
+//				}
+////			}else{
+////				velY = rand.nextGaussian()*velMax;
+////			}
+//			
+//			double rumboX = velX;
+//			double rumboY = velY;
+//			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, rumboX, rumboY);
+//			obstaculos.add(obs);
 		}
 	}
 	
@@ -695,7 +757,7 @@ public class Simulador{
 	 * el Ã­ndice del lider de la iteraciÃ³n anterior
 	 */
 //	public int moverBoids(int indMinAnt){
-	public void moverBoids(Coche ModCoche){
+	public void moverBoids(Coche ModCoche){		
 		for (int k=0;k < obstaculos.size();k++){//suponemos que todos los obstáculos son visibles inicialmente
 			getObstaculos().elementAt(k).setVisible(true);
 		}
@@ -860,6 +922,9 @@ public class Simulador{
 	 * @param obstaculos Vector de obstáculos que van a ser proyectados hacia el futuro una cantidad tiempo
 	 */
 	public Vector<Obstaculo> moverObstaculos(double tiempo, Vector<Obstaculo> obstaculos){
+//		for (int k=0;k < obstaculos.size();k++){//suponemos que todos los obstáculos son visibles inicialmente
+//			getObstaculos().elementAt(k).setVisible(true);
+//		}
 		if(obstaculos.size() != 0){
 			for(int i = 0;i<obstaculos.size();i++){	
 //				double gananciaVel = calculaParadaEmergencia(posInicial,
@@ -1094,18 +1159,33 @@ public class Simulador{
 								new Line2D.Double(puntoActual.get(0,0),puntoActual.get(1,0),
 										getBandada().elementAt(i).getPosicion().get(0,0),
 										getBandada().elementAt(i).getPosicion().get(1,0));
-							for (int j=0;j < obstaculos.size();j++){
-//								if (!obstaculos.elementAt(j).isVisible())//si el obstáculo no está visible para el vehículo los boids tampoco lo ven
-//									continue;
+//							for (int j=0;j < obstaculos.size();j++){
+////								if (!obstaculos.elementAt(j).isVisible())//si el obstáculo no está visible para el vehículo los boids tampoco lo ven
+////									continue;
+////								double distObs = obstaculos.elementAt(j).getPosicion().minus(
+////										getBandada().elementAt(boidActual).getPosicion()).norm2();
 //								double distObs = obstaculos.elementAt(j).getPosicion().minus(
-//										getBandada().elementAt(boidActual).getPosicion()).norm2();
-								double distObs = obstaculos.elementAt(j).getPosicion().minus(
+//										puntoActual).norm2();
+//								if (distObs < umbralCercania){									
+//										caminoOcupado = recta.intersects(obstaculos.elementAt(j).getForma());
+//										if (caminoOcupado){// Si el camino está ocupado no sigo mirando el resto de obstáculos
+//											break;
+//										}
+//								}							
+//							}
+//						 // miramos la intersección de las lineas que unen los boids con la predicción de la posición de los obstáculos
+							for (int j=0;j < obstaculosFuturos.size();j++){
+								if (!obstaculosFuturos.elementAt(j).isVisible())//si el obstáculo no está visible para el vehículo los boids tampoco lo ven
+									continue;
+								//							double distObs = obstaculos.elementAt(j).getPosicion().minus(
+								//									getBandada().elementAt(boidActual).getPosicion()).norm2();
+								double distObs = obstaculosFuturos.elementAt(j).getPosicion().minus(
 										puntoActual).norm2();
 								if (distObs < umbralCercania){									
-										caminoOcupado = recta.intersects(obstaculos.elementAt(j).getForma());
-										if (caminoOcupado){// Si el camino está ocupado no sigo mirando el resto de obstáculos
-											break;
-										}
+									caminoOcupado = recta.intersects(obstaculosFuturos.elementAt(j).getForma());
+									if (caminoOcupado){// Si el camino está ocupado no sigo mirando el resto de obstáculos
+										break;
+									}
 								}							
 							}
 							if(!caminoOcupado){
@@ -1583,8 +1663,9 @@ public class Simulador{
 			double velY = obstaculos.elementAt(i).getVelocidad().get(1, 0);
 			double vecRumboX = obstaculos.elementAt(i).getRumboDeseado().get(0, 0);
 			double vecRumboY = obstaculos.elementAt(i).getRumboDeseado().get(1, 0);
+			boolean visible = obstaculos.elementAt(i).isVisible();
 					
-			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, vecRumboX, vecRumboY);
+			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, vecRumboX, vecRumboY,visible);
 			this.obstaculosFuturos.add(obs);
 		}
 	}

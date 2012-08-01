@@ -401,9 +401,12 @@ public class Boid implements Serializable{
 //				new Line2D.Double(this.getPosicion().get(0,0),this.getPosicion().get(1,0)
 //						,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
 		for (int i=0;i < obstaculos.size();i++){
-			//si el obstáculo no está visible para el coche es como si no existiera para losw boids
-			if(!obstaculos.elementAt(i).isVisible())
-				continue;			
+			//si el obstáculo no está visible para el coche es como si no existiera para los boids
+			if(!obstaculos.elementAt(i).isVisible()){
+//				System.out.println("El obstáculo no está visible");
+				continue;
+			}
+							
 			dist = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();		
 			if (dist < radioObstaculo){
 				//			if (dist < radioObstaculo*(1+this.getDistOrigen()/100)){
@@ -493,13 +496,13 @@ public class Boid implements Serializable{
 					}else{	// El obstáculo está quieto													
 						//Evitamos que la repulsion de los obstÃ¡culos sea perpendicular al obstÃ¡culo
 						if (tendenciaRepulsion>=0 && tendenciaRepulsion< 0.5){
-							System.out.println("Izquierda");
+//							System.out.println("Izquierda");
 							compensacion.set(0,0,repulsion.get(1,0));
 							compensacion.set(1,0,-repulsion.get(0,0));
 						}
 						else {
 //							 if(tendenciaRepulsion>0.5 && tendenciaRepulsion<= 1)
-							System.out.println("Derecha");
+//							System.out.println("Derecha");
 							compensacion.set(0,0,-repulsion.get(1,0));
 							compensacion.set(1,0,repulsion.get(0,0));
 							

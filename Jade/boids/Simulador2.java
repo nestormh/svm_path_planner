@@ -242,6 +242,10 @@ public class Simulador2{
 		bandada.clear();
 //		setTamanoBandada(0);
 	}
+	public void borrarObstaculos(){
+		obstaculos.clear();
+		obstaculosFuturos.clear();
+	}
 	/**
 	 * Posiciona la bandada en un punto
 	 * @param puntoIni Matriz 2x1 que indica el punto alrededor del cual se va a colocar la 
@@ -353,24 +357,24 @@ public class Simulador2{
 		}
 	}
 	
-	public void marcaObstaculosVisibles(){
+	public void marcaObstaculosVisibles(Vector<Obstaculo> obst){
 		boolean visionOcluida;
-		for (int k=0;k < obstaculos.size();k++){//suponemos que todos los obstáculos son visibles inicialmente
-			getObstaculos().elementAt(k).setVisible(true);
+		for (int k=0;k < obst.size();k++){//suponemos que todos los obstáculos son visibles inicialmente
+			obst.elementAt(k).setVisible(true);
 		}
-		for (int i=0;i < obstaculos.size();i++){
+		for (int i=0;i < obst.size();i++){
 			Line2D recta = 
 					new Line2D.Double(getModCoche().getX(),getModCoche().getY(),
 //							new Line2D.Double(getPosInicial().get(0,0),getPosInicial().get(1,0),
-							getObstaculos().elementAt(i).getPosicion().get(0,0),
-							getObstaculos().elementAt(i).getPosicion().get(1,0));
-			for (int j=0;j < obstaculos.size();j++){
+							obst.elementAt(i).getPosicion().get(0,0),
+							obst.elementAt(i).getPosicion().get(1,0));
+			for (int j=0;j < obst.size();j++){
 				if(i==j){					
 					continue;
 				}				
-				visionOcluida = recta.intersects(getObstaculos().elementAt(j).getForma());
+				visionOcluida = recta.intersects(obst.elementAt(j).getForma());
 				if (visionOcluida){// Si el camino está ocupado no sigo mirando el resto de obstáculos
-					getObstaculos().elementAt(i).setVisible(false);
+					obst.elementAt(i).setVisible(false);
 					break;
 				}
 			}							
@@ -693,7 +697,7 @@ public class Simulador2{
 	 */
 //	public int moverBoids(int indMinAnt){
 	public void moverBoids(Coche ModCoche){
-		marcaObstaculosVisibles();
+		marcaObstaculosVisibles(getObstaculos());
 		int indLider = 0;
 		double distMin = Double.POSITIVE_INFINITY;
 		boolean liderEncontrado = false;
@@ -855,14 +859,15 @@ public class Simulador2{
 	 * @param obstaculos Vector de obstáculos que van a ser proyectados hacia el futuro una cantidad tiempo
 	 */
 	public Vector<Obstaculo> moverObstaculos(double tiempo, Vector<Obstaculo> obstaculos){
+//		marcaObstaculosVisibles(obstaculos);
 		if(obstaculos.size() != 0){
 			for(int i = 0;i<obstaculos.size();i++){	
 //				double gananciaVel = calculaParadaEmergencia(posInicial,
 //						obstaculos.elementAt(i).getPosicion(),
 //						obstaculos.elementAt(i).getVelocidad());
 				double gananciaVel = 1;
-				if(!obstaculos.elementAt(i).isVisible()) //si no está visible por el coche no lo movemos, no hacemos predicción de su movimiento
-					continue;
+//				if(!obstaculos.elementAt(i).isVisible()) //si no está visible por el coche no lo movemos, no hacemos predicción de su movimiento
+//					continue;
 				obstaculos.elementAt(i).mover(
 						obstaculos.elementAt(i).getRumboDeseado().times(gananciaVel),tiempo);
 				//-Control para que los obstÃ¡culos vuelvan a aparecer por el lado contrario-
@@ -1091,15 +1096,30 @@ public class Simulador2{
 								new Line2D.Double(puntoActual.get(0,0),puntoActual.get(1,0),
 										getBandada().elementAt(i).getPosicion().get(0,0),
 										getBandada().elementAt(i).getPosicion().get(1,0));
-							for (int j=0;j < obstaculos.size();j++){
-								if (!obstaculos.elementAt(j).isVisible())//si el obstáculo no está visible para el vehículo los boids tampoco lo ven
+							// miramos la intersección de las lineas que unen los boids con la posición actual de los obstáculos
+//							for (int j=0;j < obstaculos.size();j++){
+//								if (!obstaculos.elementAt(j).isVisible())//si el obstáculo no está visible para el vehículo los boids tampoco lo ven
+//									continue;
+////								double distObs = obstaculos.elementAt(j).getPosicion().minus(
+////										getBandada().elementAt(boidActual).getPosicion()).norm2();
+//								double distObs = obstaculos.elementAt(j).getPosicion().minus(
+//										puntoActual).norm2();
+//								if (distObs < umbralCercania){									
+//										caminoOcupado = recta.intersects(obstaculos.elementAt(j).getForma());
+//										if (caminoOcupado){// Si el camino está ocupado no sigo mirando el resto de obstáculos
+//											break;
+//										}
+//								}							
+//							} // miramos la intersección de las lineas que unen los boids con la predicción de la posición de los obstáculos
+							for (int j=0;j < obstaculosFuturos.size();j++){
+								if (!obstaculosFuturos.elementAt(j).isVisible())//si el obstáculo no está visible para el vehículo los boids tampoco lo ven
 									continue;
 //								double distObs = obstaculos.elementAt(j).getPosicion().minus(
 //										getBandada().elementAt(boidActual).getPosicion()).norm2();
-								double distObs = obstaculos.elementAt(j).getPosicion().minus(
+								double distObs = obstaculosFuturos.elementAt(j).getPosicion().minus(
 										puntoActual).norm2();
 								if (distObs < umbralCercania){									
-										caminoOcupado = recta.intersects(obstaculos.elementAt(j).getForma());
+										caminoOcupado = recta.intersects(obstaculosFuturos.elementAt(j).getForma());
 										if (caminoOcupado){// Si el camino está ocupado no sigo mirando el resto de obstáculos
 											break;
 										}
@@ -1580,8 +1600,9 @@ public class Simulador2{
 			double velY = obstaculos.elementAt(i).getVelocidad().get(1, 0);
 			double vecRumboX = obstaculos.elementAt(i).getRumboDeseado().get(0, 0);
 			double vecRumboY = obstaculos.elementAt(i).getRumboDeseado().get(1, 0);
-					
-			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, vecRumboX, vecRumboY);
+			boolean visible = obstaculos.elementAt(i).isVisible();
+			
+			Obstaculo obs = new Obstaculo(posX, posY, velX, velY, vecRumboX, vecRumboY,visible);
 			this.obstaculosFuturos.add(obs);
 		}
 	}

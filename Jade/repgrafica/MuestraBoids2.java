@@ -656,7 +656,7 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 //	SpinnerNumberModel spRadioObsLejos = new SpinnerNumberModel(Boid.getRadioObstaculoLejos(),0,1000,0.1);
 //	JSpinner spinnerRadioObsLejos = new JSpinner(spRadioObsLejos);
 	JLabel etiquetaVelMax = new JLabel("Maximun velocity");
-	SpinnerNumberModel spVelMax = new SpinnerNumberModel(Boid.getVelMax(),0,100,1);
+	SpinnerNumberModel spVelMax = new SpinnerNumberModel(Boid.getVelMax(),0,100,0.1);
 	JSpinner spinnerVelMax = new JSpinner(spVelMax);
 	JLabel etiquetaNumBoids = new JLabel("Cuantity of boids");
 	SpinnerNumberModel spNumBoids = new SpinnerNumberModel(20,1,200,1);
@@ -1113,7 +1113,7 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 		int numSimu = 0;
 		int simuDeseadas = 300;
 		int numObstaculos = 20;
-		double sepEntreObst = 5;
+		double sepEntreObst = 7;
 		double distCercana = 3;		
 		gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
 		int indMinAnt = 0;
@@ -1185,9 +1185,13 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 				distMinObstAEstrella.clear();
 				distMinObstSolitario.clear();
 				gui.pintor.eliminarObstaculos();
+				gui.getSim().borrarObstaculos();
+				gui.getSim2().borrarObstaculos();
 //				gui.getSim().generaObstaculos(numObstaculos,1.5);								
 //				gui.getSim().generaObstaculosEquiespaciados(5, 1.5);
 				gui.getSim().generaObstaculosEquiespaciadosCruce(sepEntreObst, 1.5,2.6,false);
+				int[] posicionesMuros = {2,1};
+				gui.getSim().generaObstaculosEstaticos(2,0.4,posicionesMuros);
 				gui.getSim2().setObstaculos(gui.getSim().getObstaculos());
 				//leemos el escenario de un archivo
 //				try {
@@ -1277,11 +1281,12 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 //						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
 //						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
 						// Si la ruta no ha sido intersectada por un obstáculo no se vuelve a calcular
-//						if (gui.getSim().compruebaRuta() || !gui.getSim().isRutaCompleta()){							
+//						if (gui.getSim().compruebaRuta() || !gui.getSim().isRutaCompleta()){
+//						gui.getSim().setRutaDinamica(gui.getSim().busquedaAEstrella(gui.getSim().getModCoche()));
 							gui.getSim().setRutaDinamica(gui.getSim().calculaRutaDinamica(gui.getSim().getModCoche()));
 							gui.getSim2().setRutaDinamica(gui.getSim2().calculaRutaDinamica(gui.getSim2().getModCoche()));
 //							gui.getSim().setRutaDinamica(gui.getSim().busquedaAEstrella(gui.getSim().getModCoche()));
-//							gui.getSim().busquedaAEstrella();
+
 //							gui.getSim().setRutaDinamica(gui.getSim().busquedaAEstrella());
 //							gui.getSim().setRutaDinamica(gui.getSim().getRejilla().busquedaAEstrella());
 //							if (gui.getSim().getRutaDinamica().size() <= 3){

@@ -23,7 +23,7 @@ public class Obstaculo implements Serializable{
 	/**Forma geom√©trica con la que se pintar√° el obst√°culo*/
 	Rectangle2D cuadrado;
 	LoggerArrayDoubles logDatosObst;
-	double lado = 2;//2	
+	static double lado = 2;//2	
 	/**Variable booleana que indica si el obst·culo es visible desde el vehÌculo o est· ocluido*/
 	boolean visible = true;
 
@@ -71,6 +71,11 @@ public class Obstaculo implements Serializable{
 //		logDatosObst.setDescripcion("Coordenadas y velocidad [x,y,vel]");
 	}
 	
+	public Obstaculo(double posX, double posY, double velX, double velY,double vecRumboX, double vecRumboY, boolean visible2) {
+		this(posX, posY, velX, velY, vecRumboX, vecRumboY);
+		setVisible(visible2);
+	}
+
 	public void mover(Matrix vel,double Ts){
 //		this.getForma().transform(AffineTransform.getTranslateInstance(vel.get(0,0), vel.get(1,0)));
 		this.setVelocidad(vel);
