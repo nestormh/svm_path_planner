@@ -1189,7 +1189,7 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 				gui.getSim2().borrarObstaculos();
 //				gui.getSim().generaObstaculos(numObstaculos,1.5);								
 //				gui.getSim().generaObstaculosEquiespaciados(5, 1.5);
-				gui.getSim().generaObstaculosEquiespaciadosCruce(sepEntreObst, 1.5,2.6,false);
+//				gui.getSim().generaObstaculosEquiespaciadosCruce(sepEntreObst, 1.5,2.6,false);
 				int[] posicionesMuros = {2,1};
 				gui.getSim().generaObstaculosEstaticos(2,0.4,posicionesMuros);
 				gui.getSim2().setObstaculos(gui.getSim().getObstaculos());

@@ -432,22 +432,40 @@ public class Simulador2{
 	
 	public double calculaVelocidadCoche(Coche modVehi){
 		double velocidad = 0;
+		boolean emergencia = false;
+//		if(modVehi.isFlagEmergencia())
+//			cuentaMarchaAtras++;
 		double paradaEmergencia = 1;
 		double posCoche[] = {modVehi.getX(),modVehi.getY()};
 		Matrix posiCoche = new Matrix(posCoche,2);
 		double vel[] = {Math.cos(modVehi.getYaw()),Math.sin(modVehi.getYaw())};
 		Matrix velo = new Matrix(vel,2);
 		for (int i=0;i<getObstaculos().size();i++){
-			paradaEmergencia = calculaParadaEmergencia(getObstaculos().elementAt(i).getPosicion(),
-				posiCoche,velo,modVehi);
-			if (paradaEmergencia == 0)
-				break;
+//			paradaEmergencia = calculaParadaEmergencia(getObstaculos().elementAt(i).getPosicion(),
+//				posiCoche,velo,modVehi);
+			emergencia = isEmergencia(getObstaculos().elementAt(i).getPosicion(),posiCoche,velo,modVehi); 
+			if (emergencia)
+				break;			
 		}
-		if (!isRutaParcial()){
-			velocidad = -1*paradaEmergencia;		
+		
+		if (emergencia){
+//			System.out.println("parada de emergencia TRUE en calculaVelocidadCoche");
+			modVehi.setFlagEmergencia(true);
+			velocidad = -1;
+//			modVehi.setCuentaMarchaAtras(modVehi.getCuentaMarchaAtras()+1);
+			
 		}else{
-			velocidad = 3*paradaEmergencia;
+//			System.out.println("parada de emergencia FALSE en calculaVelocidadCoche");
+			modVehi.setFlagEmergencia(false);
+//			modVehi.setCuentaMarchaAtras(0);
+			if (!isRutaParcial()){
+				velocidad = -1*paradaEmergencia;		
+			}else{
+				velocidad = 3*paradaEmergencia;
+			}
+					
 		}
+		
 //		System.out.println("velocidad calculada "+velocidad);
 		return velocidad;
 	}
@@ -515,6 +533,7 @@ public class Simulador2{
 	public Coche moverVehiculo(Coche modVehi,Vector<Matrix> trayectoria,double t,boolean predictivo,boolean segSimple,ControlPredictivo cp){
 		double comand = 0;
 		double velocidad = calculaVelocidadCoche(modVehi);
+//		System.out.println("Consigna de velocidad del coche " + velocidad);
 		if(predictivo){			
 			if (trayectoria.size()<=3){
 				comand = calculaComandoVolante(modVehi,trayectoria);
@@ -531,6 +550,13 @@ public class Simulador2{
 		}
 		if (segSimple){
 			comand = calculaComandoVolante(modVehi,trayectoria);
+			if (modVehi.isFlagEmergencia()){
+				if(comand >= 0){
+					comand = -Math.PI/6;			
+				}else{
+					comand = Math.PI/6;
+				}
+			}
 		}
 		modVehi.calculaEvolucion(comand,velocidad,t);		
 		return modVehi;
@@ -933,6 +959,56 @@ public class Simulador2{
 			veloObjMovil = 1;
 		}
 		return veloObjMovil;
+	}
+	
+	/**
+	 * Dependiendo de la posiciÃ³n del vehÃ­culo el obstÃ¡culo se detendrÃ¡ o no
+	 * @param Obs ObstÃ¡culo sobre el que se quiere calcular su velocidad 
+	 * @return velocidad
+	 */
+	public boolean isEmergencia(Matrix posObst,Matrix posObjMovil, Matrix velObjMovil,Coche modVehi){
+		double veloObjMovil = 0;	
+		boolean emergencia = false;
+		double distSeguridad = 3;
+		if(modVehi.isFlagEmergencia()){
+			distSeguridad = 6;
+		}else{
+			distSeguridad = 3;
+		}
+		// calculo el vector diferencia entre la pos del obstÃ¡culo
+		// y la posicion inicial de salida de los boids, es decir, la posiciÃ³n del
+		// vehÃ­culo
+		Matrix difPosInicialObs = new Matrix(2,1);
+		difPosInicialObs = posObst.minus(posObjMovil);
+		double dist = difPosInicialObs.norm2();
+		// calculo el Ã¡ngulo entre la velocidad del obstÃ¡culo y el vector diferencia 
+		// anteriormente calculado para saber si el coche estÃ¡ dentro de la trayectoria
+		// del obstÃ¡culo
+		 // OJO CON EL MENOS DE LA COMPONENTE Y, EN ES SIST DE REF DE LA PANTALLA EL EJE Y
+		 // ESTÃ� INVERTIDO!!
+		double orientacionObjMovil = Math.atan2(velObjMovil.get(1,0)
+				,velObjMovil.get(0,0));
+		double orientacionVectorDif = Math.atan2(difPosInicialObs.get(1,0)
+				,difPosInicialObs.get(0,0));		
+		double difOrientaciones = UtilCalculos.normalizaAngulo(orientacionObjMovil-orientacionVectorDif);
+
+		if ((Math.abs(difOrientaciones) < Math.PI/6)&&(dist < distSeguridad)){
+//		if ((Math.abs(difOrientaciones) < Math.PI)&&(dist < 3)){
+			modVehi.setContParadas(modVehi.getContParadas()+1); //contParadas
+//			veloObjMovil = 0;
+			emergencia = true;
+//			if(!modVehi.isFlagEmergencia()){
+//				modVehi.setFlagEmergencia(true); //Usamos el flag para evitar que una vez que el coche se detenga siga aumentando				
+//				modVehi.setContParadas(modVehi.getContParadas()+1); //contParadas
+//				System.out.println("Número de paradas "+modVehi.getContParadas());
+//			}
+//			System.out.println("Parada de emergencia!!");
+		}
+		else{
+			emergencia = false;
+//			veloObjMovil = 1;
+		}
+		return emergencia;
 	}
 	
 
