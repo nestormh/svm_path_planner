@@ -1,1 +1,0 @@
-/home/nestor/gold/apps/StereoEval/nativerel/src/CMakeFiles/gold_app_stereo_eval.dir

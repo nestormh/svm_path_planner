@@ -1,7 +1,0 @@
-libCPDInitialize
-libCPDInitializeWithHandlers
-libCPDTerminate
-libCPDPrintStackTrace
-libCPDGetMcrID
-mlxCpd_register
-cpd_register
