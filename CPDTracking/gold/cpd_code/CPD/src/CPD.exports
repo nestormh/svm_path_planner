@@ -1,0 +1,7 @@
+CPDInitialize
+CPDInitializeWithHandlers
+CPDTerminate
+CPDPrintStackTrace
+CPDGetMcrID
+mlxCpd_register
+cpd_register

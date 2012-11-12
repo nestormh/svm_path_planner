@@ -1,0 +1,10 @@
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	-1.000000	0.000000	5.000000	canny	2	nonrigid	1230	5968
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	-1.000000	5.000000	5.000000	canny	2	nonrigid	1264	6772
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	-1.000000	10.000000	5.000000	canny	2	nonrigid	1371	7368
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	0.000000	-10.000000	5.000000	canny	2	nonrigid	1112	6172
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	0.000000	-5.000000	5.000000	canny	2	nonrigid	1189	4693
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	0.000000	0.000000	5.000000	canny	2	nonrigid	1290	8887
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	0.000000	5.000000	5.000000	canny	2	nonrigid	1405	7172
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	0.000000	10.000000	5.000000	canny	2	nonrigid	1408	6382
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	1.000000	-10.000000	5.000000	canny	2	nonrigid	1141	5607
+/home/neztol/doctorado/Datos/EstadisticasITER/ManzanillaTripodeLowRes/	1.000000	-5.000000	5.000000	canny	2	nonrigid	1229	5263
