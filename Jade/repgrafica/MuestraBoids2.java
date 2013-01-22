@@ -1191,7 +1191,7 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 //				gui.getSim().generaObstaculosEquiespaciados(5, 1.5);
 //				gui.getSim().generaObstaculosEquiespaciadosCruce(sepEntreObst, 1.5,2.6,false);
 				int[] posicionesMuros = {2,1};
-				gui.getSim().generaObstaculosEstaticos(2,0.4,posicionesMuros);
+				gui.getSim().generaObstaculosEstaticos(2,0.5,posicionesMuros);
 				gui.getSim2().setObstaculos(gui.getSim().getObstaculos());
 				//leemos el escenario de un archivo
 //				try {
@@ -1202,9 +1202,10 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 //					e1.printStackTrace();
 //				}
 				gui.pintor.introducirObstaculos(gui.getSim().getObstaculos());
-				gui.getSim().borrarBandada();
-				gui.getSim().crearBandada(20,gui.getSim().getContIteraciones());
-				gui.getSim().setPosInicial(new Matrix(inicial,2));
+				gui.getSim().creaBandadaUniforme();
+//				gui.getSim().borrarBandada();
+//				gui.getSim().crearBandada(20,gui.getSim().getContIteraciones());
+//				gui.getSim().setPosInicial(new Matrix(inicial,2));
 				
 				
 				gui.getSim2().borrarBandada();
@@ -1263,7 +1264,7 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 						}
 						
 						gui.getSim().moverBoids(gui.getSim().getModCoche());
-						gui.getSim2().moverBoids(gui.getSim2().getModCoche());
+//						gui.getSim2().moverBoids(gui.getSim2().getModCoche());
 
 						//Introducimos datos en la rejilla y la creamos	
 
@@ -1282,9 +1283,9 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 //						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
 						// Si la ruta no ha sido intersectada por un obst·culo no se vuelve a calcular
 //						if (gui.getSim().compruebaRuta() || !gui.getSim().isRutaCompleta()){
-//						gui.getSim().setRutaDinamica(gui.getSim().busquedaAEstrella(gui.getSim().getModCoche()));
-							gui.getSim().setRutaDinamica(gui.getSim().calculaRutaDinamica(gui.getSim().getModCoche()));
-							gui.getSim2().setRutaDinamica(gui.getSim2().calculaRutaDinamica(gui.getSim2().getModCoche()));
+						gui.getSim().setRutaDinamica(gui.getSim().busquedaAEstrella(gui.getSim().getModCoche()));
+//							gui.getSim().setRutaDinamica(gui.getSim().calculaRutaDinamica(gui.getSim().getModCoche()));
+//							gui.getSim2().setRutaDinamica(gui.getSim2().calculaRutaDinamica(gui.getSim2().getModCoche()));
 //							gui.getSim().setRutaDinamica(gui.getSim().busquedaAEstrella(gui.getSim().getModCoche()));
 
 //							gui.getSim().setRutaDinamica(gui.getSim().busquedaAEstrella());
@@ -1317,10 +1318,10 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 							gui.getSim().moverVehiculo(gui.getSim().getModCoche(),gui.getSim().getRutaDinamica(),
 									 gui.getSim().getTs(),false,true,gui.getSim().getContPred());				
 						}
-						if(!coche2EnObjetivo){							
-							gui.getSim2().moverVehiculo(gui.getSim2().getModCoche(),gui.getSim2().getRutaDinamica(),
-									 gui.getSim2().getTs(),false,true,gui.getSim2().getContPred());							
-						}
+//						if(!coche2EnObjetivo){							
+//							gui.getSim2().moverVehiculo(gui.getSim2().getModCoche(),gui.getSim2().getRutaDinamica(),
+//									 gui.getSim2().getTs(),false,true,gui.getSim2().getContPred());							
+//						}
 //						if(!cocheAEstrellaEnObjetivo){
 //							gui.getSim().moverVehiculo(gui.getSim().getModeCocheAEstrella(),gui.getSim().getRutaAEstrellaGrid(),
 //									 gui.getSim().getTs(),false,true,gui.getSim().getContPredAEstrella());
@@ -1543,8 +1544,9 @@ public class MuestraBoids2 extends JApplet implements ChangeListener,ActionListe
 					//Configuramos los par·metros de la bandada
 	    				gui.getSim().configurador(gui.getConfigurador().getVectorSim().elementAt(i),
 	    						gui.getConfigurador().getNomParam());
-	    				gui.getSim().crearBandada();
-	    				gui.getSim().posicionarBandada(gui.getSim().getPosInicial());	    				
+//	    				gui.getSim().crearBandada();
+//	    				gui.getSim().posicionarBandada(gui.getSim().getPosInicial());	  
+	    				gui.getSim().creaBandadaUniforme();
 	    				gui.getSim().simuPorLotes();
 //	    				gui.tiempoConsumido.setText("Tard√≥ " + gui.getSim().getTiempoInvertido() + " sec");	    				
 	    				if (gui.pintarEscena){
