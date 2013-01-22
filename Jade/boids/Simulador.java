@@ -237,6 +237,21 @@ public class Simulador{
     	posicionarBandada(posInicial);
 	}
 	
+	public void creaBandadaUniforme(){		
+		getBandada().clear();
+		for (double i = 0; i < largoEscenario;i = i + umbralCercania/3){
+			for (double j = 0; j < anchoEscenario; j = j + umbralCercania/3){
+				double pos[] = {i,j};
+				Matrix posi = new Matrix(pos,2);
+				double vel[] = {0,0};
+				Matrix velo = new Matrix(vel,2);
+				double ace[] = {0,0};
+				Matrix acel = new Matrix(ace,2);
+				bandada.add(new Boid(posi, velo, acel));
+			}
+		}
+	}
+	
 	/**Limpia el vector de boids*/	
 	public void borrarBandada(){
 		bandada.clear();
@@ -619,6 +634,7 @@ public class Simulador{
 				}
 			}
 		}
+		System.out.println("comando de volante " + comand);
 		modVehi.calculaEvolucion(comand,velocidad,t);		
 		return modVehi;
 	}
@@ -792,7 +808,7 @@ public class Simulador{
 		boolean liderEncontrado = false;
 		contIteraciones++;
 		//If para controlar la frecuencia a la que se aÃ±aden boids a la bandada
-		if(contIteraciones > contNuevosBoids){
+		if(contIteraciones >= contNuevosBoids){
 			for(int g=0;g<3;g++){				
 //				double pos[] = {Math.abs(700*Math.random()),Math.abs(500*Math.random())};
 //				double pos[] = {getBandada().lastElement().getPosicion().get(0,0)+10*Math.random(),
@@ -1402,7 +1418,6 @@ public class Simulador{
 						continue; // si el nodo está en el closedSet no hacemos nada con el y seguimos mirando						
 					}
 					
-					//TODO comprobar que entre un boid y otro no hay obstáculos
 					Line2D recta = 
 							new Line2D.Double(actual.getPosicion().get(0,0),actual.getPosicion().get(1,0),
 									getBandada().elementAt(j).getPosicion().get(0,0),
@@ -1464,8 +1479,9 @@ public class Simulador{
 	public Vector<Matrix> reconstruirCaminoAEstrella(Boid actual){
 		Vector<Matrix> camino = new Vector<Matrix>();
 		Boid aux = actual;
+		camino.add(aux.getPosicion());
 		while(aux.getCame_from() != null){
-			camino.add(aux.getPosicion());
+			camino.add(aux.getCame_from().getPosicion());
 			aux = aux.getCame_from();			
 		}
 //		System.out.println("tamaño del camino a estrella "+ camino.size());
@@ -1573,7 +1589,9 @@ public class Simulador{
 	         case 9: Boid.setPesoLider((Double)designPoint.get(nomParam[indice]));break;	         
 	         case 10: Boid.setVelMax((Double)designPoint.get(nomParam[indice]));break;	         
 	         case 11: setTamanoBandada((Double)designPoint.get(nomParam[indice]));
-	         		  crearBandada();break;	         		  
+	         		  creaBandadaUniforme();
+//	         		  crearBandada();
+	         		  break;	         		  
 	         case 12:setNumBoidsOkDeseados((Double)designPoint.get(nomParam[indice]));break;	         	         		  
 	         }
 	     }
