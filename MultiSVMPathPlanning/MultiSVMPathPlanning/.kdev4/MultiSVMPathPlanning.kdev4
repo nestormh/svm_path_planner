@@ -1,0 +1,57 @@
+[Buildset]
+BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x04\x00\x00\x00(\x00M\x00u\x00l\x00t\x00i\x00S\x00V\x00M\x00P\x00a\x00t\x00h\x00P\x00l\x00a\x00n\x00n\x00i\x00n\x00g\x00\x00\x00\x06\x00s\x00r\x00c\x00\x00\x00\x12\x00G\x00P\x00U\x00L\x00i\x00b\x00S\x00V\x00M\x00\x00\x00\x1a\x00t\x00e\x00s\x00t\x00G\x00P\x00U\x00L\x00i\x00b\x00S\x00V\x00M)
+
+[CMake]
+BuildDirs[$e]=$HOME/Dropbox/projects/MultiSVMPathPlanning/build
+CMakeDir=/usr/share/cmake-2.8/Modules
+Current CMake Binary=file:///usr/bin/cmake
+CurrentBuildDir=file:///home/nestor/Dropbox/projects/MultiSVMPathPlanning/build
+CurrentBuildType=Debug
+CurrentInstallDir=file:///usr/local
+Extra Arguments=
+ProjectRootRelative=./
+
+[Launch]
+Launch Configurations=Launch Configuration 0,Launch Configuration 1
+
+[Launch][Launch Configuration 0]
+Configured Launch Modes=execute
+Configured Launchers=nativeAppLauncher
+Name=testSVMPathPlanning
+Type=Native Application
+
+[Launch][Launch Configuration 0][Data]
+Arguments=~/Dropbox/projects/MultiSVMPathPlanning/build/bin/testSVMPathPlanning
+Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
+Dependency Action=Nothing
+EnvironmentGroup=default
+Executable=optirun
+External Terminal=konsole --noclose --workdir %workdir -e %exe
+Project Target=MultiSVMPathPlanning,src,testSVMPathPlanning
+Use External Terminal=false
+Working Directory=file:///home/nestor/Dropbox/projects/MultiSVMPathPlanning/build/bin
+isExecutable=true
+
+[Launch][Launch Configuration 1]
+Configured Launch Modes=execute
+Configured Launchers=nativeAppLauncher
+Name=testGPULibSVM
+Type=Native Application
+
+[Launch][Launch Configuration 1][Data]
+Arguments=~/Dropbox/projects/MultiSVMPathPlanning/build/bin/testGPULibSVM
+Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
+Dependency Action=Nothing
+EnvironmentGroup=default
+Executable=optirun
+External Terminal=konsole --noclose --workdir %workdir -e %exe
+Project Target=MultiSVMPathPlanning,src,GPULibSVM,testGPULibSVM
+Use External Terminal=false
+Working Directory=file:///home/nestor/Dropbox/projects/MultiSVMPathPlanning/build/bin
+isExecutable=true
+
+[MakeBuilder]
+Number Of Jobs=8
+
+[Project]
+VersionControlSupport=kdevsubversion
