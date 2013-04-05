@@ -2,6 +2,7 @@
 #define _LIBSVM_H
 #define _DENSE_REP
 #define LIBSVM_VERSION 300
+// #define DEBUG
 
 #ifdef __cplusplus
 extern "C" {

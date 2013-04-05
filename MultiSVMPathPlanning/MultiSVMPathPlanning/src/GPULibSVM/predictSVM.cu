@@ -35,10 +35,8 @@ using namespace std;
 __global__
 void predictPixel(const float * d_coeffs, const float2 * d_SVs, 
                   const float gamma, const float rho, const int totalSVs,
-                  const float minCornerX, const float minCornerY, 
-                  const float intervalX, const float intervalY, 
                   const unsigned int rows, const unsigned int cols, 
-                  const float resolution, unsigned char * d_data) {
+                  unsigned char * d_data) {
 
     const int2 pos2D = make_int2( blockIdx.x * blockDim.x + threadIdx.x,
                                   blockIdx.y * blockDim.y + threadIdx.y);
@@ -55,13 +53,16 @@ void predictPixel(const float * d_coeffs, const float2 * d_SVs,
     
     __syncthreads();
     
+//     const float2 * shared_SVs = d_SVs;
+//     const float * shared_coeffs = d_coeffs;
+    
     if ((pos2D.x > cols) || (pos2D.y > rows))
         return;
         
     const int pos1D = pos2D.y * cols + pos2D.x;
     
-    const float2 posRealWorld = make_float2((intervalX * pos2D.x / cols) + minCornerX,
-                                              (intervalY * pos2D.y / rows) + minCornerY);
+    const float2 posRealWorld = make_float2((float)pos2D.x / cols, (float)pos2D.y / rows);
+    
     float sum = 0.0;
     float val;
     for (int i = 0; i < totalSVs; i++) {
@@ -73,6 +74,8 @@ void predictPixel(const float * d_coeffs, const float2 * d_SVs,
     
     if (sum > 0)
         d_data[pos1D] = 255;
+    else
+        d_data[pos1D] = 0;
 }
 
 void chk_error(){
@@ -88,17 +91,15 @@ void chk_error(){
 }
 
 extern "C"
-void launchSVMPrediction(const svm_model * &model, 
-                         const double & minCornerX, const double & minCornerY, 
-                         const double & intervalX, const double & intervalY, 
+void launchSVMPrediction(const svm_model * &model,
                          const unsigned int & rows, const unsigned int & cols, 
-                         const double & resolution, unsigned char * &h_data) {
-                         
+                         unsigned char * &h_data) {
+    int L = model->l;
     if (model->l > (MEM_BLOCK)) {
         cerr << "Error: The number of support vectors is " << model->l << endl;
-        cerr << "Unable to reserve memory for more than " << (BLOCK_SIZE * BLOCK_SIZE) << "SVs" << endl;
-        cerr << "Exiting..." << endl;
-        exit(-1);
+        cerr << "Unable to reserve memory for more than " << MEM_BLOCK << "SVs" << endl;
+        cerr << "Using just the first " << MEM_BLOCK << "SVs" << endl;
+        L = MEM_BLOCK;
     }
                          
     // Reserving device memory for ouput data
@@ -106,105 +107,49 @@ void launchSVMPrediction(const svm_model * &model,
     CUDA_SAFE_CALL(cudaMalloc(&d_data, sizeof(unsigned char) * rows * cols));
     
     // Data structure is transformed for Support Vectors and passed to the device 
-    float2 * h_SVs = new float2[model->l];
-    for (int i = 0; i < model->l; i++) {
+    float2 * h_SVs = new float2[L];
+    for (int i = 0; i < L; i++) {
         h_SVs[i] = make_float2(model->SV[i].values[0], model->SV[i].values[1]);
     }   
     float2 * d_SVs;
-    CUDA_SAFE_CALL(cudaMalloc(&d_SVs, sizeof(float2) * model->l));
-    CUDA_SAFE_CALL(cudaMemcpy(d_SVs, h_SVs, sizeof(float2) * model->l, cudaMemcpyHostToDevice));
+    CUDA_SAFE_CALL(cudaMalloc(&d_SVs, sizeof(float2) * L));
+    CUDA_SAFE_CALL(cudaMemcpy(d_SVs, h_SVs, sizeof(float2) * L, cudaMemcpyHostToDevice));
     
     // Support vector coefficients are passed to device memory
-    float * h_coeffs = new float[model->l];
-    for (int i = 0; i < model->l; i++) {
+    float * h_coeffs = new float[L];
+    for (int i = 0; i < L; i++) {
         h_coeffs[i] = model->sv_coef[0][i];
     } 
     float * d_coeffs;
-    CUDA_SAFE_CALL(cudaMalloc(&d_coeffs, sizeof(float) * model->l));
-    CUDA_SAFE_CALL(cudaMemcpy(d_coeffs, h_coeffs, sizeof(float) * model->l, cudaMemcpyHostToDevice));
+    CUDA_SAFE_CALL(cudaMalloc(&d_coeffs, sizeof(float) * L));
+    CUDA_SAFE_CALL(cudaMemcpy(d_coeffs, h_coeffs, sizeof(float) * L, cudaMemcpyHostToDevice));
     
     const dim3 blockSize(BLOCK_SIZE, BLOCK_SIZE, 1);
     const dim3 gridSize(cols / blockSize.x + 1, rows / blockSize.x + 1, 1);
     
-//     cout << blockSize.x << ", " << blockSize.y << ", " << blockSize.z << endl;
-//     cout << gridSize.x << ", " << gridSize.y << ", " << gridSize.z << endl;
-//     cout << rows << ", " << cols << endl;
-//     
-//     cout << "minCornerX " << minCornerX << endl;
-//     cout << "minCornerY " << minCornerY << endl;
-//     cout << "intervalX " << intervalX << endl;
-//     cout << "intervalY " << intervalY << endl;
-//     cout << "rows " << rows << endl;
-//     cout << "cols " << cols << endl;
-    
+#ifdef DEBUG
     struct timespec start, finish;
     double elapsed;
     
     clock_gettime(CLOCK_MONOTONIC, &start);
-    
-    predictPixel <<<gridSize, blockSize>>> (d_coeffs, d_SVs, model->param.gamma, model->rho[0], model->l, 
-                                            minCornerX, minCornerY, intervalX, intervalY, 
-                                            rows, cols, resolution, d_data);
+#endif    
+
+    predictPixel <<<gridSize, blockSize>>> (d_coeffs, d_SVs, model->param.gamma, model->rho[0], L,
+                                            rows, cols, d_data);
     
     cudaDeviceSynchronize(); CUDA_SAFE_CALL(cudaGetLastError());
     
+#ifdef DEBUG
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
     
     std::cout << "Elapsed time for kernel = " << elapsed << endl;
+#endif
     
     CUDA_SAFE_CALL(cudaMemcpy(h_data, d_data, sizeof(unsigned char) * rows * cols, cudaMemcpyDeviceToHost));
     
     CUDA_SAFE_CALL(cudaFree(d_data));
     
     CUDA_SAFE_CALL(cudaGetLastError());
-    
-//     for (int y = 0; y < rows; y++) {
-//         for (int x = 0; x < rows; x++)  {
-//         
-//             const int2 pos2D = make_int2(x, y);
-//             const int pos1D = pos2D.y * cols + pos2D.x;
-//         
-//             const double2 posRealWorld = make_double2((intervalX * pos2D.x / cols) + minCornerX,
-//                                                     (intervalY * pos2D.y / rows) + minCornerY);
-// 
-//             double sum = 0.0;
-//             double term1, term2, val;
-//             bool paint = false;
-//             for (int i = 0; i < model->l; i++) {
-//                 val = -model->param.gamma * ((h_SVs[i].x - posRealWorld.x) * (h_SVs[i].x - posRealWorld.x) + 
-//                                (h_SVs[i].y - posRealWorld.y) * (h_SVs[i].y - posRealWorld.y));
-//                 sum += model->sv_coef[0][i] * exp(val);
-//                 int2 posImg = make_int2(cols * (h_SVs[i].x - minCornerX) / intervalX, 
-//                                         rows * (h_SVs[i].y - minCornerY) / intervalY); 
-//                 
-//                 if ((posImg.x == pos2D.x) && (posImg.y == pos2D.y))
-//                     paint = true;
-//             }
-//             sum -=  model->rho[0];
-// 
-//             if (paint)
-//                 if (sum > 0)
-//                     d_data[pos1D] = 255;
-//                 else
-//                     d_data[pos1D] = 128;
-//         }
-//     }
 }
-
-
-// extern "C"
-// void launchSVMPrediction(const svm_model * &model, 
-//                          const double & minCornerX, const double & minCornerY, 
-//                          const double & intervalX, const double & intervalY, 
-//                          const unsigned int & rows, const unsigned int & cols, 
-//                          const double & resolution, unsigned char * &h_data) {
-// 
-//                         
-//     GPUPredictWrapper(int m, int n, int k, float kernelwidth, const float *Test, 
-//                        const float *Svs, float * alphas,float *prediction, float beta,
-//                        float isregression, float * elapsed);
-// }
-
-                         

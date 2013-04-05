@@ -3,7 +3,7 @@
 int main ( int argc, char * argv[] )
 {
 
-    SVMPathPlanning pathPlanner;
+    svmpp::SVMPathPlanning pathPlanner;
     
     pathPlanner.testSingleProblem();
 

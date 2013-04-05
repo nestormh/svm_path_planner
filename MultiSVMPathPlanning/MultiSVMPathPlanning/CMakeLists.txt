@@ -6,7 +6,7 @@ set(OpenCV_DIR "/usr/local/share/OpenCV")
 # set(PCL_ROOT "/usr/local")
 
 # find_package(OMPL    REQUIRED )
-# find_package(Boost REQUIRED)
+find_package(Boost REQUIRED)
 find_package(CUDA 5.0 REQUIRED)
 find_package(OpenCV  REQUIRED )
 find_package( Eigen3    REQUIRED )

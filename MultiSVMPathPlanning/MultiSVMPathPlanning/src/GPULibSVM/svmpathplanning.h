@@ -30,6 +30,7 @@
 #define SVMPATHPLANNING_H
 
 #include "svm.h"
+// #include "nodexyzrgb.h"
 
 #include <string.h>
 #include <fstream>
@@ -46,26 +47,32 @@
 
 #include <vector_types.h>
 
+#include <lemon/list_graph.h>
+#include <lemon/dim2.h>
+
 #define NDIMS 2
 
 using namespace std;
 
+namespace svmpp {
+
 extern "C"
 void launchSVMPrediction(const svm_model * &model, 
-                         const double & minCornerX, const double & minCornerY, 
-                         const double & intervalX, const double & intervalY, 
                          const unsigned int & rows, const unsigned int & cols, 
-                         const double & resolution, unsigned char * &h_data);
+                         unsigned char * &h_data);
 
 extern "C"
 void GPUPredictWrapper(int m, int n, int k, float kernelwidth, const float *Test, 
                        const float *Svs, float * alphas,float *prediction, float beta,
                        float isregression, float * elapsed);
 
+typedef double2 CornerLimitsType;
+typedef pcl::PointXY PointType;
+typedef pcl::PointCloud<PointType> PointCloudType;
+typedef pcl::PointXYZRGB PointTypeExt;
+typedef pcl::PointCloud<PointTypeExt> PointCloudTypeExt;
+    
 class SVMPathPlanning {
-    typedef std::pair<double, double> CornerLimitsType;
-    typedef pcl::PointXYZRGB PointType;
-    typedef pcl::PointCloud<PointType> PointCloudType;
     
 public:
     SVMPathPlanning();
@@ -73,27 +80,36 @@ public:
     virtual ~SVMPathPlanning();
     
     void testSingleProblem();
+    void obtainGraphFromMap(const PointCloudTypeExt::Ptr & inputCloud);
     
 private:
     void loadDataFromFile ( const std::string & fileName,
                             PointCloudType::Ptr & X,
                             PointCloudType::Ptr & Y );
     
-    void visualizeClasses ( const PointCloudType::Ptr & X, const PointCloudType::Ptr & Y );
-    void reducePointCloud ( PointCloudType::Ptr & pointCloud );
-    void getBorderFromPointClouds ( const PointCloudType::Ptr & X, const PointCloudType::Ptr & Y,
-                                    CornerLimitsType & minCorner, CornerLimitsType & maxCorner,
-                                    double resolution);
-    void getContoursFromSVMPrediction(const svm_model * &model, const double & resolution);
+    void visualizeClasses(const std::vector< PointCloudType::Ptr > & classes);
+    void getBorderFromPointClouds (PointCloudType::Ptr & X, PointCloudType::Ptr & Y );
+    void getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval);
+    
+    void clusterize(const PointCloudTypeExt::Ptr & pointCloud, 
+                    std::vector< PointCloudType::Ptr > & classes);
+    
+    void generateRNG();
         
     
     struct svm_parameter m_param;
     struct svm_problem m_problem;
     
     double m_minPointDistance;
-    uint32_t m_resolution;
+    cv::Size m_gridSize;
+    double m_minDistBetweenObstacles;
+    
+    PointCloudType::Ptr m_existingNodes;
+    
+    CornerLimitsType m_minCorner;
+    CornerLimitsType m_maxCorner;
 };
     
-    
+}
 
 #endif // SVMPATHPLANNING_H

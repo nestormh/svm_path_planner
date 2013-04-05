@@ -32,6 +32,30 @@
 
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <vector_functions.h>
+
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/sample_consensus/ransac.h>
+#include <pcl/sample_consensus/sac_model_plane.h>
+
+#include <pcl/ModelCoefficients.h>
+#include <pcl/point_types.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/kdtree/kdtree.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/segmentation/extract_clusters.h>
+
+#include <pcl/common/common_headers.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <boost/thread/thread.hpp>
+#include <pcl/visualization/cloud_viewer.h>
+
+using namespace svmpp;
 
 SVMPathPlanning::SVMPathPlanning()
 {
@@ -39,12 +63,12 @@ SVMPathPlanning::SVMPathPlanning()
     m_param.svm_type = C_SVC;
     m_param.kernel_type = RBF;
     m_param.degree = 3;
-    m_param.gamma = 300;        // 1/num_features
+    m_param.gamma = 150;//300;        // 1/num_features
     m_param.coef0 = 0;
     m_param.nu = 0.5;
     m_param.cache_size = 100;
-    m_param.C = 500;
-    m_param.eps = 1e-3;
+    m_param.C = 10000;//500;
+    m_param.eps = 1e-2;
     m_param.p = 0.1;
     m_param.shrinking = 0;
     m_param.probability = 0;
@@ -53,9 +77,12 @@ SVMPathPlanning::SVMPathPlanning()
     m_param.weight = NULL;
 //     cross_validation = 0;
     
-    m_minPointDistance = 0.005;
-    m_resolution = 400;
+    m_minPointDistance = 2.0;
+    m_gridSize = cv::Size(200, 200);
+    m_minDistBetweenObstacles = 2.5;
 
+    m_existingNodes = PointCloudType::Ptr(new PointCloudType);
+    
 }
 
 SVMPathPlanning::SVMPathPlanning ( const SVMPathPlanning& other )
@@ -72,16 +99,17 @@ void SVMPathPlanning::testSingleProblem()
 {
     PointCloudType::Ptr X, Y;
     
+    m_minPointDistance = 0.0005;
+    m_minDistBetweenObstacles = 0.005;
+    
     loadDataFromFile ( "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/out1.txt", X, Y );
     
-    CornerLimitsType minCorner = make_pair<double, double> ( 0.0, 0.0 );
-    CornerLimitsType maxCorner = make_pair<double, double> ( 1.0, 1.0 );
+    m_minCorner = make_double2(0,0);
+    m_maxCorner = make_double2(1,1);
     
-    reducePointCloud(X);
-    reducePointCloud(Y);
-//     visualizeClasses(X, Y);
+    getBorderFromPointClouds ( X, Y );
     
-    getBorderFromPointClouds ( X, Y, minCorner, maxCorner, 400.0);
+    cv::waitKey(0);
 }
 
 void SVMPathPlanning::loadDataFromFile (const std::string & fileName,
@@ -126,56 +154,161 @@ void SVMPathPlanning::loadDataFromFile (const std::string & fileName,
         PointType p;
         p.x = x;
         p.y = y;
-        p.z = p.r = p.g = p.b = 0.0;
+//         p.z = p.r = p.g = p.b = 0.0;
         
-        if ( classType == 1 ) {
-            p.r = 255;
-            X->push_back ( p );
-        } else {
-            p.g = 255;
-            Y->push_back ( p );
-        }       
+//         if ( classType == 1 ) {
+//             p.r = 255;
+//             X->push_back ( p );
+//         } else {
+//             p.g = 255;
+//             Y->push_back ( p );
+//         }       
         fin.ignore ( 1024, '\n' );
     }
     
     fin.close();
 }
 
-void SVMPathPlanning::visualizeClasses ( const PointCloudType::Ptr & X, const PointCloudType::Ptr & Y )
-{
+void SVMPathPlanning::clusterize(const PointCloudTypeExt::Ptr & pointCloud,
+                                 std::vector< PointCloudType::Ptr > & classes) {    
     
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer ( new pcl::visualization::PCLVisualizer ( "3D Viewer" ) );
-    viewer->setBackgroundColor ( 0, 0, 0 );
+//     pcl::KdTreeFLANN<PointType> kdtree;    
+    std::vector<int> pointIdxNKNSearch(1);
+    std::vector<float> pointNKNSquaredDistance(1);
+    
+    // Creating the KdTree object for the search method of the extraction
+    pcl::search::KdTree<PointTypeExt>::Ptr tree (new pcl::search::KdTree<PointTypeExt>);
+    tree->setInputCloud (pointCloud);
+    
+    std::vector<pcl::PointIndices> cluster_indices;
+    pcl::EuclideanClusterExtraction<PointTypeExt> ec;
+    ec.setClusterTolerance (m_minDistBetweenObstacles);
+    ec.setMinClusterSize (1);
+    ec.setMaxClusterSize (INT_MAX);
+    ec.setSearchMethod (tree);
+    ec.setInputCloud (pointCloud);
+    ec.extract (cluster_indices);
+    
+    pcl::search::KdTree<PointType>::Ptr tree2 (new pcl::search::KdTree<PointType>);
+    
+    classes.reserve(cluster_indices.size());
+    
+    m_minCorner = make_double2(DBL_MAX, DBL_MAX);
+    m_maxCorner = make_double2(DBL_MIN, DBL_MIN);
+    
+    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); it++) {
+        
+        PointCloudType::Ptr newClass(new PointCloudType);
+        newClass->reserve(it->indices.size());
+        
+        for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end (); pit++) {
+            PointType point;
+            point.x = pointCloud->points[*pit].x;
+            point.y = pointCloud->points[*pit].y;
+            
+            uint32_t nPointsFound = 0;
+            
+            if (pit != it->indices.begin()) {
+                tree2->setInputCloud (newClass);
+                nPointsFound = tree2->nearestKSearch (point, 1, pointIdxNKNSearch, pointNKNSquaredDistance);
+            }
+            
+            if ((nPointsFound == 0) || (pointNKNSquaredDistance[0] > m_minPointDistance)) {
+                if (point.x < m_minCorner.x) m_minCorner.x = point.x;
+                if (point.x > m_maxCorner.x) m_maxCorner.x = point.x;
+                if (point.y < m_minCorner.y) m_minCorner.y = point.y;
+                if (point.y > m_maxCorner.y) m_maxCorner.y = point.y;
+                
+                newClass->push_back(point);
+            }
+        }
+        
+        classes.push_back(newClass);
+    }
+
+    m_maxCorner.x = 1.1 * m_maxCorner.x;
+    m_maxCorner.y = 1.1 * m_maxCorner.y;
+    m_minCorner.x = 0.9 * m_minCorner.x;
+    m_minCorner.y = 0.9 * m_minCorner.y;
+    
+}
+
+void SVMPathPlanning::visualizeClasses(const std::vector< PointCloudType::Ptr > & classes) {
+                      
+    PointCloudTypeExt::Ptr pointCloud(new PointCloudTypeExt);
+    
+    for (uint32_t i = 0; i < classes.size(); i++) {
+        PointCloudType::Ptr currentClass = classes[i];
+        
+        uchar color[] = { rand() & 255, rand() & 255, rand() & 255 };
+        
+        for (uint32_t j = 0; j < currentClass->size(); j++) {
+            
+            PointTypeExt point;
+            
+            point.x = currentClass->at(j).x;
+            point.y = currentClass->at(j).y;
+            point.z = 0.0;
+            point.r = color[0];
+            point.g = color[1];
+            point.b = color[2];
+            
+            pointCloud->push_back(point);
+        }
+    }
+    
+    PointCloudTypeExt::Ptr trajectory(new PointCloudTypeExt);
+    trajectory->reserve(m_existingNodes->size());
+    
+    for (uint32_t i = 0; i < m_existingNodes->size(); i++) {
+        PointTypeExt point;
+        
+        point.x = m_existingNodes->at(i).x;
+        point.y = m_existingNodes->at(i).y;
+        point.z = 0.0;
+        point.r = 0;
+        point.g = 255;
+        point.b = 0;
+        
+        trajectory->push_back(point);
+    }   
+    
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+    viewer->setBackgroundColor (0, 0, 0);
     viewer->initCameraParameters();
     viewer->addCoordinateSystem();
     
-    pcl::visualization::PointCloudColorHandlerRGBField<PointType> rgbX ( X );
-    viewer->addPointCloud<PointType> ( X, rgbX, "X" );
+    pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgb(pointCloud);
+    viewer->addPointCloud<PointTypeExt> (pointCloud, rgb, "pointCloud");
     
-    pcl::visualization::PointCloudColorHandlerRGBField<PointType> rgbY ( Y );
-    viewer->addPointCloud<PointType> ( Y, rgbY, "Y" );
+    pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbTrajectory(trajectory);
+    viewer->addPointCloud<PointTypeExt> (trajectory, rgbTrajectory, "trajectory");
     
-    while ( ! viewer->wasStopped () ) {
-        viewer->spinOnce();
+    while (! viewer->wasStopped ()) {    
+        viewer->spinOnce();       
     }
+    
+    
 }
 
-void SVMPathPlanning::getBorderFromPointClouds ( const PointCloudType::Ptr & X, const PointCloudType::Ptr & Y,
-                                CornerLimitsType & minCorner, CornerLimitsType & maxCorner,
-                                double resolution ) {
+void SVMPathPlanning::getBorderFromPointClouds (PointCloudType::Ptr & X, PointCloudType::Ptr & Y ) {
+    
+    CornerLimitsType interval = make_double2(m_maxCorner.x - m_minCorner.x, 
+                                             m_maxCorner.y - m_minCorner.y);
     
     m_problem.l = X->size() + Y->size();
     m_problem.y = new double[m_problem.l];
     m_problem.x = new svm_node[m_problem.l];
     
+#ifdef DEBUG
     cout << "L = " << m_problem.l << endl;
-    
-    cv::Mat mapViz = cv::Mat::ones (resolution, resolution, CV_8UC3);
+#endif
     
     for ( uint32_t i = 0; i < X->size(); i++ ) {
         const PointType & p = X->at ( i );
-        double x = p.x; //( p.x - minCorner.first );
-        double y = p.y; //( p.y - minCorner.second );
+        
+        double x = ( p.x - m_minCorner.x ) / interval.x;
+        double y = ( p.y - m_minCorner.y ) / interval.y;
         
         m_problem.y[i] = 1;
         m_problem.x[i].dim = NDIMS;
@@ -186,10 +319,8 @@ void SVMPathPlanning::getBorderFromPointClouds ( const PointCloudType::Ptr & X, 
     
     for ( uint32_t i = 0; i < Y->size(); i++ ) {
         const PointType & p = Y->at ( i );
-        double x = p.x; //( p.x - minCorner.first );
-        double y = p.y; //( p.y - minCorner.second );
-        
-//         cout << "1: ( " << x << ", " << y << ")" << endl;
+        double x = (p.x - m_minCorner.x ) / interval.x;
+        double y = ( p.y - m_minCorner.y ) / interval.y;
         
         const int & idx = i + X->size();
         m_problem.y[idx] = 2;
@@ -198,149 +329,111 @@ void SVMPathPlanning::getBorderFromPointClouds ( const PointCloudType::Ptr & X, 
         m_problem.x[idx].values[0] = x;
         m_problem.x[idx].values[1] = y;
     }
-    
+   
+#ifdef DEBUG
     struct timespec start, finish;
     double elapsed;
 
     clock_gettime(CLOCK_MONOTONIC, &start);
-
+#endif
+    
     svm_model * model = svm_train(&m_problem, &m_param);
 
+#ifdef DEBUG
     clock_gettime(CLOCK_MONOTONIC, &finish);
 
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
-    
+
     std::cout << "Elapsed time = " << elapsed << endl;
-    
-    getContoursFromSVMPrediction((const svm_model*&)model, 0.005);
-    
-    // Visualization
-    svm_node node;
-//     node.dim = NDIMS;
-//     node.values = new double[NDIMS];
-// 
-//     CornerLimitsType interval = make_pair<double, double>(
-//         (maxCorner.first - minCorner.first),
-//         (maxCorner.second - minCorner.second)
-//     );
-//     for (uint32_t y = 0; y < resolution; y++) {
-//         double prevVal = DBL_MIN;
-//         for (uint32_t x = 0; x < resolution; x++) {
-//             node.values[0] = (interval.first * x / resolution) + minCorner.first;
-//             node.values[1] = (interval.second * y / resolution) + minCorner.second;
-//             
-//             double val = svm_predict(model, &node);
-//             
-//             if ((prevVal != DBL_MIN) && (prevVal != val)) {                
-//                 cv::Vec3b& elem = mapViz.at<cv::Vec3b> (y, x);
-//                 elem[0] = 255;
-//                 elem[1] = 255;
-//                 elem[2] = 255;
-//             }
-//             prevVal = val;
-//         }
-//     }
-//     
-//     for (uint32_t i = 0; i < model->l; i++) {
-//         double x = (model->SV[i].values[0] - minCorner.first) * resolution / interval.first;
-//         double y = (model->SV[i].values[1] - minCorner.second) * resolution / interval.second;
-//         
-//         cv::Vec3b& elem = mapViz.at<cv::Vec3b> (y, x);
-//         elem[0] = 0;
-//         elem[1] = 0;
-//         elem[2] = 255;
-//     }
-    
-    
-    
-//     svm_free_and_destroy_model(&model);
-//     for (uint32_t i = 0; i < m_problem.l; i++) {
-//         delete m_problem.x[i].values;
-//     }
-//     delete [] node.values;
-//     delete [] m_problem.x;
-//     delete [] m_problem.y;
-    
-    cv::imshow ( "Map", mapViz );
-    
-    cv::waitKey ( 0 );
-    
+#endif    
+
+    getContoursFromSVMPrediction((const svm_model*&)model, interval);
+
+    svm_free_and_destroy_model(&model);
+    for (uint32_t i = 0; i < m_problem.l; i++) {
+        delete m_problem.x[i].values;
+    }
+    delete [] m_problem.x;
+    delete [] m_problem.y;
 }
 
-void SVMPathPlanning::reducePointCloud(PointCloudType::Ptr& pointCloud)
-{
-    pcl::KdTreeFLANN<PointType> kdtree;
+inline void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval) {
     
-    PointCloudType::Ptr tmpPointCloud(new PointCloudType);
-    tmpPointCloud->reserve(pointCloud->size());
-    tmpPointCloud->push_back(pointCloud->at(0));
-//     kdtree.setPointRepresentation(boost::make_shared<const XYZRGBRepresentation> (pointRepresentation));
-    
-    std::vector<int> pointIdxNKNSearch(1);
-    std::vector<float> pointNKNSquaredDistance(1);
-    
-    PointCloudType::iterator it;
-    for (it = pointCloud->begin(); it != pointCloud->end(); it++) {
-        kdtree.setInputCloud (tmpPointCloud);
-        uint32_t nPointsFound = kdtree.nearestKSearch (*it, 1, pointIdxNKNSearch, pointNKNSquaredDistance);
-        
-        if ((nPointsFound == 0) || (pointNKNSquaredDistance[0] > m_minPointDistance))
-            tmpPointCloud->push_back(*it);
-    }
-    
-    pointCloud = tmpPointCloud;
-}
+    cv::Mat predictMap(m_gridSize, CV_8UC1);
 
-void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &model, const double & resolution) {
-    
-    CornerLimitsType minCorner = make_pair<double, double>(DBL_MAX, DBL_MAX);
-    CornerLimitsType maxCorner = make_pair<double, double>(DBL_MIN, DBL_MIN);
-    for (uint32_t i = 0; i < model->l; i++) {
-        const double & x = model->SV[i].values[0];
-        const double & y = model->SV[i].values[1];
-        
-        if (minCorner.first > x) minCorner.first = x;
-        if (minCorner.second > y) minCorner.second = y;
-        if (maxCorner.first < x) maxCorner.first = x;
-        if (maxCorner.second < y) maxCorner.second = y;
-    }
-    CornerLimitsType interval = make_pair<double, double>(
-        (maxCorner.first - minCorner.first),
-        (maxCorner.second - minCorner.second)
-    );
-    
-    cv::Size outputSize(interval.first / resolution + 1, interval.second / resolution + 1);
-    
-    cv::Mat predictMap(outputSize, CV_8UC1);
-
+#ifdef DEBUG
     struct timespec start, finish;
     double elapsed;
     
     clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
     
-    launchSVMPrediction(model, minCorner.first, minCorner.second, interval.first, interval.second, 
-                        outputSize.height, outputSize.width, resolution, predictMap.data);
+    launchSVMPrediction(model, m_gridSize.height, m_gridSize.width, predictMap.data);
+    
+#ifdef DEBUG
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = (finish.tv_sec - start.tv_sec);
     elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
     
     std::cout << "Elapsed time for prediction = " << elapsed << endl;
+#endif
     
     vector<vector<cv::Point> > contours;
     cv::findContours(predictMap, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
     
-    cv::Mat contoursImg = cv::Mat::zeros(outputSize, CV_8UC3);
     for (vector<vector<cv::Point> >::iterator it = contours.begin(); it != contours.end(); it++) {
         for (vector<cv::Point>::iterator it2 = it->begin(); it2 != it->end(); it2++) {
-            cv::Vec3b& elem = contoursImg.at<cv::Vec3b> (it2->y, it2->x);
-            elem[0] = 0;
-            elem[1] = 0;
-            elem[2] = 255;
+            PointType graphPoint;
+            graphPoint.x = (it2->x * interval.x / m_gridSize.width) + m_minCorner.x;
+            graphPoint.y = (it2->y * interval.y / m_gridSize.height) + m_minCorner.y;
+            
+            if ((graphPoint.x >= m_minCorner.x / 0.9) && (graphPoint.x <= m_maxCorner.x / 1.1) &&
+                (graphPoint.y >= m_minCorner.y / 0.9) && (graphPoint.y <= m_maxCorner.y / 1.1)) {
+            
+                m_existingNodes->push_back(graphPoint);
+            }
         }
     }
+}
+
+void SVMPathPlanning::generateRNG() {
+    // TODO: aprovechar esta parte para hacer limpieza, si es necesario ¿o mejor al añadirlas al grafo inicial?
+}
+
+
+void SVMPathPlanning::obtainGraphFromMap(const PointCloudTypeExt::Ptr & inputCloud)
+{
+    struct timespec start, finish;
+    double elapsed;
     
-    cv::imshow("predictMap", predictMap);
-    cv::imshow("contoursImg", contoursImg);
-//     cv::imwrite("/home/nestor/Dropbox/projects/MultiSVMPathPlanning/predictMap.png", predictMap);
+    clock_gettime(CLOCK_MONOTONIC, &start);
+        
+    vector< PointCloudType::Ptr > classes;
+    clusterize(inputCloud, classes);
+    
+    vector< PointCloudType::Ptr >::iterator it1, it2;
+    
+    for (it1 = classes.begin(); it1 != classes.end(); it1++) {
+        PointCloudType::Ptr pointCloud1(new PointCloudType);
+        *pointCloud1 = *(*it1);
+        PointCloudType::Ptr pointCloud2(new PointCloudType);
+        for (it2 = classes.begin(); it2 != classes.end(); it2++) {
+            if (it1 != it2) {
+                *pointCloud2 += *(*it2);
+            }
+        }
+                                         
+        getBorderFromPointClouds (pointCloud1, pointCloud2);
+        
+    }
+    generateRNG();
+    
+    clock_gettime(CLOCK_MONOTONIC, &finish);
+    elapsed = (finish.tv_sec - start.tv_sec);
+    elapsed += (finish.tv_nsec - start.tv_nsec) / 1000000000.0;
+    
+    std::cout << "Total time = " << elapsed << endl;
+    
+    visualizeClasses(classes);
 }

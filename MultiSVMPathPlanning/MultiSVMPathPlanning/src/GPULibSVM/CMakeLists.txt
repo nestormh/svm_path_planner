@@ -1,12 +1,13 @@
 set(CCFILES
   testGPULibSVM.cpp
-#   kernel_matrix_calculation.c
   svm-train.c
   svm.cpp
+  svmpathplanning.cpp
 )
 
 set (HFILES
   svm.h
+  nodexyzrgb.h
 )
 
 set (CUHFILES
@@ -15,7 +16,6 @@ set (CUHFILES
 
 set(CUFILES
     predictSVM.cu
-    cuSVMPredictKernel.cu
 )
 
 set(HFILES_PUBLIC
@@ -35,34 +35,29 @@ if (CUDA_VERBOSE_PTXAS)
   set(VERBOSE_PTXAS --ptxas-options=-v)
 endif (CUDA_VERBOSE_PTXAS)
 
-cuda_add_executable(testGPULibSVM svmpathplanning.cpp
+cuda_add_executable(testGPULibSVM
   ${CUFILES} 
   ${CCFILES} 
   ${HFILES}
   ${CUHFILES}
   ${HFILES_PUBLIC}
-  OPTIONS ${GENCODE_SM20} ${CUDAGDB_OPTS}
+  OPTIONS ${GENCODE_SM30} ${CUDAGDB_OPTS}
 #   ${GENCODE_SM10} ${GENCODE_SM13} ${GENCODE_SM20} ${VERBOSE_PTXAS}
 )
   
 
 
 include_directories(testGPULibSVM
-#     ${EIGEN3_INCLUDE_DIR}
     ${PCL_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIR}
-    emon.a
+    ${Boost_INCLUDE_DIR}
     ${CUDA_INCLUDE_DIRS}
 )
 
-# set(CUDA_CURAND_LIBRARIES ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcurand.so)
-
 target_link_libraries(testGPULibSVM
-#   ${EIGEN3_LIBRARIES}
   ${PCL_LIBRARIES}
   ${OpenCV_LIBS}
   ${CUDA_LIBRARIES}
-#   ${CUDA_CURAND_LIBRARIES}
-#   emon.a
+  ${BOOST_LIBRARIES}
 )
 CUDA_ADD_CUBLAS_TO_TARGET(testGPULibSVM)
