@@ -308,8 +308,9 @@ void SVMPathPlanning::visualizeClasses(const std::vector< PointCloudType::Ptr > 
     viewer->addPointCloud<PointTypeExt> (trajectory, rgbTrajectory, "trajectory");
     
     PointCloudTypeExt::Ptr linesPointCloud(new PointCloudTypeExt);    
-    for (vector< pair<uint32_t, uint32_t> >::iterator it = m_matches.begin(); it != m_matches.end(); it++) {
-        addLineToPointCloud(m_existingNodes->at(it->first), m_existingNodes->at(it->second), 255, 0, 0, linesPointCloud);
+    boost::graph_traits<Graph>::edge_iterator ei, ei_end;
+    for (tie(ei, ei_end) = boost::edges(m_graph); ei != ei_end; ++ei) {
+        addLineToPointCloud(m_graph[boost::source(*ei, m_graph)], m_graph[boost::target(*ei, m_graph)], 255, 0, 0, linesPointCloud);
     }
     
     pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbTriangulation(linesPointCloud);
@@ -318,8 +319,6 @@ void SVMPathPlanning::visualizeClasses(const std::vector< PointCloudType::Ptr > 
     while (! viewer->wasStopped ()) {    
         viewer->spinOnce();       
     }
-    
-    
 }
 
 void SVMPathPlanning::getBorderFromPointClouds (PointCloudType::Ptr & X, PointCloudType::Ptr & Y ) {
@@ -469,7 +468,15 @@ void SVMPathPlanning::generateRNG() {
     
     for (vector<pcl::Vertices>::iterator it = triangles.polygons.begin(); it != triangles.polygons.end(); it++) {
         for (uint32_t i = 0; i < it->vertices.size(); i++) {
-            m_matches.push_back(make_pair<uint32_t, uint32_t>(it->vertices[i], it->vertices[(i + 1) % it->vertices.size()]));
+            const Graph::vertex_descriptor & vertex1 = boost::add_vertex(m_graph);
+            const Graph::vertex_descriptor  & vertex2 = boost::add_vertex(m_graph);
+            
+            m_graph[vertex1] = m_existingNodes->at(it->vertices[i]);
+            m_graph[vertex2] = m_existingNodes->at(it->vertices[(i + 1) % it->vertices.size()]);
+            
+            EdgeWeightProperty dist = sqrt((m_graph[vertex1].x - m_graph[vertex2].x) * (m_graph[vertex1].x - m_graph[vertex2].x) + 
+                                           (m_graph[vertex1].y - m_graph[vertex2].y) * (m_graph[vertex1].y - m_graph[vertex2].y));
+            boost::add_edge(vertex1, vertex2, dist, m_graph);
         }
     }
     
@@ -483,7 +490,14 @@ void SVMPathPlanning::generateRNG() {
     for (uint32_t i = 0; i < m_existingNodes->size(); i++) {
         treeNNG->radiusSearch(m_existingNodes->at(i), m_distBetweenSamples, pointIdxNKNSearch, pointNKNSquaredDistance);
         for (uint32_t j = 0; j < pointIdxNKNSearch.size(); j++) {
-            m_matches.push_back(make_pair<uint32_t, uint32_t>(i, pointIdxNKNSearch[j]));
+            const Graph::vertex_descriptor & vertex1 = boost::add_vertex(m_graph);
+            const Graph::vertex_descriptor & vertex2 = boost::add_vertex(m_graph);
+            
+            m_graph[vertex1] = m_existingNodes->at(i);
+            m_graph[vertex2] = m_existingNodes->at(pointIdxNKNSearch[j]);
+            
+            boost::add_edge(vertex1, vertex2, pointNKNSquaredDistance[j], m_graph);
+            
         }
     }
 }

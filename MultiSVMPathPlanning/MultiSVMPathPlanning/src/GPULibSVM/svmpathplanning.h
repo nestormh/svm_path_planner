@@ -35,20 +35,19 @@
 #include <string.h>
 #include <fstream>
 
-#include <pcl/point_cloud.h>
-#include <pcl/common/common.h>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
+#include <pcl/point_cloud.h>
+#include <pcl/common/common.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/visualization/cloud_viewer.h>
 
 #include <opencv2/opencv.hpp>
 
 #include <vector_types.h>
-
-#include <lemon/list_graph.h>
-#include <lemon/dim2.h>
 
 #define NDIMS 2
 
@@ -71,6 +70,8 @@ typedef pcl::PointXYZ PointType;
 typedef pcl::PointCloud<PointType> PointCloudType;
 typedef pcl::PointXYZRGB PointTypeExt;
 typedef pcl::PointCloud<PointTypeExt> PointCloudTypeExt;
+typedef boost::property<boost::edge_weight_t, double> EdgeWeightProperty;
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, PointType, EdgeWeightProperty> Graph;
     
 class SVMPathPlanning {
     
@@ -112,6 +113,7 @@ private:
     CornerLimitsType m_minCorner;
     CornerLimitsType m_maxCorner;
     
+    Graph m_graph;
     
     vector< pair<uint32_t, uint32_t> > m_matches;
 };

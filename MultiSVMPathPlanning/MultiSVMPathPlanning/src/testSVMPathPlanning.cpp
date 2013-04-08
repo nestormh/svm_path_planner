@@ -23,6 +23,9 @@
 
 #include<opencv2/opencv.hpp>
 
+#include <boost/graph/graph_traits.hpp>
+  #include <boost/graph/adjacency_list.hpp>
+
 #include "svmpathplanning.h"
 
 #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1.pgm"
