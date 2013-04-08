@@ -7,7 +7,6 @@ set(CCFILES
 
 set (HFILES
   svm.h
-  nodexyzrgb.h
 )
 
 set (CUHFILES

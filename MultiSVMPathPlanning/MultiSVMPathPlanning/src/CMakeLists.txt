@@ -7,7 +7,6 @@ set(CCFILES
 
 set (HFILES
   GPULibSVM/svm.h
-  GPULibSVM/nodexyzrgb.h
 )
 
 set (CUHFILES

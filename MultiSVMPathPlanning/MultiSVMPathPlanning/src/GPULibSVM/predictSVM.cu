@@ -90,6 +90,7 @@ void chk_error(){
     }
 }
 
+// TODO: Modificar para que sea capaz de permitir mapas grandes y tiles en los SVs
 extern "C"
 void launchSVMPrediction(const svm_model * &model,
                          const unsigned int & rows, const unsigned int & cols, 
@@ -119,7 +120,7 @@ void launchSVMPrediction(const svm_model * &model,
     float * h_coeffs = new float[L];
     for (int i = 0; i < L; i++) {
         h_coeffs[i] = model->sv_coef[0][i];
-    } 
+    }
     float * d_coeffs;
     CUDA_SAFE_CALL(cudaMalloc(&d_coeffs, sizeof(float) * L));
     CUDA_SAFE_CALL(cudaMemcpy(d_coeffs, h_coeffs, sizeof(float) * L, cudaMemcpyHostToDevice));
@@ -133,7 +134,7 @@ void launchSVMPrediction(const svm_model * &model,
     
     clock_gettime(CLOCK_MONOTONIC, &start);
 #endif    
-
+    
     predictPixel <<<gridSize, blockSize>>> (d_coeffs, d_SVs, model->param.gamma, model->rho[0], L,
                                             rows, cols, d_data);
     

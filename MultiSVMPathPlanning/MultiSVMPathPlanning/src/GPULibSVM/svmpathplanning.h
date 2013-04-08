@@ -67,7 +67,7 @@ void GPUPredictWrapper(int m, int n, int k, float kernelwidth, const float *Test
                        float isregression, float * elapsed);
 
 typedef double2 CornerLimitsType;
-typedef pcl::PointXY PointType;
+typedef pcl::PointXYZ PointType;
 typedef pcl::PointCloud<PointType> PointCloudType;
 typedef pcl::PointXYZRGB PointTypeExt;
 typedef pcl::PointCloud<PointTypeExt> PointCloudTypeExt;
@@ -87,6 +87,9 @@ private:
                             PointCloudType::Ptr & X,
                             PointCloudType::Ptr & Y );
     
+    void addLineToPointCloud(const PointType& p1, const PointType& p2, 
+                             const uint8_t & r, const uint8_t & g, const uint8_t  & b,
+                             PointCloudTypeExt::Ptr &linesPointCloud);
     void visualizeClasses(const std::vector< PointCloudType::Ptr > & classes);
     void getBorderFromPointClouds (PointCloudType::Ptr & X, PointCloudType::Ptr & Y );
     void getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval);
@@ -95,19 +98,22 @@ private:
                     std::vector< PointCloudType::Ptr > & classes);
     
     void generateRNG();
-        
-    
+  
     struct svm_parameter m_param;
     struct svm_problem m_problem;
     
     double m_minPointDistance;
     cv::Size m_gridSize;
     double m_minDistBetweenObstacles;
+    double m_distBetweenSamples;
     
     PointCloudType::Ptr m_existingNodes;
     
     CornerLimitsType m_minCorner;
     CornerLimitsType m_maxCorner;
+    
+    
+    vector< pair<uint32_t, uint32_t> > m_matches;
 };
     
 }

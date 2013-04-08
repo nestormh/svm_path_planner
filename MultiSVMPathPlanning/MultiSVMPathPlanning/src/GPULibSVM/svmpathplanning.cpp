@@ -54,6 +54,7 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <boost/thread/thread.hpp>
 #include <pcl/visualization/cloud_viewer.h>
+#include <pcl/surface/gp3.h>
 
 using namespace svmpp;
 
@@ -78,7 +79,7 @@ SVMPathPlanning::SVMPathPlanning()
 //     cross_validation = 0;
     
     m_minPointDistance = 2.0;
-    m_gridSize = cv::Size(200, 200);
+    m_gridSize = cv::Size(300, 300);
     m_minDistBetweenObstacles = 2.5;
 
     m_existingNodes = PointCloudType::Ptr(new PointCloudType);
@@ -233,6 +234,28 @@ void SVMPathPlanning::clusterize(const PointCloudTypeExt::Ptr & pointCloud,
     
 }
 
+void SVMPathPlanning::addLineToPointCloud(const PointType& p1, const PointType& p2, 
+                                          const uint8_t & r, const uint8_t & g, const uint8_t  & b,
+                                          PointCloudTypeExt::Ptr & linesPointCloud) {
+    
+    double dist = sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+    
+    const uint32_t nSamples = (uint32_t)(ceil(dist / 0.02));
+    
+    for (uint32_t i = 0; i <= nSamples; i++) {
+        pcl::PointXYZRGB p;
+        p.x = p1.x + ((double)i / nSamples) * (p2.x - p1.x);
+        p.y = p1.y + ((double)i / nSamples) * (p2.y - p1.y);
+        p.z = p1.z + ((double)i / nSamples) * (p2.z - p1.z);
+        
+        p.r = r;
+        p.g = g;
+        p.b = b;
+        
+        linesPointCloud->push_back(p);
+    } 
+}
+
 void SVMPathPlanning::visualizeClasses(const std::vector< PointCloudType::Ptr > & classes) {
                       
     PointCloudTypeExt::Ptr pointCloud(new PointCloudTypeExt);
@@ -265,24 +288,32 @@ void SVMPathPlanning::visualizeClasses(const std::vector< PointCloudType::Ptr > 
         
         point.x = m_existingNodes->at(i).x;
         point.y = m_existingNodes->at(i).y;
-        point.z = 0.0;
+        point.z = -1.0;
         point.r = 0;
         point.g = 255;
         point.b = 0;
         
         trajectory->push_back(point);
-    }   
+    }
     
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (0, 0, 0);
     viewer->initCameraParameters();
     viewer->addCoordinateSystem();
     
-    pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgb(pointCloud);
-    viewer->addPointCloud<PointTypeExt> (pointCloud, rgb, "pointCloud");
+//     pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgb(pointCloud);
+//     viewer->addPointCloud<PointTypeExt> (pointCloud, rgb, "pointCloud");
     
     pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbTrajectory(trajectory);
     viewer->addPointCloud<PointTypeExt> (trajectory, rgbTrajectory, "trajectory");
+    
+    PointCloudTypeExt::Ptr linesPointCloud(new PointCloudTypeExt);    
+    for (vector< pair<uint32_t, uint32_t> >::iterator it = m_matches.begin(); it != m_matches.end(); it++) {
+        addLineToPointCloud(m_existingNodes->at(it->first), m_existingNodes->at(it->second), 255, 0, 0, linesPointCloud);
+    }
+    
+    pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbTriangulation(linesPointCloud);
+    viewer->addPointCloud<PointTypeExt> (linesPointCloud, rgbTriangulation, "linesPointCloud");
     
     while (! viewer->wasStopped ()) {    
         viewer->spinOnce();       
@@ -295,6 +326,9 @@ void SVMPathPlanning::getBorderFromPointClouds (PointCloudType::Ptr & X, PointCl
     
     CornerLimitsType interval = make_double2(m_maxCorner.x - m_minCorner.x, 
                                              m_maxCorner.y - m_minCorner.y);
+    
+    m_distBetweenSamples = 1.5 * sqrt((interval.x / m_gridSize.width) * (interval.x / m_gridSize.width) +
+                                      (interval.y / m_gridSize.height) * (interval.y / m_gridSize.height));
     
     m_problem.l = X->size() + Y->size();
     m_problem.y = new double[m_problem.l];
@@ -378,29 +412,81 @@ inline void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &mod
     
     std::cout << "Elapsed time for prediction = " << elapsed << endl;
 #endif
-    
+   
     vector<vector<cv::Point> > contours;
     cv::findContours(predictMap, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
-    
+            
     for (vector<vector<cv::Point> >::iterator it = contours.begin(); it != contours.end(); it++) {
         for (vector<cv::Point>::iterator it2 = it->begin(); it2 != it->end(); it2++) {
-            PointType graphPoint;
-            graphPoint.x = (it2->x * interval.x / m_gridSize.width) + m_minCorner.x;
-            graphPoint.y = (it2->y * interval.y / m_gridSize.height) + m_minCorner.y;
+            PointType point;
+            point.x = (it2->x * interval.x / m_gridSize.width) + m_minCorner.x;
+            point.y = (it2->y * interval.y / m_gridSize.height) + m_minCorner.y;
             
-            if ((graphPoint.x >= m_minCorner.x / 0.9) && (graphPoint.x <= m_maxCorner.x / 1.1) &&
-                (graphPoint.y >= m_minCorner.y / 0.9) && (graphPoint.y <= m_maxCorner.y / 1.1)) {
+            if ((point.x >= m_minCorner.x / 0.9) && (point.x <= m_maxCorner.x / 1.1) &&
+                (point.y >= m_minCorner.y / 0.9) && (point.y <= m_maxCorner.y / 1.1)) {
             
-                m_existingNodes->push_back(graphPoint);
+                m_existingNodes->push_back(point);
             }
         }
     }
 }
 
+// TODO: aprovechar esta parte para hacer limpieza, si es necesario ¿o meqjor al añadirlas al grafo inicial?
 void SVMPathPlanning::generateRNG() {
-    // TODO: aprovechar esta parte para hacer limpieza, si es necesario ¿o mejor al añadirlas al grafo inicial?
-}
+    
+    // As we are working in 2D, we do not need normal estimation
+    pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
+    normals->resize(m_existingNodes->size());
 
+    // Concatenate the XYZ and normal fields
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals (new pcl::PointCloud<pcl::PointNormal>);
+    pcl::concatenateFields (*m_existingNodes, *normals, *cloud_with_normals);
+    
+    // Create search tree
+    pcl::search::KdTree<pcl::PointNormal>::Ptr treeNormal (new pcl::search::KdTree<pcl::PointNormal>);
+    treeNormal->setInputCloud (cloud_with_normals);
+    
+    // Initialize objects
+    pcl::GreedyProjectionTriangulation<pcl::PointNormal> triangulator;
+    pcl::PolygonMesh triangles;
+    
+    // Set the maximum distance between connected points (maximum edge length)
+    triangulator.setSearchRadius (2.0);
+    
+    // Set typical values for the parameters
+    triangulator.setMu (2.0);
+    triangulator.setMaximumNearestNeighbors (50);
+    triangulator.setMaximumSurfaceAngle(M_PI); // 360 degrees
+    triangulator.setMinimumAngle(0); // 360 degrees
+    triangulator.setMaximumAngle(M_PI); // 360 degrees
+    triangulator.setNormalConsistency(false);
+    triangulator.setConsistentVertexOrdering (true);
+    
+    // Get result
+    triangulator.setInputCloud (cloud_with_normals);
+    triangulator.setSearchMethod (treeNormal);
+    triangulator.reconstruct (triangles);
+    
+    for (vector<pcl::Vertices>::iterator it = triangles.polygons.begin(); it != triangles.polygons.end(); it++) {
+        for (uint32_t i = 0; i < it->vertices.size(); i++) {
+            m_matches.push_back(make_pair<uint32_t, uint32_t>(it->vertices[i], it->vertices[(i + 1) % it->vertices.size()]));
+        }
+    }
+    
+    // Graph is completed with lines that not form a polygon
+    vector<int> pointIdxNKNSearch;
+    vector<float> pointNKNSquaredDistance;
+    pcl::KdTreeFLANN<PointType>::Ptr treeNNG (new pcl::KdTreeFLANN<PointType>);
+    treeNNG->setInputCloud (m_existingNodes);
+    treeNNG->setSortedResults(true);
+    
+    for (uint32_t i = 0; i < m_existingNodes->size(); i++) {
+        treeNNG->radiusSearch(m_existingNodes->at(i), m_distBetweenSamples, pointIdxNKNSearch, pointNKNSquaredDistance);
+        for (uint32_t j = 0; j < pointIdxNKNSearch.size(); j++) {
+            m_matches.push_back(make_pair<uint32_t, uint32_t>(i, pointIdxNKNSearch[j]));
+        }
+    }
+}
 
 void SVMPathPlanning::obtainGraphFromMap(const PointCloudTypeExt::Ptr & inputCloud)
 {
@@ -425,7 +511,7 @@ void SVMPathPlanning::obtainGraphFromMap(const PointCloudTypeExt::Ptr & inputClo
         }
                                          
         getBorderFromPointClouds (pointCloud1, pointCloud2);
-        
+//         break;
     }
     generateRNG();
     
