@@ -52,7 +52,7 @@ include_directories(testSVMPathPlanning
     ${PCL_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
-#     emon.a
+    emon.a
     ${CUDA_INCLUDE_DIRS}
 )
 
@@ -65,7 +65,7 @@ target_link_libraries(testSVMPathPlanning
   ${CUDA_LIBRARIES}
   ${BOOST_LIBRARIES}
 #   ${CUDA_CURAND_LIBRARIES}
-#   emon.a
+  emon.a
 )
 CUDA_ADD_CUBLAS_TO_TARGET(testSVMPathPlanning)
 

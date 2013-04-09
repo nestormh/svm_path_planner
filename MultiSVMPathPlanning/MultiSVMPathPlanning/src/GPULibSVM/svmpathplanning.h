@@ -35,11 +35,6 @@
 #include <string.h>
 #include <fstream>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-
 #include <pcl/point_cloud.h>
 #include <pcl/common/common.h>
 #include <pcl/visualization/pcl_visualizer.h>
@@ -48,6 +43,8 @@
 #include <opencv2/opencv.hpp>
 
 #include <vector_types.h>
+
+#include <lemon/list_graph.h>
 
 #define NDIMS 2
 
@@ -70,9 +67,13 @@ typedef pcl::PointXYZ PointType;
 typedef pcl::PointCloud<PointType> PointCloudType;
 typedef pcl::PointXYZRGB PointTypeExt;
 typedef pcl::PointCloud<PointTypeExt> PointCloudTypeExt;
-typedef boost::property<boost::edge_weight_t, double> EdgeWeightProperty;
-typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, PointType, EdgeWeightProperty> Graph;
-    
+
+typedef lemon::ListGraph Graph;
+typedef lemon::ListGraph::Node Node;
+typedef lemon::ListGraph::Edge Edge;
+typedef lemon::ListGraph::EdgeMap<double> EdgeMap;
+typedef lemon::ListGraph::NodeMap<PointType> NodeMap;
+
 class SVMPathPlanning {
     
 public:
@@ -81,7 +82,15 @@ public:
     virtual ~SVMPathPlanning();
     
     void testSingleProblem();
-    void obtainGraphFromMap(const PointCloudTypeExt::Ptr & inputCloud);
+    void obtainGraphFromMap(const PointCloudType::Ptr & inputCloud);
+    
+    void findShortestPath(const PointType & start, const PointType & goal,
+                          const PointCloudType::Ptr & footprint, 
+                          const PointCloudType::Ptr & rtObstacles);
+    
+    void visualizeClasses();
+    
+    void testDijkstra();
     
 private:
     void loadDataFromFile ( const std::string & fileName,
@@ -90,13 +99,11 @@ private:
     
     void addLineToPointCloud(const PointType& p1, const PointType& p2, 
                              const uint8_t & r, const uint8_t & g, const uint8_t  & b,
-                             PointCloudTypeExt::Ptr &linesPointCloud);
-    void visualizeClasses(const std::vector< PointCloudType::Ptr > & classes);
+                             PointCloudTypeExt::Ptr &linesPointCloud, double zOffset);
     void getBorderFromPointClouds (PointCloudType::Ptr & X, PointCloudType::Ptr & Y );
     void getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval);
     
-    void clusterize(const PointCloudTypeExt::Ptr & pointCloud, 
-                    std::vector< PointCloudType::Ptr > & classes);
+    void clusterize(const PointCloudType::Ptr & pointCloud);
     
     void generateRNG();
   
@@ -108,14 +115,25 @@ private:
     double m_minDistBetweenObstacles;
     double m_distBetweenSamples;
     
+    // TODO: Revisar que se reinicializan las estructuras al cambiar de mapa
+    
     PointCloudType::Ptr m_existingNodes;
     
     CornerLimitsType m_minCorner;
     CornerLimitsType m_maxCorner;
     
-    Graph m_graph;
+    vector< PointCloudType::Ptr > m_classes;
     
-    vector< pair<uint32_t, uint32_t> > m_matches;
+    Graph m_graph;
+    boost::shared_ptr<EdgeMap> m_distMap;
+    boost::shared_ptr<NodeMap> m_nodeMap;
+    vector<Node> m_nodeList;
+    
+    PointCloudType::Ptr m_path;
+    
+    // Variables for visualization
+    PointType m_start, m_goal;
+    PointCloudType::Ptr m_footprint, m_rtObstacles;
 };
     
 }
