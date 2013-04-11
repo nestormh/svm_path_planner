@@ -1,4 +1,6 @@
 set(CCFILES
+  gpudt/predicates.cpp
+  gpudt/gpudt.cpp
   GPULibSVM/svm-train.c
   GPULibSVM/svm.cpp
   GPULibSVM/svmpathplanning.cpp
@@ -6,15 +8,30 @@ set(CCFILES
 )
 
 set (HFILES
+  gpudt/gpudt.h
   GPULibSVM/svm.h
 )
 
 set (CUHFILES
-  
+  gpudt/Cuda/common.h
+  gpudt/Cuda/cudaDecl.h
+  gpudt/Cuda/cudaCCW.h
+  gpudt/Cuda/kernelVoronoi.h
+  gpudt/Cuda/pba2DKernel.h
+  gpudt/predicates.h  
 )
 
 set(CUFILES
-    GPULibSVM/predictSVM.cu
+  gpudt/Cuda/cudaShifting.cu
+  gpudt/Cuda/pba2DHost.cu
+  gpudt/Cuda/cudaVoronoi.cu
+  gpudt/Cuda/cudaMain.cu
+  gpudt/Cuda/cudaFlipping.cu
+  gpudt/Cuda/cudaReconstruction.cu
+  gpudt/Cuda/cudaMissing.cu
+  gpudt/Cuda/cudaBoundary.cu
+  gpudt/Cuda/cudaConstraint.cu
+  GPULibSVM/predictSVM.cu
 )
 
 set(HFILES_PUBLIC
@@ -44,8 +61,6 @@ cuda_add_executable(testSVMPathPlanning
 #   ${GENCODE_SM10} ${GENCODE_SM13} ${GENCODE_SM20} ${VERBOSE_PTXAS} ${CUDAGDB_OPTS}
 )
   
-
-
 include_directories(testSVMPathPlanning
     GPULibSVM
 #     ${EIGEN3_INCLUDE_DIR}

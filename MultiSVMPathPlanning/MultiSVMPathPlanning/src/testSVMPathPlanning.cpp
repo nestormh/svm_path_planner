@@ -24,17 +24,13 @@
 #include<opencv2/opencv.hpp>
 
 #include <boost/graph/graph_traits.hpp>
-  #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/adjacency_list.hpp>
 
 #include "svmpathplanning.h"
 
-// #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1.pgm"
-#define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/mapaSeparado.pgm"
+#define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1.pgm"
+// #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/mapaSeparado.pgm"
 #define REAL_TIME "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/realTime/realTime1.pgm"
-
-// Multiclass SVM in CUDA
-// http://code.google.com/p/multisvm/source/checkout
-// http://patternsonascreen.net/cuSVM.html
 
 typedef svmpp::PointType SVMPointType;
 typedef svmpp::PointCloudType SVMPointCloud;

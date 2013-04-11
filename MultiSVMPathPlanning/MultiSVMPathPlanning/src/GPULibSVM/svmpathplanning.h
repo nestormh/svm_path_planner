@@ -98,11 +98,11 @@ private:
     void getBorderFromPointClouds (PointCloudType::Ptr & X, PointCloudType::Ptr & Y,
                                    const CornerLimitsType & minCorner, const CornerLimitsType & maxCorner, 
                                    const CornerLimitsType & interval, const cv::Size & gridSize, 
-                                   PointCloudType::Ptr & pathNodes, vector<Node> & nodeList);
+                                   const uint32_t & label, PointCloudType::Ptr & pathNodes, vector<Node> & nodeList);
     void getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval,
                                       const CornerLimitsType & minCorner, const CornerLimitsType & maxCorner,
-                                      const cv::Size & gridSize, PointCloudType::Ptr & pathNodes,
-                                      vector<Node> & nodeList);
+                                      const cv::Size & gridSize, const uint32_t & label,
+                                      PointCloudType::Ptr & pathNodes, vector<Node> & nodeList);
     
     void clusterize(const PointCloudType::Ptr & pointCloud, vector< PointCloudType::Ptr > & classes,
                     CornerLimitsType & minCorner, CornerLimitsType & maxCorner);
@@ -111,14 +111,11 @@ private:
     
     bool getFootPrint(const PointType & position, const PointCloudType::Ptr & rtObstacles, PointCloudType::Ptr & footprint);
     
-    void getCurrentGraph(PointCloudType::Ptr rtObstacles, vector<Node> nodeList);
     void filterExistingObstacles(PointCloudType::Ptr & rtObstacles);
     
     void visualizeClasses(const vector< PointCloudType::Ptr > & classes, const PointCloudType::Ptr & pathNodes,
                           const PointCloudType::Ptr & rtObstacles, const PointCloudType::Ptr & path);
-    
-    void linkUnconnectedGraphs(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList);
-    
+        
     bool isSegmentValid(const PointType & v, const PointType & w);
     double lineToPointDistanceSqr(const PointType & v, const PointType & w, const PointType & p);
   

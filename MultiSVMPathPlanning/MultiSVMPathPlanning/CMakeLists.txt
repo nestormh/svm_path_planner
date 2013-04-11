@@ -5,12 +5,14 @@ project(multisvmpathplanning)
 set(OpenCV_DIR "/usr/local/share/OpenCV")
 # set(PCL_ROOT "/usr/local")
 
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 # find_package(OMPL    REQUIRED )
 find_package(Boost REQUIRED)
 find_package(CUDA 5.0 REQUIRED)
 find_package(OpenCV  REQUIRED )
 find_package( Eigen3    REQUIRED )
 find_package(PCL REQUIRED)
+
 
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 # add_subdirectory(tutorials)
