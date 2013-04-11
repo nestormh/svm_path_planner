@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2013, NÃ©stor Morales HernÃ¡ndez <nestor@isaatc.ull.es>
+    Copyright (c) 2013, Néstor Morales Hernández <nestor@isaatc.ull.es>
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,11 @@ void launchSVMPrediction(const svm_model * &model,
                          unsigned char * &h_data);
 
 extern "C"
+void launchCheckEdges(const float2 * &pointsInMap, const unsigned int &nPointsInMap,
+                      const float2 * &edgeU, const float2 * &edgeV, const unsigned int &nEdges,
+                      const float &minDist, bool * &validEdges);
+
+extern "C"
 void GPUPredictWrapper(int m, int n, int k, float kernelwidth, const float *Test, 
                        const float *Svs, float * alphas,float *prediction, float beta,
                        float isregression, float * elapsed);
@@ -107,7 +112,7 @@ private:
     void clusterize(const PointCloudType::Ptr & pointCloud, vector< PointCloudType::Ptr > & classes,
                     CornerLimitsType & minCorner, CornerLimitsType & maxCorner);
     
-    void generateRNG(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList);
+    void generateRNG(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList, const PointCloudType::Ptr & currentMap);
     
     bool getFootPrint(const PointType & position, const PointCloudType::Ptr & rtObstacles, PointCloudType::Ptr & footprint);
     
@@ -118,6 +123,9 @@ private:
         
     bool isSegmentValid(const PointType & v, const PointType & w);
     double lineToPointDistanceSqr(const PointType & v, const PointType & w, const PointType & p);
+    
+    void checkSegments(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList, 
+                       const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges);
   
     struct svm_parameter m_param;
     

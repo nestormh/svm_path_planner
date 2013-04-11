@@ -32,6 +32,7 @@ set(CUFILES
   gpudt/Cuda/cudaBoundary.cu
   gpudt/Cuda/cudaConstraint.cu
   GPULibSVM/predictSVM.cu
+  GPULibSVM/checkEdges.cu
 )
 
 set(HFILES_PUBLIC

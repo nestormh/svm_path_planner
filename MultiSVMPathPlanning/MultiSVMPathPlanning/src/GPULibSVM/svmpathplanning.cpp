@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2013, NÃ©stor Morales HernÃ¡ndez <nestor@isaatc.ull.es>
+    Copyright (c) 2013, Néstor Morales Hernández <nestor@isaatc.ull.es>
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,6 @@
     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 
 #include "svmpathplanning.h"
 
@@ -529,7 +528,7 @@ void SVMPathPlanning::obtainGraphFromMap(const PointCloudType::Ptr & inputCloud,
         
 //         break;
     }
-    generateRNG(m_pathNodes, m_nodeList);
+    generateRNG(m_pathNodes, m_nodeList, m_originalMap);
     
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = (finish.tv_sec - start.tv_sec);
@@ -626,7 +625,9 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
         //         break;
     }
     
-    generateRNG(pathNodesRT, nodeListRT);
+    PointCloudType::Ptr currentMap = m_originalMap;
+    *currentMap += *rtObstacles;
+    generateRNG(pathNodesRT, nodeListRT, currentMap);
     
     copy(m_classes.begin(), m_classes.end(), back_inserter(classes));
     
@@ -747,38 +748,13 @@ void SVMPathPlanning::filterExistingObstacles(PointCloudType::Ptr & rtObstacles)
     pcl::copyPointCloud(*rtObstacles, inliers, *rtObstacles);
 }
 
-double SVMPathPlanning::lineToPointDistanceSqr(const PointType& v, const PointType& w, const PointType& p)
-{
-    // Return minimum distance between line segment vw and point p
-    const double lineLenghtSqr = pcl::squaredEuclideanDistance(v, w);
-    if (lineLenghtSqr == 0.0) 
-        return pcl::squaredEuclideanDistance(p, v);
-    
-    double t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / lineLenghtSqr;
-    if (t < 0) 
-        return pcl::squaredEuclideanDistance(p, v);
-    if (t > 1) 
-        return pcl::squaredEuclideanDistance(p, w);
-
-    PointType tmp(v.x + t * (w.x - v.x), v.y + t * (w.y - v.y), 0.0);
-    
-    return pcl::squaredEuclideanDistance(p, tmp);
-}
-
-inline bool SVMPathPlanning::isSegmentValid(const PointType & v, const PointType & w)
-{
-//     for (PointCloudType::iterator it = m_originalMap->begin(); it != m_originalMap->end(); it++) {
-//         if (lineToPointDistanceSqr(v, w, *it) < (m_minDistCarObstacle + m_carWidth)) {
-//             return false;
-//         }
-//     }
-    return true;
-}
-
-inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList) {
+inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList, const PointCloudType::Ptr & currentMap) {
     
     std::vector<int> pointIdxNKNSearch;
     std::vector<float> pointNKNSquaredDistance;
+    
+    vector< pair<uint32_t, uint32_t> > edges;
+    edges.reserve(pathNodes->size() * pathNodes->size());
     
     // Creating the KdTree object for the search method of the extraction
     pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType>);
@@ -842,17 +818,7 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
             const int & idx1 = triangle.vtx[j];
             const int & idx2 = triangle.vtx[(j + 1) % 3];
             if (nodeLabels[idx1] != nodeLabels[idx2]) {
-                const Node & node1 = nodeList[idx1];
-                const Node & node2 = nodeList[idx2];
-                
-                const PointType & point1 = (*m_nodeMap)[node1];
-                const PointType & point2 = (*m_nodeMap)[node2];
-                
-                if (isSegmentValid(point1, point2)) {
-                    Edge edge = m_graph.addEdge(node1, node2);
-                                        
-                    (*m_distMap)[edge] = pcl::euclideanDistance(point1, point2);
-                }
+                edges.push_back(make_pair<uint32_t, uint32_t>(idx1, idx2));
             }
         }
     }
@@ -870,17 +836,58 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
     treeNNG->setSortedResults(true);
     
     for (uint32_t i = 0; i < pathNodes->size(); i++) {
-            treeNNG->radiusSearch(pathNodes->at(i), m_distBetweenSamples, pointIdxNKNSearch, pointNKNSquaredDistance);
-        const Node & node1 = nodeList[i];
+        treeNNG->radiusSearch(pathNodes->at(i), m_distBetweenSamples, pointIdxNKNSearch, pointNKNSquaredDistance);
         
         for (uint32_t j = 0; j < pointIdxNKNSearch.size(); j++) {
-            const Node & node2 = nodeList[pointIdxNKNSearch[j]];
-            
-            if (isSegmentValid(pathNodes->at(i), pathNodes->at(pointIdxNKNSearch[j]))) {
-                Edge edge = m_graph.addEdge(node1, node2);
-                
-                (*m_distMap)[edge] = pointNKNSquaredDistance[j];
-            }
+            edges.push_back(make_pair<uint32_t, uint32_t>(i, pointIdxNKNSearch[j]));
         }
     }
+    
+    checkSegments(pathNodes, nodeList, currentMap, edges);
+}
+
+void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList, 
+                                    const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges)
+{
+    float2 * pointsInMap = new float2[currentMap->size()];
+    float2 * edgeU = new float2[edges.size()];
+    float2 * edgeV = new float2[edges.size()];
+    bool * validEdges =  new bool[edges.size()];
+    
+    uint32_t i = 0;
+    for (PointCloudType::iterator it = currentMap->begin(); it != currentMap->end(); it++, i++) {
+        pointsInMap[i].x = it->x;
+        pointsInMap[i].y = it->y;
+    }
+    
+    i = 0;
+    for (vector< pair<uint32_t, uint32_t> >::const_iterator it = edges.begin(); it != edges.end(); it++, i++) {
+        edgeU[i].x = pathNodes->at(it->first).x;
+        edgeU[i].y = pathNodes->at(it->first).y;
+
+        edgeV[i].x = pathNodes->at(it->second).x;
+        edgeV[i].y = pathNodes->at(it->second).y;
+    }
+    
+    launchCheckEdges((const float2 *&)pointsInMap, currentMap->size(), (const float2 *&)edgeU, 
+                     (const float2 *&)edgeV, edges.size(), (const float &)(m_minDistCarObstacle + m_carWidth), (bool *&)validEdges);
+    
+    for (uint32_t i = 0; i < edges.size(); i++) {
+        if (validEdges[i] == true) {
+            const Node & node1 = nodeList[edges[i].first];
+            const Node & node2 = nodeList[edges[i].second];
+            
+            const PointType & point1 = (*m_nodeMap)[node1];
+            const PointType & point2 = (*m_nodeMap)[node2];
+            
+            Edge edge = m_graph.addEdge(node1, node2);
+                                        
+            (*m_distMap)[edge] = pcl::euclideanDistance(point1, point2);
+        }
+    }
+    
+    delete pointsInMap;
+    delete edgeU;
+    delete edgeV;
+    delete validEdges;
 }
