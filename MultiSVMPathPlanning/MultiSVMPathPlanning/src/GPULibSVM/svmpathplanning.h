@@ -82,15 +82,10 @@ public:
     virtual ~SVMPathPlanning();
     
     void testSingleProblem();
-    void obtainGraphFromMap(const PointCloudType::Ptr & inputCloud);
+    void obtainGraphFromMap(const PointCloudType::Ptr & inputCloud, const bool & visualize);
     
-    void findShortestPath(const PointType & start, const PointType & goal,
-                          const PointCloudType::Ptr & footprint, 
-                          const PointCloudType::Ptr & rtObstacles);
-    
-    void visualizeClasses();
-    
-    void testDijkstra();
+    bool findShortestPath(const PointType & start, const PointType & goal,
+                          PointCloudType::Ptr rtObstacles, bool visualize);
     
 private:
     void loadDataFromFile ( const std::string & fileName,
@@ -100,27 +95,48 @@ private:
     void addLineToPointCloud(const PointType& p1, const PointType& p2, 
                              const uint8_t & r, const uint8_t & g, const uint8_t  & b,
                              PointCloudTypeExt::Ptr &linesPointCloud, double zOffset);
-    void getBorderFromPointClouds (PointCloudType::Ptr & X, PointCloudType::Ptr & Y );
-    void getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval);
+    void getBorderFromPointClouds (PointCloudType::Ptr & X, PointCloudType::Ptr & Y,
+                                   const CornerLimitsType & minCorner, const CornerLimitsType & maxCorner, 
+                                   const CornerLimitsType & interval, const cv::Size & gridSize, 
+                                   PointCloudType::Ptr & pathNodes, vector<Node> & nodeList);
+    void getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval,
+                                      const CornerLimitsType & minCorner, const CornerLimitsType & maxCorner,
+                                      const cv::Size & gridSize, PointCloudType::Ptr & pathNodes,
+                                      vector<Node> & nodeList);
     
-    void clusterize(const PointCloudType::Ptr & pointCloud);
+    void clusterize(const PointCloudType::Ptr & pointCloud, vector< PointCloudType::Ptr > & classes,
+                    CornerLimitsType & minCorner, CornerLimitsType & maxCorner);
     
-    void generateRNG();
+    void generateRNG(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList);
+    
+    bool getFootPrint(const PointType & position, const PointCloudType::Ptr & rtObstacles, PointCloudType::Ptr & footprint);
+    
+    void getCurrentGraph(PointCloudType::Ptr rtObstacles, vector<Node> nodeList);
+    void filterExistingObstacles(PointCloudType::Ptr & rtObstacles);
+    
+    void visualizeClasses(const vector< PointCloudType::Ptr > & classes, const PointCloudType::Ptr & pathNodes,
+                          const PointCloudType::Ptr & rtObstacles, const PointCloudType::Ptr & path);
+    
+    void linkUnconnectedGraphs(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList);
+    
+    bool isSegmentValid(const PointType & v, const PointType & w);
+    double lineToPointDistanceSqr(const PointType & v, const PointType & w, const PointType & p);
   
     struct svm_parameter m_param;
-    struct svm_problem m_problem;
     
-    double m_minPointDistance;
-    cv::Size m_gridSize;
-    double m_minDistBetweenObstacles;
-    double m_distBetweenSamples;
+    double m_minPointDistance;                  // Minimal distance between samples in downsampling
+    cv::Size m_mapGridSize;
+    cv::Size m_mapGridSizeRT;
+    double m_minDistBetweenObstacles;          // Minimal distance between obstacles in clustering
+    double m_distBetweenSamples;               // Maximal distance to be considered as an edge in the graph
+    
+    double m_carWidth;
+    double m_minDistCarObstacle;               // Minimal distance between the car and an obstacle in path finding
     
     // TODO: Revisar que se reinicializan las estructuras al cambiar de mapa
     
-    PointCloudType::Ptr m_existingNodes;
-    
-    CornerLimitsType m_minCorner;
-    CornerLimitsType m_maxCorner;
+    PointCloudType::Ptr m_originalMap;
+    PointCloudType::Ptr m_pathNodes;
     
     vector< PointCloudType::Ptr > m_classes;
     
@@ -131,9 +147,9 @@ private:
     
     PointCloudType::Ptr m_path;
     
-    // Variables for visualization
-    PointType m_start, m_goal;
-    PointCloudType::Ptr m_footprint, m_rtObstacles;
+    CornerLimitsType m_minCorner, m_maxCorner;
+    
+    bool m_mapGenerated;
 };
     
 }

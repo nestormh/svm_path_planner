@@ -28,7 +28,8 @@
 
 #include "svmpathplanning.h"
 
-#define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1.pgm"
+// #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1.pgm"
+#define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/mapaSeparado.pgm"
 #define REAL_TIME "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/realTime/realTime1.pgm"
 
 // Multiclass SVM in CUDA
@@ -57,20 +58,6 @@ void map2PointCloud(const cv::Mat & map, double resolution,
     }
 }
 
-void getFootPrint(const svmpp::PointType & position, const double & width,
-                  svmpp::PointCloudType::Ptr & footprint) {
-    
-    footprint = svmpp::PointCloudType::Ptr(new svmpp::PointCloudType);
-    footprint->reserve(360);
-    
-    for (double alpha = 0.0; alpha < 2 * M_PI; alpha += M_PI / 180) {
-        svmpp::PointType point(width * cos(alpha) + position.x, 
-                               width * sin(alpha) + position.y,
-                               0.0);
-        footprint->push_back(point);
-    }
-}
-
 int main(int argc, char **argv) {
     double resolution = 0.1;
     double carWidth = 1.0;
@@ -80,32 +67,28 @@ int main(int argc, char **argv) {
     
     SVMPointCloud::Ptr pointCloud;
     SVMPointCloud::Ptr rtObstacles;
-    svmpp::PointCloudType::Ptr footprint;
     
     map2PointCloud(map, resolution, pointCloud);
     map2PointCloud(rtObstaclesMap, resolution, rtObstacles);
     
     svmpp::PointType start, goal;
-    goal.x = 50.0;
-    goal.y = 50.0;
+    start.x = 399 * resolution;
+    start.y = 576 * resolution;
     
-    start.x = 886 * resolution;
-    start.y = 748 * resolution;
-    
-    getFootPrint(start, carWidth, footprint);
+    goal.x = 886 * resolution;
+    goal.y = 748 * resolution;
     
 //     cv::resize(map, map, cv::Size(800, 800));
 //     cv::imshow("Map", map);
 //     cv::waitKey(200);
     
     svmpp::SVMPathPlanning pathPlanner;
-    pathPlanner.obtainGraphFromMap(pointCloud);
+    pathPlanner.obtainGraphFromMap(pointCloud, true);
 //     start.x = 1; start.y = 2;
 //     goal.x = 4; goal.y = 2;
     
-    pathPlanner.findShortestPath(start, goal, footprint, rtObstacles);
+//     pathPlanner.findShortestPath(start, goal, rtObstacles, true);
 //     pathPlanner.testDijkstra();
-    pathPlanner.visualizeClasses();
     
     return 0;
 }
