@@ -106,11 +106,11 @@ int main(int argc, char **argv) {
 //     cv::waitKey(200);
     
     svmpp::SVMPathPlanning pathPlanner;
-    pathPlanner.obtainGraphFromMap(pointCloud, true);
+    pathPlanner.obtainGraphFromMap(pointCloud, false);
 //     start.x = 1; start.y = 2;
 //     goal.x = 4; goal.y = 2;
     
-//     pathPlanner.findShortestPath(start, goal, rtObstacles, true);
+    pathPlanner.findShortestPath(start, goal, rtObstacles, true);
 //     pathPlanner.testDijkstra();
     
     return 0;

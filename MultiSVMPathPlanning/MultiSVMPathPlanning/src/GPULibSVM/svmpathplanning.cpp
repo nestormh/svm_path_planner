@@ -83,7 +83,7 @@ SVMPathPlanning::SVMPathPlanning()
     m_param.weight = NULL;
 //     cross_validation = 0;
     
-    m_minPointDistance = 2.0;
+    m_minPointDistance = 0.5; //2.0;
     m_mapGridSize = cv::Size(300, 300);
     m_mapGridSizeRT = cv::Size(300, 300);
     m_minDistBetweenObstacles = 2.5;
@@ -95,7 +95,7 @@ SVMPathPlanning::SVMPathPlanning()
     m_nodeMap = boost::shared_ptr<NodeMap>(new NodeMap(m_graph));
     
     m_carWidth = 1.0;
-    m_minDistCarObstacle = 0.5;
+    m_minDistCarObstacle = 0.1;
     
     m_mapGenerated = false;
 }
@@ -169,7 +169,7 @@ void SVMPathPlanning::loadDataFromFile (const std::string & fileName,
 
 void SVMPathPlanning::clusterize(const PointCloudType::Ptr & pointCloud, vector< PointCloudType::Ptr > & classes,
                                  CornerLimitsType & minCorner, CornerLimitsType & maxCorner) {
-    
+        
     std::vector<int> pointIdxNKNSearch(1);
     std::vector<float> pointNKNSquaredDistance(1);
     
@@ -324,15 +324,17 @@ void SVMPathPlanning::visualizeClasses(const vector< PointCloudType::Ptr > & cla
 //         footprintGoalRGB->push_back(point);
 //     }
     
-//     PointCloudTypeExt::Ptr path(new PointCloudTypeExt);
-//     PointType lastPoint;
-//     for (uint32_t i = 0; i < path->size(); i++) {
-//         const PointType & point = path->at(i);
-//         
-//         if (i != 0)
-//             addLineToPointCloud(lastPoint, point, 0, 255, 255, path, 1.0);
-//         lastPoint = point;
-//     }
+    PointCloudTypeExt::Ptr pathPointCloud(new PointCloudTypeExt);
+    PointType lastPoint;
+    for (uint32_t i = 0; i < path->size(); i++) {
+        const PointType & point = path->at(i);
+        
+        if (i != 0)
+            addLineToPointCloud(lastPoint, point, 0, 255, 255, pathPointCloud, 1.0);
+        lastPoint = point;
+        
+//         cout << point << endl;
+    }
     
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (0, 0, 0);
@@ -351,8 +353,8 @@ void SVMPathPlanning::visualizeClasses(const vector< PointCloudType::Ptr > & cla
 //     pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbFootprintGoal(footprintGoal);
 //     viewer->addPointCloud<PointTypeExt> (footprintGoal, rgbFootprintGoal, "footprintGoal");
     
-//     pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbPath(path);
-//     viewer->addPointCloud<PointTypeExt> (path, rgbPath, "path");
+    pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbPath(pathPointCloud);
+    viewer->addPointCloud<PointTypeExt> (pathPointCloud, rgbPath, "pathPointCloud");
     
     PointCloudTypeExt::Ptr graphPointCloud(new PointCloudTypeExt);  
     for (Graph::ArcIt it(m_graph); it != lemon::INVALID; ++it) {
@@ -467,7 +469,7 @@ inline void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &mod
     
     std::cout << "Elapsed time for prediction = " << elapsed << endl;
 #endif
-    
+            
     vector<vector<cv::Point> > contours;
     cv::findContours(predictMap, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
             
@@ -547,7 +549,7 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
                                        PointCloudType::Ptr rtObstacles, bool visualize = false)
 {
     // We make a backup of the current graph
-    lemon::ListGraph::Snapshot graphSnapshot(m_graph);
+//     lemon::ListGraph::Snapshot graphSnapshot(m_graph);
     
     struct timespec startTime, finishTime;
     double elapsed;
@@ -564,15 +566,19 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
     CornerLimitsType dummyCorner1, dummyCorner2;
     clusterize(rtObstacles, classes, dummyCorner1, dummyCorner2);
     
+    PointCloudType::Ptr currentMap(new PointCloudType);
+    *currentMap += *m_originalMap;
+    *currentMap += *rtObstacles;    
+
     PointCloudType::Ptr footprintStart, footprintGoal;
-    bool startCheck = getFootPrint(start, rtObstacles, footprintStart);
-    bool goalCheck = getFootPrint(goal, rtObstacles, footprintGoal);
+    bool startCheck = getFootPrint(start, currentMap, footprintStart);
+    bool goalCheck = getFootPrint(goal, currentMap, footprintGoal);
     
     if (! startCheck) {
         cerr << "Failed to find a path: Current position is too near to an obstacle or colliding with it" << endl;
         
         // Original graph is restored
-        graphSnapshot.restore();
+//         graphSnapshot.restore();
         
         return false;
     }
@@ -580,7 +586,7 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
         cerr << "Failed to find a path: Goal position is not clear" << endl;
         
         // Original graph is restored
-        graphSnapshot.restore();
+//         graphSnapshot.restore();
         
         return false;
     }
@@ -593,7 +599,7 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
    
     vector<Node> nodeListRT;
     copy(m_nodeList.begin(), m_nodeList.end(), back_inserter(nodeListRT));
-    
+
     vector< PointCloudType::Ptr >::iterator it;
     uint32_t label = m_classes.size();
     for (it = classes.begin(); it != classes.end(); it++, label++) {
@@ -625,8 +631,6 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
         //         break;
     }
     
-    PointCloudType::Ptr currentMap = m_originalMap;
-    *currentMap += *rtObstacles;
     generateRNG(pathNodesRT, nodeListRT, currentMap);
     
     copy(m_classes.begin(), m_classes.end(), back_inserter(classes));
@@ -637,9 +641,9 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
     
     std::cout << "Total time for graph generation in real time = " << elapsed << endl;
     
-    visualizeClasses(classes, pathNodesRT, rtObstacles);
+//     visualizeClasses(classes, pathNodesRT, rtObstacles);
     
-    return true;
+//     return true;
     
     double distStart = DBL_MAX, distGoal = DBL_MAX;
     Node startNode, goalNode;
@@ -673,16 +677,16 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
     }
     
     if (visualize) {
-        visualizeClasses(classes, m_pathNodes, rtObstacles);
+        visualizeClasses(classes, m_pathNodes, rtObstacles, m_path);
     }
     
     // Original graph is restored
-    graphSnapshot.restore();
+//     graphSnapshot.restore();
     
     return true;
 }
 
-bool SVMPathPlanning::getFootPrint(const PointType & position, const PointCloudType::Ptr & rtObstacles, 
+bool SVMPathPlanning::getFootPrint(const PointType & position, const PointCloudType::Ptr & currentMap, 
                                    PointCloudType::Ptr & footprint) {
     
     vector<int> idxMap, idxRT;
@@ -690,33 +694,30 @@ bool SVMPathPlanning::getFootPrint(const PointType & position, const PointCloudT
     
     // Creating the KdTree object for the search method of the extraction
     pcl::search::KdTree<PointType>::Ptr treeMap (new pcl::search::KdTree<PointType>);
-    treeMap->setInputCloud (m_originalMap);
+    treeMap->setInputCloud (currentMap);
     
-    treeMap->nearestKSearch(position, 1, idxMap, distMap);
-    double radius = max((double)sqrt(distMap[0]) - m_minDistBetweenObstacles, m_carWidth);
+//     treeMap->nearestKSearch(position, 1, idxMap, distMap);
+//     double radius = max((double)sqrt(distMap[0]) - m_minDistBetweenObstacles, m_carWidth);
     
-    pcl::search::KdTree<PointType>::Ptr treeObstacles (new pcl::search::KdTree<PointType>);
-    treeObstacles->setInputCloud (rtObstacles);
+    treeMap->radiusSearch(position, (m_carWidth / 2 + m_minDistCarObstacle), idxMap, distMap);
     
-    treeMap->radiusSearch(position, m_carWidth, idxMap, distMap);
-    treeMap->radiusSearch(position, m_carWidth, idxRT, distRT);
-    
-    if ((idxMap.size() != 0) || (idxRT.size() != 0)) {
+    // If idxMap != 0, we are colliding with an obstacle
+    if (idxMap.size() != 0) {
         return false;
     }
     
     footprint = PointCloudType::Ptr(new PointCloudType);
-    footprint->reserve(360);
+    footprint->reserve(36);
     
     for (double alpha = 0.0; alpha < 2 * M_PI; alpha += M_PI / 180 * 10) {
-        const PointType point(radius * cos(alpha) + position.x, 
-                              radius * sin(alpha) + position.y,
-                               0.0);
+        const PointType point(m_carWidth * cos(alpha) + position.x, 
+                              m_carWidth * sin(alpha) + position.y,
+                              0.0);
         
-        treeMap->radiusSearch(point, m_minDistCarObstacle, idxMap, distMap);
-        treeMap->radiusSearch(point, m_minDistCarObstacle, idxRT, distRT);
+        treeMap->radiusSearch(point, (m_carWidth / 2 + m_minDistCarObstacle), idxMap, distMap);
         
-        if ((idxMap.size() != 0) || (idxRT.size() != 0)) {
+        // If idxMap != 0, we are colliding with an obstacle
+        if (idxMap.size() != 0) {
             return false;
         }
         
@@ -748,7 +749,7 @@ void SVMPathPlanning::filterExistingObstacles(PointCloudType::Ptr & rtObstacles)
     pcl::copyPointCloud(*rtObstacles, inliers, *rtObstacles);
 }
 
-inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList, const PointCloudType::Ptr & currentMap) {
+inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, const PointCloudType::Ptr & currentMap) {
     
     std::vector<int> pointIdxNKNSearch;
     std::vector<float> pointNKNSquaredDistance;
@@ -837,6 +838,7 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
     
     for (uint32_t i = 0; i < pathNodes->size(); i++) {
         treeNNG->radiusSearch(pathNodes->at(i), m_distBetweenSamples, pointIdxNKNSearch, pointNKNSquaredDistance);
+//         treeNNG->radiusSearch(pathNodes->at(i), 1.1 * (m_minDistCarObstacle + m_carWidth), pointIdxNKNSearch, pointNKNSquaredDistance);
         
         for (uint32_t j = 0; j < pointIdxNKNSearch.size(); j++) {
             edges.push_back(make_pair<uint32_t, uint32_t>(i, pointIdxNKNSearch[j]));
@@ -846,7 +848,7 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
     checkSegments(pathNodes, nodeList, currentMap, edges);
 }
 
-void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList, 
+void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
                                     const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges)
 {
     float2 * pointsInMap = new float2[currentMap->size()];
@@ -870,8 +872,22 @@ void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, const
     }
     
     launchCheckEdges((const float2 *&)pointsInMap, currentMap->size(), (const float2 *&)edgeU, 
-                     (const float2 *&)edgeV, edges.size(), (const float &)(m_minDistCarObstacle + m_carWidth), (bool *&)validEdges);
+                     (const float2 *&)edgeV, edges.size(), (const float &)(m_carWidth / 2 + m_minDistCarObstacle), (bool *&)validEdges);
     
+//     m_graph.clear();
+//     boost::shared_ptr<EdgeMap> tmpDistMap(new EdgeMap(m_graph));
+//     boost::shared_ptr<NodeMap> tmpNodeMap(new NodeMap(m_graph));
+//     for (uint32_t i = 0; i < nodeList.size(); i++) {
+//         const PointType & point = (*m_nodeMap)[nodeList[i]];
+//         Node node = m_graph.addNode();
+//         (*tmpNodeMap)[nodeList[i]] = point;
+//         nodeList[i] = node;
+//     }
+//     m_nodeMap = tmpNodeMap;
+    for (Graph::EdgeIt it(m_graph); it != lemon::INVALID; ++it) {
+        Edge currentEdge = it;
+        m_graph.erase(currentEdge);
+    }
     for (uint32_t i = 0; i < edges.size(); i++) {
         if (validEdges[i] == true) {
             const Node & node1 = nodeList[edges[i].first];
@@ -879,12 +895,13 @@ void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, const
             
             const PointType & point1 = (*m_nodeMap)[node1];
             const PointType & point2 = (*m_nodeMap)[node2];
-            
+    
             Edge edge = m_graph.addEdge(node1, node2);
                                         
             (*m_distMap)[edge] = pcl::euclideanDistance(point1, point2);
         }
     }
+//     m_distMap = tmpDistMap;
     
     delete pointsInMap;
     delete edgeU;

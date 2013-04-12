@@ -112,7 +112,7 @@ private:
     void clusterize(const PointCloudType::Ptr & pointCloud, vector< PointCloudType::Ptr > & classes,
                     CornerLimitsType & minCorner, CornerLimitsType & maxCorner);
     
-    void generateRNG(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList, const PointCloudType::Ptr & currentMap);
+    void generateRNG(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, const PointCloudType::Ptr & currentMap);
     
     bool getFootPrint(const PointType & position, const PointCloudType::Ptr & rtObstacles, PointCloudType::Ptr & footprint);
     
@@ -124,7 +124,7 @@ private:
     bool isSegmentValid(const PointType & v, const PointType & w);
     double lineToPointDistanceSqr(const PointType & v, const PointType & w, const PointType & p);
     
-    void checkSegments(const PointCloudType::Ptr & pathNodes, const vector<Node> & nodeList, 
+    void checkSegments(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
                        const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges);
   
     struct svm_parameter m_param;
