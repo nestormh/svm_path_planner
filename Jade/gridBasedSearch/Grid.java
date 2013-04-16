@@ -8,6 +8,7 @@ import boids.Obstaculo;
 import boids.Simulador;
 
 public class Grid {
+	double[][] matrizPesos = new double[30][30];
 	double resolution;
 	double longitudX;	
 	double longitudY;
@@ -26,7 +27,12 @@ public class Grid {
 	 * Vector que contiene los obstáculos del escenario. Cada miembro de este vector es un objeto de la clase obstaculo 
 	 * donde se almacena su forma, su velocidad, su posición, etc
 	 */
-	Vector<Obstaculo> obstaculos;	
+	Vector<Obstaculo> obstaculos;
+	/**
+	 * Vector que contiene los boids presentes en el escenario. Cada miembro es un objeto de la clase Boid, donde entre otras cosas se encuenta
+	 * la información de posición, velocidad, etc... de cada boid.
+	 */
+	Vector<Boid> boids;		
 	/**
 	 * Clase simulador que usaremos para mover los obstáculos, para hacer la predicción de laas posiciones de los obstáculos
 	 * pasado un cierto tiempo. Esta clase tiene todos los métodos necesarios
@@ -41,6 +47,7 @@ public class Grid {
 	public Grid(double resolution, double longitudX, double longitudY){	
 //		sim = new Simulador();
 		obstaculos = new Vector<Obstaculo>();
+		boids = new Vector<Boid>();
 		this.resolution = resolution;
 		this.longitudX = longitudX;
 		this.longitudY = longitudY;
@@ -54,6 +61,7 @@ public class Grid {
 				this.rejilla[i][j] = new GridSearchPoint(i, j, this.resolution);
 			}
 		}
+		this.matrizPesos = crearRejillaPesos(30);
 	}
 	
 	public void addObstacle(double posX, double posY, double dimensionX, double dimensionY){
@@ -61,14 +69,14 @@ public class Grid {
 		boolean gridOccupiedRight = true;
 		boolean gridOccupiedUp = true;
 		boolean gridOccupiedDown = true;		
-		int xIndexObs = (int)Math.floor(posX/getResolution());
-		int yIndexObs = (int)Math.floor(posY/getResolution());
-		int incrLeft = xIndexObs;
-		int incrRight = xIndexObs;
-		int incrUp = yIndexObs;
-		int incrDown = yIndexObs;
-		double posXObsGrid = xIndexObs*getResolution();
-		double posYObsGrid = yIndexObs*getResolution();
+		int xIndexBoid = (int)Math.floor(posX/getResolution());
+		int yIndexBoid = (int)Math.floor(posY/getResolution());
+		int incrLeft = xIndexBoid;
+		int incrRight = xIndexBoid;
+		int incrUp = yIndexBoid;
+		int incrDown = yIndexBoid;
+		double posXObsGrid = xIndexBoid*getResolution();
+		double posYObsGrid = yIndexBoid*getResolution();
 		while (gridOccupiedLeft && (incrLeft > 0)){//exploramos hacia la izquierda
 			if ((incrLeft*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
 				if (((incrLeft*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
@@ -144,6 +152,125 @@ public class Grid {
 //			System.out.println("creamos la rejilla ");
 			this.addObstacle(posXObs, posYObs, dimensionX, dimensionY);
 		}
+	}
+	
+	public double[][] crearRejillaPesos(int numCeldasLado){
+		int centro = (int) Math.ceil(numCeldasLado/2);
+		double[][] rejillaPesos = new double[numCeldasLado][numCeldasLado];
+		for (int i=0; i < numCeldasLado; i++){
+			for (int j=0; j < numCeldasLado; j++){
+				rejillaPesos[i][j] = Math.sqrt(Math.pow((i+1-centro), 2)+Math.pow((j+1-centro), 2));				
+			}
+		}
+		this.matrizPesos = rejillaPesos;
+		return rejillaPesos;
+	}
+	
+	/**
+	 * Marca el entorno del boid como libre y añade un peso a cada celda, dependiendo de la distancia hasta el boid
+	 * @param posX
+	 * @param posY
+	 * @param dimensionX
+	 * @param dimensionY
+	 */
+	public void addBoid(double posX, double posY, double dimensionX, double dimensionY){
+		boolean gridOccupiedLeft = true;
+		boolean gridOccupiedRight = true;
+		boolean gridOccupiedUp = true;
+		boolean gridOccupiedDown = true;		
+		int xIndexBoid = (int)Math.floor(posX/getResolution());
+		int yIndexBoid = (int)Math.floor(posY/getResolution());
+		int incrLeft = xIndexBoid;
+		int incrRight = xIndexBoid;
+		int incrUp = yIndexBoid;
+		int incrDown = yIndexBoid;		
+		while (gridOccupiedLeft && (incrLeft > 0)){//exploramos hacia la izquierda
+			if ((incrLeft*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
+				if (((incrLeft*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
+					incrLeft--;					
+				}else{
+					gridOccupiedLeft = false;
+				}
+			}else{
+				gridOccupiedLeft = false;
+			}			
+		}
+		while (gridOccupiedRight && (incrRight < getNumPtosX())){//exploramos hacia la derecha
+			if ((incrRight*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
+				if (((incrRight*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
+					incrRight++;
+				}else{
+					gridOccupiedRight = false;
+				}
+			}else{
+				gridOccupiedRight = false;
+			}			
+		}
+		while (gridOccupiedUp && (incrUp < getNumPtosY())){//exploramos hacia arriba
+			if ((incrUp*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
+				if (((incrUp*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
+					incrUp++;
+				}else{
+					gridOccupiedUp = false;
+				}
+			}else{
+				gridOccupiedUp = false;
+			}			
+		}
+		while (gridOccupiedDown && (incrDown > 0)){//exploramos hacia abajo
+			if ((incrDown*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
+				if (((incrDown*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
+					incrDown--;
+				}else{
+					gridOccupiedDown = false;
+				}
+			}else{
+				gridOccupiedDown = false;
+			}			
+		}
+		//Marcamos las casillas cercanas a los boids como libres y les asignamos un peso
+		for (int i=incrLeft;i<incrRight;i++){
+			if (i < 0 || i > this.numPtosX-1){//comprobamos que no sobrepasamos los límites de la rejilla
+//				System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
+				continue;
+			}
+			for (int j=incrDown;j<incrUp;j++){
+				if (j < 0 || j > this.numPtosY-1){//comprobamos que no sobrepasamos los límites de la rejilla
+//					System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
+					continue;
+				}			
+				//Se marca la celda como libre
+				this.getRejilla()[i][j].setOccupied(false);
+//				System.out.println(pesos.length);
+				// Se asigna un peso de marcado igual a la distancia con el boid más cercano, por eso se comprueba si la distancia con el
+				// boid actual es menor que el peso de marcado que la celda tenga asignado, de manera que sólo se sobreescribe si la distancia
+				// con el boid actual es menor. Antes de añadir los boids a la rejilla con este método, la rejilla tiene que haber sido reseteada
+				// con el método marcarTodoOcupado, que además de marcar todas las celdas como ocupadas asigna un valor infinito a el peso de marcado de 
+				//cada celda
+				//TODO Repasar la siguiente linea!!!!!!!!!!!!!!!!!
+				double peso_marcado = this.matrizPesos[i-xIndexBoid+15][j-yIndexBoid+15]*getResolution(); 
+				if(peso_marcado < this.getRejilla()[i][j].getPeso_marcado()){
+					this.getRejilla()[i][j].setPeso_marcado(peso_marcado);
+				}			
+//				System.out.println("casilla "+i+","+j+ " marcada como libre con un peso = " + this.getRejilla()[i][j].getPeso_marcado());
+			}
+		}
+	}
+	
+	/**
+	 * Añade un grupo de boids
+	 * @param obstaculos Vector de boids
+	 */
+	
+	public void addBoids(Vector<Boid> boids,double RadioBusqueda){		
+		for (int i=0; i < boids.size();i++){
+			double posXObs = boids.elementAt(i).getPosicion().get(0,0);
+			double posYObs = boids.elementAt(i).getPosicion().get(1,0);
+			double dimensionX = RadioBusqueda/2;
+			double dimensionY = dimensionX;
+//			System.out.println("introducimos los boids en la rejilla ");
+			this.addBoid(posXObs, posYObs, dimensionX, dimensionY);
+		}		
 	}
 	
 	public Vector<Matrix> busquedaAEstrella(){
@@ -225,7 +352,7 @@ public class Grid {
 					addObstacles(this.getObstaculos());
 					if (this.rejilla[j][k].isOccupied()){
 //						System.out.println("la celda está ocupada por un obstáculo");
-						continue; // si el nodo está en el closedSet no hacemos nada con el y seguimos mirando						
+						continue; // si el nodo está en el ocupado por un obstáculo no hacemos nada con el y seguimos mirando						
 					}
 					double g_score_tentativo = actual.getG_score() +
 							actual.distThisPoint2Point(this.rejilla[j][k].getxPosition(),this.rejilla[j][k].getyPosition());
@@ -253,6 +380,121 @@ public class Grid {
 						this.rejilla[j][k].setCameFrom(actual);
 						this.rejilla[j][k].setG_score(g_score_tentativo);
 						this.rejilla[j][k].setF_score(this.rejilla[j][k].getG_score()+this.rejilla[j][k].getH_score());						
+					}
+				}
+			}
+		}
+		if (!caminoCompleto){
+			camino = reconstruirCaminoAEstrella(actual);
+			System.out.println("no se logró un camino completo con grid");
+		}
+		return camino;
+	}
+	
+public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
+		
+		boolean caminoCompleto = false;
+		boolean tentative_is_better = false;		
+		double minF_score = Double.POSITIVE_INFINITY;
+		int indMin = 0;
+		Vector<Matrix> camino = new Vector<Matrix>();
+		Vector<GridSearchPoint> openSet = new Vector<GridSearchPoint>();
+		Vector<GridSearchPoint> closedSet = new Vector<GridSearchPoint>();		
+		openSet.clear();
+		closedSet.clear();	
+		clearSearchData();//Desmarcamos las celdas marcadas en la iteración anterior como pertenecientes al open o closedset
+		int [] start = getStartPos();
+		int [] goal = getGoalPos();	
+		this.rejilla[start[0]][start[1]].setG_score(0);
+		this.rejilla[start[0]][start[1]].setH_score(this.rejilla[start[0]][start[1]].distThisPoint2Point(goal[0],goal[1]));
+		this.rejilla[start[0]][start[1]].setF_score(this.rejilla[start[0]][start[1]].getG_score()+
+				this.rejilla[start[0]][start[1]].getH_score());
+		this.rejilla[start[0]][start[1]].setOpenSet(true);
+		openSet.add(this.rejilla[start[0]][start[1]]);
+		GridSearchPoint actual = this.rejilla[start[0]][start[1]];		
+		while (!openSet.isEmpty()){
+//			System.out.println("tamaño del openset "+openSet.size());
+//			System.out.println("tamaño del closedSet "+closedSet.size());
+			minF_score = Double.POSITIVE_INFINITY;
+			//Buscamos el nodo del opneSet con mejor f_score
+			for (int i=0;i<openSet.size();i++){
+				if(openSet.elementAt(i).getF_score() < minF_score) {
+					indMin=i;
+					minF_score=openSet.elementAt(i).getF_score();
+				}								
+			}
+			actual = openSet.elementAt(indMin);
+//			System.out.println("índices del punto actual "+actual.getxIndex()+" "+actual.getyIndex()+" y su f_score "+actual.getF_score());
+			//comprobamos si el nodo actual es el objetivo
+			if (Math.abs(actual.getxIndex() - goal[0]) < 2 && Math.abs(actual.getyIndex() - goal[1]) < 2){ //Asegurarse de que la comprobación funciona
+//			if (actual.getxIndex() == goal[0] && actual.getyIndex() == goal[1]){ //Asegurarse de que la comprobación funciona
+				caminoCompleto = true;
+//				System.out.println("se completó con éxito el camino, supuestamente");
+				return reconstruirCaminoAEstrella(actual);
+				
+			}
+			//Quitamos el nodo actual del openSet 
+			openSet.remove(indMin); //También existe un método para quitar un elemento especificando que objeto hay que quitar
+			//y lo añadimos al closedSet
+			actual.setOpenSet(false);
+			actual.setClosedSet(true);
+			closedSet.add(actual);
+//			System.out.println("tamaño de la rejilla "+this.getNumPtosX()+" "+this.getNumPtosY());
+			//Exploramos los vecinos del actual
+			for (int j=actual.getxIndex()-1;j<=actual.getxIndex()+1;j++){
+//				System.out.println("posición de goal "+goal[0]+" "+goal[1]);
+				if (j < 0 || j > this.numPtosX-1){//comprobamos que no sobrepasamos los límites de la rejilla
+//					System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
+					continue;
+				}				
+				for (int k=actual.getyIndex()-1;k<=actual.getyIndex()+1;k++){
+					if (k < 0 || k > this.numPtosY-1){//comprobamos que no sobrepasamos los límites de la rejilla
+//						System.out.println("Desborde de la rejilla en el eje y, k vale "+k);
+						continue;
+					}
+					if (this.rejilla[j][k].isClosedSet()){
+//						System.out.println("está en el closedSet");
+						continue; // si el nodo está en el closedSet no hacemos nada con el y seguimos mirando						
+					}
+					//Clonamos el vector de obstáculos
+					this.setObstaculos(this.sim.getObstaculos());
+					this.setBoids(this.sim.getBandada());
+					//Marcamos todas las celdas como ocupadas
+					marcarTodoOcupado();
+					//Marcamos las celdas próximas a los boids como libres y les asignamos un peso
+					addBoids(this.getBoids(), RadioBusqueda);
+					//Marcamos como ocupadas las celdas que intersectan con la superficie de los obstáculos
+					addObstacles(this.getObstaculos());
+					if (this.rejilla[j][k].isOccupied()){
+//						System.out.println("la celda está ocupada por un obstáculo");
+						continue; // si el nodo está en el ocupado por un obstáculo no hacemos nada con el y seguimos mirando						
+					}
+					double g_score_tentativo = actual.getG_score() +
+							actual.distThisPoint2Point(this.rejilla[j][k].getxPosition(),this.rejilla[j][k].getyPosition());
+					//Comprobamos si el vecino está en el openSet
+					if (!this.rejilla[j][k].isOpenSet()){
+//						System.out.println("el vecino no está en el openset y lo deberíamos meter");
+						//si no está lo metemos en el openSet
+						this.rejilla[j][k].setOpenSet(true);
+						this.rejilla[j][k].setClosedSet(false);
+						openSet.add(this.rejilla[j][k]);
+						//Calculamos su h_score (distancia euclídea hasta el objetivo) y se lo asignamos
+						this.rejilla[j][k].setH_score(this.rejilla[j][k].distThisPoint2Point(goal));
+						tentative_is_better = true;
+					}else if (g_score_tentativo < this.rejilla[j][k].getG_score()){
+//						System.out.println("el vecino está en el openset y la tentativa es mejor");
+						//la tentativa es mejor si el g_score tentativo es mejor que el g_score del vecino
+						tentative_is_better = true;
+					}else{// si no es así la tentativa es peor
+//						System.out.println("el vecino está en el openset y la tentativa es peor");
+						tentative_is_better = false;
+					}
+					if (tentative_is_better){
+//						System.out.println("la tentativa es mejor");
+						//Indicamos desde que nodo (boid) hemos llegado a este vecino
+						this.rejilla[j][k].setCameFrom(actual);
+						this.rejilla[j][k].setG_score(g_score_tentativo);
+						this.rejilla[j][k].setF_score(this.rejilla[j][k].getG_score()+this.rejilla[j][k].getH_score()+this.rejilla[j][k].getPeso_marcado());						
 					}
 				}
 			}
@@ -293,6 +535,19 @@ public class Grid {
 			}
 		}
 	}
+	/**
+	 * Se marcan todas las celdas como ocupadas y se les asigna un valor de peso de marcado infinito
+	 * Cuando se añadan los boids a la rejilla, las celdas próximas a cad aboid se marcarán como libres y
+	 * se les asignará un valor de peso de marcado igual a la distancia a la que se encuentren del boid más cercano
+	 */
+	public void marcarTodoOcupado(){
+		for (int i=0;i<getNumPtosX();i++){
+			for (int j=0;j<getNumPtosY();j++){
+				this.rejilla[i][j].setOccupied(true);
+				this.rejilla[i][j].setPeso_marcado(Double.POSITIVE_INFINITY);				
+			}
+		}
+	}
 	
 	public void clearSearchDataAndObst(){
 		for (int i=0;i<getNumPtosX();i++){
@@ -315,7 +570,13 @@ public class Grid {
 	public Vector<Obstaculo> getObstaculos() {
 		return obstaculos;
 	}
-
+	public Vector<Boid> getBoids() {
+		return boids;
+	}
+	/**
+	 * Copia el vector de obstáculos
+	 * @param obstaculos Vector que contiene los obstáculos presentes en el escenario
+	 */
 	public void setObstaculos(Vector<Obstaculo> obstaculos) {
 		if (!this.obstaculos.isEmpty()){
 			this.obstaculos.clear();
@@ -334,6 +595,33 @@ public class Grid {
 		}
 	}
 
+	/**
+	 * Copia el vector de boids
+	 * @param bandada
+	 */
+	public void setBoids(Vector<Boid> bandada) {
+		if (!this.boids.isEmpty()){			
+			this.boids.clear();
+		}
+		
+		for (int i=0;i<bandada.size();i++){
+			double posX = bandada.elementAt(i).getPosicion().get(0, 0);
+			double posY = bandada.elementAt(i).getPosicion().get(1, 0);
+			double velX = bandada.elementAt(i).getVelocidad().get(0, 0);
+			double velY = bandada.elementAt(i).getVelocidad().get(1, 0);
+			double acelX = bandada.elementAt(i).getAceleracion().get(0, 0);
+			double acelY = bandada.elementAt(i).getAceleracion().get(1, 0);
+			double posi[] = {posX,posY};
+			Matrix pos = new Matrix(posi,2);
+			double velo[] = {velX,velY};
+			Matrix vel = new Matrix(velo,2);
+			double acele[] = {acelX,acelY};
+			Matrix acel = new Matrix(acele,2);
+			Boid boid = new Boid(pos,vel,acel);
+			
+			this.boids.add(boid);
+		}
+	}
 	
 	public Simulador getSim() {
 		return sim;

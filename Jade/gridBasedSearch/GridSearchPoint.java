@@ -40,6 +40,7 @@ public class GridSearchPoint {
 
 	double g_score;
 	double h_score;
+	double peso_marcado;
 	double f_score;
 	
 	public GridSearchPoint(int xIndex, int yIndex, double resolution){
@@ -115,6 +116,14 @@ public class GridSearchPoint {
 
 	public void setH_score(double h_score) {
 		this.h_score = h_score;
+	}
+	
+	public double getPeso_marcado() {
+		return peso_marcado;
+	}
+
+	public void setPeso_marcado(double peso_marcado) {
+		this.peso_marcado = peso_marcado;
 	}
 
 	public double getF_score() {

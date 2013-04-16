@@ -455,8 +455,7 @@ public class Boid implements Serializable{
 								compensacion.set(1,0,-repulsion.get(0,0));
 								angCompensacion = Math.atan2(compensacion.get(1,0),
 										compensacion.get(0,0));
-								if (UtilCalculos.
-										diferenciaAngulos(angVelObst,angCompensacion)>Math.toRadians(90)){
+								if (UtilCalculos.diferenciaAngulos(angVelObst,angCompensacion)>Math.toRadians(90)){
 									//Si se da la condicion lo cambiamos de sentido, si no se queda 
 									//como se calculo antes del if
 									compensacion.set(0,0,-repulsion.get(1,0));
