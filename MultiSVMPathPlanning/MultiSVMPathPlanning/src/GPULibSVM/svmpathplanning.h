@@ -94,10 +94,6 @@ public:
                           PointCloudType::Ptr rtObstacles, bool visualize);
     
 private:
-    void loadDataFromFile ( const std::string & fileName,
-                            PointCloudType::Ptr & X,
-                            PointCloudType::Ptr & Y );
-    
     void addLineToPointCloud(const PointType& p1, const PointType& p2, 
                              const uint8_t & r, const uint8_t & g, const uint8_t  & b,
                              PointCloudTypeExt::Ptr &linesPointCloud, double zOffset);
@@ -115,16 +111,14 @@ private:
     
     void generateRNG(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, const PointCloudType::Ptr & currentMap);
     
-    bool getFootPrint(const PointType & position, const PointCloudType::Ptr & rtObstacles, PointCloudType::Ptr & footprint);
+    bool getFootPrint(const PointType & position, const double & orientation, 
+                      const PointCloudType::Ptr & rtObstacles, vector<PointCloudType::Ptr> & footprint);
     
     void filterExistingObstacles(PointCloudType::Ptr & rtObstacles);
     
     void visualizeClasses(const vector< PointCloudType::Ptr > & classes, const PointCloudType::Ptr & pathNodes,
                           const PointCloudType::Ptr & rtObstacles, const PointCloudType::Ptr & path);
         
-    bool isSegmentValid(const PointType & v, const PointType & w);
-    double lineToPointDistanceSqr(const PointType & v, const PointType & w, const PointType & p);
-    
     void checkSegments(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
                        const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges);
   
@@ -138,8 +132,6 @@ private:
     
     double m_carWidth;
     double m_minDistCarObstacle;               // Minimal distance between the car and an obstacle in path finding
-    
-    // TODO: Revisar que se reinicializan las estructuras al cambiar de mapa
     
     PointCloudType::Ptr m_originalMap;
     PointCloudType::Ptr m_pathNodes;

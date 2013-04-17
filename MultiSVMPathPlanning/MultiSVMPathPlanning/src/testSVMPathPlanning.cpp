@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
     goalWithoutPath.y = 374 * resolution;
     
     svmpp::SVMPathPlanning pathPlanner;
-    pathPlanner.obtainGraphFromMap(pointCloud, true);
+    pathPlanner.obtainGraphFromMap(pointCloud, false);
 //     start.x = 1; start.y = 2;
 //     goal.x = 4; goal.y = 2;
     
