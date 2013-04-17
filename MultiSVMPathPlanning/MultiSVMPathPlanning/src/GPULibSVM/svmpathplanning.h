@@ -89,7 +89,8 @@ public:
     void testSingleProblem();
     void obtainGraphFromMap(const PointCloudType::Ptr & inputCloud, const bool & visualize);
     
-    bool findShortestPath(const PointType & start, const PointType & goal,
+    bool findShortestPath(const PointType& start, const double & startOrientation,
+                          const PointType & goal, const double & goalOrientation,
                           PointCloudType::Ptr rtObstacles, bool visualize);
     
 private:

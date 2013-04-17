@@ -56,6 +56,7 @@
 #include "svmpathplanning.h"
 
 #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1.pgm"
+// #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1WithoutPath.pgm"
 // #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/mapaSeparado.pgm"
 #define REAL_TIME "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/realTime/realTime1.pgm"
 
@@ -94,7 +95,7 @@ int main(int argc, char **argv) {
     map2PointCloud(map, resolution, pointCloud);
     map2PointCloud(rtObstaclesMap, resolution, rtObstacles);
     
-    svmpp::PointType start, goal;
+    svmpp::PointType start, goal, goalWithoutPath;
     start.x = 399 * resolution;
     start.y = 576 * resolution;
     
@@ -104,13 +105,15 @@ int main(int argc, char **argv) {
 //     cv::resize(map, map, cv::Size(800, 800));
 //     cv::imshow("Map", map);
 //     cv::waitKey(200);
+    goalWithoutPath.x = 1192 * resolution;
+    goalWithoutPath.y = 374 * resolution;
     
     svmpp::SVMPathPlanning pathPlanner;
-    pathPlanner.obtainGraphFromMap(pointCloud, false);
+    pathPlanner.obtainGraphFromMap(pointCloud, true);
 //     start.x = 1; start.y = 2;
 //     goal.x = 4; goal.y = 2;
     
-    pathPlanner.findShortestPath(start, goal, rtObstacles, true);
+    pathPlanner.findShortestPath(start, 0, goalWithoutPath, M_PI / 4, rtObstacles, true);
 //     pathPlanner.testDijkstra();
     
     return 0;

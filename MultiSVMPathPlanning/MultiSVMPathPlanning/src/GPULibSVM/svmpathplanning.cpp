@@ -58,6 +58,7 @@
 #include <boost/property_map/property_map.hpp>
 
 #include <lemon/dijkstra.h>
+#include <lemon/connectivity.h>
 
 #include <../gpudt/gpudt.h>
 
@@ -325,15 +326,17 @@ void SVMPathPlanning::visualizeClasses(const vector< PointCloudType::Ptr > & cla
 //     }
     
     PointCloudTypeExt::Ptr pathPointCloud(new PointCloudTypeExt);
-    PointType lastPoint;
-    for (uint32_t i = 0; i < path->size(); i++) {
-        const PointType & point = path->at(i);
-        
-        if (i != 0)
-            addLineToPointCloud(lastPoint, point, 0, 255, 255, pathPointCloud, 1.0);
-        lastPoint = point;
-        
-//         cout << point << endl;
+    if (path.get() != NULL) {
+        PointType lastPoint;
+        for (uint32_t i = 0; i < path->size(); i++) {
+            const PointType & point = path->at(i);
+            
+            if (i != 0)
+                addLineToPointCloud(lastPoint, point, 0, 255, 255, pathPointCloud, 1.0);
+            lastPoint = point;
+            
+    //         cout << point << endl;
+        }
     }
     
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
@@ -353,8 +356,10 @@ void SVMPathPlanning::visualizeClasses(const vector< PointCloudType::Ptr > & cla
 //     pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbFootprintGoal(footprintGoal);
 //     viewer->addPointCloud<PointTypeExt> (footprintGoal, rgbFootprintGoal, "footprintGoal");
     
-    pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbPath(pathPointCloud);
-    viewer->addPointCloud<PointTypeExt> (pathPointCloud, rgbPath, "pathPointCloud");
+    if (path.get() != NULL) {
+        pcl::visualization::PointCloudColorHandlerRGBField<PointTypeExt> rgbPath(pathPointCloud);
+        viewer->addPointCloud<PointTypeExt> (pathPointCloud, rgbPath, "pathPointCloud");
+    }
     
     PointCloudTypeExt::Ptr graphPointCloud(new PointCloudTypeExt);  
     for (Graph::ArcIt it(m_graph); it != lemon::INVALID; ++it) {
@@ -545,11 +550,15 @@ void SVMPathPlanning::obtainGraphFromMap(const PointCloudType::Ptr & inputCloud,
     }
 }
 
-bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType & goal,
+bool SVMPathPlanning::findShortestPath(const PointType& start, const double & startOrientation,
+                                       const PointType & goal, const double & goalOrientation,
                                        PointCloudType::Ptr rtObstacles, bool visualize = false)
 {
-    // We make a backup of the current graph
-//     lemon::ListGraph::Snapshot graphSnapshot(m_graph);
+    
+    for (Graph::EdgeIt it(m_graph); it != lemon::INVALID; ++it) {
+        Edge currentEdge = it;
+        m_graph.erase(currentEdge);
+    }
     
     struct timespec startTime, finishTime;
     double elapsed;
@@ -577,16 +586,10 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
     if (! startCheck) {
         cerr << "Failed to find a path: Current position is too near to an obstacle or colliding with it" << endl;
         
-        // Original graph is restored
-//         graphSnapshot.restore();
-        
         return false;
     }
     if (! startCheck) {
         cerr << "Failed to find a path: Goal position is not clear" << endl;
-        
-        // Original graph is restored
-//         graphSnapshot.restore();
         
         return false;
     }
@@ -599,7 +602,8 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
    
     vector<Node> nodeListRT;
     copy(m_nodeList.begin(), m_nodeList.end(), back_inserter(nodeListRT));
-
+    int maxNodeId = nodeListRT.size();
+    
     vector< PointCloudType::Ptr >::iterator it;
     uint32_t label = m_classes.size();
     for (it = classes.begin(); it != classes.end(); it++, label++) {
@@ -633,26 +637,32 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
     
     generateRNG(pathNodesRT, nodeListRT, currentMap);
     
-    copy(m_classes.begin(), m_classes.end(), back_inserter(classes));
-    
     clock_gettime(CLOCK_MONOTONIC, &finishTime);
     elapsed = (finishTime.tv_sec - startTime.tv_sec);
     elapsed += (finishTime.tv_nsec - startTime.tv_nsec) / 1000000000.0;
     
     std::cout << "Total time for graph generation in real time = " << elapsed << endl;
     
+//     copy(m_classes.begin(), m_classes.end(), back_inserter(classes));    
 //     visualizeClasses(classes, pathNodesRT, rtObstacles);
     
 //     return true;
     
     double distStart = DBL_MAX, distGoal = DBL_MAX;
     Node startNode, goalNode;
-    for (vector<Node>::iterator it = m_nodeList.begin(); it != m_nodeList.end(); it++) {
+    PointType tmpStartPoint(start.x + m_carWidth * cos(startOrientation),
+                            start.y + m_carWidth * sin(startOrientation),
+                            0.0);
+    PointType tmpGoalPoint(goal.x + m_carWidth * cos(goalOrientation + M_PI),
+                           goal.y + m_carWidth * sin(goalOrientation + M_PI),
+                            0.0);
+
+    for (vector<Node>::iterator it = nodeListRT.begin(); it != nodeListRT.end(); it++) {
         
         const PointType & point = (*m_nodeMap)[*it];
         
-        double tmpDistStart = pcl::squaredEuclideanDistance(start, point);
-        double tmpDistGoal = pcl::squaredEuclideanDistance(goal, point);
+        double tmpDistStart = pcl::squaredEuclideanDistance(tmpStartPoint, point);
+        double tmpDistGoal = pcl::squaredEuclideanDistance(tmpGoalPoint, point);
         
         if (tmpDistStart < distStart) {
             distStart = tmpDistStart;
@@ -665,23 +675,36 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const PointType &
         }
     }
     
+    if (! lemon::connected(m_graph)) {
+        Graph::NodeMap<uint32_t> compMap(m_graph);
+        
+        lemon::connectedComponents(m_graph, compMap);
+        
+        if (compMap[startNode] != compMap[goalNode]) {
+            cerr << "Unable to find a path: It is impossible to go from " << start << 
+                    " to " << goal << " in this map." << endl;
+            
+            return false; 
+        }
+    }
+    
     lemon::Dijkstra<Graph, EdgeMap> dijkstra(m_graph, *m_distMap);
     dijkstra.init();
     dijkstra.addSource(goalNode);
     dijkstra.start();
     
     Node currentNode = startNode;
+    m_path->push_back(start);
     while (currentNode != goalNode) {
         currentNode = dijkstra.predNode(currentNode);
         m_path->push_back((*m_nodeMap)[currentNode]);
     }
-    
+    m_path->push_back(goal);
+        
     if (visualize) {
+        copy(m_classes.begin(), m_classes.end(), back_inserter(classes));
         visualizeClasses(classes, m_pathNodes, rtObstacles, m_path);
     }
-    
-    // Original graph is restored
-//     graphSnapshot.restore();
     
     return true;
 }
@@ -770,11 +793,15 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
     ec.setInputCloud (pathNodes);
     ec.extract (cluster_indices);
 
+//     m_graph.clear();
     vector<uint32_t> nodeLabels;
     nodeLabels.resize(pathNodes->size());
     uint32_t label = 0;
     for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); it++, label++) {
         for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end (); pit++) {
+//             Node node = m_graph.addNode();
+//             (*m_nodeMap)[node] = pathNodes->at(*pit);
+//             nodeList.push_back(node);
             nodeLabels[*pit] = label;
         }
     }
@@ -874,20 +901,6 @@ void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, vecto
     launchCheckEdges((const float2 *&)pointsInMap, currentMap->size(), (const float2 *&)edgeU, 
                      (const float2 *&)edgeV, edges.size(), (const float &)(m_carWidth / 2 + m_minDistCarObstacle), (bool *&)validEdges);
     
-//     m_graph.clear();
-//     boost::shared_ptr<EdgeMap> tmpDistMap(new EdgeMap(m_graph));
-//     boost::shared_ptr<NodeMap> tmpNodeMap(new NodeMap(m_graph));
-//     for (uint32_t i = 0; i < nodeList.size(); i++) {
-//         const PointType & point = (*m_nodeMap)[nodeList[i]];
-//         Node node = m_graph.addNode();
-//         (*tmpNodeMap)[nodeList[i]] = point;
-//         nodeList[i] = node;
-//     }
-//     m_nodeMap = tmpNodeMap;
-    for (Graph::EdgeIt it(m_graph); it != lemon::INVALID; ++it) {
-        Edge currentEdge = it;
-        m_graph.erase(currentEdge);
-    }
     for (uint32_t i = 0; i < edges.size(); i++) {
         if (validEdges[i] == true) {
             const Node & node1 = nodeList[edges[i].first];
@@ -901,7 +914,6 @@ void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, vecto
             (*m_distMap)[edge] = pcl::euclideanDistance(point1, point2);
         }
     }
-//     m_distMap = tmpDistMap;
     
     delete pointsInMap;
     delete edgeU;
