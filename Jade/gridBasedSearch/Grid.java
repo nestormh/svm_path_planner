@@ -65,69 +65,96 @@ public class Grid {
 	}
 	
 	public void addObstacle(double posX, double posY, double dimensionX, double dimensionY){
-		boolean gridOccupiedLeft = true;
-		boolean gridOccupiedRight = true;
-		boolean gridOccupiedUp = true;
-		boolean gridOccupiedDown = true;		
-		int xIndexBoid = (int)Math.floor(posX/getResolution());
-		int yIndexBoid = (int)Math.floor(posY/getResolution());
-		int incrLeft = xIndexBoid;
-		int incrRight = xIndexBoid;
-		int incrUp = yIndexBoid;
-		int incrDown = yIndexBoid;
-		double posXObsGrid = xIndexBoid*getResolution();
-		double posYObsGrid = yIndexBoid*getResolution();
-		while (gridOccupiedLeft && (incrLeft > 0)){//exploramos hacia la izquierda
-			if ((incrLeft*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
-				if (((incrLeft*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
-					incrLeft--;					
-				}else{
-					gridOccupiedLeft = false;
-				}
-			}else{
-				gridOccupiedLeft = false;
-			}			
+//		boolean gridOccupiedLeft = true;
+//		boolean gridOccupiedRight = true;
+//		boolean gridOccupiedUp = true;
+//		boolean gridOccupiedDown = true;		
+		int xIndex = (int)Math.floor(posX/getResolution());
+		int yIndex = (int)Math.floor(posY/getResolution());
+		int offSetCeldasX = (int)Math.floor(dimensionX/getResolution());
+		int offSetCeldasY = (int)Math.floor(dimensionY/getResolution());
+		int limitInfX = xIndex - offSetCeldasX;
+		int limitSupX = xIndex + offSetCeldasX;
+		int limitInfY = yIndex - offSetCeldasY;
+		int limitSupY = yIndex + offSetCeldasY;
+//		double posXObsGrid = xIndexBoid*getResolution();
+//		double posYObsGrid = yIndexBoid*getResolution();
+//		while (gridOccupiedLeft && (incrLeft > 0)){//exploramos hacia la izquierda
+//			if ((incrLeft*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
+//				if (((incrLeft*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
+//					incrLeft--;					
+//				}else{
+//					gridOccupiedLeft = false;
+//				}
+//			}else{
+//				gridOccupiedLeft = false;
+//			}			
+//		}
+//		while (gridOccupiedRight && (incrRight < getNumPtosX())){//exploramos hacia la derecha
+//			if ((incrRight*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
+//				if (((incrRight*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
+//					incrRight++;
+//				}else{
+//					gridOccupiedRight = false;
+//				}
+//			}else{
+//				gridOccupiedRight = false;
+//			}			
+//		}
+//		while (gridOccupiedUp && (incrUp < getNumPtosY())){//exploramos hacia arriba
+//			if ((incrUp*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
+//				if (((incrUp*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
+//					incrUp++;
+//				}else{
+//					gridOccupiedUp = false;
+//				}
+//			}else{
+//				gridOccupiedUp = false;
+//			}			
+//		}
+//		while (gridOccupiedDown && (incrDown > 0)){//exploramos hacia abajo
+//			if ((incrDown*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
+//				if (((incrDown*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
+//					incrDown--;
+//				}else{
+//					gridOccupiedDown = false;
+//				}
+//			}else{
+//				gridOccupiedDown = false;
+//			}			
+//		}
+		if (limitInfX < 0){
+			limitInfX = 0;
+		}else if(limitInfX > numPtosX-1){
+			limitInfX = numPtosX-1;
 		}
-		while (gridOccupiedRight && (incrRight < getNumPtosX())){//exploramos hacia la derecha
-			if ((incrRight*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
-				if (((incrRight*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
-					incrRight++;
-				}else{
-					gridOccupiedRight = false;
-				}
-			}else{
-				gridOccupiedRight = false;
-			}			
+		
+		if (limitInfY < 0){
+			limitInfY = 0;
+		}else if(limitInfY > numPtosY-1){
+			limitInfY = numPtosY-1;
 		}
-		while (gridOccupiedUp && (incrUp < getNumPtosY())){//exploramos hacia arriba
-			if ((incrUp*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
-				if (((incrUp*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
-					incrUp++;
-				}else{
-					gridOccupiedUp = false;
-				}
-			}else{
-				gridOccupiedUp = false;
-			}			
+		
+		
+		if (limitSupX < 0){
+			limitSupX = 0;
+		}else if(limitSupX > numPtosX-1){
+			limitSupX = numPtosX-1;
 		}
-		while (gridOccupiedDown && (incrDown > 0)){//exploramos hacia abajo
-			if ((incrDown*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
-				if (((incrDown*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
-					incrDown--;
-				}else{
-					gridOccupiedDown = false;
-				}
-			}else{
-				gridOccupiedDown = false;
-			}			
+		
+		if (limitSupY < 0){
+			limitSupY = 0;
+		}else if(limitSupY > numPtosY-1){
+			limitSupY = numPtosY-1;
 		}
+		
 		//Marcamos las casillas ocupadas por obstáculos
-		for (int i=incrLeft;i<incrRight;i++){
+		for (int i=limitInfX;i<limitSupX;i++){
 			if (i < 0 || i > this.numPtosX-1){//comprobamos que no sobrepasamos los límites de la rejilla
 //				System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
 				continue;
 			}
-			for (int j=incrDown;j<incrUp;j++){
+			for (int j=limitInfY;j<limitSupY;j++){
 				if (j < 0 || j > this.numPtosY-1){//comprobamos que no sobrepasamos los límites de la rejilla
 //					System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
 					continue;
@@ -147,8 +174,8 @@ public class Grid {
 		for (int i=0; i < obstaculos.size();i++){
 			double posXObs = obstaculos.elementAt(i).getPosicion().get(0,0);
 			double posYObs = obstaculos.elementAt(i).getPosicion().get(1,0);
-			double dimensionX = obstaculos.elementAt(i).getLado();
-			double dimensionY = obstaculos.elementAt(i).getLado();
+			double dimensionX = obstaculos.elementAt(i).getLado()/2;
+			double dimensionY = obstaculos.elementAt(i).getLado()/2;
 //			System.out.println("creamos la rejilla ");
 			this.addObstacle(posXObs, posYObs, dimensionX, dimensionY);
 		}
@@ -173,68 +200,98 @@ public class Grid {
 	 * @param dimensionX
 	 * @param dimensionY
 	 */
-	public void addBoid(double posX, double posY, double dimensionX, double dimensionY){
-		boolean gridOccupiedLeft = true;
-		boolean gridOccupiedRight = true;
-		boolean gridOccupiedUp = true;
-		boolean gridOccupiedDown = true;		
+	public void addBoid(double posX, double posY, double radioBusqueda){
+//		boolean gridOccupiedLeft = true;
+//		boolean gridOccupiedRight = true;
+//		boolean gridOccupiedUp = true;
+//		boolean gridOccupiedDown = true;		
 		int xIndexBoid = (int)Math.floor(posX/getResolution());
 		int yIndexBoid = (int)Math.floor(posY/getResolution());
-		int incrLeft = xIndexBoid;
-		int incrRight = xIndexBoid;
-		int incrUp = yIndexBoid;
-		int incrDown = yIndexBoid;		
-		while (gridOccupiedLeft && (incrLeft > 0)){//exploramos hacia la izquierda
-			if ((incrLeft*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
-				if (((incrLeft*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
-					incrLeft--;					
-				}else{
-					gridOccupiedLeft = false;
-				}
-			}else{
-				gridOccupiedLeft = false;
-			}			
+		int offSetCeldas = (int)Math.floor(radioBusqueda/getResolution());
+		int limitInfX = xIndexBoid - offSetCeldas;
+		int limitSupX = xIndexBoid + offSetCeldas;
+		int limitInfY = yIndexBoid - offSetCeldas;
+		int limitSupY = yIndexBoid + offSetCeldas;
+//		int incrLeft = xIndexBoid;
+//		int incrRight = xIndexBoid;
+//		int incrUp = yIndexBoid;
+//		int incrDown = yIndexBoid;		
+//		while (gridOccupiedLeft && (incrLeft > 0)){//exploramos hacia la izquierda
+//			if ((incrLeft*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
+//				if (((incrLeft*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
+//					incrLeft--;					
+//				}else{
+//					gridOccupiedLeft = false;
+//				}
+//			}else{
+//				gridOccupiedLeft = false;
+//			}			
+//		}
+//		while (gridOccupiedRight && (incrRight < getNumPtosX())){//exploramos hacia la derecha
+//			if ((incrRight*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
+//				if (((incrRight*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
+//					incrRight++;
+//				}else{
+//					gridOccupiedRight = false;
+//				}
+//			}else{
+//				gridOccupiedRight = false;
+//			}			
+//		}
+//		while (gridOccupiedUp && (incrUp < getNumPtosY())){//exploramos hacia arriba
+//			if ((incrUp*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
+//				if (((incrUp*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
+//					incrUp++;
+//				}else{
+//					gridOccupiedUp = false;
+//				}
+//			}else{
+//				gridOccupiedUp = false;
+//			}			
+//		}
+//		while (gridOccupiedDown && (incrDown > 0)){//exploramos hacia abajo
+//			if ((incrDown*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
+//				if (((incrDown*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
+//					incrDown--;
+//				}else{
+//					gridOccupiedDown = false;
+//				}
+//			}else{
+//				gridOccupiedDown = false;
+//			}			
+//		}
+		if (limitInfX < 0){
+			limitInfX = 0;
+		}else if(limitInfX > numPtosX-1){
+			limitInfX = numPtosX-1;
 		}
-		while (gridOccupiedRight && (incrRight < getNumPtosX())){//exploramos hacia la derecha
-			if ((incrRight*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
-				if (((incrRight*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
-					incrRight++;
-				}else{
-					gridOccupiedRight = false;
-				}
-			}else{
-				gridOccupiedRight = false;
-			}			
+		
+		if (limitInfY < 0){
+			limitInfY = 0;
+		}else if(limitInfY > numPtosY-1){
+			limitInfY = numPtosY-1;
 		}
-		while (gridOccupiedUp && (incrUp < getNumPtosY())){//exploramos hacia arriba
-			if ((incrUp*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
-				if (((incrUp*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
-					incrUp++;
-				}else{
-					gridOccupiedUp = false;
-				}
-			}else{
-				gridOccupiedUp = false;
-			}			
+		
+		
+		if (limitSupX < 0){
+			limitSupX = 0;
+		}else if(limitSupX > numPtosX-1){
+			limitSupX = numPtosX-1;
 		}
-		while (gridOccupiedDown && (incrDown > 0)){//exploramos hacia abajo
-			if ((incrDown*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
-				if (((incrDown*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
-					incrDown--;
-				}else{
-					gridOccupiedDown = false;
-				}
-			}else{
-				gridOccupiedDown = false;
-			}			
+		
+		if (limitSupY < 0){
+			limitSupY = 0;
+		}else if(limitSupY > numPtosY-1){
+			limitSupY = numPtosY-1;
 		}
+		
 		//Marcamos las casillas cercanas a los boids como libres y les asignamos un peso
-		for (int i=incrLeft;i<incrRight;i++){
+		for (int i=limitInfX;i<limitSupX;i++){
 			if (i < 0 || i > this.numPtosX-1){//comprobamos que no sobrepasamos los límites de la rejilla
 //				System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
 				continue;
 			}
-			for (int j=incrDown;j<incrUp;j++){
+			for (int j=limitInfY;j<limitSupY;j++){
 				if (j < 0 || j > this.numPtosY-1){//comprobamos que no sobrepasamos los límites de la rejilla
 //					System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
 					continue;
@@ -258,18 +315,144 @@ public class Grid {
 	}
 	
 	/**
+	 * Método que comprueba la existencia de partículas en torno a una celda de la rejilla. 
+	 * @param indiceX Índice x de la celda en estudio. No puede ser menor que cero ni mayor que el número máximo de celdas en x
+	 * @param indiceY Índice y de la celda en estudio. No puede ser menor que cero ni mayor que el número máximo de celdas en y
+	 * @param offSetCeldas Distancia en celdas hasta la que se quiere estudiar la existencia de partículas vecinas
+	 * @return Vector de Boid que contiene las partículas vecinas que se encuentran a una distancia menor al offSetCeldas
+	 */
+	public Vector<Boid> buscarParticulasVecinas(int indiceX,int indiceY,int offSetCeldas){
+		Vector<Boid> particulasVecinas = new Vector<Boid>();
+		particulasVecinas.clear();
+		if (indiceX < 0 || indiceX > numPtosX-1 || indiceY < 0 || indiceY > numPtosY-1){
+//			System.out.println("la partícula está fuera del escenario");
+			return particulasVecinas;
+		}
+		int limitInfX = indiceX - offSetCeldas;
+		int limitSupX = indiceX + offSetCeldas;
+		int limitInfY = indiceY - offSetCeldas;
+		int limitSupY = indiceY + offSetCeldas;
+		
+		if (limitInfX < 0){
+			limitInfX = 0;
+		}else if(limitInfX > numPtosX-1){
+			limitInfX = numPtosX-1;
+		}
+		
+		if (limitInfY < 0){
+			limitInfY = 0;
+		}else if(limitInfY > numPtosY-1){
+			limitInfY = numPtosY-1;
+		}
+		
+		
+		if (limitSupX < 0){
+			limitSupX = 0;
+		}else if(limitSupX > numPtosX-1){
+			limitSupX = numPtosX-1;
+		}
+		
+		if (limitSupY < 0){
+			limitSupY = 0;
+		}else if(limitSupY > numPtosY-1){
+			limitSupY = numPtosY-1;
+		}
+		
+		for (int i=limitInfX;i<limitSupX;i++){
+			if (i < 0 || i > this.numPtosX-1){//comprobamos que no sobrepasamos los límites de la rejilla
+//				System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
+				continue;
+			}
+			for (int j=limitInfY;j<limitSupY;j++){
+				if (j < 0 || j > this.numPtosY-1){//comprobamos que no sobrepasamos los límites de la rejilla
+//					System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
+					continue;
+				}			
+				if (this.getRejilla()[i][j].getParticulas().isEmpty()){
+					continue;
+				}else{
+					for (int k=0;k<this.getRejilla()[i][j].getParticulas().size();k++){
+						particulasVecinas.add(this.getRejilla()[i][j].getParticulas().elementAt(k));
+					}
+					
+				}
+			}
+		}
+		return particulasVecinas;
+	}
+	
+	public Vector<Obstaculo> buscarObstaculosVecinos(int indiceX,int indiceY,int offSetCeldas){
+		Vector<Obstaculo> obstaculosVecinos = new Vector<Obstaculo>();
+		obstaculosVecinos.clear();
+		if (indiceX < 0 || indiceX > numPtosX-1 || indiceY < 0 || indiceY > numPtosY-1){
+//			System.out.println("El obstáculo está fuera del escenario");
+			return obstaculosVecinos;
+		}
+		int limitInfX = indiceX - offSetCeldas;
+		int limitSupX = indiceX + offSetCeldas;
+		int limitInfY = indiceY - offSetCeldas;
+		int limitSupY = indiceY + offSetCeldas;
+		
+		if (limitInfX < 0){
+			limitInfX = 0;
+		}else if(limitInfX > numPtosX-1){
+			limitInfX = numPtosX-1;
+		}
+		
+		if (limitInfY < 0){
+			limitInfY = 0;
+		}else if(limitInfY > numPtosY-1){
+			limitInfY = numPtosY-1;
+		}
+		
+		
+		if (limitSupX < 0){
+			limitSupX = 0;
+		}else if(limitSupX > numPtosX-1){
+			limitSupX = numPtosX-1;
+		}
+		
+		if (limitSupY < 0){
+			limitSupY = 0;
+		}else if(limitSupY > numPtosY-1){
+			limitSupY = numPtosY-1;
+		}
+		for (int i=limitInfX;i<limitSupX;i++){
+			if (i < 0 || i > this.numPtosX-1){//comprobamos que no sobrepasamos los límites de la rejilla
+//				System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
+				continue;
+			}
+			for (int j=limitInfY;j<limitSupY;j++){
+				if (j < 0 || j > this.numPtosY-1){//comprobamos que no sobrepasamos los límites de la rejilla
+//					System.out.println("Desborde de la rejilla en el eje x, j vale "+j);
+					continue;
+				}			
+				if (this.getRejilla()[i][j].getObstaculos().isEmpty()){
+					continue;
+				}else{
+					for (int k=0;k<this.getRejilla()[i][j].getObstaculos().size();k++){
+						obstaculosVecinos.add(this.getRejilla()[i][j].getObstaculos().elementAt(k));
+					}
+					
+				}
+			}
+		}
+		return obstaculosVecinos;
+	}
+	
+	/**
 	 * Añade un grupo de boids
 	 * @param obstaculos Vector de boids
 	 */
 	
 	public void addBoids(Vector<Boid> boids,double RadioBusqueda){		
 		for (int i=0; i < boids.size();i++){
-			double posXObs = boids.elementAt(i).getPosicion().get(0,0);
-			double posYObs = boids.elementAt(i).getPosicion().get(1,0);
-			double dimensionX = RadioBusqueda/2;
-			double dimensionY = dimensionX;
+			double posXBoid = boids.elementAt(i).getPosicion().get(0,0);
+			double posYBoid = boids.elementAt(i).getPosicion().get(1,0);
+//			double dimensionX = RadioBusqueda;//RadioBusqueda/2
+//			double dimensionY = dimensionX;
 //			System.out.println("introducimos los boids en la rejilla ");
-			this.addBoid(posXObs, posYObs, dimensionX, dimensionY);
+			this.addBoid(posXBoid, posYBoid, RadioBusqueda/2);
 		}		
 	}
 	
@@ -412,6 +595,22 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 		this.rejilla[start[0]][start[1]].setOpenSet(true);
 		openSet.add(this.rejilla[start[0]][start[1]]);
 		GridSearchPoint actual = this.rejilla[start[0]][start[1]];		
+		
+		//--------MARCO LA REJILLA CON LA INFORMACIÓN DE LOS BOIDS------------------------		
+		
+		//limpiamos las celdas anteriores marcadas con obstáculos
+		clearObstacles();
+		//Clonamos el vector de boids
+		this.setBoids(this.sim.getBandada());
+		//Marcamos todas las celdas como ocupadas
+		marcarTodoOcupado();
+		//Marcamos las celdas próximas a los boids como libres y les asignamos un peso
+		addBoids(this.getBoids(), RadioBusqueda);
+		//Marcamos como ocupadas las celdas que intersectan con la superficie de los obstáculos
+		addObstacles(this.getObstaculos());
+		
+		
+		
 		while (!openSet.isEmpty()){
 //			System.out.println("tamaño del openset "+openSet.size());
 //			System.out.println("tamaño del closedSet "+closedSet.size());
@@ -458,13 +657,26 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 					}
 					//Clonamos el vector de obstáculos
 					this.setObstaculos(this.sim.getObstaculos());
-					this.setBoids(this.sim.getBandada());
-					//Marcamos todas las celdas como ocupadas
-					marcarTodoOcupado();
-					//Marcamos las celdas próximas a los boids como libres y les asignamos un peso
-					addBoids(this.getBoids(), RadioBusqueda);
-					//Marcamos como ocupadas las celdas que intersectan con la superficie de los obstáculos
-					addObstacles(this.getObstaculos());
+					
+					
+//					//Calculamos el tiempo que el vehículo va a alcanzar el obstáculo
+//					double t = actual.getG_score()/this.getVelCoche();
+////					System.out.println("tiempo t "+t);
+//					//Calculamos la posición de los obstáculos un tiempo t después
+////					setObstaculos(this.getSim().moverObstaculos(t,this.getObstaculos()));
+//					this.getSim().moverObstaculos(t,this.getObstaculos());
+					
+					
+//					//limpiamos las celdas anteriores marcadas con obstáculos
+//					clearObstacles();
+//					//Clonamos el vector de boids
+//					this.setBoids(this.sim.getBandada());
+//					//Marcamos todas las celdas como ocupadas
+//					marcarTodoOcupado();
+//					//Marcamos las celdas próximas a los boids como libres y les asignamos un peso
+//					addBoids(this.getBoids(), RadioBusqueda);
+//					//Marcamos como ocupadas las celdas que intersectan con la superficie de los obstáculos
+//					addObstacles(this.getObstaculos());
 					if (this.rejilla[j][k].isOccupied()){
 //						System.out.println("la celda está ocupada por un obstáculo");
 						continue; // si el nodo está en el ocupado por un obstáculo no hacemos nada con el y seguimos mirando						
@@ -495,13 +707,14 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 						this.rejilla[j][k].setCameFrom(actual);
 						this.rejilla[j][k].setG_score(g_score_tentativo);
 						this.rejilla[j][k].setF_score(this.rejilla[j][k].getG_score()+this.rejilla[j][k].getH_score()+this.rejilla[j][k].getPeso_marcado());						
+//						this.rejilla[j][k].setF_score(this.rejilla[j][k].getG_score()+this.rejilla[j][k].getH_score());
 					}
 				}
 			}
 		}
 		if (!caminoCompleto){
-			camino = reconstruirCaminoAEstrella(actual);
 			System.out.println("no se logró un camino completo con grid");
+			camino = reconstruirCaminoAEstrella(actual);			
 		}
 		return camino;
 	}
@@ -516,6 +729,9 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 			aux = aux.getCameFrom();			
 		}
 //		System.out.println("tamaño del camino a estrella "+ camino.size());
+//		double pos[] = {(double)this.startPos[0],(double)this.startPos[1]};
+//		Matrix posi = new Matrix(pos,2);
+//		camino.add(posi);
 		return camino;
 	}
 
@@ -555,6 +771,23 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 				this.rejilla[i][j].setClosedSet(false);
 				this.rejilla[i][j].setOpenSet(false);
 				this.rejilla[i][j].setOccupied(false);
+			}
+		}
+	}
+	
+	public void clearVectorParticulas(){
+		for (int i=0;i<getNumPtosX();i++){
+			for (int j=0;j<getNumPtosY();j++){
+				this.rejilla[i][j].particulas.clear();
+			}
+		}
+	}
+	
+	
+	public void clearVectorObstaculos(){
+		for (int i=0;i<getNumPtosX();i++){
+			for (int j=0;j<getNumPtosY();j++){		
+				this.rejilla[i][j].obstaculos.clear();
 			}
 		}
 	}

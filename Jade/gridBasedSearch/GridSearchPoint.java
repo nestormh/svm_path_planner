@@ -1,5 +1,10 @@
 package gridBasedSearch;
 
+import java.util.Vector;
+
+import boids.Boid;
+import boids.Obstaculo;
+
 public class GridSearchPoint {
 	/**
 	 * indica si el punto de la rejilla pertenece al openSet (puntos susceptibles de ser explorados)
@@ -43,12 +48,20 @@ public class GridSearchPoint {
 	double peso_marcado;
 	double f_score;
 	
+	/** Vector donde se almacenan los boids de la bandada*/
+	Vector<Boid> particulas = new Vector<Boid>();
+	/** Vector con la informacion de posicion de los obstaculos del escenario*/
+	Vector<Obstaculo> obstaculos = new Vector<Obstaculo>();
+	/**Vector con la prediccion de la posicion de los obstaculos en un determinado instante del futuro*/
+	Vector<Obstaculo> obstaculosFuturos = new Vector<Obstaculo>();
+	
 	public GridSearchPoint(int xIndex, int yIndex, double resolution){
 		this.xIndex = xIndex;
 		this.yIndex = yIndex;
 		this.resolution = resolution;
 		setxPosition(resolution*xIndex);
 		setyPosition(resolution*yIndex);
+		this.cameFrom = null;
 	}
 	
 	public boolean isOpenSet() {
@@ -140,6 +153,30 @@ public class GridSearchPoint {
 
 	public void setCameFrom(GridSearchPoint cameFrom) {
 		this.cameFrom = cameFrom;
+	}
+	
+	public Vector<Boid> getParticulas() {
+		return particulas;
+	}
+
+	public void setParticulas(Vector<Boid> particulas) {
+		this.particulas = particulas;
+	}
+
+	public Vector<Obstaculo> getObstaculos() {
+		return obstaculos;
+	}
+
+	public void setObstaculos(Vector<Obstaculo> obstaculos) {
+		this.obstaculos = obstaculos;
+	}
+
+	public Vector<Obstaculo> getObstaculosFuturos() {
+		return obstaculosFuturos;
+	}
+
+	public void setObstaculosFuturos(Vector<Obstaculo> obstaculosFuturos) {
+		this.obstaculosFuturos = obstaculosFuturos;
 	}
 /**
  * Método que calcula la distancia euclídea entre este punto y el que se le pasa como parámetro.Son las distancias entre

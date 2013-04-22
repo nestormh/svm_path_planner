@@ -183,7 +183,8 @@ public class Boid implements Serializable{
 		double dist = 0;
 		// Bucle que recorre toda la bandada
 		for (int i=0;i < bandada.size();i++){
-			if (i != indBoid){
+			if (bandada.elementAt(i).equals(this)){
+//			if (i != indBoid){
 				dist = bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();
 				if (dist < radioAlineacion){
 					velMedia = velMedia.plus(bandada.elementAt(i).getVelocidad());
@@ -341,7 +342,8 @@ public class Boid implements Serializable{
 	
 	public Matrix seguirObjetivo(Vector<Boid> bandada,int indBoid,Matrix obj){
 		Matrix velObj = new Matrix(2,1);
-		velObj = obj.minus(bandada.elementAt(indBoid).getPosicion());
+//		velObj = obj.minus(bandada.elementAt(indBoid).getPosicion());
+		velObj = obj.minus(this.getPosicion());
 		if(this.isLider()) // El lider es atraido con mas fuerza por el objetivo
 			velObj = velObj.times(pesoObjetivo*10);
 		else
@@ -402,10 +404,10 @@ public class Boid implements Serializable{
 //						,Boid.getObjetivo().get(0,0),Boid.getObjetivo().get(1,0));
 		for (int i=0;i < obstaculos.size();i++){
 			//si el obstáculo no está visible para el coche es como si no existiera para los boids
-			if(!obstaculos.elementAt(i).isVisible()){
-//				System.out.println("El obstáculo no está visible");
-				continue;
-			}
+//			if(!obstaculos.elementAt(i).isVisible()){
+////				System.out.println("El obstáculo no está visible");
+//				continue;
+//			}
 							
 			dist = obstaculos.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();		
 			if (dist < radioObstaculo){
@@ -528,21 +530,15 @@ public class Boid implements Serializable{
 	
 	public void calculaMover(Vector<Boid> bandada,Vector<Obstaculo> obstaculos,int indBoid, Matrix obj){
 		Matrix desp = new Matrix(2,1);
-//		Matrix despCohesion = new Matrix(2,1);
-//		Matrix despSeparacion = new Matrix(2,1);
-//		Matrix despAlineacion = new Matrix(2,1);
 		Matrix despObjetivo = new Matrix(2,1);
 		Matrix despAliCoheSep = new Matrix(2,1);
 		Matrix despObstaculo = new Matrix(2,1);
 		Matrix haciaObjetivo = new Matrix(2,1);
 		haciaObjetivo = objetivo.minus(this.getPosicion());
-//		System.out.println("el objetivo está en "+objetivo.get(0, 0)+" "+objetivo.get(1, 0));
-//		despCohesion = cohesion(bandada, indBoid);
-//		despSeparacion = separacion(bandada, indBoid);
-//		despAlineacion = alineacion(bandada, indBoid);
 		despAliCoheSep = aliCoheSep(bandada, indBoid);
 		despObjetivo = seguirObjetivo(bandada,indBoid,obj);
-		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid),haciaObjetivo);
+//		despObstaculo = evitaObstaculo(obstaculos,bandada.elementAt(indBoid),haciaObjetivo);
+		despObstaculo = evitaObstaculo(obstaculos,this,haciaObjetivo);
 //		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo)).plus(this.getVelocidad());
 		desp = ((despAliCoheSep.plus(despObjetivo)).plus(despObstaculo));
 //		desp = desp.times(1/desp.norm2());
@@ -555,9 +551,6 @@ public class Boid implements Serializable{
 //		this.setVelocidad(desp);
 		this.setVelocidad(limitaVelocidad(getAceleracion().plus(this.getVelocidad()))); 
 //		this.setPosicion(this.getPosicion().plus(this.getVelocidad()));
-//		setLineaDireccion(getPosicion().get(0,0),getPosicion().get(1,0),
-//				(getPosicion().plus(getVelocidad().times(2))).get(0,0),
-//				(getPosicion().plus(getVelocidad().times(2))).get(1,0));
 	}
 	
 	public void mover(){
