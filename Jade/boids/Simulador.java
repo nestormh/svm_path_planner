@@ -40,11 +40,11 @@ public class Simulador{
 	Coche modeCocheAEstrella = new Coche();	
 	Coche cocheSolitario = new Coche();
 	
-	int horPrediccion = 13;
-	int horControl = 2;//3;
+	int horPrediccion = 16;//13;
+	int horControl = 3;//3;
 	double landa = 1;//1;
 	double Ts = 0.1;
-	double TsPred = 0.2;
+	double TsPred = 0.1;
 	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, TsPred);	
 	ControlPredictivo contPredAEstrella = new ControlPredictivo(modeCocheAEstrella,trAEstrella, horPrediccion, horControl, landa, TsPred);
 
@@ -612,14 +612,15 @@ public class Simulador{
 	 */
 	public Coche moverVehiculo(Coche modVehi,Vector<Matrix> trayectoria,double t,boolean predictivo,boolean segSimple,ControlPredictivo cp){
 		double comand = 0;
-//		double velocidad = calculaVelocidadCoche(modVehi);
 		double velocidad = calculaVelocidadCoche(modVehi);
+//		double velocidad = 3;
 //		System.out.println("Consigna de velocidad del coche " + velocidad);
 		if(predictivo){			
 			if (trayectoria.size()<=3){
 				comand = calculaComandoVolante(modVehi,trayectoria);
 			}else{
-				double [][] trayecAux = traduceRuta(trayectoria);
+				//si el segundo parámetro es false se recorre la ruta en sentido contrario para generar trayecAux
+				double [][] trayecAux = traduceRuta(trayectoria,false);
 				Trayectoria trayec = new Trayectoria(trayecAux);
 				cp.setCarroOriginal(modVehi);				
 				trayec.situaCoche(modVehi.getX(),modVehi.getY());				
@@ -639,7 +640,7 @@ public class Simulador{
 				}
 			}
 		}
-//		System.out.println("comando de volante " + comand);
+//		System.out.println("comando de volante " + comand+" y velocidad "+velocidad);
 		modVehi.calculaEvolucion(comand,velocidad,t);		
 		return modVehi;
 	}
@@ -1660,15 +1661,23 @@ public class Simulador{
 	 * @param ruta
 	 * @return
 	 */
-	public double[][] traduceRuta(Vector<Matrix> ruta){
+	public double[][] traduceRuta(Vector<Matrix> ruta, boolean sentido){
 		if (ruta.size()==0){
 			throw new IllegalArgumentException("la ruta tiene que tener puntos para poderla traducir");
 		}
 		double [][] arrayRuta = new double[ruta.size()][2];
-		for (int i=0;i<=ruta.size()-1;i++){
-			arrayRuta[i][0] = ruta.elementAt(i).get(0,0);
-			arrayRuta[i][1] = ruta.elementAt(i).get(1,0);
-//			System.out.println("en traduceRuta x e y son "+arrayRuta[i][0]+" "+arrayRuta[i][0]);
+		if(sentido){
+			for (int i=0;i<=ruta.size()-1;i++){
+				arrayRuta[i][0] = ruta.elementAt(i).get(0,0);
+				arrayRuta[i][1] = ruta.elementAt(i).get(1,0);
+//				System.out.println("en traduceRuta x e y son "+arrayRuta[i][0]+" "+arrayRuta[i][0]);
+			}
+		} else{
+			for (int i=0;i<=ruta.size()-1;i++){
+				arrayRuta[i][0] = ruta.elementAt(ruta.size()-1-i).get(0,0);
+				arrayRuta[i][1] = ruta.elementAt(ruta.size()-1-i).get(1,0);
+//				System.out.println("en traduceRuta x e y son "+arrayRuta[i][0]+" "+arrayRuta[i][0]);
+			}
 		}
 		return arrayRuta;
 	}
@@ -2067,7 +2076,7 @@ public class Simulador{
 	 * @param resolucion TamaÃ±o del lado de la celda
 	 */
 	public void creaRejilla(double resolucion){
-		rejilla = new Grid(resolucion, getLargoEscenario(), getAnchoEscenario());
+		rejilla = new Grid(resolucion, getLargoEscenario(), getAnchoEscenario(),umbralCercania);
 //		rejilla.addObstacles(this.getObstaculos());
 //		for (int i=0; i < getObstaculos().size();i++){
 //			double posXObs = getObstaculos().elementAt(i).getPosicion().get(0,0);

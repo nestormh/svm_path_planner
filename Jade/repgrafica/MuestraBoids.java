@@ -198,6 +198,7 @@ class Dibujante2 extends JPanel{
 	}
 	
 	public void setPrediccion(double[][] prediccionPosPorFilas) {
+		System.out.println("predicción pasada al dibujante");
 		this.prediccion = prediccionPosPorFilas;		
 	}
 	
@@ -468,7 +469,7 @@ class Dibujante2 extends JPanel{
 		g3.setColor(Color.black);
 		if (prediccion != null){
 //			if (prediccion. >= 2){		
-//				System.out.println("pintando la predicción y el tamaño de la predicción es " + prediccion.length);
+				System.out.println("pintando la predicción y el tamaño de la predicción es " + prediccion.length);
 				GeneralPath predicc = new GeneralPath();
 				Point2D ptoRuta = point2Pixel(prediccion[0][0],prediccion[1][0]);
 				predicc.moveTo(ptoRuta.getX(),ptoRuta.getY());
@@ -1128,11 +1129,11 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						
 					//Código para temporizar la reproducción de la simulación
 					if(gui.play){
-//						try {
-//							Thread.sleep(gui.getVelReprod()-(long)(tSim-tInicioIteracion));
-//						} catch (Exception e) {
-//							System.out.println("No se pudo dormir el hilo principal de ejecución, el valor de velReprod es "+gui.getVelReprod());
-//						}
+						try {
+							Thread.sleep(gui.getVelReprod()-(long)(tSim-tInicioIteracion));
+						} catch (Exception e) {
+							System.out.println("No se pudo dormir el hilo principal de ejecución, el valor de velReprod es "+gui.getVelReprod());
+						}
 						tInicioIteracion = System.currentTimeMillis()/1000;
 						if (gui.playObs){
 							gui.getSim().moverObstaculos();
@@ -1143,11 +1144,11 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 
 						//Introducimos datos en la rejilla y la creamos	
 
-//						gui.getSim().creaRejilla(1);
-//						gui.getSim().getRejilla().setSim(gui.getSim());
-//						gui.getSim().getRejilla().setVelCoche(gui.getSim().getModeCocheAEstrella().getVelocidad());
-//						gui.getSim().getRejilla().setGoalPos(gui.getSim().getObjetivo().get(0, 0),gui.getSim().getObjetivo().get(1, 0));
-//						gui.getSim().getRejilla().setStartPos(gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY());
+						gui.getSim().creaRejilla(0.3);
+						gui.getSim().getRejilla().setSim(gui.getSim());
+						gui.getSim().getRejilla().setVelCoche(gui.getSim().getModeCocheAEstrella().getVelocidad());
+						gui.getSim().getRejilla().setGoalPos(gui.getSim().getObjetivo().get(0, 0),gui.getSim().getObjetivo().get(1, 0));
+						gui.getSim().getRejilla().setStartPos(gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY());
 
 						//-----------------------------------------------------------------------
 						//-----Cálculo de las diferentes trayectorias----------------------------
@@ -1157,7 +1158,7 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 					
 						gui.getSim().setRutaAEstrellaGrid(gui.getSim().getRejilla().busquedaAEstrellaConMarcado(gui.getSim().getUmbralCercania()));
 
-						//						System.out.println(gui.getSim().getRutaAEstrellaGrid().size());
+						//System.out.println(gui.getSim().getRutaAEstrellaGrid().size());
 //						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica(indice));
 //						gui.setRutaDinamica(gui.getSim().calculaRutaDinamica());
 						// Si la ruta no ha sido intersectada por un obstáculo no se vuelve a calcular
@@ -1181,8 +1182,10 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						gui.pintor.setRutaDinamica(gui.getSim().getRutaDinamica());
 						gui.pintor.setRutaAEstrella(gui.getSim().getRutaAEstrellaGrid());
 //						gui.pintor.setRutaDinamica(gui.getRutaDinamica());
-						gui.pintor.setHorPrediccion(gui.getSim().getContPred().getHorPrediccion());
-						gui.pintor.setPrediccion(gui.getSim().getContPred().getPrediccionPosPorFilas());
+//						gui.pintor.setHorPrediccion(gui.getSim().getContPred().getHorPrediccion());
+//						gui.pintor.setPrediccion(gui.getSim().getContPred().getPrediccionPosPorFilas());
+						gui.pintor.setHorPrediccion(gui.getSim().getContPredAEstrella().getHorPrediccion());
+						gui.pintor.setPrediccion(gui.getSim().getContPredAEstrella().getPrediccionPosPorFilas());
 						//Arreglar este seteo salvaje
 						gui.getSim().setRutaParcial(true);
 						
@@ -1194,11 +1197,11 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //							gui.getSim().moverVehiculo(gui.getSim().getModCoche(),gui.getSim().getRutaDinamica(),
 //									 gui.getSim().getTs(),false,true,gui.getSim().getContPred());
 //						}
-//						if(!cocheAEstrellaEnObjetivo){
-////							System.out.println("el coche no está en el objetivo");
-//							gui.getSim().moverVehiculo(gui.getSim().getModeCocheAEstrella(),gui.getSim().getRutaAEstrellaGrid(),
-//									 gui.getSim().getTs(),false,true,gui.getSim().getContPredAEstrella());
-//						}
+						if(!cocheAEstrellaEnObjetivo){
+//							System.out.println("el coche no está en el objetivo");
+							gui.getSim().moverVehiculo(gui.getSim().getModeCocheAEstrella(),gui.getSim().getRutaAEstrellaGrid(),
+									 gui.getSim().getTs(),true,false,gui.getSim().getContPredAEstrella());
+						}
 //						if(!cocheSolitarioEnObjetivo){
 //							gui.pintor.setVectorDirectorCoche(gui.getSim().moverCocheSolitario(gui.getSim().getTs()));
 //						}
@@ -1267,6 +1270,8 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //						gui.pintor.setPosCocheSolitario(gui.getSim().getPosCocheSolitario());
 						gui.pintor.setYawCoche(gui.getSim().getModCoche().getYaw());
 						gui.pintor.setYawCocheAEstrella(gui.getSim().getModeCocheAEstrella().getYaw());
+						gui.pintor.setHorPrediccion(gui.getSim().getContPredAEstrella().getHorPrediccion());
+						gui.pintor.setPrediccion(gui.getSim().getContPredAEstrella().getPrediccionPosPorFilas());
 //						gui.pintor.setYawCocheSolitario((gui.getSim().getCocheSolitario().getYaw()));						
 						/*if (gui.getRutaDinamica().size()>1){ //Comprobar si hay ruta que seguir					
 							Trayectoria tr = new Trayectoria(gui.getSim().traduceRuta(gui.getRutaDinamica()));

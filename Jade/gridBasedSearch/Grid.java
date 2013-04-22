@@ -43,8 +43,9 @@ public class Grid {
 	 * vaya a cruzar con ellos
 	 */
 	double velCoche;
+	int centro;
 
-	public Grid(double resolution, double longitudX, double longitudY){	
+	public Grid(double resolution, double longitudX, double longitudY,double radioMax){	
 //		sim = new Simulador();
 		obstaculos = new Vector<Obstaculo>();
 		boids = new Vector<Boid>();
@@ -61,7 +62,7 @@ public class Grid {
 				this.rejilla[i][j] = new GridSearchPoint(i, j, this.resolution);
 			}
 		}
-		this.matrizPesos = crearRejillaPesos(30);
+		this.matrizPesos = crearRejillaPesos((int)Math.ceil(radioMax/this.resolution));
 	}
 	
 	public void addObstacle(double posX, double posY, double dimensionX, double dimensionY){
@@ -182,7 +183,7 @@ public class Grid {
 	}
 	
 	public double[][] crearRejillaPesos(int numCeldasLado){
-		int centro = (int) Math.ceil(numCeldasLado/2);
+		centro = (int) Math.ceil(numCeldasLado/2);
 		double[][] rejillaPesos = new double[numCeldasLado][numCeldasLado];
 		for (int i=0; i < numCeldasLado; i++){
 			for (int j=0; j < numCeldasLado; j++){
@@ -298,14 +299,15 @@ public class Grid {
 				}			
 				//Se marca la celda como libre
 				this.getRejilla()[i][j].setOccupied(false);
-//				System.out.println(pesos.length);
+//				System.out.println("Celda "+i+","+j+" libre");
 				// Se asigna un peso de marcado igual a la distancia con el boid más cercano, por eso se comprueba si la distancia con el
 				// boid actual es menor que el peso de marcado que la celda tenga asignado, de manera que sólo se sobreescribe si la distancia
 				// con el boid actual es menor. Antes de añadir los boids a la rejilla con este método, la rejilla tiene que haber sido reseteada
 				// con el método marcarTodoOcupado, que además de marcar todas las celdas como ocupadas asigna un valor infinito a el peso de marcado de 
 				//cada celda
 				//TODO Repasar la siguiente linea!!!!!!!!!!!!!!!!!
-				double peso_marcado = this.matrizPesos[i-xIndexBoid+15][j-yIndexBoid+15]*getResolution(); 
+
+				double peso_marcado = this.matrizPesos[i-xIndexBoid+centro][j-yIndexBoid+centro]*getResolution(); 
 				if(peso_marcado < this.getRejilla()[i][j].getPeso_marcado()){
 					this.getRejilla()[i][j].setPeso_marcado(peso_marcado);
 				}			
@@ -587,6 +589,7 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 		closedSet.clear();	
 		clearSearchData();//Desmarcamos las celdas marcadas en la iteración anterior como pertenecientes al open o closedset
 		int [] start = getStartPos();
+//		System.out.println("la posición del coche es (en búsqueda A*) "+start[0]+" "+start[1]);
 		int [] goal = getGoalPos();	
 		this.rejilla[start[0]][start[1]].setG_score(0);
 		this.rejilla[start[0]][start[1]].setH_score(this.rejilla[start[0]][start[1]].distThisPoint2Point(goal[0],goal[1]));
@@ -599,7 +602,7 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 		//--------MARCO LA REJILLA CON LA INFORMACIÓN DE LOS BOIDS------------------------		
 		
 		//limpiamos las celdas anteriores marcadas con obstáculos
-		clearObstacles();
+//		clearObstacles();
 		//Clonamos el vector de boids
 		this.setBoids(this.sim.getBandada());
 		//Marcamos todas las celdas como ocupadas
@@ -656,18 +659,18 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 						continue; // si el nodo está en el closedSet no hacemos nada con el y seguimos mirando						
 					}
 					//Clonamos el vector de obstáculos
-					this.setObstaculos(this.sim.getObstaculos());
+//					this.setObstaculos(this.sim.getObstaculos());
 					
 					
-//					//Calculamos el tiempo que el vehículo va a alcanzar el obstáculo
+					//Calculamos el tiempo que el vehículo va a alcanzar el obstáculo
 //					double t = actual.getG_score()/this.getVelCoche();
 ////					System.out.println("tiempo t "+t);
 //					//Calculamos la posición de los obstáculos un tiempo t después
-////					setObstaculos(this.getSim().moverObstaculos(t,this.getObstaculos()));
+//					setObstaculos(this.getSim().moverObstaculos(t,this.getObstaculos()));
 //					this.getSim().moverObstaculos(t,this.getObstaculos());
 					
 					
-//					//limpiamos las celdas anteriores marcadas con obstáculos
+					//limpiamos las celdas anteriores marcadas con obstáculos
 //					clearObstacles();
 //					//Clonamos el vector de boids
 //					this.setBoids(this.sim.getBandada());
@@ -675,7 +678,7 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 //					marcarTodoOcupado();
 //					//Marcamos las celdas próximas a los boids como libres y les asignamos un peso
 //					addBoids(this.getBoids(), RadioBusqueda);
-//					//Marcamos como ocupadas las celdas que intersectan con la superficie de los obstáculos
+					//Marcamos como ocupadas las celdas que intersectan con la superficie de los obstáculos
 //					addObstacles(this.getObstaculos());
 					if (this.rejilla[j][k].isOccupied()){
 //						System.out.println("la celda está ocupada por un obstáculo");
