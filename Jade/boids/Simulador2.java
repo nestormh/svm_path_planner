@@ -237,6 +237,21 @@ public class Simulador2{
     	posicionarBandada(posInicial);
 	}
 	
+	public void creaBandadaUniforme(){		
+		getBandada().clear();
+		for (double i = 0; i < largoEscenario;i = i + umbralCercania/2){
+			for (double j = 0; j < anchoEscenario; j = j + umbralCercania/2){
+				double pos[] = {i,j};
+				Matrix posi = new Matrix(pos,2);
+				double vel[] = {0,0};
+				Matrix velo = new Matrix(vel,2);
+				double ace[] = {0,0};
+				Matrix acel = new Matrix(ace,2);
+				bandada.add(new Boid(posi, velo, acel));
+			}
+		}
+	}
+	
 	/**Limpia el vector de boids*/	
 	public void borrarBandada(){
 		bandada.clear();
@@ -723,7 +738,7 @@ public class Simulador2{
 	 */
 //	public int moverBoids(int indMinAnt){
 	public void moverBoids(Coche ModCoche){
-		marcaObstaculosVisibles(getObstaculos());
+//		marcaObstaculosVisibles(getObstaculos());
 		int indLider = 0;
 		double distMin = Double.POSITIVE_INFINITY;
 		boolean liderEncontrado = false;
@@ -1845,7 +1860,7 @@ public class Simulador2{
 	 * @param resolucion Tamaño del lado de la celda
 	 */
 	public void creaRejilla(double resolucion){
-		rejilla = new Grid(resolucion, getLargoEscenario(), getAnchoEscenario());
+		rejilla = new Grid(resolucion, getLargoEscenario(), getAnchoEscenario(),umbralCercania);
 //		rejilla.addObstacles(this.getObstaculos());
 //		for (int i=0; i < getObstaculos().size();i++){
 //			double posXObs = getObstaculos().elementAt(i).getPosicion().get(0,0);

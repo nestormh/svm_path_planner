@@ -183,7 +183,7 @@ public class Boid implements Serializable{
 		double dist = 0;
 		// Bucle que recorre toda la bandada
 		for (int i=0;i < bandada.size();i++){
-			if (bandada.elementAt(i).equals(this)){
+			if (!bandada.elementAt(i).equals(this)){
 //			if (i != indBoid){
 				dist = bandada.elementAt(i).getPosicion().minus(this.getPosicion()).norm2();
 				if (dist < radioAlineacion){

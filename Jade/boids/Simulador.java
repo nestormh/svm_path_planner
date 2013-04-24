@@ -40,9 +40,9 @@ public class Simulador{
 	Coche modeCocheAEstrella = new Coche();	
 	Coche cocheSolitario = new Coche();
 	
-	int horPrediccion = 16;//13;
-	int horControl = 3;//3;
-	double landa = 1;//1;
+	int horPrediccion = 20;//13;
+	int horControl = 5;//3;
+	double landa = 10;//1;
 	double Ts = 0.1;
 	double TsPred = 0.1;
 	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, TsPred);	
@@ -354,7 +354,7 @@ public class Simulador{
 		Random rand = new Random();
 		int numObst = (int) Math.floor(largoEscenario/separacion);
 //		for (int i=0;i<numObst;i++){
-		for (int i=3;i<numObst-1;i++){ //los índices del bucle hacen que los primeros y el último obstáculo no se creen
+		for (int i=5;i<numObst-1;i++){ //los índices del bucle hacen que los primeros y el último obstáculo no se creen
 			double posX = separacion*i;
 			double posY = Math.random()*anchoEscenario;
 //			double velX = rand.nextGaussian()*velMax;
@@ -622,11 +622,24 @@ public class Simulador{
 				//si el segundo par�metro es false se recorre la ruta en sentido contrario para generar trayecAux
 				double [][] trayecAux = traduceRuta(trayectoria,false);
 				Trayectoria trayec = new Trayectoria(trayecAux);
+				
+				//Hacemos copia de los estados internos de los sistemas de direcci�n y tracci�n 
+				double[] arrayEstadoVolante = {modVehi.getEstado().get(0, 0),modVehi.getEstado().get(1, 0),modVehi.getEstado().get(2, 0)};
+				Matrix estadoVolanteAux = new Matrix(arrayEstadoVolante,3);
+				
+				double[] arrayEstadoVel = {modVehi.getEstadoVel().get(0, 0),modVehi.getEstadoVel().get(1, 0)};
+				Matrix estadoVelAux = new Matrix(arrayEstadoVel,2);
+				
+				
 				cp.setCarroOriginal(modVehi);				
 				trayec.situaCoche(modVehi.getX(),modVehi.getY());				
 				cp.setRuta(trayec);
 				comand  = cp.calculaComando();
 				comand = sibtra.util.UtilCalculos.limita(comand,-Math.PI/6,Math.PI/6);
+				
+				//Los estados copiados antes de ejecutar el controlador preditivo se asignan de nuevo
+				modVehi.setEstadoVel(estadoVelAux);
+				modVehi.setEstado(estadoVolanteAux);
 			}	
 //			logPosturaCoche.add(modCoche.getX(),modCoche.getY(),modCoche.getYaw());
 		}
@@ -640,8 +653,14 @@ public class Simulador{
 				}
 			}
 		}
-//		System.out.println("comando de volante " + comand+" y velocidad "+velocidad);
+//		System.out.println("comando de volante " + comand+" y consigna de velocidad "+velocidad+" con Ts= "+t);
+//		System.out.println("Velocidad instantanea "+modVehi.getVelocidad());
+//		System.out.println("Estado interno del modelo de la tracci�n "+modVehi.getEstadoVel().get(0, 0)+" "+modVehi.getEstadoVel().get(1, 0));
+//		System.out.println("Este simulador es "+this.toString());
+//		System.out.println("-----------");
 		modVehi.calculaEvolucion(comand,velocidad,t);		
+//		modVehi.calculaEvolucion(0,3,t);
+		
 		return modVehi;
 	}
 	
@@ -879,7 +898,8 @@ public class Simulador{
 //					getBandada().elementAt(j).calculaMover(getBandada()
 //						,getObstaculos(),j,Boid.getObjetivo());
 					setObstaculosFuturos(getObstaculos()); 
-					//calculo el tiempo que el coche tardaría en alcanzar este boid
+					//calculo el tiempo que el coche tardaría en alcanzar este boid. 
+//					double tiempoExtra = 3;
 					double t = getBandada().elementAt(j).distThisBoid2Point(ModCoche.getX(),ModCoche.getY())/ModCoche.getVelocidad();
 					//prediccion de donde van a estar los obstáculos cuando el coche llegue al luga r que ocupa este boid en este instante
 					moverObstaculos(t,getObstaculosFuturos());

@@ -78,52 +78,7 @@ public class Grid {
 		int limitSupX = xIndex + offSetCeldasX;
 		int limitInfY = yIndex - offSetCeldasY;
 		int limitSupY = yIndex + offSetCeldasY;
-//		double posXObsGrid = xIndexBoid*getResolution();
-//		double posYObsGrid = yIndexBoid*getResolution();
-//		while (gridOccupiedLeft && (incrLeft > 0)){//exploramos hacia la izquierda
-//			if ((incrLeft*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
-//				if (((incrLeft*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
-//					incrLeft--;					
-//				}else{
-//					gridOccupiedLeft = false;
-//				}
-//			}else{
-//				gridOccupiedLeft = false;
-//			}			
-//		}
-//		while (gridOccupiedRight && (incrRight < getNumPtosX())){//exploramos hacia la derecha
-//			if ((incrRight*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
-//				if (((incrRight*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
-//					incrRight++;
-//				}else{
-//					gridOccupiedRight = false;
-//				}
-//			}else{
-//				gridOccupiedRight = false;
-//			}			
-//		}
-//		while (gridOccupiedUp && (incrUp < getNumPtosY())){//exploramos hacia arriba
-//			if ((incrUp*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
-//				if (((incrUp*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
-//					incrUp++;
-//				}else{
-//					gridOccupiedUp = false;
-//				}
-//			}else{
-//				gridOccupiedUp = false;
-//			}			
-//		}
-//		while (gridOccupiedDown && (incrDown > 0)){//exploramos hacia abajo
-//			if ((incrDown*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
-//				if (((incrDown*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
-//					incrDown--;
-//				}else{
-//					gridOccupiedDown = false;
-//				}
-//			}else{
-//				gridOccupiedDown = false;
-//			}			
-//		}
+
 		if (limitInfX < 0){
 			limitInfX = 0;
 		}else if(limitInfX > numPtosX-1){
@@ -213,54 +168,7 @@ public class Grid {
 		int limitSupX = xIndexBoid + offSetCeldas;
 		int limitInfY = yIndexBoid - offSetCeldas;
 		int limitSupY = yIndexBoid + offSetCeldas;
-//		int incrLeft = xIndexBoid;
-//		int incrRight = xIndexBoid;
-//		int incrUp = yIndexBoid;
-//		int incrDown = yIndexBoid;		
-//		while (gridOccupiedLeft && (incrLeft > 0)){//exploramos hacia la izquierda
-//			if ((incrLeft*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
-//				if (((incrLeft*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
-//					incrLeft--;					
-//				}else{
-//					gridOccupiedLeft = false;
-//				}
-//			}else{
-//				gridOccupiedLeft = false;
-//			}			
-//		}
-//		while (gridOccupiedRight && (incrRight < getNumPtosX())){//exploramos hacia la derecha
-//			if ((incrRight*getResolution()) < (posX+dimensionX/2)){ //miramos que se cumpla la condición del borde izquierdo
-//				if (((incrRight*getResolution())+getResolution()) > (posX-dimensionX/2)){//miramos que se cumpla la condición del borde derecho
-//					incrRight++;
-//				}else{
-//					gridOccupiedRight = false;
-//				}
-//			}else{
-//				gridOccupiedRight = false;
-//			}			
-//		}
-//		while (gridOccupiedUp && (incrUp < getNumPtosY())){//exploramos hacia arriba
-//			if ((incrUp*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
-//				if (((incrUp*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
-//					incrUp++;
-//				}else{
-//					gridOccupiedUp = false;
-//				}
-//			}else{
-//				gridOccupiedUp = false;
-//			}			
-//		}
-//		while (gridOccupiedDown && (incrDown > 0)){//exploramos hacia abajo
-//			if ((incrDown*getResolution()) < (posY+dimensionY/2)){ //miramos que se cumpla la condición del borde izquierdo
-//				if (((incrDown*getResolution())+getResolution()) > (posY-dimensionY/2)){//miramos que se cumpla la condición del borde derecho
-//					incrDown--;
-//				}else{
-//					gridOccupiedDown = false;
-//				}
-//			}else{
-//				gridOccupiedDown = false;
-//			}			
-//		}
+
 		if (limitInfX < 0){
 			limitInfX = 0;
 		}else if(limitInfX > numPtosX-1){
@@ -305,9 +213,8 @@ public class Grid {
 				// con el boid actual es menor. Antes de añadir los boids a la rejilla con este método, la rejilla tiene que haber sido reseteada
 				// con el método marcarTodoOcupado, que además de marcar todas las celdas como ocupadas asigna un valor infinito a el peso de marcado de 
 				//cada celda
-				//TODO Repasar la siguiente linea!!!!!!!!!!!!!!!!!
-
-				double peso_marcado = this.matrizPesos[i-xIndexBoid+centro][j-yIndexBoid+centro]*getResolution(); 
+				double gananciaPesado = 4;
+				double peso_marcado = this.matrizPesos[i-xIndexBoid+centro][j-yIndexBoid+centro]*getResolution()*gananciaPesado; 
 				if(peso_marcado < this.getRejilla()[i][j].getPeso_marcado()){
 					this.getRejilla()[i][j].setPeso_marcado(peso_marcado);
 				}			
@@ -789,8 +696,10 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 	
 	public void clearVectorObstaculos(){
 		for (int i=0;i<getNumPtosX();i++){
-			for (int j=0;j<getNumPtosY();j++){		
-				this.rejilla[i][j].obstaculos.clear();
+			for (int j=0;j<getNumPtosY();j++){	
+				if(!this.rejilla[i][j].obstaculos.isEmpty()){
+					this.rejilla[i][j].obstaculos.clear();
+				}				
 			}
 		}
 	}
