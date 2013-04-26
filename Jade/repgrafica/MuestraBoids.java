@@ -1298,8 +1298,8 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 							gui.getSim().moverObstaculos();
 						}
 						
-						gui.getSim2().moverBoids(gui.getSim2().getModCoche());
 						gui.getSim().moverBoids(gui.getSim().getModCoche());
+						gui.getSim2().moverBoids(gui.getSim2().getModCocheMarcado());						
 
 						//Introducimos datos en la rejilla y la creamos
 						
@@ -1312,15 +1312,15 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						
 						gui.getSim().creaRejilla(0.3);
 						gui.getSim().getRejilla().setSim(gui.getSim());
-						gui.getSim().getRejilla().setVelCoche(gui.getSim().getModCoche().getVelocidad());
+						gui.getSim().getRejilla().setVelCoche(gui.getSim().getModeCocheAEstrella().getVelocidad());
 						gui.getSim().getRejilla().setGoalPos(gui.getSim().getObjetivo().get(0, 0),gui.getSim().getObjetivo().get(1, 0));
-						gui.getSim().getRejilla().setStartPos(gui.getSim().getModCoche().getX(),gui.getSim().getModCoche().getY());
+						gui.getSim().getRejilla().setStartPos(gui.getSim().getModeCocheAEstrella().getX(),gui.getSim().getModeCocheAEstrella().getY());
 						
 						gui.getSim2().creaRejilla(0.3);
 						gui.getSim2().getRejilla().setSim(gui.getSim2());
-						gui.getSim2().getRejilla().setVelCoche(gui.getSim2().getModCoche().getVelocidad());
+						gui.getSim2().getRejilla().setVelCoche(gui.getSim2().getModCocheMarcado().getVelocidad());
 						gui.getSim2().getRejilla().setGoalPos(gui.getSim2().getObjetivo().get(0, 0),gui.getSim2().getObjetivo().get(1, 0));
-						gui.getSim2().getRejilla().setStartPos(gui.getSim2().getModCoche().getX(),gui.getSim2().getModCoche().getY());
+						gui.getSim2().getRejilla().setStartPos(gui.getSim2().getModCocheMarcado().getX(),gui.getSim2().getModCocheMarcado().getY());
 
 						
 						//-----------------------------------------------------------------------
@@ -1328,14 +1328,16 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 						//-----------------------------------------------------------------------
 						
 						
-						gui.getSim2().setRutaDinamica(gui.getSim2().calculaRutaDinamica(gui.getSim2().getModCoche()));
+						gui.getSim().setRutaDinamica(gui.getSim().calculaRutaDinamica(gui.getSim().getModCoche()));
+						gui.getSim().setRutaAEstrellaGrid(gui.getSim().getRejilla().busquedaAEstrella());
+						gui.getSim2().setRutaMarcadoGrid(gui.getSim2().getRejilla().busquedaAEstrellaConMarcado(gui.getSim2().getUmbralCercania()));
 //						gui.getSim().setRutaAEstrellaGrid(gui.getSim().suavizador(gui.getSim().getRejilla().busquedaAEstrellaConMarcado(gui.getSim().getUmbralCercania()),0.25));
 						
 						//Linea para A* con marcado
 //						gui.getSim().setRutaAEstrellaGrid(gui.getSim().getRejilla().busquedaAEstrellaConMarcado(gui.getSim().getUmbralCercania()));
-//						gui.getSim().setRutaAEstrellaGrid(gui.getSim().getRejilla().busquedaAEstrella());
 						
-						gui.getSim().setRutaDinamica(gui.getSim().calculaRutaDinamica(gui.getSim().getModCoche()));
+						
+//						gui.getSim().setRutaDinamica(gui.getSim().calculaRutaDinamica(gui.getSim().getModCoche()));
 						
 						
 						//System.out.println(gui.getSim().getRutaAEstrellaGrid().size());
@@ -1359,12 +1361,10 @@ public class MuestraBoids extends JApplet implements ChangeListener,ActionListen
 //						}					
 //						gui.getSim().setRutaDinamica(gui.getSim().suavizador(0.1));
 //						gui.pintor.setRutaDinamica(gui.getSim().busquedaAEstrella());
-						gui.pintor.setRutaDinamica(gui.getSim2().getRutaDinamica());
+						gui.pintor.setRutaDinamica(gui.getSim().getRutaDinamica());
+						gui.pintor.setRutaAEstrella(gui.getSim().getRutaAEstrellaGrid());
+						gui.pintor.setRutaMarcado(gui.getSim2().getRutaMarcadoGrid());						
 						
-						//Linea para A* con marcado
-//						gui.pintor.setRutaAEstrella(gui.getSim().getRutaAEstrellaGrid());
-						
-						gui.pintor.setRutaAEstrella(gui.getSim().getRutaDinamica());
 //						gui.pintor.setRutaDinamica(gui.getRutaDinamica());
 //						gui.pintor.setHorPrediccion(gui.getSim().getContPred().getHorPrediccion());
 //						gui.pintor.setPrediccion(gui.getSim().getContPred().getPrediccionPosPorFilas());
