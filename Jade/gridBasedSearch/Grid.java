@@ -62,7 +62,7 @@ public class Grid {
 				this.rejilla[i][j] = new GridSearchPoint(i, j, this.resolution);
 			}
 		}
-		this.matrizPesos = crearRejillaPesos((int)Math.ceil(radioMax/this.resolution));
+		this.matrizPesos = crearRejillaPesos((int)Math.ceil(radioMax/this.resolution)*10);
 	}
 	
 	public void addObstacle(double posX, double posY, double dimensionX, double dimensionY){
@@ -213,7 +213,7 @@ public class Grid {
 				// con el boid actual es menor. Antes de añadir los boids a la rejilla con este método, la rejilla tiene que haber sido reseteada
 				// con el método marcarTodoOcupado, que además de marcar todas las celdas como ocupadas asigna un valor infinito a el peso de marcado de 
 				//cada celda
-				double gananciaPesado = 4;
+				double gananciaPesado = 3;
 				double peso_marcado = this.matrizPesos[i-xIndexBoid+centro][j-yIndexBoid+centro]*getResolution()*gananciaPesado; 
 				if(peso_marcado < this.getRejilla()[i][j].getPeso_marcado()){
 					this.getRejilla()[i][j].setPeso_marcado(peso_marcado);
@@ -361,7 +361,7 @@ public class Grid {
 //			double dimensionX = RadioBusqueda;//RadioBusqueda/2
 //			double dimensionY = dimensionX;
 //			System.out.println("introducimos los boids en la rejilla ");
-			this.addBoid(posXBoid, posYBoid, RadioBusqueda/2);
+			this.addBoid(posXBoid, posYBoid, RadioBusqueda);
 		}		
 	}
 	

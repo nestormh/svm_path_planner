@@ -67,11 +67,11 @@ public class Boid implements Serializable{
 	public Boid came_from;
 	//------Acaban los campos para la gestión de la búsqueda a*------------------------		
 	public boolean conectado = false;
-	static double radioObstaculo = 5.5;//5.5;
+	static double radioObstaculo = 6;//5.5;
 //	static double radioObstaculoLejos = 3;
 //	static double radioObstaculoCerca = 5;
 	static double radioCohesion = 5;
-	static double radioSeparacion = 0.5;//2;
+	static double radioSeparacion = 1;//0.5;//2;
 	static double radioAlineacion = 5;//3;
 	static double pesoCohesion = 0;//0.1;//0;//0.01;
 	static double pesoSeparacion = 1;//0.2;//0.3; // 10

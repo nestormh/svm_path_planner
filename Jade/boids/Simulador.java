@@ -43,14 +43,19 @@ public class Simulador{
 	Coche modCocheMarcado = new Coche();
 	Coche cocheSolitario = new Coche();
 	
-	int horPrediccion = 20;//13;
-	int horControl = 3;//3;   //5 para la ruta generada con A* con marcado de rejilla
-	double landa = 1;//1;    //10 para la ruta generada con A* con marcado de rejilla
+	int horPrediccion = 13;
+	int horPrediccionMarcado = 16;
+	int horControl = 3;
+	int horControlMarcado = 6;
+	double landa = 1;//1;
+	double landaMarcado = 10;
+	double alpha = 1;
+	double alphaMarcado = 0.8;
 	double Ts = 0.1;
 	double TsPred = 0.1;
-	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, TsPred);	
-	ControlPredictivo contPredAEstrella = new ControlPredictivo(modeCocheAEstrella,trAEstrella, horPrediccion, horControl, landa, TsPred);
-	ControlPredictivo contPredMarcado = new ControlPredictivo(modCocheMarcado,trMarcado, horPrediccion, horControl, landa, TsPred);	
+	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, alpha, TsPred);	
+	ControlPredictivo contPredAEstrella = new ControlPredictivo(modeCocheAEstrella,trAEstrella, horPrediccion, horControl, landa, alpha, TsPred);
+	ControlPredictivo contPredMarcado = new ControlPredictivo(modCocheMarcado,trMarcado, horPrediccionMarcado, horControlMarcado, landaMarcado, alphaMarcado, TsPred);	
 
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Simulaciones"));
 	/**Coordenadas del coche con comportamiento reactivo*/
@@ -78,9 +83,9 @@ public class Simulador{
 	int tamanoBandada;
 	/** Vector donde se almacenan los boids de la bandada*/
 	Vector<Boid> bandada = new Vector<Boid>();
-	/** Vector donde se almacenan los boids vecinos a una determianda partícula*/
+	/** Vector donde se almacenan los boids vecinos a una determianda partï¿½cula*/
 	Vector<Boid> particulasVecinas = new Vector<Boid>();
-	/** Vector donde se almacenan los obstáculos vecinos para una determinada partícula*/
+	/** Vector donde se almacenan los obstï¿½culos vecinos para una determinada partï¿½cula*/
 	Vector<Obstaculo> obstaculosVecinos = new Vector<Obstaculo>();
 	/** Vector donde se almacenan los boids que han alcanzado el objetivo*/
 	Vector<Boid> boidsOk = new Vector<Boid>();
@@ -265,8 +270,8 @@ public class Simulador{
 	
 	public void creaBandadaUniforme(){		
 		getBandada().clear();
-		for (double i = 0; i < largoEscenario;i = i + umbralCercania/2){
-			for (double j = 0; j < anchoEscenario; j = j + umbralCercania/2){
+		for (double i = 0; i < largoEscenario;i = i + umbralCercania/2){ //umbralCercania/2
+			for (double j = 0; j < anchoEscenario; j = j + umbralCercania/2){ //umbralCercania/2
 				double pos[] = {i,j};
 				Matrix posi = new Matrix(pos,2);
 				double vel[] = {0,0};
@@ -376,7 +381,7 @@ public class Simulador{
 		Random rand = new Random();
 		int numObst = (int) Math.floor(largoEscenario/separacion);
 //		for (int i=0;i<numObst;i++){
-		for (int i=5;i<numObst-1;i++){ //los Ã­ndices del bucle hacen que los primeros y el Ãºltimo obstÃ¡culo no se creen
+		for (int i=3;i<numObst-1;i++){ //los Ã­ndices del bucle hacen que los primeros y el Ãºltimo obstÃ¡culo no se creen
 			double posX = separacion*i;
 			double posY = Math.random()*anchoEscenario;
 //			double velX = rand.nextGaussian()*velMax;
@@ -640,11 +645,11 @@ public class Simulador{
 			if (trayectoria.size()<=3){
 				comand = calculaComandoVolante(modVehi,trayectoria);
 			}else{
-				//si el segundo parámetro es false se recorre la ruta en sentido contrario para generar trayecAux
+				//si el segundo parï¿½metro es false se recorre la ruta en sentido contrario para generar trayecAux
 				double [][] trayecAux = traduceRuta(trayectoria,sentidoNormal);
 				Trayectoria trayec = new Trayectoria(trayecAux,0.1);
 				
-				//Hacemos copia de los estados internos de los sistemas de dirección y tracción 
+				//Hacemos copia de los estados internos de los sistemas de direcciï¿½n y tracciï¿½n 
 				double[] arrayEstadoVolante = {modVehi.getEstado().get(0, 0),modVehi.getEstado().get(1, 0),modVehi.getEstado().get(2, 0)};
 				Matrix estadoVolanteAux = new Matrix(arrayEstadoVolante,3);
 				
@@ -683,8 +688,8 @@ public class Simulador{
 		
 //		System.out.println("comando de volante " + comand+" y consigna de velocidad "+velocidad+" con Ts= "+t);
 //		System.out.println("Velocidad instantanea "+modVehi.getVelocidad());
-//		System.out.println("Estado interno del modelo de la tracción "+modVehi.getEstadoVel().get(0, 0)+" "+modVehi.getEstadoVel().get(1, 0));
-//		System.out.println("Este simulador es "+this.toString());
+//		System.out.println("Estado interno del modelo de la tracciï¿½n "+modVehi.getEstadoVel().get(0, 0)+" "+modVehi.getEstadoVel().get(1, 0));
+//		System.out.println("Este coche es "+modVehi.toString());
 //		System.out.println("-----------");
 		modVehi.calculaEvolucion(comand,velocidad,t);		
 //		modVehi.calculaEvolucion(0,3,t);
@@ -897,10 +902,10 @@ public class Simulador{
 				getBandada().elementAt(j).setAntiguo((double)contIteraciones);
 				getBandada().elementAt(j).calculaValoracion();			
 				
-				//-----------AÑADO CODIGO PARA LA OPTIMIZACION DE LA BUSQUEDA DE VECINOS------------------------
+				//-----------Aï¿½ADO CODIGO PARA LA OPTIMIZACION DE LA BUSQUEDA DE VECINOS------------------------
 				
 				
-				//La partícula se encuenta dentro del escenario, por lo que buscamos el gridSearchPoint de la rejilla uniforme que le corresponde y la apuntamos
+				//La partï¿½cula se encuenta dentro del escenario, por lo que buscamos el gridSearchPoint de la rejilla uniforme que le corresponde y la apuntamos
 				if(getBandada().elementAt(j).getPosicion().get(0,0) < getLargoEscenario() && getBandada().elementAt(j).getPosicion().get(0,0) > 0 &&
 						getBandada().elementAt(j).getPosicion().get(1,0) < getAnchoEscenario() && getBandada().elementAt(j).getPosicion().get(1,0) > 0){
 					int indiceX = (int)Math.floor(getBandada().elementAt(j).getPosicion().get(0,0)/getRejilla().getResolution());
@@ -910,14 +915,14 @@ public class Simulador{
 						getRejilla().getRejilla()[indiceX][indiceY].getParticulas().add(this.getBandada().elementAt(j));
 					}
 					
-//					System.out.println("tamaño bandada "+ this.getBandada().size()+"boid "+j);
+//					System.out.println("tamaï¿½o bandada "+ this.getBandada().size()+"boid "+j);
 //					System.out.println("indices de la rejilla"+ getRejilla().getNumPtosX()+ " "+getRejilla().getNumPtosY());
 //					System.out.println("indices calculados, x= "+ indiceX + " y= "+indiceY);
-//					System.out.println("posición del boid, x= "+ getBandada().elementAt(j).getPosicion().get(0,0)+" y= "+getBandada().elementAt(j).getPosicion().get(1, 0));
+//					System.out.println("posiciï¿½n del boid, x= "+ getBandada().elementAt(j).getPosicion().get(0,0)+" y= "+getBandada().elementAt(j).getPosicion().get(1, 0));
 					
 
 				}
-//				else{ // si está fuera del escenario eliminamos la partícula
+//				else{ // si estï¿½ fuera del escenario eliminamos la partï¿½cula
 //					getBandada().remove(j);
 //				}
 				
@@ -927,19 +932,19 @@ public class Simulador{
 //						,getObstaculos(),j,Boid.getObjetivo());
 					setObstaculosFuturos(getObstaculos()); 
 					//calculo el tiempo que el coche tardarÃ­a en alcanzar este boid. 
-//					double tiempoExtra = 3;
+					double tiempoExtra = 1.5;
 					double t = 0;
 					if(ModCoche.getVelocidad() > 0){
-						t = getBandada().elementAt(j).distThisBoid2Point(ModCoche.getX(),ModCoche.getY())/ModCoche.getVelocidad();
+						t = (tiempoExtra*getBandada().elementAt(j).distThisBoid2Point(ModCoche.getX(),ModCoche.getY()))/ModCoche.getVelocidad();
 					}					
 					//prediccion de donde van a estar los obstÃ¡culos cuando el coche llegue al luga r que ocupa este boid en este instante
 					moverObstaculos(t,getObstaculosFuturos());
 					
 					//-----------------------------------------------------------------------------------
-					//------------AÑADO MÉTODOS PARA MEJORAR EL RENDIMIENTO DEL ALGORITMO-----------------
+					//------------Aï¿½ADO Mï¿½TODOS PARA MEJORAR EL RENDIMIENTO DEL ALGORITMO-----------------
 					//-----------------------------------------------------------------------------------
 					
-					// Busco las partículas vecinas, para ello se calcula la celda en la que se encuentra la partícula en estudio y el offset de celdas en el que se
+					// Busco las partï¿½culas vecinas, para ello se calcula la celda en la que se encuentra la partï¿½cula en estudio y el offset de celdas en el que se
 					// quiere comprobar si hay vecinas
 					
 					this.particulasVecinas.clear();
@@ -951,7 +956,7 @@ public class Simulador{
 					this.obstaculosVecinos = getRejilla().buscarObstaculosVecinos((int)Math.floor(getBandada().elementAt(j).getPosicion().get(0,0)/getRejilla().getResolution()),
 							(int)Math.floor(getBandada().elementAt(j).getPosicion().get(1,0)/getRejilla().getResolution()), 
 							(int)Math.floor(Boid.radioObstaculo/getRejilla().getResolution()));
-//					System.out.println("tamaño del vector de partículas vecinas " + particulasVecinas.size());
+//					System.out.println("tamaï¿½o del vector de particulas vecinas " + particulasVecinas.size());
 					
 					getBandada().elementAt(j).calculaMover(this.particulasVecinas
 							,this.obstaculosVecinos,j,Boid.getObjetivo());
@@ -999,7 +1004,7 @@ public class Simulador{
 				contPensar = contIteraciones + incrPensar;			
 			}
 			
-			//----------BORRO LAS PARTÍCULAS Y OBSTÁCULOS APUNTADAS EN LOS GRIDsEARHpOINT DE LA REJILLA UNIFORME----
+			//----------BORRO LAS PARTï¿½CULAS Y OBSTï¿½CULOS APUNTADAS EN LOS GRIDsEARHpOINT DE LA REJILLA UNIFORME----
 			this.getRejilla().clearVectorParticulas();
 			
 //			if (indMinAnt<getBandada().size())
@@ -1049,7 +1054,7 @@ public class Simulador{
 	public void moverObstaculos(){
 		if(getObstaculos().size() != 0){
 			
-			//Borro los obstáculos apuntados en los gridSearhPoint de la rejilla uniforme
+			//Borro los obstï¿½culos apuntados en los gridSearhPoint de la rejilla uniforme
 			
 			getRejilla().clearVectorObstaculos();
 			
@@ -1079,11 +1084,11 @@ public class Simulador{
 					getObstaculos().elementAt(i).setPosicion(posi);
 				}
 				
-				//-----------AÑADO CODIGO PARA LA OPTIMIZACION DE LA BUSQUEDA DE VECINOS------------------------
+				//-----------Aï¿½ADO CODIGO PARA LA OPTIMIZACION DE LA BUSQUEDA DE VECINOS------------------------
 				
 				int indiceX = (int)Math.floor(getObstaculos().elementAt(i).getPosicion().get(0,0)/getRejilla().getResolution());
 				int indiceY = (int)Math.floor(getObstaculos().elementAt(i).getPosicion().get(1,0)/getRejilla().getResolution());
-//				System.out.println("número de obstáculos "+this.getObstaculos().size()+"obstaculo "+i);
+//				System.out.println("nï¿½mero de obstï¿½culos "+this.getObstaculos().size()+"obstaculo "+i);
 				if(indiceX >= 0 && indiceX <= getRejilla().getNumPtosX()-1 && indiceY >= 0 && indiceY <= getRejilla().getNumPtosY()-1 ){
 					getRejilla().getRejilla()[indiceX][indiceY].getObstaculos().add(this.getObstaculos().elementAt(i));
 				}
@@ -1104,18 +1109,18 @@ public class Simulador{
 		if(obstaculos.size() != 0){
 			for(int i = 0;i<obstaculos.size();i++){
 				
-//				//-----------AÑADO CODIGO PARA LA OPTIMIZACION DE LA BUSQUEDA DE VECINOS------------------------
+//				//-----------Aï¿½ADO CODIGO PARA LA OPTIMIZACION DE LA BUSQUEDA DE VECINOS------------------------
 //				
 //				
-//				//El obstáculo se encuenta dentro del escenario, por lo que buscamos el gridSearchPoint de la rejilla uniforme que le corresponde y la apuntamos
+//				//El obstï¿½culo se encuenta dentro del escenario, por lo que buscamos el gridSearchPoint de la rejilla uniforme que le corresponde y la apuntamos
 //				if(getObstaculos().elementAt(i).getPosicion().get(0,0) < getLargoEscenario() && getObstaculos().elementAt(i).getPosicion().get(0,0) > 0 &&
 //						getObstaculos().elementAt(i).getPosicion().get(1,0) < getAnchoEscenario() && getObstaculos().elementAt(i).getPosicion().get(1,0) > 0){
 //					int indiceX = (int)Math.floor(getObstaculos().elementAt(i).getPosicion().get(0,0)/getRejilla().getResolution());
 //					int indiceY = (int)Math.floor(getObstaculos().elementAt(i).getPosicion().get(1,0)/getRejilla().getResolution());
-////					System.out.println("tamaño bandada "+ this.getBandada().size()+"boid "+j);
+////					System.out.println("tamaï¿½o bandada "+ this.getBandada().size()+"boid "+j);
 ////					System.out.println("indices de la rejilla"+ getRejilla().getNumPtosX()+ " "+getRejilla().getNumPtosY());
 ////					System.out.println("indices calculados, x= "+ indiceX + " y= "+indiceY);
-////					System.out.println("posición del boid, x= "+ getBandada().elementAt(j).getPosicion().get(0,0)+" y= "+getBandada().elementAt(j).getPosicion().get(1, 0));
+////					System.out.println("posiciï¿½n del boid, x= "+ getBandada().elementAt(j).getPosicion().get(0,0)+" y= "+getBandada().elementAt(j).getPosicion().get(1, 0));
 //					getRejilla().getRejilla()[indiceX][indiceY].getObstaculos().add(this.getObstaculos().elementAt(i));
 //
 //				}
@@ -1145,11 +1150,11 @@ public class Simulador{
 					obstaculos.elementAt(i).setPosicion(posi);
 				}	
 				
-				//-----------AÑADO CODIGO PARA LA OPTIMIZACION DE LA BUSQUEDA DE VECINOS------------------------
+				//-----------Aï¿½ADO CODIGO PARA LA OPTIMIZACION DE LA BUSQUEDA DE VECINOS------------------------
 				
 				int indiceX = (int)Math.floor(getObstaculos().elementAt(i).getPosicion().get(0,0)/getRejilla().getResolution());
 				int indiceY = (int)Math.floor(getObstaculos().elementAt(i).getPosicion().get(1,0)/getRejilla().getResolution());
-//				System.out.println("número de obstáculos "+this.getObstaculos().size()+"obstaculo "+i);
+//				System.out.println("nï¿½mero de obstï¿½culos "+this.getObstaculos().size()+"obstaculo "+i);
 				if(indiceX >= 0 && indiceX <= getRejilla().getNumPtosX()-1 && indiceY >= 0 && indiceY <= getRejilla().getNumPtosY()-1 ){
 					getRejilla().getRejilla()[indiceX][indiceY].getObstaculos().add(this.getObstaculos().elementAt(i));
 				}
@@ -2057,7 +2062,14 @@ public class Simulador{
 	public LoggerArrayDoubles getLogPosturaCocheAEstrella() {
 		return logPosturaCocheAEstrella;
 	}
-	
+	public LoggerArrayDoubles getLogEstadisticaCocheMarcado() {
+		return logEstadisticaCocheMarcado;
+	}
+
+	public void setLogEstadisticaCocheMarcado(
+			LoggerArrayDoubles logEstadisticaCocheMarcado) {
+		this.logEstadisticaCocheMarcado = logEstadisticaCocheMarcado;
+	}
 	public LoggerArrayDoubles getLogPosturaCocheMarcado() {
 		return logPosturaCocheMarcado;
 	}

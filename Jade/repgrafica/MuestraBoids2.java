@@ -57,7 +57,7 @@ import com.bruceeckel.swing.Console;
 import Jama.Matrix;
 import boids.*;
 
-class Dibujante2 extends JPanel{
+class Dibujante extends JPanel{
 	double largoCoche = 1.7;
 	double anchoCoche = 1;
 	Matrix posCoche = new Matrix(2,1);
