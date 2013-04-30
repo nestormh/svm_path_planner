@@ -93,10 +93,10 @@ public:
                           const PointType & goal, const double & goalOrientation,
                           PointCloudType::Ptr rtObstacles, bool visualize);
     
-private:
+protected:
     void addLineToPointCloud(const PointType& p1, const PointType& p2, 
                              const uint8_t & r, const uint8_t & g, const uint8_t  & b,
-                             PointCloudTypeExt::Ptr &linesPointCloud, double zOffset);
+                             PointCloudTypeExt::Ptr &linesPointCloud, double zOffset = 0.0);
     void getBorderFromPointClouds (PointCloudType::Ptr & X, PointCloudType::Ptr & Y,
                                    const CornerLimitsType & minCorner, const CornerLimitsType & maxCorner, 
                                    const CornerLimitsType & interval, const cv::Size & gridSize, 
@@ -109,7 +109,8 @@ private:
     void clusterize(const PointCloudType::Ptr & pointCloud, vector< PointCloudType::Ptr > & classes,
                     CornerLimitsType & minCorner, CornerLimitsType & maxCorner);
     
-    void generateRNG(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, const PointCloudType::Ptr & currentMap);
+    void generateRNG(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, const PointCloudType::Ptr & currentMap,
+                     const bool & doExtendedGraph = true, const bool & doSegmentChecking = true);
     
     bool getFootPrint(const PointType & position, const double & orientation, 
                       const PointCloudType::Ptr & rtObstacles, vector<PointCloudType::Ptr> & footprint);
@@ -120,7 +121,8 @@ private:
                           const PointCloudType::Ptr & rtObstacles, const PointCloudType::Ptr & path);
         
     void checkSegments(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
-                       const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges);
+                       const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges,
+                       const bool & doSegmentChecking);
   
     struct svm_parameter m_param;
     

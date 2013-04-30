@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(multisvmpathplanning)
 
 set(OpenCV_DIR "/usr/local/share/OpenCV")
-# set(PCL_ROOT "/usr/local")
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math")
 
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 # find_package(OMPL    REQUIRED )
@@ -12,7 +13,9 @@ find_package(CUDA 5.0 REQUIRED)
 find_package(OpenCV  REQUIRED )
 find_package( Eigen3    REQUIRED )
 find_package(PCL REQUIRED)
-
+find_package(CGAL REQUIRED)
+find_package(GMP REQUIRED)
+find_package(MPFR REQUIRED)
 
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 # add_subdirectory(tutorials)

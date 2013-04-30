@@ -178,7 +178,7 @@ void SVMPathPlanning::clusterize(const PointCloudType::Ptr & pointCloud, vector<
 
 void SVMPathPlanning::addLineToPointCloud(const PointType& p1, const PointType& p2, 
                                           const uint8_t & r, const uint8_t & g, const uint8_t  & b,
-                                          PointCloudTypeExt::Ptr & linesPointCloud, double zOffset = 0.0) {
+                                          PointCloudTypeExt::Ptr & linesPointCloud, double zOffset) {
     
     double dist = pcl::euclideanDistance(p1, p2);
     
@@ -387,7 +387,7 @@ inline void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &mod
     
     std::cout << "Elapsed time for prediction = " << elapsed << endl;
 #endif
-            
+    
     vector<vector<cv::Point> > contours;
     cv::findContours(predictMap, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
             
@@ -682,7 +682,9 @@ void SVMPathPlanning::filterExistingObstacles(PointCloudType::Ptr & rtObstacles)
     pcl::copyPointCloud(*rtObstacles, inliers, *rtObstacles);
 }
 
-inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, const PointCloudType::Ptr & currentMap) {
+inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
+                                         const PointCloudType::Ptr & currentMap, const bool & doExtendedGraph,
+                                         const bool & doSegmentChecking) {
     
     std::vector<int> pointIdxNKNSearch;
     std::vector<float> pointNKNSquaredDistance;
@@ -690,79 +692,82 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
     vector< pair<uint32_t, uint32_t> > edges;
     edges.reserve(pathNodes->size() * pathNodes->size());
     
-    // Creating the KdTree object for the search method of the extraction
-    pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType>);
-    tree->setInputCloud (pathNodes);
-    
-    std::vector<pcl::PointIndices> cluster_indices;
-    pcl::EuclideanClusterExtraction<PointType> ec;
-    ec.setClusterTolerance (m_distBetweenSamples);
-    ec.setMinClusterSize (1);
-    ec.setMaxClusterSize (INT_MAX);
-    ec.setSearchMethod (tree);
-    ec.setInputCloud (pathNodes);
-    ec.extract (cluster_indices);
-
-    vector<uint32_t> nodeLabels;
-    nodeLabels.resize(pathNodes->size());
-    uint32_t label = 0;
-    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); it++, label++) {
-        for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end (); pit++) {
-            nodeLabels[*pit] = label;
-        }
-    }
-            
-    PGPUDTPARAMS pInput = new GPUDTPARAMS;
-    
-    pInput->minX = m_minCorner.x;
-    pInput->minY = m_minCorner.y;
-    pInput->maxX = m_maxCorner.x;
-    pInput->maxY = m_maxCorner.y;
-    
-    pInput->nPoints = pathNodes->size();
-    pInput->points = new gpudtVertex[pInput->nPoints];
-    
-    pInput->nConstraints = 0;
-    
-    uint32_t idx = 0;
-    for (PointCloudType::iterator it = pathNodes->begin(); it != pathNodes->end(); it++, idx++) {
-        pInput->points[idx].x = it->x;
-        pInput->points[idx].y = it->y;
-    }
-    pInput->fboSize = 256;                    // Texture size to be used (256, 512, 1024, 2048, 4096)
-    
-    // Run GPU-DT
-    
-    clock_t tv[2];
-    
-    PGPUDTOUTPUT pOutput = NULL;
-    
-    tv[0] = clock();
-    
-    pOutput = gpudtComputeDT(pInput);
-    
-    tv[1] = clock();
-    
-    printf("GPU-DT time: %.4fs\n", (tv[1]-tv[0])/(REAL)CLOCKS_PER_SEC);      
-    
-    for (uint32_t i = 0; i < pOutput->nTris; i++) {
-        const gpudtTriangle & triangle = pOutput->triangles[i];
+    if (doExtendedGraph) {
         
-        for (unsigned j = 0; j < 3; j++) {
-            const int & idx1 = triangle.vtx[j];
-            const int & idx2 = triangle.vtx[(j + 1) % 3];
-            if (nodeLabels[idx1] != nodeLabels[idx2]) {
-                edges.push_back(make_pair<uint32_t, uint32_t>(idx1, idx2));
+        // Creating the KdTree object for the search method of the extraction
+        pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType>);
+        tree->setInputCloud (pathNodes);
+        
+        std::vector<pcl::PointIndices> cluster_indices;
+        pcl::EuclideanClusterExtraction<PointType> ec;
+        ec.setClusterTolerance (m_distBetweenSamples);
+        ec.setMinClusterSize (1);
+        ec.setMaxClusterSize (INT_MAX);
+        ec.setSearchMethod (tree);
+        ec.setInputCloud (pathNodes);
+        ec.extract (cluster_indices);
+
+        vector<uint32_t> nodeLabels;
+        nodeLabels.resize(pathNodes->size());
+        uint32_t label = 0;
+        for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); it != cluster_indices.end (); it++, label++) {
+            for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end (); pit++) {
+                nodeLabels[*pit] = label;
             }
         }
+                
+        PGPUDTPARAMS pInput = new GPUDTPARAMS;
+        
+        pInput->minX = m_minCorner.x;
+        pInput->minY = m_minCorner.y;
+        pInput->maxX = m_maxCorner.x;
+        pInput->maxY = m_maxCorner.y;
+        
+        pInput->nPoints = pathNodes->size();
+        pInput->points = new gpudtVertex[pInput->nPoints];
+        
+        pInput->nConstraints = 0;
+        
+        uint32_t idx = 0;
+        for (PointCloudType::iterator it = pathNodes->begin(); it != pathNodes->end(); it++, idx++) {
+            pInput->points[idx].x = it->x;
+            pInput->points[idx].y = it->y;
+        }
+        pInput->fboSize = 256;                    // Texture size to be used (256, 512, 1024, 2048, 4096)
+        
+        // Run GPU-DT
+        
+        clock_t tv[2];
+        
+        PGPUDTOUTPUT pOutput = NULL;
+        
+        tv[0] = clock();
+        
+        pOutput = gpudtComputeDT(pInput);
+        
+        tv[1] = clock();
+        
+        printf("GPU-DT time: %.4fs\n", (tv[1]-tv[0])/(REAL)CLOCKS_PER_SEC);      
+        
+        for (uint32_t i = 0; i < pOutput->nTris; i++) {
+            const gpudtTriangle & triangle = pOutput->triangles[i];
+            
+            for (unsigned j = 0; j < 3; j++) {
+                const int & idx1 = triangle.vtx[j];
+                const int & idx2 = triangle.vtx[(j + 1) % 3];
+                if (nodeLabels[idx1] != nodeLabels[idx2]) {
+                    edges.push_back(make_pair<uint32_t, uint32_t>(idx1, idx2));
+                }
+            }
+        }
+        
+        if (pOutput)
+            gpudtReleaseDTOutput(pOutput);
+        
+        delete pInput->points;
+        delete pInput;
+        delete pOutput;
     }
-    
-    if (pOutput)
-        gpudtReleaseDTOutput(pOutput);
-    
-    delete pInput->points;
-    delete pInput;
-    delete pOutput;
     
     // Graph is completed with lines that not form a polygon
     pcl::KdTreeFLANN<PointType>::Ptr treeNNG (new pcl::KdTreeFLANN<PointType>);
@@ -777,11 +782,12 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
         }
     }
     
-    checkSegments(pathNodes, nodeList, currentMap, edges);
+    checkSegments(pathNodes, nodeList, currentMap, edges, doSegmentChecking);
 }
 
 void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
-                                    const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges)
+                                    const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges,
+                                    const bool & doSegmentChecking)
 {
     float2 * pointsInMap = new float2[currentMap->size()];
     float2 * edgeU = new float2[edges.size()];

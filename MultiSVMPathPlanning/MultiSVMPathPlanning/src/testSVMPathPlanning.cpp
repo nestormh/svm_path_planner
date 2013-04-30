@@ -54,7 +54,10 @@
 #include <boost/graph/adjacency_list.hpp>
 
 #include "svmpathplanning.h"
+#include "svmpathplanningmiura.h"
+#include "voronoipathplanning.h"
 
+// #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/mapaMiura.pgm"
 #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1.pgm"
 // #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1WithoutPath.pgm"
 // #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/mapaSeparado.pgm"
@@ -108,13 +111,23 @@ int main(int argc, char **argv) {
     goalWithoutPath.x = 1192 * resolution;
     goalWithoutPath.y = 374 * resolution;
     
-    svmpp::SVMPathPlanning pathPlanner;
-    pathPlanner.obtainGraphFromMap(pointCloud, false);
-//     start.x = 1; start.y = 2;
-//     goal.x = 4; goal.y = 2;
+//     svmpp::SVMPathPlanning pathPlanner;
+//     pathPlanner.obtainGraphFromMap(pointCloud, false);
+//     pathPlanner.findShortestPath(start, 0, goalWithoutPath, M_PI / 4, rtObstacles, true);
     
-    pathPlanner.findShortestPath(start, 0, goalWithoutPath, M_PI / 4, rtObstacles, true);
-//     pathPlanner.testDijkstra();
+//     start.x = 269 * resolution;
+//     start.y = 455 * resolution;
+//     
+//     goal.x = 327 * resolution;
+//     goal.y = 39 * resolution;
+
+//     svmpp::SVMPathPlanningMiura pathPlannerMiura;
+//     pathPlannerMiura.setMap(pointCloud);
+//     pathPlannerMiura.findShortestPath(start, 0.0, goal, 3 * M_PI / 2, pointCloud, true);
+
+    svmpp::VoronoiPathPlanning pathPlannerVoronoi;
+//     pathPlannerVoronoi.setMap(pointCloud);
+    pathPlannerVoronoi.findShortestPathVoronoi(start, 0.0, goal, 3 * M_PI / 2, pointCloud, true);
     
     return 0;
 }
