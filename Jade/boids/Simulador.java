@@ -54,7 +54,7 @@ public class Simulador{
 	double Ts = 0.1;
 	double TsPred = 0.1;
 	ControlPredictivo contPred = new ControlPredictivo(modCoche,tr, horPrediccion, horControl, landa, alpha, TsPred);	
-	ControlPredictivo contPredAEstrella = new ControlPredictivo(modeCocheAEstrella,trAEstrella, horPrediccion, horControl, landa, alpha, TsPred);
+	ControlPredictivo contPredAEstrella = new ControlPredictivo(modeCocheAEstrella,trAEstrella, horPrediccion, horControl, landa, alphaMarcado, TsPred);
 	ControlPredictivo contPredMarcado = new ControlPredictivo(modCocheMarcado,trMarcado, horPrediccionMarcado, horControlMarcado, landaMarcado, alphaMarcado, TsPred);	
 
 	JFileChooser selectorArchivo = new JFileChooser(new File("./Simulaciones"));
@@ -932,7 +932,7 @@ public class Simulador{
 //						,getObstaculos(),j,Boid.getObjetivo());
 					setObstaculosFuturos(getObstaculos()); 
 					//calculo el tiempo que el coche tardaría en alcanzar este boid. 
-					double tiempoExtra = 1.5;
+					double tiempoExtra = 1;
 					double t = 0;
 					if(ModCoche.getVelocidad() > 0){
 						t = (tiempoExtra*getBandada().elementAt(j).distThisBoid2Point(ModCoche.getX(),ModCoche.getY()))/ModCoche.getVelocidad();

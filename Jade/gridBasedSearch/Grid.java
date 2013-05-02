@@ -213,7 +213,7 @@ public class Grid {
 				// con el boid actual es menor. Antes de añadir los boids a la rejilla con este método, la rejilla tiene que haber sido reseteada
 				// con el método marcarTodoOcupado, que además de marcar todas las celdas como ocupadas asigna un valor infinito a el peso de marcado de 
 				//cada celda
-				double gananciaPesado = 3;
+				double gananciaPesado = 4;
 				double peso_marcado = this.matrizPesos[i-xIndexBoid+centro][j-yIndexBoid+centro]*getResolution()*gananciaPesado; 
 				if(peso_marcado < this.getRejilla()[i][j].getPeso_marcado()){
 					this.getRejilla()[i][j].setPeso_marcado(peso_marcado);
@@ -633,7 +633,8 @@ public Vector<Matrix> busquedaAEstrellaConMarcado(double RadioBusqueda){
 		Vector<Matrix> camino = new Vector<Matrix>();
 		GridSearchPoint aux = actual;
 		while(aux.getCameFrom() != null){
-			double pos[] = {aux.getxPosition(),aux.getyPosition()};
+			double pos[] = {aux.getxPosition()+getResolution()/2,aux.getyPosition()+getResolution()/2};
+//			double pos[] = {aux.getxPosition(),aux.getyPosition()}
 			Matrix posi = new Matrix(pos,2);
 			camino.add(posi);
 			aux = aux.getCameFrom();			
