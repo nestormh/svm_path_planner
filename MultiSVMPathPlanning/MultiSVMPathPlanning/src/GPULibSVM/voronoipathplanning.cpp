@@ -48,9 +48,8 @@ VoronoiPathPlanning::VoronoiPathPlanning() : SVMPathPlanning()
 }
 
 bool VoronoiPathPlanning::findShortestPathVoronoi(const PointType& start, const double& startOrientation, const PointType& goal, 
-                                                  const double& goalOrientation, PointCloudType::Ptr rtObstacles, bool visualize)
+                                                  const double& goalOrientation, const PointCloudType::Ptr & rtObstacles, bool visualize)
 {
-
     *rtObstacles += *m_originalMap;
     
     PointCloudType::Ptr footprintStart, footprintGoal;

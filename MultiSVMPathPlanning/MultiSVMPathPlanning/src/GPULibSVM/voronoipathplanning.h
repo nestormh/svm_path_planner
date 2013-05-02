@@ -47,7 +47,7 @@ public:
     
     bool findShortestPathVoronoi(const PointType& start, const double & startOrientation,
                                 const PointType & goal, const double & goalOrientation,
-                                PointCloudType::Ptr rtObstacles, bool visualize);
+                                const PointCloudType::Ptr & rtObstacles, bool visualize);
 protected:
     // typedefs for defining the adaptor
     typedef CGAL::Exact_predicates_inexact_constructions_kernel                  K;
