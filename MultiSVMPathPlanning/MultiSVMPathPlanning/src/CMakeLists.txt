@@ -6,6 +6,7 @@ set(CCFILES
   GPULibSVM/svmpathplanning.cpp
   GPULibSVM/svmpathplanningmiura.cpp
   GPULibSVM/voronoipathplanning.cpp
+  GPULibSVM/voronoisvmpathplanning.cpp
   testSVMPathPlanning.cpp
 )
 
@@ -86,7 +87,6 @@ target_link_libraries(testSVMPathPlanning
   ${GMP_LIBRARIES}
 #   ${CUDA_CURAND_LIBRARIES}
   emon
-  voro++
 )
 CUDA_ADD_CUBLAS_TO_TARGET(testSVMPathPlanning)
 

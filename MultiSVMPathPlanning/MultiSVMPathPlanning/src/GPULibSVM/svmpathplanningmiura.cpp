@@ -284,7 +284,10 @@ inline bool SVMPathPlanningMiura::getPath(const vector <bool> & currentPattern,
                                           const bool & visualize)
 {
  
-    m_graph.clear();
+    for (Graph::EdgeIt it(m_graph); it != lemon::INVALID; ++it) {
+        Edge currentEdge = it;
+        m_graph.erase(currentEdge);
+    }
     m_nodeList.clear();
     
     cost = DBL_MAX;

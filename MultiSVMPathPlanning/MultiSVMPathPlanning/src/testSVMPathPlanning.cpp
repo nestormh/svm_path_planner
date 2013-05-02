@@ -56,6 +56,7 @@
 #include "svmpathplanning.h"
 #include "svmpathplanningmiura.h"
 #include "voronoipathplanning.h"
+#include "voronoisvmpathplanning.h"
 
 // #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/mapaMiura.pgm"
 #define MAP_BASE "/home/nestor/Dropbox/projects/MultiSVMPathPlanning/maps/parkingETSII1.pgm"
@@ -125,9 +126,12 @@ int main(int argc, char **argv) {
 //     pathPlannerMiura.setMap(pointCloud);
 //     pathPlannerMiura.findShortestPath(start, 0.0, goal, 3 * M_PI / 2, pointCloud, true);
 
-    svmpp::VoronoiPathPlanning pathPlannerVoronoi;
-//     pathPlannerVoronoi.setMap(pointCloud);
-    pathPlannerVoronoi.findShortestPathVoronoi(start, 0.0, goal, 3 * M_PI / 2, pointCloud, true);
+//     svmpp::VoronoiPathPlanning pathPlannerVoronoi;
+//     pathPlannerVoronoi.findShortestPathVoronoi(start, 0.0, goal, 3 * M_PI / 2, pointCloud, true);
+ 
+    svmpp::VoronoiSVMPathPlanning pathPlannerVoronoiSVM;
+    pathPlannerVoronoiSVM.findShortestPath(start, 0.0, goal, 3 * M_PI / 2, pointCloud, true);
+    
     
     return 0;
 }
