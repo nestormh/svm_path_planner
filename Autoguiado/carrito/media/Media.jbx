@@ -1,0 +1,12 @@
+[PropertyInfo]
+dispositivos,String[],false,false, , ,false,<default>
+dllpath,String,false,false, , ,false,<default>
+faster,int,false,false, , ,true,<default>
+instancias,java.util.Vector,false,false, , ,false,<default>
+mute,int,false,false, , ,true,<default>
+slower,int,false,false, , ,true,<default>
+[IconNames]
+
+
+
+

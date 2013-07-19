@@ -1,0 +1,18 @@
+[PropertyInfo]
+acelAnt,int,false,false, , ,false,<default>
+acelera,boolean,false,false, , ,true,<default>
+canvas,carrito.gps.CanvasRuta,false,false, , ,true,<default>
+comando,int,false,false, , ,false,<default>
+cte,carrito.configura.Constantes,false,false, , ,false,<default>
+derivativoAnt,double,false,false, , ,false,<default>
+errorAnt,int,false,false, , ,false,<default>
+gira,boolean,false,false, , ,true,<default>
+giro,float,false,false, , ,true,<default>
+integral,double,false,false, , ,false,<default>
+posAnt,int,false,false, , ,false,<default>
+puerto,carrito.server.serial.SerialConnection,false,false, , ,false,<default>
+[IconNames]
+
+
+
+
