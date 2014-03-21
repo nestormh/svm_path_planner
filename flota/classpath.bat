@@ -1,1 +1,0 @@
-set CLASSPATH=.;arq-2.8.1.jar;icu4j-3.4.4.jar;iri-0.7.jar;jena-2.6.2.jar;jena-2.6.2-tests.jar;jess.jar;junit-4.5.jar;log4j-1.2.13.jar;lucene-core-2.3.1.jar;slf4j-api-1.5.10.jar;slf4j-log4j12-1.5.6.jar;;stax-api-1.0.1.jar;wstx-asl-3.2.9.jar;xercesImpl-2.7.1.jar;

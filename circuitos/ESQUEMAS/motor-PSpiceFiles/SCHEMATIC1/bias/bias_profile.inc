@@ -1,1 +1,0 @@
-.STMLIB	".\bias.stl" 

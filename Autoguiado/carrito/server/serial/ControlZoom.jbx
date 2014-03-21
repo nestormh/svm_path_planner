@@ -1,9 +1,0 @@
-[PropertyInfo]
-cte,carrito.configura.Constantes,false,false, , ,false,<default>
-puerto,carrito.server.serial.ZoomConnection[],false,false, , ,false,<default>
-zoom,int[],false,false, , ,true,<default>
-[IconNames]
-
-
-
-
