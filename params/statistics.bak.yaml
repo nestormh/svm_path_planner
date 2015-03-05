@@ -1,0 +1,25 @@
+# Possibilities: MultiSVMPathPlanner, SingleSVMPathPlanner, VoronoiPathPlanner, VoronoiSVMPathPlanner
+planner_type: MultiSVMPathPlanner
+
+# SVM param values
+svm_type: 0
+svm_kernel_type: 2
+svm_degree: 3
+svm_gamma: 150 #300
+svm_coef0: 0
+svm_nu: 0.5
+svm_cache_size: 100
+svm_C: 10000 #10000 #500
+svm_eps: 1e-2
+svm_p: 0.1
+svm_shrinking: 0
+svm_probability: 0
+    
+# Distances
+minPointDistance: 0.5 #2.0
+minDistBetweenObstacles: 2.5
+minDistCarObstacle: 0.1
+
+# Statistics related
+doStatistics: true
+statisticsFile: /home/nestor/Dropbox/ros/groovy/svm_path_planner/stats/multi_svm_bag1.txt

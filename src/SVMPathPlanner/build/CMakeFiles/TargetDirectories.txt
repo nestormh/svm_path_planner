@@ -1,0 +1,4 @@
+/home/nestor/Dropbox/ros/groovy/svm_path_planner/src/SVMPathPlanner/build/cuSVM/CMakeFiles/testCuSVM.dir
+/home/nestor/Dropbox/ros/groovy/svm_path_planner/src/SVMPathPlanner/build/GPULibSVM/CMakeFiles/testGPULibSVM.dir
+/home/nestor/Dropbox/ros/groovy/svm_path_planner/src/SVMPathPlanner/build/libsvm/CMakeFiles/testLibSVM.dir
+/home/nestor/Dropbox/ros/groovy/svm_path_planner/src/SVMPathPlanner/build/CMakeFiles/testSVMPathPlanning.dir

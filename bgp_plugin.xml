@@ -1,0 +1,9 @@
+<library path="lib/libsvm_path_planner">
+    <class name="svm_path_planner/SVMPathPlannerROS" type="svmpp_ros::SVMPathPlannerROS" base_class_type="nav_core::BaseGlobalPlanner">
+    <description>
+      This planner gets a route between the current pose and a goal, using several based SVM techniques. 
+      By default, this package uses the method described TODO..., but there are other methods, 
+      implemented mainly for comparison purposes.
+    </description>
+  </class>
+</library>

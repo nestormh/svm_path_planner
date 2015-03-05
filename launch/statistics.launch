@@ -1,0 +1,33 @@
+<launch>
+    <param name="use_sim_time" value="true" />
+    
+    <node launch-prefix="optirun" required="true" pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+<!--     <node launch-prefix="optirun gdb -ex run &#45;&#45;args"  -->
+<!--         pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen"> -->
+        <remap from="map" to="nav_map"/>
+        <remap from="odom" to="gps_imu/odom"/>
+        
+        <param name="planner_frequency" value="5"/>
+        <param name="controller_frequency" value="5"/>
+            
+        <param name="base_local_planner" value="base_local_planner/TrajectoryPlannerROS" />
+<!--         <param name="base_global_planner" value="navfn/NavfnROS" /> -->
+        <param name="base_global_planner" value="svm_path_planner/SVMPathPlannerROS" />
+                    
+        <!-- Possibilities: MultiSVMPathPlanner, SingleSVMPathPlanner, VoronoiPathPlanner, VoronoiSVMPathPlanner -->
+<!--         <param name="SVMPathPlannerROS/planner_type" value="VoronoiSVMPathPlanner" /> -->
+        
+        <rosparam file="$(find svm_path_planner)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find svm_path_planner)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        
+        <rosparam file="$(find svm_path_planner)/params/statistics.yaml" command="load" ns="SVMPathPlannerROS" />
+
+        <param name="~/global_costmap/robot_base_frame" value="/base_footprint" />
+        <param name="~/local_costmap/robot_base_frame" value="/base_footprint" />
+    </node>
+          
+<!--     <node pkg="rviz" type="rviz" name="rviz" args="&#45;&#45;display-config $(find svm_path_planner)/config/visualizeSVMPathPlanner.rviz"/> -->
+    
+    <node name="play" pkg="rosbag" type="play" required="true" args=" -r 0.25 -d 10 &#45;&#45;clock $(find bags)/testSVMPathPlanning_2013-05-03-12-13-49.bag"/>
+<!--     <node name="play" pkg="rosbag" type="play" required="true" args=" -r $(arg clockFreq) -d 10 &#45;&#45;clock $(find bags)/$(arg bagFile)"/> -->
+</launch>

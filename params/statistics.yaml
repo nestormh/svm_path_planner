@@ -1,0 +1,27 @@
+# This is an auto-generated yaml file. To edit this, please use the ../scripts/launchStats.sh file
+
+# Planner type
+planner_type: MultiSVMPathPlanner
+
+# SVM param values
+svm_type: 0
+svm_kernel_type: 2
+svm_degree: 3
+svm_gamma: 1000
+svm_coef0: 0
+svm_nu: 0.5
+svm_cache_size: 100
+svm_C: 1000
+svm_eps: 1e-2
+svm_p: 0.1
+svm_shrinking: 0
+svm_probability: 0
+
+# Distances
+minPointDistance: 0.5
+minDistBetweenObstacles: 2.0
+minDistCarObstacle: 0.1
+
+# Statistics related
+doStatistics: false
+statisticsFile: /home/nestor/Dropbox/ros/groovy/svm_path_planner/stats/testSVMPathPlanning_2013-05-03-12-13-49.bag/MultiSVMPathPlanner_gamma_1000_C_1000.txt
