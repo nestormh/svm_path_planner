@@ -41,13 +41,13 @@ publish_frequency: 5.0 # The frequency in Hz for the map to publish display info
 robot_radius: 0.5
 
 plugins:
-- {name: static_layer, type: 'costmap_2d::StaticLayer'}
-- {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
-- {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
+ - {name: static_layer, type: 'costmap_2d::StaticLayer'}
+ - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
+ - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
 
 
 static_layer:
- unknown_cost_value: 0 # The value for which a cost should be considered unknown when reading in a map from the map server.
+ unknown_cost_value: 1 # The value for which a cost should be considered unknown when reading in a map from the map server.
                      # If the costmap is not tracking unknown space, costs of this value will be considered occupied.
                      # A value of zero also results in this parameter being unused.
  lethal_cost_threshold: 100 # The threshold value at which to consider a cost lethal when reading in a map from the map server.

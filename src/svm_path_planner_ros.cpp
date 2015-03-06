@@ -26,6 +26,8 @@
 
 #include <pcl/common/distances.h>
 
+#include <time.h>
+
 #include <CGAL/Line_2.h>
 #include </opt/ros/indigo/include/geometry_msgs/PoseStamped.h>
 
@@ -59,41 +61,35 @@ void SVMPathPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* c
     if(! initialized_){
         cout << "Initializing..." << endl;
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
+        sleep(2);
+        
         costmap_ros_ = costmap_ros;
 //         planner_ = boost::shared_ptr<NavFn>(new NavFn(costmap_ros->getSizeInCellsX(), costmap_ros->getSizeInCellsY()));
         
         //get an initial copy of the costmap
-//         costmap_ros_->getCostmapCopy(costmap_); // DEPRECATED
         costmap_ = *(costmap_ros_->getCostmap());
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         
         ros::NodeHandle private_nh("~/" + name);
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
+
         plan_pub_ = private_nh.advertise<nav_msgs::Path>("plan", 1);
         // Publishers
         map_point_cloud_pub_ = private_nh.advertise< svmpp::PointCloudTypeExt >("mapPointCloud", 100);
         graph_point_cloud_pub_ = private_nh.advertise< svmpp::PointCloudTypeExt >("graphPointCloud", 100);
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
+
         //we'll get the parameters for the robot radius from the costmap we're associated with
         inscribed_radius_ = costmap_ros_->getLayeredCostmap()->getInscribedRadius();
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
+
         private_nh.param <std::string> ("planner_type", plannerType_, PLANNER_TYPE_MULTISVM);
         setPlanner();
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
+
         struct svm_parameter svm_params;
         private_nh.param <std::string> ("planner_type", plannerType_, PLANNER_TYPE_MULTISVM);
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
+
         private_nh.param <int> ("svm_type", svm_params.svm_type, C_SVC);        
         private_nh.param <int> ("svm_kernel_type", svm_params.kernel_type, RBF);        
         private_nh.param <int> ("svm_degree", svm_params.degree, 3);        
@@ -107,8 +103,7 @@ void SVMPathPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* c
         private_nh.param <int> ("svm_shrinking", svm_params.shrinking, 0);        
         private_nh.param <int> ("svm_probability", svm_params.probability, 0);  
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
+
         svm_params.nr_weight = 0;
         svm_params.weight_label = NULL;
         svm_params.weight = NULL;
@@ -119,19 +114,18 @@ void SVMPathPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* c
         private_nh.param <double> ("minPointDistance", minPointDistance, 0.5);
         private_nh.param <double> ("minDistBetweenObstacles", minDistBetweenObstacles, 2.5);
         private_nh.param <double> ("minDistCarObstacle", minDistCarObstacle, 0.1);
+        private_nh.param <double> ("threshInflation", m_threshInflation, 100);
         
         planner_->setMinPointDistance(minPointDistance);
         planner_->setMinDistBetweenObstacles(minDistBetweenObstacles);
         planner_->setMinDistCarObstacle(minDistCarObstacle);
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
+
         std::string statistisFileName;
         private_nh.param <bool> ("doStatistics", doStatistics_, false);
         private_nh.param <std::string> ("statisticsFile", statistisFileName, "/tmp/stats.txt");
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
+
         if (doStatistics_) {
             statisticsFile_.open(statistisFileName.c_str(), ios::out | ios::trunc);
             
@@ -139,28 +133,25 @@ void SVMPathPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* c
                             << "MIN_SMOOTH\tMAX_SMOOTH\tAVG_SMOOTH\tTIME_ELAPSED" << endl;
         }
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
+
         bool doStatistics_;
         std::ofstream statisticsFile_;
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
         obtainGraphFromMap();
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
 
         //get the tf prefix
         ros::NodeHandle prefix_nh;
         tf_prefix_ = tf::getPrefixParam(prefix_nh);
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
         make_plan_srv_ =  private_nh.advertiseService("make_plan", &SVMPathPlannerROS::makePlanService, this);
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
         cout << "Initialized" << endl;
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         initialized_ = true;
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
     }
     else
         ROS_WARN("This planner has already been initialized, you can't call it twice, doing nothing");
@@ -171,17 +162,22 @@ void SVMPathPlannerROS::getMapPointCloud(svmpp::PointCloudType::Ptr & pointCloud
     
     cv::Mat inflatedMap = cv::Mat::zeros(cv::Size(costmap_.getSizeInCellsX(), costmap_.getSizeInCellsY()), CV_8UC1);
     
+//     TODO: Probar con esto: unsigned char * costmap_2d::Costmap2D::getCharMap()
+    
     for (uint32_t mx = 0; mx < costmap_.getSizeInCellsX(); mx ++) {
         for (uint32_t my = 0; my < costmap_.getSizeInCellsY(); my ++) {
+            
             if ((costmap_.getCost(mx, my) != costmap_2d:: NO_INFORMATION) &&
                 (costmap_.getCost(mx, my) != costmap_2d::FREE_SPACE)) {
-                
-                inflatedMap.at<char>(my, mx) = 255;
+//             if (costmap_.getCost(mx, my) > m_threshInflation) {
+                inflatedMap.at<unsigned char>(my, mx) = 255;
             }
         }
     }
     
     cout << cv::Size(costmap_.getSizeInCellsX(), costmap_.getSizeInCellsY()) << endl;
+    cv::imwrite("/tmp/inflatedMap.png", inflatedMap);
+    costmap_.saveMap ("/tmp/map.pgm");
     
     vector<vector<cv::Point> > contours;
     cv::findContours(inflatedMap, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
@@ -200,6 +196,8 @@ void SVMPathPlannerROS::getMapPointCloud(svmpp::PointCloudType::Ptr & pointCloud
             }
         }
     }
+    
+    planner_->filterPath(pointCloud);
 }
 
 void SVMPathPlannerROS::getLethalObstacles(svmpp::PointCloudType::Ptr & pointCloud) {
@@ -237,7 +235,21 @@ void SVMPathPlannerROS::mapToWorld(double mx, double my, double& wx, double& wy)
 bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start, 
                         const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan){
    
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
+    // FIXME: This is just to debug the initial map generation
+    plan.clear();
+    plan.push_back(start);
+    plan.push_back(goal);
+    
+//     if (!planner_->isMapGenerated())
+//         obtainGraphFromMap();
+    
+//     svmpp::PointCloudType::Ptr tmpPointCloud;
+//     getMapPointCloud(tmpPointCloud);
+//     publishPointCloud(costmap_ros_->getGlobalFrameID(), tmpPointCloud, map_point_cloud_pub_);
+    
+    
+    return !plan.empty();
     
     boost::mutex::scoped_lock lock(mutex_);
     if(!initialized_){
@@ -245,8 +257,7 @@ bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
         return false;
     }
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
-    
+
     //until tf can handle transforming things that are way in the past... we'll require the goal to be in our global frame
     if(tf::resolve(tf_prefix_, goal.header.frame_id) != tf::resolve(tf_prefix_, costmap_ros_->getGlobalFrameID())){
         ROS_ERROR("The goal pose passed to this planner must be in the %s frame.  It is instead in the %s frame.", 
@@ -254,44 +265,41 @@ bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
         return false;
     }
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
-    
+
     if(tf::resolve(tf_prefix_, start.header.frame_id) != tf::resolve(tf_prefix_, costmap_ros_->getGlobalFrameID())){
         ROS_ERROR("The start pose passed to this planner must be in the %s frame.  It is instead in the %s frame.", 
         tf::resolve(tf_prefix_, costmap_ros_->getGlobalFrameID()).c_str(), tf::resolve(tf_prefix_, start.header.frame_id).c_str());
         return false;
     }
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
-    
+
     double wx = start.pose.position.x;
     double wy = start.pose.position.y;
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
-    
+
     cout << "start frame " << start.header.frame_id << endl;
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
     costmap_ = *(costmap_ros_->getCostmap());
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
     unsigned int mx, my;
     if(!costmap_.worldToMap(wx, wy, mx, my)){
         ROS_WARN("The robot's start position is off the global costmap. Planning will always fail, are you sure the robot has been properly localized?");
         return false;
     }
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
     svmpp::PointCloudType::Ptr rtPointCloud;
     getMapPointCloud(rtPointCloud);
     cout << "RT map: " << map_point_cloud_->size() << endl;
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
     svmpp::PointType startPoint(start.pose.position.x, start.pose.position.y, 0.0);
     svmpp::PointType goalPoint(goal.pose.position.x, goal.pose.position.y, 0.0);
     double tElapsed;
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
     if (! findShortestPath(startPoint, tf::getYaw(start.pose.orientation), 
                            goalPoint, tf::getYaw(goal.pose.orientation), 
                            rtPointCloud, tElapsed)) {
@@ -299,19 +307,17 @@ bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
         
         ROS_WARN("Unable to find a path.");
     }
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     
     svmpp::PointCloudType::Ptr pointCloudPath = planner_->getPath();
     cout << "Plan found: " << pointCloudPath->size() << endl;
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     if (doStatistics_)
         doStatistics(pointCloudPath, tElapsed);
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
     plan.clear();
     plan.reserve(pointCloudPath->size());
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+    
     for (svmpp::PointCloudType::iterator it = pointCloudPath->begin(); it != pointCloudPath->end(); it++) {
         geometry_msgs::PoseStamped currentPose;
         currentPose.header.frame_id = costmap_ros_->getGlobalFrameID();
@@ -335,10 +341,10 @@ bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
             currentPose.pose.orientation.y = (double)(quatOrientation.getY());
             currentPose.pose.orientation.z = (double)(quatOrientation.getZ());
         }
+
         
         plan.push_back(currentPose);
     }
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
 
     //publish the plan for visualization purposes
     if (plan.size() != 0) publishPlan(plan, 0.0, 1.0, 0.0, 0.0);
@@ -349,8 +355,7 @@ bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
     planner_->getGraph(graphPointCloud);
     publishPointCloud(costmap_ros_->getGlobalFrameID(), graphPointCloud, graph_point_cloud_pub_);
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
-    
+
     return !plan.empty();
 }
 
@@ -382,11 +387,11 @@ inline void SVMPathPlannerROS::publishPointCloud(const std::string & frameId,
                                                  const svmpp::PointCloudType::Ptr & pointCloud, 
                                                  ros::Publisher & pointCloudPublish) {
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmpPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+//     pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmpPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>);
     
     sensor_msgs::PointCloud2 cloudMsg;
     pcl::toROSMsg (*pointCloud, cloudMsg);
-    cloudMsg.header.frame_id="left_cam";
+    cloudMsg.header.frame_id=frameId;
     cloudMsg.header.stamp = ros::Time();
     
 //     pointCloud->header.frame_id = frameId;
@@ -418,19 +423,18 @@ void SVMPathPlannerROS::setPlanner() {
 
 // TODO: Complete this with the new planners
 void SVMPathPlannerROS::obtainGraphFromMap() {
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
     getMapPointCloud(map_point_cloud_);
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
-    
+
     // Initializing the planner...
     if (plannerType_ == PLANNER_TYPE_MULTISVM) {
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
         cout << "Initial map: " << map_point_cloud_->size() << endl;
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
         publishPointCloud(costmap_ros_->getGlobalFrameID(), map_point_cloud_, map_point_cloud_pub_);
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
         planner_->obtainGraphFromMap(map_point_cloud_, false);
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
+
     }
 }
 

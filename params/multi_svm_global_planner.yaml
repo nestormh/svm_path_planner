@@ -17,8 +17,9 @@ svm_probability: 0
     
 # Distances
 minPointDistance: 0.5 #2.0
-minDistBetweenObstacles: 2.0 #5
+minDistBetweenObstacles: 1.0 #5
 minDistCarObstacle: 0.1
+threshInflation: 100
 
 # Statistics related
 doStatistics: true

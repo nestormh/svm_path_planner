@@ -99,6 +99,7 @@ private:
     std::string plannerType_;
     bool doStatistics_;
     std::ofstream statisticsFile_;
+    double m_threshInflation;
     
 };
 };  

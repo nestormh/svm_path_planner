@@ -24,7 +24,7 @@
 #include <string.h>
 #include <fstream>
 
-#include <pcl/point_cloud.h>
+// #include <pcl/point_cloud.h>
 #include <pcl/common/common.h>
 // #include <pcl/visualization/pcl_visualizer.h>
 // #include <pcl/visualization/cloud_viewer.h>
@@ -34,6 +34,18 @@
 #include <vector_types.h>
 
 #include <lemon/list_graph.h>
+
+#include <ros/ros.h>
+#include <pcl_ros/point_cloud.h>
+
+#include <costmap_2d/costmap_2d_ros.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Point.h>
+#include <nav_msgs/Path.h>
+#include <tf/transform_datatypes.h>
+#include <nav_core/base_global_planner.h>
+#include <nav_msgs/GetPlan.h>
+#include <pcl_ros/publisher.h>
 
 #define NDIMS 2
 
@@ -84,6 +96,8 @@ public:
                           const PointType & goal, const double & goalOrientation,
                           PointCloudType::Ptr rtObstacles, bool visualize);
     
+    void filterPath(PointCloudType::Ptr & path);
+    
     void getGraph(PointCloudType::Ptr & pointCloud);
     
     bool isMapGenerated() { return m_mapGenerated; }
@@ -105,6 +119,9 @@ protected:
                                    const CornerLimitsType & minCorner, const CornerLimitsType & maxCorner, 
                                    const CornerLimitsType & interval, const cv::Size & gridSize, 
                                    const uint32_t & label, PointCloudType::Ptr & pathNodes, vector<Node> & nodeList);
+    void predictSVM(const svm_model * &model,
+                    const unsigned int & rows, const unsigned int & cols, 
+                    cv::Mat & mapPrediction);
     void getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval,
                                       const CornerLimitsType & minCorner, const CornerLimitsType & maxCorner,
                                       const cv::Size & gridSize, const uint32_t & label,
@@ -127,7 +144,7 @@ protected:
     void checkSegments(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
                        const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges,
                        const bool & doSegmentChecking);
-  
+    
     struct svm_parameter m_param;
     
     double m_minPointDistance;                  // Minimal distance between samples in downsampling
@@ -156,6 +173,9 @@ protected:
     bool m_mapGenerated;
     
     PointType m_start, m_goal;
+    
+    // Debug
+    ros::Publisher m_dbgPub;
 };
     
 }

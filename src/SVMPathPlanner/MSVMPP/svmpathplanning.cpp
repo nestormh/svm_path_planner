@@ -47,11 +47,13 @@
 #include <pcl/common/transforms.h>
 
 #include <boost/property_map/property_map.hpp>
+#include <pcl-1.7/pcl/point_cloud.h>
 
 #include <lemon/dijkstra.h>
 #include <lemon/connectivity.h>
 
 #include "gpudt/gpudt.h"
+#include </opt/ros/indigo/include/pcl_conversions/pcl_conversions.h>
 
 using namespace svmpp;
 
@@ -90,6 +92,9 @@ SVMPathPlanning::SVMPathPlanning()
     m_minDistCarObstacle = 0.1;
     
     m_mapGenerated = false;
+    
+    ros::NodeHandle private_nh("~");
+    m_dbgPub = private_nh.advertise< svmpp::PointCloudTypeExt >("dbgPointCloud", 100);
 }
 
 SVMPathPlanning::SVMPathPlanning ( const SVMPathPlanning& other )
@@ -352,6 +357,37 @@ void SVMPathPlanning::getBorderFromPointClouds (PointCloudType::Ptr & X, PointCl
     delete [] svmProblem.y;
 }
 
+inline void SVMPathPlanning::predictSVM(const svm_model*& model, 
+                                        const unsigned int& rows, const unsigned int& cols, 
+                                        cv::Mat & mapPrediction)
+{
+    
+    for (int i = 0; i < mapPrediction.rows; i++) {
+        const float rw_y = (float)i / mapPrediction.rows;
+        for (int j = 0; j < mapPrediction.cols; j++) {
+            const float rw_x = (float)j / mapPrediction.cols;
+            
+            float sum = 0.0;
+            for (int k = 0; k < model->l; k++) {
+                const float sv_x = model->SV[k].values[0];
+                const float sv_y = model->SV[k].values[1];
+                
+                const float val = -model->param.gamma * ((sv_x - rw_x) * (sv_x - rw_x) + 
+                                (sv_y - rw_y) * (sv_y - rw_y));
+                sum += model->sv_coef[0][k] * exp(val);
+            }
+            sum -=  model->rho[0];
+            
+            if (sum > 0)
+                mapPrediction.at<unsigned char>(j, i) = 255;
+            else
+                mapPrediction.at<unsigned char>(j, i) = 0;
+        }
+    }
+}
+
+
+
 inline void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval,
                                                           const CornerLimitsType & minCorner, const CornerLimitsType & maxCorner,
                                                           const cv::Size & gridSize, const uint32_t & label,
@@ -367,6 +403,7 @@ inline void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &mod
 #endif
     
     launchSVMPrediction(model, gridSize.height, gridSize.width, predictMap.data);
+//     predictSVM(model, gridSize.height, gridSize.width, predictMap);
     
 #ifdef DEBUG
     clock_gettime(CLOCK_MONOTONIC, &finish);
@@ -403,14 +440,12 @@ void SVMPathPlanning::obtainGraphFromMap(const PointCloudType::Ptr & inputCloud,
     
     clock_gettime(CLOCK_MONOTONIC, &start);
         
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+    // Input point cloud is clustered into different classes
     CornerLimitsType minCorner, maxCorner, interval;
     clusterize(inputCloud, m_classes, minCorner, maxCorner);
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     vector< PointCloudType::Ptr >::iterator it1, it2;
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     interval = make_double2(maxCorner.x - minCorner.x, 
                             maxCorner.y - minCorner.y);
     m_minCorner = minCorner;
@@ -419,10 +454,9 @@ void SVMPathPlanning::obtainGraphFromMap(const PointCloudType::Ptr & inputCloud,
     m_distBetweenSamples = 1.5 * sqrt((interval.x / m_mapGridSize.width) * (interval.x / m_mapGridSize.width) +
                                       (interval.y / m_mapGridSize.height) * (interval.y / m_mapGridSize.height));
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+    // This is where we will store the paths around obstacles
     m_originalMap = PointCloudType::Ptr(new PointCloudType);
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     uint32_t label = 0;
     for (it1 = m_classes.begin(); it1 != m_classes.end(); it1++, label++) {
         PointCloudType::Ptr pointCloud1(new PointCloudType);
@@ -438,11 +472,11 @@ void SVMPathPlanning::obtainGraphFromMap(const PointCloudType::Ptr & inputCloud,
         }
                                          
         getBorderFromPointClouds (pointCloud1, pointCloud2, minCorner, maxCorner, interval, m_mapGridSize, label, m_pathNodes, m_nodeList);
+        
 //         break;
     }
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
+    
     generateRNG(m_pathNodes, m_nodeList, m_originalMap);
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     
     clock_gettime(CLOCK_MONOTONIC, &finish);
     elapsed = (finish.tv_sec - start.tv_sec);
@@ -451,8 +485,6 @@ void SVMPathPlanning::obtainGraphFromMap(const PointCloudType::Ptr & inputCloud,
     std::cout << "Total time for graph generation = " << elapsed << endl;
     
     m_mapGenerated = true;
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
-
 //     if (visualize) {
 //         visualizeClasses(m_classes, m_pathNodes);
 //     }
@@ -631,6 +663,8 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const double & st
         m_path->push_back((*m_nodeMap)[currentNode]);
     }
     m_path->push_back(goal);
+    
+    filterPath(m_path);
 
 //     if (visualize) {
 //         copy(m_classes.begin(), m_classes.end(), back_inserter(classes));
@@ -704,28 +738,22 @@ void SVMPathPlanning::filterExistingObstacles(PointCloudType::Ptr & rtObstacles)
 inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
                                          const PointCloudType::Ptr & currentMap, const bool & doExtendedGraph,
                                          const bool & doSegmentChecking) {
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     if (pathNodes->size() == 0)
         return;
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     std::vector<int> pointIdxNKNSearch;
     std::vector<float> pointNKNSquaredDistance;
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     cout << pathNodes->size() << endl;
     vector< pair<uint32_t, uint32_t> > edges;
     edges.reserve(pathNodes->size() * pathNodes->size());
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     if (doExtendedGraph) {
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         // Creating the KdTree object for the search method of the extraction
         pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType>);
         tree->setInputCloud (pathNodes);
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         std::vector<pcl::PointIndices> cluster_indices;
         pcl::EuclideanClusterExtraction<PointType> ec;
         ec.setClusterTolerance (m_distBetweenSamples);
@@ -735,7 +763,6 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
         ec.setInputCloud (pathNodes);
         ec.extract (cluster_indices);
 
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         vector<uint32_t> nodeLabels;
         nodeLabels.resize(pathNodes->size());
         uint32_t label = 0;
@@ -745,7 +772,6 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
             }
         }
                 
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         PGPUDTPARAMS pInput = new GPUDTPARAMS;
         
         pInput->minX = m_minCorner.x;
@@ -758,7 +784,6 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
         
         pInput->nConstraints = 0;
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         uint32_t idx = 0;
         for (PointCloudType::iterator it = pathNodes->begin(); it != pathNodes->end(); it++, idx++) {
             pInput->points[idx].x = it->x;
@@ -774,7 +799,6 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
         
         tv[0] = clock();
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         try {
             pOutput = gpudtComputeDT(pInput);
         } catch (...) {
@@ -782,12 +806,10 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
             pOutput = NULL;
         }
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         tv[1] = clock();
         
         printf("GPU-DT time: %.4fs\n", (tv[1]-tv[0])/(REAL)CLOCKS_PER_SEC);      
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         if (pOutput) {
             for (uint32_t i = 0; i < pOutput->nTris; i++) {
                 const gpudtTriangle & triangle = pOutput->triangles[i];
@@ -803,33 +825,24 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
             
             gpudtReleaseDTOutput(pOutput);
         }
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
-        
         delete pInput->points;
         delete pInput;
         delete pOutput;
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
     }
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     // Graph is completed with lines that not form a polygon
     pcl::search::KdTree<PointType>::Ptr treeNNG (new pcl::search::KdTree<PointType>);
     treeNNG->setInputCloud (pathNodes);
     treeNNG->setSortedResults(true);
     
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
     for (uint32_t i = 0; i < pathNodes->size(); i++) {
         treeNNG->radiusSearch(pathNodes->at(i), m_distBetweenSamples, pointIdxNKNSearch, pointNKNSquaredDistance);
         
-        cout << __FUNCTION__ << ":" << __LINE__ << endl;
         for (uint32_t j = 0; j < pointIdxNKNSearch.size(); j++) {
             edges.push_back(make_pair<uint32_t, uint32_t>(i, pointIdxNKNSearch[j]));
         }
     }
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
-    
     checkSegments(pathNodes, nodeList, currentMap, edges, doSegmentChecking);
-    cout << __FUNCTION__ << ":" << __LINE__ << endl;
 }
 
 void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
@@ -891,3 +904,103 @@ void SVMPathPlanning::getGraph(PointCloudType::Ptr & pointCloud) {
         
     pcl::copyPointCloud(*pointCloudRGB, *pointCloud);
 }
+
+void SVMPathPlanning::filterPath(PointCloudType::Ptr& path)
+{
+//     TODO: Trocear para quedarme con la mayor curvatura en cada tramo, y utilizar para sustituir
+    pcl::io::loadPCDFile("/tmp/filterPath.pcd", *path);
+    cout << __LINE__ << endl;
+    cv::Mat output = cv::Mat::zeros(1000, path->size() * 3, CV_8UC3);
+    
+    PointCloudTypeExt::Ptr dbgPath(new PointCloudTypeExt);
+    
+    vector<float> curvature(path->size());
+    
+    // Parameters
+    int radius = 5;
+    float threshCurvature = 1.0f;
+    
+    cout << __LINE__ << endl;
+    for (int i = radius; i < path->size() - radius; i++) {
+        
+        cout << __LINE__ << endl;
+        const PointType & currPoint = path->at(i);
+        const PointType & prevPoint = path->at(i - radius);
+        const PointType & nextPoint = path->at(i + radius);
+        
+        cout << __LINE__ << endl;
+
+        cout << "currPoint " << cv::Point2d(currPoint.x, currPoint.y) << endl;
+        cout << "prevPoint " << cv::Point2d(prevPoint.x, prevPoint.y) << endl;
+        cout << "nextPoint " << cv::Point2d(nextPoint.x, nextPoint.y) << endl;
+        
+        float slope1 = 0.0f, slope2 = 0.0f;
+        if (currPoint.x != prevPoint.x)
+            slope1 = (currPoint.y - prevPoint.y) / (currPoint.x - prevPoint.x);
+        
+        cout << __LINE__ << endl;
+        
+        if (nextPoint.x != currPoint.x)
+            slope2= (nextPoint.y - currPoint.y) / (nextPoint.x - currPoint.x);
+        
+        cout << __LINE__ << endl;
+        
+        cout << "slope1 " << slope1 << endl;
+        cout << "slope2 " << slope2 << endl;
+        
+        cout << __LINE__ << endl;
+        
+        const float curvatureVal = (slope2 - slope1) * (slope2 - slope1);
+        
+        cout << __LINE__ << endl;
+        
+        cout << "slope " << curvatureVal << endl;
+        
+        curvature[i] = curvatureVal;
+
+        cout << __LINE__ << endl;
+        
+        output.at<cv::Vec3b>(min(curvatureVal * 10.0f, output.rows - 1.0f), min(i * 3 + 0.0f, output.cols - 1.0f)) = cv::Vec3b(0, 255, 0);
+        output.at<cv::Vec3b>(min(curvatureVal * 10.0f, output.rows - 1.0f), min(i * 3 + 1.0f, output.cols - 1.0f)) = cv::Vec3b(0, 255, 0);
+        output.at<cv::Vec3b>(min(curvatureVal * 10.0f, output.rows - 1.0f), min(i * 3 + 2.0f, output.cols - 1.0f)) = cv::Vec3b(0, 255, 0);
+        cout << __LINE__ << endl;
+        
+        PointTypeExt newPoint;
+        newPoint.x = currPoint.x;
+        newPoint.y = currPoint.y;
+        newPoint.z = currPoint.z;
+        
+        if (curvatureVal > 1.5) {
+            newPoint.r = 255;
+        } else {
+            newPoint.r = 0.0;
+        }
+        newPoint.g = 255 - newPoint.r;
+        newPoint.b = 0;
+        newPoint.a = 255;
+        
+        dbgPath->push_back(newPoint);
+    }
+    cout << __LINE__ << endl;
+    
+    cv::line(output, cv::Point2f(0, threshCurvature * 10.0f), cv::Point2f(output.cols - 1, threshCurvature * 10.0f), cv::Scalar(0, 0, 255));
+    
+//     cv::flip(output, output, 1);
+    cv::imwrite("/tmp/filterPath.png", output);
+//     pcl::io::savePCDFileASCII ("/tmp/filterPath.pcd", *path);
+//     cv::imshow("filterPath", output);
+    
+//     cv::waitKey(200);
+    
+    cout << __LINE__ << endl;
+    
+    sensor_msgs::PointCloud2 cloudMsg;
+    pcl::toROSMsg (*dbgPath, cloudMsg);
+    cloudMsg.header.frame_id="map";
+    cloudMsg.header.stamp = ros::Time();
+    m_dbgPub.publish(cloudMsg);
+    
+    
+//     exit(0);
+}
+
