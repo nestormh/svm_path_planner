@@ -325,5 +325,5 @@ void cudaExactInit()
 //    for (int i = 0; i < 13; i++)
 //        printf("%.30f\n", hostConst[i]); 
 
-    cutilSafeCall( cudaFree(constants) ); 
+    cutilSafeCall( cudaFree(constants) );
 }

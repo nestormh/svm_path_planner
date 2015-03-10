@@ -49,7 +49,7 @@
 
 #define NDIMS 2
 
-#define FBO_SIZE 256                    // Texture size to be used (256, 512, 1024, 2048, 4096)
+#define FBO_SIZE 1024                    // Texture size to be used (256, 512, 1024, 2048, 4096)
 
 using namespace std;
 

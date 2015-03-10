@@ -85,9 +85,9 @@ inline void __cudaSafeCall( cudaError err, const char *file, const int line )
 #ifdef CUDA_CHECK_ERROR
     do {
         if( cudaSuccess != err) {
-            fprintf(stderr, "cudaSafeCall() Runtime API error in file <%s>, line %i : %s.\n",
-                    file, line, cudaGetErrorString( err) );
-            exit(-1);
+//             fprintf(stderr, "cudaSafeCall() Runtime API error in file <%s>, line %i : %s.\n",
+//                     file, line, cudaGetErrorString( err) );
+//             exit(-1);
         }
     } while (0);
 #endif
@@ -99,17 +99,17 @@ inline void __cudaCheckError( const char *file, const int line )
     do {
         cudaError_t err = cudaGetLastError();
         if( cudaSuccess != err) {
-            fprintf(stderr, "cutilCheckMsg() CUTIL CUDA error in file <%s>, line %i : %s.\n",
-                    file, line, cudaGetErrorString( err) );
-            exit(-1);
+//             fprintf(stderr, "cutilCheckMsg() CUTIL CUDA error in file <%s>, line %i : %s.\n",
+//                     file, line, cudaGetErrorString( err) );
+//             exit(-1);
         }
 		// More careful checking will be to perform a cudaThreadSynchronize(). 
 		// This however will reduce the performance. 
         err = cudaThreadSynchronize();
         if( cudaSuccess != err) {
-            fprintf(stderr, "cutilCheckMsg cudaThreadSynchronize error in file <%s>, line %i : %s.\n",
-                    file, line, cudaGetErrorString( err) );
-            exit(-1);
+//             fprintf(stderr, "cutilCheckMsg cudaThreadSynchronize error in file <%s>, line %i : %s.\n",
+//                     file, line, cudaGetErrorString( err) );
+//             exit(-1);
         }
     } while (0);
 #endif
