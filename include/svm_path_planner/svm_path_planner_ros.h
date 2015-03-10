@@ -68,18 +68,18 @@ private:
     
     void mapToWorld(double mx, double my, double& wx, double& wy);
     
-    void getMapPointCloud(pcl::PointCloud< svmpp::PointType >::Ptr& pointCloud);
+    void getMapPointCloud(pcl::PointCloud< svmpp::PointType >::Ptr& pointCloud,
+                          const svmpp::PointType & startPoint);
     void getLethalObstacles(svmpp::PointCloudType::Ptr & pointCloud);
     
     void setPlanner();
-    void obtainGraphFromMap();
+    void obtainGraphFromMap(const svmpp::PointType & startPoint);
     bool findShortestPath(const svmpp::PointType& start, const double & startOrientation,
                           const svmpp::PointType & goal, const double & goalOrientation,
                           svmpp::PointCloudType::Ptr rtObstacles, double & tElapsed);
     
     void doStatistics(const svmpp::PointCloudType::Ptr & path, const double & tElapsed);
     
-        
     costmap_2d::Costmap2DROS* costmap_ros_;
     double inscribed_radius_;
     ros::Publisher plan_pub_;

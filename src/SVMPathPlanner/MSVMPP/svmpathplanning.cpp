@@ -36,6 +36,8 @@
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
 
+#include <pcl/common/geometry.h>
+
 #include <pcl/common/common_headers.h>
 #include <pcl/io/pcd_io.h>
 // #include <pcl/visualization/pcl_visualizer.h>
@@ -51,6 +53,10 @@
 
 #include <lemon/dijkstra.h>
 #include <lemon/connectivity.h>
+
+#include <eigen3/Eigen/Dense>
+
+#include "gpudt/Cuda/cudaDecl.h"
 
 #include "gpudt/gpudt.h"
 #include </opt/ros/indigo/include/pcl_conversions/pcl_conversions.h>
@@ -78,14 +84,15 @@ SVMPathPlanning::SVMPathPlanning()
 //     cross_validation = 0;
     
     m_minPointDistance = 0.5; //2.0;
-    m_mapGridSize = cv::Size(300, 300);
-    m_mapGridSizeRT = cv::Size(300, 300);
+    m_mapGridSize = cv::Size(200, 200);
+    m_mapGridSizeRT = cv::Size(200, 200);
     m_minDistBetweenObstacles = 2.5;
 
     m_pathNodes = PointCloudType::Ptr(new PointCloudType);
     m_path = PointCloudType::Ptr(new PointCloudType);
     
     m_distMap = boost::shared_ptr<EdgeMap>(new EdgeMap(m_graph));
+    m_edgeTypeMap = boost::shared_ptr<EdgeTypeMap>(new EdgeTypeMap(m_graph));
     m_nodeMap = boost::shared_ptr<NodeMap>(new NodeMap(m_graph));
     
     m_carWidth = 1.0;
@@ -386,8 +393,6 @@ inline void SVMPathPlanning::predictSVM(const svm_model*& model,
     }
 }
 
-
-
 inline void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &model, const CornerLimitsType & interval,
                                                           const CornerLimitsType & minCorner, const CornerLimitsType & maxCorner,
                                                           const cv::Size & gridSize, const uint32_t & label,
@@ -415,7 +420,7 @@ inline void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &mod
     
     vector<vector<cv::Point> > contours;
     cv::findContours(predictMap, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
-            
+    
     for (vector<vector<cv::Point> >::iterator it = contours.begin(); it != contours.end(); it++) {
         for (vector<cv::Point>::iterator it2 = it->begin(); it2 != it->end(); it2++) {
             if ((it2->x > 1) && (it2->y > 1) && (it2->x < gridSize.width - 2) && (it2->y < gridSize.height - 2) ) {
@@ -423,11 +428,17 @@ inline void SVMPathPlanning::getContoursFromSVMPrediction(const svm_model * &mod
                 point.x = (it2->x * interval.x / gridSize.width) + minCorner.x;
                 point.y = (it2->y * interval.y / gridSize.height) + minCorner.y;
                 
-                pathNodes->push_back(point);
+                PointType pointInMap;
+                pointInMap.x = (point.x - m_origin.x) / m_resolution;
+                pointInMap.y = (point.y - m_origin.y) / m_resolution;
+                
+                if (m_inflatedMap.at<unsigned char>(pointInMap.y, pointInMap.x) != 0) {
+                    pathNodes->push_back(point);
             
-                Node node = m_graph.addNode();
-                (*m_nodeMap)[node] = point;
-                nodeList.push_back(node);
+                    Node node = m_graph.addNode();
+                    (*m_nodeMap)[node] = point;
+                    nodeList.push_back(node);
+                }
             }
         }
     }
@@ -439,7 +450,7 @@ void SVMPathPlanning::obtainGraphFromMap(const PointCloudType::Ptr & inputCloud,
     double elapsed;
     
     clock_gettime(CLOCK_MONOTONIC, &start);
-        
+    
     // Input point cloud is clustered into different classes
     CornerLimitsType minCorner, maxCorner, interval;
     clusterize(inputCloud, m_classes, minCorner, maxCorner);
@@ -499,7 +510,7 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const double & st
     double elapsed;
     
     clock_gettime(CLOCK_MONOTONIC, &startTime);
-    
+
     CornerLimitsType minCornerRT;
     CornerLimitsType maxCornerRT;
     
@@ -516,8 +527,8 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const double & st
     *currentMap += *rtObstacles;
     
     vector<PointCloudType::Ptr> footprintStart, footprintGoal;
-    bool startCheck = getFootPrint(start, startOrientation, currentMap, footprintStart);
-    bool goalCheck = getFootPrint(goal, goalOrientation, currentMap, footprintGoal);
+    bool startCheck = getFootPrint(start, startOrientation, currentMap, footprintStart, false);
+    bool goalCheck = getFootPrint(goal, goalOrientation, currentMap, footprintGoal, true);
     
     if (! startCheck) {
         cerr << "Failed to find a path: Current position is too near to an obstacle or colliding with it" << endl;
@@ -658,13 +669,42 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const double & st
     m_path->clear();
     Node currentNode = startNode;
     m_path->push_back(start);
+    Node prevNode = startNode;
+    Node lastNode = startNode;
     while (currentNode != goalNode) {
+        prevNode = lastNode;
+        lastNode = currentNode;
         currentNode = dijkstra.predNode(currentNode);
-        m_path->push_back((*m_nodeMap)[currentNode]);
+        
+        Edge edge = lemon::findEdge(m_graph, lastNode, currentNode);
+        
+        if ((*m_edgeTypeMap)[edge] == EDGE_TYPE_DT) {
+            PointCloudType::Ptr spline;
+            Node nextNode = dijkstra.predNode(currentNode);
+            
+            if ((lastNode != lemon::INVALID) &&
+                (currentNode != lemon::INVALID) &&
+                (prevNode != lemon::INVALID) &&
+                (nextNode != lemon::INVALID)) {
+            
+                generateSpline((*m_nodeMap)[lastNode], (*m_nodeMap)[currentNode], 
+                                (*m_nodeMap)[prevNode], (*m_nodeMap)[nextNode], spline);
+ 
+                if (spline && spline->size() != 0)
+                    *m_path += *spline;
+                
+                currentNode = nextNode;
+            } else {
+                m_path->push_back((*m_nodeMap)[currentNode]);
+            }
+            
+        } else {
+            m_path->push_back((*m_nodeMap)[currentNode]);
+        }
     }
     m_path->push_back(goal);
     
-    filterPath(m_path);
+//     filterPath(m_path);
 
 //     if (visualize) {
 //         copy(m_classes.begin(), m_classes.end(), back_inserter(classes));
@@ -675,7 +715,8 @@ bool SVMPathPlanning::findShortestPath(const PointType& start, const double & st
 }
 
 bool SVMPathPlanning::getFootPrint(const PointType & position, const double & orientation, 
-                                   const PointCloudType::Ptr & currentMap, vector<PointCloudType::Ptr> & footprint) {
+                                   const PointCloudType::Ptr & currentMap, vector<PointCloudType::Ptr> & footprint,
+                                   const bool & isGoal) {
     
     vector<int> idxMap, idxRT;
     vector<float> distMap, distRT;
@@ -692,16 +733,23 @@ bool SVMPathPlanning::getFootPrint(const PointType & position, const double & or
         return false;
     }
     
+    double startX = -m_carWidth;
+    double endX = m_carWidth;
+    if (isGoal) {
+        startX = -2.0 * m_carWidth;
+        endX = m_carWidth;
+    }
+    
     footprint.resize(2);
     footprint[0] = PointCloudType::Ptr(new PointCloudType);
-    footprint[0]->reserve(2 * m_carWidth / (m_minPointDistance / 2.0));
-    for (double x = -m_carWidth; x <= m_carWidth; x += m_minPointDistance / 2.0) {
+    footprint[0]->reserve(3.0 * m_carWidth / (m_minPointDistance / 2.0));
+    for (double x = startX; x <= endX; x += m_minPointDistance / 2.0) {
         footprint[0]->push_back(PointType(x, -m_carWidth, 0));
     }
     
     footprint[1] = PointCloudType::Ptr(new PointCloudType);
-    footprint[1]->reserve(2 * m_carWidth / (m_minPointDistance / 2.0));
-    for (double x = -m_carWidth; x <= m_carWidth; x += m_minPointDistance / 2.0) {
+    footprint[1]->reserve(3.0 * m_carWidth / (m_minPointDistance / 2.0));
+    for (double x = startX; x <= endX; x += m_minPointDistance / 2.0) {
         footprint[1]->push_back(PointType(x, m_carWidth, 0));
     }
     
@@ -735,6 +783,7 @@ void SVMPathPlanning::filterExistingObstacles(PointCloudType::Ptr & rtObstacles)
     pcl::copyPointCloud(*rtObstacles, inliers, *rtObstacles);
 }
 
+// TODO: Try with http://pointclouds.org/documentation/tutorials/greedy_projection.php
 inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
                                          const PointCloudType::Ptr & currentMap, const bool & doExtendedGraph,
                                          const bool & doSegmentChecking) {
@@ -744,9 +793,11 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
     std::vector<int> pointIdxNKNSearch;
     std::vector<float> pointNKNSquaredDistance;
     
-    cout << pathNodes->size() << endl;
     vector< pair<uint32_t, uint32_t> > edges;
     edges.reserve(pathNodes->size() * pathNodes->size());
+    
+    // We want to know how many edges were generated using delaunay, so we can adapt costs accordingly
+    uint32_t totalDelaunayEdges = 0;
     
     if (doExtendedGraph) {
         
@@ -811,13 +862,24 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
         printf("GPU-DT time: %.4fs\n", (tv[1]-tv[0])/(REAL)CLOCKS_PER_SEC);      
         
         if (pOutput) {
+            const float & maxDist2 = 0.0f; //2.0f * 2.0f;
+            
             for (uint32_t i = 0; i < pOutput->nTris; i++) {
                 const gpudtTriangle & triangle = pOutput->triangles[i];
                 
                 for (unsigned j = 0; j < 3; j++) {
                     const int & idx1 = triangle.vtx[j];
                     const int & idx2 = triangle.vtx[(j + 1) % 3];
-                    if (nodeLabels[idx1] != nodeLabels[idx2]) {
+                    
+                    const PointType & p1 = pathNodes->at(idx1);
+                    const PointType & p2 = pathNodes->at(idx2);
+                    
+                    const float & dist2 = (p1.x - p2.x) * (p1.x - p2.x) +
+                                          (p1.y - p2.y) * (p1.y - p2.y);
+                                        
+                    
+                    if ((nodeLabels[idx1] != nodeLabels[idx2]) ||
+                        (dist2 > maxDist2)) {
                         edges.push_back(make_pair<uint32_t, uint32_t>(idx1, idx2));
                     }
                 }
@@ -829,6 +891,8 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
         delete pInput;
         delete pOutput;
     }
+    
+    totalDelaunayEdges = edges.size();
     
     // Graph is completed with lines that not form a polygon
     pcl::search::KdTree<PointType>::Ptr treeNNG (new pcl::search::KdTree<PointType>);
@@ -842,12 +906,13 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
             edges.push_back(make_pair<uint32_t, uint32_t>(i, pointIdxNKNSearch[j]));
         }
     }
-    checkSegments(pathNodes, nodeList, currentMap, edges, doSegmentChecking);
+    checkSegments(pathNodes, nodeList, currentMap, edges, doSegmentChecking, totalDelaunayEdges);
 }
 
 void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
-                                    const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges,
-                                    const bool & doSegmentChecking)
+                                    const PointCloudType::Ptr & currentMap, 
+                                    const vector< pair<uint32_t, uint32_t> > & edges,
+                                    const bool & doSegmentChecking, const uint32_t & totalDelaunayEdges)
 {
     float2 * pointsInMap = new float2[currentMap->size()];
     float2 * edgeU = new float2[edges.size()];
@@ -881,8 +946,16 @@ void SVMPathPlanning::checkSegments(const PointCloudType::Ptr & pathNodes, vecto
             const PointType & point2 = (*m_nodeMap)[node2];
     
             Edge edge = m_graph.addEdge(node1, node2);
+            
+            // Edges generated using delaunay are more expensive
+            float factor = 1.0f;
+            (*m_edgeTypeMap)[edge] = EDGE_TYPE_SIMPLE;
+            if (i < totalDelaunayEdges) {
+                factor = 2.0f;
+                (*m_edgeTypeMap)[edge] = EDGE_TYPE_DT;
+            }
                                         
-            (*m_distMap)[edge] = pcl::euclideanDistance(point1, point2);
+            (*m_distMap)[edge] = pcl::euclideanDistance(point1, point2) * factor;
         }
     }
     
@@ -1004,3 +1077,48 @@ void SVMPathPlanning::filterPath(PointCloudType::Ptr& path)
 //     exit(0);
 }
 
+void SVMPathPlanning::generateSpline(const PointType & p1, const PointType & p2, 
+                                      const PointType & p1Prev, const PointType & p2Next, PointCloudType::Ptr & spline)
+{
+
+    const float & tangent1 = atan2(p1Prev.y - p1.y, p1Prev.x - p1.x);
+    const float & tangent2 = atan2(p2.y - p2Next.y, p2.x - p2Next.x);
+    
+    const double xi = p1.x - p1.x;
+    const double xi2 = xi * xi;
+    const double xi3 = xi2 * xi;
+    
+    const double xf = p2.x - p1.x;
+    const double xf2 = xf * xf;
+    const double xf3 = xf2 * xf;
+
+    Eigen::MatrixXf A(3, 3);
+    A << xf3, xf2, xf,
+         3 * xi2, 2 * xi, 1,
+         3 * xf2, 2 * xf, 1;
+    
+    Eigen::MatrixXf B(3, 1);
+    B << p2.y - p1.y, tangent1, tangent2;
+    
+    Eigen::MatrixXf X = A.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(B);
+    
+    spline.reset(new PointCloudType());
+    
+    const double minX = min(p1.x, p2.x);
+    const double maxX = max(p1.x, p2.x);
+    
+    for (double factor = 0.0; factor <= 1.0; factor += 0.1) {
+        const double currX = p1.x + (p2.x - p1.x) * factor;
+        
+        const double xi = currX - p1.x;
+        const double xi2 = xi * xi;
+        const double xi3 = xi2 * xi;
+        
+        
+        PointType currPoint;
+        currPoint.x = currX;
+        currPoint.y = X(0) * xi3 + X(1) * xi2 + X(2) * xi + p1.y;
+        
+        spline->push_back(currPoint);
+    }
+}

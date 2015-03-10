@@ -31,5 +31,6 @@
 
     <node name="play" pkg="rosbag" type="play" required="true" 
           args=" -l -d 5 &#45;&#45;clock /media/nestor/data/research_data/bags/testSVMPathPlanning_2013-05-03-12-13-49.bag"/>
+<!--           args=" -l -d 5 &#45;&#45;clock /media/nestor/data/research_data/bags/testSVMPathPlanning_2013-05-03-12-13-49.bag"/> -->
     <!--     <node name="play" pkg="rosbag" type="play" args=" -l -d 5 &#45;&#45;clock $(find bags)/testSVMPathPlanning_2013-05-03-12-13-49.bag"/> -->
 </launch>

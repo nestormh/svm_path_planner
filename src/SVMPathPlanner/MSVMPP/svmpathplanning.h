@@ -49,7 +49,7 @@
 
 #define NDIMS 2
 
-#define FBO_SIZE 1024                    // Texture size to be used (256, 512, 1024, 2048, 4096)
+#define FBO_SIZE 256                    // Texture size to be used (256, 512, 1024, 2048, 4096)
 
 using namespace std;
 
@@ -70,6 +70,11 @@ void GPUPredictWrapper(int m, int n, int k, float kernelwidth, const float *Test
                        const float *Svs, float * alphas,float *prediction, float beta,
                        float isregression, float * elapsed);
 
+// const int EDGE_TYPE_SIMPLE = 0;
+// const int EDGE_TYPE_DT = 1;
+
+enum EdgeType { EDGE_TYPE_SIMPLE = 0, EDGE_TYPE_DT = 1 };
+
 typedef double2 CornerLimitsType;
 typedef pcl::PointXYZ PointType;
 typedef pcl::PointCloud<PointType> PointCloudType;
@@ -81,6 +86,7 @@ typedef lemon::ListGraph::Node Node;
 typedef lemon::ListGraph::Edge Edge;
 typedef lemon::ListGraph::EdgeMap<double> EdgeMap;
 typedef lemon::ListGraph::NodeMap<PointType> NodeMap;
+typedef lemon::ListGraph::EdgeMap<EdgeType> EdgeTypeMap;
 
 class SVMPathPlanning {
     
@@ -110,6 +116,11 @@ public:
     void setMinDistBetweenObstacles(const double & minDistBetweenObstacles) { m_minDistBetweenObstacles = minDistBetweenObstacles; }
     void setMinDistCarObstacle(const double & minDistCarObstacle) { m_minDistCarObstacle = minDistCarObstacle; }
     void setCarWidth(const double & carWidth) { m_carWidth = carWidth; }
+    void setInflatedMap(const cv::Mat & inflatedMap, const PointType & origin, const double & resolution) { 
+        inflatedMap.copyTo(m_inflatedMap); 
+        m_origin = origin;
+        m_resolution = resolution;
+    }
     
 protected:
     void addLineToPointCloud(const PointType& p1, const PointType& p2, 
@@ -134,7 +145,8 @@ protected:
                      const bool & doExtendedGraph = true, const bool & doSegmentChecking = true);
     
     bool getFootPrint(const PointType & position, const double & orientation, 
-                      const PointCloudType::Ptr & rtObstacles, vector<PointCloudType::Ptr> & footprint);
+                      const PointCloudType::Ptr & rtObstacles, vector<PointCloudType::Ptr> & footprint,
+                      const bool & isGoal = false);
     
     void filterExistingObstacles(PointCloudType::Ptr & rtObstacles);
     
@@ -143,7 +155,11 @@ protected:
         
     void checkSegments(const PointCloudType::Ptr & pathNodes, vector<Node> & nodeList, 
                        const PointCloudType::Ptr & currentMap, const vector< pair<uint32_t, uint32_t> > & edges,
-                       const bool & doSegmentChecking);
+                       const bool & doSegmentChecking, 
+                       const uint32_t & totalDelaunayEdges = std::numeric_limits<uint32_t>::max());
+    
+    void generateSpline(const PointType & p1, const PointType & p2, 
+                         const PointType & p1Prev, const PointType & p2Next, PointCloudType::Ptr & spline);
     
     struct svm_parameter m_param;
     
@@ -163,6 +179,7 @@ protected:
     
     Graph m_graph;
     boost::shared_ptr<EdgeMap> m_distMap;
+    boost::shared_ptr<EdgeTypeMap> m_edgeTypeMap;
     boost::shared_ptr<NodeMap> m_nodeMap;
     vector<Node> m_nodeList;
     
@@ -172,7 +189,9 @@ protected:
     
     bool m_mapGenerated;
     
-    PointType m_start, m_goal;
+    cv::Mat m_inflatedMap;
+    PointType m_origin;
+    double m_resolution;
     
     // Debug
     ros::Publisher m_dbgPub;

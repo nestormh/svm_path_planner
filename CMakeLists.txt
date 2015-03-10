@@ -183,7 +183,7 @@ set(GENCODE_SM13 -gencode=arch=compute_13,code=sm_13 -gencode=arch=compute_13,co
 set(GENCODE_SM20 -gencode=arch=compute_20,code=sm_20 -gencode=arch=compute_20,code=compute_20)
 set(GENCODE_SM30 -gencode=arch=compute_30,code=sm_30 -gencode=arch=compute_30,code=compute_30)
 
-# set(CUDAGDB_OPTS -g -G)
+set(CUDAGDB_OPTS -g -G)
 
 # set(CUDA_BIND_COMPILER --compiler-bindir /home/nestor/Dropbox/projects/MultiSVMPathPlanning/compiler_bind)
 
@@ -204,7 +204,7 @@ cuda_add_library(SVMPathPlanningCUDA  ${CUDA_LIB_TYPE}
 #   ${HFILES}
   ${CUHFILES}
   ${HFILES_PUBLIC}
-  OPTIONS ${GENCODE_SM30} ${VERBOSE_PTXAS} ${CUDA_BIND_COMPILER} ${CUDAGDB_OPTS}
+  OPTIONS ${GENCODE_SM30} ${VERBOSE_PTXAS} ${CUDAGDB_OPTS}
 #   ${GENCODE_SM10} ${GENCODE_SM13} ${GENCODE_SM20} ${VERBOSE_PTXAS} ${CUDAGDB_OPTS}
 )
   

@@ -138,7 +138,7 @@ void SVMPathPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* c
         std::ofstream statisticsFile_;
         
 
-        obtainGraphFromMap();
+//         obtainGraphFromMap();
 
         //get the tf prefix
         ros::NodeHandle prefix_nh;
@@ -157,30 +157,39 @@ void SVMPathPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* c
         ROS_WARN("This planner has already been initialized, you can't call it twice, doing nothing");
 }
 
-void SVMPathPlannerROS::getMapPointCloud(svmpp::PointCloudType::Ptr & pointCloud) {
+void SVMPathPlannerROS::getMapPointCloud(svmpp::PointCloudType::Ptr & pointCloud,
+                                         const svmpp::PointType & startPoint) {
+    
     pointCloud = svmpp::PointCloudType::Ptr(new svmpp::PointCloudType);
     
     cv::Mat inflatedMap = cv::Mat::zeros(cv::Size(costmap_.getSizeInCellsX(), costmap_.getSizeInCellsY()), CV_8UC1);
-    
-//     TODO: Probar con esto: unsigned char * costmap_2d::Costmap2D::getCharMap()
     
     for (uint32_t mx = 0; mx < costmap_.getSizeInCellsX(); mx ++) {
         for (uint32_t my = 0; my < costmap_.getSizeInCellsY(); my ++) {
             
             if ((costmap_.getCost(mx, my) != costmap_2d:: NO_INFORMATION) &&
                 (costmap_.getCost(mx, my) != costmap_2d::FREE_SPACE)) {
-//             if (costmap_.getCost(mx, my) > m_threshInflation) {
+
                 inflatedMap.at<unsigned char>(my, mx) = 255;
             }
         }
     }
     
-    cout << cv::Size(costmap_.getSizeInCellsX(), costmap_.getSizeInCellsY()) << endl;
-    cv::imwrite("/tmp/inflatedMap.png", inflatedMap);
-    costmap_.saveMap ("/tmp/map.pgm");
+    cv::Mat contoursMap;
+    inflatedMap.copyTo(contoursMap);
+    
+    cv::Mat mask = cv::Mat::zeros(inflatedMap.rows + 2, inflatedMap.cols + 2, CV_8UC1); 
+    cv::floodFill(inflatedMap, mask, cv::Point2d(startPoint.x, startPoint.y), 255, 
+                    0, cv::Scalar(), cv::Scalar(),  4 + (255 << 8) + cv::FLOODFILL_MASK_ONLY);
+
+    mask = mask(cv::Rect(1, 1, inflatedMap.cols, inflatedMap.rows));
+    
+    planner_->setInflatedMap(mask, 
+                                svmpp::PointType(costmap_.getOriginX(), costmap_.getOriginY(), 0.0), 
+                                costmap_.getResolution());
     
     vector<vector<cv::Point> > contours;
-    cv::findContours(inflatedMap, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+    cv::findContours(contoursMap, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
     
     for (vector<vector<cv::Point> >::iterator it = contours.begin(); it != contours.end(); it++) {
         for (vector<cv::Point>::iterator it2 = it->begin(); it2 != it->end(); it2++) {
@@ -196,8 +205,6 @@ void SVMPathPlannerROS::getMapPointCloud(svmpp::PointCloudType::Ptr & pointCloud
             }
         }
     }
-    
-    planner_->filterPath(pointCloud);
 }
 
 void SVMPathPlannerROS::getLethalObstacles(svmpp::PointCloudType::Ptr & pointCloud) {
@@ -233,13 +240,14 @@ void SVMPathPlannerROS::mapToWorld(double mx, double my, double& wx, double& wy)
 }
 
 bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start, 
-                        const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan){
+                                 const geometry_msgs::PoseStamped& goal, 
+                                 std::vector<geometry_msgs::PoseStamped>& plan){
    
 
     // FIXME: This is just to debug the initial map generation
-    plan.clear();
-    plan.push_back(start);
-    plan.push_back(goal);
+//     plan.clear();
+//     plan.push_back(start);
+//     plan.push_back(goal);
     
 //     if (!planner_->isMapGenerated())
 //         obtainGraphFromMap();
@@ -247,9 +255,9 @@ bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
 //     svmpp::PointCloudType::Ptr tmpPointCloud;
 //     getMapPointCloud(tmpPointCloud);
 //     publishPointCloud(costmap_ros_->getGlobalFrameID(), tmpPointCloud, map_point_cloud_pub_);
+    //publish the plan for visualization purposes
     
-    
-    return !plan.empty();
+//     return !plan.empty();
     
     boost::mutex::scoped_lock lock(mutex_);
     if(!initialized_){
@@ -289,14 +297,20 @@ bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
         return false;
     }
     
+    svmpp::PointType startPoint(start.pose.position.x, start.pose.position.y, 0.0);
+    svmpp::PointType goalPoint(goal.pose.position.x, goal.pose.position.y, 0.0);
+    
+    svmpp::PointType startPointInMap(mx, my, 0.0);
 
     svmpp::PointCloudType::Ptr rtPointCloud;
-    getMapPointCloud(rtPointCloud);
+    if (! planner_->isMapGenerated())
+        obtainGraphFromMap(startPointInMap);
+    
+    getMapPointCloud(rtPointCloud, startPointInMap);
+    
     cout << "RT map: " << map_point_cloud_->size() << endl;
     
 
-    svmpp::PointType startPoint(start.pose.position.x, start.pose.position.y, 0.0);
-    svmpp::PointType goalPoint(goal.pose.position.x, goal.pose.position.y, 0.0);
     double tElapsed;
     
 
@@ -422,9 +436,9 @@ void SVMPathPlannerROS::setPlanner() {
 }
 
 // TODO: Complete this with the new planners
-void SVMPathPlannerROS::obtainGraphFromMap() {
+void SVMPathPlannerROS::obtainGraphFromMap(const svmpp::PointType & startPoint) {
 
-    getMapPointCloud(map_point_cloud_);
+    getMapPointCloud(map_point_cloud_, startPoint);
 
     // Initializing the planner...
     if (plannerType_ == PLANNER_TYPE_MULTISVM) {
