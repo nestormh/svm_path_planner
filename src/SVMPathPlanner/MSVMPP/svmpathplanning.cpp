@@ -914,7 +914,7 @@ inline void SVMPathPlanning::generateRNG(const PointCloudType::Ptr & pathNodes, 
 
         // TODO: Params
         const float & maxDist = 2.0f;
-        const float & maxJump = 60.0f;
+        const float & maxJump = 100.0f;
         
         for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin (); 
                     it != cluster_indices.end (); it++) {

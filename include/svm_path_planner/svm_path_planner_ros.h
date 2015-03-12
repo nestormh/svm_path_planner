@@ -11,11 +11,17 @@
 #include <nav_core/base_global_planner.h>
 #include <nav_msgs/GetPlan.h>
 #include <pcl_ros/publisher.h>
+#include <time.h>
 
 #include "MSVMPP/svmpathplanning.h"
 #include "MSVMPP/voronoipathplanning.h"
 #include "MSVMPP/voronoisvmpathplanning.h"
 #include "MSVMPP/svmpathplanningsingle.h"
+
+#define INIT_CLOCK(start) clock_t start = clock();
+#define RESET_CLOCK(start) start = clock();
+#define END_CLOCK(time, start) float time = (clock() - start) / (float)(CLOCKS_PER_SEC);
+#define END_CLOCK_2(time, start) time = (clock() - start) / (float)(CLOCKS_PER_SEC);
 
 namespace svmpp_ros {
 

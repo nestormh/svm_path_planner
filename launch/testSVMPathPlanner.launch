@@ -16,7 +16,7 @@
         <param name="base_global_planner" value="svm_path_planner/SVMPathPlannerROS" />
                     
 <!--         Possibilities: MultiSVMPathPlanner, SingleSVMPathPlanner, VoronoiPathPlanner, VoronoiSVMPathPlanner -->
-        <param name="SVMPathPlannerROS/planner_type" value="MultiSVMPathPlanner" />
+<!--         <param name="SVMPathPlannerROS/planner_type" value="MultiSVMPathPlanner" /> -->
         
         <rosparam file="$(find svm_path_planner)/params/costmap_common_params.yaml" command="load" ns="global_costmap" />
         <rosparam file="$(find svm_path_planner)/params/costmap_common_params.yaml" command="load" ns="local_costmap" />

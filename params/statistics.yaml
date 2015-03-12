@@ -20,8 +20,9 @@ svm_probability: 0
 # Distances
 minPointDistance: 0.5
 minDistBetweenObstacles: 2.0
-minDistCarObstacle: 0.1
+minDistCarObstacle: 0.01
+threshInflation: 100
 
 # Statistics related
-doStatistics: false
-statisticsFile: /home/nestor/Dropbox/ros/groovy/svm_path_planner/stats/testSVMPathPlanning_2013-05-03-12-13-49.bag/MultiSVMPathPlanner_gamma_1000_C_1000.txt
+doStatistics: true
+statisticsFile: /home/nestor/Dropbox/ros/indigo/nestormh/src/svm_path_planner/stats/testSVMPathPlanning_2013-05-03-12-13-49.bag/MultiSVMPathPlanner_gamma_1000_C_1000.txt

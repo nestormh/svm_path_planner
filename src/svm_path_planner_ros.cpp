@@ -311,16 +311,18 @@ bool SVMPathPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
     cout << "RT map: " << map_point_cloud_->size() << endl;
     
 
-    double tElapsed;
+    double tElapsed_old;
     
 
+    INIT_CLOCK(beginTime)
     if (! findShortestPath(startPoint, tf::getYaw(start.pose.orientation), 
                            goalPoint, tf::getYaw(goal.pose.orientation), 
-                           rtPointCloud, tElapsed)) {
-        tElapsed = DBL_MIN;
+                           rtPointCloud, tElapsed_old)) {
+//         tElapsed = DBL_MIN;
         
         ROS_WARN("Unable to find a path.");
     }
+    END_CLOCK(tElapsed, beginTime)
     
     svmpp::PointCloudType::Ptr pointCloudPath = planner_->getPath();
     cout << "Plan found: " << pointCloudPath->size() << endl;
@@ -456,7 +458,8 @@ bool SVMPathPlannerROS::findShortestPath(const svmpp::PointType& start, const do
                                          const svmpp::PointType & goal, const double & goalOrientation,
                                          svmpp::PointCloudType::Ptr rtObstacles, double & tElapsed) {
 
-    ros::Time beginTime = ros::Time::now();
+//     ros::Time beginTime = ros::Time::now();
+    
     if (plannerType_ == PLANNER_TYPE_MULTISVM) {
         return planner_->findShortestPath(start, startOrientation, goal, goalOrientation, rtObstacles, false);
     } else if  (plannerType_ == PLANNER_TYPE_SINGLESVM) {
@@ -470,9 +473,8 @@ bool SVMPathPlannerROS::findShortestPath(const svmpp::PointType& start, const do
         return voronoiSVMPlanner->findShortestPath(start, startOrientation, goal, goalOrientation, rtObstacles, false);
     }
     
-    ros::Duration elapsedTime = ros::Time::now() - beginTime;
-    tElapsed = elapsedTime.toNSec() / 1e6;
-                          
+//     ros::Duration elapsedTime = ros::Time::now() - beginTime;
+//     tElapsed = elapsedTime.toNSec() / 1e6;
 }
 
 void SVMPathPlannerROS::doStatistics(const svmpp::PointCloudType::Ptr & path, const double & tElapsed) {

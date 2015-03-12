@@ -1,7 +1,8 @@
 <launch>
     <param name="use_sim_time" value="true" />
     
-    <node launch-prefix="optirun" required="true" pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+<!--     <node launch-prefix="optirun" pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen"> -->
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" required="true" >
 <!--     <node launch-prefix="optirun gdb -ex run &#45;&#45;args"  -->
 <!--         pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen"> -->
         <remap from="map" to="nav_map"/>
@@ -28,6 +29,8 @@
           
 <!--     <node pkg="rviz" type="rviz" name="rviz" args="&#45;&#45;display-config $(find svm_path_planner)/config/visualizeSVMPathPlanner.rviz"/> -->
     
-    <node name="play" pkg="rosbag" type="play" required="true" args=" -r 0.25 -d 10 &#45;&#45;clock $(find bags)/testSVMPathPlanning_2013-05-03-12-13-49.bag"/>
+    <node name="play" pkg="rosbag" type="play" required="true" 
+          args=" -r 0.25 -d 5 &#45;&#45;clock /media/nestor/data/research_data/bags/testSVMPathPlanning_2013-05-03-12-13-49.bag"/>
+    
 <!--     <node name="play" pkg="rosbag" type="play" required="true" args=" -r $(arg clockFreq) -d 10 &#45;&#45;clock $(find bags)/$(arg bagFile)"/> -->
 </launch>
